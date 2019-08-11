@@ -45,6 +45,10 @@ public class GeneratorUtility {
         return BeanAttribute.toFirstLower(string);
     }
 
+    public String toLowerCase(String text) {
+        return text.toLowerCase();
+    }
+
     /**
      * toUpperCase
      * 

@@ -10,12 +10,14 @@
 package de.tsl2.nano.util.codegen;
 
 import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Properties;
 
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.cls.ClassFinder;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -46,6 +48,7 @@ import de.tsl2.nano.core.util.Util;
 public class PackageGenerator extends ClassGenerator {
     Properties properties = null;
     private String packagePath;
+    private String classpathEntry;
 
     /**
      * main
@@ -104,7 +107,7 @@ public class PackageGenerator extends ClassGenerator {
      */
     @SuppressWarnings({ "rawtypes" })
     protected Collection<Class> getModelClasses() {
-        final ClassLoader classLoader = getDefaultClassloader();
+        ClassLoader classLoader = getDefaultClassloader();
         Collection<Class> modelClasses;
         String[] classNames;
         String p;
@@ -115,6 +118,7 @@ public class PackageGenerator extends ClassGenerator {
                 throw new ManagedException("the given jar-file doesn't exist!");
             }
         } else if (packagePath.matches("(\\w+\\.)+\\w+") && !(new File(packagePath).isDirectory())) {
+            LOG.info("packagePath was given as java-class-package -> searching through ClassFinder!");
             p = packagePath;
             Collection<Class> classes =  ClassFinder.self().fuzzyFind(packagePath + ".*", Class.class, 0, null).values();
             classNames = new String[classes.size()];
@@ -123,15 +127,24 @@ public class PackageGenerator extends ClassGenerator {
                 classNames[i++] = cls.getName();
             }
         } else {
-            final File packageFilePath = new File(packagePath);
+            File packageFilePath = new File(packagePath);
             if (!packageFilePath.isDirectory()) {
-                throw new ManagedException("the given package-file-path is not a directory: " + packagePath);
+                if (packageFilePath.getParentFile().isDirectory())
+                    if (packagePath.contains(".") && (packageFilePath = new File(packagePath.replace('.', '/'))).isDirectory())
+                        LOG.info("packagePath transformed to: " + packageFilePath.getPath());
+                    else
+                        throw new ManagedException("the given package-file-path is not a directory: " + packagePath);
             }
             if (!packageFilePath.canRead()) {
-                throw new ManagedException("the given package-file-path is not readable!");
+                throw new ManagedException("the given package-file-path is not readable: " + packagePath);
             }
             classNames = packageFilePath.list();
-            p = getPackage(classLoader, packagePath.replace('/', '.'), classNames);
+            p = packagePath.replace('/', '.');
+            Class<?> classInPackage = findClassInPackage(classLoader, p, classNames);
+            if (classInPackage != null) {
+                p = classInPackage.getPackage().getName();
+                classLoader = classInPackage.getClassLoader();
+            }
         }
         modelClasses = new ArrayList<Class>(classNames.length);
         for (int i = 0; i < classNames.length; i++) {
@@ -141,7 +154,7 @@ public class PackageGenerator extends ClassGenerator {
                     className = p + "." + className;
                 }
                 className = className.replace('/', '.');
-                LOG.info("loading class: " + className);
+                LOG.info("trying to load class: " + className);
                 try {
                     modelClasses.add(classLoader.loadClass(className));
                 } catch (final Exception e) {
@@ -161,7 +174,7 @@ public class PackageGenerator extends ClassGenerator {
      * @param classLoader classloader
      * @return package path
      */
-    private String getPackage(ClassLoader classLoader, String fullpath, String[] classNames) {
+    private Class<?> findClassInPackage(ClassLoader classLoader, String fullpath, String[] classNames) {
         String p = fullpath;
         String className = null;
         for (int i = 0; i < classNames.length; i++) {
@@ -173,18 +186,44 @@ public class PackageGenerator extends ClassGenerator {
         }
         if (className == null) {
             LOG.warn("COULDN'T EVALUATE ANY PACKAGE. NO CLASSES FOUND!");
-            return p;
+            return null;
         }
         String pckName = Util.get("bean.generation.packagename", null);
+        RuntimeClassloader extendedClassLoader = null;
+        String pClassName = null;
+        Class<?> classInPackage = null;
         while (true) {
             try {
-                Class<?> cls = classLoader.loadClass(p + (p != null ? "." : "") + className);
-                if (pckName == null || cls.getName().matches(pckName + ".*")) {
-                    break; //-->Ok
-                }
-                LOG.info("ignoring class " + cls.getName() + " not beeing in package " + pckName);
+                pClassName = p + (p != null ? "." : "") + className;
+                classInPackage = classLoader.loadClass(pClassName);
             } catch (final Exception e) {
-                LOG.debug(e);
+                LOG.warn("couldn't load class: " + e.toString());
+                if (!fullpath.equals(p)) {
+                    classpathEntry = StringUtil.substring(packagePath.replace('.', '/'), null, p.replace(".", "/"));
+                    LOG.info("reload class with extended classpath: " + classpathEntry);
+                    extendedClassLoader = new RuntimeClassloader(new URL[0], classLoader);
+                    extendedClassLoader.addFile(classpathEntry);
+                    try {
+                        classInPackage = extendedClassLoader.loadClass(pClassName);
+                        LOG.info("classInPackage: " + classInPackage); //trick to generate an Exception, if 'wrong name' class was loaded!
+                    } catch (Throwable e1) { // parent module may collaps on loading that class - but class is only temporarily used!
+                        classInPackage = null;
+                        pClassName = null;
+                        LOG.debug(e1);
+                    }
+                } else {
+                    pClassName = null;
+                }
+            } finally {
+                if (classInPackage != null && pClassName != null) {
+                    if (pckName == null || pClassName.matches(pckName + ".*")) {
+                        LOG.info("package evaluated: '" + p + "'. starting to load " + classNames.length + " classes");
+                        Thread.currentThread().setContextClassLoader(classInPackage.getClassLoader());
+                        break; //-->Ok
+                    }
+
+                    LOG.info("ignoring class " + pClassName + " not beeing in package " + pckName);
+                }
             }
             //evaluate the package-path for the classloader
             if (p != null) {
@@ -196,7 +235,7 @@ public class PackageGenerator extends ClassGenerator {
                 p = p.substring(ii + 1);
             }
         }
-        return p;
+        return classInPackage;
     }
 
     /**

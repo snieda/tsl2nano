@@ -310,7 +310,28 @@
 				</descriptorRefs> </configuration> <executions> <execution> <id>make-assembly</id> 
 				<phase>package</phase> <goals> <goal>single</goal> </goals> </execution> 
 				</executions> </plugin> -->
-		</plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-release-plugin</artifactId>
+					<version>2.5.3</version>
+					<executions>
+						<execution>
+							<id>fromMaster</id>
+							<configuration>
+								<developmentVersion>${parsedVersion.majorVersion}.${parsedVersion.nextMinorVersion}.0-SNAPSHOT</developmentVersion>
+								<tagNameFormat>@{project.version}</tagNameFormat>
+							</configuration>
+						</execution>
+						<execution>
+							<id>fromBranch</id>
+							<configuration>
+								<developmentVersion>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.nextIncrementalVersion}-SNAPSHOT</developmentVersion>
+								<tagNameFormat>@{project.version}</tagNameFormat>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
 	</build>
 	<reporting>
 		<plugins>
@@ -379,6 +400,15 @@
 						</reports>
 					</reportSet>
 				</reportSets>
+			</plugin>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${version.compiler.plugin}</version>
+				<configuration>
+					<source>${maven.compiler.source}</source>
+					<target>${maven.compiler.target}</target>
+					<encoding>${project.build.sourceEncoding}</encoding>
+				</configuration>
 			</plugin>
 		</plugins>
 	</reporting>

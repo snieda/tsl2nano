@@ -152,7 +152,7 @@ public class ClassGenerator {
         context.put("util", util);
         context.put("time", new Timestamp(System.currentTimeMillis()));
         context.put("template", templateFile);
-        context.put("copyright", "Copyright (c) 2002-2015 Thomas Schneider");
+        context.put("copyright", "Copyright (c) 2002-2019 Thomas Schneider");
         for (final Object p : properties.keySet()) {
             final Object v = properties.get(p);
             context.put((String) p, v);

@@ -1,0 +1,21 @@
+/*
+ * created by: Generated through velocity template (repository.vm)
+ * created on: ----/--/-- (not filled with property 'time' to simplify version-diffs)
+ * 
+ * spring data rest repository
+ *
+ * ${copyright}
+ */
+package ${package};
+
+#define($attKey) KEY_${util.toUpperCase(${att.Name})}#end
+#define($attKeyTooltip) KEY_TOOLTIP_${util.toUpperCase(${att.Name})}#end
+#define($attName) ATTR_${util.toUpperCase(${att.Name})}#end
+
+import ${class.Clazz.CanonicalName};
+
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+
+@RepositoryRestResource(collectionResourceRel = "${util.toLowerCase(${class.Name})}s", path = "${util.toLowerCase(${class.Name})}s")
+public interface ${class.Name}Repository extends CrudRepository<${class.Name}, Long> {}
