@@ -9,7 +9,7 @@ import org.apache.maven.project.MavenProject;
 
 import de.tsl2.nano.util.codegen.PackageGenerator;
 
-@Mojo( name = "run", defaultPhase = LifecyclePhase.PROCESS_SOURCES )
+@Mojo( name = "run", defaultPhase = LifecyclePhase.PROCESS_CLASSES )
 public class GeneratorMojo extends AbstractMojo {
 	
     @Parameter(defaultValue = "${project}")
@@ -23,6 +23,8 @@ public class GeneratorMojo extends AbstractMojo {
 	private String templateFilePath;
 	@Parameter(property="bean.generation.propertyFile")
 	private String propertyFile;
+	@Parameter( property = "bean.generation.outputpath")
+	private String outputPath;
 	@Parameter( property = "bean.generation.nameprefix")
 	private String destinationPrefix;
     @Parameter( property = "bean.generation.namepostfix", required = false )
@@ -31,8 +33,14 @@ public class GeneratorMojo extends AbstractMojo {
 	@Override
 	public void execute() throws MojoExecutionException {
 		try {
-			// project.
-			PackageGenerator.main(new String[] { packageFilePath, templateFilePath, generator, propertyFile });
+			if (outputPath != null)
+				System.setProperty("bean.generation.outputpath", outputPath);
+			if (destinationPrefix != null)
+				System.setProperty("bean.generation.nameprefix", destinationPrefix);
+			if (destinationPostfix != null)
+				System.setProperty("bean.generation.namepostfix", destinationPostfix);
+			PackageGenerator.main(packageFilePath == null ? new String[0] 
+				: new String[] { packageFilePath, templateFilePath, generator, propertyFile });
 		} catch (Exception e) {
 			throw new MojoExecutionException(e.getMessage(), e);
 		}

@@ -63,7 +63,7 @@ public class PackageGenerator extends ClassGenerator {
                     + "example: PackageGenerator bin/mylocale/mycompany/mypackagepath codegen/beanconstant.vm de.tsl2.nano.codegen.PackageGenerator\n"
                     + "\nreading system variables:\n"
                     + " - bean.generation.packagename     : only class in that package\n"
-                    + " - bean.generation.outputpath      : output base path\n"
+                    + " - bean.generation.outputpath      : output base path (default: src/gen)\n"
                     + " - bean.generation.nameprefix      : class+package name prefix (default: package + code-template)\n"
                     + " - bean.generation.namepostfix     : class name postfix (default: {code-template}.java)\n";
             System.out.println(help);
@@ -284,8 +284,7 @@ public class PackageGenerator extends ClassGenerator {
     protected String getDefaultDestinationFile(String modelFile) {
         modelFile = super.getDefaultDestinationFile(modelFile);
         modelFile = appendPackage(modelFile, extractName(codeTemplate));
-        String outputPath = Util.get("bean.generation.outputpath", "");
-        return (outputPath.length() > 0 ? outputPath + "/" : "") + modelFile;
+        return modelFile;
     }
 
     /**

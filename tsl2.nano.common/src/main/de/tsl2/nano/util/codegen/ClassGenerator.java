@@ -206,7 +206,8 @@ public class ClassGenerator {
     protected String getDefaultDestinationFile(String modelFile) {
 //        return engine.getProperty(DEST_FILENAME_PATTERN)
         modelFile = modelFile.replace('.', '/');
-        return DEFAULT_DEST_PREFIX + "/" + modelFile + getDestinationPostfix() + ".java";
+        String path = Util.get("bean.generation.outputpath", DEFAULT_DEST_PREFIX);
+        return (path.endsWith("/") ? path : path + "/") + modelFile + getDestinationPostfix() + ".java";
     }
 
     protected String getDestinationPostfix() {
