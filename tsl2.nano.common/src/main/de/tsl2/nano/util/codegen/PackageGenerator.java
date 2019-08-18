@@ -14,10 +14,13 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.classloader.RuntimeClassloader;
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.ClassFinder;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -65,7 +68,8 @@ public class PackageGenerator extends ClassGenerator {
                     + " - bean.generation.packagename     : only class in that package\n"
                     + " - bean.generation.outputpath      : output base path (default: src/gen)\n"
                     + " - bean.generation.nameprefix      : class+package name prefix (default: package + code-template)\n"
-                    + " - bean.generation.namepostfix     : class name postfix (default: {code-template}.java)\n";
+                    + " - bean.generation.namepostfix     : class name postfix (default: {code-template}.java)\n"
+                    + " - bean.generation.unpackaged      : no package structure from origin will be inherited (default: false)\n";
             System.out.println(help);
             System.exit(1);
         }
@@ -90,14 +94,23 @@ public class PackageGenerator extends ClassGenerator {
      */
     @SuppressWarnings("rawtypes")
     public void generate() {
-        final Collection<Class> classes = getModelClasses();
-        for (final Iterator<Class> iterator = classes.iterator(); iterator.hasNext();) {
+        final Collection<Class<?>> classes = getModelClasses();
+        prepareProperties(classes);
+        boolean singleFile = Boolean.getBoolean("bean.generation.singleFile");
+        for (final Iterator<Class<?>> iterator = classes.iterator(); iterator.hasNext();) {
             try {
                 generate(iterator.next());
+                if (singleFile)
+                    break;
             } catch (final Exception e) {
                 ManagedException.forward(e);
             }
         }
+    }
+
+    private void prepareProperties(Collection<Class<?>> classes) {
+        List<BeanClass<?>> allClasses = classes.stream().map(c -> BeanClass.getBeanClass(c)).collect(Collectors.toList());
+        getProperties().put("allClasses", allClasses);
     }
 
     /**
@@ -106,9 +119,9 @@ public class PackageGenerator extends ClassGenerator {
      * @return all types to generate information classes for
      */
     @SuppressWarnings({ "rawtypes" })
-    protected Collection<Class> getModelClasses() {
+    protected Collection<Class<?>> getModelClasses() {
         ClassLoader classLoader = getDefaultClassloader();
-        Collection<Class> modelClasses;
+        Collection<Class<?>> modelClasses;
         String[] classNames;
         String p;
         if (packagePath.endsWith(".jar")) {
@@ -146,7 +159,7 @@ public class PackageGenerator extends ClassGenerator {
                 classLoader = classInPackage.getClassLoader();
             }
         }
-        modelClasses = new ArrayList<Class>(classNames.length);
+        modelClasses = new ArrayList<>(classNames.length);
         for (int i = 0; i < classNames.length; i++) {
             if (classNames[i].endsWith(POSTFIX_CLS)) {
                 String className = StringUtil.substring(classNames[i], null, POSTFIX_CLS);
@@ -252,14 +265,14 @@ public class PackageGenerator extends ClassGenerator {
         }
         final String destFile = getDefaultDestinationFile(modelFile);
         final Properties p = getProperties();
-        ClassGenerator.instance().generate(modelFile, getTemplate(type), destFile, p, getDefaultClassloader());
+        super.generate(modelFile, getTemplate(type), destFile, p, getDefaultClassloader());
         p.put("constClass", getDestinationClassName(modelFile, destFile));
     }
 
     /**
      * @return properties for the velocity context
      */
-    protected Properties getProperties() {
+    public Properties getProperties() {
         if (properties == null) {
             properties = new Properties();
         }
@@ -283,7 +296,9 @@ public class PackageGenerator extends ClassGenerator {
     @Override
     protected String getDefaultDestinationFile(String modelFile) {
         modelFile = super.getDefaultDestinationFile(modelFile);
-        modelFile = appendPackage(modelFile, extractName(codeTemplate));
+        boolean unpackaged = Boolean.getBoolean("bean.generation.unpackaged");
+        if (!unpackaged)
+            modelFile = appendPackage(modelFile, extractName(codeTemplate));
         return modelFile;
     }
 

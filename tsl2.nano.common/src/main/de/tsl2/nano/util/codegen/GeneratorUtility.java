@@ -152,4 +152,8 @@ public class GeneratorUtility {
         final Object value = props.get(key);
         return value != null ? value : "";
     }
+
+    public String getFilePathFromPackage(String pck) {
+        return pck.replace('.', '/');
+    }
 }

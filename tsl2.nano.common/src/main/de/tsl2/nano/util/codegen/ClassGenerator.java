@@ -60,7 +60,9 @@ public class ClassGenerator {
      * @return singelton instance
      */
     public static final ClassGenerator instance() {
-        return instance(new ClassGenerator());
+        if (self == null)
+            return instance(new ClassGenerator());
+        return self;
     }
 
     /**
@@ -70,8 +72,8 @@ public class ClassGenerator {
      * @param newInstance singelton instance, if singelton instance is null.
      * @return singelton
      */
-    protected static final ClassGenerator instance(ClassGenerator newInstance) {
-        if (self == null) {
+    public static final ClassGenerator instance(ClassGenerator newInstance) {
+        if (self == null || !(newInstance.getClass().isAssignableFrom(self.getClass()))) {
             self = newInstance;
         }
         return self;
@@ -155,6 +157,10 @@ public class ClassGenerator {
         context.put("copyright", "Copyright (c) 2002-2019 Thomas Schneider");
         for (final Object p : properties.keySet()) {
             final Object v = properties.get(p);
+            if (context.containsKey(p)) {
+                LOG.error("name clash in velocity context on key '" + p + "': existing generator value: " + context.get(p.toString()) + ", user property: " + v + " will be ignored!");
+                continue;
+            }
             context.put((String) p, v);
             LOG.debug("adding velocity context property: " + p + "=" + v);
         }
@@ -204,14 +210,14 @@ public class ClassGenerator {
      * @return default classloader
      */
     protected String getDefaultDestinationFile(String modelFile) {
-//        return engine.getProperty(DEST_FILENAME_PATTERN)
-        modelFile = modelFile.replace('.', '/');
+        boolean unpackaged = Boolean.getBoolean("bean.generation.unpackaged");
+        modelFile = unpackaged ? StringUtil.substring(modelFile, ".", null, true) : modelFile.replace('.', '/');
         String path = Util.get("bean.generation.outputpath", DEFAULT_DEST_PREFIX);
-        return (path.endsWith("/") ? path : path + "/") + modelFile + getDestinationPostfix() + ".java";
+        return (path.endsWith("/") ? path : path + "/") + modelFile + getDestinationPostfix();
     }
 
     protected String getDestinationPostfix() {
-        return Util.get("bean.generation.namepostfix", StringUtil.toFirstUpper(extractName(codeTemplate)));
+        return Util.get("bean.generation.namepostfix", StringUtil.toFirstUpper(extractName(codeTemplate)) + ".java");
     }
 
     /**
@@ -226,7 +232,8 @@ public class ClassGenerator {
         String dest = destinationFileName.replace('/', '.');
         dest = dest.substring(0, dest.lastIndexOf('.'));
         final String src = sourceFile.substring(0, sourceFile.lastIndexOf('.'));
-        return dest.substring(dest.indexOf(src));
+        int isrc = dest.indexOf(src);
+        return isrc > -1 ? dest.substring(isrc) : dest;
     }
 
     /**

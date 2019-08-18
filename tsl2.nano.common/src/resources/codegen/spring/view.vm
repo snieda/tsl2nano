@@ -1,0 +1,16 @@
+<!-- 
+    Thymeleaf Container View
+    created by: velocity template (${template})
+    created on: ----/--/-- (not filled with property 'time' to simplify version-diffs)
+
+${copyright}
+-->
+#define($entity)${util.toLowerCase(${class.Name})}#end
+<form action="#" th:action="@{${${entity}/save/{id}(id=${${entity}.id})}" th:object="${entity}" method="post">
+#foreach( $att in $class.Attributes)    
+    <label for="name">${att.Name}</label>
+    <input type="text" th:field="*{name}" id="name" placeholder="${att.Name}">
+    <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+#end
+    <input type="submit" value="Update ${class.Name}">   
+</form>

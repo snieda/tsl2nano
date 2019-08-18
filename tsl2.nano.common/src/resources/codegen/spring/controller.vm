@@ -1,0 +1,87 @@
+/*
+ * Spring Controller to bind rest calls through crudrepository to view name
+ * created by: Generated through velocity template (presenter.vm)
+ * created on: ----/--/-- (not filled with property 'time' to simplify version-diffs)
+ * 
+ * ${copyright}
+ */
+package ${package};
+
+#define($entity)${util.toLowerCase(${class.Name})}#end
+
+import javax.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import ${class.Clazz.CanonicalName};
+import ${basepackage}.beans.repository.${class.Name}Repository;
+
+@Controller
+public class ${class.Name}Controller {
+
+    @Autowired
+    ${class.Name}Repository repository;
+
+    String basePath = "";
+
+    @GetMapping("/${entity}s/all")
+    public String all${class.Name}(Model model) {
+        model.addAttribute("${entity}s", repository.findAll());
+        return basePath + "viewlist/${class.Name}Containerview";
+    }
+
+#foreach( $att in $class.Attributes)    
+    // @GetMapping("/${entity}s/${att.Name}/{${att.Name}}")
+    // public String ${class.Name}With${att.Name}(String ${att.Name}, Model model) {
+    //     model.addAttribute("${entity}s", ${entity}Repository.findBy${util.toFirstUpperCase(${att.Name})}(${att.Name}));
+    //     return basePath + "containerview/${class.Name}Containerview";
+    // }
+#end
+
+    @PostMapping("/${entity}/add")
+    public String add${class.Name}(@Valid ${class.Name} ${entity}, BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            return basePath + "view/${class.Name}View";
+        }
+
+        repository.save(${entity});
+        model.addAttribute("${entity}s", repository.findAll());
+        return basePath + "viewlist/${class.Name}Containerview";
+    }
+
+    @GetMapping("/${entity}/edit/{id}")
+    public String showUpdateForm(@PathVariable("id") long id, Model model) {
+        ${class.Name} ${entity} = repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid ${entity} Id:" + id));
+
+        model.addAttribute("${entity}", ${entity});
+        return basePath + "view/${class.Name}View";
+    }
+
+    @PostMapping("/${entity}/update/{id}")
+    public String update${class.Name}(@PathVariable("id") long id, @Valid ${class.Name} ${entity}, BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            ${entity}.setId(id);
+            return basePath + "view/${class.Name}View";
+        }
+
+        repository.save(${entity});
+        model.addAttribute("${entity}s", repository.findAll());
+        return basePath + "viewlist/${class.Name}Containerview";
+    }
+
+    @GetMapping("/${entity}/delete/{id}")
+    public String delete${class.Name}(@PathVariable("id") long id, Model model) {
+        ${class.Name} ${entity} = repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid ${entity} Id:" + id));
+        repository.delete(${entity});
+        model.addAttribute("${entity}s", repository.findAll());
+        return basePath + "viewlist/${class.Name}Containerview";
+    }
+}

@@ -1,0 +1,31 @@
+#define($entity)${util.toLowerCase(${class.Name})}#end
+<!-- 
+    Thymeleaf Container View
+    created by: velocity template (${template})
+    created on: ----/--/-- (not filled with property 'time' to simplify version-diffs)
+
+${copyright}
+-->
+<div th:switch="${class.Name}">
+    <h2 th:case="null">No ${class.Name} yet!</h2>
+        <div th:case="*">
+            <h2>${class.Name}</h2>
+            <table>
+                <thead>
+                    <tr>
+#foreach( $att in $class.Attributes)    
+                        <th>${att.Name}</th>
+#end
+                    </tr>
+                </thead>
+                <tbody>
+                <tr th:each="entity : ${entity}s">
+                    <td th:text="${entity.name}"></td>
+                    <td><a th:href="@{/save/{id}(id=${entity.id})}">Edit</a></td>
+                    <td><a th:href="@{/delete/{id}(id=${entity.id})}">Delete</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>      
+    <p><a href="/${entity}/add">Add a new ${class.Name}</a></p>
+</div>

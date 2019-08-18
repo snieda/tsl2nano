@@ -14,8 +14,8 @@ package ${package};
 
 import ${class.Clazz.CanonicalName};
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
-@RepositoryRestResource(collectionResourceRel = "${util.toLowerCase(${class.Name})}s", path = "${util.toLowerCase(${class.Name})}s")
-public interface ${class.Name}Repository extends CrudRepository<${class.Name}, Long> {}
+@RepositoryRestResource(collectionResourceRel = "${util.toLowerCase(${class.Name})}s", path = "${util.toLowerCase(${class.Name})}")
+public interface ${class.Name}Repository extends PagingAndSortingRepository<${class.Name}, Long> {}
