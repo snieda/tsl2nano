@@ -297,9 +297,7 @@ public class PackageGenerator extends ClassGenerator {
     protected String getDefaultDestinationFile(String modelFile) {
         modelFile = super.getDefaultDestinationFile(modelFile);
         boolean unpackaged = Boolean.getBoolean("bean.generation.unpackaged");
-        if (!unpackaged)
-            modelFile = appendPackage(modelFile, extractName(codeTemplate));
-        return modelFile;
+        return unpackaged ? modelFile : appendPackage(modelFile, extractName(codeTemplate));
     }
 
     /**

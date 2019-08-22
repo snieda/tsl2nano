@@ -18,4 +18,8 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 @RepositoryRestResource(collectionResourceRel = "${util.toLowerCase(${class.Name})}s", path = "${util.toLowerCase(${class.Name})}")
-public interface ${class.Name}Repository extends PagingAndSortingRepository<${class.Name}, Long> {}
+public interface ${class.Name}Repository extends PagingAndSortingRepository<${class.Name}, Long> {
+#foreach( $att in $class.Attributes)    
+    ${class.Name} findBy${att.NameFU}(${att.type.name} ${att.Name});
+#end
+}

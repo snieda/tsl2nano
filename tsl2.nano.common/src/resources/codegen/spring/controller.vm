@@ -33,55 +33,62 @@ public class ${class.Name}Controller {
     @GetMapping("/${entity}s/all")
     public String all${class.Name}(Model model) {
         model.addAttribute("${entity}s", repository.findAll());
-        return basePath + "viewlist/${class.Name}Containerview";
+        return basePath + "${class.Name}CView";
     }
 
 #foreach( $att in $class.Attributes)    
-    // @GetMapping("/${entity}s/${att.Name}/{${att.Name}}")
-    // public String ${class.Name}With${att.Name}(String ${att.Name}, Model model) {
-    //     model.addAttribute("${entity}s", ${entity}Repository.findBy${util.toFirstUpperCase(${att.Name})}(${att.Name}));
-    //     return basePath + "containerview/${class.Name}Containerview";
-    // }
+    @GetMapping("/${entity}s/${att.Name}/{${att.Name}}")
+    public String ${class.Name}With${att.NameFU}(${att.type.name} ${att.Name}, Model model) {
+        model.addAttribute("${entity}s", repository.findBy${att.NameFU}(${att.Name}));
+        return basePath + "${class.Name}CView";
+    }
 #end
+
+    @GetMapping("/${entity}/create")
+    public String create${class.Name}(${class.Name} ${entity}) {
+        return basePath + "${class.Name}View";
+    }
 
     @PostMapping("/${entity}/add")
     public String add${class.Name}(@Valid ${class.Name} ${entity}, BindingResult result, Model model) {
         if (result.hasErrors()) {
-            return basePath + "view/${class.Name}View";
+            return basePath + "${class.Name}View";
         }
 
         repository.save(${entity});
         model.addAttribute("${entity}s", repository.findAll());
-        return basePath + "viewlist/${class.Name}Containerview";
+        return basePath + "${class.Name}CView";
     }
 
     @GetMapping("/${entity}/edit/{id}")
     public String showUpdateForm(@PathVariable("id") long id, Model model) {
-        ${class.Name} ${entity} = repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid ${entity} Id:" + id));
+        ${class.Name} ${entity} = repository.findById(id);
+        if (${entity} == null)
+                throw new IllegalArgumentException("Invalid ${class.Name} Id:" + id);
 
         model.addAttribute("${entity}", ${entity});
-        return basePath + "view/${class.Name}View";
+        return basePath + "${class.Name}View";
     }
 
     @PostMapping("/${entity}/update/{id}")
     public String update${class.Name}(@PathVariable("id") long id, @Valid ${class.Name} ${entity}, BindingResult result, Model model) {
         if (result.hasErrors()) {
             ${entity}.setId(id);
-            return basePath + "view/${class.Name}View";
+            return basePath + "${class.Name}View";
         }
 
         repository.save(${entity});
         model.addAttribute("${entity}s", repository.findAll());
-        return basePath + "viewlist/${class.Name}Containerview";
+        return basePath + "${class.Name}CView";
     }
 
     @GetMapping("/${entity}/delete/{id}")
     public String delete${class.Name}(@PathVariable("id") long id, Model model) {
-        ${class.Name} ${entity} = repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid ${entity} Id:" + id));
+        ${class.Name} ${entity} = repository.findById(id);
+        if (${entity} == null)
+                throw new IllegalArgumentException("Invalid ${class.Name} Id:" + id);
         repository.delete(${entity});
         model.addAttribute("${entity}s", repository.findAll());
-        return basePath + "viewlist/${class.Name}Containerview";
+        return basePath + "${class.Name}CView";
     }
 }

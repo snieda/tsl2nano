@@ -1,4 +1,6 @@
 #define($entity)${util.toLowerCase(${class.Name})}#end
+#set( $OP = "${")
+#set( $CL = "}")
 <!-- 
     Thymeleaf Container View
     created by: velocity template (${template})
@@ -6,7 +8,7 @@
 
 ${copyright}
 -->
-<div th:switch="${class.Name}">
+<div th:switch="$OP${entity}s$CL">
     <h2 th:case="null">No ${class.Name} yet!</h2>
         <div th:case="*">
             <h2>${class.Name}</h2>
@@ -16,16 +18,20 @@ ${copyright}
 #foreach( $att in $class.Attributes)    
                         <th>${att.Name}</th>
 #end
+                        <th>Edit</th>
+                        <th>Delete</th>
                     </tr>
                 </thead>
                 <tbody>
-                <tr th:each="entity : ${entity}s">
-                    <td th:text="${entity.name}"></td>
-                    <td><a th:href="@{/save/{id}(id=${entity.id})}">Edit</a></td>
-                    <td><a th:href="@{/delete/{id}(id=${entity.id})}">Delete</a></td>
+                <tr th:each="e : $OP${entity}s$CL">
+#foreach( $att in $class.Attributes)    
+                    <td th:text="$OP e.${att.Name}$CL"></td>
+#end                    
+                    <td><a th:href="@{/${entity}/edit/{id}(id=${e.id})}">Edit</a></td>
+                    <td><a th:href="@{/${entity}/delete/{id}(id=${e.id})}">Delete</a></td>
                 </tr>
             </tbody>
         </table>
     </div>      
-    <p><a href="/${entity}/add">Add a new ${class.Name}</a></p>
+    <p><a href="/${entity}/create">Add a new ${class.Name}</a></p>
 </div>

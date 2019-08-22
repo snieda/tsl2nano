@@ -211,7 +211,11 @@ public class ClassGenerator {
      */
     protected String getDefaultDestinationFile(String modelFile) {
         boolean unpackaged = Boolean.getBoolean("bean.generation.unpackaged");
-        modelFile = unpackaged ? StringUtil.substring(modelFile, ".", null, true) : modelFile.replace('.', '/');
+        boolean singleFile = Boolean.getBoolean("bean.generation.singleFile");
+        if (singleFile)
+            modelFile = ""; //only the destination postfix is the name!
+        else
+            modelFile = unpackaged ? StringUtil.substring(modelFile, ".", null, true) : modelFile.replace('.', '/');
         String path = Util.get("bean.generation.outputpath", DEFAULT_DEST_PREFIX);
         return (path.endsWith("/") ? path : path + "/") + modelFile + getDestinationPostfix();
     }

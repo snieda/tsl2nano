@@ -8,6 +8,6 @@ ${copyright}
 <h2>${util.toFirstUpperCase(${project.name})}</h2>
 <table>
 #foreach( $class in $allClasses)    
-       <tr><td>    <p><a href="/${util.toLowerCase(${class.Name})}s">${class.Name}</a></p></td></tr>
+       <tr><td>    <p><a href="/${util.toLowerCase(${class.Name})}s/all">${class.Name}</a></p></td></tr>
 #end
 </table>
