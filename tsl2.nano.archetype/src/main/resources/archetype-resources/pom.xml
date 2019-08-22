@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>net.sf.tsl2nano</groupId>
 		<artifactId>tsl2.nano.h5.thymeleaf-pack</artifactId>
-		<version>2.2.2-SNAPSHOT</version>
+		<version>2.3.0-SNAPSHOT</version>
 	</parent>
 	<!--TODO: the archetype generator inserts the archetype groupId+artifacroyId. Please correct that -->
 	<groupId>${groupId}</groupId>
