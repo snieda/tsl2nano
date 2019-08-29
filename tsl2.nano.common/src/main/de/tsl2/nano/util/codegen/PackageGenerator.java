@@ -69,7 +69,8 @@ public class PackageGenerator extends ClassGenerator {
                     + " - bean.generation.outputpath      : output base path (default: src/gen)\n"
                     + " - bean.generation.nameprefix      : class+package name prefix (default: package + code-template)\n"
                     + " - bean.generation.namepostfix     : class name postfix (default: {code-template}.java)\n"
-                    + " - bean.generation.unpackaged      : no package structure from origin will be inherited (default: false)\n";
+                    + " - bean.generation.unpackaged      : no package structure from origin will be inherited (default: false)\n"
+                    + " - bean.generation.singleFile      : generate only the first occurrency (default: false)\n";
             System.out.println(help);
             System.exit(1);
         }
@@ -265,7 +266,7 @@ public class PackageGenerator extends ClassGenerator {
         }
         final String destFile = getDefaultDestinationFile(modelFile);
         final Properties p = getProperties();
-        super.generate(modelFile, getTemplate(type), destFile, p, getDefaultClassloader());
+        super.generate(getModel(modelFile), modelFile, getTemplate(type), destFile, p);
         p.put("constClass", getDestinationClassName(modelFile, destFile));
     }
 

@@ -137,7 +137,7 @@ public class XmlUtil {
      * 
      * @param expression xpath expression
      * @param stream input stream (mostly a FileInputStream)
-     * @param resultType result type to be returned. One of: {@link Map}, {@link Node}, {@link Number}, {@link Boolean},
+     * @param resultType result type to be returned. One of: {@link Map}, {@link NodeList}, {@link Node}, {@link Number}, {@link Boolean},
      *            {@link String}.
      * @return result depending on the result type. if Map was specified, all result nodes and their child-nodes will be
      *         put to the result map.
@@ -162,6 +162,8 @@ public class XmlUtil {
                     add(n, result);
                 }
                 return (RESULTTYPE) result;
+            } else if (NodeList.class.isAssignableFrom(resultType)) {
+                return (RESULTTYPE) xPath.compile(expression).evaluate(xmlDocument, XPathConstants.NODESET);
             } else if (Node.class.isAssignableFrom(resultType)) {
                 return (RESULTTYPE) xPath.compile(expression).evaluate(xmlDocument, XPathConstants.NODE);
             } else if (Boolean.class.isAssignableFrom(resultType)) {

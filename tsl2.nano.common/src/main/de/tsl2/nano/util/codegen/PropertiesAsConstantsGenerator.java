@@ -33,24 +33,10 @@ import de.tsl2.nano.core.util.StringUtil;
  */
 public class PropertiesAsConstantsGenerator extends ClassGenerator {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected Object getModel(String modelFile, ClassLoader classLoader) {
-        return super.getModel(modelFile, classLoader);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected String getDefaultDestinationFile(String modelFile) {
         modelFile = modelFile.replace('.', '/');
         modelFile = StringUtil.substring(modelFile, null, "/", true);
         return "src/gen/" + modelFile + ".java";
-    }
-
-    public static final void main(String args[]) {
     }
 }
