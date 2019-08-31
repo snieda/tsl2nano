@@ -487,13 +487,16 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
 
     /**
      * create performance enhancing cache
+     * 
+     * @return
      */
-    private void createNaturalSortedAttributeNames(String[] attributeNames) {
+    private String[] createNaturalSortedAttributeNames(String[] attributeNames) {
         naturalSortedAttributeNames = CollectionUtil.copyOfRange(attributeNames,
             0,
             attributeNames.length,
             String[].class);
         Arrays.sort(naturalSortedAttributeNames);
+        return naturalSortedAttributeNames;
     }
 
     /**

@@ -25,6 +25,8 @@ public class DeclaredMethodComparator implements Comparator<Method> {
 			} else
 				return compareName(m1, m2);
 		}
+		if (!m1.getName().equals(m2.getName()))
+			return compareName(m1, m2);
 		// only on hierarchy...
 		boolean m1TopOfm2 = m2.getDeclaringClass().isAssignableFrom(m1.getDeclaringClass());
 		// TODO: why it throws a 'java.lang.IllegalArgumentException: Comparison method

@@ -8,3 +8,6 @@
 /temp
 /*.log
 /.settings
+/.project
+/.classpath
+

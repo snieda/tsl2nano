@@ -9,7 +9,9 @@
 /*.log
 /logfactory.xml
 /.metadata
-/tsl2.nano.*/.settings
-/tsl2.nano.*/.vscode
-/tsl2.nano.*/.project
-/tsl2.nano.*/.classpath
+.project
+.classpath
+/**/.settings/*eclipse.*.core.prefs
+/**/tsl2.nano.*/.vscode
+/**/tsl2.nano.*/.project
+/**/tsl2.nano.*/.classpath

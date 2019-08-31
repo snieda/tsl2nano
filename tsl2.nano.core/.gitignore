@@ -7,3 +7,7 @@
 /dist
 /temp
 /*.log
+/.settings
+/.project
+/.classpath
+
