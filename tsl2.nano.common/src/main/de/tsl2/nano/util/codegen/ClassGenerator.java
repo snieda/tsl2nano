@@ -1,21 +1,13 @@
 package de.tsl2.nano.util.codegen;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.sql.Timestamp;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
-import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
 
-import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.core.util.Util;
 
 /**
  * 
@@ -43,9 +35,9 @@ public class ClassGenerator extends ACodeGenerator {
      * @return singelton instance
      */
     public static final ACodeGenerator instance() {
-        if (self == null)
-            return instance(new ACodeGenerator());
-        return self;
+        if (!hasInstance() || !(instance() instanceof ClassGenerator))
+            return instance(new ClassGenerator());
+        return instance();
     }
 
     protected void fillVelocityContext(Object model, String modelFile,
@@ -82,25 +74,6 @@ public class ClassGenerator extends ACodeGenerator {
         } catch (final ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    /**
-     * override this method to provide a default destination file
-     * 
-     * @see #getModel(String, ClassLoader)
-     * 
-     * @param modelFile source file
-     * @return default classloader
-     */
-    protected String getDefaultDestinationFile(String modelFile) {
-        boolean unpackaged = Boolean.getBoolean("bean.generation.unpackaged");
-        boolean singleFile = Boolean.getBoolean("bean.generation.singleFile");
-        if (singleFile)
-            modelFile = ""; //only the destination postfix is the name!
-        else
-            modelFile = unpackaged ? StringUtil.substring(modelFile, ".", null, true) : modelFile.replace('.', '/');
-        String path = Util.get("bean.generation.outputpath", DEFAULT_DEST_PREFIX);
-        return (path.endsWith("/") ? path : path + "/") + modelFile + getDestinationPostfix();
     }
 
     /**

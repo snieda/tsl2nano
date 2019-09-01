@@ -1,0 +1,6 @@
+class ${node.getNodeName()}${node.getTextContent()} {
+#foreach( $child in ${util.iterable(${node.getChildNodes()})})    
+    String ${child};
+#end
+}
+

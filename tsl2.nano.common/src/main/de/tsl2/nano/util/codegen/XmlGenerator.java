@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
+import org.apache.velocity.VelocityContext;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -37,16 +38,15 @@ import de.tsl2.nano.core.util.Util;
  * If you use a jar-file, be sure to set the classpath to find all needed classes!
  * 
  * how-to-start: start the main of this class with parameter:
- *   1. package path to find model classes to generate presenters for
- *   2. velocity template file
- *   3. class name of generator specialization (default: PackageGenerator)
- *   4. property-file name (default: null, system-properties will be used anyway)
+ *   1. xml-file
+ *   2. xpath-nodelist xpath expression to filter a node list to generate code for each node
+ *   3. velocity template file
+ *   4. class name of generator specialization (default: XmlGenerator)
+ *   5. property-file name (default: null, system-properties will be used anyway)
  *   
  * example:
- *  PackageGenerator bin/org/anonymous/project/ de.tsl2.nano.codegen.PackageGenerator
- *  PackageGenerator lib/mymodel.jar de.tsl2.nano.codegen.PresenterGenerator
+ *  XmlGenerator api.xml codegen/api.vm
  *  
- * To constrain the generation to a specific package path, set the environment variable "bean.generation.packagename".
  * </pre>
  * 
  * @author Thomas Schneider
@@ -64,7 +64,7 @@ public class XmlGenerator extends ACodeGenerator {
      * @throws Exception on any error
      */
     public static void main(String args[]) throws Exception {
-        if (args.length == 0 || args.length > 4) {
+        if (args.length < 3 || args.length > 5) {
             String help =
                 "syntax : XmlGenerator <xml-file> <xpath-nodelist> [code-template] [[generator-class [property-file]]\n"
                     + "example: XmlGenerator data.xml codegen/openapi.vm de.tsl2.nano.codegen.XmlGenerator\n"
@@ -79,17 +79,18 @@ public class XmlGenerator extends ACodeGenerator {
         }
 
         XmlGenerator gen;
-        if (args.length > 2) {
-            gen = (XmlGenerator) ClassGenerator.instance(args[2]);
-            if (args.length > 3 && args[3] != null && args[3].length() > 0) {
+        if (args.length > 3) {
+            gen = (XmlGenerator) ClassGenerator.instance(args[3]);
+            if (args.length > 4 && args[4] != null && args[4].length() > 0) {
                 gen.getProperties()
-                    .putAll(FileUtil.loadProperties(args[3], Thread.currentThread().getContextClassLoader()));
+                    .putAll(FileUtil.loadProperties(args[4], Thread.currentThread().getContextClassLoader()));
             }
         } else {
             gen = (XmlGenerator) ClassGenerator.instance(new XmlGenerator());
         }
         gen.xmlFile = args[0];
-        gen.codeTemplate = args.length > 1 ? args[1] : "codegen/openapi.vm";
+        gen.xmlXPath = args[1];
+        gen.codeTemplate = args[2];
         gen.generate();
     }
 
@@ -99,6 +100,8 @@ public class XmlGenerator extends ACodeGenerator {
     @SuppressWarnings("rawtypes")
     public void generate() {
         NodeList nodeList =  XmlUtil.xpath(xmlXPath, xmlFile, NodeList.class);
+        if (nodeList.getLength() == 0)
+            throw new IllegalStateException("given xpath '" + xmlXPath + "' hits no xml element!");
         prepareProperties(nodeList);
         boolean singleFile = Boolean.getBoolean("bean.generation.singleFile");
         Node n;
@@ -125,9 +128,9 @@ public class XmlGenerator extends ACodeGenerator {
      * @throws Exception on any error
      */
     protected void generate(Node node) throws Exception {
-        final String destFile = getDefaultDestinationFile(node.getNodeName());
+        final String destFile = getDefaultDestinationFile(node.getTextContent());
         final Properties p = getProperties();
-        super.generate(node, node.getNodeName(), getTemplate(node), destFile, p);
+        super.generate(node, node.getTextContent(), getTemplate(node), destFile, p);
     }
 
     /**
@@ -174,5 +177,22 @@ public class XmlGenerator extends ACodeGenerator {
             + packageName
             + modelFile.substring(modelFile.lastIndexOf('/'), modelFile.length());
         return modelFile;
+    }
+
+    @Override
+    protected GeneratorUtility getUtilityInstance() {
+        return new GeneratorXmlUtility();
+    }
+    
+    @Override
+    protected void fillVelocityContext(Object model,
+            String modelFile,
+            String templateFile,
+            String destFile,
+            Properties properties,
+            GeneratorUtility util,
+            VelocityContext context) {
+        super.fillVelocityContext(model, modelFile, templateFile, destFile, properties, util, context);
+        context.put("node", model);
     }
 }

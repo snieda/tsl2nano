@@ -45,6 +45,9 @@ public abstract class ACodeGenerator {
         init();
     }
 
+    protected static boolean hasInstance() {
+        return self != null;
+    }
     /**
      * returns a singelton instance of type ACodeGenerator. if the singelton is null, the argument will be used as
      * singelton.
@@ -172,14 +175,6 @@ public abstract class ACodeGenerator {
     }
 
     /**
-     * override this method to provide a default destination file
-     * 
-     * @param modelFile source file
-     * @return default classloader
-     */
-    abstract protected String getDefaultDestinationFile(String modelFile);
-
-    /**
      * tries to extract the destination class name. precondition is, that package-path starts equal on model and
      * destination!
      * 
@@ -190,9 +185,28 @@ public abstract class ACodeGenerator {
     protected String getDestinationClassName(String sourceFile, String destinationFileName) {
         String dest = destinationFileName.replace('/', '.');
         dest = dest.substring(0, dest.lastIndexOf('.'));
-        final String src = sourceFile.substring(0, sourceFile.lastIndexOf('.'));
+        final String src = sourceFile.contains(".") ? sourceFile.substring(0, sourceFile.lastIndexOf('.')) : sourceFile;
         int isrc = dest.indexOf(src);
         return isrc > -1 ? dest.substring(isrc) : dest;
+    }
+
+    /**
+     * override this method to provide a default destination file
+     * 
+     * @see #getModel(String, ClassLoader)
+     * 
+     * @param modelFile source file
+     * @return default classloader
+     */
+    protected String getDefaultDestinationFile(String modelFile) {
+        boolean unpackaged = Boolean.getBoolean("bean.generation.unpackaged");
+        boolean singleFile = Boolean.getBoolean("bean.generation.singleFile");
+        if (singleFile)
+            modelFile = ""; //only the destination postfix is the name!
+        else
+            modelFile = unpackaged ? StringUtil.substring(modelFile, ".", null, true) : modelFile.replace('.', '/');
+        String path = Util.get("bean.generation.outputpath", DEFAULT_DEST_PREFIX);
+        return (path.endsWith("/") ? path : path + "/") + modelFile + getDestinationPostfix();
     }
 
     protected String getDestinationPostfix() {
@@ -209,7 +223,7 @@ public abstract class ACodeGenerator {
      */
     protected String getDestinationPackageName(String sourceFile, String destinationFileName) {
         final String p = getDestinationClassName(sourceFile, destinationFileName);
-        return p.substring(0, p.lastIndexOf('.'));
+        return p.indexOf('.') != -1 ? p.substring(0, p.lastIndexOf('.')) : p;
     }
 
     public static String extractName(String filePath) {
