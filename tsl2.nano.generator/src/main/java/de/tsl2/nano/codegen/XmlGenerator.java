@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2008, all rights reserved
  */
-package de.tsl2.nano.util.codegen;
+package de.tsl2.nano.codegen;
 
 import java.io.File;
 import java.net.URL;
@@ -53,47 +53,22 @@ import de.tsl2.nano.core.util.Util;
  * @version $Revision$
  */
 public class XmlGenerator extends ACodeGenerator {
-    Properties properties = null;
     private String xmlFile;
     private String xmlXPath;
 
-    /**
-     * main
-     * 
-     * @param args will be ignored
-     * @throws Exception on any error
-     */
-    public static void main(String args[]) throws Exception {
-        if (args.length < 3 || args.length > 5) {
-            String help =
-                "syntax : XmlGenerator <xml-file> <xpath-nodelist> [code-template] [[generator-class [property-file]]\n"
-                    + "example: XmlGenerator data.xml codegen/openapi.vm de.tsl2.nano.codegen.XmlGenerator\n"
-                    + "\nreading system variables:\n"
-                    + " - bean.generation.outputpath      : output base path (default: src/gen)\n"
-                    + " - bean.generation.nameprefix      : class+package name prefix (default: package + code-template)\n"
-                    + " - bean.generation.namepostfix     : class name postfix (default: {code-template}.java)\n"
-                    + " - bean.generation.unpackaged      : no package structure from origin will be inherited (default: false)\n"
-                    + " - bean.generation.singleFile      : generate only the first occurrency (default: false)\n";
-            System.out.println(help);
-            System.exit(1);
-        }
-
-        XmlGenerator gen;
-        if (args.length > 3) {
-            gen = (XmlGenerator) ClassGenerator.instance(args[3]);
-            if (args.length > 4 && args[4] != null && args[4].length() > 0) {
-                gen.getProperties()
-                    .putAll(FileUtil.loadProperties(args[4], Thread.currentThread().getContextClassLoader()));
-            }
-        } else {
-            gen = (XmlGenerator) ClassGenerator.instance(new XmlGenerator());
-        }
-        gen.xmlFile = args[0];
-        gen.xmlXPath = args[1];
-        gen.codeTemplate = args[2];
-        gen.generate();
+    @Override
+    public void initParameter(Properties args) {
+        super.initParameter(args);
+        xmlFile = args.getProperty(KEY_MODEL);
+        xmlXPath = args.getProperty(KEY_FILTER);
     }
 
+    @Override
+    public void start(Properties args) {
+        initParameter(args);
+        generate();
+    }
+    
     /**
      * starts the generate process
      */
@@ -128,30 +103,9 @@ public class XmlGenerator extends ACodeGenerator {
      * @throws Exception on any error
      */
     protected void generate(Node node) throws Exception {
-        final String destFile = getDefaultDestinationFile(node.getTextContent());
+        final String destFile = getDefaultDestinationFile(getUtil().getNodeText(node));
         final Properties p = getProperties();
-        super.generate(node, node.getTextContent(), getTemplate(node), destFile, p);
-    }
-
-    /**
-     * @return properties for the velocity context
-     */
-    public Properties getProperties() {
-        if (properties == null) {
-            properties = new Properties();
-        }
-        return properties;
-    }
-
-    /**
-     * override this method, to define the path to your own template.
-     * 
-     * @param type
-     * 
-     * @return file name of presenter constant class
-     */
-    protected String getTemplate(Node node) {
-        return codeTemplate;
+        super.generate(node, getUtil().getNodeText(node), codeTemplate, destFile, p);
     }
 
     /**
@@ -180,10 +134,14 @@ public class XmlGenerator extends ACodeGenerator {
     }
 
     @Override
-    protected GeneratorUtility getUtilityInstance() {
+    protected GeneratorXmlUtility getUtil() {
+        return (GeneratorXmlUtility) super.getUtil();
+    }
+    @Override
+    protected GeneratorUtility createUtilityInstance() {
         return new GeneratorXmlUtility();
     }
-    
+
     @Override
     protected void fillVelocityContext(Object model,
             String modelFile,

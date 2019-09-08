@@ -1,4 +1,4 @@
-package de.tsl2.nano.util.codegen;
+package de.tsl2.nano.codegen;
 
 import java.util.Properties;
 
@@ -31,15 +31,6 @@ public class ClassGenerator extends ACodeGenerator {
 
     public static final String POSTFIX_CLS = ".class";
 
-    /**
-     * @return singelton instance
-     */
-    public static final ACodeGenerator instance() {
-        if (!hasInstance() || !(instance() instanceof ClassGenerator))
-            return instance(new ClassGenerator());
-        return instance();
-    }
-
     protected void fillVelocityContext(Object model, String modelFile,
             String templateFile,
             String destFile,
@@ -51,12 +42,16 @@ public class ClassGenerator extends ACodeGenerator {
         context.put("class", model);
     }
 
+    @Override
+    protected GeneratorBeanUtility getUtil() {
+        return (GeneratorBeanUtility)super.getUtil();
+    }
     /**
      * override this method to use your special utility
      * 
      * @return utility instance
      */
-    protected GeneratorUtility getUtilityInstance() {
+    protected GeneratorUtility createUtilityInstance() {
         return new GeneratorBeanUtility();
     }
 
@@ -114,25 +109,14 @@ public class ClassGenerator extends ACodeGenerator {
         return Thread.currentThread().getContextClassLoader();
     }
 
-    /**
-     * @param args model file name and template
-     * @throws Exception any exception!
-     */
-    public static void main(String args[]) throws Exception {
-
-        if (args.length != 2) {
-            System.out.print("Syntax: ClassGenerator <model-class-in-classpath> <velocity-template>");
-            System.exit(1);
-        }
-
-        final String modelFile = args[0];
-        final String templateFile = args[1];
-
-        ClassGenerator gen = new ClassGenerator();
-        ACodeGenerator.instance(gen);
-        gen.generate(gen.getModel(modelFile), modelFile, templateFile, null);
-
+    @Override
+    public void start(Properties args) {
+        super.initParameter(args);
+        generate(getModel(args.getProperty(KEY_MODEL)), args.getProperty(KEY_MODEL), args.getProperty(KEY_TEMPLATE), getProperties());
     }
+
+
+
     public static String extractName(String filePath) {
         return StringUtil.substring(filePath, "/", ".", true);
     }

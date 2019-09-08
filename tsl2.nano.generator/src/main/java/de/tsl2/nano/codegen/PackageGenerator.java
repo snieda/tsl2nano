@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2008, all rights reserved
  */
-package de.tsl2.nano.util.codegen;
+package de.tsl2.nano.codegen;
 
 import java.io.File;
 import java.net.URL;
@@ -49,7 +49,6 @@ import de.tsl2.nano.core.util.Util;
  * @version $Revision$
  */
 public class PackageGenerator extends ClassGenerator {
-    Properties properties = null;
     private String packagePath;
     private String classpathEntry;
 
@@ -59,41 +58,22 @@ public class PackageGenerator extends ClassGenerator {
      * @param args will be ignored
      * @throws Exception on any error
      */
-    public static void main(String args[]) throws Exception {
-        if (args.length == 0 || args.length > 4) {
-            String help =
-                "syntax : PackageGenerator <package-file-path> [code-template] [[generator-class [property-file]]\n"
-                    + "example: PackageGenerator bin/mylocale/mycompany/mypackagepath codegen/beanconstant.vm de.tsl2.nano.codegen.PackageGenerator\n"
-                    + "\nreading system variables:\n"
-                    + " - bean.generation.packagename     : only class in that package\n"
-                    + " - bean.generation.outputpath      : output base path (default: src/gen)\n"
-                    + " - bean.generation.nameprefix      : class+package name prefix (default: package + code-template)\n"
-                    + " - bean.generation.namepostfix     : class name postfix (default: {code-template}.java)\n"
-                    + " - bean.generation.unpackaged      : no package structure from origin will be inherited (default: false)\n"
-                    + " - bean.generation.singleFile      : generate only the first occurrency (default: false)\n";
-            System.out.println(help);
-            System.exit(1);
-        }
 
-        PackageGenerator gen;
-        if (args.length > 2) {
-            gen = (PackageGenerator) ClassGenerator.instance(args[2]);
-            if (args.length > 3 && args[3] != null && args[3].length() > 0) {
-                gen.getProperties()
-                    .putAll(FileUtil.loadProperties(args[3], Thread.currentThread().getContextClassLoader()));
-            }
-        } else {
-            gen = (PackageGenerator) ClassGenerator.instance(new PackageGenerator());
-        }
-        gen.packagePath = args[0];
-        gen.codeTemplate = args.length > 1 ? args[1] : "codegen/beanconstant.vm";
-        gen.generate();
+    @Override
+    public void initParameter(Properties args) {
+        super.initParameter(args);
+        packagePath = args.getProperty("model");
+    }
+
+    @Override
+    public void start(Properties args) {
+        initParameter(args);
+        generate();
     }
 
     /**
      * starts the generate process
      */
-    @SuppressWarnings("rawtypes")
     public void generate() {
         final Collection<Class<?>> classes = getModelClasses();
         prepareProperties(classes);
@@ -268,16 +248,6 @@ public class PackageGenerator extends ClassGenerator {
         final Properties p = getProperties();
         super.generate(getModel(modelFile), modelFile, getTemplate(type), destFile, p);
         p.put("constClass", getDestinationClassName(modelFile, destFile));
-    }
-
-    /**
-     * @return properties for the velocity context
-     */
-    public Properties getProperties() {
-        if (properties == null) {
-            properties = new Properties();
-        }
-        return properties;
     }
 
     /**

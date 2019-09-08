@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.simpleframework.xml.Transient;
 import org.simpleframework.xml.core.Commit;
 
@@ -37,6 +36,7 @@ import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.exception.Message;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.execution.IPRunnable;

@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.core;
 
+@FunctionalInterface
 /**
  * evaluates a true or false for a given object - useful for filtering.
  * 

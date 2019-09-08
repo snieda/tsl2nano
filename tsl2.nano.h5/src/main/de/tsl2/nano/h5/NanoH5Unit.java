@@ -2,6 +2,7 @@ package de.tsl2.nano.h5;
 
 import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.List;
@@ -70,9 +71,11 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
     }
     
     public static void tearDown() {
-        BeanContainer.instance().executeStmt(ENV.get("app.shutdown.statement", "SHUTDOWN"), true,
-            null);
-//        ENVTestPreparation.tearDown();
+        // String target = StringUtil.subEnclosing(new File(TEST_DIR).getAbsolutePath(), null, "target", false);
+        // String instanceId = FileUtil.getFileString(target + "/pre-integration-test/.nanoh5.environment/temp/instance-id.txt");
+        // NetUtil.get(getServiceURL(false) + "/" + instanceId);
+        if (BeanContainer.isInitialized())
+            BeanContainer.instance().executeStmt(ENV.get("app.shutdown.statement", "SHUTDOWN"), true, null);
     }
     
     protected static void startApplication() {

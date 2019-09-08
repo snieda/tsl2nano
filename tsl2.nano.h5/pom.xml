@@ -78,7 +78,19 @@
 				</excludes>
 			</resource>
 			<resource>
+				<directory>../tsl2.nano.datastructure/target/classes</directory>
+				<excludes>
+					<exclude>**/*.class</exclude>
+				</excludes>
+			</resource>
+			<resource>
 				<directory>../tsl2.nano.common/target/classes</directory>
+				<excludes>
+					<exclude>**/*.class</exclude>
+				</excludes>
+			</resource>
+			<resource>
+				<directory>../tsl2.nano.generator/target/classes</directory>
 				<excludes>
 					<exclude>**/*.class</exclude>
 				</excludes>
@@ -168,7 +180,7 @@
 						</goals>
 						<configuration>
 							<includeScope>runtime</includeScope>
-							<includeArtifactIds>tsl2.nano.common,tsl2.nano.operation, tsl2.nano.descriptor, tsl2.nano.specification, tsl2.nano.incubation, tsl2.nano.vnet, tsl2.nano.logicstructure, tsl2.nano.repeatable, tsl2.nano.cursus, tsl2.nano.terminal, tsl2.nano.serviceaccess,tsl2.nano.directaccess,tsl2.nano.jarresolver,tsl2.nano.ormliteprovider,tsl2.nano.ebeanprovider,simple-xml,snakeyaml,Java-WebSocket,xchart,VectorGraphics2D,javax.json,javax.json-api,jboss-ejb-api_3.2_spec,hibernate-jpa-2.1-api,jboss-transaction-api_1.2_spec,jboss-interceptor-api,jboss-connector-api_1.7_spec,javax.json-api,jboss-jaxrs-api,jboss-annotations-api
+							<includeArtifactIds>tsl2.nano.datastructure, tsl2.nano.common, tsl2.nano.generator, tsl2.nano.operation, tsl2.nano.descriptor, tsl2.nano.specification, tsl2.nano.incubation, tsl2.nano.vnet, tsl2.nano.logicstructure, tsl2.nano.repeatable, tsl2.nano.cursus, tsl2.nano.terminal, tsl2.nano.serviceaccess,tsl2.nano.directaccess,tsl2.nano.jarresolver,tsl2.nano.ormliteprovider,tsl2.nano.ebeanprovider,simple-xml,snakeyaml,Java-WebSocket,xchart,VectorGraphics2D,javax.json,javax.json-api,jboss-ejb-api_3.2_spec,hibernate-jpa-2.1-api,jboss-transaction-api_1.2_spec,jboss-interceptor-api,jboss-connector-api_1.7_spec,javax.json-api,jboss-jaxrs-api,jboss-annotations-api
 							</includeArtifactIds>
 							<!-- standalone:<includeArtifactIds>ant,ant-launcher,ant-nodeps,antlr,mysql-connector-java,h2,app,avalon-framework,commands,common,commons-collections,commons-logging,contenttype,dom4j,freemarker,hibernate-commons-annotations,hibernate-core,hibernate-entitymanager,hibernate-jpa-2.1-api,hibernate-tools,jandex,javassist,jboss-logging,jboss-logging-annotations,jobs,jta,jtidy,logkit,org.eclipse.jdt.core,osgi,preferences,registry,runtime,servlet-api,text,hibernate-tools,log4j,slf4j-api,slf4j-simple</includeArtifactIds> -->
 							<!-- <excludeArtifactIds> commons-codec,javax.json,junit,jasperreports,javassist,avalon-framework-impl,avalon-framework-api,avalon-framework-impl,fop,velocity,tools,aspectjweaver,jersey-bundle,icu4j 
@@ -322,7 +334,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin> <!-- WHY IS IT NOT STARTED ON PRE_INTEGRATION-TEST??? -->
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 	            <artifactId>maven-antrun-plugin</artifactId>
 	            <executions>
@@ -334,21 +346,24 @@
 	                    </goals>
 	                    <inherited>true</inherited>
 	                    <configuration>
-							<!-- <skip>true</skip> -->
 	                    	<failOnError>true</failOnError>
 	                    	<skip>${skipTests}</skip>
-	                        <tasks>
-	                            <java jar="target/${project.build.finalName}-standalone.jar"
-	                            	  dir="target/test"
+	                        <target>
+								<echo>${project.build.finalName}</echo>
+								<mkdir dir="${project.build.directory}/pre-integration-test" />
+	                            <java jar="${project.build.directory}/${artifactId}-${project.version}-standalone.jar"
+	                            	  dir="${project.build.directory}/pre-integration-test"
 	                                  fork="true"
-	                                  spawn="true">
+									  spawn="true"
+									  >
 	                                <sysproperty key="app.server.running" value="true" />
 	                                <sysproperty key="websocket.use" value="false" />
 	                                <sysproperty key="tsl2nano.offline" value="true" />
 	                                <sysproperty key="app.show.startpage" value="false" />
 	                                <!-- <arg value="-xyz" /> <arg value="123" /> -->
 	                            </java>
-	                        </tasks>
+								<sleep seconds="10" />
+	                        </target>
 	                    </configuration>
 	                </execution>
 	            </executions>
@@ -374,6 +389,11 @@
 			<artifactId>jersey-bundle</artifactId>
 			<version>1.19.4</version>
 			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.tsl2nano</groupId>
+			<artifactId>tsl2.nano.generator</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>

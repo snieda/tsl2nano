@@ -80,7 +80,9 @@
 	</developers>
 	<modules>
 		<module>tsl2.nano.core</module>
+		<module>tsl2.nano.datastructure</module>
 		<module>tsl2.nano.common</module>
+		<module>tsl2.nano.generator</module>
 		<module>tsl2.nano.mavengenerator</module>
 		<module>tsl2.nano.operation</module>
 		<module>tsl2.nano.descriptor</module>
@@ -179,7 +181,7 @@
    			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>2.20.1</version>
+				<version>2.22.2</version>
 				<configuration>
 					<!-- <skipITs>true</skipITs> -->
 					<forkCount>${forkCount}</forkCount>

@@ -14,6 +14,7 @@ package de.tsl2.nano.core;
  * @author Thomas Schneider
  * @version $Revision$ 
  */
+@FunctionalInterface
 public interface ITransformer<S, T> {
     /** Transforms an object from S to T. */
     T transform(S toTransform);

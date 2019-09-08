@@ -1,0 +1,6 @@
+class ${util.getName(${node})} {
+#foreach( $child in ${util.iterableLeafs(${node.getChildNodes()})})    
+    String ${util.getNameFL(${child})};
+#end
+}
+

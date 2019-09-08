@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2012, all rights reserved
  */
-package de.tsl2.nano.util.codegen;
+package de.tsl2.nano.codegen;
 
 import de.tsl2.nano.core.util.StringUtil;
 

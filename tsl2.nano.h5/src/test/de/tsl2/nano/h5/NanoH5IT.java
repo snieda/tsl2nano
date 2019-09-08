@@ -38,7 +38,7 @@ public class NanoH5IT extends NanoH5Unit {
     
     @AfterClass
     public static void tearDown() {
-//        NanoH5Unit.tearDown();
+       NanoH5Unit.tearDown();
     }
 
     @Test

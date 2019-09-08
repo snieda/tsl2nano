@@ -8,7 +8,7 @@
 	</parent>
 	<artifactId>tsl2.nano.common</artifactId>
 	<name>TSL2 Framework Commons</name>
-	<description>TSL2 Framework Commons (Collections, Actions/Excecution, Readers, Xml, Print, Mail, FuzzyFinder, Proxies, Code-Generators, Network-Structure)</description>
+	<description>TSL2 Framework Commons (Collections, Actions/Excecution, Readers, Xml, Print, Mail, FuzzyFinder, Proxies, Network-Structure)</description>
 	<properties>
 		<module.parent>..</module.parent>
 	</properties>
@@ -99,38 +99,12 @@
 			<version>6.4.1</version>
 			<scope>compile</scope>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/velocity/velocity -->
- 		<dependency>
-			<groupId>org.apache.velocity</groupId>
-			<artifactId>velocity</artifactId>
-			<version>1.7</version>
-<!-- 			<type>pom</type> -->
-		 </dependency>
-<!-- https://mvnrepository.com/artifact/org.apache.clerezza.ext/org.json.simple -->
-		<dependency>
-			<groupId>org.apache.clerezza.ext</groupId>
-			<artifactId>org.json.simple</artifactId>
-			<version>0.4</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-			<version>20160212</version>
-			<scope>test</scope>
-		</dependency>
-		<!-- <dependency>
-			<groupId>velocity</groupId>
-			<artifactId>velocity-dep</artifactId>
-			<version>1.5</version>
-			<type>pom</type>
-		</dependency>  -->
 		<!-- https://mvnrepository.com/artifact/avalon-framework/avalon-framework-impl -->
 		<!-- <dependency> <groupId>avalon-framework</groupId> <artifactId>avalon-framework-impl</artifactId> 
 			<version>4.2.0</version> </dependency> -->
 		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>
-			<artifactId>tsl2.nano.core</artifactId>
+			<artifactId>tsl2.nano.datastructure</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

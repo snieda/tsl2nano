@@ -3,30 +3,35 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - ACodeGenerator",
+            "request": "launch",
+            "mainClass": "de.tsl2.nano.codegen.ACodeGenerator",
+            "projectName": "tsl2.nano.generator"
+        },
+        {
+            "type": "java",
             "name": "Debug (Attach MAVEN Surefire on 5005)",
             "request": "attach",
             "projectName": "tsl2.nano.h5",
             "hostName": "localhost",
             "port": 5005
         },
-        
         {
             "type": "java",
             "name": "Debug (Attach MAVEN plugin on 8000)",
             "request": "attach",
-            "projectName": "tsl2.nano.mavengenerator",
+            "projectName": "tsl2nano-code/tsl2.nano.common",
             "hostName": "localhost",
             "port": 8000
         },
-    {
-        "name": "Debug (Attach on 8787)",
-        "type": "java",
-        "request": "attach",
-        "remoteHost": "localhost",
-        "remotePort": 8787,
-        "hostName": "localhost",
-        "port": 8787
-        //"preLaunchTask": "java -jar tsl2.nano.h5"
+        {
+            "name": "Debug (Attach on 8787)",
+            "type": "java",
+            "request": "attach",
+            "remoteHost": "localhost",
+            "remotePort": 8787,
+            "hostName": "localhost",
+            "port": 8787
         },
         {
             "name": "Java",

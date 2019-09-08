@@ -1,4 +1,4 @@
-package de.tsl2.nano.util.codegen;
+package de.tsl2.nano.codegen;
 
 import java.sql.Time;
 import java.util.Collection;

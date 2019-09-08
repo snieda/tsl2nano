@@ -9,9 +9,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
-import de.tsl2.nano.core.cls.BeanClass;
-import de.tsl2.nano.util.codegen.ClassGenerator;
-import de.tsl2.nano.util.codegen.PackageGenerator;
+import de.tsl2.nano.codegen.ACodeGenerator;
 
 @Mojo( name = "run", defaultPhase = LifecyclePhase.PROCESS_CLASSES )
 public class GeneratorMojo extends AbstractMojo {
@@ -19,12 +17,14 @@ public class GeneratorMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project}")
     private MavenProject project;
 
-	@Parameter(defaultValue="de.tsl2.nano.util.codegen.PackageGenerator", property="bean.generation.generator")
-	private String generator;
-    @Parameter(property = "bean.generation.packageFilePath", required = true )
-	private String packageFilePath;
-	@Parameter(defaultValue="codegen/beanconstant.vm", property="bean.generation.templateFilePath" )
-	private String templateFilePath;
+	@Parameter(alias = "generator", defaultValue="de.tsl2.nano.util.codegen.PackageGenerator", property="bean.generation.generator")
+	private String algorithm;
+    @Parameter(alias = "packageFilePath", property = "bean.generation.packageFilePath", required = true )
+	private String model;
+	@Parameter(alias = "templateFilePath", defaultValue="codegen/beanconstant.vm", property="bean.generation.templateFilePath" )
+	private String template;
+	@Parameter(alias = "package", property="bean.generation.package" )
+	private String filter;
 	@Parameter(property="bean.generation.propertyFile")
 	private String propertyFile;
 	@Parameter( property = "bean.generation.outputpath")
@@ -50,17 +50,14 @@ public class GeneratorMojo extends AbstractMojo {
 			System.setProperty("bean.generation.unpackaged", unpackaged);
 			System.setProperty("bean.generation.singleFile", singleFile);
 
-			ClassGenerator genInstance = ClassGenerator.instance((ClassGenerator)BeanClass.createInstance(generator));
-			if (genInstance instanceof PackageGenerator) {
-				Properties properties = ((PackageGenerator)genInstance).getProperties();
-				properties.putAll(System.getenv());
-				properties.putAll(System.getProperties());
-				properties.putAll(project.getProperties());
-				properties.put("project", project);
-			}
+			Properties properties = new Properties();
+			properties.putAll(System.getenv());
+			properties.putAll(System.getProperties());
+			properties.putAll(project.getProperties());
+			properties.put("project", project);
 
-			PackageGenerator.main(packageFilePath == null ? new String[0] 
-				: new String[] { packageFilePath, templateFilePath, generator, propertyFile });
+			ACodeGenerator.start(model == null ? new String[0] 
+				: new String[] {algorithm, model, template, filter, propertyFile }, properties);
 
 		} catch (Exception e) {
 			e.printStackTrace();

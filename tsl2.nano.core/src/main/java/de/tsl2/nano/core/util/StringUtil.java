@@ -119,7 +119,7 @@ public class StringUtil {
      * @param from start-string
      * @param to end-string
      * @param start index
-     * @param constrain if true, null will be returned if from or to couldn't be found
+     * @param constrain if true, null will be returned if @from or @to couldn't be found
      * @return extracted substring
      */
     public static String substring(String data, String from, String to, int start, boolean constrain) {
@@ -265,6 +265,10 @@ public class StringUtil {
         }
     }
 
+    public static String replaceAll(CharSequence src, String regex, ITransformer<String, String> transformer) {
+        return replaceAll(src, regex, 0, transformer);
+    }
+
     /**
      * replaces all matches of regex in source src calling the callback {@link ITransformer#transform(String)} of your
      * given transformer.
@@ -274,20 +278,20 @@ public class StringUtil {
      * @param transformer callback to replace matches.
      * @return transformed string
      */
-    public static String replaceAll(CharSequence src, String regex, ITransformer<String, String> transformer) {
+    public static String replaceAll(CharSequence src, String regex, int group, ITransformer<String, String> transformer) {
         Matcher matcher = Pattern.compile(regex).matcher(src);
         StringBuffer result = new StringBuffer(src.length());
         while (matcher.find()) {
             //while appendReplacement seems to block strings having special characters like '$', '{', the appending is done on #append()
             matcher.appendReplacement(result, "");
-            result.append(transformer.transform(matcher.group()));
+            result.append(transformer.transform(matcher.group(group)));
         }
         matcher.appendTail(result);
         return result.toString();
     }
 
     /**
-     * @param src StringBuffer in cause of Matcher ony working on StringBuffer directly
+     * @param src StringBuffer in cause of Matcher only working on StringBuffer directly
      * @param regex regular expression
      * @param replacement replacement
      * @return count of findings
@@ -984,4 +988,15 @@ public class StringUtil {
     	} while (true);
 		return c;
     }
+
+    /**
+     * 
+     * @param txt text to convert to a valid name
+     * @return valid java class or variable name with camel-case
+     */
+    public static String toValidName(String txt) {
+        // return txt.replaceAll("[^\\w\\d]+([\\w\\d])", "\\U$1\\E");
+        return StringUtil.replaceAll(txt, "[^\\w\\d]+([\\w\\d])", 1, s -> s.toUpperCase());
+    }
+
 }

@@ -153,5 +153,5 @@ button, input, #field§quicksearch, .actionpanel {
 }
 .sidenav {padding-top: 15px;}
 .sidenav a {font-size: 18px;}
-.sidenav button {font-size: 18px;}
+.sidenav button {font-size: 18px; width: 100%}
 }

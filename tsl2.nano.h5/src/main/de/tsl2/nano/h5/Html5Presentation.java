@@ -1200,10 +1200,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         try {
             if (useSideNav(actions.size())) {
                 cell = sideNav = createSidebarNavMenuButton(parent, sideNav);
-                width = setTemporaryWidth200();
+                width = setTemporaryFullWidth();
             } else {
                 if (useSideNav(Integer.MAX_VALUE))
-                    width = setTemporaryWidth200();
+                    width = setTemporaryFullWidth();
                 Element panel =
                     createGrid(parent, "Actions", "action.panel", /*actions != null ? 1 + actions.size() : 1*/0);
                 Element row = appendTag(panel, TABLE(TAG_ROW, ATTR_CLASS, "actionpanel"));
@@ -1225,11 +1225,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         return cell;
     }
 
-    private int setTemporaryWidth200() {
+    private int setTemporaryFullWidth() {
         int width;
         width = ENV.get("layout.action.width", -1);
         if (width == -1)
-            ENV.setProperty("layout.action.width", 200);
+            ENV.setProperty("layout.action.width", "100%");
         return width;
     }
 

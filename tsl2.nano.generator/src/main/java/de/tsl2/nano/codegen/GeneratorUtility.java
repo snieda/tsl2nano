@@ -1,8 +1,9 @@
-package de.tsl2.nano.util.codegen;
+package de.tsl2.nano.codegen;
 
 import java.util.Properties;
 
 import de.tsl2.nano.core.cls.BeanAttribute;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * helper class for {@linkplain ClassGenerator}
@@ -73,5 +74,9 @@ public class GeneratorUtility {
 
     public String getFilePathFromPackage(String pck) {
         return pck.replace('.', '/');
+    }
+
+    public String toValidName(String txt) {
+        return StringUtil.toValidName(txt);
     }
 }

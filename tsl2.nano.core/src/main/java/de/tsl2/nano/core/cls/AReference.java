@@ -157,7 +157,9 @@ public abstract class AReference<T, O> {
 		this.description = description;
 	}
 
-	abstract protected void checkDescription(String description);
+	protected void checkDescription(String description) {
+    	type(description);
+    }
 
 	@SuppressWarnings("rawtypes")
     @Override

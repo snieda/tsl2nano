@@ -28,13 +28,13 @@ import java.util.Properties;
 
 import javax.ws.rs.Path;
 
+import com.sun.jersey.api.container.httpserver.HttpServerFactory;
+import com.sun.net.httpserver.HttpServer;
+
 import org.anonymous.project.Address;
 import org.anonymous.project.Charge;
 import org.junit.Assert;
 import org.junit.Test;
-
-import com.sun.jersey.api.container.httpserver.HttpServerFactory;
-import com.sun.net.httpserver.HttpServer;
 
 import de.tsl2.nano.action.IStatus;
 import de.tsl2.nano.bean.BeanContainer;
@@ -44,6 +44,7 @@ import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.IValueDefinition;
+import de.tsl2.nano.codegen.ACodeGenerator;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.classloader.NestedJarClassLoader;
 import de.tsl2.nano.core.classloader.RuntimeClassloader;
@@ -74,7 +75,6 @@ import de.tsl2.nano.incubation.specification.rules.RuleScript;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.IAuthorization;
-import de.tsl2.nano.util.codegen.PackageGenerator;
 import de.tsl2.nano.util.test.BaseTest;
 import my.app.MyApp;
 import my.app.Times;
@@ -162,7 +162,7 @@ public class NanoH5Test implements ENVTestPreparation {
         System.setProperty("bean.generation.packagename", pckName);
         System.setProperty("bean.generation.outputpath", DIR_TEST);
         
-        PackageGenerator.main(new String[] { "target/test-classes/" + pckName.replace('.', '/') });
+        ACodeGenerator.start(new String[] { "target/test-classes/" + pckName.replace('.', '/'), "codegen/beanconstant.vm" }, null, 0);
 
         Persistence.current().save();
         
@@ -315,7 +315,7 @@ public class NanoH5Test implements ENVTestPreparation {
         
         //delete the test output
 //        ConcurrentUtil.sleep(10000);
-        new File(DIR_TEST).deleteOnExit();
+        // new File(DIR_TEST).deleteOnExit();
 //        p.clear();
 //        p.put("dir", DIR_TEST);
 //        AntRunner.runTask(AntRunner.TASK_DELETE, p, (String)null);
@@ -425,8 +425,6 @@ public class NanoH5Test implements ENVTestPreparation {
 
         cSheet.set(1, 0, new BigDecimal(5));
         Assert.assertTrue(cSheet.get(1, 2).equals(new BigDecimal(25)));
-        
-        
     }
     
     /**

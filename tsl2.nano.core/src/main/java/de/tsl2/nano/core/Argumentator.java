@@ -10,9 +10,12 @@
 package de.tsl2.nano.core;
 
 import java.io.PrintStream;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.jar.Attributes;
 
 import de.tsl2.nano.core.classloader.RuntimeClassloader;
@@ -36,13 +39,20 @@ import de.tsl2.nano.core.util.StringUtil;
  * 
  * <pre>
  *         Argumentator argumentator = new Argumentator("print", getManual(), args);
+ *         argumentator.start(System.out, r -> r.run()); 
+ * </pre>
+ * 
+ * Example 2:
+ * 
+ * <pre>
+ *         Argumentator argumentator = new Argumentator("print", getManual(), args);
  *         if (argumentator.check(System.out)) {
  *             Properties am = argumentator.getArgMap();
  *             String source = am.getProperty("source");
  *             ...
  * </pre>
  * 
- * Example 2:
+ * Example 3:
  * 
  * <pre>
  *      Properties p = Argumentator.defineArguments(getManual(), args);
@@ -66,23 +76,37 @@ public class Argumentator {
     //TODO: use dynamic syntax
     String syntax = "-+/=?";
 
-    private Map<String, String> man;
-
-    private static final String KEY_DUTY = "(!)";
+    private static final String KEY_DUTY = Arg.KEY_DUTY;
+    /** example: arg0: my description [(!) @java.lang.String(*******) ? {test...testZZZ} : test] */
+    private static final String EXP_CONSTRAINT = "\\[[\\w.\\d]: ";
     private static final String KEY_PREFIX_EXAMPLE = "example";
+    private Map<String, Arg<?>> man;
+    private int errorCodeOnExit;
 
     /**
      * constructor
      * 
      * @param name program name
-     * @param man manual
+     * @param man  manual
      * @param args program arguments
      */
     public Argumentator(String name, Map<String, String> man, String... args) {
-        super();
+        this(name, decorateMan(man), 0, args);
+    }
+
+    public Argumentator(String name, Map<String, Arg<?>> man, int errorCodeOnExit, String... args) {
         this.name = name;
-        argMap = defineArgs(man, args);
         this.man = man;
+        this.errorCodeOnExit = errorCodeOnExit;
+        argMap = defineArgs(man, args);
+    }
+
+    private static Map<String, Arg<?>> decorateMan(Map<String, String> man) {
+        Map<String, Arg<?>> argDef = new LinkedHashMap<>(man.size());
+        for (String k : man.keySet()) {
+            argDef.put(k, new Arg(k, man.get(k)));
+        }
+        return argDef;
     }
 
     /**
@@ -91,7 +115,7 @@ public class Argumentator {
      * @param man
      * @param args
      */
-    public static Properties defineArgs(Map<String, String> man, String[] args) {
+    public static Properties defineArgs(Map<String, Arg<?>> man, String[] args) {
         Properties argMap = new Properties();
         String n;
         Object v;
@@ -109,6 +133,7 @@ public class Argumentator {
                     if (p.length == 1) {
                         n = String.valueOf(i + 1);
                         v = p[0];
+                        storeWithName(i + 1, v, man, argMap);
                     } else {
                         n = p[0];
                         v = p[1];
@@ -119,6 +144,18 @@ public class Argumentator {
             }
         }
         return argMap;
+    }
+
+    private static void storeWithName(int i, Object v, Map<String, Arg<?>> man, Properties argMap) {
+        if (man.size() > i) {
+            Iterator<String> it = man.keySet().iterator();
+            String k = null;
+            for(int n = 0; n < i; n++) {
+                k = it.next();
+            }
+            check(k, v, man);
+            argMap.put(k, v);
+        }
     }
 
     public Properties getArgMap() {
@@ -158,8 +195,12 @@ public class Argumentator {
         Set<String> keys = man.keySet();
         for (String k : keys) {
             if (isDuty(man, k) && !isSet(k)) {
-                out.println("argument '" + k + "' was not set!\n");
+                out.println("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                out.println("ERROR: argument '" + k + "' was not set!");
+                out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
                 printManual(out);
+                if (errorCodeOnExit > 0)
+                    System.exit(errorCodeOnExit);
                 return false;
             }
         }
@@ -174,7 +215,7 @@ public class Argumentator {
      * @param value
      * @param man
      */
-    private static void check(String name, Object value, Map<String, String> man) {
+    private static void check(String name, Object value, Map<String, Arg<?>> man) {
         if (man == null) {
             return;
         }
@@ -278,8 +319,8 @@ public class Argumentator {
         printManual(name, man, out, 80);
     }
 
-    static boolean isDuty(Map<String, String> man, String name) {
-        return man.get(name).startsWith(KEY_DUTY);
+    static boolean isDuty(Map<String, ?> man, String name) {
+        return man.get(name) instanceof Arg ? ((Arg)man.get(name)).mandatory : man.get(name).toString().contains(KEY_DUTY);
     }
 
     /**
@@ -287,7 +328,7 @@ public class Argumentator {
      * 
      * @param man manual to be logged
      */
-    public static void printManual(String name, Map<String, String> man, PrintStream out, int width) {
+    public static void printManual(String name, Map<String, ?> man, PrintStream out, int width) {
         Set<String> keys = man.keySet();
         StringBuilder buf = new StringBuilder(keys.size() * width);
         int kw = 10;// key width
@@ -310,7 +351,7 @@ public class Argumentator {
         out.println(buf.toString());
     }
 
-    static String getSyntax(String name, Map<String, String> man, int width) {
+    static String getSyntax(String name, Map<String, ?> man, int width) {
         Set<String> keys = man.keySet();
         StringBuilder buf = new StringBuilder(keys.size() * 15);
         buf.append("syntax: " + name);
@@ -329,9 +370,22 @@ public class Argumentator {
         return RuntimeClassloader.readManifest();
     }
     
+    /**
+     * 
+     * @param prinStream
+     * @param runner
+     * @return result of runner function
+     */
+    public void start(PrintStream printStream, Function<Properties, Object> runner) {
+        if (check( printStream)) {
+            printStream.println("\n>>>>> " + runner.apply(getArgMap()) + " <<<<<\n");           
+        }
+    }
+
     @Override
     public String toString() {
     	String ln = "===============================================================================\n";
     	return ln + getClass().getSimpleName() + ":\n" + StringUtil.toFormattedString(man, -1) + "\ncalled with:\n" + StringUtil.toFormattedString(argMap, -1) + ln;
     }
+
 }

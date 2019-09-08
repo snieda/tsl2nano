@@ -1,0 +1,47 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>net.sf.tsl2nano</groupId>
+    <artifactId>tsl2.nano.h5-package</artifactId>
+    <version>2.3.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>tsl2.nano.generator</artifactId>
+  <name>TSL2 Framework Generator</name>
+  <description>velocity template generator through classes or dom</description>
+	<properties>
+		<module.parent>..</module.parent>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>net.sf.tsl2nano</groupId>
+			<artifactId>tsl2.nano.core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/velocity/velocity -->
+ 		<dependency>
+			<groupId>org.apache.velocity</groupId>
+			<artifactId>velocity</artifactId>
+			<version>1.7</version>
+<!-- 			<type>pom</type> -->
+		 </dependency>
+<!-- https://mvnrepository.com/artifact/org.apache.clerezza.ext/org.json.simple -->
+		<dependency>
+			<groupId>org.apache.clerezza.ext</groupId>
+			<artifactId>org.json.simple</artifactId>
+			<version>0.4</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20160212</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- <dependency>
+			<groupId>velocity</groupId>
+			<artifactId>velocity-dep</artifactId>
+			<version>1.5</version>
+			<type>pom</type>
+		</dependency>  -->
+	</dependencies>
+</project>

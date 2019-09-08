@@ -15,6 +15,8 @@ import static de.tsl2.nano.core.util.ByteUtil.toByteArray;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.StringReader;
@@ -41,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.function.Function;
 
 import javax.json.Json;
 import javax.json.JsonStructure;
@@ -686,10 +689,10 @@ public class NetUtil {
      * @param args data (key/values) to be sent packed into a map (key1, value1, key2, value2,...)
      * @return servers result
      */
-    public static <T> T send(String host, int port, Class<T> resultType, Object... args) {
+    public static <T> T request(String host, int port, Class<T> resultType, Object... args) {
         Socket socket = NetUtil.connect(host, port);
         try {
-            return send(connect(host, port), resultType, args);
+            return request(connect(host, port), resultType, args);
         } finally {
             if (socket != null) {
                 try {
@@ -710,13 +713,43 @@ public class NetUtil {
      * @return servers result
      */
     @SuppressWarnings("unchecked")
-    public static <T> T send(Socket socket, Class<T> resultType, Object... args) {
+    public static <T> T request(Socket socket, Class<T> resultType, Object arg) {
         try {
-            socket.getOutputStream().write(ObjectUtil.serialize(MapUtil.asMap(args)));
+            send(socket, arg);
             return (T) serialize(toByteArray(socket.getInputStream()));
         } catch (IOException e) {
             ManagedException.forward(e);
             return null;
+        }
+    }
+
+    public static void send(Socket socket, Object obj) {
+        try {
+            new ObjectOutputStream(socket.getOutputStream()).writeObject(obj);
+        } catch (IOException e) {
+            ManagedException.forward(e);
+        }
+    }
+    public static Object receive(Socket socket) {
+        try {
+            return new ObjectInputStream(socket.getInputStream()).readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            return ManagedException.forward(e);
+        }
+    }
+    /**
+     * waits for a client-connection and a request, sends a response  - without closing the socket
+     * 
+     * @param socket socket
+     * @param func evaluates the response object
+     */
+    @SuppressWarnings("unchecked")
+    public static <REQUEST, RESPONSE> void response(Socket socket, Function<REQUEST, RESPONSE> func) {
+        try {
+            REQUEST request = (REQUEST) new ObjectInputStream(socket.getInputStream()).readObject();
+            new ObjectOutputStream(socket.getOutputStream()).writeObject(func.apply(request));
+        } catch (IOException | ClassNotFoundException e) {
+            ManagedException.forward(e);
         }
     }
 

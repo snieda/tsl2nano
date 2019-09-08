@@ -18,7 +18,7 @@
   <dependencies>
 	<dependency>
 		<groupId>net.sf.tsl2nano</groupId>
-		<artifactId>tsl2.nano.common</artifactId>
+		<artifactId>tsl2.nano.generator</artifactId>
 		<version>${project.version}</version>
 	</dependency>
 	<dependency>

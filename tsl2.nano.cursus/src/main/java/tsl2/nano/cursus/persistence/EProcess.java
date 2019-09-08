@@ -21,7 +21,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.annotation.Action;
@@ -30,6 +29,7 @@ import de.tsl2.nano.bean.annotation.Presentable;
 import de.tsl2.nano.bean.annotation.ValueExpression;
 import de.tsl2.nano.bean.def.SStatus;
 import de.tsl2.nano.core.exception.Message;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.messaging.IListener;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.Util;

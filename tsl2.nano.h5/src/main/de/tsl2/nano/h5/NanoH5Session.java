@@ -461,7 +461,8 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
                 }
             };
             Plugins.process(INanoPlugin.class).exceptionHandler(ex);
-            msg = refreshPage(ex);
+            if (nav.current() != null)
+                msg = refreshPage(ex);
             String user = getUserAuthorization() != null ? (String)getUserAuthorization().getUser() : "unauthorized";
             try {// only a try, don't throw a new exception in this catch block
                 FileUtil.writeBytes(msg.getBytes(), ENV.getTempPath() + "page-failed-" 
@@ -476,7 +477,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
             EMessage.broadcast(this,
                 ENV.translate("nanoh5.error", false,
                     user, 
-                    nav.current(), ex.getLocalizedMessage()),
+                    nav.current() != null ? nav.current() : "UNDEFINED", ex.getLocalizedMessage()),
                 "*");
         }
         //TODO: eliminate bug in NanoHTTPD not resetting uri...
