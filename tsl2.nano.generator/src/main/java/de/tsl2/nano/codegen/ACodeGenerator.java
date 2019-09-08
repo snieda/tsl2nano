@@ -42,7 +42,7 @@ import de.tsl2.nano.core.util.Util;
  *      (class package) and creates a java file.
  * 
  *      Howto start (example): mainClass:
- *      de.tsl2.nano.util.codegen.ACodeGenerator arguments:
+ *      de.tsl2.nano.codegen.ACodeGenerator arguments:
  *      bin/codegen/beanclass.vm
  * @author ts 07.12.2008
  * @version $Revision: 1.0 $
@@ -110,8 +110,8 @@ public abstract class ACodeGenerator {
             ACodeGenerator gen = (ACodeGenerator) BeanClass.createInstance(a.getProperty(KEY_ALGORITHM));
             if (props != null)
                 gen.getProperties().putAll(props);
-            gen.initParameter(a);
-            return gen.getClass().getSimpleName() + "finished successfull";
+            gen.start(a);
+            return gen.getClass().getSimpleName() + " finished successfull";
         });
     }
 

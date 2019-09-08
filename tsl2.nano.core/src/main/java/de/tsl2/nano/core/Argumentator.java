@@ -378,6 +378,8 @@ public class Argumentator {
      */
     public void start(PrintStream printStream, Function<Properties, Object> runner) {
         if (check( printStream)) {
+            printStream.println("\n>>>>> " + "starting " + name        + " <<<<<\n");  
+            printStream.println(StringUtil.toFormattedString(argMap, -1, true));         
             printStream.println("\n>>>>> " + runner.apply(getArgMap()) + " <<<<<\n");           
         }
     }

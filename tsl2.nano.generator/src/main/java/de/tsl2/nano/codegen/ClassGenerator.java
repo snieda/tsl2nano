@@ -21,7 +21,7 @@ import de.tsl2.nano.core.util.StringUtil;
  * 
  *      The default implementation of this basic generator expects a java bean (class package) and creates a java file.
  * 
- *      Howto start (example): mainClass: de.tsl2.nano.util.codegen.ClassGenerator arguments:
+ *      Howto start (example): mainClass: de.tsl2.nano.codegen.ClassGenerator arguments:
  *      bin/codegen/beanclass.vm
  * @author ts 07.12.2008
  * @version $Revision: 1.0 $

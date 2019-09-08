@@ -17,7 +17,7 @@ public class GeneratorMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project}")
     private MavenProject project;
 
-	@Parameter(alias = "generator", defaultValue="de.tsl2.nano.util.codegen.PackageGenerator", property="bean.generation.generator")
+	@Parameter(alias = "generator", defaultValue="de.tsl2.nano.codegen.PackageGenerator", property="bean.generation.generator")
 	private String algorithm;
     @Parameter(alias = "packageFilePath", property = "bean.generation.packageFilePath", required = true )
 	private String model;
