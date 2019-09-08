@@ -10,6 +10,8 @@
 package de.tsl2.nano.incubation.network;
 
 import java.io.Serializable;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 
@@ -25,13 +27,12 @@ public class JobContext<V> implements Serializable {
     String name;
     Callable<V> callable;
     ClassLoader classLoader;
+    URL[] urlsForClassLoading;
     Properties properties;
-    /**
-     * constructor
-     * @param callable
-     * @param classLoader
-     * @param properties
-     */
+    public JobContext(String name, Callable<V> callable, Properties properties, URL...urlsForClassLoading) {
+        this(name, callable, null, properties);
+        this.urlsForClassLoading = urlsForClassLoading;
+    }
     public JobContext(String name, Callable<V> callable, ClassLoader classLoader, Properties properties) {
         super();
         this.name = name;
@@ -49,6 +50,9 @@ public class JobContext<V> implements Serializable {
      * @return Returns the classLoader.
      */
     public ClassLoader getClassLoader() {
+        if (classLoader == null) {
+            classLoader = new URLClassLoader(urlsForClassLoading, Thread.currentThread().getContextClassLoader());
+        }
         return classLoader;
     }
     /**

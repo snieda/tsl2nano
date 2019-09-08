@@ -75,6 +75,7 @@ public class Worker {
              */
             stream = new ObjectInputStream(socket.getInputStream());
             Request request = (Request) stream.readObject();
+            request.setProgress(Request.PROGRESS_ACCEPTED);
             request.createResponse(task);
             //send it back to the client
             LOG.debug("sending response " + request + " for job " + task);

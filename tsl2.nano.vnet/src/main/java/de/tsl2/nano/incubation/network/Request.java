@@ -17,11 +17,16 @@ public class Request implements Serializable {
     private static final long serialVersionUID = -6312981186212043234L;
     private byte type;
     private Object response;
-
+    private long[] progressTimeStamps = new long[4]; 
     public static final byte DONE = 1;
     public static final byte CANCELED = 2;
     public static final byte CANCEL = 3;
     public static final byte RESULT = 4;
+
+    public static final int PROGRESS_INIT = 0;
+    public static final int PROGRESS_ACCEPTED = 1;
+    public static final int PROGRESS_DONE = 2;
+    public static final int PROGRESS_SENT = 3;
 
     /**
      * constructor
@@ -42,6 +47,11 @@ public class Request implements Serializable {
         super();
         this.type = type;
         this.response = value;
+        setProgress(PROGRESS_INIT);
+    }
+
+    public void setProgress(int progressIndex) {
+        progressTimeStamps[progressIndex] = System.currentTimeMillis();
     }
 
     /**
@@ -92,6 +102,7 @@ public class Request implements Serializable {
         default:
             break;
         }
+        setProgress(PROGRESS_DONE);
     }
 
     @Override

@@ -1,17 +1,19 @@
 package de.tsl2.nano.incubation.network;
 
-import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
 
 import java.io.Serializable;
+import java.net.Socket;
+import java.net.URI;
 import java.util.concurrent.Callable;
 
-import org.apache.commons.logging.Log;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
-import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ENVTestPreparation;
+import de.tsl2.nano.core.util.NetUtil;
 
 public class JobServerTest {
 
@@ -26,11 +28,28 @@ public class JobServerTest {
     }
     
    @Test
-    public void testJobServer() throws Exception {
+    public void testJobServerDirectly() throws Exception {
         JobServer jobServer = new JobServer();
         String result = jobServer.executeWait("test", new TestJob(), 5000);
         jobServer.close();
-        assertNotNull(result);
+        assertEquals("my-test-job", result);
+    }
+
+    @Ignore
+    @Test
+    public void testJobServerThroughSocket() throws Exception {
+        JobServer jobServer = new JobServer();
+        
+        Socket socket = new Socket("127.0.0.1", 9876);
+        JobContext<String> jobContext = new JobContext<>("test", new TestJob(), null, URI.create("file://./").toURL());
+        NetUtil.send(socket, jobContext);
+
+        Request result = NetUtil.request(socket, Request.class, new Request(Request.RESULT));
+        result.setProgress(Request.PROGRESS_SENT);
+        jobServer.close();
+        socket.close();
+
+        assertEquals("my-test-job", result.getResponse());
     }
 
 }
@@ -41,12 +60,12 @@ class TestJob implements Callable<String>, Serializable {
 
     @Override
     public String call() throws Exception {
-        Log log = LogFactory.getLog(this.getClass());
         for (int i = 0; i < 10; i++) {
             Thread.sleep(100);
-            log.info(".");
+            System.out.print(".");
         }
-        log.info("test-work done!");
+        System.out.println("\ntest-work done!");
         return "my-test-job";
     }
 }
+

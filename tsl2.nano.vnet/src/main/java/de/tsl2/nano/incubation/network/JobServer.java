@@ -132,6 +132,7 @@ public class JobServer implements Runnable, Closeable {
             //don't send class (use urlclassloader on the other side) but send object to the remote host
             //TODO: perhaps, send current classloader? the urlclassloader would have to know, which jars and pathes to load!
             if (!isLoaded(connection.getInetAddress().getHostAddress(), command.getClass())) {
+                //TODO: don't use classloader but provide jars/directories in url-parameter of JobContext!
                 cl = new SerializableClassLoader(command.getClass().getClassLoader());
             }
             o = new ObjectOutputStream(connection.getOutputStream());
@@ -165,14 +166,22 @@ public class JobServer implements Runnable, Closeable {
      */
     @Override
     public void run() {
+        ServerSocket serverSocket = null;
         try {
             //create a socket, waiting for a connection to get a working job
-            ServerSocket serverSocket = ServerSocketFactory.getDefault().createServerSocket(port);
+            serverSocket = ServerSocketFactory.getDefault().createServerSocket(port);
             while (port > 0) {
                 new Worker(localExecutorService, serverSocket.accept());
             }
         } catch (Exception e) {
             ManagedException.forward(e);
+        } finally {
+            if (serverSocket != null)
+                try {
+                    serverSocket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
         }
     }
 
@@ -186,21 +195,20 @@ public class JobServer implements Runnable, Closeable {
     }
 }
 class SerializableClassLoader extends ClassLoader implements Serializable {
-    /** serialVersionUID */
     private static final long serialVersionUID = -2466479262962610559L;
 
-    /**
-     * constructor
-     */
     public SerializableClassLoader() {
         super();
     }
 
-    /**
-     * constructor
-     * @param parent
-     */
     public SerializableClassLoader(ClassLoader parent) {
         super(parent);
+    }
+    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+        //TODO: howto read ClassLoader.classes: out.writeObject(classes);
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        //TODO: howto store ClassLoader.classes: out.writeObject(classes);
     }
 }
