@@ -714,13 +714,8 @@ public class NetUtil {
      */
     @SuppressWarnings("unchecked")
     public static <T> T request(Socket socket, Class<T> resultType, Object arg) {
-        try {
-            send(socket, arg);
-            return (T) serialize(toByteArray(socket.getInputStream()));
-        } catch (IOException e) {
-            ManagedException.forward(e);
-            return null;
-        }
+        send(socket, arg);
+        return (T) receive(socket);
     }
 
     public static void send(Socket socket, Object obj) {
@@ -745,12 +740,8 @@ public class NetUtil {
      */
     @SuppressWarnings("unchecked")
     public static <REQUEST, RESPONSE> void response(Socket socket, Function<REQUEST, RESPONSE> func) {
-        try {
-            REQUEST request = (REQUEST) new ObjectInputStream(socket.getInputStream()).readObject();
-            new ObjectOutputStream(socket.getOutputStream()).writeObject(func.apply(request));
-        } catch (IOException | ClassNotFoundException e) {
-            ManagedException.forward(e);
-        }
+        REQUEST request = (REQUEST) receive(socket);
+        send(socket, func.apply(request));
     }
 
     public static String httpResponse(String wsUrl, String method, String contenttype, String data) {

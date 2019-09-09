@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 
 /**
  * 
@@ -81,6 +82,7 @@ public class Worker {
             LOG.debug("sending response " + request + " for job " + task);
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
             out.writeObject(request);
+            ConcurrentUtil.sleep(500);
         }
     }
 }

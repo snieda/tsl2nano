@@ -12,6 +12,7 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.NetUtil;
 
@@ -35,14 +36,18 @@ public class JobServerTest {
         assertEquals("my-test-job", result);
     }
 
-    @Ignore
+    // @Ignore
     @Test
     public void testJobServerThroughSocket() throws Exception {
         JobServer jobServer = new JobServer();
-        
+        ConcurrentUtil.sleep(500);
+
         Socket socket = new Socket("127.0.0.1", 9876);
+        ConcurrentUtil.sleep(500);
         JobContext<String> jobContext = new JobContext<>("test", new TestJob(), null, URI.create("file://./").toURL());
+
         NetUtil.send(socket, jobContext);
+        ConcurrentUtil.sleep(500);
 
         Request result = NetUtil.request(socket, Request.class, new Request(Request.RESULT));
         result.setProgress(Request.PROGRESS_SENT);

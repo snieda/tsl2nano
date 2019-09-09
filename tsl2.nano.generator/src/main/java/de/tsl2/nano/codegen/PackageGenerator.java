@@ -124,7 +124,7 @@ public class PackageGenerator extends ClassGenerator {
             File packageFilePath = new File(packagePath);
             if (!packageFilePath.isDirectory()) {
                 if (packageFilePath.getParentFile().isDirectory())
-                    if (packagePath.contains(".") && (packageFilePath = new File(packagePath.replace('.', '/'))).isDirectory())
+                    if (packagePath.contains(".") && (packageFilePath = toFilePath(packageFilePath)).isDirectory())
                         LOG.info("packagePath transformed to: " + packageFilePath.getPath());
                     else
                         throw new ManagedException("the given package-file-path is not a directory: " + packagePath);
@@ -159,6 +159,10 @@ public class PackageGenerator extends ClassGenerator {
         if (modelClasses.isEmpty())
             LOG.warn("NOTHING TO DO: NO CLASSES FOUND IN " + packagePath);
         return modelClasses;
+    }
+
+    private File toFilePath(File packageFilePath) {
+        return new File(packageFilePath.getParent() + "/" + packageFilePath.getName().replace('.', '/'));
     }
 
     /**
