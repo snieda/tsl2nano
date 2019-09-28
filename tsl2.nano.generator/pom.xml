@@ -11,6 +11,14 @@
 	<properties>
 		<module.parent>..</module.parent>
 	</properties>
+	<build>
+		<resources>
+			<resource><!-- overwrite parent definition: filtering=true -->
+	           <directory>src/main/resources</directory>
+	           <filtering>false</filtering>
+	        </resource>
+		</resources>
+	</build>
 	<dependencies>
 		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>

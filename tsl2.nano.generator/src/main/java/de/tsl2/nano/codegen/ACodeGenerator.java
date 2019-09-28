@@ -169,6 +169,7 @@ public abstract class ACodeGenerator {
 
     protected void fillVelocityContext(Object model, String modelFile, String templateFile, String destFile,
             Properties properties, final GeneratorUtility util, final VelocityContext context) {
+        fillVelocityProperties(context, properties);
         context.put("path", getDestinationPackageName(modelFile, destFile));
         context.put(KEY_MODEL, model);
         context.put("postfix", getDestinationPostfix());
@@ -176,6 +177,9 @@ public abstract class ACodeGenerator {
         context.put("time", new Timestamp(System.currentTimeMillis()));
         context.put(KEY_TEMPLATE, templateFile);
         context.put("copyright", "Copyright (c) 2002-2019 Thomas Schneider");
+    }
+
+    private void fillVelocityProperties(VelocityContext context, Properties properties) {
         for (final Object p : properties.keySet()) {
             final Object v = properties.get(p);
             if (context.containsKey(p)) {

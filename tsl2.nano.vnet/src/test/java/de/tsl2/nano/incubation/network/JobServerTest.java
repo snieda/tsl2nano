@@ -9,7 +9,6 @@ import java.util.concurrent.Callable;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import de.tsl2.nano.core.util.ConcurrentUtil;
@@ -36,7 +35,6 @@ public class JobServerTest {
         assertEquals("my-test-job", result);
     }
 
-    // @Ignore
     @Test
     public void testJobServerThroughSocket() throws Exception {
         JobServer jobServer = new JobServer();

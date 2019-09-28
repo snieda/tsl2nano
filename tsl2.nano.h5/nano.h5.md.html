@@ -3769,15 +3769,15 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
 
  Version | Date | Description
  ------- | ---- | -----------
- 0.0.1 | 06.07.2013 | First alpha Version
- 0.0.2 | 21.09.2013 | beta Version (full basic feature implementation)
- 0.0.3 | 01.01.2014 | beta Version (basic features + authorization + workflows + rules)
- 0.0.4 | 20.03.2014 | full featured version (replication, attribute- and beandef-extensions QueryResult, RuleAttribute, many refactorings)
+ 0.0.1  | 06.07.2013 | First alpha Version
+ 0.0.2  | 21.09.2013 | beta Version (full basic feature implementation)
+ 0.0.3  | 01.01.2014 | beta Version (basic features + authorization + workflows + rules)
+ 0.0.4  | 20.03.2014 | full featured version (replication, attribute- and beandef-extensions QueryResult, RuleAttribute, many refactorings)
  0.0.4b | 11.05.2014 | lots of corrections, partially working on android
  0.0.4c | 25.05.2014 | classloader transformation changed to enable loading persistence.xml through EclipseLink and OpenJPA
- 0.0.5 | 01.06.2014 | supporting non-jpa-persistence-providers like ebean, ormlite through NanoEntityManagerFactory
- 0.1.0 | 29.06.2014 | supporting non-jpa-persistence-providers like ebean, ormlite through NanoEntityManagerFactory
- 0.6.0 | 13.07.2014 | using websockets to support rich client gui interactions
+ 0.0.5  | 01.06.2014 | supporting non-jpa-persistence-providers like ebean, ormlite through NanoEntityManagerFactory
+ 0.1.0  | 29.06.2014 | supporting non-jpa-persistence-providers like ebean, ormlite through NanoEntityManagerFactory
+ 0.6.0  | 13.07.2014 | using websockets to support rich client gui interactions
  0.7.0a | 01.11.2014 | new plugin interface on beandefintions (path changed to 'presentation'). specified rules and actions are 						pluggable into beandef or attributedef now.
  0.7.0b | 09.11.2014 | gui fading, offline message, web-cache through manifest, testing batoo-jpa
  0.7.0c | 15.11.2014 | reverse-engineering with openjpa support, jar resolving enhanced
@@ -3810,12 +3810,12 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.1.1  | 01.05.2018 | supporting extensions through new maven pom module thymeleaf-pack
  2.1.2  | 13.05.2018 | Hotfixes for use on linux jdk, Updater catching LinkageError
  2.1.3  | --.--.2018 | Hotfixes
- 2.1.4	| 12.08.2018 | NEW: tsl2.nano.cursus as delta-processing-engine, NEW: @Attributes, @ValueExpression, minor extensions
- 2.1.5	| 26.08.2018 | NEW: annotation extensions: @With -> (DependencyListener, Query, Compositor, Specification, VirtualAttribute)
+ 2.1.4  | 12.08.2018 | NEW: tsl2.nano.cursus as delta-processing-engine, NEW: @Attributes, @ValueExpression, minor extensions
+ 2.1.5  | 26.08.2018 | NEW: annotation extensions: @With -> (DependencyListener, Query, Compositor, Specification, VirtualAttribute)
  2.2.0  | 14.10.2018 | REF: h5.Collectors -> h.collector.*, NEW: ChatMessage
  2.2.1  | 21.10.2018 | H2 Database Keywords in copyddl eliminated. anyway.sql: +mission, +chargestatus, charge->location
  2.2.2  | 22.04.2019 | bugfixing on cursus, linux-start-scripts, messages constraint on app.secure.login=true in cause of security aspects
- 2.3.0  | 31.08.2019 | NEW: tsl2.nano.archetype, tsl2.nano.mavengenerator
+ 2.3.0  | 31.08.2019 | NEW: tsl2.nano.archetype, tsl2.nano.mavengenerator, REF: tsl2.nano.generator, tsl2.nano.datastructure
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
 
@@ -4628,15 +4628,26 @@ Apps auf Serverway:
 - [x] sidenav button: width: 100%
 
 - [ ] logbook auf heroku deployen
-- [x] create own velocity-maven-plugin: generator-maven-plugin
-- [x] velocity template for spring-data-rest repositors with finders for all attributes
+- [v] create own velocity-maven-plugin: generator-maven-plugin
+- [v] velocity template for spring-data-rest repositors with finders for all attributes
 - [x] velocity template for tsl2 to generate rest interfaces with javax.ws.rs annotations for all entities resolved by a util through resteasy
-- [x] velocity template for tsl2 to generate thymeleaf templates for each entity
+- [v] velocity template for tsl2 to generate thymeleaf templates for each entity
 - [x] velocity template for tsl2 to generate openapi-tools rest yaml-documents for swagger
-- [x] create maven archetype
-- [x] encapsulate common: collection+tree, action, execution, generator
-- [ ] GeneratorMojo: Refactore PackageGenerator.main -> ACodeGenerator.main
-- [ ] JobServerTest wieder aktivieren
+- [v] create maven archetype
+- [v] encapsulate common: collection+tree, (action, execution), generator
+- [v] GeneratorMojo: Refactore PackageGenerator.main -> ACodeGenerator.main
+- [v] JobServerTest wieder aktivieren
 - [ ] NanoH5ITTest: ant-run im post-integration-test stoppen
+- [ ] Version 2.3.0 auf serverway testen und release erstellen
 
+- [ ] test archetype:generate mit net.sf.tsl2nano:tsl2.nano.archetype
+   - [ ] neues project setzt falsche groupid/artefactid (von parent) <-- pom: resource filter=false?
+   - [ ] bei mvn clean install wird anyway generiert, websocket ist nicht ansprechbar
+   - [ ] nach erneutem start über run.sh (falscher jar-file name) ist login nicht möglich , wegen falschem login/passwd
+
+- [ ] test mavengenerator+tsl2spring-archetype
+   [ ] index und controller nicht startbar <-- mvn install muss ein zweites mal ausgeführt werden
+   [ ] wo werden bean java klassen generiert? class files sind vorhanden
+   [ ]
+   
  -->

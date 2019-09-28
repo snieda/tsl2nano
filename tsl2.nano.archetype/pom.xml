@@ -16,6 +16,12 @@
 	</properties>
 
   <build>
+		<resources>
+			<resource><!-- overwrite parent definition: filtering=true -->
+	           <directory>src/main/resources</directory>
+	           <filtering>false</filtering>
+	        </resource>
+		</resources>
     <extensions>
       <extension>
         <groupId>org.apache.maven.archetype</groupId>
