@@ -5,8 +5,9 @@
 
 ${copyright}
 -->
+<link th:href="@{/css/style.css}" href="/css/style.css" rel="stylesheet" type="text/css" />
 <h2>${util.toFirstUpperCase(${project.name})}</h2>
-<table>
+<table class="page">
 #foreach( $class in $allClasses)    
        <tr><td>    <p><a href="/${util.toLowerCase(${class.Name})}s/all">${class.Name}</a></p></td></tr>
 #end

@@ -9,12 +9,22 @@ ${copyright}
 #set( $OP = "${")
 #set( $CL = "}")
 
+<link th:href="@{/css/style.css}" href="/css/style.css" rel="stylesheet" type="text/css" />
 <!--<form action="#" th:action="@{${entity}/save/{id}(id=${${entity}.id})}" th:object="$OP${entity}$CL" method="post"> -->
-<form action="#" th:action="@{/${entity}/add}" th:object="$OP${entity}$CL" method="post">
+<form class="page" action="#" th:action="@{/${entity}/add}" th:object="$OP${entity}$CL" method="post">
+<div class="table">
 #foreach( $att in $class.Attributes)    
-    <label for="${att.Name}">${att.NameFU}</label>
-    <input type="text" th:field="*{${att.Name}}" id="${att.Name}" placeholder="${att.Name}">
-    <span th:if="${#fields.hasErrors('${att.Name}')}" th:errors="*{${att.Name}}"></span>
+    <div class="tr">
+        <span class="td">
+            <label for="${att.Name}">${att.NameFU}</label>
+        </span>
+        <span class="td">
+            <input type="text" th:field="*{${att.Name}}" id="${att.Name}" placeholder="${att.Name}">
+        </span>
+        <span th:if="${#fields.hasErrors('${att.Name}')}" th:errors="*{${att.Name}}"></span>
+    </div>
 #end
+</div>
     <input type="submit" value="Save">
+    <input type="button" value="Back" onclick="history.back()">
 </form>
