@@ -1,5 +1,5 @@
 package org.anonymous.project;
-// Generated 27.11.2015 18:21:32 by Hibernate Tools 4.3.1.Final
+// Generated 04.10.2019 09:31:23 by Hibernate Tools 4.3.1.Final
 
 
 import java.sql.Blob;
@@ -25,6 +25,7 @@ public class Party  implements java.io.Serializable {
 
 
      private int id;
+     private Mission mission;
      private Organisation organisation;
      private String name;
      private String description;
@@ -38,14 +39,16 @@ public class Party  implements java.io.Serializable {
     }
 
 	
-    public Party(int id, Organisation organisation, String name, String shortname) {
+    public Party(int id, Mission mission, Organisation organisation, String name, String shortname) {
         this.id = id;
+        this.mission = mission;
         this.organisation = organisation;
         this.name = name;
         this.shortname = shortname;
     }
-    public Party(int id, Organisation organisation, String name, String description, String shortname, Blob icon, Set<Location> locations, Set<Property> properties, Set<Charge> charges) {
+    public Party(int id, Mission mission, Organisation organisation, String name, String description, String shortname, Blob icon, Set<Location> locations, Set<Property> properties, Set<Charge> charges) {
        this.id = id;
+       this.mission = mission;
        this.organisation = organisation;
        this.name = name;
        this.description = description;
@@ -66,6 +69,16 @@ public class Party  implements java.io.Serializable {
     
     public void setId(int id) {
         this.id = id;
+    }
+
+@ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="MISSION", nullable=false)
+    public Mission getMission() {
+        return this.mission;
+    }
+    
+    public void setMission(Mission mission) {
+        this.mission = mission;
     }
 
 @ManyToOne(fetch=FetchType.LAZY)

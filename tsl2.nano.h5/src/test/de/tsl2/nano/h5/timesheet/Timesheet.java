@@ -54,12 +54,14 @@ import org.anonymous.project.Area;
 import org.anonymous.project.Category;
 import org.anonymous.project.Charge;
 import org.anonymous.project.Chargeitem;
+import org.anonymous.project.Chargestatus;
 import org.anonymous.project.Classification;
 import org.anonymous.project.Coordinate;
 import org.anonymous.project.Digital;
 import org.anonymous.project.Discharge;
 import org.anonymous.project.Item;
 import org.anonymous.project.Location;
+import org.anonymous.project.Mission;
 import org.anonymous.project.Organisation;
 import org.anonymous.project.Party;
 import org.anonymous.project.Property;
@@ -181,25 +183,27 @@ public class Timesheet extends NanoH5App {
         /*
          * define all beans
          */
-        define(Type.class, icon("equipment"), TypeConst.ATTR_NAME);
-        define(Category.class, icon("equipment"), CategoryConst.ATTR_NAME);
-        define(Account.class, icon("euro"), AccountConst.ATTR_NAME);
+        define(Type.class, icon("equipment"), ve(TypeConst.ATTR_NAME));
+        define(Category.class, icon("equipment"), ve(CategoryConst.ATTR_NAME));
+        define(Account.class, icon("euro"), ve(AccountConst.ATTR_NAME));
         define(Property.class, icon("table"), ve(PropertyConst.ATTR_AKEY), PropertyConst.ATTR_AKEY, PropertyConst.ATTR_AVALUE, PropertyConst.ATTR_ORGANISATION, PropertyConst.ATTR_PARTY, PropertyConst.ATTR_ITEM);
-        define(Organisation.class, icon("people"), OrganisationConst.ATTR_NAME);
-        define(Party.class, icon("male"), PartyConst.ATTR_SHORTNAME);
+        define(Organisation.class, icon("people"), ve(OrganisationConst.ATTR_NAME));
+        define(Party.class, icon("male"), ve(PartyConst.ATTR_SHORTNAME));
         define(Address.class, icon("home"), ve(AddressConst.ATTR_CITY) + ", " + ve(AddressConst.ATTR_STREET));
-        define(Location.class, icon("yellow_pin"), LocationConst.ATTR_NAME);
-        define(Digital.class, icon("e-mail"), DigitalConst.ATTR_NAME);
+        define(Location.class, icon("yellow_pin"), ve(LocationConst.ATTR_NAME));
+        define(Digital.class, icon("e-mail"), ve(DigitalConst.ATTR_NAME));
         define(Coordinate.class, icon("blue_pin"), ve(CoordinateConst.ATTR_X) + "-" + ve(CoordinateConst.ATTR_Y) + "-"
             + ve(CoordinateConst.ATTR_X));
-        define(Area.class, icon("boss"), AreaConst.ATTR_NAME);
-        define(Classification.class, icon("widget"), ClassificationConst.ATTR_NAME);
-        define(Item.class, icon("equipment"), ItemConst.ATTR_NAME, ItemConst.ATTR_ID, ItemConst.ATTR_NAME, ItemConst.ATTR_ORGANISATION,
+        define(Area.class, icon("boss"), ve(AreaConst.ATTR_NAME));
+        define(Classification.class, icon("widget"), ve(ClassificationConst.ATTR_NAME));
+        define(Item.class, icon("equipment"), ve(ItemConst.ATTR_NAME), ItemConst.ATTR_ID, ItemConst.ATTR_NAME, ItemConst.ATTR_ORGANISATION,
             ItemConst.ATTR_CLASSIFICATION, ItemConst.ATTR_TYPE, ItemConst.ATTR_START, ItemConst.ATTR_END,
-            ItemConst.ATTR_VALUE, ItemConst.ATTR_DESCRIPTION, ItemConst.ATTR_CHARGEITEMS, ItemConst.ATTR_PROPERTIES);
-        define(Chargeitem.class, icon("buy"), ChargeitemConst.ATTR_ITEM);
+            ItemConst.ATTR_VALUE, ItemConst.ATTR_ICON, ItemConst.ATTR_DESCRIPTION, ItemConst.ATTR_CHARGEITEMS, ItemConst.ATTR_PROPERTIES);
+        define(Chargeitem.class, icon("buy"), ve(ChargeitemConst.ATTR_ITEM));
         define(Discharge.class, icon("accounting"), ve(DischargeConst.ATTR_CHARGE) + " (" + ve(DischargeConst.ATTR_DATE) + ": "
             + ve(DischargeConst.ATTR_VALUE));
+        define(Chargestatus.class, icon("yellow_pin"), ve("name"));
+        define(Mission.class, icon("yellow_pin"), ve("name"));
 
         /*
          * configure the main type: Charge (Zeiterfassung)
@@ -208,7 +212,7 @@ public class Timesheet extends NanoH5App {
             define(Charge.class, icon("clock"), ve(ChargeConst.ATTR_CHARGEITEM) + " (" + ve(ChargeConst.ATTR_FROMDATE) + ": "
                 + ve(ChargeConst.ATTR_VALUE) + ")"
                 , ATTR_FROMDATE, ATTR_WEEKDAY, ATTR_FROMTIME, ATTR_TOTIME, ATTR_PAUSE, ATTR_PARTY, ATTR_CHARGEITEM,
-                ATTR_VALUE, ATTR_COMMENT);
+                ATTR_VALUE, ATTR_COMMENT, "chargestatus");
         IPresentableColumn column = charge.getAttribute(ATTR_VALUE).getColumnDefinition();
         if (column instanceof ValueColumn)
             ((ValueColumn) column).setStandardSummary(true);

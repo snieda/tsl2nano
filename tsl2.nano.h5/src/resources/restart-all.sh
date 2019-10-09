@@ -28,7 +28,7 @@ if [[ $1 == "clean" ]]; then
 	find . -type f -name '*.tar.gz' -or -name '*.sik' -exec rm -I {} +
 fi
 echo "refreshing backup 'tsl2nano-all-services.tar.gz'..."
-tar -uf tsl2nano-all-services.tar.gz . --exclude *.gz --exclude=*.*ar --exclude *.log --exclude *.sik --exclude *.lck --exclude *.out --exclude temp --exclude target --exclude dist
+tar -uf tsl2nano-all-services.tar.gz . --exclude *.gz --exclude=*.*ar --exclude *.log --exclude *.sik --exclude *.lck --exclude *.out --exclude target --exclude dist
 
 echo "<html><body><h1>Summary of all Tsl2Nano Services</h1><ul>" > app-index.html
 for d in $(ls -d */)

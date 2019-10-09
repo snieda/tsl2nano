@@ -1,5 +1,5 @@
 package org.anonymous.project;
-// Generated 27.11.2015 18:21:32 by Hibernate Tools 4.3.1.Final
+// Generated 04.10.2019 09:31:23 by Hibernate Tools 4.3.1.Final
 
 
 import java.math.BigDecimal;
@@ -29,6 +29,8 @@ public class Charge  implements java.io.Serializable {
 
      private int id;
      private Chargeitem chargeitem;
+     private Chargestatus chargestatus;
+     private Location location;
      private Party party;
      private Date fromdate;
      private Date fromtime;
@@ -53,9 +55,11 @@ public class Charge  implements java.io.Serializable {
         this.totime = totime;
         this.value = value;
     }
-    public Charge(int id, Chargeitem chargeitem, Party party, Date fromdate, Date fromtime, Date todate, Date totime, Date pause, BigDecimal value, String comment, Set<Discharge> discharges) {
+    public Charge(int id, Chargeitem chargeitem, Chargestatus chargestatus, Location location, Party party, Date fromdate, Date fromtime, Date todate, Date totime, Date pause, BigDecimal value, String comment, Set<Discharge> discharges) {
        this.id = id;
        this.chargeitem = chargeitem;
+       this.chargestatus = chargestatus;
+       this.location = location;
        this.party = party;
        this.fromdate = fromdate;
        this.fromtime = fromtime;
@@ -90,6 +94,26 @@ public class Charge  implements java.io.Serializable {
     }
 
 @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="STATUS")
+    public Chargestatus getChargestatus() {
+        return this.chargestatus;
+    }
+    
+    public void setChargestatus(Chargestatus chargestatus) {
+        this.chargestatus = chargestatus;
+    }
+
+@ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="LOCATION")
+    public Location getLocation() {
+        return this.location;
+    }
+    
+    public void setLocation(Location location) {
+        this.location = location;
+    }
+
+@ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="PARTY", nullable=false)
     public Party getParty() {
         return this.party;
@@ -99,8 +123,8 @@ public class Charge  implements java.io.Serializable {
         this.party = party;
     }
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="FROMDATE", nullable=false, length=19)
+    @Temporal(TemporalType.DATE)
+    @Column(name="FROMDATE", nullable=false, length=10)
     public Date getFromdate() {
         return this.fromdate;
     }
@@ -119,8 +143,8 @@ public class Charge  implements java.io.Serializable {
         this.fromtime = fromtime;
     }
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="TODATE", nullable=false, length=19)
+    @Temporal(TemporalType.DATE)
+    @Column(name="TODATE", nullable=false, length=10)
     public Date getTodate() {
         return this.todate;
     }
@@ -150,7 +174,7 @@ public class Charge  implements java.io.Serializable {
     }
 
     
-    @Column(name="VALUE", nullable=false, precision=128, scale=0)
+    @Column(name="VALUE", nullable=false, precision=8)
     public BigDecimal getValue() {
         return this.value;
     }

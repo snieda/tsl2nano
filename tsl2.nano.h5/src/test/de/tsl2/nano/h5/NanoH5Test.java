@@ -301,7 +301,7 @@ public class NanoH5Test implements ENVTestPreparation {
 
         //create  run configuration
         FileUtil.writeBytes((projectPath() + "run.bat " + new File(DIR_TEST).getName()).getBytes(), basedir + name + ".cmd", false);
-        FileUtil.writeBytes((projectPath() + "run.sh " + new File(DIR_TEST).getName()).getBytes(), basedir + name + ".sh", false);
+        FileUtil.writeBytes((projectPath() + "./run.sh " + new File(DIR_TEST).getName()).getBytes(), basedir + name + ".sh", false);
         
         //workaround: replace path 'test/.nanoh5.timesheet' with '.nanoh5.timesheet'
         AntRunner.runRegexReplace("(target[/]test[/])([.]nanoh5[.]timesheet)[/](icons)", "\\3", new File(DIR_TEST).getParent(), "**");
@@ -352,7 +352,8 @@ public class NanoH5Test implements ENVTestPreparation {
      */
     public static String createENV(String name) {
         String DIR_TEST = targetPath() + "test/" + ENV.PREFIX_ENVNAME + name;
-        DIR_TEST = new File(DIR_TEST).getAbsolutePath();
+        DIR_TEST = new File(DIR_TEST).getAbsolutePath();//on different test starts (mvn, ide) you have diffeent user.dirs
+        DIR_TEST = FileUtil.getRelativePath(DIR_TEST);
         
         Bean.clearCache();
 //        new File(DIR_TEST).delete();

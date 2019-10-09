@@ -1,5 +1,5 @@
 package org.anonymous.project;
-// Generated 27.11.2015 18:21:32 by Hibernate Tools 4.3.1.Final
+// Generated 04.10.2019 09:31:23 by Hibernate Tools 4.3.1.Final
 
 
 import java.math.BigDecimal;
@@ -58,7 +58,7 @@ public class Coordinate  implements java.io.Serializable {
     }
 
     
-    @Column(name="X", nullable=false, precision=128, scale=0)
+    @Column(name="X", nullable=false, precision=65535, scale=32767)
     public BigDecimal getX() {
         return this.x;
     }
@@ -68,7 +68,7 @@ public class Coordinate  implements java.io.Serializable {
     }
 
     
-    @Column(name="Y", nullable=false, precision=128, scale=0)
+    @Column(name="Y", nullable=false, precision=65535, scale=32767)
     public BigDecimal getY() {
         return this.y;
     }
@@ -78,7 +78,7 @@ public class Coordinate  implements java.io.Serializable {
     }
 
     
-    @Column(name="Z", precision=128, scale=0)
+    @Column(name="Z", precision=65535, scale=32767)
     public BigDecimal getZ() {
         return this.z;
     }

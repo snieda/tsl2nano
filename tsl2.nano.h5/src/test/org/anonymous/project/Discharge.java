@@ -1,5 +1,5 @@
 package org.anonymous.project;
-// Generated 27.11.2015 18:21:32 by Hibernate Tools 4.3.1.Final
+// Generated 04.10.2019 09:31:23 by Hibernate Tools 4.3.1.Final
 
 
 import java.math.BigDecimal;
@@ -97,7 +97,7 @@ public class Discharge  implements java.io.Serializable {
     }
 
     
-    @Column(name="VALUE", nullable=false, precision=128, scale=0)
+    @Column(name="VALUE", nullable=false, precision=8)
     public BigDecimal getValue() {
         return this.value;
     }

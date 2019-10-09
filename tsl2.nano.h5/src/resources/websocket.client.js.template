@@ -58,8 +58,9 @@ socket.onclose = function(e) {
  */
 function showStatusMessage(msg) {
 	console.log(msg);
-	document.getElementById('${websocket.element.id}').childNodes[0].nodeValue = ' \t'
-			+ msg;
+	var wsElement = document.getElementById('${websocket.element.id}');
+	if (wsElement != null)
+		wsElement.childNodes[0].nodeValue = ' \t' + msg;
 	//user must enable this feature in his browser...
 	window.status = msg;
 }

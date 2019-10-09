@@ -1,5 +1,5 @@
 package org.anonymous.project;
-// Generated 27.11.2015 18:21:32 by Hibernate Tools 4.3.1.Final
+// Generated 04.10.2019 09:31:23 by Hibernate Tools 4.3.1.Final
 
 
 import javax.persistence.Column;
@@ -21,8 +21,8 @@ public class Property  implements java.io.Serializable {
 
 
      private int id;
-     private Organisation organisation;
      private Item item;
+     private Organisation organisation;
      private Party party;
      private String akey;
      private String avalue;
@@ -36,10 +36,10 @@ public class Property  implements java.io.Serializable {
         this.akey = akey;
         this.avalue = avalue;
     }
-    public Property(int id, Organisation organisation, Item item, Party party, String akey, String avalue) {
+    public Property(int id, Item item, Organisation organisation, Party party, String akey, String avalue) {
        this.id = id;
-       this.organisation = organisation;
        this.item = item;
+       this.organisation = organisation;
        this.party = party;
        this.akey = akey;
        this.avalue = avalue;
@@ -58,16 +58,6 @@ public class Property  implements java.io.Serializable {
     }
 
 @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="ORGA")
-    public Organisation getOrganisation() {
-        return this.organisation;
-    }
-    
-    public void setOrganisation(Organisation organisation) {
-        this.organisation = organisation;
-    }
-
-@ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="ITEM")
     public Item getItem() {
         return this.item;
@@ -75,6 +65,16 @@ public class Property  implements java.io.Serializable {
     
     public void setItem(Item item) {
         this.item = item;
+    }
+
+@ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="ORGA")
+    public Organisation getOrganisation() {
+        return this.organisation;
+    }
+    
+    public void setOrganisation(Organisation organisation) {
+        this.organisation = organisation;
     }
 
 @ManyToOne(fetch=FetchType.LAZY)

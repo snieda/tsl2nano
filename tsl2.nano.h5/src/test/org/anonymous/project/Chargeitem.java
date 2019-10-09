@@ -1,7 +1,8 @@
 package org.anonymous.project;
-// Generated 27.11.2015 18:21:32 by Hibernate Tools 4.3.1.Final
+// Generated 04.10.2019 09:31:23 by Hibernate Tools 4.3.1.Final
 
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.Column;
@@ -25,19 +26,19 @@ public class Chargeitem  implements java.io.Serializable {
 
      private int id;
      private Item item;
-     private int charge;
+     private BigDecimal charge;
      private Set<Charge> charges = new HashSet<Charge>(0);
 
     public Chargeitem() {
     }
 
 	
-    public Chargeitem(int id, Item item, int charge) {
+    public Chargeitem(int id, Item item, BigDecimal charge) {
         this.id = id;
         this.item = item;
         this.charge = charge;
     }
-    public Chargeitem(int id, Item item, int charge, Set<Charge> charges) {
+    public Chargeitem(int id, Item item, BigDecimal charge, Set<Charge> charges) {
        this.id = id;
        this.item = item;
        this.charge = charge;
@@ -67,12 +68,12 @@ public class Chargeitem  implements java.io.Serializable {
     }
 
     
-    @Column(name="CHARGE", nullable=false)
-    public int getCharge() {
+    @Column(name="CHARGE", nullable=false, precision=8)
+    public BigDecimal getCharge() {
         return this.charge;
     }
     
-    public void setCharge(int charge) {
+    public void setCharge(BigDecimal charge) {
         this.charge = charge;
     }
 

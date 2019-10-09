@@ -1,5 +1,5 @@
 package org.anonymous.project;
-// Generated 27.11.2015 18:21:32 by Hibernate Tools 4.3.1.Final
+// Generated 04.10.2019 09:31:23 by Hibernate Tools 4.3.1.Final
 
 
 import java.math.BigDecimal;
@@ -29,8 +29,8 @@ public class Item  implements java.io.Serializable {
 
 
      private int id;
-     private Organisation organisation;
      private Classification classification;
+     private Organisation organisation;
      private Type type;
      private String name;
      private Date start;
@@ -45,19 +45,19 @@ public class Item  implements java.io.Serializable {
     }
 
 	
-    public Item(int id, Organisation organisation, Classification classification, Type type, String name, Date start, BigDecimal value) {
+    public Item(int id, Classification classification, Organisation organisation, Type type, String name, Date start, BigDecimal value) {
         this.id = id;
-        this.organisation = organisation;
         this.classification = classification;
+        this.organisation = organisation;
         this.type = type;
         this.name = name;
         this.start = start;
         this.value = value;
     }
-    public Item(int id, Organisation organisation, Classification classification, Type type, String name, Date start, Date end, BigDecimal value, String description, Blob icon, Set<Property> properties, Set<Chargeitem> chargeitems) {
+    public Item(int id, Classification classification, Organisation organisation, Type type, String name, Date start, Date end, BigDecimal value, String description, Blob icon, Set<Property> properties, Set<Chargeitem> chargeitems) {
        this.id = id;
-       this.organisation = organisation;
        this.classification = classification;
+       this.organisation = organisation;
        this.type = type;
        this.name = name;
        this.start = start;
@@ -82,16 +82,6 @@ public class Item  implements java.io.Serializable {
     }
 
 @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="ORGA", nullable=false)
-    public Organisation getOrganisation() {
-        return this.organisation;
-    }
-    
-    public void setOrganisation(Organisation organisation) {
-        this.organisation = organisation;
-    }
-
-@ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="CLASS", nullable=false)
     public Classification getClassification() {
         return this.classification;
@@ -99,6 +89,16 @@ public class Item  implements java.io.Serializable {
     
     public void setClassification(Classification classification) {
         this.classification = classification;
+    }
+
+@ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="ORGA", nullable=false)
+    public Organisation getOrganisation() {
+        return this.organisation;
+    }
+    
+    public void setOrganisation(Organisation organisation) {
+        this.organisation = organisation;
     }
 
 @ManyToOne(fetch=FetchType.LAZY)
@@ -121,8 +121,8 @@ public class Item  implements java.io.Serializable {
         this.name = name;
     }
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="START", nullable=false, length=19)
+    @Temporal(TemporalType.DATE)
+    @Column(name="START", nullable=false, length=10)
     public Date getStart() {
         return this.start;
     }
@@ -131,8 +131,8 @@ public class Item  implements java.io.Serializable {
         this.start = start;
     }
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="END", length=19)
+    @Temporal(TemporalType.DATE)
+    @Column(name="END", length=10)
     public Date getEnd() {
         return this.end;
     }
@@ -142,7 +142,7 @@ public class Item  implements java.io.Serializable {
     }
 
     
-    @Column(name="VALUE", nullable=false, precision=128, scale=0)
+    @Column(name="VALUE", nullable=false, precision=8)
     public BigDecimal getValue() {
         return this.value;
     }
