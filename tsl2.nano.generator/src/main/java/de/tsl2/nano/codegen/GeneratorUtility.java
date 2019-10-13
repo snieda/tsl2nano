@@ -1,10 +1,16 @@
 package de.tsl2.nano.codegen;
 
+import java.util.Map;
 import java.util.Properties;
+
+import org.apache.velocity.VelocityContext;
 
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.CallingPath;
+import de.tsl2.nano.core.cls.ValuePath;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * helper class for {@linkplain ClassGenerator}
@@ -15,6 +21,7 @@ import de.tsl2.nano.core.util.StringUtil;
  */
 public class GeneratorUtility {
     Properties props = new Properties(System.getProperties());
+    private VelocityContext context;
 
     /**
      * Constructor
@@ -59,15 +66,19 @@ public class GeneratorUtility {
 
     public void put(String key, Object value) {
         props.put(key, value);
+        context.put(key, value);
     }
 
     /**
-     * if the value was found, it will return the value. if not, an empty string will be returned to delete the
-     * variable-entry inside the template.
+     * if the value was found, it will return the value. if not, an empty string
+     * will be returned to delete the variable-entry inside the template.
      * 
-     * if key starts with 'obj', it will be interpreted as class name and an instance of that class will be returned
-     * if key starts with 'cls', it will be interpreted as class name and that class will be returned
-     * if key starts with 'bls', it will be interpreted as class name and that class will be returned - packed into BeanClass
+     * if key starts with 'obj', it will be interpreted as class name and an
+     * instance of that class will be returned if key starts with 'cls', it will be
+     * interpreted as class name and that class will be returned if key starts with
+     * 'bls', it will be interpreted as class name and that class will be returned -
+     * packed into BeanClass
+     * 
      * @param key key
      * @return value or empty string
      */
@@ -95,7 +106,8 @@ public class GeneratorUtility {
 
     /**
      * @param cls class name having default constructor
-     * @return new instance of given class. this result object will be available as property 'obj'+simple-class-name
+     * @return new instance of given class. this result object will be available as
+     *         property 'obj'+simple-class-name
      */
     public Object object(String cls) {
         Object instance = BeanClass.createInstance(cls);
@@ -107,7 +119,7 @@ public class GeneratorUtility {
      * @param cls class name
      * @return beanclass of given class
      */
-    public BeanClass<?>  beanclass(String cls) {
+    public BeanClass<?> beanclass(String cls) {
         BeanClass<?> bc = BeanClass.createBeanClass(cls);
         put("bls" + bc.getClass().getSimpleName(), bc);
         return bc;
@@ -115,11 +127,34 @@ public class GeneratorUtility {
 
     /**
      * @param cls class name
-     * @return class. this result object will be available as property 'cls'+simple-class-name
+     * @return class. this result object will be available as property
+     *         'cls'+simple-class-name
      */
     public Class<?> clazz(String cls) {
         Class<?> clazz = BeanClass.load(cls);
         put("cls" + clazz.getClass().getSimpleName(), clazz);
         return clazz;
     }
+
+    /**
+     * creates an enumeration string (list seperated with ',', e.g.: SATURDAY,
+     * SUNDAY).
+     */
+    public String toString(Object obj) {
+        String t = StringUtil.toString(obj, -1);
+        return Util.isContainer(obj) ? t.substring(1, t.length() - 1) : t;
+    }
+
+    public Object eval(String expression) {
+        String objRef = StringUtil.substring(expression, null, ".");
+        return eval(get(objRef), expression);
+    }
+
+    public Object eval(Object obj, String expression) {
+        return CallingPath.eval(obj, expression, (Map<String, Object>)props);
+    }
+
+    public void setContext(VelocityContext context) {
+        this.context = context;
+	}
 }

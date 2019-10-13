@@ -1,8 +1,10 @@
 package de.tsl2.nano.core;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.security.Policy;
+import java.util.Map;
 
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -11,7 +13,9 @@ import org.junit.Test;
 
 import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.CallingPath;
 import de.tsl2.nano.core.util.ENVTestPreparation;
+import de.tsl2.nano.core.util.MapUtil;
 
 public class CoreTest implements ENVTestPreparation {
 	static int aufrufe = 0;
@@ -67,5 +71,12 @@ public class CoreTest implements ENVTestPreparation {
     public static void sagEs(String[] wasdenn) {
     	System.out.println(wasdenn[0]);
     	aufrufe++;
-    }
+	}
+	
+	@Test
+	public void testCallingPath() {
+		Map args = MapUtil.asMap("0", 0, "2", 2, "3", 3);
+		Object result = CallingPath.eval("test", "substring(0, 3).substring(2)", args);
+		assertEquals("s", result);
+	}
 }

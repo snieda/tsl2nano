@@ -177,6 +177,7 @@ public abstract class ACodeGenerator {
         context.put("time", new Timestamp(System.currentTimeMillis()));
         context.put(KEY_TEMPLATE, templateFile);
         context.put("copyright", "Copyright (c) 2002-2019 Thomas Schneider");
+        util.setContext(context);
     }
 
     private void fillVelocityProperties(VelocityContext context, Properties properties) {
