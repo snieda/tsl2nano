@@ -44,6 +44,6 @@ public class GeneratorUtilityTest {
         GeneratorUtility util = new GeneratorUtility();
         util.put("objGeneratorUtility", util);
         util.put("eins", "EINS");
-        assertEquals("EINS", util.eval("objGeneratorUtility.get(eins)"));
+        assertEquals("EINS", util.eval(util.get("objGeneratorUtility"), "get(eins)"));
     }
 }

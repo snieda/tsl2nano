@@ -66,7 +66,8 @@ public class GeneratorUtility {
 
     public void put(String key, Object value) {
         props.put(key, value);
-        context.put(key, value);
+        if (context != null)
+            context.put(key, value);
     }
 
     /**
@@ -93,7 +94,7 @@ public class GeneratorUtility {
             else if (key.startsWith("bls"))
                 return beanclass(cls != null ? cls : key.substring(3));
         }
-        return value != null ? value : "";
+        return value != null ? value : key;
     }
 
     public String getFilePathFromPackage(String pck) {
@@ -151,7 +152,7 @@ public class GeneratorUtility {
     }
 
     public Object eval(Object obj, String expression) {
-        return CallingPath.eval(obj, expression, (Map<String, Object>)props);
+        return CallingPath.eval(obj, expression, (Map)props);
     }
 
     public void setContext(VelocityContext context) {
