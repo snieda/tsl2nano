@@ -32,6 +32,7 @@ import static org.anonymous.project.presenter.ChargeConst.ATTR_PARTY;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_PAUSE;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_TOTIME;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_VALUE;
+import static org.anonymous.project.presenter.ChargeitemConst.ATTR_CHARGE;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
@@ -199,12 +200,16 @@ public class Timesheet extends NanoH5App {
         define(Item.class, icon("equipment"), ve(ItemConst.ATTR_NAME), ItemConst.ATTR_ID, ItemConst.ATTR_NAME, ItemConst.ATTR_ORGANISATION,
             ItemConst.ATTR_CLASSIFICATION, ItemConst.ATTR_TYPE, ItemConst.ATTR_START, ItemConst.ATTR_END,
             ItemConst.ATTR_VALUE, ItemConst.ATTR_ICON, ItemConst.ATTR_DESCRIPTION, ItemConst.ATTR_CHARGEITEMS, ItemConst.ATTR_PROPERTIES);
-        define(Chargeitem.class, icon("buy"), ve(ChargeitemConst.ATTR_ITEM));
         define(Discharge.class, icon("accounting"), ve(DischargeConst.ATTR_CHARGE) + " (" + ve(DischargeConst.ATTR_DATE) + ": "
             + ve(DischargeConst.ATTR_VALUE));
         define(Chargestatus.class, icon("yellow_pin"), ve("name"));
         define(Mission.class, icon("yellow_pin"), ve("name"));
 
+        BeanDefinition<Chargeitem> chargeItem = define(Chargeitem.class, icon("buy"), ve(ChargeitemConst.ATTR_ITEM));
+        //this test does not use a real beancontainer reading jpa annotations
+        chargeItem.getAttribute(ATTR_CHARGE).getConstraint().setNullable(false);
+        chargeItem.saveDefinition();
+        
         /*
          * configure the main type: Charge (Zeiterfassung)
          */
@@ -213,6 +218,10 @@ public class Timesheet extends NanoH5App {
                 + ve(ChargeConst.ATTR_VALUE) + ")"
                 , ATTR_FROMDATE, ATTR_WEEKDAY, ATTR_FROMTIME, ATTR_TOTIME, ATTR_PAUSE, ATTR_PARTY, ATTR_CHARGEITEM,
                 ATTR_VALUE, ATTR_COMMENT, "chargestatus");
+        //this test does not use a real beancontainer reading jpa annotations
+        charge.getAttribute(ATTR_FROMTIME).getPresentation().setType(IPresentable.TYPE_TIME);
+        charge.getAttribute(ATTR_TOTIME).getPresentation().setType(IPresentable.TYPE_TIME);
+        charge.getAttribute(ATTR_PAUSE).getPresentation().setType(IPresentable.TYPE_TIME);
         IPresentableColumn column = charge.getAttribute(ATTR_VALUE).getColumnDefinition();
         if (column instanceof ValueColumn)
             ((ValueColumn) column).setStandardSummary(true);
@@ -555,6 +564,8 @@ public class Timesheet extends NanoH5App {
         BeanCollector<Collection<Charge>,Charge> collector = BeanCollector.getBeanCollector(Arrays.asList(c), 0);
         style = collector.getAttribute(ATTR_FROMDATE).getColumnDefinition().getPresentable().getLayoutConstraints();
         assertEquals(null, style);
+
+        assertEquals(IPresentable.TYPE_TIME, bean.getAttribute(ATTR_FROMTIME).getPresentation().getType());
 
         assertEquals(c, collector.nextRow());
 
