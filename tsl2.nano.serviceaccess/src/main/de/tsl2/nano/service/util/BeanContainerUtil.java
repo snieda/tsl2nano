@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -37,6 +38,7 @@ import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanFindParameters;
+import de.tsl2.nano.bean.BeanProxy;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.bean.def.Bean;
@@ -45,8 +47,10 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
+import de.tsl2.nano.serviceaccess.ServiceLocator;
 
 /**
  * JPA 2.0 BeanContainer, using the stateless session bean {@link IGenericService}.
@@ -54,11 +58,33 @@ import de.tsl2.nano.serviceaccess.ServiceFactory;
  * @author Thomas Schneider, Thomas Schneider
  * @version $Revision$
  */
+//TODO: refactore BeanContainerUtil to BeanContainerInitializer while its not a util anymore...
 @SuppressWarnings({ "rawtypes", "unchecked", "serial" })
 public class BeanContainerUtil {
     private static final Map<String, IAttributeDef> attrDefCache = new HashMap<String, IAttributeDef>();
 
     private static final Log LOG = LogFactory.getLog(BeanContainerUtil.class);
+
+    public static ClassLoader initProxyServiceFactory() {
+        System.setProperty(ServiceLocator.NO_JNDI, "true");
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        if (!ServiceFactory.isInitialized()) {
+            ServiceFactory.createInstance(cl);
+        }
+        IGenericService service = BeanProxy.createBeanImplementation(IGenericService.class);
+        BeanProxy.setReturnEmptyCollections(service, true);
+        ServiceFactory.instance().setInitialServices(
+            MapUtil.asMap(IGenericService.class.getName(), service));
+        ENV.addService(IGenericService.class, service);
+        return cl;
+    }
+
+    /**
+     * provides a beancontainer using empty proxy genericservices - without initialContext - for test purposes!
+     */
+    public static void initEmptyProxyServices() {
+        initGenericServices(initProxyServiceFactory());    
+    }
 
     /**
      * initializes the standard bean container to use GenericService methods. it creates an own servicefactory using the
@@ -67,12 +93,19 @@ public class BeanContainerUtil {
      * @param classloader loader to be used inside the own servicefactory instance.
      */
     public static void initGenericServices(ClassLoader classloader) {
+        initGenericServices(new BeanContainerUtil(), classloader);
+    }
+    // TODO: refactore the BeanContainerUtil.init...() calls not to be static!
+    public static <I extends BeanContainerUtil> void initGenericServices(final I _impl, ClassLoader classloader) {
         if (!ServiceFactory.isInitialized()) {
             ServiceFactory.createInstance(classloader);
         }
         final IGenericService service = ServiceFactory.instance().getService(IGenericService.class);
         ENV.addService(IGenericService.class, service);
+        initGenericServices(_impl, () -> service);
+    }
 
+    public static <I extends BeanContainerUtil> void initGenericServices(I _impl, Supplier<IGenericService> service) {
         final IAction idFinder = new CommonAction() {
             @Override
             public Object action() {
@@ -81,14 +114,14 @@ public class BeanContainerUtil {
                 if (!BeanClass.getBeanClass(entityType).isAnnotationPresent(Entity.class)) {
                     return null;
                 }
-                return service.findById(entityType, id);
+                return service.get().findById(entityType, id);
             }
         };
         final IAction<Collection<?>> typeFinder = new CommonAction<Collection<?>>() {
             @Override
             public Collection<?> action() {
                 if (parameters().getValue(0) instanceof BeanFindParameters) {
-                    return service.findAll((BeanFindParameters)parameters().getValue(0));
+                    return service.get().findAll((BeanFindParameters)parameters().getValue(0));
                 } else {
                     final Class entityType = (Class) parameters().getValue(0);
                     final int startIndex = (Integer) parameters().getValue(1);
@@ -96,7 +129,7 @@ public class BeanContainerUtil {
                     if (!BeanClass.getBeanClass(entityType).isAnnotationPresent(Entity.class)) {
                         return null;
                     }
-                    return service.findAll(entityType, startIndex, maxResult);
+                    return service.get().findAll(entityType, startIndex, maxResult);
                 }
             }
         };
@@ -107,23 +140,23 @@ public class BeanContainerUtil {
                 boolean useFindParameters = parameters().getValue(2) instanceof BeanFindParameters;
                 if (useLike) {
                     if (useFindParameters) {
-                        return service.findByExampleLike(parameters().getValue(0), true, (BeanFindParameters) parameters().getValue(2));
+                        return service.get().findByExampleLike(parameters().getValue(0), true, (BeanFindParameters) parameters().getValue(2));
                     } else {
-                        return service.findByExampleLike(parameters().getValue(0), true, (Integer) parameters().getValue(2),
+                        return service.get().findByExampleLike(parameters().getValue(0), true, (Integer) parameters().getValue(2),
                             (Integer) parameters().getValue(3));
                     }
                 } else {
-                        return service.findByExample(parameters().getValue(0), true);
+                        return service.get().findByExample(parameters().getValue(0), true);
                 }
             }
         };
         final IAction<Collection<?>> betweenFinder = new CommonAction<Collection<?>>() {
             @Override
             public Collection<?> action() {
-                if (parameters().getValue(0) instanceof BeanFindParameters) {
-                    return service.findBetween(parameters().getValue(0), parameters().getValue(1), true, (BeanFindParameters)parameters().getValue(0));
+                if (parameters().getValue(2) instanceof BeanFindParameters) {
+                    return service.get().findBetween(parameters().getValue(0), parameters().getValue(1), true, (BeanFindParameters)parameters().getValue(2));
                 } else {
-                    return service.findBetween(parameters().getValue(0), parameters().getValue(1), true, (Integer) parameters().getValue(2),
+                    return service.get().findBetween(parameters().getValue(0), parameters().getValue(1), true, (Integer) parameters().getValue(2),
                         (Integer) parameters().getValue(3));
                 }
             }
@@ -131,7 +164,7 @@ public class BeanContainerUtil {
         final IAction<Collection<?>> queryFinder = new CommonAction<Collection<?>>() {
             @Override
             public Collection<?> action() {
-                return service.findByQuery((String) parameters().getValue(0),
+                return service.get().findByQuery((String) parameters().getValue(0),
                     (Boolean) parameters().getValue(1),
                     (Object[]) parameters().getValue(2),
                     (Class[]) parameters().getValue(3));
@@ -140,7 +173,7 @@ public class BeanContainerUtil {
         final IAction<Collection<?>> queryMapFinder = new CommonAction<Collection<?>>() {
             @Override
             public Collection<?> action() {
-                return service.findByQuery((String) parameters().getValue(0),
+                return service.get().findByQuery((String) parameters().getValue(0),
                     (Boolean) parameters().getValue(1),
                     (Map<String, Object>) parameters().getValue(2),
                     (Class[]) parameters().getValue(3));
@@ -151,7 +184,7 @@ public class BeanContainerUtil {
             public Object action() {
                 //use the weak implementation of BeanClass to avoid classloader problems!
                 if (BeanClass.getBeanClass(parameters().getValue(0).getClass()).isAnnotationPresent(Entity.class)) {
-                    return service.instantiateLazyRelationship(parameters().getValue(0));
+                    return service.get().instantiateLazyRelationship(parameters().getValue(0));
                 } else {
                     return parameters().getValue(0);
                 }
@@ -160,13 +193,13 @@ public class BeanContainerUtil {
         final IAction saveAction = new CommonAction() {
             @Override
             public Object action() {
-                return service.persist(parameters().getValue(0));
+                return service.get().persist(parameters().getValue(0));
             }
         };
         final IAction deleteAction = new CommonAction() {
             @Override
             public Object action() {
-                service.remove(parameters().getValue(0));
+                service.get().remove(parameters().getValue(0));
                 return null;
             }
         };
@@ -179,19 +212,19 @@ public class BeanContainerUtil {
         final IAction permissionAction = new CommonAction() {
             @Override
             public Object action() {
-                return ServiceFactory.instance().hasRole((String) parameters().getValue(0));
+                return _impl.hasPermission((String) parameters().getValue(0), (String) (parameters().size() > 1 ? parameters().getValue(1) : null));
             }
         };
         final IAction persistableAction = new CommonAction() {
             @Override
             public Object action() {
-                return BeanContainerUtil.isPersistable((Class<?>) parameters().getValue(0));
+                return isPersistable((Class<?>) parameters().getValue(0));
             }
         };
         final IAction<Integer> executeAction = new CommonAction<Integer>() {
             @Override
             public Integer action() {
-                return service.executeQuery((String) parameters().getValue(0),
+                return service.get().executeQuery((String) parameters().getValue(0),
                     (Boolean) parameters().getValue(1),
                     (Object[]) parameters().getValue(2));
             }
@@ -209,6 +242,10 @@ public class BeanContainerUtil {
             permissionAction,
             persistableAction,
             executeAction);
+    }
+
+    protected Object hasPermission(String name, String action) {
+        return ServiceFactory.instance().hasRole(name);
     }
 
     /**

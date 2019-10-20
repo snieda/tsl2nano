@@ -34,6 +34,7 @@ import static org.anonymous.project.presenter.ChargeConst.ATTR_TOTIME;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_VALUE;
 import static org.anonymous.project.presenter.ChargeitemConst.ATTR_CHARGE;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -84,7 +85,6 @@ import org.anonymous.project.presenter.PartyConst;
 import org.anonymous.project.presenter.PropertyConst;
 import org.anonymous.project.presenter.TypeConst;
 
-import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.IBeanContainer;
 import de.tsl2.nano.bean.def.Attachment;
 import de.tsl2.nano.bean.def.AttributeDefinition;
@@ -296,7 +296,7 @@ public class Timesheet extends NanoH5App {
         //create a compositor
         //WORAROUND: switch-off real BeanContainer not having any bean-type from anyway.jar
         //don't use a real persistence.xml while no anyway.jar file exists!
-        BeanContainer.initEmtpyServiceActions();
+        // BeanContainer.initEmtpyServiceActions();
         
         Bean<BeanConfigurator<Charge>> bconf = BeanConfigurator.create(Charge.class);
         bconf.getInstance().actionCreateCompositor(Item.class.getName(), "chargeitems", "chargeitem", "icon");
@@ -566,7 +566,8 @@ public class Timesheet extends NanoH5App {
         assertEquals(null, style);
 
         assertEquals(IPresentable.TYPE_TIME, bean.getAttribute(ATTR_FROMTIME).getPresentation().getType());
-
+        assertFalse(BeanDefinition.getBeanDefinition(Chargeitem.class).getAttribute(ATTR_CHARGE).getConstraint().isNullable());
+        
         assertEquals(c, collector.nextRow());
 
         //test the queries

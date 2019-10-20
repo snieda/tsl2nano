@@ -72,9 +72,12 @@ import de.tsl2.nano.incubation.specification.ParType;
 import de.tsl2.nano.incubation.specification.actions.ActionPool;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.specification.rules.RuleScript;
+import de.tsl2.nano.persistence.GenericLocalBeanContainer;
 import de.tsl2.nano.persistence.Persistence;
+import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.IAuthorization;
+import de.tsl2.nano.serviceaccess.ServiceFactory;
 import de.tsl2.nano.util.test.BaseTest;
 import my.app.MyApp;
 import my.app.Times;
@@ -232,7 +235,7 @@ public class NanoH5Test implements ENVTestPreparation {
 
         // check encoding (only if german!)
          assertTrue(!Locale.getDefault().equals(Locale.GERMANY) || html.contains("S&amp;chlie&szlig"));
-         assertTrue("possible enoding problems found in html-output", !html.contains("ï»¿"));
+         assertTrue("possible encoding problems found in html-output", !html.contains("ï»¿"));
          
          //create a new expected file (after new changes in the gui)
          String expFileName = "test-" + name + "-output.html";
@@ -328,8 +331,11 @@ public class NanoH5Test implements ENVTestPreparation {
         ENV.addService(IAuthorization.class, auth);
         ConcurrentUtil.setCurrent(auth);
 
-        BeanContainer.initEmtpyServiceActions();
-//        GenericLocalBeanContainer.initLocalContainer(Thread.currentThread().getContextClassLoader(), false);
+        // BeanContainer.initEmtpyServiceActions();
+        // BeanContainerUtil.initEmptyProxyServices();
+        BeanContainerUtil.initProxyServiceFactory();
+        GenericLocalBeanContainer.initLocalContainer();
+        ServiceFactory.instance().setSubject(auth.getSubject());
         ENV.addService(IBeanContainer.class, BeanContainer.instance());
         ConcurrentUtil.setCurrent(BeanContainer.instance());
     }

@@ -15,6 +15,7 @@ import java.io.FileReader;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.lang.reflect.Proxy;
 import java.text.Format;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1126,7 +1127,15 @@ public class ENV implements Serializable {
     private boolean isNotSerializable(Object value) {
         return value != null
             && (!Serializable.class.isAssignableFrom(value.getClass()) || (!ObjectUtil.isStandardType(value) && !BeanClass
-                .hasDefaultConstructor(value.getClass())));
+                .hasDefaultConstructor(value.getClass())) || !isProxyHandlerSerializable(value));
+    }
+
+    /** 
+     * The Proxy itself is always serliazable while the invocationhandler maybe not! 
+     * @return true if it is not a proxy or the proxies handler is serializable
+     */
+    private boolean isProxyHandlerSerializable(Object value) {
+        return !Proxy.isProxyClass(value.getClass()) || Serializable.class.isAssignableFrom(Proxy.getInvocationHandler(value).getClass());
     }
 
     /**

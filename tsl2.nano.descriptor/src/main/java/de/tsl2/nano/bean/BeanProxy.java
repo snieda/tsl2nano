@@ -9,6 +9,7 @@ package de.tsl2.nano.bean;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,6 +18,7 @@ import de.tsl2.nano.bean.def.BeanProperty;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.util.DelegationHandler;
+import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
@@ -51,6 +53,7 @@ public class BeanProxy<T> extends DelegationHandler<T> {
     private static final long serialVersionUID = -3486884118905162667L;
     /** if true, the property hashmap will be prefered to the delegate */
     boolean preferProperties = false;
+    private boolean returnEmptyCollections = false;
     
     static/*final*/Method METHOD_GET_PROPERTY;
     static/*final*/Method METHOD_SET_PROPERTY;
@@ -85,6 +88,9 @@ public class BeanProxy<T> extends DelegationHandler<T> {
         this.preferProperties = preferProperties;
     }
 
+    public static <T> T createBeanImplementation(Class<T> interfaze) {
+        return createBeanImplementation(interfaze, null);
+    }
     /**
      * creates a new proxy instance with BeanProxy as invocationhandler.
      * 
@@ -92,10 +98,6 @@ public class BeanProxy<T> extends DelegationHandler<T> {
      * @param attributes map of bean attributes for this bean implementation
      * @return implementation of the given interface.
      */
-//    public static Object createBeanImplementation(Class<?> interfaze, Map<String, Object> attributes) {
-//    	return createBeanImplementation(interfaze, attributes, BeanProxy.class.getClassLoader());
-//    }
-
     public static <T> T createBeanImplementation(Class<T> interfaze,
             Map<String, Object> attributes) {
         return createBeanImplementation(interfaze, attributes, null, false, null);
@@ -126,6 +128,17 @@ public class BeanProxy<T> extends DelegationHandler<T> {
         return (T) Proxy.newProxyInstance(classLoader,
             new Class[] { interfaze, BeanProperty.class },
             new BeanProxy(attributes, preferProperties, delegate));
+    }
+
+    public static void setReturnEmptyCollections(Object proxy, boolean returnEmptyCollections) {
+        assert Proxy.isProxyClass(proxy.getClass());
+        ((BeanProxy)((Proxy)proxy).getInvocationHandler(proxy)).setReturnEmptyCollections(returnEmptyCollections);
+    }
+    /**
+     * @param returnEmptyCollections the returnEmptyCollections to set
+     */
+    public void setReturnEmptyCollections(boolean returnEmptyCollections) {
+        this.returnEmptyCollections = returnEmptyCollections;
     }
 
     /**
@@ -180,6 +193,9 @@ public class BeanProxy<T> extends DelegationHandler<T> {
         if (preferProperties && result == null && delegate != null && method.getDeclaringClass().isAssignableFrom(delegate.getClass()))
             result = invokeDelegate(method, args);
         
+        if (result == null && Collection.class.isAssignableFrom(method.getReturnType()) && returnEmptyCollections) {
+            result = new ListSet<>();
+        }
         //for test purpose, we provide last invokation as property
         properties.put(PROPERTY_INVOKATION_INFO + method.getName(), getMethodArgsId(method, args));
 

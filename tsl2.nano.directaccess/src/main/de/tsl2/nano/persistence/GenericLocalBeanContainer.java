@@ -22,6 +22,11 @@ import de.tsl2.nano.service.util.IGenericService;
  * @version $Revision$
  */
 public class GenericLocalBeanContainer extends GenericBeanContainer {
+    protected IGenericService service;
+
+    public static void initLocalContainer() {
+        initLocalContainer(Thread.currentThread().getContextClassLoader(), false);
+    }
 
     /**
      * initializes the standard bean container to use GenericService methods. it creates an own servicefactory using the
