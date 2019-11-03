@@ -13,44 +13,36 @@ ${copyright}
     <h2 th:case="null">No ${class.Name} yet!</h2>
         <div th:case="*">
         <form>
-        <div class="table">
-#foreach( $att in $class.Attributes)    
-            <div class="tr">
-                <span class="td">
-                    <label for="${att.Name}">${att.NameFU}</label>
-                </span>
-                <span class="td">
-                    <input type="text" id="${att.Name}" placeholder="${att.Name}">
-                </span>
-                <span class="td">
-                    <a th:href="@{/${entity}s/${att.Name}/$OP${att.Name}$CL}">Search</a>
-                </span>
-            </div>
-#end
-        </div>
-        </form>
-        <form>
             <h2>${class.Name}</h2>
-            <table>
-                <thead>
-                    <tr>
+        <div class="table">
+                <span class="thead">
+                    <div class="tr">
 #foreach( $att in $class.Attributes)    
-                        <th>${att.Name}</th>
+                        <span class="th">${att.Name}</span>
 #end
-                        <th>Edit</th>
-                        <th>Delete</th>
-                    </tr>
-                </thead>
-                <tbody>
-                <tr th:each="e : $OP${entity}s$CL">
+                        <span class="th">Edit</span>
+                        <span class="th">Delete</span>
+                    </div>
+                </span>
+                <span class="tbody">
+                <div class="tr">
 #foreach( $att in $class.Attributes)    
-                    <td th:text="$OP e.${att.Name}$CL"></td>
+                <span class="td">
+                    <input type="text" id="${att.Name}" th:value="*{${att.Name}}" placeholder="${att.Name}">
+                    <a th:href="@{/${entity}s/${att.Name}/${value}(value=$OP${att.Name}$CL)}">Search</a>
+                    <!--<a th:href="@{/${entity}s/${att.Name}/${value}(value=$OP${att.Name}.value$CL)}">Search</a>-->
+                </span>
+#end
+                </div>
+                <div class="tr" th:each="e : $OP${entity}s$CL">
+#foreach( $att in $class.Attributes)    
+                    <span class="td" th:text="$OP e.${att.Name}$CL"></span>
 #end                    
-                    <td><a th:href="@{/${entity}/edit/{id}(id=${e.id})}">Edit</a></td>
-                    <td><a th:href="@{/${entity}/delete/{id}(id=${e.id})}">Delete</a></td>
-                </tr>
-            </tbody>
-        </table>
+                    <span class="td"><a th:href="@{/${entity}/edit/{id}(id=${e.id})}">Edit</a></span>
+                    <span class="td"><a th:href="@{/${entity}/delete/{id}(id=${e.id})}">Delete</a></span>
+                </div>
+            </span>
+        </div>
         <input type="button" value="Back" onclick="history.back()" >
         <a href="/${entity}/create" class="button">New</a>
         </form>
