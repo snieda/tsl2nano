@@ -20,10 +20,10 @@ ${copyright}
                     <label for="${att.Name}">${att.NameFU}</label>
                 </span>
                 <span class="td">
-                    <input type="text" th:field="*{${att.Name}}" id="${att.Name}" placeholder="${att.Name}">
+                    <input type="text" id="${att.Name}" placeholder="${att.Name}">
                 </span>
                 <span class="td">
-                    <a th:href="@{/${entity}s/${att.Name}/${att.Name}}">Search</a>
+                    <a th:href="@{/${entity}s/${att.Name}/$OP${att.Name}$CL}">Search</a>
                 </span>
             </div>
 #end

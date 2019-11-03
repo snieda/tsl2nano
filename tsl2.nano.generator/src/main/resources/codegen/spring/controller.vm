@@ -61,8 +61,8 @@ public class ${class.Name}Controller {
     }
 
     @GetMapping("/${entity}/edit/{id}")
-    public String showUpdateForm(@PathVariable("id") long id, Model model) {
-        ${class.Name} ${entity} = repository.findById(id);
+    public String showUpdateForm(@PathVariable("id") ${idType} id, Model model) {
+        ${class.Name} ${entity} = repository.findById(id).get();
         if (${entity} == null)
                 throw new IllegalArgumentException("Invalid ${class.Name} Id:" + id);
 
@@ -71,7 +71,7 @@ public class ${class.Name}Controller {
     }
 
     @PostMapping("/${entity}/update/{id}")
-    public String update${class.Name}(@PathVariable("id") long id, @Valid ${class.Name} ${entity}, BindingResult result, Model model) {
+    public String update${class.Name}(@PathVariable("id") ${idType} id, @Valid ${class.Name} ${entity}, BindingResult result, Model model) {
         if (result.hasErrors()) {
             ${entity}.setId(id);
             return basePath + "${class.Name}View";
@@ -83,8 +83,8 @@ public class ${class.Name}Controller {
     }
 
     @GetMapping("/${entity}/delete/{id}")
-    public String delete${class.Name}(@PathVariable("id") long id, Model model) {
-        ${class.Name} ${entity} = repository.findById(id);
+    public String delete${class.Name}(@PathVariable("id") ${idType} id, Model model) {
+        ${class.Name} ${entity} = repository.findById(id).get();
         if (${entity} == null)
                 throw new IllegalArgumentException("Invalid ${class.Name} Id:" + id);
         repository.delete(${entity});

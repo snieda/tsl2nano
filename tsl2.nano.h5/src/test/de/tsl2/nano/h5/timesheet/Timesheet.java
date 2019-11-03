@@ -30,6 +30,7 @@ import static org.anonymous.project.presenter.ChargeConst.ATTR_FROMDATE;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_FROMTIME;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_PARTY;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_PAUSE;
+import static org.anonymous.project.presenter.ChargeConst.ATTR_TODATE;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_TOTIME;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_VALUE;
 import static org.anonymous.project.presenter.ChargeitemConst.ATTR_CHARGE;
@@ -130,6 +131,7 @@ import de.tsl2.nano.incubation.specification.ParType;
 import de.tsl2.nano.incubation.specification.actions.Action;
 import de.tsl2.nano.incubation.specification.actions.ActionPool;
 import de.tsl2.nano.incubation.specification.rules.RuleDecisionTable;
+import de.tsl2.nano.incubation.specification.rules.RuleDependencyListener;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.specification.rules.RuleScript;
 import de.tsl2.nano.util.PrintUtil;
@@ -216,9 +218,9 @@ public class Timesheet extends NanoH5App {
         charge =
             define(Charge.class, icon("clock"), ve(ChargeConst.ATTR_CHARGEITEM) + " (" + ve(ChargeConst.ATTR_FROMDATE) + ": "
                 + ve(ChargeConst.ATTR_VALUE) + ")"
-                , ATTR_FROMDATE, ATTR_WEEKDAY, ATTR_FROMTIME, ATTR_TOTIME, ATTR_PAUSE, ATTR_PARTY, ATTR_CHARGEITEM,
+                , ATTR_FROMDATE, ATTR_WEEKDAY, ATTR_FROMTIME, ATTR_TODATE, ATTR_TOTIME, ATTR_PAUSE, ATTR_PARTY, ATTR_CHARGEITEM,
                 ATTR_VALUE, ATTR_COMMENT, "chargestatus");
-        //this test does not use a real beancontainer reading jpa annotations
+        //this test does not use a real beancontainer, but jpa annotations will be read
         charge.getAttribute(ATTR_FROMTIME).getPresentation().setType(IPresentable.TYPE_TIME);
         charge.getAttribute(ATTR_TOTIME).getPresentation().setType(IPresentable.TYPE_TIME);
         charge.getAttribute(ATTR_PAUSE).getPresentation().setType(IPresentable.TYPE_TIME);
@@ -291,6 +293,12 @@ public class Timesheet extends NanoH5App {
         RuleCover.cover(Charge.class, ATTR_FROMDATE, "presentable.layoutConstraints", "&" + dtRule.getName());
         RuleCover.cover(Charge.class, ATTR_FROMDATE, "columnDefinition.presentable.layoutConstraints", "&" + dtRule.getName());
         
+        //copy fromdate to todate
+        charge.getAttribute(ATTR_TODATE).getPresentation().setVisible(false);
+        RuleScript<String> id = new RuleScript<String>("id", "value", null);
+        ENV.get(RulePool.class).add(id);
+        charge.getAttribute(ATTR_FROMDATE).changeHandler().addListener(new RuleDependencyListener<>(charge.getAttribute(ATTR_TODATE),ATTR_TODATE, "id"));
+
         charge.saveDefinition();
 
         //create a compositor
@@ -329,12 +337,12 @@ public class Timesheet extends NanoH5App {
         QueryResult.createQueryResult(STAT_TIMESHEET_STATISTICS, stat);
 
         stat = "\n-- get a statistic table over projects\n" +
-                "select org.NAME || ' ' || i.NAME as Project, sum(value) as Hours from Charge c join CHARGEITEM ci on c.CHARGEITEM = ci.ID join ITEM i on ci.ITEM = i.ID join ORGANISATION org on i.ORGA = org.ID\n" + 
+                "select org.NAME || ' ' || i.NAME as Project, sum(c.value) as Hours from Charge c join CHARGEITEM ci on c.CHARGEITEM = ci.ID join ITEM i on ci.ITEM = i.ID join ORGANISATION org on i.ORGA = org.ID\n" + 
                 "group by Project\n";
         QueryResult.createQueryResult(STAT_PROJECTS, stat);
 
         stat = "\n-- get a statistic table over types\n" +
-                "select t.NAME as Type, sum(value) as Hours from Charge c join CHARGEITEM ci on c.CHARGEITEM = ci.ID join ITEM i on ci.ITEM = i.ID join TYPE t on i.TYPE = t.ID\n" +
+                "select t.NAME as Type, sum(c.value) as Hours from Charge c join CHARGEITEM ci on c.CHARGEITEM = ci.ID join ITEM i on ci.ITEM = i.ID join TYPE t on i.TYPE = t.ID\n" +
                 "group by t.NAME\n";
         QueryResult queryResult = QueryResult.createQueryResult(STAT_TYPES, stat);
 

@@ -974,7 +974,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         }
         BeanDefinition<T> beandef = null;
         boolean nameCollision = false;
-        if (i == -1 || !(nameCollision=virtualBeanCache.get(i).getDeclaringClass().equals(type))) {
+        if (i == -1 || (type != null && !(nameCollision=virtualBeanCache.get(i).getDeclaringClass().equals(type)))) {
             File xmlFile = getDefinitionFile(name);
             if (usePersistentCache && xmlFile.canRead()) {
                 try {
