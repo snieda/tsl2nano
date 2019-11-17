@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<SIShell name="sishell.xml" width="79" height="22" style="7" bars="true" refreshConfig="false" useNetworkExtension="true" sequential="false">
+<SIShell name="sishell.xml" width="79" height="22" style="7" fgColor="YELLOW" bgColor="BLUE" bars="true" refreshConfig="false" useNetworkExtension="true" sequential="false">
    <definition name="image.out">
       <value class="java.lang.String">-out</value>
    </definition>
@@ -228,13 +228,43 @@
             </argNames>
          </item>
       </item>
+      <item class="de.tsl2.nano.incubation.terminal.item.Container" name="vNet" multiple="false" sequential="false">
+         <item class="de.tsl2.nano.incubation.terminal.item.Container" name="implementation" multiple="false" sequential="false">
+            <description>vNet implementation</description>
+            <item class="de.tsl2.nano.incubation.terminal.item.Option" name="NeuralNet">
+               <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
+               <description>NeuralNet implementation class</description>
+               <defaultValue class="java.lang.String">de.tsl2.nano.incubation.vnet.neuron.VNeuron</defaultValue>
+               <value class="java.lang.String">de.tsl2.nano.incubation.vnet.neuron.VNeuron</value>
+            </item>
+            <item class="de.tsl2.nano.incubation.terminal.item.Option" name="RoutingStar">
+               <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
+               <description>Routing implementation class</description>
+               <defaultValue class="java.lang.String">de.tsl2.nano.incubation.vnet.routing.RoutingAStar</defaultValue>
+               <value class="java.lang.String">de.tsl2.nano.incubation.vnet.routing.RoutingAStar</value>
+            </item>
+            <item class="de.tsl2.nano.incubation.terminal.item.Option" name="Workflow">
+               <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
+               <description>Workflow implementation class</description>
+               <defaultValue class="java.lang.String">de.tsl2.nano.incubation.vnet.workflow.VActivity</defaultValue>
+               <value class="java.lang.String">de.tsl2.nano.incubation.vnet.workflow.VActivity</value>
+            </item>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.item.Action" name="main">
+            <mainClass>de.tsl2.nano.incubation.vnet.NetCommunicator</mainClass>
+            <method>main</method>
+            <argNames length="1">
+               <string>implementation</string>
+            </argNames>
+         </item>
+      </item>
       <item class="de.tsl2.nano.incubation.terminal.item.Container" name="Net" multiple="false" sequential="false">
          <description>wrench.png</description>
          <item class="de.tsl2.nano.incubation.terminal.item.Container" name="Scan" multiple="false" sequential="false">
             <item class="de.tsl2.nano.incubation.terminal.item.Input" name="ip">
                <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
                <description>internet address to be scanned</description>
-               <value class="java.lang.String">192.168.242.12</value>
+               <value class="java.lang.String">2001:a62:3a1:4e01:ffb8:a2a7:f231:b61b%wlp2s0</value>
             </item>
             <item class="de.tsl2.nano.incubation.terminal.item.Input" name="lowest-port">
                <constraints type="java.lang.Integer" nullable="true" length="-1" scale="-1" precision="-1"/>
@@ -357,9 +387,9 @@
             <item class="de.tsl2.nano.incubation.terminal.item.selector.PropertySelector" name="arguments" multiple="false" sequential="false">
                <description>RESTful arguments</description>
             </item>
-            <item class="de.tsl2.nano.incubation.terminal.item.Action" name="getRestful">
+            <item class="de.tsl2.nano.incubation.terminal.item.Action" name="getRest">
                <mainClass>de.tsl2.nano.core.util.NetUtil</mainClass>
-               <method>getRestful</method>
+               <method>getRest</method>
                <argNames length="2">
                   <string>url</string>
                   <string>arguments</string>
@@ -441,5 +471,102 @@
             <cmd>cmd /C</cmd>
          </item>
       </item>
+      <item class="de.tsl2.nano.incubation.terminal.item.Container" name="Generator" multiple="false" sequential="false">
+         <description>Generate Code with Velocity</description>
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="algorithm">
+            <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
+            <description>generator implementation</description>
+            <value class="java.lang.String">de.tsl2.nano.codegen.PackageGenerator</value>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="model">
+            <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
+            <description>package file path of source code used as model</description>
+            <value class="java.lang.String">${user.dir}</value>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="template">
+            <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
+            <description>velocity template file path</description>
+            <value class="java.lang.String">codegen/bean-const.vm</value>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="filter">
+            <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
+            <description>optional package  of source code files</description>
+            <value class="java.lang.String"></value>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="propertyFile">
+            <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
+            <description>optional property file</description>
+            <value class="java.lang.String"></value>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="outputPath">
+            <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
+            <description>optional output path</description>
+            <value class="java.lang.String">${user.dir}</value>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="destinationPrefix">
+            <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
+            <description>optional destination file prefix</description>
+            <value class="java.lang.String"></value>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="destinationPostfix">
+            <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
+            <description>optional destination file postfix</description>
+            <value class="java.lang.String">${user.dir}</value>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="unpackaged">
+            <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
+            <description>whether to store flat without package structure</description>
+            <value class="java.lang.String">false</value>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="singleFile">
+            <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
+            <description>whether to generate only a single file</description>
+            <value class="java.lang.String">false</value>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.item.Action" name="start">
+            <mainClass>de.tsl2.nano.codegen.ACodeGenerator</mainClass>
+            <method>start</method>
+            <argNames length="5">
+               <string>${algorithm}</string>
+               <string>${model}</string>
+               <string>${template}</string>
+               <string>${filter}</string>
+               <string>${propertyFile}</string>
+            </argNames>
+         </item>
+      </item>
+      <item class="de.tsl2.nano.incubation.terminal.item.Container" name="EvolutionalAlgorithm" multiple="false" sequential="false">
+         <description>Starts an Evolutional Algorithm</description>
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="fitnessFunction">
+            <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
+            <description>Fitness function implementation</description>
+            <value class="java.lang.String">de.tsl2.nano.gp.PolyglottFitnessFunction</value>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="script">
+            <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
+            <description>Script mplementation if fitnessFunction is PolyglottFitnessFunction</description>
+            <value class="java.lang.String">fit.ts</value>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="geneticRangeLow">
+            <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
+            <description></description>
+            <value class="java.lang.String">10</value>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="geneticRangeHigh">
+            <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
+            <description></description>
+            <value class="java.lang.String">10</value>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.item.MainAction" name="start">
+            <mainClass>de.tsl2.nano.gp.EvolutionalAlgorithm</mainClass>
+            <method>main</method>
+            <argNames length="3">
+               <string>fitnessFunction=${fitnessFunction}</string>
+               <string>geneticRangeLow=${geneticRangeLow}</string>
+               <string>geneticRangeHigh=${geneticRangeHigh}</string>
+            </argNames>
+         </item>
+      </item>
    </root>
+   <clearScreenCmd>clear</clearScreenCmd>
 </SIShell>

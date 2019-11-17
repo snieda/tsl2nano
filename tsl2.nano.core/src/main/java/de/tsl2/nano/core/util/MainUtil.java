@@ -24,12 +24,14 @@ public class MainUtil {
     private static final String OPTION = "-";
     private static final String ASSIGN = "=";
 
-    private static final String TAG_COLOR = "\033[%d;%dm";
+    private static final String TAG_COLOR = "\033[%d;%d;%dm";
     public static final String NC = "\033[0m";
 
     public static final int COLOR_BASE = 30;
     public enum Color {BLACK, RED, GREEN, ORANGE, BLUE, PURPLE, CYAN, LIGHT_GRAY, // => now all with ligh=1
         DARK_GRAY, LIGHT_RED, LIGHT_GREEN, YELLOW, LIGHT_BLUE, LIGHT_PURPLE, LIGHT_CYAN, WHITE}
+
+    public enum Style {NORMAL, BOLD, DARK, ITALIC, UNDERLINED}
 
     public static final String INFO = tag("INFO:  ", Color.BLUE);
     public static final String WARN = tag("WARN:  ", Color.YELLOW);
@@ -217,13 +219,26 @@ public class MainUtil {
     }
 
     public static String tag(Object txt, Color color) {
-        return tag(color) + txt + NC;
+        return tag(txt, color, null);
+    }
+    public static String tag(Object txt, Color color, Color background) {
+        return tag(txt, color, background, null);
+    }
+    public static String tag(Object txt, Color color, Color background, Style style) {
+        return tag(color, background, style) + txt + NC;
     }
 
     public static String tag(Color color) {
-        int light = color.ordinal() > 7 ? 1 : 0;
+        return tag(color, null);
+    }
+    public static String tag(Color color, Color background) {
+        return tag(color, background, (Style)null);
+    }
+    public static String tag(Color color, Color background, Style style) {
+        int lightOrStyle = style != null ? style.ordinal() : color.ordinal() > 7 ? 1 : 0;
         int c = (color.ordinal() % 8) + COLOR_BASE;
-        return String.format(TAG_COLOR, light, c);
+        int b = background != null ? background.ordinal() + COLOR_BASE + 10 : 1; //1: default value of ansi escape codes
+        return String.format(TAG_COLOR, lightOrStyle, c, b);
     }
 
     public static void assertw(boolean expression, String msg) {

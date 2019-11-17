@@ -49,7 +49,7 @@
 						</goals>
 						<configuration>
 							<includeScope>runtime</includeScope>
-							<includeArtifactIds>tsl2.nano.common,tsl2.nano.operation, tsl2.nano.descriptor, tsl2.nano.specification, tsl2.nano.incubation, tsl2.nano.vnet, tsl2.nano.logicstructure, tsl2.nano.repeatable, tsl2.nano.terminal, tsl2.nano.serviceaccess,tsl2.nano.directaccess,tsl2.nano.jarresolver,tsl2.nano.ormliteprovider,tsl2.nano.ebeanprovider,simple-xml,snakeyaml,Java-WebSocket,xchart,VectorGraphics2D,javax.json,javax.json-api,jboss-ejb-api_3.2_spec,hibernate-jpa-2.1-api,javax.json-api,jboss-jaxrs-api
+							<includeArtifactIds>tsl2.nano.common,tsl2.nano.operation, tsl2.nano.datastructure, tsl2.nano.generator, tsl2.nano.gp, tsl2.nano.descriptor, tsl2.nano.specification, tsl2.nano.incubation, tsl2.nano.vnet, tsl2.nano.logicstructure, tsl2.nano.repeatable, tsl2.nano.terminal, tsl2.nano.serviceaccess,tsl2.nano.directaccess,tsl2.nano.jarresolver,tsl2.nano.ormliteprovider,tsl2.nano.ebeanprovider,simple-xml,snakeyaml,Java-WebSocket,xchart,VectorGraphics2D,javax.json,javax.json-api,jboss-ejb-api_3.2_spec,hibernate-jpa-2.1-api,javax.json-api,jboss-jaxrs-api
 							</includeArtifactIds>
 							<outputDirectory>${project.build.directory}/classes</outputDirectory>
 						</configuration>
@@ -87,6 +87,16 @@
 		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>tsl2.nano.jarresolver</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.tsl2nano</groupId>
+			<artifactId>tsl2.nano.generator</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.tsl2nano</groupId>
+			<artifactId>tsl2.nano.gp</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

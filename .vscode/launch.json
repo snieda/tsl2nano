@@ -6,6 +6,13 @@
             "name": "CodeLens (Launch) - EvolutionalAlgorithm",
             "request": "launch",
             "mainClass": "de.tsl2.nano.gp.EvolutionalAlgorithm",
+            "projectName": "tsl2.nano.gp"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - EvolutionalAlgorithm",
+            "request": "launch",
+            "mainClass": "de.tsl2.nano.gp.EvolutionalAlgorithm",
             "projectName": "tsl2.nano.vnet"
         },
         {

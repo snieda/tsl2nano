@@ -9,7 +9,7 @@
  */
 package de.tsl2.nano.incubation.terminal;
 
-import static de.tsl2.nano.incubation.terminal.TextTerminal.BLOCK_BAR;
+import static de.tsl2.nano.incubation.terminal.TextTerminal.*;
 import static de.tsl2.nano.incubation.terminal.TextTerminal.SCREEN_HEIGHT;
 import static de.tsl2.nano.incubation.terminal.TextTerminal.SCREEN_WIDTH;
 import static de.tsl2.nano.incubation.terminal.TextTerminal.getTextFrame;
@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
+import static de.tsl2.nano.core.util.MainUtil.*;
 
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Attribute;
@@ -53,6 +54,7 @@ import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.core.util.MainUtil.Color;
 import de.tsl2.nano.incubation.platform.PlatformManagement;
 import de.tsl2.nano.incubation.terminal.IItem.Type;
 import de.tsl2.nano.incubation.terminal.item.Container;
@@ -110,7 +112,11 @@ public class SIShell implements IItemHandler, Serializable {
     @Attribute
     int height = SCREEN_HEIGHT;
     @Attribute
-    int style = BLOCK_BAR;
+    int style = BLOCK_TEXT_LINE;
+    @Attribute(required = false)
+    Color fgColor = Color.YELLOW;
+    @Attribute(required = false)
+    Color bgColor = Color.BLUE;
     @Attribute
     boolean bars = true;
     /** item properties */
@@ -209,11 +215,19 @@ public class SIShell implements IItemHandler, Serializable {
     }
 
     public SIShell(IItem root, InputStream in, PrintStream out) {
-        this(root, in, out, SCREEN_WIDTH, SCREEN_HEIGHT, BLOCK_BAR, null);
+        this(root, in, out, SCREEN_WIDTH, SCREEN_HEIGHT, BLOCK_TEXT_LINE, Color.YELLOW, Color.BLUE);
     }
 
     public SIShell(IItem root, InputStream in, PrintStream out, int width, int height, int style) {
-        this(root, in, out, width, height, style, null);
+        this(root, in, out, width, height, style, Color.YELLOW, Color.BLUE);
+    }
+
+    public SIShell(IItem root, InputStream in, PrintStream out, int width, int height, int style, Map<String, Object> definitions) {
+        this(root, in, out, width, height, style, Color.YELLOW, Color.BLUE, definitions);
+    }
+
+    public SIShell(IItem root, InputStream in, PrintStream out, int width, int height, int style, Color fgColor, Color bgColor) {
+        this(root, in, out, width, height, style, fgColor, bgColor, null);
     }
 
     /**
@@ -230,6 +244,8 @@ public class SIShell implements IItemHandler, Serializable {
             int width,
             int height,
             int style,
+            Color fgColor,
+            Color bgColor,
             Map<String, Object> defintions) {
         super();
         this.root = root;
@@ -238,6 +254,8 @@ public class SIShell implements IItemHandler, Serializable {
         this.width = width;
         this.height = height;
         this.style = style;
+        this.fgColor = fgColor;
+        this.bgColor = bgColor;
         this.definitions = defintions;
         this.env = createEnvironment(name, defintions);
     }
@@ -335,7 +353,7 @@ public class SIShell implements IItemHandler, Serializable {
         save(refreshConfig || !new File(name).getAbsoluteFile().exists());
         String shutdownInfo =
             ENV.translate("message.shutdown", false, name);
-        printScreen(shutdownInfo, in, out, null, width, height, style, true, isInBatchMode());
+        printScreen(shutdownInfo, in, out, null, width, height, style, true, isInBatchMode(), fgColor, bgColor);
         LOG.info("si-shell " + name + " ended");
     }
 
@@ -408,22 +426,25 @@ public class SIShell implements IItemHandler, Serializable {
     public String printScreen(IItem item, PrintStream out) {
         String title = item.toString();
         int style = item.getStyle() != null ? item.getStyle() : this.style;
-        out.print(title.length() > (3 * width) ? title : TextTerminal.getTextFrame(title, style, width, true));
+        out.print(title.length() > (3 * width) ? title : tag(TextTerminal.getTextFrame(title, style, width, true), fgColor, bgColor));
         String question = item.ask(env);
         return printScreen(
             item.getDescription(env, false),
             in,
-            out, question, width, height, style, false, isInBatchMode());
+            out, question, width, height, style, false, isInBatchMode(), fgColor, bgColor);
     }
 
     public String printScreen(String screen, InputStream in, PrintStream out, String question) {
-        return printScreen(screen, in, out, question, width, height, style, false, isInBatchMode());
+        return printScreen(screen, in, out, question, width, height, style, false, isInBatchMode(), fgColor, bgColor);
     }
 
-    /**
+    public static String printScreen(String screen, InputStream in, PrintStream out, String question, int width, int height, int style, boolean center, boolean isInBatchMode) {
+        return printScreen(screen, in, out, question, width, height, style, center, isInBatchMode, Color.GREEN, Color.BLUE);
+    }
+        /**
      * {@inheritDoc}
      */
-    public static String printScreen(String screen, InputStream in, PrintStream out, String question, int width, int height, int style, boolean center, boolean isInBatchMode) {
+    public static String printScreen(String screen, InputStream in, PrintStream out, String question, int width, int height, int style, boolean center, boolean isInBatchMode, Color fgColor, Color bgColor) {
         //split screens to max height
         String pagingInput;
         String s = screen;
@@ -433,7 +454,7 @@ public class SIShell implements IItemHandler, Serializable {
                 i = l + width - 2;
             }
             if (++lines > height && height > 0) {
-                out.print(getTextFrame(s.substring(page, i), style, width, center));
+                out.print(tag(getTextFrame(s.substring(page, i), style, width, center), fgColor, bgColor));
                 out.print(ASK_ENTER);
                 page = i + 1;
                 lines = 0;
@@ -452,9 +473,9 @@ public class SIShell implements IItemHandler, Serializable {
             screen = s.substring(page, s.length());
             if (height > 0)
                 screen += StringUtil.fixString(height - lines, ' ').replace(" ", " \n");
-            out.print(getTextFrame(screen, style, width, center));
+            out.print(tag(getTextFrame(screen, style, width, center), fgColor, bgColor));
         }
-        out.print(question);
+        out.print(tag(question, Color.WHITE));
         return null;
     }
 
@@ -486,7 +507,7 @@ public class SIShell implements IItemHandler, Serializable {
                 } else if (isCommand(input, KEY_PROPERTIES)) {
                     System.getProperties().list(out);
                 } else if (isCommand(input, KEY_INFO)) {
-                    printScreen(SystemUtil.createInfo(null), in, out, "");
+                    printScreen(SystemUtil.createInfo(""), in, out, "");
                 } else if (isCommand(input, KEY_PLATFORMINFO)) {
                     printScreen(PlatformManagement.getMBeanInfo(null).toString(), in, out, "");
                 } else if (isCommand(input, KEY_LASTEXCEPTION)) {

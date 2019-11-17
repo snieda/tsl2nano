@@ -17,6 +17,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import de.tsl2.nano.bean.def.Constraint;
+import de.tsl2.nano.codegen.ACodeGenerator;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.execution.SystemUtil;
@@ -27,6 +28,7 @@ import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.execution.AntRunner;
+import de.tsl2.nano.gp.EvolutionalAlgorithm;
 import de.tsl2.nano.incubation.terminal.item.Action;
 import de.tsl2.nano.incubation.terminal.item.Container;
 import de.tsl2.nano.incubation.terminal.item.Input;
@@ -81,7 +83,7 @@ public class TerminalTest implements ENVTestPreparation {
       });
 
       InputStream in = ByteUtil.getInputStream("1\n2\n3\n4\n5\n\n".getBytes());
-      new SIShell(root, in, System.out, 79, 10, 1).run();
+      new SIShell(root, in, System.out, 79, 10, 7).run();
 
       SIShell.main(new String[] { SIShell.DEFAULT_NAME });
 
@@ -219,7 +221,7 @@ public class TerminalTest implements ENVTestPreparation {
       restful
           .add(new PropertySelector<String>("arguments", "RESTful arguments",
               null/*MapUtil.asMap(new TreeMap(), "destFile", "mynew.jar")*/));
-      restful.add(new Action(NetUtil.class, "getRestful", "url", "arguments"));
+      restful.add(new Action(NetUtil.class, "getRest", "url", "arguments"));
 
       net.add(new Action(NetUtil.class, "getNetInfo"));
       net.add(new Action(NetUtil.class, "getFreePort"));
@@ -243,12 +245,34 @@ public class TerminalTest implements ENVTestPreparation {
       shell.add(new de.tsl2.nano.incubation.terminal.item.Command("command", "cmd /C"));
       root.add(shell);
 
+      Container generator = new Container("Generator", "Generate Code with Velocity");
+      generator.add(new Input("algorithm", "de.tsl2.nano.codegen.PackageGenerator", "generator implementation"));
+      generator.add(new Input("model", "${user.dir}", "package file path of source code used as model"));
+      generator.add(new Input("template", "codegen/bean-const.vm", "velocity template file path"));
+      generator.add(new Input("filter", "", "optional package  of source code files"));
+      generator.add(new Input("propertyFile", "", "optional property file"));
+      generator.add(new Input("outputPath", "${user.dir}", "optional output path"));
+      generator.add(new Input("destinationPrefix", "", "optional destination file prefix"));
+      generator.add(new Input("destinationPostfix", "${user.dir}", "optional destination file postfix"));
+      generator.add(new Input("unpackaged", "false", "whether to store flat without package structure"));
+      generator.add(new Input("singleFile", "false", "whether to generate only a single file"));
+      generator.add(new Action(ACodeGenerator.class, "start", "${algorithm}", "${model}", "${template}", "${filter}", "${propertyFile}"));
+      root.add(generator);
+
+      Container evolutionalAlg = new Container("EvolutionalAlgorithm", "Starts an Evolutional Algorithm");
+      evolutionalAlg.add(new Input("fitnessFunction", "de.tsl2.nano.gp.PolyglottFitnessFunction", "Fitness function implementation"));
+      evolutionalAlg.add(new Input("script", "fit.ts", "Script mplementation if fitnessFunction is PolyglottFitnessFunction"));
+      evolutionalAlg.add(new Input("geneticRangeLow", "10", ""));
+      evolutionalAlg.add(new Input("geneticRangeHigh", "10", ""));
+      evolutionalAlg.add(new MainAction("start", EvolutionalAlgorithm.class, "fitnessFunction=${fitnessFunction}", "geneticRangeLow=${geneticRangeLow}", "geneticRangeHigh=${geneticRangeHigh}"));
+      root.add(evolutionalAlg);
+
       Map<String, Object> defs = new HashMap<String, Object>();
       defs.put("image.out", "-out");
       System.getProperties().put(SIShell.KEY_SEQUENTIAL, true);
 
       InputStream in = SystemUtil.createBatchStream("Printing", "jobname", "test", "10", "", ":quit");
-      new SIShell(root, in, System.out, 79, 22, 1, defs).run();
+      new SIShell(root, in, System.out, 79, 22, 7, defs).run();
 
       //check, if serialization was ok
       System.setIn(SystemUtil.createBatchStream("", "Printing", "jobname", "test", "10", "", ":quit"));
