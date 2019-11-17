@@ -1047,10 +1047,12 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             IAttributeDefinition a = beandef.getAttributeDefinitions().get(k);
 
             //change listeners hold only the attribute-id and must have attribute instances
-            if (a instanceof BeanValue) {
-                ((BeanValue) a).injectAttributeOnChangeListeners(beandef);
-                if (a.hasRuleCover())
-                	((BeanValue)a).injectIntoRuleCover();
+            if (a instanceof AttributeDefinition) {
+                AttributeDefinition attr = (AttributeDefinition) a;
+                attr.injectAttributeOnChangeListeners(beandef);
+                if (attr.hasRuleCover()) {
+                    AttributeDefinition.injectIntoRuleCover(attr, instance);
+                }
             }
         }
     }

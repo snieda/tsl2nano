@@ -414,4 +414,13 @@ public class FormatUtil {
         numberFormat.setParseBigDecimal(true);
         return numberFormat;
     }
+
+    public static <T> T parse(Class<T> type, String source) {
+        try {
+            return (T) getDefaultFormat(type, true).parseObject(source);
+        } catch (ParseException e) {
+            return (T) ManagedException.forward(e);
+        }
+    }
+
 }

@@ -319,4 +319,9 @@ public abstract class AttributeCover<T> extends DelegationHandler<T> implements
     public static void resetTypeCache() {
         cachedConnectionEndTypes.clear();
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + " name: " + name;
+    }
 }

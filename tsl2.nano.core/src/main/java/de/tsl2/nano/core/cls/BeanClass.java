@@ -847,8 +847,10 @@ public class BeanClass<T> implements Serializable {
                     //ok, try it on declared constructors
                     try {
                         Constructor<T> constructor = clazz.getDeclaredConstructor(new Class[0]);
-                        constructor.setAccessible(true);
-                        instance = constructor.newInstance();
+                        if (constructor != null) {
+                            constructor.setAccessible(true);
+                            instance = constructor.newInstance();
+                        }
                     } catch (final Exception e1) {
                         ManagedException.forward(e1);
                     }

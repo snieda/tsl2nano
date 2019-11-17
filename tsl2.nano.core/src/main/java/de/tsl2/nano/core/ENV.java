@@ -59,12 +59,14 @@ import de.tsl2.nano.core.serialize.YamlUtil;
 import de.tsl2.nano.core.update.Updater;
 import de.tsl2.nano.core.util.DefaultFormat;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.MainUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.core.util.MainUtil.Color;
 
 /**
  * Generic Application-Environment. Providing:
@@ -239,7 +241,7 @@ public class ENV implements Serializable {
         String buildInfo = getBuildInformations();
         
         LogFactory.log("\n===========================================================\n"
-            + new String(FileUtil.getFileBytes("tsl-logo.txt", null))
+            + MainUtil.tag(new String(FileUtil.getFileBytes("tsl-logo.txt", null)), Color.YELLOW)
             + "creating environment "
             + dir
             + "\n"

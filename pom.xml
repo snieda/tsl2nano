@@ -81,6 +81,7 @@
 	<modules>
 		<module>tsl2.nano.core</module>
 		<module>tsl2.nano.datastructure</module>
+		<module>tsl2.nano.gp</module>
 		<module>tsl2.nano.common</module>
 		<module>tsl2.nano.generator</module>
 		<module>tsl2.nano.mavengenerator</module>

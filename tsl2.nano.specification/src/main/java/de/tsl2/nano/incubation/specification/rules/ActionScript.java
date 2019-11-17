@@ -9,23 +9,18 @@
  */
 package de.tsl2.nano.incubation.specification.rules;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
-import javax.script.Bindings;
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineFactory;
-import javax.script.ScriptEngineManager;
 
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Attribute;
 
-import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.ClassFinder;
+import de.tsl2.nano.core.execution.ScriptEngineProvider;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.incubation.specification.AbstractRunnable;
 import de.tsl2.nano.incubation.specification.ParType;
@@ -63,12 +58,6 @@ public class ActionScript<T> extends AbstractRunnable<T> {
         super(name, operation, parameter);
     }
 
-    protected ScriptEngine engine() {
-        if (engine == null)
-            engine = ActionScript.createEngine(language);
-        return engine;
-    }
-    
     private static void provideLanguage(String language) {
         if (language != null && ClassFinder.self().findClass(language) == null) {
             String pck = ENV.getPackagePrefix(language);
@@ -77,64 +66,27 @@ public class ActionScript<T> extends AbstractRunnable<T> {
         }
     }
 
-	public static ScriptEngine createEngine(String language) {
-    	if (language == null) {
-    		LOG.warn("scrip language undefined -> using 'javascript' as default!");
-    		language = "javascript";
-    	}
-
-    	provideLanguage(language);
-		
-        ScriptEngineManager managerThread = new ScriptEngineManager();
-        ScriptEngine engine = managerThread.getEngineByName(language);
-        if (engine != null)
-        	return engine;
-        ScriptEngineManager managerSystem = new ScriptEngineManager(System.class.getClassLoader());
-        engine = managerSystem.getEngineByName(language);
-        if (engine != null)
-        	return engine;
-		List<ScriptEngineFactory> engines = managerThread.getEngineFactories();
-        if (engines.isEmpty()) {
-        	engines = new ScriptEngineManager(System.class.getClassLoader()).getEngineFactories();
-        	if (engines.isEmpty())
-        		throw new IllegalStateException("no script engine available!");
-        }
-        String info = "script engine " + language + " not found. Available engines are: " +
-        		printEngines();
-        throw new IllegalStateException(info);
-	}
-
-    public static String printEngines() {
-        List<ScriptEngineFactory> engs = new ArrayList<>();
-        engs.addAll(new ScriptEngineManager().getEngineFactories());
-        engs.addAll(new ScriptEngineManager(System.class.getClassLoader()).getEngineFactories());
-        
-        StringBuilder str = new StringBuilder("\n--------------------------------------------------------------------------------");
-        for (ScriptEngineFactory e : engs) {
-            str.append(e.getEngineName() + ": " + e.getLanguageName() + " " + e.getLanguageVersion() + "\n");
-        }
-        return str.append("--------------------------------------------------------------------------------\n").toString();
+    protected ScriptEngine engine() {
+        if (engine == null)
+            engine = ScriptEngineProvider.createEngine(language);
+        return engine;
     }
     
-    private static boolean isJava8() {
-        return AppLoader.getJavaVersion().equals("1.8");
-    }
+	public static ScriptEngine createEngine(String language) {
+        language = language == null ? "javascript" : language;
+    	provideLanguage(language);
+		return ScriptEngineProvider.createEngine(language);
+	}
 
     @SuppressWarnings("unchecked")
     @Override
     public T run(Map<String, Object> arguments, Object... extArgs) {
         try {
-            return (T) engine().eval(getOperation(), bind(engine(), arguments));
+            return (T) engine().eval(getOperation(), ScriptEngineProvider.bind(engine(), arguments));
         } catch (Exception e) {
             ManagedException.forward(e);
             return null;
         }
-    }
-
-    public static Bindings bind(ScriptEngine engine, Map<String, Object> arguments) {
-        Bindings bindings = engine.createBindings();
-        bindings.putAll(arguments);
-        return bindings;
     }
 
 }

@@ -3,6 +3,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - EvolutionalAlgorithm",
+            "request": "launch",
+            "mainClass": "de.tsl2.nano.gp.EvolutionalAlgorithm",
+            "projectName": "tsl2.nano.vnet"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - ACodeGenerator",
             "request": "launch",
             "mainClass": "de.tsl2.nano.codegen.ACodeGenerator",
@@ -31,7 +38,8 @@
             "remoteHost": "localhost",
             "remotePort": 8787,
             "hostName": "localhost",
-            "port": 8787
+            "port": 8787,
+            "projectName": "meintest2"
         },
         {
             "name": "Java",

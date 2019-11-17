@@ -23,6 +23,7 @@ import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.execution.ScriptEngineProvider;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.incubation.specification.ParType;
 import de.tsl2.nano.util.operation.Operator;
@@ -122,7 +123,7 @@ public class RuleScript<T> extends AbstractRule<T> {
     }
 
     private Bindings bind(Map<String, Object> arguments) {
-        return ActionScript.bind(engine(), arguments);
+        return ScriptEngineProvider.bind(engine(), arguments);
     }
 
     @Override

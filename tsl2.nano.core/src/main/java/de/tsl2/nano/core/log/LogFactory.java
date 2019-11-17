@@ -25,6 +25,8 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.serialize.XmlUtil;
 import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.ConcurrentUtil;
+import static  de.tsl2.nano.core.util.MainUtil.*;
+import static  de.tsl2.nano.core.util.MainUtil.Color.*;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
@@ -87,7 +89,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
     public static final int LOG_ALL = INFO | WARN | ERROR | FATAL | DEBUG | TRACE;
 
     static final String[] STATEDESCRIPTION = new String[] { "fatal", "error", "warn", "info", "debug", "trace" };
-    static final String[] STATETXT = new String[] { "!", "§", "#", " ", "-", "=" };
+    static final String[] STATETXT = new String[] { tag("!", LIGHT_RED), tag("§", LIGHT_RED), tag("#", YELLOW), " ", "-", "=" };
 
     /** bit set of states to log. will be used in inner log class */
     @Attribute
@@ -353,12 +355,12 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
              */
             @Override
             public void warn(Object arg0, Throwable arg1) {
-                log(logClass, WARN, arg0, arg1);
+                log(logClass, WARN, tag(arg0, ORANGE), arg1);
             }
 
             @Override
             public void warn(Object arg0) {
-                log(logClass, WARN, arg0, null);
+                log(logClass, WARN, tag(arg0, ORANGE), null);
             }
 
             @Override
@@ -413,7 +415,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
 
             @Override
             public void fatal(Object arg0, Throwable arg1) {
-                log(logClass, FATAL, arg0, arg1);
+                log(logClass, FATAL, tag(arg0, LIGHT_RED), arg1);
             }
 
             @Override
@@ -423,7 +425,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
 
             @Override
             public void error(Object arg0, Throwable arg1) {
-                log(logClass, ERROR, arg0, arg1);
+                log(logClass, ERROR, tag(arg0, LIGHT_RED), arg1);
             }
 
             @Override

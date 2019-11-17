@@ -250,9 +250,9 @@ public class Timesheet extends NanoH5App {
         Time t1700 = DateUtil.getTime(17, 0);
         Time t0000 = DateUtil.getTime(0, 0);
         Time t0030 = DateUtil.getTime(0, 30);
-        calcTime.addSpecification("notime", "check for zero-times", 0d,
+        calcTime.addSpecification("notime", "check for zero-times", 0,
             MapUtil.asMap("fromtime", t0800, "totime", t0800, "pause", t0000));
-        calcTime.addSpecification("notime1", "check for zero-times", 0d,
+        calcTime.addSpecification("notime1", "check for zero-times", 0,
             MapUtil.asMap("fromtime", t0800, "totime", t0800, "pause", null));
         calcTime.addSpecification("standard", "standard work day", 8.5d,
             MapUtil.asMap("fromtime", t0800, "totime", t1700, "pause", t0030));
@@ -270,7 +270,7 @@ public class Timesheet extends NanoH5App {
          */
         RuleScript<String> presValueColor =
             new RuleScript<String>(
-                "presValueColor", "var map = new java.util.HashMap(); map.put('style', value > 10 ? '" + redColorStyle
+                "presValueColor", "var map = new java.util.HashMap(); map.put('style', (typeof value != 'undefined' ? value : 0) > 10 ? '" + redColorStyle
                     + "' : '" + greenColorStyle + "'); map;", null);
         ENV.get(RulePool.class).add(presValueColor);
         RuleCover.cover(Charge.class, ATTR_VALUE, "presentable.layoutConstraints", "%" + presValueColor.getName());

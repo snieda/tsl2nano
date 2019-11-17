@@ -1,0 +1,1 @@
+var s = 0; for (i=0; i<input.length; i++) s+=input[i]; s+=0.001;

@@ -58,6 +58,7 @@ import de.tsl2.nano.core.secure.ISecure;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.DelegationHandler;
 import de.tsl2.nano.core.util.FormatUtil;
+import de.tsl2.nano.core.util.MainUtil;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -287,6 +288,10 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
         }
     }
 
+    static <I> void injectIntoRuleCover(IAttributeDefinition attribute, Object instance) {
+    	injectIntoRuleCover(new PrivateAccessor<>(attribute), instance);
+    }
+
     /**
      * inject the given attribute as context - walks recursive to the member tree of acc
      * 
@@ -294,6 +299,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
      * @param instance to be set as context object in all RuleCover Proxies.
      */
     protected static <I> void injectIntoRuleCover(UnboundAccessor acc, Object instance) {
+    	LOG.info("doing rule-cover injection on " + acc + " with instance " + instance);
     	injectIntoRuleCover(acc, instance, 0);
     }
     protected static <I> void injectIntoRuleCover(UnboundAccessor acc, Object instance, int level) {
@@ -310,8 +316,9 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
         Map members = acc.members();
         InvocationHandler handler;
         Object item;
-        LOG.debug("walking through " + members.size() + " members of instance " + Util.toObjString(acc.instance()) 
-        		+ " to inject " + Util.toObjString(instance) + " into existing rule-covers ");
+        if (LOG.isDebugEnabled())
+            LOG.debug("walking through " + members.size() + " members of instance " + Util.toObjString(acc.instance()) 
+                    + " to inject " + Util.toObjString(instance) + " into existing rule-covers ");
         for (Object k : members.keySet()) {
             item = members.get(k);
             if (item != null) {
@@ -332,6 +339,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
                         }
                         DelegationHandler<I> cover = ((DelegationHandler<I>) handler).clone();
                         item = DelegationHandler.createProxy(cover);
+                        LOG.info("injecting (level:" + level + ") context " + " on cover " + cover + " into " + MainUtil.tag(acc + "->" + k, MainUtil.Color.GREEN));
                         acc.set((String) k, item);
                         ((IRuleCover)cover).setContext((Serializable)instance);
 //                        new UnboundAccessor(handler).call("setContext", null, new Class[] { Serializable.class },

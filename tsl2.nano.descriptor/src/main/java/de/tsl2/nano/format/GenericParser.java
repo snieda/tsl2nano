@@ -16,6 +16,7 @@ import java.text.DateFormat;
 import java.text.FieldPosition;
 import java.text.Format;
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Currency;
@@ -23,13 +24,15 @@ import java.util.Date;
 
 import org.simpleframework.xml.Attribute;
 
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.DefaultFormat;
 import de.tsl2.nano.core.util.FormatUtil;
 
 /**
- * is able to format the given type to a string and to parse a string into an object of the given type. uses
- * {@link DefaultFormat} to format to a string and {@link FormatUtil} and {@link RegExpFormat} to parse a
- * string to an object. is able to be xml-serialized.
+ * is able to format the given type to a string and to parse a string into an
+ * object of the given type. uses {@link DefaultFormat} to format to a string
+ * and {@link FormatUtil} and {@link RegExpFormat} to parse a string to an
+ * object. is able to be xml-serialized.
  * 
  * @author Thomas Schneider
  * @version $Revision$
@@ -40,22 +43,25 @@ public class GenericParser<T> extends DefaultFormat implements INumberFormatChec
     /** serialVersionUID */
     private static final long serialVersionUID = 5202034503591423763L;
 
-    @Attribute(required=false)
+    @Attribute(required = false)
     protected Class<T> parsingType;
-    @Attribute(required=false)
+    @Attribute(required = false)
     protected String parsingPattern;
     private transient Format parsingFormat;
-    @Attribute(required=false)
+    @Attribute(required = false)
     /** scale, usable for numbers */
     private int scale;
-    /** precision, usable for numbers as precision or on dates for short/medium/long presentation */
-    @Attribute(required=false)
+    /**
+     * precision, usable for numbers as precision or on dates for short/medium/long
+     * presentation
+     */
+    @Attribute(required = false)
     private int precision;
     /** prefix to start the format */
-    @Attribute(required=false)
+    @Attribute(required = false)
     private String prefix;
     /** postfix (at the moment only on currencies) to end the format */
-    @Attribute(required=false)
+    @Attribute(required = false)
     private String postfix;
 
     /**
@@ -67,7 +73,7 @@ public class GenericParser<T> extends DefaultFormat implements INumberFormatChec
     public GenericParser(Format format) {
         this(format, null);
     }
-    
+
     public GenericParser(Format format, Class<T> type) {
         this.parsingFormat = format;
         this.parsingType = type;
@@ -101,14 +107,14 @@ public class GenericParser<T> extends DefaultFormat implements INumberFormatChec
             }
         }
         if (format instanceof RegExpFormat) {
-            parsingPattern = ((RegExpFormat)format).getPattern();
+            parsingPattern = ((RegExpFormat) format).getPattern();
         }
     }
-    
+
     public GenericParser(Class<T> parsingType) {
         this(parsingType, null, null, -1);
     }
-    
+
     /**
      * constructor
      * 
@@ -122,6 +128,13 @@ public class GenericParser<T> extends DefaultFormat implements INumberFormatChec
         this.precision = precision;
     }
 
+    public T parse(String source) {
+        try {
+            return (T) parseObject(source);
+        } catch (ParseException e) {
+            return (T) ManagedException.forward(e);
+        }
+    }
     /**
      * {@inheritDoc}
      */
