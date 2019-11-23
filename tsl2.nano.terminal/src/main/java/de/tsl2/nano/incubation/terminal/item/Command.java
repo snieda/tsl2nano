@@ -1,11 +1,10 @@
 package de.tsl2.nano.incubation.terminal.item;
 
 import java.util.ArrayList;
-import java.util.Properties;
 
 import org.simpleframework.xml.Element;
+import org.simpleframework.xml.core.Persist;
 
-import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.util.Util;
 
@@ -23,13 +22,11 @@ public class Command<T> extends MainAction<T> {
     @Element
     String cmd;
     
-    transient IRunnable<T, Properties> runner;
-
     public Command() {
     }
 
     public Command(String name, String command, String... argumentNames) {
-        super(name, SystemUtil.class, "execute", null, argumentNames);
+        super(name, SystemUtil.class, "executeAndGetOutput", null, argumentNames);
         this.cmd = command;
     }
 
@@ -43,5 +40,12 @@ public class Command<T> extends MainAction<T> {
             }
         }
         return args;
+    }
+    @Persist
+    private void initSerialization() {
+        if (mainClass==null)
+            mainClass = SystemUtil.class;
+        if (method==null)
+            method="executeAndGetOutput";
     }
 }

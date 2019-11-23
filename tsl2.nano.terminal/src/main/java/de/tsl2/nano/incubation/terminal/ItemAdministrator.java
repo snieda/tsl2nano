@@ -23,6 +23,7 @@ import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.MainUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.AntRunner;
@@ -82,6 +83,7 @@ public class ItemAdministrator<T> extends Container<T> {
         itemTypes = new HashMap<String, String[]>();
         if (adminProperties.isEmpty()) {
             //add special parameter to available items
+            //TODO: get the info from the items themselves. e.g.: Input.getParameter()
             itemTypes.put("container", new String[] { Container.class.getName(), "multiple", "sequential" });
             itemTypes.put("option", new String[] { Option.class.getName() });
             itemTypes.put("input", new String[] { Input.class.getName() });
@@ -95,12 +97,12 @@ public class ItemAdministrator<T> extends Container<T> {
             itemTypes.put("selector", new String[] { ActionSelector.class.getName(), "mainClass=", "method", ARGS });
             itemTypes.put("file", new String[] { FileSelector.class.getName(), "roots", "include" });
             itemTypes.put("dir", new String[] { DirSelector.class.getName(), "roots", "include" });
-            itemTypes.put("csv", new String[] { CSVSelector.class.getName(), "csv", "pattern" });
+            itemTypes.put("csv", new String[] { CSVSelector.class.getName(), "csv", "pattern", "usePatternAsDelimiter" });
             itemTypes.put("properties", new String[] { PropertySelector.class.getName() });
             itemTypes.put("field", new String[] { FieldSelector.class.getName(), "cls", "field"/*field-type*/});
             itemTypes.put("xpath", new String[] { XPathSelector.class.getName(), "xml", "xpath"});
             itemTypes.put("sql", new String[] { SQLSelector.class.getName(), "driver", "url", "user", "password", "sql"});
-            itemTypes.put("sequence", new String[] { Sequence.class.getName(), "action", "selector"});
+            itemTypes.put("sequence", new String[] { Sequence.class.getName(), "action", "sequence"});
 
             Properties p = new Properties();
             for (String k : itemTypes.keySet()) {
@@ -136,7 +138,15 @@ public class ItemAdministrator<T> extends Container<T> {
         addingAction = new Action<T>(this, "addItem") {
             @Override
             public IItem react(IItem caller, String input, InputStream in, PrintStream out, Properties env) {
-                askItem(in, out, env, this, item, TYPE, INDEX, "name", "value", "description", "condition", "style");
+                out.println("----------------------------------------------------------------------------------");
+                out.println("types      : " + StringUtil.toString(itemTypes.keySet(), -1));
+                out.println("styles     : " + TextTerminal.BLOCK_BAR + " to " + TextTerminal.BLOCK_TEXT_LINE);
+                out.println("colors     : " + StringUtil.toString(MainUtil.Color.values(), -1));
+                out.println("constraints: " + StringUtil.toString(new PrivateAccessor(new Constraint<>()).members().keySet(), -1));
+                out.println("condition  : " + "expression (using variables with ${...} and operators: +-*/<>=) defining the enabling of that item");
+                out.println("description: " + "may be the path to an image file or a simple description");
+                out.println("----------------------------------------------------------------------------------");
+                askItem(in, out, env, this, item, TYPE, INDEX, "name", "value", "description", "condition", "style", "fgColor", "bgColor");
                 return super.react(caller, input, in, out, env);
             }
 
@@ -154,7 +164,7 @@ public class ItemAdministrator<T> extends Container<T> {
                 out.println(StringUtil.toFormattedString(new PrivateAccessor(nodes.get(getSelectedIndex())).members(),
                     -1));
 
-                askItem(in, out, env, this, item, NEWINDEX, "name", "value", "description", "condition", "style");
+                askItem(in, out, env, this, item, NEWINDEX, "name", "value", "description", "condition", "style", "fgColor", "bgColor");
                 return super.react(caller, input, in, out, env);
             }
 
@@ -235,8 +245,10 @@ public class ItemAdministrator<T> extends Container<T> {
         boolean hasType = item.containsKey(TYPE);
         if (!Util.isEmpty(item.get("condition")))
             item.put("condition", new Condition(item.getProperty("condition")));
-        if (!Util.isEmpty(item.get("condition")))
-            item.put("condition", new Condition(item.getProperty("condition")));
+        if (!Util.isEmpty(item.get("fgColor")))
+            item.put("fgColor", MainUtil.Color.valueOf(item.getProperty("fgColor")));
+        if (!Util.isEmpty(item.get("bgColor")))
+            item.put("bgColor", MainUtil.Color.valueOf(item.getProperty("bgColor")));
         //now, the type specific attributes
         if (hasType) {
             String type = item.getProperty(TYPE);

@@ -36,6 +36,9 @@ public class CSVSelector extends Selector<String> {
     /** regular expression pattern to extract the child nodes. */
     @Element
     String pattern;
+    /** whether to use pattern as delimiter */
+    @Element(required = false)
+    boolean usePatternAsDelimiter;
 
     /**
      * constructor
@@ -50,10 +53,11 @@ public class CSVSelector extends Selector<String> {
      * @param roots
      * @param filter
      */
-    public CSVSelector(String name, String description, String csvName, String pattern) {
+    public CSVSelector(String name, String description, String csvName, String pattern, boolean usePatternAsDelimiter) {
         super(name, description);
         this.csv = csvName;
         this.pattern = pattern;
+        this.usePatternAsDelimiter = usePatternAsDelimiter;
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -64,8 +68,13 @@ public class CSVSelector extends Selector<String> {
             List<String> items = new LinkedList<String>();
             try {
                 scanner = new Scanner(new File(csvFileName));
-                while (scanner.hasNext(pattern)) {
-                    items.add(scanner.next(pattern));
+                if (usePatternAsDelimiter)
+                    scanner.useDelimiter(pattern);
+                while (scanner.hasNext()) {
+                    if (usePatternAsDelimiter)
+                        items.add(scanner.next());
+                    else
+                        items.add(scanner.next(pattern));
                 }
             } catch (FileNotFoundException e) {
                 ManagedException.forward(e);

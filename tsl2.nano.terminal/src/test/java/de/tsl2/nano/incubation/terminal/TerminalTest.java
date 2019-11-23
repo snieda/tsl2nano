@@ -2,7 +2,6 @@ package de.tsl2.nano.incubation.terminal;
 
 import java.io.File;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -18,7 +17,6 @@ import org.junit.Test;
 
 import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.codegen.ACodeGenerator;
-import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.secure.Crypt;
@@ -41,10 +39,8 @@ import de.tsl2.nano.incubation.terminal.item.selector.FileSelector;
 import de.tsl2.nano.incubation.terminal.item.selector.PropertySelector;
 import de.tsl2.nano.incubation.terminal.item.selector.Sequence;
 import de.tsl2.nano.incubation.terminal.item.selector.XPathSelector;
-import de.tsl2.nano.incubation.tree.Tree;
 import de.tsl2.nano.incubation.vnet.NetCommunicator;
 import de.tsl2.nano.incubation.vnet.neuron.VNeuron;
-import de.tsl2.nano.incubation.vnet.routing.AbstractRoutingAStar;
 import de.tsl2.nano.incubation.vnet.routing.RoutingAStar;
 import de.tsl2.nano.incubation.vnet.workflow.Condition;
 import de.tsl2.nano.incubation.vnet.workflow.VActivity;
@@ -256,7 +252,7 @@ public class TerminalTest implements ENVTestPreparation {
       generator.add(new Input("destinationPostfix", "${user.dir}", "optional destination file postfix"));
       generator.add(new Input("unpackaged", "false", "whether to store flat without package structure"));
       generator.add(new Input("singleFile", "false", "whether to generate only a single file"));
-      generator.add(new Action(ACodeGenerator.class, "start", "${algorithm}", "${model}", "${template}", "${filter}", "${propertyFile}"));
+      generator.add(new Action(ACodeGenerator.class, "start", "algorithm", "model", "template", "filter", "propertyFile"));
       root.add(generator);
 
       Container evolutionalAlg = new Container("EvolutionalAlgorithm", "Starts an Evolutional Algorithm");

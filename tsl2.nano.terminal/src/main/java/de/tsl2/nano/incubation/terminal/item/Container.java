@@ -24,6 +24,7 @@ import de.tsl2.nano.action.IConstraint;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.IPredicate;
+import de.tsl2.nano.core.util.MainUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.terminal.IContainer;
@@ -317,7 +318,7 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
             for (AItem t : list) {
                 buf.append(StringUtil.fixString(String.valueOf(++i), s, ' ', false)
                     + "."
-                    + t.getName(kl, ' ')
+                    + (t.getFgColor() != null && getFgColor() != null ? MainUtil.tag(t.getName(kl, ' '), t.getFgColor()) + MainUtil.tag(getFgColor()): t.getName(kl, ' '))
                     + POSTFIX_QUESTION
                     + (full && !t.getType().equals(Type.Container) ? t.getDescription(env, full) : StringUtil.toString(
                         t.getValueText().replace('\n', ' '), vwidth))

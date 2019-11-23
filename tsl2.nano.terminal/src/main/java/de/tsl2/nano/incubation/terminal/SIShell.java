@@ -426,6 +426,8 @@ public class SIShell implements IItemHandler, Serializable {
     public String printScreen(IItem item, PrintStream out) {
         String title = item.toString();
         int style = item.getStyle() != null ? item.getStyle() : this.style;
+        Color fgColor = item.getFgColor() != null ? item.getFgColor() : this.fgColor;
+        Color bgColor = item.getBgColor() != null ? item.getBgColor() : this.bgColor;
         out.print(title.length() > (3 * width) ? title : tag(TextTerminal.getTextFrame(title, style, width, true), fgColor, bgColor));
         String question = item.ask(env);
         return printScreen(

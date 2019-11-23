@@ -235,6 +235,7 @@ public class MainUtil {
         return tag(color, background, (Style)null);
     }
     public static String tag(Color color, Color background, Style style) {
+        color = color != null ? color : Color.LIGHT_GRAY;
         int lightOrStyle = style != null ? style.ordinal() : color.ordinal() > 7 ? 1 : 0;
         int c = (color.ordinal() % 8) + COLOR_BASE;
         int b = background != null ? background.ordinal() + COLOR_BASE + 10 : 1; //1: default value of ansi escape codes

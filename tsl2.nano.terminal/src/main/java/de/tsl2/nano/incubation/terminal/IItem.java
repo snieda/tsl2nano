@@ -15,6 +15,7 @@ import java.io.Serializable;
 import java.util.Properties;
 
 import de.tsl2.nano.action.IConstraint;
+import de.tsl2.nano.core.util.MainUtil;
 import de.tsl2.nano.incubation.vnet.workflow.Condition;
 
 /**
@@ -83,6 +84,12 @@ public interface IItem<T> {
     
     /** optional, defines an own frame style */
     Integer getStyle();
+    
+    /** optional, defines an own frame foreground color */
+    MainUtil.Color getFgColor();
+    
+    /** optional, defines an own frame background color */
+    MainUtil.Color getBgColor();
     
     enum Type implements Serializable {
         Input, Option, Container, Selector, Action;

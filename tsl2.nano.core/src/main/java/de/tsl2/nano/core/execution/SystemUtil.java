@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.lang.ProcessBuilder.Redirect;
 import java.net.InetAddress;
 import java.security.Policy;
 import java.util.Date;
@@ -61,7 +62,10 @@ public class SystemUtil {
     	return execute(directory, true, command);
     }
     
-    /**
+    public static final Process execute(File directory, boolean waitFor, String... command) {
+        return execute(directory, waitFor, true, command);
+    }
+        /**
      * execute system call - waiting for process to end - and logging its console output.<br>
      * example: <code>ScriptUtil.execute("cmd", "/C", "echo", "hello");</code>
      * <p>
@@ -71,7 +75,7 @@ public class SystemUtil {
      * @param directory where to start the command from
      * @param command command with arguments
      */
-    public static final Process execute(File directory, boolean waitFor, String... command) {
+    public static final Process execute(File directory, boolean waitFor, boolean inheritIO, String... command) {
         final ProcessBuilder processBuilder = new ProcessBuilder(command);
         processBuilder.directory(directory);
         Process process = null;
@@ -83,20 +87,18 @@ public class SystemUtil {
                     + processBuilder.environment() : ""));
 
             provideJdkAsJavaHome(processBuilder.environment());
-            try {//on dalvik, inheritIO is not present - no problem 
-                processBuilder.inheritIO();
-            } catch (NoSuchMethodError err) {
-                LOG.warn(err.toString());
-            }
+                try {//on dalvik, inheritIO is not present - no problem 
+                    if (inheritIO)
+                        processBuilder.inheritIO();
+                    else
+                        processBuilder.redirectInput(Redirect.INHERIT);
+                } catch (NoSuchMethodError err) {
+                    LOG.warn(err.toString());
+                }
             process = processBuilder.start();
             //IMPROVE: could we use redirection? we need output to standard + log file
             if (waitFor) {
-	            String input = StringUtil.fromInputStream(process.getInputStream());
-	            if (input.length() > 0)
-	            	LOG.info("process input: " + input);
-            
 	            int result = process.waitFor();
-	
 	            LOG.info("\n-------------------------------------------------------------------\n"
 	                + "process '" + StringUtil.toString(command, -1) + "' finished with errorlevel: " + result);
 	            if (result != 0) {
@@ -108,6 +110,13 @@ public class SystemUtil {
             ManagedException.forward(e);
         }
         return process;
+    }
+
+    public static String executeAndGetOutput(String... command) {
+        return getExecutionOutput(execute(null, true, false, command));
+    }
+    public static String getExecutionOutput(Process prc) {
+        return StringUtil.fromInputStream(prc.getInputStream());
     }
 
     /**

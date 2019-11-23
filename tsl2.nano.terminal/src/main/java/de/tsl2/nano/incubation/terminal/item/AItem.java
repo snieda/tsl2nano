@@ -26,8 +26,10 @@ import de.tsl2.nano.action.IConstraint;
 import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
+import de.tsl2.nano.core.util.MainUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.core.util.MainUtil.Color;
 import de.tsl2.nano.incubation.terminal.AsciiImage;
 import de.tsl2.nano.incubation.terminal.IContainer;
 import de.tsl2.nano.incubation.terminal.IItem;
@@ -51,6 +53,10 @@ public class AItem<T> implements IItem<T>, Serializable {
     /** presentation style. see the parent terminal style */
     @Attribute(required = false)
     protected Integer style;
+    @Attribute(required = false)
+    protected MainUtil.Color fgColor;
+    @Attribute(required = false)
+    protected MainUtil.Color bgColor;
 
     /** the type has to be set by the implementing class */
     transient Type type;
@@ -326,6 +332,29 @@ public class AItem<T> implements IItem<T>, Serializable {
         this.style = style;
     }
 
+    @Override
+    public Color getFgColor() {
+        return fgColor;
+    }
+    /**
+     * @param fgColor the fgColor to set
+     */
+    public void setFgColor(MainUtil.Color fgColor) {
+        this.fgColor = fgColor;
+    }
+    /**
+     * @return the bgColor
+     */
+    @Override
+    public MainUtil.Color getBgColor() {
+        return bgColor;
+    }
+    /**
+     * @param bgColor the bgColor to set
+     */
+    public void setBgColor(MainUtil.Color bgColor) {
+        this.bgColor = bgColor;
+    }
     public static String translate(String name) {
         return SIShell.translate(name);
     }

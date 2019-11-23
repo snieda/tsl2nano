@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import org.simpleframework.xml.core.Persist;
+
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.execution.IRunnable;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
 public class MainAction<T> extends Action<T> {
@@ -52,7 +55,10 @@ public class MainAction<T> extends Action<T> {
          * removing the null values from the end!
          */
         for (int i = 0; i < argNames.length; i++) {
-            a = context.get(argNames[i]);
+            if (argNames[i].contains("${"))
+                a = StringUtil.insertProperties(argNames[i], context);
+            else
+                a = context.get(argNames[i]);
             argList.add(Util.asString(a));
         }
         for (int i = argList.size() - 1; i >= 0; i--) {
@@ -90,4 +96,9 @@ public class MainAction<T> extends Action<T> {
         return super.getDescription(env, full);
     }
 
+    @Persist
+    private void initSerialization() {
+        if (method == null)
+            method="main";
+    }
 }

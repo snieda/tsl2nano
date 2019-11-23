@@ -330,7 +330,9 @@ public class ObjectUtil extends ByteUtil {
                         return PrimitiveUtil.convert(value, wrapperType);
                     else if (ByteUtil.isByteStream(wrapperType))
                         return ByteUtil.toByteStream((byte[])value, wrapperType);
-                    //IMPROVE: what's about the GenericParser (it's in the wrong module...)
+                    else if (Collection.class.isAssignableFrom(wrapperType))
+                        return (T )new ListSet(value);
+                    //IMPROVE: what's about FormatUtil.parse() <-- ObjectUtil.wrap() is called in FormatUtil!
                     return BeanClass.createInstance(wrapperType, value);
                 }
             }
