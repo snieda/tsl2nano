@@ -27,7 +27,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
-import static de.tsl2.nano.core.util.MainUtil.*;
 
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Attribute;
@@ -54,7 +53,7 @@ import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.core.util.MainUtil.Color;
+import static de.tsl2.nano.core.util.CLI.*;
 import de.tsl2.nano.incubation.platform.PlatformManagement;
 import de.tsl2.nano.incubation.terminal.IItem.Type;
 import de.tsl2.nano.incubation.terminal.item.Container;
@@ -382,6 +381,7 @@ public class SIShell implements IItemHandler, Serializable {
         Object value = root.getValue();
         if (value != null) {
             env.put(root.getName(), value);
+            System.getProperties().put(root.getName(), value);
         }
         if (root.getType() == Type.Selector) {
             return;
@@ -507,7 +507,7 @@ public class SIShell implements IItemHandler, Serializable {
                     nextLine(in);
                     printScreen(item.getDescription(env, true), in, out, "");
                 } else if (isCommand(input, KEY_PROPERTIES)) {
-                    System.getProperties().list(out);
+                    out.println(StringUtil.toFormattedString(System.getProperties(), -1));
                 } else if (isCommand(input, KEY_INFO)) {
                     printScreen(SystemUtil.createInfo(""), in, out, "");
                 } else if (isCommand(input, KEY_PLATFORMINFO)) {
@@ -556,6 +556,7 @@ public class SIShell implements IItemHandler, Serializable {
             lastException = ex;
             //print only - no problem
             out.println(ex.getLocalizedMessage());
+            LOG.error(ex.getLocalizedMessage(), ex);
             //do it again
             nextLine(in);
             serve(item, in, out, env);

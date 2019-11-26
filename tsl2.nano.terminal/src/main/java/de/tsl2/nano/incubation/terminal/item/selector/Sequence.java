@@ -22,7 +22,6 @@ import de.tsl2.nano.collection.Entry;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.core.util.MainUtil.Color;
 import de.tsl2.nano.incubation.terminal.IItem;
 import de.tsl2.nano.incubation.terminal.SIShell;
 import de.tsl2.nano.incubation.terminal.TextTerminal;

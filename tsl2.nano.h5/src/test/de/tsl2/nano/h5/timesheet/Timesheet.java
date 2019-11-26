@@ -250,9 +250,9 @@ public class Timesheet extends NanoH5App {
         Time t1700 = DateUtil.getTime(17, 0);
         Time t0000 = DateUtil.getTime(0, 0);
         Time t0030 = DateUtil.getTime(0, 30);
-        calcTime.addSpecification("notime", "check for zero-times", 0,
+        calcTime.addSpecification("notime", "check for zero-times", 0d,
             MapUtil.asMap("fromtime", t0800, "totime", t0800, "pause", t0000));
-        calcTime.addSpecification("notime1", "check for zero-times", 0,
+        calcTime.addSpecification("notime1", "check for zero-times", 0d,
             MapUtil.asMap("fromtime", t0800, "totime", t0800, "pause", null));
         calcTime.addSpecification("standard", "standard work day", 8.5d,
             MapUtil.asMap("fromtime", t0800, "totime", t1700, "pause", t0030));

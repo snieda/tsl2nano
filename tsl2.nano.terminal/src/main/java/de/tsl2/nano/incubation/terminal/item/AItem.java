@@ -29,7 +29,7 @@ import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.util.MainUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.core.util.MainUtil.Color;
+import de.tsl2.nano.core.util.CLI.*;
 import de.tsl2.nano.incubation.terminal.AsciiImage;
 import de.tsl2.nano.incubation.terminal.IContainer;
 import de.tsl2.nano.incubation.terminal.IItem;
@@ -54,9 +54,9 @@ public class AItem<T> implements IItem<T>, Serializable {
     @Attribute(required = false)
     protected Integer style;
     @Attribute(required = false)
-    protected MainUtil.Color fgColor;
+    protected Color fgColor;
     @Attribute(required = false)
-    protected MainUtil.Color bgColor;
+    protected Color bgColor;
 
     /** the type has to be set by the implementing class */
     transient Type type;
@@ -164,6 +164,8 @@ public class AItem<T> implements IItem<T>, Serializable {
             constraints.check(name, value);
         }
         this.value = value;
+        if (value != null)
+            System.getProperties().put(name, value);
     }
 
     @Override
@@ -339,20 +341,20 @@ public class AItem<T> implements IItem<T>, Serializable {
     /**
      * @param fgColor the fgColor to set
      */
-    public void setFgColor(MainUtil.Color fgColor) {
+    public void setFgColor(Color fgColor) {
         this.fgColor = fgColor;
     }
     /**
      * @return the bgColor
      */
     @Override
-    public MainUtil.Color getBgColor() {
+    public Color getBgColor() {
         return bgColor;
     }
     /**
      * @param bgColor the bgColor to set
      */
-    public void setBgColor(MainUtil.Color bgColor) {
+    public void setBgColor(Color bgColor) {
         this.bgColor = bgColor;
     }
     public static String translate(String name) {

@@ -25,8 +25,8 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.serialize.XmlUtil;
 import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.ConcurrentUtil;
-import static  de.tsl2.nano.core.util.MainUtil.*;
-import static  de.tsl2.nano.core.util.MainUtil.Color.*;
+import static  de.tsl2.nano.core.util.CLI.*;
+import static  de.tsl2.nano.core.util.CLI.Color.*;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**

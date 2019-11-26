@@ -1,19 +1,24 @@
 package de.tsl2.nano.gp;
 
+import static de.tsl2.nano.core.util.CLI.NC;
+import static de.tsl2.nano.core.util.CLI.tag;
+import static de.tsl2.nano.core.util.CLI.Color.GREEN;
+import static de.tsl2.nano.core.util.CLI.Color.LIGHT_BLUE;
+import static de.tsl2.nano.core.util.CLI.Color.RED;
+import static de.tsl2.nano.core.util.MainUtil.log;
+import static de.tsl2.nano.core.util.MainUtil.logn;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.Function;
 
 import de.tsl2.nano.core.util.MainUtil;
-import static de.tsl2.nano.core.util.MainUtil.*;
-import static de.tsl2.nano.core.util.MainUtil.Color.*;
 
 /**
  * the evolutational algorithm tries to find a solution, defined and measured up

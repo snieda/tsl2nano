@@ -56,9 +56,9 @@ import de.tsl2.nano.core.messaging.EventController;
 import de.tsl2.nano.core.messaging.IListener;
 import de.tsl2.nano.core.secure.ISecure;
 import de.tsl2.nano.core.util.ByteUtil;
+import de.tsl2.nano.core.util.CLI;
 import de.tsl2.nano.core.util.DelegationHandler;
 import de.tsl2.nano.core.util.FormatUtil;
-import de.tsl2.nano.core.util.MainUtil;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -339,7 +339,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
                         }
                         DelegationHandler<I> cover = ((DelegationHandler<I>) handler).clone();
                         item = DelegationHandler.createProxy(cover);
-                        LOG.info("injecting (level:" + level + ") context " + " on cover " + cover + " into " + MainUtil.tag(acc + "->" + k, MainUtil.Color.GREEN));
+                        LOG.info("injecting (level:" + level + ") context " + " on cover " + cover + " into " + CLI.tag(acc + "->" + k, CLI.Color.GREEN));
                         acc.set((String) k, item);
                         ((IRuleCover)cover).setContext((Serializable)instance);
 //                        new UnboundAccessor(handler).call("setContext", null, new Class[] { Serializable.class },

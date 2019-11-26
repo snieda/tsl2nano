@@ -30,6 +30,7 @@ import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.terminal.IContainer;
 import de.tsl2.nano.incubation.terminal.IItem;
 import de.tsl2.nano.incubation.terminal.SIShell;
+import static de.tsl2.nano.core.util.CLI.*;
 
 /**
  * the Container of items. if only one item is available, it should delegate the request directly to that item.
@@ -318,7 +319,7 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
             for (AItem t : list) {
                 buf.append(StringUtil.fixString(String.valueOf(++i), s, ' ', false)
                     + "."
-                    + (t.getFgColor() != null && getFgColor() != null ? MainUtil.tag(t.getName(kl, ' '), t.getFgColor()) + MainUtil.tag(getFgColor()): t.getName(kl, ' '))
+                    + (t.getFgColor() != null && getFgColor() != null ? tag(t.getName(kl, ' '), t.getFgColor()) + tag(getFgColor()): t.getName(kl, ' '))
                     + POSTFIX_QUESTION
                     + (full && !t.getType().equals(Type.Container) ? t.getDescription(env, full) : StringUtil.toString(
                         t.getValueText().replace('\n', ' '), vwidth))

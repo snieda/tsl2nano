@@ -257,7 +257,7 @@ public class TerminalTest implements ENVTestPreparation {
 
       Container evolutionalAlg = new Container("EvolutionalAlgorithm", "Starts an Evolutional Algorithm");
       evolutionalAlg.add(new Input("fitnessFunction", "de.tsl2.nano.gp.PolyglottFitnessFunction", "Fitness function implementation"));
-      evolutionalAlg.add(new Input("script", "fit.ts", "Script mplementation if fitnessFunction is PolyglottFitnessFunction"));
+      evolutionalAlg.add(new Input("evolutionalalgorithm.fitnessfunction.script", "fit.ts", "Script implementation if fitnessFunction is PolyglottFitnessFunction"));
       evolutionalAlg.add(new Input("geneticRangeLow", "10", ""));
       evolutionalAlg.add(new Input("geneticRangeHigh", "10", ""));
       evolutionalAlg.add(new MainAction("start", EvolutionalAlgorithm.class, "fitnessFunction=${fitnessFunction}", "geneticRangeLow=${geneticRangeLow}", "geneticRangeHigh=${geneticRangeHigh}"));

@@ -45,6 +45,7 @@ import de.tsl2.nano.incubation.terminal.item.selector.SQLSelector;
 import de.tsl2.nano.incubation.terminal.item.selector.Sequence;
 import de.tsl2.nano.incubation.terminal.item.selector.XPathSelector;
 import de.tsl2.nano.incubation.vnet.workflow.Condition;
+import static de.tsl2.nano.core.util.CLI.*;
 
 /**
  * item administration shell
@@ -141,7 +142,7 @@ public class ItemAdministrator<T> extends Container<T> {
                 out.println("----------------------------------------------------------------------------------");
                 out.println("types      : " + StringUtil.toString(itemTypes.keySet(), -1));
                 out.println("styles     : " + TextTerminal.BLOCK_BAR + " to " + TextTerminal.BLOCK_TEXT_LINE);
-                out.println("colors     : " + StringUtil.toString(MainUtil.Color.values(), -1));
+                out.println("colors     : " + StringUtil.toString(Color.values(), -1));
                 out.println("constraints: " + StringUtil.toString(new PrivateAccessor(new Constraint<>()).members().keySet(), -1));
                 out.println("condition  : " + "expression (using variables with ${...} and operators: +-*/<>=) defining the enabling of that item");
                 out.println("description: " + "may be the path to an image file or a simple description");
@@ -246,9 +247,9 @@ public class ItemAdministrator<T> extends Container<T> {
         if (!Util.isEmpty(item.get("condition")))
             item.put("condition", new Condition(item.getProperty("condition")));
         if (!Util.isEmpty(item.get("fgColor")))
-            item.put("fgColor", MainUtil.Color.valueOf(item.getProperty("fgColor")));
+            item.put("fgColor", Color.valueOf(item.getProperty("fgColor")));
         if (!Util.isEmpty(item.get("bgColor")))
-            item.put("bgColor", MainUtil.Color.valueOf(item.getProperty("bgColor")));
+            item.put("bgColor", Color.valueOf(item.getProperty("bgColor")));
         //now, the type specific attributes
         if (hasType) {
             String type = item.getProperty(TYPE);
