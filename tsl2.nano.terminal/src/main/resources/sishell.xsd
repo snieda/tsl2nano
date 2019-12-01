@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://sourceforge.net/projects/tsl2nano ./sishell.xsd" xmlns:s="http://sourceforge.net/projects/tsl2nano ./sishell.xsd">
   <xs:element name="SIShell">
     <xs:complexType>
       <xs:sequence>
-        <xs:element maxOccurs="unbounded" ref="definition"/>
-        <xs:element ref="root"/>
+        <xs:element ref="s:defString"/>
+        <xs:element ref="s:root"/>
+        <xs:element ref="s:clearScreenCmd"/>
       </xs:sequence>
       <xs:attribute name="bars" use="required" type="xs:boolean"/>
+      <xs:attribute name="bgColor" use="required" type="xs:NCName"/>
+      <xs:attribute name="fgColor" use="required" type="xs:NCName"/>
       <xs:attribute name="height" use="required" type="xs:integer"/>
       <xs:attribute name="name" use="required" type="xs:NCName"/>
       <xs:attribute name="refreshConfig" use="required" type="xs:boolean"/>
@@ -16,68 +19,231 @@
       <xs:attribute name="width" use="required" type="xs:integer"/>
     </xs:complexType>
   </xs:element>
-  <xs:element name="definition">
+  <xs:element name="defString">
+    <xs:complexType>
+      <xs:attribute name="name" use="required" type="xs:NCName"/>
+      <xs:attribute name="value" use="required" type="xs:NMTOKEN"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="clearScreenCmd" type="xs:NCName"/>
+  <xs:element name="root">
+    <xs:complexType mixed="true">
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="s:container"/>
+        <xs:element ref="s:description"/>
+      </xs:choice>
+      <xs:attribute name="class" type="xs:NCName"/>
+      <xs:attribute name="multiple" type="xs:boolean"/>
+      <xs:attribute name="name" type="xs:NCName"/>
+      <xs:attribute name="sequential" type="xs:boolean"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="container">
     <xs:complexType>
       <xs:sequence>
-        <xs:element ref="value"/>
+        <xs:choice>
+          <xs:element ref="s:anttask"/>
+          <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="s:container"/>
+            <xs:element ref="s:description"/>
+          </xs:choice>
+        </xs:choice>
+        <xs:choice>
+          <xs:element ref="s:command"/>
+          <xs:element minOccurs="0" maxOccurs="unbounded" ref="s:option"/>
+        </xs:choice>
+        <xs:element minOccurs="0" ref="s:dir"/>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element ref="s:action"/>
+          <xs:element ref="s:fieldSelector"/>
+          <xs:element ref="s:file"/>
+          <xs:element ref="s:input"/>
+          <xs:element ref="s:property"/>
+        </xs:choice>
+        <xs:choice minOccurs="0">
+          <xs:element ref="s:foreach"/>
+          <xs:element ref="s:mainaction"/>
+        </xs:choice>
+      </xs:sequence>
+      <xs:attribute name="multiple" use="required" type="xs:boolean"/>
+      <xs:attribute name="name" use="required" type="xs:NCName"/>
+      <xs:attribute name="sequential" use="required" type="xs:boolean"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="anttask">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="s:description"/>
+        <xs:element ref="s:value"/>
+      </xs:sequence>
+      <xs:attribute name="multiple" use="required" type="xs:boolean"/>
+      <xs:attribute name="name" use="required" type="xs:NCName"/>
+      <xs:attribute name="sequential" use="required" type="xs:boolean"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="command">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="s:mainClass"/>
+        <xs:element ref="s:method"/>
+        <xs:element ref="s:argNames"/>
+        <xs:element ref="s:cmd"/>
       </xs:sequence>
       <xs:attribute name="name" use="required" type="xs:NCName"/>
     </xs:complexType>
   </xs:element>
+  <xs:element name="option">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="s:constraints"/>
+        <xs:element ref="s:description"/>
+        <xs:element ref="s:defaultValue"/>
+        <xs:element ref="s:value"/>
+      </xs:sequence>
+      <xs:attribute name="name" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="dir">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="s:root"/>
+        <xs:element ref="s:include"/>
+      </xs:sequence>
+      <xs:attribute name="multiple" use="required" type="xs:boolean"/>
+      <xs:attribute name="name" use="required" type="xs:NCName"/>
+      <xs:attribute name="sequential" use="required" type="xs:boolean"/>
+      <xs:attribute name="showFiles" use="required" type="xs:boolean"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="action">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="s:mainClass"/>
+        <xs:element ref="s:method"/>
+        <xs:element ref="s:argNames"/>
+      </xs:sequence>
+      <xs:attribute name="name" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="fieldSelector">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="s:description"/>
+        <xs:element ref="s:cls"/>
+        <xs:element ref="s:field"/>
+        <xs:element ref="s:value"/>
+      </xs:sequence>
+      <xs:attribute name="multiple" use="required" type="xs:boolean"/>
+      <xs:attribute name="name" use="required" type="xs:NCName"/>
+      <xs:attribute name="sequential" use="required" type="xs:boolean"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="cls" type="xs:string"/>
+  <xs:element name="field" type="xs:string"/>
+  <xs:element name="file">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="s:directory"/>
+        <xs:element ref="s:include"/>
+      </xs:sequence>
+      <xs:attribute name="multiple" use="required" type="xs:boolean"/>
+      <xs:attribute name="name" use="required" type="xs:NCName"/>
+      <xs:attribute name="sequential" use="required" type="xs:boolean"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="directory" type="xs:string"/>
+  <xs:element name="input">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="s:constraints"/>
+        <xs:element ref="s:description"/>
+        <xs:element minOccurs="0" ref="s:value"/>
+      </xs:sequence>
+      <xs:attribute name="name" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="property">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="s:description"/>
+      </xs:sequence>
+      <xs:attribute name="multiple" use="required" type="xs:boolean"/>
+      <xs:attribute name="name" use="required" type="xs:NCName"/>
+      <xs:attribute name="sequential" use="required" type="xs:boolean"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="foreach">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="s:doAction"/>
+        <xs:element ref="s:sequence"/>
+      </xs:sequence>
+      <xs:attribute name="multiple" use="required" type="xs:boolean"/>
+      <xs:attribute name="name" use="required"/>
+      <xs:attribute name="sequential" use="required" type="xs:boolean"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="doAction">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="s:mainClass"/>
+        <xs:element ref="s:method"/>
+        <xs:element ref="s:argNames"/>
+        <xs:element ref="s:cmd"/>
+      </xs:sequence>
+      <xs:attribute name="class" use="required"/>
+      <xs:attribute name="name" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="sequence">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="s:xml"/>
+        <xs:element ref="s:xpath"/>
+      </xs:sequence>
+      <xs:attribute name="class" use="required"/>
+      <xs:attribute name="multiple" use="required" type="xs:boolean"/>
+      <xs:attribute name="name" use="required" type="xs:NCName"/>
+      <xs:attribute name="sequential" use="required" type="xs:boolean"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="xml" type="xs:string"/>
+  <xs:element name="xpath" type="xs:string"/>
+  <xs:element name="mainaction">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="s:condition"/>
+        <xs:element minOccurs="0" ref="s:mainClass"/>
+        <xs:element ref="s:method"/>
+        <xs:element ref="s:argNames"/>
+      </xs:sequence>
+      <xs:attribute name="name" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="condition">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="s:expression"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="expression" type="xs:string"/>
+  <xs:element name="description" type="xs:string"/>
   <xs:element name="value">
     <xs:complexType mixed="true">
       <xs:attribute name="class" use="required" type="xs:NCName"/>
     </xs:complexType>
   </xs:element>
-  <xs:element name="root">
-    <xs:complexType mixed="true">
-      <xs:sequence>
-        <xs:element minOccurs="0" maxOccurs="unbounded" ref="item"/>
-      </xs:sequence>
-      <xs:attribute name="class" use="required" type="xs:NCName"/>
-      <xs:attribute name="multiple" type="xs:boolean"/>
-      <xs:attribute name="name" type="xs:NCName"/>
-    </xs:complexType>
-  </xs:element>
-  <xs:element name="item">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element minOccurs="0" maxOccurs="unbounded" ref="item"/>
-        <xs:element minOccurs="0" ref="root"/>
-        <xs:element minOccurs="0" ref="constraints"/>
-        <xs:choice minOccurs="0">
-          <xs:element ref="description"/>
-          <xs:element ref="directory"/>
-        </xs:choice>
-        <xs:element minOccurs="0" ref="include"/>
-        <xs:sequence minOccurs="0">
-          <xs:element ref="cls"/>
-          <xs:element ref="field"/>
-        </xs:sequence>
-        <xs:element minOccurs="0" ref="value"/>
-        <xs:element minOccurs="0" ref="condition"/>
-        <xs:element minOccurs="0" ref="mainClass"/>
-        <xs:sequence minOccurs="0">
-          <xs:element ref="method"/>
-          <xs:element ref="argNames"/>
-        </xs:sequence>
-      </xs:sequence>
-      <xs:attribute name="class" use="required"/>
-      <xs:attribute name="multiple" type="xs:boolean"/>
-      <xs:attribute name="name" use="required"/>
-      <xs:attribute name="showFiles" type="xs:boolean"/>
-    </xs:complexType>
-  </xs:element>
   <xs:element name="constraints">
     <xs:complexType>
-      <xs:sequence>
-        <xs:element minOccurs="0" ref="defaultValue"/>
-        <xs:element ref="scale"/>
-        <xs:element ref="precision"/>
-        <xs:element minOccurs="0" maxOccurs="unbounded" ref="value"/>
+      <xs:sequence minOccurs="0">
+        <xs:element ref="s:defaultValue"/>
+        <xs:element maxOccurs="unbounded" ref="s:value"/>
       </xs:sequence>
       <xs:attribute name="length" use="required" type="xs:integer"/>
       <xs:attribute name="nullable" use="required" type="xs:boolean"/>
+      <xs:attribute name="precision" use="required" type="xs:integer"/>
+      <xs:attribute name="scale" use="required" type="xs:integer"/>
       <xs:attribute name="type" use="required" type="xs:NCName"/>
     </xs:complexType>
   </xs:element>
@@ -90,30 +256,17 @@
       </xs:simpleContent>
     </xs:complexType>
   </xs:element>
-  <xs:element name="scale" type="xs:integer"/>
-  <xs:element name="precision" type="xs:integer"/>
-  <xs:element name="description" type="xs:string"/>
-  <xs:element name="directory" type="xs:string"/>
-  <xs:element name="include" type="xs:string"/>
-  <xs:element name="cls" type="xs:string"/>
-  <xs:element name="field" type="xs:string"/>
-  <xs:element name="condition">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element ref="expression"/>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-  <xs:element name="expression" type="xs:string"/>
   <xs:element name="mainClass" type="xs:NCName"/>
   <xs:element name="method" type="xs:NCName"/>
   <xs:element name="argNames">
     <xs:complexType>
       <xs:sequence>
-        <xs:element minOccurs="0" maxOccurs="unbounded" ref="string"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="s:string"/>
       </xs:sequence>
       <xs:attribute name="length" use="required" type="xs:integer"/>
     </xs:complexType>
   </xs:element>
-  <xs:element name="string" type="xs:NCName"/>
+  <xs:element name="string" type="xs:string"/>
+  <xs:element name="cmd" type="xs:string"/>
+  <xs:element name="include" type="xs:string"/>
 </xs:schema>

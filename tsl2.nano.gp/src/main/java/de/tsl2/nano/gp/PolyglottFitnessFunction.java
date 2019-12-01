@@ -28,7 +28,7 @@ public class PolyglottFitnessFunction implements Function<Long[], Double> {
         scriptFile = System.getProperty("evolutionalalgorithm.fitnessfunction.script");
         if (scriptFile == null) {
             System.out.println(ScriptEngineProvider.printEngines());
-            throw new IllegalArgumentException("Please define java property 'polyglott.fitnessfunction.language' and 'evolutionalalgorithm.fitnessfunction.script'\n\tThe script may access the variable 'input' of type Long[] ");
+            throw new IllegalArgumentException("Please define java property 'evolutionalalgorithm.fitnessfunction.language' and 'evolutionalalgorithm.fitnessfunction.script'\n\tThe script may access the variable 'input' of type Long[] ");
         }
         script = FileUtil.getFileString(scriptFile);
         if (scriptLanguage == null && scriptFile.contains(".")) {
