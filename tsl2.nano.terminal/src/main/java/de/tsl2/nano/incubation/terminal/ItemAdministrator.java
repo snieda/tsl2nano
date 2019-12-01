@@ -102,7 +102,7 @@ public class ItemAdministrator<T> extends Container<T> {
             itemTypes.put("field", new String[] { FieldSelector.class.getName(), "cls", "field"/*field-type*/});
             itemTypes.put("xpath", new String[] { XPathSelector.class.getName(), "xml", "xpath"});
             itemTypes.put("sql", new String[] { SQLSelector.class.getName(), "driver", "url", "user", "password", "sql"});
-            itemTypes.put("sequence", new String[] { Sequence.class.getName(), "action", "sequence"});
+            itemTypes.put("sequence", new String[] { Sequence.class.getName(), "doAction", "sequence"});
 
             Properties p = new Properties();
             for (String k : itemTypes.keySet()) {
