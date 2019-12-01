@@ -112,6 +112,8 @@ public class CLI {
     }
 
     public static String tag(Color color, Color background, Style style) {
+        if (Boolean.getBoolean("dont.use.ansi.escape"))
+            return ""; //on legacy systems like windows older than windows 10, ansi escape codes are unavailable
         color = color != null ? color : Color.LIGHT_GRAY;
         int lightOrStyle = style != null ? style.ordinal() : color.ordinal() > 7 ? 1 : 0;
         int c = (color.ordinal() % 10) + COLOR_BASE;

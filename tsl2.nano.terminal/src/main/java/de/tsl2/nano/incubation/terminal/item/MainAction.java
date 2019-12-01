@@ -70,6 +70,7 @@ public class MainAction<T> extends Action<T> {
         }
         
         context.put("arg1", argList.toArray(new String[0]));
+        method = StringUtil.insertProperties(method, context);
         if (runner == null) {
             try {
                 runner = new de.tsl2.nano.incubation.specification.actions.Action(getMainClass().getMethod(method,

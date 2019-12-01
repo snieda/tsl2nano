@@ -40,7 +40,7 @@ public class Sequence<T, R> extends Selector<T> {
     private static final long serialVersionUID = 1977032828721824363L;
 
     @Element(required = false)
-    Action<R> action;
+    Action<R> doAction;
     @Element(required = false)
     Selector<T> sequence;
     //TODO: use concurrent list
@@ -52,7 +52,7 @@ public class Sequence<T, R> extends Selector<T> {
 
     public Sequence(Action<R> action, Selector<T> selector, String description) {
         super(action.getName(), description);
-        this.action = action;
+        this.doAction = action;
         sequence = selector;
         initResult();
     }
@@ -68,7 +68,7 @@ public class Sequence<T, R> extends Selector<T> {
                 for (AItem<T> item : sequence.getNodes(context)) {
                     context.put(sequence.getName(), item.getValue());
                     System.out.print(sequence + " running...");
-                    Object r = action.run(context);
+                    Object r = doAction.run(context);
                     result.add(new Entry(item, r));
                     SIShell.printScreen(getDescription(env, false), in, out, ask(env),
                         Util.get(SIShell.KEY_WIDTH, TextTerminal.SCREEN_WIDTH),

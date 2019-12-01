@@ -22,8 +22,8 @@ import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.execution.SystemUtil;
+import de.tsl2.nano.core.util.CLI.Color;
 import de.tsl2.nano.core.util.FileUtil;
-import de.tsl2.nano.core.util.MainUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.AntRunner;
@@ -45,7 +45,6 @@ import de.tsl2.nano.incubation.terminal.item.selector.SQLSelector;
 import de.tsl2.nano.incubation.terminal.item.selector.Sequence;
 import de.tsl2.nano.incubation.terminal.item.selector.XPathSelector;
 import de.tsl2.nano.incubation.vnet.workflow.Condition;
-import static de.tsl2.nano.core.util.CLI.*;
 
 /**
  * item administration shell
@@ -95,7 +94,7 @@ public class ItemAdministrator<T> extends Container<T> {
                 "method=execute", ARGS });
             itemTypes.put("ant", new String[] { Action.class.getName(), "mainClass=" + AntRunner.class.getName(),
                 "method=runTask", ARGS /*"task", "properties", "fileset"*/});
-            itemTypes.put("selector", new String[] { ActionSelector.class.getName(), "mainClass=", "method", ARGS });
+            itemTypes.put("selector", new String[] { ActionSelector.class.getName(), "action", ARGS });
             itemTypes.put("file", new String[] { FileSelector.class.getName(), "roots", "include" });
             itemTypes.put("dir", new String[] { DirSelector.class.getName(), "roots", "include" });
             itemTypes.put("csv", new String[] { CSVSelector.class.getName(), "csv", "pattern", "usePatternAsDelimiter" });

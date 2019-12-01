@@ -69,15 +69,17 @@ public class FileSelector extends Selector<String> {
             roots.add("${user.dir}");
         }
         this.roots = roots;
-        this.include = include;
+        this.include = include != null ? include : ".*";
     }
 
     @Override
     protected List<File> createItems(Map context) {
         List<File> files = new ArrayList<File>();
+        include = StringUtil.insertProperties(include, context);
         for (String root : roots) {
             root = StringUtil.insertProperties(root, context);
-            files.addAll(FileUtil.getFileset(root, include));
+            List<File> ff = FileUtil.getFileset(root, include);
+            files.addAll(ff);
         }
         return files;
     }

@@ -9,6 +9,8 @@
  */
 package de.tsl2.nano.incubation.terminal.item;
 
+import static de.tsl2.nano.core.util.CLI.tag;
+
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -18,19 +20,29 @@ import java.util.Properties;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementList;
+import org.simpleframework.xml.ElementListUnion;
 import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.action.IConstraint;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.IPredicate;
-import de.tsl2.nano.core.util.MainUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.terminal.IContainer;
 import de.tsl2.nano.incubation.terminal.IItem;
 import de.tsl2.nano.incubation.terminal.SIShell;
-import static de.tsl2.nano.core.util.CLI.*;
+import de.tsl2.nano.incubation.terminal.item.selector.ActionSelector;
+import de.tsl2.nano.incubation.terminal.item.selector.AntTaskSelector;
+import de.tsl2.nano.incubation.terminal.item.selector.CSVSelector;
+import de.tsl2.nano.incubation.terminal.item.selector.DirSelector;
+import de.tsl2.nano.incubation.terminal.item.selector.FieldSelector;
+import de.tsl2.nano.incubation.terminal.item.selector.FileSelector;
+import de.tsl2.nano.incubation.terminal.item.selector.PropertySelector;
+import de.tsl2.nano.incubation.terminal.item.selector.SQLSelector;
+import de.tsl2.nano.incubation.terminal.item.selector.Sequence;
+import de.tsl2.nano.incubation.terminal.item.selector.TreeSelector;
+import de.tsl2.nano.incubation.terminal.item.selector.XPathSelector;
 
 /**
  * the Container of items. if only one item is available, it should delegate the request directly to that item.
@@ -45,7 +57,28 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
     private static final long serialVersionUID = -3656677742608173033L;
 
     /** child nodes */
-    @ElementList(type = AItem.class, inline = true, entry = "item", required = false)
+    // @ElementList(type = AItem.class, inline = true, entry = "item", required = false)
+    @ElementListUnion ({
+        @ElementList(type = Container.class, inline = true, entry = "container", required = false),
+        @ElementList(type = ActionSelector.class, inline = true, entry = "selector", required = false),
+        @ElementList(type = AntTaskSelector.class, inline = true, entry = "anttask", required = false),
+        @ElementList(type = CSVSelector.class, inline = true, entry = "csv", required = false),
+        @ElementList(type = DirSelector.class, inline = true, entry = "dir", required = false),
+        @ElementList(type = FieldSelector.class, inline = true, entry = "fieldSelector", required = false),
+        @ElementList(type = FileSelector.class, inline = true, entry = "file", required = false),
+        @ElementList(type = PropertySelector.class, inline = true, entry = "property", required = false),
+        @ElementList(type = SQLSelector.class, inline = true, entry = "sql", required = false),
+        @ElementList(type = TreeSelector.class, inline = true, entry = "tree", required = false),
+        @ElementList(type = XPathSelector.class, inline = true, entry = "xpathSelector", required = false),
+        @ElementList(type = Action.class, inline = true, entry = "action", required = false),
+        @ElementList(type = Command.class, inline = true, entry = "command", required = false),
+        @ElementList(type = Echo.class, inline = true, entry = "echo", required = false),
+        @ElementList(type = Input.class, inline = true, entry = "input", required = false),
+        @ElementList(type = MainAction.class, inline = true, entry = "mainaction", required = false),
+        @ElementList(type = Option.class, inline = true, entry = "option", required = false),
+        @ElementList(type = Sequence.class, inline = true, entry = "foreach", required = false),
+        @ElementList(type = AItem.class, inline = true, entry = "item", required = false)
+    })
     protected List<AItem<T>> nodes;
 
     transient private boolean isactive;

@@ -34,6 +34,8 @@ import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementMap;
+import org.simpleframework.xml.ElementMapUnion;
+import org.simpleframework.xml.ElementUnion;
 import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.core.AppLoader;
@@ -56,7 +58,9 @@ import de.tsl2.nano.core.util.Util;
 import static de.tsl2.nano.core.util.CLI.*;
 import de.tsl2.nano.incubation.platform.PlatformManagement;
 import de.tsl2.nano.incubation.terminal.IItem.Type;
+import de.tsl2.nano.incubation.terminal.item.AItem;
 import de.tsl2.nano.incubation.terminal.item.Container;
+import de.tsl2.nano.incubation.terminal.item.selector.Selector;
 import de.tsl2.nano.util.SchedulerUtil;
 
 /**
@@ -128,7 +132,11 @@ public class SIShell implements IItemHandler, Serializable {
      * predefined variables (not changable through user input) copied to the {@link #env} but not saved in property
      * file. mostly technical definitions.
      */
-    @ElementMap(entry = "definition", attribute = true, inline = true, keyType = String.class, key = "name", required = false, value = "value", valueType = Object.class)
+    @ElementMapUnion({
+        @ElementMap(entry = "defString", attribute = true, inline = true, keyType = String.class, key = "name", required = false, value = "value", valueType = String.class),
+        @ElementMap(entry = "defInt", attribute = true, inline = true, keyType = String.class, key = "name", required = false, value = "value", valueType = Integer.class),
+        @ElementMap(entry = "definition", attribute = true, inline = true, keyType = String.class, key = "name", required = false, value = "value", valueType = Object.class)
+    })
     Map<String, Object> definitions;
 
     /** batch file name. the batch file contains input instructions (numbers or names) separated by '\n'. */
@@ -136,7 +144,7 @@ public class SIShell implements IItemHandler, Serializable {
     String batch;
 
     /** base item - should be a Selection */
-    @Element
+    @Element(type = Container.class)
     IItem root;
 
     /** useNetworkExtension */
@@ -751,12 +759,6 @@ public class SIShell implements IItemHandler, Serializable {
     }
 
     public static void main(String[] args) {
-    	AppLoader.useCp1252();
-    	
-//        if (args.length == 0) {
-//            System.out.println("Please provide a file name as base for this terminal");
-//            return;
-//        }
         try {
 //            //TODO: refactor
 //            ClassLoader cl = new NetworkClassLoader(Thread.currentThread().getContextClassLoader());

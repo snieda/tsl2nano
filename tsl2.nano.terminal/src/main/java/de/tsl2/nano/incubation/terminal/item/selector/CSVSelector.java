@@ -72,9 +72,9 @@ public class CSVSelector extends Selector<String> {
                     scanner.useDelimiter(pattern);
                 while (scanner.hasNext()) {
                     if (usePatternAsDelimiter)
-                        items.add(scanner.next());
+                        items.add(StringUtil.insertProperties(scanner.next(), context));
                     else
-                        items.add(scanner.next(pattern));
+                        items.add(StringUtil.insertProperties(scanner.next(pattern), context));
                 }
             } catch (FileNotFoundException e) {
                 ManagedException.forward(e);

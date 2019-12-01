@@ -48,7 +48,7 @@ public class Action<T> extends AItem<T> {
     /** method. see {@link #mainClass} */
     @Element
     String method;
-    @ElementArray
+    @ElementArray(required=false)
     String[] argNames;
 
     transient Object instance;
@@ -103,7 +103,7 @@ public class Action<T> extends AItem<T> {
             } else if (isReference(argName)) {
                 v = resolveReference(argName);
             } else {
-                v = context.get(argName);
+                v = argName.contains("${") ? StringUtil.insertProperties(argName, context) : context.get(argName);
             }
             //optional casting
             String c = StringUtil.substring(argNames[i], "(", ")", false, true);
@@ -117,6 +117,7 @@ public class Action<T> extends AItem<T> {
             p.put("instance", instance);
         IRunnable<T, Properties> runner = null;
         try {
+            method = StringUtil.insertProperties(method, context);
             Set<Method> methods = PrivateAccessor.findMethod(mainClass, method, null, cls);
             //if nothing found, throw a nosuchmethod exception
             Method m = methods.size() > 0 ? methods.iterator().next() : getMainClass().getMethod(method, cls);

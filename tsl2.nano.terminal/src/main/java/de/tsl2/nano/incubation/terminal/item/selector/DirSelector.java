@@ -20,6 +20,7 @@ import org.simpleframework.xml.Attribute;
 
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.terminal.item.Option;
 
 /**
@@ -72,10 +73,14 @@ public class DirSelector extends TreeSelector<String> {
         }
         if (include == null) {
             include = ".*";
+        } else {
+            include = StringUtil.insertProperties(include, context);
         }
         for (String root : roots) {
             root = StringUtil.insertProperties(root, context);
-            files.addAll(Arrays.asList(FileUtil.getFiles(root, include)));
+            File[] ff = FileUtil.getFiles(root, include);
+            if (!Util.isEmpty(ff))
+                files.addAll(Arrays.asList(ff));
         }
         return files;
     }
