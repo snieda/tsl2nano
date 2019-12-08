@@ -60,15 +60,15 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
     // @ElementList(type = AItem.class, inline = true, entry = "item", required = false)
     @ElementListUnion ({
         @ElementList(type = Container.class, inline = true, entry = "container", required = false),
-        @ElementList(type = ActionSelector.class, inline = true, entry = "selector", required = false),
+        @ElementList(type = ActionSelector.class, inline = true, entry = "actionSelector", required = false),
         @ElementList(type = AntTaskSelector.class, inline = true, entry = "anttask", required = false),
-        @ElementList(type = CSVSelector.class, inline = true, entry = "csv", required = false),
-        @ElementList(type = DirSelector.class, inline = true, entry = "dir", required = false),
+        @ElementList(type = CSVSelector.class, inline = true, entry = "csvSelector", required = false),
+        @ElementList(type = DirSelector.class, inline = true, entry = "dirSelector", required = false),
         @ElementList(type = FieldSelector.class, inline = true, entry = "fieldSelector", required = false),
-        @ElementList(type = FileSelector.class, inline = true, entry = "file", required = false),
-        @ElementList(type = PropertySelector.class, inline = true, entry = "property", required = false),
-        @ElementList(type = SQLSelector.class, inline = true, entry = "sql", required = false),
-        @ElementList(type = TreeSelector.class, inline = true, entry = "tree", required = false),
+        @ElementList(type = FileSelector.class, inline = true, entry = "fileSelector", required = false),
+        @ElementList(type = PropertySelector.class, inline = true, entry = "propertySelector", required = false),
+        @ElementList(type = SQLSelector.class, inline = true, entry = "sqlSelector", required = false),
+        @ElementList(type = TreeSelector.class, inline = true, entry = "treeSelector", required = false),
         @ElementList(type = XPathSelector.class, inline = true, entry = "xpathSelector", required = false),
         @ElementList(type = Action.class, inline = true, entry = "action", required = false),
         @ElementList(type = Command.class, inline = true, entry = "command", required = false),
@@ -330,7 +330,7 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
         if (isactive || isSequential()) {
             String img = null;
             List<AItem<T>> list = getNodes(env);
-            if (hasFileDescription()) {
+            if (hasImageDescription()) {
                 if (isSequential())
                     return super.getDescription(env, full);
                 else {

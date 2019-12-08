@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 
@@ -459,4 +460,8 @@ public class Util {
         return cl;
 	}
 
+    /**let the trY to the standard exception handling  */
+    public static <T> T trY(SupplierEx<T> callback) {
+        return ManagedException.trY(callback);
+    }
 }

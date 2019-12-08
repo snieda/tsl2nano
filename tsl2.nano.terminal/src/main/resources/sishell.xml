@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<SIShell name="sishell.xml" width="79" height="22" style="7" fgColor="YELLOW" bgColor="BLUE" bars="true" refreshConfig="false" useNetworkExtension="true" sequential="false" xmlns="http://sourceforge.net/projects/tsl2nano ./sishell.xsd">
+<SIShell name="sishell.xml" width="79" height="22" style="7" fgColor="YELLOW" bgColor="BLUE" bars="true" refreshConfig="false" useNetworkExtension="true" sequential="false">
    <defString name="image.out" value="-out"/>
    <root name="Toolbox" multiple="false" sequential="false">
       <description>Helpful Utilities</description>
       <container name="Printing" multiple="false" sequential="false">
-         <file name="source" multiple="false" sequential="false">
+         <fileSelector name="source" multiple="false" sequential="false">
             <directory>${user.dir}</directory>
             <include>.*</include>
-         </file>
+         </fileSelector>
          <input name="printer">
             <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
             <description>printer to use</description>
@@ -136,14 +136,14 @@
          </mainaction>
       </container>
       <container name="Xml" multiple="false" sequential="false">
-         <file name="source" multiple="false" sequential="false">
+         <fileSelector name="source" multiple="false" sequential="false">
             <directory>${user.dir}</directory>
             <include>.*xml</include>
-         </file>
-         <file name="xsl-transformation" multiple="false" sequential="false">
+         </fileSelector>
+         <fileSelector name="xsl-transformation" multiple="false" sequential="false">
             <directory>${user.dir}</directory>
             <include>.*xsl.*</include>
-         </file>
+         </fileSelector>
          <input name="xsl-destination">
             <constraints type="java.lang.String" nullable="false" length="-1" scale="-1" precision="-1"/>
             <description>xsl destination file</description>
@@ -192,10 +192,10 @@
          </foreach>
       </container>
       <container name="Html" multiple="false" sequential="false">
-         <file name="source" multiple="false" sequential="false">
+         <fileSelector name="source" multiple="false" sequential="false">
             <directory>${user.dir}</directory>
             <include>.*.markdown</include>
-         </file>
+         </fileSelector>
          <mainaction name="Markdown (TxtMark)">
             <method>com.github.rjeschke.txtmark.cmd.Run.main</method>
             <argNames length="1">
@@ -208,9 +208,9 @@
             <description>pack given filesets to zip</description>
             <value class="java.lang.String">Jar</value>
          </anttask>
-         <property name="properties" multiple="false" sequential="false">
+         <propertySelector name="properties" multiple="false" sequential="false">
             <description>ant task properties</description>
-         </property>
+         </propertySelector>
          <input name="filesets">
             <constraints type="java.lang.String" nullable="false" length="-1" scale="-1" precision="-1"/>
             <description>filesets expression</description>
@@ -382,9 +382,9 @@
                <description>URL of a RESTful service</description>
                <value class="java.lang.String">http://echo.jsontest.com/title/ipsum</value>
             </input>
-            <property name="arguments" multiple="false" sequential="false">
+            <propertySelector name="arguments" multiple="false" sequential="false">
                <description>RESTful arguments</description>
-            </property>
+            </propertySelector>
             <action name="getRest">
                <mainClass>de.tsl2.nano.core.util.NetUtil</mainClass>
                <method>getRest</method>
@@ -406,10 +406,10 @@
          </action>
       </container>
       <container name="File-Operation" multiple="false" sequential="false">
-         <dir name="directory" multiple="false" sequential="false" showFiles="true">
+         <dirSelector name="directory" multiple="false" sequential="false" showFiles="true">
             <root class="java.lang.String">${user.dir}</root>
             <include>.*</include>
-         </dir>
+         </dirSelector>
          <input name="file">
             <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
             <description>regular expression (with ant-like path **) as file filter</description>
@@ -427,10 +427,10 @@
                <string>(java.io.File)file</string>
             </argNames>
          </action>
-         <file name="List" multiple="false" sequential="false">
+         <fileSelector name="List" multiple="false" sequential="false">
             <directory>${user.dir}</directory>
             <include>directory</include>
-         </file>
+         </fileSelector>
          <action name="Delete">
             <mainClass>de.tsl2.nano.core.util.FileUtil</mainClass>
             <method>forEach</method>

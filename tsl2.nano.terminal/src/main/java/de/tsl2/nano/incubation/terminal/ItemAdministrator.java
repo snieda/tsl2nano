@@ -28,6 +28,7 @@ import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.AntRunner;
 import de.tsl2.nano.format.RegExpFormat;
+import de.tsl2.nano.incubation.terminal.TextTerminal.Frame;
 import de.tsl2.nano.incubation.terminal.item.AItem;
 import de.tsl2.nano.incubation.terminal.item.Action;
 import de.tsl2.nano.incubation.terminal.item.Command;
@@ -140,7 +141,7 @@ public class ItemAdministrator<T> extends Container<T> {
             public IItem react(IItem caller, String input, InputStream in, PrintStream out, Properties env) {
                 out.println("----------------------------------------------------------------------------------");
                 out.println("types      : " + StringUtil.toString(itemTypes.keySet(), -1));
-                out.println("styles     : " + TextTerminal.BLOCK_BAR + " to " + TextTerminal.BLOCK_TEXT_LINE);
+                out.println("styles     : " + StringUtil.toString(TextTerminal.Frame.values(), -1));
                 out.println("colors     : " + StringUtil.toString(Color.values(), -1));
                 out.println("constraints: " + StringUtil.toString(new PrivateAccessor(new Constraint<>()).members().keySet(), -1));
                 out.println("condition  : " + "expression (using variables with ${...} and operators: +-*/<>=) defining the enabling of that item");
@@ -245,6 +246,8 @@ public class ItemAdministrator<T> extends Container<T> {
         boolean hasType = item.containsKey(TYPE);
         if (!Util.isEmpty(item.get("condition")))
             item.put("condition", new Condition(item.getProperty("condition")));
+        if (!Util.isEmpty(item.get("style")))
+            item.put("style", Frame.valueOf(item.getProperty("style")));
         if (!Util.isEmpty(item.get("fgColor")))
             item.put("fgColor", Color.valueOf(item.getProperty("fgColor")));
         if (!Util.isEmpty(item.get("bgColor")))

@@ -25,6 +25,7 @@ import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
+import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.execution.IPRunnable;
 
 /**
@@ -274,10 +275,13 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
     protected void checkSpecification(Specification s) {
         LOG.debug("checking rule '" + getName() + " for specification " + s);
         T result = run(s.getArguments());
-        if (result != null && !result.equals(s.getExptected()))
-            throw new IllegalStateException("assertion failed on rule " + getName() + ", " + s + ": expected="
-                + s.getExptected()
-                + " , but was: " + result);
+        if (result != null && (!result.equals(s.getExptected()))) {
+            // script engines like nashorn and graalvm differ in handling number types, so this is a workaround for different number types
+            if (!((result instanceof Number) && NumberUtil.roundAbout((Number)result, (Number)s.getExptected())))
+                throw new IllegalStateException("assertion failed on rule " + getName() + ", " + s + ": expected="
+                    + s.getExptected()
+                    + " , but was: " + result);
+        }
     }
 
     public String getOperation() {

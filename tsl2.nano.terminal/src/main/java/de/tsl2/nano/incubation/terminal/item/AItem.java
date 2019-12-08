@@ -27,12 +27,14 @@ import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.util.CLI.Color;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.terminal.AsciiImage;
 import de.tsl2.nano.incubation.terminal.IContainer;
 import de.tsl2.nano.incubation.terminal.IItem;
 import de.tsl2.nano.incubation.terminal.SIShell;
+import de.tsl2.nano.incubation.terminal.TextTerminal.Frame;
 import de.tsl2.nano.incubation.vnet.workflow.Condition;
 
 /**
@@ -51,7 +53,7 @@ public class AItem<T> implements IItem<T>, Serializable {
     protected String name;
     /** presentation style. see the parent terminal style */
     @Attribute(required = false)
-    protected Integer style;
+    protected Frame style;
     @Attribute(required = false)
     protected Color fgColor;
     @Attribute(required = false)
@@ -237,26 +239,31 @@ public class AItem<T> implements IItem<T>, Serializable {
         return prefix.toString();
     }
 
-    /**
-     * {@inheritDoc}.
-     * <p/>
-     * see {@link #description}.
-     */
     @Override
     public String getDescription(Properties env, boolean full) {
+        return getDescription(env, full, defaultHeight());
+    }
+    public String getDescription(Properties env, boolean full, int height) {
         //if sequential mode, show the parents (-->tree) description
         if (Util.get(SIShell.KEY_SEQUENTIAL, false) && getParent() != null) {
             return getParent().getDescription(env, full);
         } else if (description == null) {
             description = getConstraints() != null ? getConstraints().toString() : name;
-        } else if (full || hasFileDescription()) {
-            description = printImageDescription();
+        } else if (full) {
+            if (hasImageDescription())
+                description = printImageDescription(height);
+            else if (hasFileDescription())
+                description = FileUtil.getFileString(description);
         }
         return description;
     }
 
     protected String printImageDescription() {
-        return printImageDescription(Util.get(SIShell.KEY_HEIGHT, 20) - 6);
+        return printImageDescription(defaultHeight());
+    }
+
+    private int defaultHeight() {
+        return Util.get(SIShell.KEY_HEIGHT, 20) - 6;
     }
 
     /**
@@ -279,6 +286,9 @@ public class AItem<T> implements IItem<T>, Serializable {
         this.description = description;
     }
 
+    public boolean hasImageDescription() {
+        return description != null && new File(description).isFile() && FileUtil.isBinary(new File(description));
+    }
     /**
      * hasFileDescription
      * 
@@ -322,14 +332,14 @@ public class AItem<T> implements IItem<T>, Serializable {
     /**
      * @return Returns the style.
      */
-    public Integer getStyle() {
+    public Frame getStyle() {
         return style;
     }
 
     /**
      * @param style The style to set.
      */
-    public void setStyle(Integer style) {
+    public void setStyle(Frame style) {
         this.style = style;
     }
 

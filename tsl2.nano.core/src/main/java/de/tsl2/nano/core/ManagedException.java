@@ -17,6 +17,7 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.SupplierEx;
 import de.tsl2.nano.core.util.Util;
 
 /**
@@ -203,6 +204,15 @@ public class ManagedException extends RuntimeException {
         }
     }
     
+    /**let the trY to the standard exception handling  */
+    public static <T> T trY(SupplierEx<T> callback) {
+        try {
+            return callback.get();
+        } catch(Exception ex) {
+            return (T) forward(ex);
+        }
+    }
+
     public static String toString(Throwable ex) {
     	return StringUtil.printToString(c->ex.printStackTrace(c));
     }

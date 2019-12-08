@@ -50,6 +50,7 @@ import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.serialize.XmlUtil;
+import de.tsl2.nano.core.util.CLI;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
@@ -115,7 +116,7 @@ public class SIShell implements IItemHandler, Serializable {
     @Attribute
     int height = SCREEN_HEIGHT;
     @Attribute
-    int style = BLOCK_TEXT_LINE;
+    Frame style = Frame.TEXT_LINE;
     @Attribute(required = false)
     Color fgColor = Color.YELLOW;
     @Attribute(required = false)
@@ -222,18 +223,18 @@ public class SIShell implements IItemHandler, Serializable {
     }
 
     public SIShell(IItem root, InputStream in, PrintStream out) {
-        this(root, in, out, SCREEN_WIDTH, SCREEN_HEIGHT, BLOCK_TEXT_LINE, Color.YELLOW, Color.BLUE);
+        this(root, in, out, SCREEN_WIDTH, SCREEN_HEIGHT, Frame.TEXT_LINE, Color.YELLOW, Color.BLUE);
     }
 
-    public SIShell(IItem root, InputStream in, PrintStream out, int width, int height, int style) {
+    public SIShell(IItem root, InputStream in, PrintStream out, int width, int height, Frame style) {
         this(root, in, out, width, height, style, Color.YELLOW, Color.BLUE);
     }
 
-    public SIShell(IItem root, InputStream in, PrintStream out, int width, int height, int style, Map<String, Object> definitions) {
+    public SIShell(IItem root, InputStream in, PrintStream out, int width, int height, Frame style, Map<String, Object> definitions) {
         this(root, in, out, width, height, style, Color.YELLOW, Color.BLUE, definitions);
     }
 
-    public SIShell(IItem root, InputStream in, PrintStream out, int width, int height, int style, Color fgColor, Color bgColor) {
+    public SIShell(IItem root, InputStream in, PrintStream out, int width, int height, Frame style, Color fgColor, Color bgColor) {
         this(root, in, out, width, height, style, fgColor, bgColor, null);
     }
 
@@ -250,7 +251,7 @@ public class SIShell implements IItemHandler, Serializable {
             PrintStream out,
             int width,
             int height,
-            int style,
+            Frame style,
             Color fgColor,
             Color bgColor,
             Map<String, Object> defintions) {
@@ -433,7 +434,7 @@ public class SIShell implements IItemHandler, Serializable {
     @Override
     public String printScreen(IItem item, PrintStream out) {
         String title = item.toString();
-        int style = item.getStyle() != null ? item.getStyle() : this.style;
+        Frame style = item.getStyle() != null ? item.getStyle() : this.style;
         Color fgColor = item.getFgColor() != null ? item.getFgColor() : this.fgColor;
         Color bgColor = item.getBgColor() != null ? item.getBgColor() : this.bgColor;
         out.print(title.length() > (3 * width) ? title : tag(TextTerminal.getTextFrame(title, style, width, true), fgColor, bgColor));
@@ -448,13 +449,13 @@ public class SIShell implements IItemHandler, Serializable {
         return printScreen(screen, in, out, question, width, height, style, false, isInBatchMode(), fgColor, bgColor);
     }
 
-    public static String printScreen(String screen, InputStream in, PrintStream out, String question, int width, int height, int style, boolean center, boolean isInBatchMode) {
+    public static String printScreen(String screen, InputStream in, PrintStream out, String question, int width, int height, Frame style, boolean center, boolean isInBatchMode) {
         return printScreen(screen, in, out, question, width, height, style, center, isInBatchMode, Color.GREEN, Color.BLUE);
     }
         /**
      * {@inheritDoc}
      */
-    public static String printScreen(String screen, InputStream in, PrintStream out, String question, int width, int height, int style, boolean center, boolean isInBatchMode, Color fgColor, Color bgColor) {
+    public static String printScreen(String screen, InputStream in, PrintStream out, String question, int width, int height, Frame style, boolean center, boolean isInBatchMode, Color fgColor, Color bgColor) {
         //split screens to max height
         String pagingInput;
         String s = screen;
@@ -563,7 +564,7 @@ public class SIShell implements IItemHandler, Serializable {
         } catch (Exception ex) {
             lastException = ex;
             //print only - no problem
-            out.println(ex.getLocalizedMessage());
+            out.println(CLI.tag(ex.getLocalizedMessage(), Color.ORANGE));
             LOG.error(ex.getLocalizedMessage(), ex);
             //do it again
             nextLine(in);
@@ -604,8 +605,8 @@ public class SIShell implements IItemHandler, Serializable {
     }
 
     private void startAmin(IItem item) {
-        int ostyle = style;
-        style = 3;
+        Frame ostyle = style;
+        style = Frame.DOUBLE_LINE;
         ItemAdministrator administrator = new ItemAdministrator(this, (Container) item);
         serve(administrator, in, out, env);
         administrator.clean();

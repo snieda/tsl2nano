@@ -64,7 +64,9 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
     @ElementMap(attribute = true, inline = true, entry = "loglevel", key = "package", keyType = String.class, value = "level", valueType = Integer.class, required = false)
     Map<String, Integer> loglevels;
 
+    @Attribute(required = false)
     static boolean printToConsole = true;
+    
     transient PrintStream out = System.out;
     transient PrintStream err = System.err;
 
@@ -547,13 +549,14 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
             //on errors, we don't use the queuing thread
             if (ex != null) {
                 try {
-                    ex.printStackTrace(factory.err);
+                    if (printToConsole)
+                        ex.printStackTrace(factory.err);
                 } catch (Exception e) {
                     //don't stop the flow on logging problems!
                     ex.printStackTrace();
                     e.printStackTrace();
                 }
-                if (factory.err != System.err) {
+                if (printToConsole && factory.err != System.err) {
                     ex.printStackTrace(System.err);
                 }
             }

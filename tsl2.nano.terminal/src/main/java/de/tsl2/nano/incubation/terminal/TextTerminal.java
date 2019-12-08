@@ -15,18 +15,17 @@ import de.tsl2.nano.core.util.StringUtil;
 /**
  * @author Tom
  * 
- *         TODO To change the template for this generated type comment go to Window - Preferences - Java - Code Style -
- *         Code Templates
+ *         TODO To change the template for this generated type comment go to
+ *         Window - Preferences - Java - Code Style - Code Templates
  */
 public class TextTerminal {
-
     public static final char SPACE = ' ';
     public static final char NEWLINE = '\n';
     public static final int SCREEN_WIDTH = 79;
     public static final int SCREEN_HEIGHT = 25;
-    //simple point
+    // simple point
     public static final char GRAPH_POINT = 0xFE;
-    //simple text line
+    // simple text line
     public static final char TEXT_HOR_LINE = '-';
     public static final char TEXT_VER_LINE = '|';
     public static final char TEXT_TOPLEFT_LINE = '/';
@@ -34,7 +33,7 @@ public class TextTerminal {
     public static final char TEXT_BOTTOMLEFT_LINE = '\\';
     public static final char TEXT_BOTTOMRIGHT_LINE = '/';
 
-    //simple line
+    // simple line
     public static final char GRAPH_HOR_LINE = 0xC4;
     public static final char GRAPH_VER_LINE = 0xB3;
     public static final char GRAPH_TOPLEFT_LINE = '/';
@@ -42,24 +41,24 @@ public class TextTerminal {
     public static final char GRAPH_BOTTOMLEFT_LINE = '\\';
     public static final char GRAPH_BOTTOMRIGHT_LINE = '/';
 
-    //Bars
-    public static final char GRAPH_BIG_BAR = 0xDB;
-    public static final char GRAPH_TOP_BAR = 0xDC;
-    public static final char GRAPH_BOTTOM_BAR = 0xDF;
+    // Bars
+    public static final char GRAPH_BIG_BAR = 0x9591;
+    public static final char GRAPH_TOP_BAR = 0x9591;
+    public static final char GRAPH_BOTTOM_BAR = 0x9591;
 
-    public static final char GRAPH_LIGHTGRAY_BAR = 0xB0;
-    public static final char GRAPH_MEDIUMGRAY_BAR = 0xB1;
-    public static final char GRAPH_DARKGRAY_BAR = 0xB2;
+    public static final char GRAPH_LIGHTGRAY_BAR = 0x9591;
+    public static final char GRAPH_MEDIUMGRAY_BAR = 0x9591;
+    public static final char GRAPH_DARKGRAY_BAR = 0x9591;
 
-    //double line for example: ÉÍÍÍÍÍÍÍÍ», º Halloo º, ÈÍÍÍÍÍÍÍÍ¼
-    public static final char GRAPH_HOR_DBLLINE = 0xCD;
-    public static final char GRAPH_VER_DBLLINE = 0xBA;
-    public static final char GRAPH_TOPLEFT_DBLLINE = 0xC9;
-    public static final char GRAPH_TOPRIGHT_DBLLINE = 0xBB;
-    public static final char GRAPH_BOTTOMLEFT_DBLLINE = 0xC8;
-    public static final char GRAPH_BOTTOMRIGHT_DBLLINE = 0xBC;
+    // double line for example: ÉÍÍÍÍÍÍÍÍ», º Halloo º, ÈÍÍÍÍÍÍÍÍ¼
+    public static final char GRAPH_HOR_DBLLINE = '\u2550';
+    public static final char GRAPH_VER_DBLLINE = '\u2551';
+    public static final char GRAPH_TOPLEFT_DBLLINE = '\u2554';
+    public static final char GRAPH_TOPRIGHT_DBLLINE = '\u2557';
+    public static final char GRAPH_BOTTOMLEFT_DBLLINE = '\u255A';
+    public static final char GRAPH_BOTTOMRIGHT_DBLLINE = '\u255D';
 
-    //Lines
+    // Lines
     public static final int LINE_HOR_BAR = 1;
     public static final int LINE_TOP_BAR = 2;
     public static final int LINE_BOTTOM_BAR = 3;
@@ -73,14 +72,10 @@ public class TextTerminal {
     public static final int LINE_TOP_DOUBLE = 11;
     public static final int LINE_BOTTOM_DOUBLE = 12;
 
-    //Blocks
-    public static final int BLOCK_BAR = 1;
-    public static final int BLOCK_LIGHTGRAY_BAR = 2;
-    public static final int BLOCK_MEDIUMGRAY_BAR = 3;
-    public static final int BLOCK_DARKGRAY_BAR = 4;
-    public static final int BLOCK_LINE = 5;
-    public static final int BLOCK_DOUBLE_LINE = 6;
-    public static final int BLOCK_TEXT_LINE = 7;
+    // Block Styles
+    public enum Frame {
+        NONE, BAR, BAR_LIGHTGRAY, BAR_MEDIUMGRAY, BAR_DARKGRAY, LINE, DOUBLE_LINE, TEXT_LINE
+    };
 
     /** horizontal alignments (used in getFormattedItem) */
     public static final int HORALIGN_NOTHING = 0;
@@ -88,10 +83,10 @@ public class TextTerminal {
     public static final int HORALIGN_CENTER = 2;
     public static final int HORALIGN_RIGHT = 3;
 
-    public static String getTextFrame(String text, int type, int width, boolean centered) {
+    public static String getTextFrame(String text, Frame frameType, int width, boolean centered) {
         text = getFormattedItem(text, width - 2, 0, null, "\n");
-        switch (type) {
-        case BLOCK_BAR:
+        switch (frameType) {
+        case BAR:
             text = getLine(null, width, GRAPH_TOP_BAR, GRAPH_TOP_BAR, GRAPH_TOP_BAR, centered) + getLines(text,
                 width,
                 GRAPH_BIG_BAR,
@@ -99,15 +94,16 @@ public class TextTerminal {
                 GRAPH_BIG_BAR,
                 centered) + getLine(null, width, GRAPH_BOTTOM_BAR, GRAPH_BOTTOM_BAR, GRAPH_BOTTOM_BAR, centered);
             break;
-        case BLOCK_LIGHTGRAY_BAR:
-        case BLOCK_MEDIUMGRAY_BAR:
-        case BLOCK_DARKGRAY_BAR:
-            char c = type == BLOCK_LIGHTGRAY_BAR ? GRAPH_LIGHTGRAY_BAR
-                : type == BLOCK_MEDIUMGRAY_BAR ? GRAPH_MEDIUMGRAY_BAR : GRAPH_DARKGRAY_BAR;
+        case BAR_LIGHTGRAY:
+        case BAR_MEDIUMGRAY:
+        case BAR_DARKGRAY:
+            char c = frameType == Frame.BAR_LIGHTGRAY ? GRAPH_LIGHTGRAY_BAR
+                : frameType == Frame.BAR_LIGHTGRAY ? GRAPH_MEDIUMGRAY_BAR : GRAPH_DARKGRAY_BAR;
             text = getLine(null, width, c, c, c, centered) + getLines(text, width, c, SPACE, c, centered)
                 + getLine(null, width, c, c, c, centered);
             break;
-        case BLOCK_TEXT_LINE:
+        case NONE:
+        case TEXT_LINE:
             text =
                 getLine(null, width, TEXT_TOPLEFT_LINE, TEXT_HOR_LINE, GRAPH_TOPRIGHT_LINE, centered) + getLines(text,
                     width,
@@ -117,7 +113,7 @@ public class TextTerminal {
                     centered)
                     + getLine(null, width, TEXT_BOTTOMLEFT_LINE, TEXT_HOR_LINE, GRAPH_BOTTOMRIGHT_LINE, centered);
             break;
-        case BLOCK_LINE:
+        case LINE:
             text =
                 getLine(null, width, GRAPH_TOPLEFT_LINE, GRAPH_HOR_LINE, GRAPH_TOPRIGHT_LINE, centered)
                     + getLines(text,
@@ -128,7 +124,7 @@ public class TextTerminal {
                         centered)
                     + getLine(null, width, GRAPH_BOTTOMLEFT_LINE, GRAPH_HOR_LINE, GRAPH_BOTTOMRIGHT_LINE, centered);
             break;
-        case BLOCK_DOUBLE_LINE:
+        case DOUBLE_LINE:
             text =
                 getLine(null, width, GRAPH_TOPLEFT_DBLLINE, GRAPH_HOR_DBLLINE, GRAPH_TOPRIGHT_DBLLINE, centered)
                     + getLines(text,
@@ -141,6 +137,8 @@ public class TextTerminal {
                         centered);
             break;
         }
+        // final String txt = text;
+        // return Util.trY( () -> new String(txt.getBytes("iso8859-1"), "utf-8"));
         return text;
     }
 
@@ -238,22 +236,22 @@ public class TextTerminal {
     static void testTerminalText() throws IOException {
         String testString = null;
 
-        testString = getTextFrame("Hallo", BLOCK_BAR, SCREEN_WIDTH, false);
+        testString = getTextFrame("Hallo", Frame.BAR, SCREEN_WIDTH, false);
         System.out.println(testString);
 
-        testString = getTextFrame("Option1\nOption2\nOption3", BLOCK_TEXT_LINE, SCREEN_WIDTH, true);
-        System.out.println(testString);
-        FileUtil.writeBytes(testString.getBytes(), "textprinter.txt", true);
-
-        testString = getTextFrame("Option1\nOption2\nOption3", BLOCK_LINE, SCREEN_WIDTH, true);
+        testString = getTextFrame("Option1\nOption2\nOption3", Frame.TEXT_LINE, SCREEN_WIDTH, true);
         System.out.println(testString);
         FileUtil.writeBytes(testString.getBytes(), "textprinter.txt", true);
 
-        testString = getTextFrame("Option1\nOption2\nOption3", BLOCK_LIGHTGRAY_BAR, SCREEN_WIDTH, true);
+        testString = getTextFrame("Option1\nOption2\nOption3", Frame.LINE, SCREEN_WIDTH, true);
         System.out.println(testString);
         FileUtil.writeBytes(testString.getBytes(), "textprinter.txt", true);
 
-        testString = getTextFrame("Option1\nOption2\nOption3", BLOCK_DOUBLE_LINE, SCREEN_WIDTH, true);
+        testString = getTextFrame("Option1\nOption2\nOption3", Frame.BAR_LIGHTGRAY, SCREEN_WIDTH, true);
+        System.out.println(testString);
+        FileUtil.writeBytes(testString.getBytes(), "textprinter.txt", true);
+
+        testString = getTextFrame("Option1\nOption2\nOption3", Frame.DOUBLE_LINE, SCREEN_WIDTH, true);
         System.out.println(testString);
         FileUtil.writeBytes(testString.getBytes(), "textprinter.txt", true);
         //TextPrinter printer = new TextPrinter();
@@ -279,15 +277,15 @@ public class TextTerminal {
         System.out.println("² Halloo ²"); //0xB2
         System.out.println("²²²²²²²²²²"); //0xB2
         //doppelte linie
-        System.out.println("ÉÍÍÍÍÍÍÍÍ»"); //0xC9,CD,BB
+        System.out.println("══════════"); //0xC9,CD,BB
         System.out.println("º Halloo º"); //0xBA
-        System.out.println("ÈÍÍÍÍÍÍÍÍ¼"); //0xC8,CD,BC
+        System.out.println("\u2550"  + '\u2550'); //0xC8,CD,BC
     }
 
     public static void main(String[] args) {
         try {
             testTerminalText();
-            //testScreen();
+            testScreen();
         } catch (Exception ex) {
             ex.printStackTrace();
         }

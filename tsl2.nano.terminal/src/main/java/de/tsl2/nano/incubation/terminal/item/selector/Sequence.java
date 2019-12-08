@@ -72,7 +72,7 @@ public class Sequence<T, R> extends Selector<T> {
                     result.add(new Entry(item, r));
                     SIShell.printScreen(getDescription(env, false), in, out, ask(env),
                         Util.get(SIShell.KEY_WIDTH, TextTerminal.SCREEN_WIDTH),
-                        Util.get(SIShell.KEY_HEIGHT, TextTerminal.SCREEN_HEIGHT), TextTerminal.BLOCK_BAR, false, false);
+                        Util.get(SIShell.KEY_HEIGHT, TextTerminal.SCREEN_HEIGHT), TextTerminal.Frame.BAR, false, false);
                 }
             }
         };

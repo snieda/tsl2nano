@@ -386,4 +386,12 @@ public class NumberUtil extends BitUtil {
         else
             return BeanClass.createInstance(type, identifier);
     }
+
+    public static boolean roundAbout(Number first, Number second) {
+        Number dev = Double.valueOf(System.getProperty("tslnano.number.deviation.max", "0.00000000000000001"));
+        return hasMaxDeviation(first, second, dev);
+    }
+    public static boolean hasMaxDeviation(Number first, Number second, Number deviation) {
+        return second.doubleValue() - first.doubleValue() < deviation.doubleValue();
+    }
 }

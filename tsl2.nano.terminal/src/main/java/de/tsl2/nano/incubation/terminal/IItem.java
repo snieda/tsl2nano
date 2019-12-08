@@ -16,6 +16,8 @@ import java.util.Properties;
 
 import de.tsl2.nano.action.IConstraint;
 import static de.tsl2.nano.core.util.CLI.*;
+
+import de.tsl2.nano.incubation.terminal.TextTerminal.Frame;
 import de.tsl2.nano.incubation.vnet.workflow.Condition;
 
 /**
@@ -83,7 +85,7 @@ public interface IItem<T> {
     String getDescription(Properties env, boolean full);
     
     /** optional, defines an own frame style */
-    Integer getStyle();
+    Frame getStyle();
     
     /** optional, defines an own frame foreground color */
     Color getFgColor();

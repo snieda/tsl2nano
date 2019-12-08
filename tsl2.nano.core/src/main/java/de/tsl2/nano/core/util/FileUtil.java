@@ -35,6 +35,7 @@ import java.io.Writer;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1455,7 +1456,11 @@ public class FileUtil {
 			ManagedException.forward(e);
 		}
     }
-    
+
+    public static boolean isBinary(File f) {
+        String type = Util.trY(() -> Files.probeContentType(f.toPath()));
+        return type == null || !type.startsWith("text") ? true : false;
+    }    
 }
 
 class FileComparator implements Comparator<File> {

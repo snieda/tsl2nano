@@ -176,6 +176,7 @@ public class NanoH5Test implements ENVTestPreparation {
         app.start();
 //        Translator.translateBundle(ENV.getConfigPath() + "messages", Messages.keySet(), Locale.ENGLISH,
 //            Locale.getDefault());
+        ENV.setProperty("rule.check.specifications", false);//the check was done on creation - on different jdks (e.g. graalvm) javascript returns different numeric types!
         ENV.persist();
 
         //now we reload the configurations...

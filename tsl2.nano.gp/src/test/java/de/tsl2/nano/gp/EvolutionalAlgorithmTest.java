@@ -32,7 +32,7 @@ public class EvolutionalAlgorithmTest {
             EvolutionalAlgorithm.main(new String[] {});
             fail();
         } catch (Exception e) {
-            assertTrue(e.getMessage().contains("polyglott.fitnessfunction.script"));
+            assertTrue(e.getMessage().contains(PolyglottFitnessFunction.EVO_FIT_SCRIPT));
         }
     }
 

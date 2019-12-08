@@ -62,7 +62,7 @@ public class AsciiImage {
      * constructor
      */
     public AsciiImage() {
-        this(BARS, RGB);
+        this(CHARS, RGB);
     }
 
     /**
@@ -106,7 +106,7 @@ public class AsciiImage {
         double px;
         Color pxColor;
         StringBuilder buf = new StringBuilder(img.getWidth());
-
+        
         int xrate = width == -1 ? height == -1 ? 1 : -1 : (int) Math.round(img.getWidth() / (double) width);
         int yrate = height == -1 ? width == -1 ? 1 : xrate : (int) Math.round(img.getHeight() / (double) height);
         //Guarantee values bigger than zero!

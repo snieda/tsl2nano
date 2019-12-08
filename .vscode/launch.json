@@ -3,6 +3,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - TextTerminal",
+            "request": "launch",
+            "mainClass": "de.tsl2.nano.incubation.terminal.TextTerminal",
+            "projectName": "tsl2.nano.terminal"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - EvolutionalAlgorithm",
             "request": "launch",
             "mainClass": "de.tsl2.nano.gp.EvolutionalAlgorithm",

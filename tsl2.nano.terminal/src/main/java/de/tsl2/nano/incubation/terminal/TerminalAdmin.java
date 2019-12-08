@@ -38,7 +38,7 @@ public class TerminalAdmin extends SIShell {
         s.add(new Input("name", null, filename, "SIShell name"));
         s.add(new Input("width", null, TextTerminal.SCREEN_WIDTH, "SIShell width"));
         s.add(new Input("height", null, TextTerminal.SCREEN_HEIGHT, "SIShell height"));
-        s.add(new Input("style", null, TextTerminal.BLOCK_BAR, "SIShell style"));
+        s.add(new Input("style", null, TextTerminal.Frame.BAR, "SIShell style"));
         
         IContainer creator;
         s.add(creator = new Container("items", "terminal items"));

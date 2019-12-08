@@ -53,26 +53,13 @@ public class MainUtil {
      * @return
      */
     public static Properties toProperties(String prefix, String[] args, Class<?> mainClass, boolean useUSLocale, String... mainArgNames) {
-        if (args == null || (args.length == 1 && args[0].matches("\\?|[-]*h(elp)*")))
-            if (mainClass != null && mainArgNames != null)
-                throw new IllegalArgumentException("syntax: " + mainClass.getSimpleName() + "\n" + toFormattedString(mainArgNames, -1));
-            else
-                throw new IllegalArgumentException("no arguments given -- no help available!");
+        checkArgs(args, mainClass, mainArgNames);
+        
         mainArgNames = mainArgNames != null ? mainArgNames : new String[0];
         if (useUSLocale) {
             Locale.setDefault(Locale.US);
         }
-        System.setProperty("enableassertions", "true");
-        Properties p = new Properties();
-        if (mainClass != null) {
-            try {
-                String propFile = mainClass.getSimpleName() + (prefix != null ? "." + prefix : "");
-                p.load(new FileReader(new File(propFile)));
-                System.out.println(propFile + " loaded");
-            } catch (IOException e) {
-                //ok, this is optional
-            }
-        }
+        Properties p = initProperties(prefix, mainClass);
         String name;
         Object value;
         int n = 0;
@@ -105,6 +92,29 @@ public class MainUtil {
         if (n < mandatoryArgs.size())
             throw new IllegalArgumentException("please fill the following arguments\n" + toFormattedString(mandatoryArgs, -1));
         printInfo(mainClass, p);
+        return p;
+    }
+
+    private static void checkArgs(String[] args, Class<?> mainClass, String... mainArgNames) {
+        if (args == null || (args.length == 1 && args[0].matches("\\?|[-]*h(elp)*")))
+            if (mainClass != null && mainArgNames != null)
+                throw new IllegalArgumentException("syntax: " + mainClass.getSimpleName() + "\n" + toFormattedString(mainArgNames, -1));
+            else
+                throw new IllegalArgumentException("no arguments given -- no help available!");
+    }
+
+    private static Properties initProperties(String prefix, Class<?> mainClass) {
+        System.setProperty("enableassertions", "true");
+        Properties p = new Properties();
+        if (mainClass != null) {
+            try {
+                String propFile = mainClass.getSimpleName() + (prefix != null ? "." + prefix : "");
+                p.load(new FileReader(new File(propFile)));
+                System.out.println(propFile + " loaded");
+            } catch (IOException e) {
+                //ok, this is optional
+            }
+        }
         return p;
     }
 

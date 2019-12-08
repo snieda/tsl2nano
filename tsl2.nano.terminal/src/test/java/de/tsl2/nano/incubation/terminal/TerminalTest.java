@@ -27,6 +27,7 @@ import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.execution.AntRunner;
 import de.tsl2.nano.gp.EvolutionalAlgorithm;
+import de.tsl2.nano.incubation.terminal.TextTerminal.Frame;
 import de.tsl2.nano.incubation.terminal.item.Action;
 import de.tsl2.nano.incubation.terminal.item.Container;
 import de.tsl2.nano.incubation.terminal.item.Input;
@@ -79,7 +80,7 @@ public class TerminalTest implements ENVTestPreparation {
       });
 
       InputStream in = ByteUtil.getInputStream("1\n2\n3\n4\n5\n\n".getBytes());
-      new SIShell(root, in, System.out, 79, 10, 7).run();
+      new SIShell(root, in, System.out, 79, 10, Frame.TEXT_LINE).run();
 
       SIShell.main(new String[] { SIShell.DEFAULT_NAME });
 
@@ -268,7 +269,7 @@ public class TerminalTest implements ENVTestPreparation {
       System.getProperties().put(SIShell.KEY_SEQUENTIAL, true);
 
       InputStream in = SystemUtil.createBatchStream("Printing", "jobname", "test", "10", "", ":quit");
-      new SIShell(root, in, System.out, 79, 22, 7, defs).run();
+      new SIShell(root, in, System.out, 79, 22, Frame.TEXT_LINE, defs).run();
 
       //check, if serialization was ok
       System.setIn(SystemUtil.createBatchStream("", "Printing", "jobname", "test", "10", "", ":quit"));

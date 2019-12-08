@@ -83,7 +83,7 @@ public class EvolutionalAlgorithm {
         long maxGenerations = (long) get(MAX_GENERATION);
         double finalFitness = (double) get(FINAL_FITNESS);
         for (int i = 0; i < maxGenerations; i++) {
-            if (nextGeneration() < finalFitness) {
+            if (nextGeneration() <= finalFitness) {
                 logn(tag("\nSUCCESS!", GREEN));
                 break;
             }
@@ -136,7 +136,7 @@ public class EvolutionalAlgorithm {
         }
         if (creature.fitness() <= (double) get(FINAL_FITNESS))
             return creature.fitness();
-        if (creature.generations > (long) get(MAX_GENERATION)) {
+        if (creature.generations * 10 > (long) get(MAX_GENERATION)) {
             creatures.remove(creature);
             return (double) get(BADEST_FITNESS);
         }
@@ -230,8 +230,8 @@ class Genom implements Comparable<Genom>, Cloneable {
         int f = g.fitness().compareTo(fitness());
         int s = Integer.valueOf(sequence.size()).compareTo(g.sequence.size());
         // in a treemap, the result of a compare seems to be stored as hash key, so the treemap is not able to find the object if the compareTo changes....
-        // int c = Integer.valueOf(g.generations).compareTo(generations);
-        return f != 0 ? f : s;// != 0 ? s : s;// != 0 ? s : Integer.valueOf(hashCode()).compareTo(g.hashCode());
+        int c = Integer.valueOf(g.generations).compareTo(generations);
+        return f != 0 ? f : c != 0 ? c : s;// != 0 ? s : Integer.valueOf(hashCode()).compareTo(g.hashCode());
     }
 
     @Override

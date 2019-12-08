@@ -31,12 +31,17 @@ public class ProgressBar {
 	}
 
 	/**
-	 * prepares a terminal progress bar maxCount : end of the bar prefix : optional
-	 * text prefix at the end of the bar barWidth : character count of bar in
-	 * terminal textWidth: maximum characters to print at the end of the bar
-	 * lineCount: default: 100 (one output per percent). count of outputs for whole
-	 * progress profile : default: False, if true, additional profile information
+	 * <pre>
+	 * prepares a terminal progress bar 
+	 * maxCount : end of the bar 
+	 * prefix : optional
+	 * text prefix at the end of the bar 
+	 * barWidth : character count of bar in terminal 
+	 * textWidth: maximum characters to print at the end of the bar
+	 * lineCount: default: 100 (one output per percent). count of outputs for whole progress 
+	 * profile : default: False, if true, additional profile information
 	 * like memory and time will be printed
+	 * </pre>
 	 */
 	public ProgressBar(int maxCount, String prefix, int barWidth, int textWidth, int lineCount, boolean profile) {
 		this.maxCount = maxCount;
@@ -64,9 +69,12 @@ public class ProgressBar {
 		this.profile = true;
 	}
 
-	/**
+	public void increase(String comment, Object... args) {
+		print(comment, args);
+	}
+		/**
 	 * <pre>
-	 * prints a simple terminal progress bar 
+	 * prints a simple terminal progress bar - count of steps will be increased 
 	 * comment: optional formatable text at the end. will be concatenated with prefix 
 	 * args   : optinoal arguments to be formatted(with{})into(prefix+comment)"
 	 * </pre>

@@ -19,16 +19,18 @@ import de.tsl2.nano.core.util.StringUtil;
  * </pre>
  */
 public class PolyglottFitnessFunction implements Function<Long[], Double> {
+    public static final String EVO_FIT_SCRIPT = "evolutionalalgorithm.fitnessfunction.script";
+    public static final String EVO_FIT_LANG = "evolutionalalgorithm.fitnessfunction.language";
     ScriptEngineProvider<Double> engine;
     String script, scriptFile;
     // static final Map<String, String> LANGUAGEEXTENSIONS = MapUtil.asMap("js", "javascript", "py", "python", "tcl", "tcl", "ry", "ruby", "kt", "kotlin");
 
     public PolyglottFitnessFunction() {
-        String scriptLanguage = System.getProperty("evolutionalalgorithm.fitnessfunction.language");
-        scriptFile = System.getProperty("evolutionalalgorithm.fitnessfunction.script");
+        String scriptLanguage = System.getProperty(EVO_FIT_LANG);
+        scriptFile = System.getProperty(EVO_FIT_SCRIPT);
         if (scriptFile == null) {
             System.out.println(ScriptEngineProvider.printEngines());
-            throw new IllegalArgumentException("Please define java property 'evolutionalalgorithm.fitnessfunction.language' and 'evolutionalalgorithm.fitnessfunction.script'\n\tThe script may access the variable 'input' of type Long[] ");
+            throw new IllegalArgumentException("Please define java property '" + EVO_FIT_LANG + "' and '" + EVO_FIT_SCRIPT + "'\n\tThe script may access the variable 'input' of type Long[] ");
         }
         script = FileUtil.getFileString(scriptFile);
         if (scriptLanguage == null && scriptFile.contains(".")) {
