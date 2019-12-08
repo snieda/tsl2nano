@@ -254,10 +254,8 @@ public class FileUtil {
     //perhaps we can use it in future
     private static byte[] readBytes(InputStream stream, String entryName, int len) throws IOException {
         LOG.debug("loading stream-entry " + entryName + " with " + len + " bytes");
-        byte[] b;
-        int read = 0;
-        int offset = 0;
-        b = new byte[len];
+        byte[] b = new byte[len];
+        int read = 0, offset = 0;
         do {
             read = stream.read(b, offset, len - offset);
             offset += read;
