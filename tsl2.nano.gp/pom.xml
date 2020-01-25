@@ -11,6 +11,29 @@
 	<properties>
 		<module.parent>..</module.parent>
 	</properties>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.3</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+							<mainClass>de.tsl2.nano.gp.EvolutionalAlgorithm</mainClass>
+						</manifest>
+						<manifestEntries>
+							<Created-By>Thomas Schneider</Created-By>
+							<Application-Name>tsl2 evolutional algorithm</Application-Name>
+							<Application-Source>${application.source}</Application-Source>
+							<Application-redirect>/download</Application-redirect>
+							<Permissions>all-permissions</Permissions>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>	
 	<dependencies>
 		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>

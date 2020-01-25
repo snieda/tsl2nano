@@ -18,6 +18,49 @@
 	           <filtering>false</filtering>
 	        </resource>
 		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>3.0.2</version>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>tree</goal>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<includeScope>runtime</includeScope>
+							<includeArtifactIds>tsl2.nano.core,tsl2.nano.jarresolver,velocity
+							</includeArtifactIds>
+							<outputDirectory>${project.build.directory}/classes</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.3</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+							<mainClass>de.tsl2.nano.core.AppLoader</mainClass>
+						</manifest>
+						<manifestEntries>
+							<Created-By>Thomas Schneider</Created-By>
+							<Main-Arguments>de.tsl2.nano.codegen.ACodeGenerator</Main-Arguments>
+							<Application-Name>tsl2 generator</Application-Name>
+							<Application-Source>${application.source}</Application-Source>
+							<Application-redirect>/download</Application-redirect>
+							<Permissions>all-permissions</Permissions>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
 	</build>
 	<dependencies>
 		<dependency>

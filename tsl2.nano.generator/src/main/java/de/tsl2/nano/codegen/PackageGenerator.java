@@ -142,7 +142,8 @@ public class PackageGenerator extends ClassGenerator {
         }
         modelClasses = new ArrayList<>(classNames.length);
         for (int i = 0; i < classNames.length; i++) {
-            if (classNames[i].endsWith(POSTFIX_CLS)) {
+            if (classNames[i].endsWith(POSTFIX_CLS) 
+                && (packagePath == null || classNames[i].matches(packagePath + ".*"))) {
                 String className = StringUtil.substring(classNames[i], null, POSTFIX_CLS);
                 if (p != null) {
                     className = p + "." + className;

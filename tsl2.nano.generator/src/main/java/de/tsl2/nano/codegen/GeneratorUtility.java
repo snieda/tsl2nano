@@ -54,6 +54,10 @@ public class GeneratorUtility {
         return text.toLowerCase();
     }
 
+    public Class<StringUtil> string() {
+        return StringUtil.class;
+    }
+    
     /**
      * toUpperCase
      * 
@@ -74,11 +78,11 @@ public class GeneratorUtility {
      * if the value was found, it will return the value. if not, an empty string
      * will be returned to delete the variable-entry inside the template.
      * 
-     * if key starts with 'obj', it will be interpreted as class name and an
-     * instance of that class will be returned if key starts with 'cls', it will be
+     * if key starts with 'obj:', it will be interpreted as class name and an
+     * instance of that class will be returned if key starts with 'cls:', it will be
      * interpreted as class name and that class will be returned if key starts with
-     * 'bls', it will be interpreted as class name and that class will be returned -
-     * packed into BeanClass
+     * 'bls:', it will be interpreted as class name and that class will be returned -
+     * packed into BeanClass instance.
      * 
      * @param key key
      * @return value or empty string
@@ -86,13 +90,13 @@ public class GeneratorUtility {
     public Object get(String key) {
         final Object value = props.get(key);
         if (value == null) {
-            String cls = props.getProperty(key.substring(3));
-            if (key.startsWith("cls"))
-                return clazz(cls != null ? cls : key.substring(3));
-            else if (key.startsWith("obj"))
-                return object(cls != null ? cls : key.substring(3));
-            else if (key.startsWith("bls"))
-                return beanclass(cls != null ? cls : key.substring(3));
+            String cls = props.getProperty(key.substring(4));
+            if (key.startsWith("cls:"))
+                return clazz(cls != null ? cls : key.substring(4));
+            else if (key.startsWith("obj:"))
+                return object(cls != null ? cls : key.substring(4));
+            else if (key.startsWith("bls:"))
+                return beanclass(cls != null ? cls : key.substring(4));
         }
         return value != null ? value : key;
     }
@@ -112,7 +116,7 @@ public class GeneratorUtility {
      */
     public Object object(String cls) {
         Object instance = BeanClass.createInstance(cls);
-        put("obj" + instance.getClass().getSimpleName(), instance);
+        put("obj:" + instance.getClass().getSimpleName(), instance);
         return instance;
     }
 
@@ -122,7 +126,7 @@ public class GeneratorUtility {
      */
     public BeanClass<?> beanclass(String cls) {
         BeanClass<?> bc = BeanClass.createBeanClass(cls);
-        put("bls" + bc.getClass().getSimpleName(), bc);
+        put("bls:" + bc.getClass().getSimpleName(), bc);
         return bc;
     }
 
@@ -133,7 +137,7 @@ public class GeneratorUtility {
      */
     public Class<?> clazz(String cls) {
         Class<?> clazz = BeanClass.load(cls);
-        put("cls" + clazz.getClass().getSimpleName(), clazz);
+        put("cls:" + clazz.getClass().getSimpleName(), clazz);
         return clazz;
     }
 

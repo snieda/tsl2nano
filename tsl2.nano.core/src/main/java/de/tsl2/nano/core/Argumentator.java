@@ -20,7 +20,10 @@ import java.util.jar.Attributes;
 
 import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.util.CLI;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.CLI.Color;
 
 /**
  * Usable to structure e.g. command line arguments. Use an instanceof Argumentator or simply call
@@ -378,9 +381,12 @@ public class Argumentator {
      */
     public void start(PrintStream printStream, Function<Properties, Object> runner) {
         if (check( printStream)) {
-            printStream.println("\n>>>>> " + "starting " + name        + " <<<<<\n");  
-            printStream.println(StringUtil.toFormattedString(argMap, -1, true));         
-            printStream.println("\n>>>>> " + runner.apply(getArgMap()) + " <<<<<\n");           
+            printStream.print(CLI.tag(new String(FileUtil.getFileBytes("tsl-logo.txt", null)), Color.YELLOW));
+            printStream.println(CLI.tag("\n>>>>> " + "starting " + name        + " <<<<<\n", Color.GREEN));  
+            printStream.println(CLI.tag(StringUtil.toFormattedString(argMap, -1, true), Color.LIGHT_BLUE)); 
+            printStream.println(CLI.tag("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", Color.GREEN));           
+            printStream.println(CLI.tag(">>>>> " + runner.apply(getArgMap()), Color.GREEN));           
+            printStream.println(CLI.tag(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n", Color.GREEN));           
         }
     }
 

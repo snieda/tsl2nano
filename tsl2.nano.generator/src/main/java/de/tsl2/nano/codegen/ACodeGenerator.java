@@ -57,7 +57,7 @@ public abstract class ACodeGenerator {
     String codeTemplate;
     private GeneratorUtility utilityInstance;
     Properties properties = null;
-
+    long count = 0;
     protected static final Log LOG = LogFactory.getLog(ACodeGenerator.class);
 
     public static final String DEFAULT_DEST_PREFIX = "src/gen";
@@ -111,7 +111,7 @@ public abstract class ACodeGenerator {
             if (props != null)
                 gen.getProperties().putAll(props);
             gen.start(a);
-            return gen.getClass().getSimpleName() + " finished successfull";
+            return gen.getClass().getSimpleName() + " finished successfull! generated sources: " + gen.count;
         });
     }
 
@@ -162,6 +162,7 @@ public abstract class ACodeGenerator {
             template.merge(context, writer);
             writer.flush();
             writer.close();
+            count++;
         } catch (ResourceNotFoundException | ParseErrorException | MethodInvocationException | IOException e) {
             ManagedException.forward(e);
         }

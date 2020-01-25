@@ -15,21 +15,21 @@ public class GeneratorUtilityTest {
     public void testObjectCreation() {
         GeneratorUtility util = new GeneratorUtility();
         util.put("GeneratorUtility", GeneratorUtility.class.getName());
-        assertTrue(util.get("objGeneratorUtility") instanceof GeneratorUtility);
+        assertTrue(util.get("obj:GeneratorUtility") instanceof GeneratorUtility);
     }
 
     @Test
     public void testClassCreation() {
         GeneratorUtility util = new GeneratorUtility();
         util.put("GeneratorUtility", GeneratorUtility.class.getName());
-        assertTrue(GeneratorUtility.class.isAssignableFrom((Class<?>) util.get("clsGeneratorUtility")));
+        assertTrue(GeneratorUtility.class.isAssignableFrom((Class<?>) util.get("cls:GeneratorUtility")));
     }
 
     @Test
     public void testBeanClassCreation() {
         GeneratorUtility util = new GeneratorUtility();
         util.put("GeneratorUtility", GeneratorUtility.class.getName());
-        assertTrue(GeneratorUtility.class.isAssignableFrom(((BeanClass) util.get("blsGeneratorUtility")).getClazz()));
+        assertTrue(GeneratorUtility.class.isAssignableFrom(((BeanClass) util.get("bls:GeneratorUtility")).getClazz()));
     }
 
     @Test
