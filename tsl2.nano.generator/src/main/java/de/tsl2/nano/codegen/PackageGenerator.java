@@ -141,14 +141,18 @@ public class PackageGenerator extends ClassGenerator {
             }
         }
         modelClasses = new ArrayList<>(classNames.length);
+        String pckName = Util.get("bean.generation.packagename", null);
         for (int i = 0; i < classNames.length; i++) {
-            if (classNames[i].endsWith(POSTFIX_CLS) 
-                && (packagePath == null || classNames[i].matches(packagePath + ".*"))) {
+            if (classNames[i].endsWith(POSTFIX_CLS)) {
                 String className = StringUtil.substring(classNames[i], null, POSTFIX_CLS);
                 if (p != null) {
                     className = p + "." + className;
                 }
                 className = className.replace('/', '.');
+                if (pckName != null && !className.matches(pckName + ".*")) {
+                    LOG.info("ignoring filtered class: " + className);
+                    continue;
+                }
                 LOG.info("trying to load class: " + className);
                 try {
                     modelClasses.add(classLoader.loadClass(className));
@@ -196,7 +200,7 @@ public class PackageGenerator extends ClassGenerator {
                 pClassName = p + (p != null ? "." : "") + className;
                 classInPackage = classLoader.loadClass(pClassName);
             } catch (final Exception e) {
-                LOG.warn("couldn't load class: " + e.toString());
+                LOG.debug("couldn't load class: " + e.toString());
                 if (!fullpath.equals(p)) {
                     classpathEntry = StringUtil.substring(packagePath.replace('.', '/'), null, p.replace(".", "/"));
                     LOG.info("reload class with extended classpath: " + classpathEntry);

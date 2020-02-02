@@ -28,4 +28,10 @@ public class PackageGeneratorTest implements ENVTestPreparation {
         ACodeGenerator.main(new String[] {PackageGenerator.class.getName(), file, "codegen/beanconstant.vm" });
         //TODO: check file creation!
     }
+    @Test
+    public void testPackageGenerationWithPackageFilter() throws Exception {
+        String file = BASE_DIR_GENERATOR + /*"tsl2.nano.generator/target/*/ "classes/" + this.getClass().getPackage().getName();
+        ACodeGenerator.main(new String[] {PackageGenerator.class.getName(), file, "codegen/beanconstant.vm", this.getClass().getPackage().getName() + "..*Package.*" });
+        //TODO: check file creation!
+    }
 }
