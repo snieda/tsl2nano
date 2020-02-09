@@ -436,7 +436,7 @@ public class ENV implements Serializable {
     	String sysValue = System.getProperty(key);
     	T value = null;
     	if (sysValue != null) { //system properties win...
-    		if (defaultValue != null) {
+    		if (defaultValue != null && !(defaultValue instanceof String)) {
     			if (PrimitiveUtil.isPrimitiveOrWrapper(defaultValue.getClass())) {
     				value = (T) PrimitiveUtil.convert(sysValue, defaultValue.getClass());
     			} else {
