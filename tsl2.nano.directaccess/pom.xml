@@ -4,7 +4,7 @@
 	  <parent>
 	    <groupId>net.sf.tsl2nano</groupId>
 	    <artifactId>tsl2.nano.h5-package</artifactId>
-	    <version>2.3.1</version>
+	    <version>2.3.2-SNAPSHOT</version>
 	  </parent>
 	<artifactId>tsl2.nano.directaccess</artifactId>
 	<name>TSL2 JEE Direct Access</name>
