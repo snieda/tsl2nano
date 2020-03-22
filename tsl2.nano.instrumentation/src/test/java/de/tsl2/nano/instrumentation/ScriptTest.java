@@ -2,11 +2,9 @@ package de.tsl2.nano.instrumentation;
 
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Test;
+import java.util.HashMap;
 
-import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.NotFoundException;
+import org.junit.Test;
 
 public class ScriptTest {
 
@@ -17,14 +15,13 @@ public class ScriptTest {
         script.afterContent.contains("hello method after");
     }
 
-    public void testScriptRun() throws NotFoundException {
+    public void testScriptRun() throws Exception {
         Script script = new Script("target/test-classes/console-log.js");
-        CtClass ctClass = ClassPool.getDefault().get(getClass().getName());
-        Object result = script.run(ctClass.getDeclaredMethod("callbackForInstrumentation"), true);
+        Object result = script.run(Script.BEFORE, new HashMap<>());
         assertTrue(result instanceof Long);
     }
 
-    public void callbackForInstrumentation() {
+    public void matchedMethod() {
         System.out.println("hello instrumentation");
     }
 }

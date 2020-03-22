@@ -56,7 +56,6 @@ public class Script {
         else if (pos == AFTER && afterContent == null)
             return null;
         javax.script.ScriptEngine engine = new javax.script.ScriptEngineManager().getEngineByExtension(ext);
-        List<AttributeInfo> attributes = m.getMethodInfo().getAttributes();
         Bindings argBindings = engine.createBindings();
         for (String arg : argBindings.keySet()) {
             argBindings.put(arg, argBindings.get(arg));

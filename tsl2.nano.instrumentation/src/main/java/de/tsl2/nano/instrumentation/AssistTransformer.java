@@ -106,7 +106,7 @@ public class AssistTransformer implements ClassFileTransformer {
         return cmd.toString();
     }
 
-    List<String> getArgNames(CtMethod m) {
+    static List<String> getArgNames(CtMethod m) {
         return m.getMethodInfo().getAttributes().stream().map(mi -> mi.getName()).collect(Collectors.toList());
     }
 
