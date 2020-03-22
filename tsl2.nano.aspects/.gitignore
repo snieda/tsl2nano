@@ -2,6 +2,7 @@
 # Standard Maven .gitignore
 #
 target/
+_ajdump/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup

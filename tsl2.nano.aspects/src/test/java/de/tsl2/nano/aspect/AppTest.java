@@ -1,18 +1,20 @@
-package org.test;
+package de.tsl2.nano.aspect;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Ignore;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 public class AppTest {
     @Cover(up = true) Account account = new Account();
 
-    @Test
+    @Ignore @Test
     public void testUseAspectCover() {
         assertFalse(account.allowed());
     }
 
-    @Test
+    @Ignore @Test
     public void testUseAspectCoverWithMethodAnnotation() {
         // Account account = new Account() {
         //     @Cover(up=true) @Override
@@ -36,6 +38,7 @@ public class AppTest {
         for (int i = 0; i < 2002; i++) {
             result |= new Account1().YYYY();
         }
+        
         assertTrue(result);
     }
     @Test

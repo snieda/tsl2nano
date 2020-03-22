@@ -1,17 +1,17 @@
 <aspectj>
     <aspects>
-        <aspect name="org.test.AspectCover"/>
+        <aspect name="de.tsl2.nano.aspect.AspectCover"/>
         <!-- define a concrete aspect inline -->
 
-        <concrete-aspect name="org.test.ConcreteAspectCover"
-            extends="org.test.AbstractAspect">
+        <concrete-aspect name="de.tsl2.nano.aspect.ConcreteAspectCover"
+            extends="de.tsl2.nano.aspect.AbstractAspect">
             <pointcut name="trace" expression="execution(public * XXXX(..))"/>
             <pointcut name="profile" expression="execution(public * YYYY(..))"/>
             <pointcut name="mock" expression="execution(public * ZZZZ(..))"/>
         </concrete-aspect>
         <weaver options="-verbose -showWeaveInfo">
-            <include within="org.test.*"/>
-            <dump within="org.test.*" />
+            <include within="de.tsl2.nano.aspect.*"/>
+            <dump within="de.tsl2.nano.aspect.*" />
         </weaver>
     </aspects>
 </aspectj>
