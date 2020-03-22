@@ -1,0 +1,4 @@
+Agent-Class: de.tsl2.nano.instrumentation.Instrumentation
+Can-Redefine-Classes: true
+Can-Retransform-Classes: true
+Premain-Class: de.tsl2.nano.instrumentation.ScriptAgent

@@ -39,9 +39,17 @@
         },
         {
             "type": "java",
-            "name": "Debug (Attach MAVEN plugin on 8000)",
+            "name": "Debug tsl2.common (MAVEN on 8000)",
             "request": "attach",
             "projectName": "tsl2nano-code/tsl2.nano.common",
+            "hostName": "localhost",
+            "port": 8000
+        },
+        {
+            "type": "java",
+            "name": "Debug aspectj (MAVEN on 8000)",
+            "request": "attach",
+            "projectName": "aspectj",
             "hostName": "localhost",
             "port": 8000
         },
@@ -53,7 +61,17 @@
             "remotePort": 8787,
             "hostName": "localhost",
             "port": 8787,
-            "projectName": "meintest2"
+            "projectName": "tsl2nano"
+        },
+        {
+            "name": "Debug (Heroku 8787)",
+            "type": "java",
+            "request": "attach",
+            "remoteHost": "https://damp-cove-99806.herokuapp.com",
+            "remotePort": 8787,
+            "hostName": "https://damp-cove-99806.herokuapp.com",
+            "port": 8787,
+            "projectName": "tsl2nano"
         },
         {
             "name": "Java",

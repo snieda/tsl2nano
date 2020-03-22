@@ -527,6 +527,10 @@ public class BeanClass<T> implements Serializable {
         return getAnnotation(annotationClass) != null;
     }
 
+    public boolean isInstanceOf(Class cls) {
+        return cls.isAssignableFrom(clazz);
+    }
+
     /**
      * getField
      * 
@@ -751,6 +755,9 @@ public class BeanClass<T> implements Serializable {
         return hasDefaultConstructor(clazz, false);
     }
 
+    public boolean isDefaultInstanceable() {
+        return Util.isInstanceable(clazz) && hasDefaultConstructor(clazz);
+    }
     /**
      * hasDefaultConstructor
      * 

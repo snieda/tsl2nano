@@ -1,0 +1,58 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.sf.tsl2nano</groupId>
+		<artifactId>tsl2.nano.h5-package</artifactId>
+		<version>2.3.2-SNAPSHOT</version>
+	</parent>
+	<artifactId>tsl2.nano.aspects</artifactId>
+	<name>TSL2 Framework Aspects</name>
+	<description>TSL2 Framework Aspects (Generic Aspects with AspectJ)</description>
+    <properties>
+		<module.parent>..</module.parent>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <aspectj.version>1.9.5</aspectj.version>
+        <java.debug>-agentlib:jdwp=transport=dt_socket,address=localhost:8787,server=y,suspend=n</java.debug>
+        <aspectj.javaagent>-javaagent:"${settings.localRepository}"/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar</aspectj.javaagent>
+        <exec.args>${java.debug} ${aspectj.javaagent}</exec.args>
+        <exec.mainClass>org.test.App</exec.mainClass>
+        <exec.arguments></exec.arguments>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+            <version>${aspectj.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>${aspectj.version}</version>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.10</version>
+                <configuration>
+                    <argLine>
+                        ${aspectj.javaagent}
+                    </argLine>
+                    <useSystemClassLoader>true</useSystemClassLoader>
+                    <forkMode>always</forkMode>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

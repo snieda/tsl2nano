@@ -79,6 +79,8 @@
 		</developer>
 	</developers>
 	<modules>
+		<!-- <module>tsl2.nano.instrumentation</module> -->
+		<module>tsl2.nano.aspects</module>
 		<module>tsl2.nano.core</module>
 		<module>tsl2.nano.datastructure</module>
 		<module>tsl2.nano.gp</module>

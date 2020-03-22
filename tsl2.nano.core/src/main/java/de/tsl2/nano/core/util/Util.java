@@ -10,6 +10,7 @@
 package de.tsl2.nano.core.util;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Modifier;
 import java.security.MessageDigest;
 import java.text.Format;
 import java.text.ParseException;
@@ -18,7 +19,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
-import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 
@@ -64,6 +64,15 @@ public class Util {
      */
     public static boolean isJavaType(Class<?> cls) {
         return cls.getPackage() != null && cls.getPackage().getName().startsWith("java");
+    }
+
+    /**
+     * 
+     * @param cls class to evaluate
+     * @return true if this class can be constructed (it is public and not abstract)
+     */
+    public static boolean isInstanceable(Class<?> cls) {
+        return !cls.isAnnotation() && !cls.isLocalClass() && !cls.isAnonymousClass() && !cls.isArray() && !cls.isInterface() && !Modifier.isAbstract(cls.getModifiers());
     }
     /**
      * isAllNull

@@ -10,6 +10,7 @@
 package de.tsl2.nano.codegen;
 
 import java.io.File;
+import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -155,7 +156,10 @@ public class PackageGenerator extends ClassGenerator {
                 }
                 LOG.info("trying to load class: " + className);
                 try {
-                    modelClasses.add(classLoader.loadClass(className));
+                    Class cls = classLoader.loadClass(className);
+                    if (checkClassFilter(cls)) {
+                        modelClasses.add(cls);
+                    }
                 } catch (final Exception e) {
                     ManagedException.forward(e);
                 }
@@ -166,7 +170,30 @@ public class PackageGenerator extends ClassGenerator {
         return modelClasses;
     }
 
-    private File toFilePath(File packageFilePath) {
+    private boolean checkClassFilter(Class<?> cls) {
+        boolean instanceable = Boolean.getBoolean("bean.generation.filter.instanceable");
+        if (instanceable && !Util.isInstanceable(cls)) {
+            LOG.info("ignoring not 'instanceable' class: " + cls.getName());
+            return false;
+        }
+        String annotated = System.getProperty("bean.generation.filter.annotated");
+        if (annotated != null) {
+            if (!cls.isAnnotationPresent(BeanClass.load(annotated))) {
+                LOG.info("ignoring  class not annotated with " + annotated + ": " + cls.getName());
+                return false;
+            }
+        }
+        String instanceOf = System.getProperty("bean.generation.filter.instanceof");
+        if (instanceOf != null) {
+            if (!BeanClass.load(instanceOf).isAssignableFrom(cls)) {
+                LOG.info("ignoring  class not instanceof " + instanceOf + ": " + cls.getName());
+                return false;
+            }
+        }
+		return true;
+	}
+
+	private File toFilePath(File packageFilePath) {
         return new File(packageFilePath.getParent() + "/" + packageFilePath.getName().replace('.', '/'));
     }
 

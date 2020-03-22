@@ -1,0 +1,17 @@
+<aspectj>
+    <aspects>
+        <aspect name="org.test.AspectCover"/>
+        <!-- define a concrete aspect inline -->
+
+        <concrete-aspect name="org.test.ConcreteAspectCover"
+            extends="org.test.AbstractAspect">
+            <pointcut name="trace" expression="execution(public * XXXX(..))"/>
+            <pointcut name="profile" expression="execution(public * YYYY(..))"/>
+            <pointcut name="mock" expression="execution(public * ZZZZ(..))"/>
+        </concrete-aspect>
+        <weaver options="-verbose -showWeaveInfo">
+            <include within="org.test.*"/>
+            <dump within="org.test.*" />
+        </weaver>
+    </aspects>
+</aspectj>

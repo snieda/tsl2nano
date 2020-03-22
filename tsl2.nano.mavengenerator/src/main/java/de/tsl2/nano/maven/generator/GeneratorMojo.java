@@ -37,6 +37,12 @@ public class GeneratorMojo extends AbstractMojo {
 	private String unpackaged;
     @Parameter( property = "bean.generation.singleFile", defaultValue = "false", required = false )
 	private String singleFile;
+    @Parameter( property = "bean.generation.filter.instanceable", defaultValue = "false", required = false )
+	private String filterInstanceable;
+    @Parameter( property = "bean.generation.filter.annotated", defaultValue = "false", required = false )
+	private String filterAnnotated;
+    @Parameter( property = "bean.generation.filter.instanceof", defaultValue = "false", required = false )
+	private String filterInstanceOf;
 
 	@Override
 	public void execute() throws MojoExecutionException {
@@ -49,6 +55,9 @@ public class GeneratorMojo extends AbstractMojo {
 				System.setProperty("bean.generation.namepostfix", destinationPostfix);
 			System.setProperty("bean.generation.unpackaged", unpackaged);
 			System.setProperty("bean.generation.singleFile", singleFile);
+			System.setProperty("bean.generation.filter.instanceable", filterInstanceable);
+			System.setProperty("bean.generation.filter.annotated", filterAnnotated);
+			System.setProperty("bean.generation.filter.instanceof", filterInstanceOf);
 
 			Properties properties = new Properties();
 			properties.putAll(System.getenv());

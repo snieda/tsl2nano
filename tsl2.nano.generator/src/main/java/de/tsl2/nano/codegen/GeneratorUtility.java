@@ -2,6 +2,7 @@ package de.tsl2.nano.codegen;
 
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.Function;
 
 import org.apache.velocity.VelocityContext;
 
@@ -9,6 +10,12 @@ import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.CallingPath;
 import de.tsl2.nano.core.cls.ValuePath;
+import de.tsl2.nano.core.util.CUtil;
+import de.tsl2.nano.core.util.CollectionUtil;
+import de.tsl2.nano.core.util.DateUtil;
+import de.tsl2.nano.core.util.FormatUtil;
+import de.tsl2.nano.core.util.MapUtil;
+import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
@@ -54,11 +61,35 @@ public class GeneratorUtility {
         return text.toLowerCase();
     }
 
-    public Class<StringUtil> string() {
+    public Class<StringUtil> strings() {
         return StringUtil.class;
     }
     
-    /**
+    public Class<ObjectUtil> objects() {
+        return ObjectUtil.class;
+    }
+    
+    public Class<CUtil> compareables() {
+        return CUtil.class;
+    }
+    
+    public Class<MapUtil> maps() {
+        return MapUtil.class;
+    }
+    
+    public Class<CollectionUtil> collections() {
+        return CollectionUtil.class;
+    }
+    
+    public Class<FormatUtil> formats() {
+        return FormatUtil.class;
+    }
+    
+    public Class<DateUtil> dates() {
+        return DateUtil.class;
+    }
+    
+/**
      * toUpperCase
      * 
      * @param string to convert
@@ -161,5 +192,9 @@ public class GeneratorUtility {
 
     public void setContext(VelocityContext context) {
         this.context = context;
-	}
+    }
+    
+    // public void addAspectAround(String pointcut, Function replacementCallback) {
+        
+    // }
 }

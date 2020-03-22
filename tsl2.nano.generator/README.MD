@@ -62,7 +62,8 @@ on generation time, all dependencies of your source model classes must be availa
 #### create a velocity template
 
 * velocity user guide: https://velocity.apache.org/engine/1.7/user-guide.html
-
+* velocity tools 2.0 : https://www.sxt.cn/manual/velocity-tools-2.0/summary.html
+ 
 the mavengenerator provides some additional evaluations, to get informations from the source model on runtime.
 
 this is done by utitliy class, invoked as *$util*

@@ -7,7 +7,7 @@
   </parent>
   <artifactId>tsl2.nano.cursus</artifactId>
   <name>TSL2 Framework Cursus</name>
-  <description>repeatable course/process</description>
+  <description>repeatable course/process (delta-processing-engine, event sourcing)</description>
 	<properties>
 		<module.parent>..</module.parent>
 	</properties>
