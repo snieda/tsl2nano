@@ -3,6 +3,8 @@ package de.tsl2.nano.instrumentation;
 import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -10,6 +12,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javassist.CannotCompileException;
 import javassist.ClassPool;
@@ -41,7 +44,7 @@ public class AssistTransformer implements ClassFileTransformer {
 
         byte[] byteCode = classfileBuffer;
 
-        log("[Agent] Transforming class " + className);
+        log("AGENT Transforming class " + className);
         try {
             ClassPool cp = ClassPool.getDefault();
             CtClass cc = cp.get(className);
@@ -54,6 +57,7 @@ public class AssistTransformer implements ClassFileTransformer {
             byteCode = cc.toBytecode();
             cc.detach();
         } catch (NotFoundException | CannotCompileException | IOException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
         return byteCode;
@@ -77,27 +81,25 @@ public class AssistTransformer implements ClassFileTransformer {
 
     private String getMethodID(CtMethod m) {
         try {
-            return m.getDeclaringClass().getAnnotations() + " " + m.getDeclaringClass() + " " + m.getAnnotations()
-                    + m.getName() + m.getSignature() + m.getExceptionTypes();
+            return Arrays.toString(m.getDeclaringClass().getAnnotations()) + " " + Arrays.toString(m.getAnnotations())
+                    + m.getLongName() + " throws " + Arrays.toString(m.getExceptionTypes());
         } catch (ClassNotFoundException | NotFoundException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    private void enhanceMethod(CtMethod m, Script script) throws CannotCompileException {
-        log("[Agent] enhancing method " + getMethodID(m));
+    private void enhanceMethod(CtMethod m, Script script) throws CannotCompileException, NotFoundException {
+        log("AGENT enhancing method " + getMethodID(m));
         String collectArgsAsCommandString = collectArgsAsCommandString(m);
         m.addLocalVariable("before_", CtClass.longType);
-        m.insertBefore(
-                collectArgsAsCommandString + getClass().getName() + ".runScript(\"" + script.name + "\", -1, args);");
+        m.insertBefore(collectArgsAsCommandString + getClass().getName() + ".runScript(\"" + script.name + "\", -1, args);");
         if (script.bodyContent != null)
             m.setBody(collectArgsAsCommandString + getClass().getName() + ".runScript(\"" + script.name
                     + "\", 0, args);");
-        m.insertAfter(
-                collectArgsAsCommandString + getClass().getName() + ".runScript(\"" + script.name + "\", 1, args);");
+        m.insertAfter(collectArgsAsCommandString + getClass().getName() + ".runScript(\"" + script.name + "\", 1, args);");
     }
 
-    private String collectArgsAsCommandString(CtMethod m) {
+    private String collectArgsAsCommandString(CtMethod m) throws NotFoundException {
         StringBuffer cmd = new StringBuffer("java.util.HashMap args = new java.util.HashMap();");
         List<String> argNames = getArgNames(m);
         for (String arg : argNames) {
@@ -106,8 +108,12 @@ public class AssistTransformer implements ClassFileTransformer {
         return cmd.toString();
     }
 
-    static List<String> getArgNames(CtMethod m) {
-        return m.getMethodInfo().getAttributes().stream().map(mi -> mi.getName()).collect(Collectors.toList());
+    static List<String> getArgNames(CtMethod m) throws NotFoundException {
+        ArrayList<String> argNames = new ArrayList<>();
+        for (int i = 0; i < m.getParameterTypes().length; i++) {
+            argNames.add("$" + i);
+        }
+        return argNames;
     }
 
     public static Object runScript(String scriptName, int pos, Map<String, Object> args) {
