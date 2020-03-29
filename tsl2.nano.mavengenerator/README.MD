@@ -132,3 +132,19 @@ this will stop the generation of that file at that position. normally you would 
 
     #set( $myMethodCall = $myFactory.myMethod($model.Clazz).get(0))
 
+#### use a for loop to catch all possible method call arguments
+
+{code:java}
+    public MyResult getType(MyEnumType myType) {
+        switch (myType) {
+        #foreach ($type in $availableEnumTypes)
+            #if ($type != MyEnumType.UNKNOWN)
+            case $type: // $typeInfo.getEntry($type)
+                return ${MyEvaluation.eval($type)};
+            #end
+        #end
+            default:
+                throw new IllegalArgumentException("unknown MyEnumType: " + myType);    
+        }
+    }
+{code}

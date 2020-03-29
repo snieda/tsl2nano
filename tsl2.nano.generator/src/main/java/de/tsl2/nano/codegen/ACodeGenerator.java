@@ -6,7 +6,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,16 +50,35 @@ import de.tsl2.nano.core.util.Util;
  * @version $Revision: 1.0 $
  */
 public abstract class ACodeGenerator {
-    private static final String KEY_PROPERTIES = "properties";
-    protected static final String KEY_FILTER = "filter";
-    protected static final String KEY_TEMPLATE = "template";
-    protected static final String KEY_MODEL = "model";
-    private static final String KEY_ALGORITHM = "algorithm";
+
+    //direct declared arguments
+    public static final String KEY_PROPERTIES = "properties";
+    public static final String KEY_FILTER = "filter";
+    public static final String KEY_TEMPLATE = "template";
+    public static final String KEY_MODEL = "model";
+    public static final String KEY_ALGORITHM = "algorithm";
+
+    //indirect system properties (using #KEY_PREFIX)
+    public static final String KEY_PREFIX = "bean.generation.";
+    public static final String KEY_PACKAGENAME = KEY_PREFIX + "packagename";
+    public static final String KEY_OUTPUTPATH = KEY_PREFIX + "outputpath";
+    public static final String KEY_NAMEPREFIX = KEY_PREFIX + "nameprefix";
+    public static final String KEY_NAMEPOSTFIX = KEY_PREFIX + "namepostfix";
+    public static final String KEY_UNPACKAGED = KEY_PREFIX + "unpackaged";
+    public static final String KEY_SINGLEFILE = KEY_PREFIX + "singlefile";
+    public static final String KEY_INSTANCEABLE = KEY_PREFIX + "filter.instanceable";
+    public static final String KEY_ANNOTATED = KEY_PREFIX + "filter.annotated";
+    public static final String KEY_INSTANCEOF = KEY_PREFIX + "filter.instanceof";
+    public static final String KEY_KEYWORDLIST = KEY_PREFIX + "keyword.list";
+    public static final String KEY_KEYWORDREPL = KEY_PREFIX + "keyword.replacement";
+    
     private VelocityEngine engine;
     String codeTemplate;
     private GeneratorUtility utilityInstance;
     Properties properties = null;
     long count = 0;
+    Map<String, String> keywordMap;
+
     protected static final Log LOG = LogFactory.getLog(ACodeGenerator.class);
 
     public static final String DEFAULT_DEST_PREFIX = "src/gen";
@@ -108,11 +129,33 @@ public abstract class ACodeGenerator {
         Argumentator am = new Argumentator(ACodeGenerator.class.getSimpleName(), getManual(), errorExitCode, mainArgs);
         am.start(System.out, a -> {
             ACodeGenerator gen = (ACodeGenerator) BeanClass.createInstance(a.getProperty(KEY_ALGORITHM));
+            Map<String, String> keywordMap = createKeywordMap();
+            if (keywordMap != null) {
+                gen.keywordMap = keywordMap;
+            }
             if (props != null)
                 gen.getProperties().putAll(props);
             gen.start(a);
             return gen.getClass().getSimpleName() + " finished successfull! generated sources: " + gen.count;
         });
+    }
+
+    private static Map<String, String> createKeywordMap() {
+        String keywordList = System.getProperty(KEY_KEYWORDLIST);
+        if (keywordList == null)
+            return null;
+        List<String> keywords = Arrays.asList(keywordList.split("[,;|\\w]"));
+        String keywordRepl = System.getProperty(KEY_KEYWORDREPL);
+        List<String> repl = Arrays.asList(keywordRepl.split("[,;|\\w]"));
+        boolean byExtension = repl.size() == 1 && keywords.size() > 1;
+        if (!byExtension && keywords.size() != repl.size())
+            throw new IllegalArgumentException(KEY_KEYWORDLIST + " size must be equal to " + KEY_KEYWORDREPL 
+                + " size (" + keywords.size() + " != " + repl.size() + ") - or " + KEY_KEYWORDREPL + " may be one");
+        Map<String, String> keywordMap = new HashMap<>();
+        for (int i = 0; i < keywords.size(); i++) {
+            keywordMap.put(keywords.get(i), repl.get(byExtension ? 0 : i));
+        }
+        return keywordMap;
     }
 
     public abstract void start(Properties args);
@@ -183,7 +226,7 @@ public abstract class ACodeGenerator {
 
     private void fillVelocityProperties(VelocityContext context, Properties properties) {
         for (final Object p : properties.keySet()) {
-            final Object v = properties.get(p);
+            final Object v = replaceKeyword(properties.get(p));
             if (context.containsKey(p)) {
                 LOG.error("name clash in velocity context on key '" + p + "': existing generator value: "
                         + context.get(p.toString()) + ", user property: " + v + " will be ignored!");
@@ -192,6 +235,12 @@ public abstract class ACodeGenerator {
             context.put((String) p, v);
             LOG.debug("adding velocity context property: " + p + "=" + v);
         }
+    }
+
+    private final Object replaceKeyword(Object contextValue) {
+        if (keywordMap == null || !keywordMap.containsKey(contextValue))
+            return contextValue;
+        return keywordMap.get(contextValue);
     }
 
     protected GeneratorUtility getUtil() {
@@ -234,18 +283,18 @@ public abstract class ACodeGenerator {
      * @return default classloader
      */
     protected String getDefaultDestinationFile(String modelFile) {
-        boolean unpackaged = Boolean.getBoolean("bean.generation.unpackaged");
-        boolean singleFile = Boolean.getBoolean("bean.generation.singleFile");
+        boolean unpackaged = Boolean.getBoolean(KEY_UNPACKAGED);
+        boolean singleFile = Boolean.getBoolean(KEY_SINGLEFILE);
         if (singleFile)
             modelFile = ""; // only the destination postfix is the name!
         else
             modelFile = unpackaged ? StringUtil.substring(modelFile, ".", null, true) : modelFile.replace('.', '/');
-        String path = Util.get("bean.generation.outputpath", DEFAULT_DEST_PREFIX);
+        String path = Util.get(KEY_OUTPUTPATH, DEFAULT_DEST_PREFIX);
         return (path.endsWith("/") ? path : path + "/") + modelFile + getDestinationPostfix();
     }
 
     protected String getDestinationPostfix() {
-        return Util.get("bean.generation.namepostfix", StringUtil.toFirstUpper(extractName(codeTemplate)) + ".java");
+        return Util.get(KEY_NAMEPOSTFIX, StringUtil.toFirstUpper(extractName(codeTemplate)) + ".java");
     }
 
     /**
@@ -281,12 +330,17 @@ public abstract class ACodeGenerator {
         man.put(KEY_PROPERTIES, new Arg(KEY_PROPERTIES, "( ) property-file to read additional informations"));
 
         man.put("system variables", new Arg("system variables", "\n"
-        + " - bean.generation.packagename     : only class in that package\n"
-        + " - bean.generation.outputpath      : output base path (default: src/gen)\n"
-        + " - bean.generation.nameprefix      : class+package name prefix (default: package + code-template)\n"
-        + " - bean.generation.namepostfix     : class name postfix (default: {code-template}.java)\n"
-        + " - bean.generation.unpackaged      : no package structure from origin will be inherited (default: false)\n"
-        + " - bean.generation.singleFile      : generate only the first occurrency (default: false)\n"));
-        return man;
+        + " - " + KEY_PACKAGENAME + "     : only class in that package\n"
+        + " - " + KEY_OUTPUTPATH + "      : output base path (default: src/gen)\n"
+        + " - " + KEY_NAMEPREFIX + "      : class+package name prefix (default: package + code-template)\n"
+        + " - " + KEY_NAMEPOSTFIX + "     : class name postfix (default: {code-template}.java)\n"
+        + " - " + KEY_UNPACKAGED + "      : no package structure from origin will be inherited (default: false)\n"
+        + " - " + KEY_SINGLEFILE + "      : generate only the first occurrency (default: false)\n"
+        + " - " + KEY_INSTANCEABLE + ": filter all not instanceable classes\n"
+        + " - " + KEY_ANNOTATED + "   : annotation to search for. all not annotated classes will be filtered\n"
+        + " - " + KEY_INSTANCEOF + "  : base/super class. all not extending classes will be filtered\n"
+        + " - " + KEY_KEYWORDLIST + " : list of comma-separated keywords to be replaced through keyword.replacement\n"
+        + " - " + KEY_KEYWORDREPL + " : list of csv keyword replacements. may be a single string to be added to all keywords\n"));
+    return man;
     }
 }

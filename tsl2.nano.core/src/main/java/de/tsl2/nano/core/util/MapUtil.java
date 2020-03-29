@@ -283,5 +283,26 @@ public class MapUtil {
 
 	public static <T> Set<T> asSet(T... items) {
 		return new HashSet<>(Arrays.asList(items));
-	}
+    }
+    
+    /** replaces special values, given by repl. usable to replace values that are keywords etc.!  */
+    public static <K, V> void replaceValues(Map<K,V> origin, Map<V, V> valueReplacements) {
+        V v;
+        for (K k : origin.keySet()) {
+            v = origin.get(k);
+            if (valueReplacements.containsKey(v)) {
+                origin.put(k, valueReplacements.get(v));
+            }
+        }
+    }
+    /** extends special values, given by repl. usable to replace values that are keywords etc.!  */
+    public static <K> void extendValues(Map<K,String> origin, Set<String> valuesToExtend, String extension) {
+        String v;
+        for (K k : origin.keySet()) {
+            v = origin.get(k);
+            if (valuesToExtend.contains(v)) {
+                origin.put(k, v + extension);
+            }
+        }
+    }
 }

@@ -181,6 +181,16 @@ public class GeneratorUtility {
         return Util.isContainer(obj) ? t.substring(1, t.length() - 1) : t;
     }
 
+    /** tries to evaluate the given expression. if expression is not invokable, returns false */
+    public Object evalOrNull(String expression) {
+        try {
+            return eval(expression);
+        } catch (Exception ex) {
+            System.err.println("expression is not invokable: " + expression + " => " + ex.toString());
+            return null;
+        }
+    }
+    
     public Object eval(String expression) {
         String objRef = StringUtil.substring(expression, null, ".");
         return eval(get(objRef), expression);

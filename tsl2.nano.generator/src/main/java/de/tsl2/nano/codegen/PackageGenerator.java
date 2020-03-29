@@ -78,7 +78,7 @@ public class PackageGenerator extends ClassGenerator {
     public void generate() {
         final Collection<Class<?>> classes = getModelClasses();
         prepareProperties(classes);
-        boolean singleFile = Boolean.getBoolean("bean.generation.singleFile");
+        boolean singleFile = Boolean.getBoolean(KEY_SINGLEFILE);
         for (final Iterator<Class<?>> iterator = classes.iterator(); iterator.hasNext();) {
             try {
                 generate(iterator.next());
@@ -142,7 +142,7 @@ public class PackageGenerator extends ClassGenerator {
             }
         }
         modelClasses = new ArrayList<>(classNames.length);
-        String pckName = Util.get("bean.generation.packagename", null);
+        String pckName = Util.get(KEY_PACKAGENAME, null);
         for (int i = 0; i < classNames.length; i++) {
             if (classNames[i].endsWith(POSTFIX_CLS)) {
                 String className = StringUtil.substring(classNames[i], null, POSTFIX_CLS);
@@ -171,19 +171,19 @@ public class PackageGenerator extends ClassGenerator {
     }
 
     private boolean checkClassFilter(Class<?> cls) {
-        boolean instanceable = Boolean.getBoolean("bean.generation.filter.instanceable");
+        boolean instanceable = Boolean.getBoolean(KEY_INSTANCEABLE);
         if (instanceable && !Util.isInstanceable(cls)) {
             LOG.info("ignoring not 'instanceable' class: " + cls.getName());
             return false;
         }
-        String annotated = System.getProperty("bean.generation.filter.annotated");
+        String annotated = System.getProperty(KEY_ANNOTATED);
         if (annotated != null) {
             if (!cls.isAnnotationPresent(BeanClass.load(annotated))) {
                 LOG.info("ignoring  class not annotated with " + annotated + ": " + cls.getName());
                 return false;
             }
         }
-        String instanceOf = System.getProperty("bean.generation.filter.instanceof");
+        String instanceOf = System.getProperty(KEY_INSTANCEOF);
         if (instanceOf != null) {
             if (!BeanClass.load(instanceOf).isAssignableFrom(cls)) {
                 LOG.info("ignoring  class not instanceof " + instanceOf + ": " + cls.getName());
@@ -218,7 +218,7 @@ public class PackageGenerator extends ClassGenerator {
             LOG.warn("COULDN'T EVALUATE ANY PACKAGE. NO CLASSES FOUND!");
             return null;
         }
-        String pckName = Util.get("bean.generation.packagename", null);
+        String pckName = Util.get(KEY_PACKAGENAME, null);
         RuntimeClassloader extendedClassLoader = null;
         String pClassName = null;
         Class<?> classInPackage = null;
@@ -303,7 +303,7 @@ public class PackageGenerator extends ClassGenerator {
     @Override
     protected String getDefaultDestinationFile(String modelFile) {
         modelFile = super.getDefaultDestinationFile(modelFile);
-        boolean unpackaged = Boolean.getBoolean("bean.generation.unpackaged");
+        boolean unpackaged = Boolean.getBoolean(KEY_UNPACKAGED);
         return unpackaged ? modelFile : appendPackage(modelFile, extractName(codeTemplate));
     }
 

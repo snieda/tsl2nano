@@ -748,6 +748,10 @@ public class BeanClass<T> implements Serializable {
         return createInstance(clazz, args);
     }
 
+    public boolean hasDefaultConstructor(boolean mustBePublic) {
+        return hasDefaultConstructor(clazz, mustBePublic);
+    }
+
     /**
      * @delegates to {@link #hasDefaultConstructor(Class, boolean)} with mustBePublic = false
      */

@@ -78,7 +78,7 @@ public class XmlGenerator extends ACodeGenerator {
         if (nodeList.getLength() == 0)
             throw new IllegalStateException("given xpath '" + xmlXPath + "' hits no xml element!");
         prepareProperties(nodeList);
-        boolean singleFile = Boolean.getBoolean("bean.generation.singleFile");
+        boolean singleFile = Boolean.getBoolean(KEY_SINGLEFILE);
         Node n;
         for (int i = 0; i < nodeList.getLength(); i++) {
             n = nodeList.item(i);
