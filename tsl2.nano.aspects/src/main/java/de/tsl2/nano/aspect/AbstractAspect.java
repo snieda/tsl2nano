@@ -18,7 +18,7 @@ import org.aspectj.lang.annotation.Pointcut;
 public abstract class AbstractAspect {
     Map<String, ProfileInfo> profiling = new HashMap<>();
     static final String PREFIX = AbstractAspect.class.getSimpleName().toLowerCase() + ".";
-    static final SimpleDateFormat SDF = new SimpleDateFormat(get("log.timeformat", "HH:mm:ss.SSS"));
+    static final SimpleDateFormat SDF = new SimpleDateFormat(get("agent.log.timeformat", "HH:mm:ss.SSS"));
 
     @Pointcut //("execution(public boolean mymethod(..))")
     abstract void trace();
@@ -62,7 +62,7 @@ public abstract class AbstractAspect {
                 pi.duration += duration;
                 pi.memuse += mem;
     
-                if (pi.count % getInt("profile.count", 1000) == 0 || pi.duration % getInt("profile.duration", 1000) == 0) {
+                if (pi.count % getInt("agent.profile.count", 1000) == 0 || pi.duration % getInt("agent.profile.duration", 1000) == 0) {
                     log(pi);
                 }
             }

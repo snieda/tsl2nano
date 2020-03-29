@@ -68,6 +68,11 @@
 			<artifactId>tsl2.nano.core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>net.sf.tsl2nano</groupId>
+			<artifactId>tsl2.nano.aspects</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		<!-- https://mvnrepository.com/artifact/velocity/velocity -->
  		<dependency>
 			<groupId>org.apache.velocity</groupId>

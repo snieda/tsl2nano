@@ -3,6 +3,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - App",
+            "request": "launch",
+            "mainClass": "de.tsl2.nano.aspect.App",
+            "projectName": "tsl2.nano.aspects"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - TextTerminal",
             "request": "launch",
             "mainClass": "de.tsl2.nano.incubation.terminal.TextTerminal",
@@ -49,7 +56,7 @@
             "type": "java",
             "name": "Debug aspectj (MAVEN on 8000)",
             "request": "attach",
-            "projectName": "aspectj",
+            "projectName": "tsl2.nano.aspects",
             "hostName": "localhost",
             "port": 8000
         },
