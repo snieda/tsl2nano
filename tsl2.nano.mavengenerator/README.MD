@@ -60,13 +60,13 @@ at the end, the plugin part may look like this:
             <plugin>
                 <groupId>net.sf.tsl2nano</groupId>
                 <artifactId>tsl2.nano.mavengenerator</artifactId>
-                <version>2.3.1-SNAPSHOT</version>
+                <version>2.3.1</version>
                 <inherited>true</inherited>
                 <dependencies>
                     <dependency>
                         <groupId>net.sf.tsl2nano</groupId>
                         <artifactId>tsl2.nano.core</artifactId>
-                        <version>2.3.1-SNAPSHOT</version>
+                        <version>2.3.1</version>
                     </dependency>
                     <dependency>
                         <groupId>org.apache.velocity</groupId>
@@ -76,9 +76,10 @@ at the end, the plugin part may look like this:
                     <dependency>
                         <groupId>net.sf.tsl2nano</groupId>
                         <artifactId>tsl2.nano.generator</artifactId>
-                        <version>2.3.1-SNAPSHOT</version>
+                        <version>2.3.1</version>
                     </dependency>
-                    <!--DEP-INSERTION: add all dependencies, your source model needs, here -->
+                    <!-- add all dependencies, your source model needs, here -->
+                    <!--DEP-INSERTION-->
                     </dependencies>
                 <executions>
                     <execution>
@@ -86,9 +87,9 @@ at the end, the plugin part may look like this:
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <template>src/main/resources/configurator.vm</template>
-                            <model>${project.build.outputDirectory}/WEB-INF/classes/de.lv1871.shared.model.persistent.vertrag.gevo</model>
-                            <filter>de.lv1871.shared.model.persistent.vertrag.gevo.[A-Z]+GeVo</filter>
+                            <template>target/classes/mytemplate.vm</template>
+                            <model>${project.build.outputDirectory}/my.anonymous.project</model>
+                            <filter>my.anonymous.project.[A-Z]+MyPostfix</filter>
                             <outputPath>target/generated-sources</outputPath>
                         </configuration>
                     </execution>
@@ -96,6 +97,25 @@ at the end, the plugin part may look like this:
             </plugin>
         <plugins>
     </build>
+
+If you need to be more detailed, there are more configuration properties:
+
+            <configuration>
+            <!-- load only classes as source model, that have a default constructor and are not abstract! -->
+                <filterInstanceable>true</filterInstanceable>
+            <!-- load only classes as source model, that are an instance of the given class -->
+                <filterInstanceOf>my.anonymous.project.MyBaseClass</filterInstanceOf>
+            <!-- load only classes as source model, having the given annotation -->
+                <filterAnnotated>javax.persistence.Entity</filterAnnotated>
+            <!-- replace all keywords in the keyword.list with keyword.replacement -->
+                <keyword.list>if, else, case, switch</keyword.list>
+            <!-- the replacements are either a list for all items in the keyword.list - or only one element, to be added to all keywords -->
+                <keyword.replacement>if_, else_, case_, switch_</keyword.replacement>
+            <!-- replace the default package path + class prefix with the given one. this may be a regex on the model-file-path -->
+                <destinationPrefix></destinationPrefix>
+            <!-- replace the default class postfix with the given one -->
+                <destinationPostfix>MyClassPostfix</destinationPostfix>
+            </configuration>
 
 #### create a velocity template
 
@@ -132,19 +152,99 @@ this will stop the generation of that file at that position. normally you would 
 
     #set( $myMethodCall = $myFactory.myMethod($model.Clazz).get(0))
 
-#### use a for loop to catch all possible method call arguments
+##### return a list of enums
+
+{code:java}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	public Set<MyEnum> getMyEnums() {
+		return EnumSet.of( ${util.toString(${MyEnumCollection.getEnumColleciton($model.Clazz)} )});
+	}
+{code}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+##### use a for loop to catch all possible method call arguments
 
 {code:java}
-    public MyResult getType(MyEnumType myType) {
-        switch (myType) {
-        #foreach ($type in $availableEnumTypes)
-            #if ($type != MyEnumType.UNKNOWN)
-            case $type: // $typeInfo.getEntry($type)
-                return ${MyEvaluation.eval($type)};
-            #end
-        #end
-            default:
-                throw new IllegalArgumentException("unknown MyEnumType: " + myType);    
+	public MyResult getType(MyEnumType myType) {
+		switch (myType) {
+		#foreach ($type in $availableEnumTypes)
+			#if ($type != MyEnumType.UNKNOWN)
+			case $type: // $typeInfo.getEntry($type)
+				return ${MyEvaluation.eval($type)};
+			#end
+		#end
+			default:
+				throw new IllegalArgumentException("unknown MyEnumType: " + myType);	
         }
-    }
+	}
 {code}
+
+#### Adding the new source path to the project
+
+        <plugin> <!-- add the source path 'generated-sources' to the build -->
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <version>3.0.0</version>
+            <executions>
+                <execution>
+                    <phase>generate-sources</phase>
+                    <goals>
+                        <goal>add-source</goal>
+                    </goals>
+                    <configuration>
+                        <sources>
+                            <source>${project.build.directory}/generated-sources</source>
+                        </sources>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+
+#### Formatting and cleaning the generated sources
+
+            <plugin> <!-- clean and format the generated source code with google-format -->
+                <groupId>com.coveo</groupId>
+                <artifactId>fmt-maven-plugin</artifactId>
+                <version>2.9</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirectory>${project.build.directory}/generated-sources</sourceDirectory>
+                            <verbose>true</verbose>
+                            <filesNamePattern>.*\.java</filesNamePattern>
+                            <additionalSourceDirectories>
+                                <param>generated-sources</param>
+                            </additionalSourceDirectories>
+                            <skip>false</skip>
+                            <skipSortingImports>false</skipSortingImports>
+                            <style>google</style>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+#### Moving the generated sources to their packages
+
+If you are on linux, the following script may move your generated files to their correct package pathes:
+
+    #!/bin/bash
+
+    moveToPackage() {
+        # Get the package name
+        package=$(grep -m 1 -Po "(?<=^package )[^; ]*" "$f")
+
+        # Replace . with / and add src/ at the beginning
+        target_folder="generated-sources/${package//./\/}"
+
+        # Create the target folder
+        mkdir -p "$target_folder"
+
+        # move the file to the target folder
+        mv -uv "$f" "$target_folder"
+    }
+
+    #Loop through the generated files
+    for f in generated-sources/my/anonymous.project/*.java; do
+        moveToPackage
+    done

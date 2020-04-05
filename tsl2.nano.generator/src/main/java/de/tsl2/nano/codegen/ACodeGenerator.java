@@ -56,6 +56,7 @@ public abstract class ACodeGenerator {
     public static final String KEY_FILTER = "filter";
     public static final String KEY_TEMPLATE = "template";
     public static final String KEY_MODEL = "model";
+    public static final String KEY_MODELFILE = "modelFile";
     public static final String KEY_ALGORITHM = "algorithm";
 
     //indirect system properties (using #KEY_PREFIX)
@@ -214,13 +215,14 @@ public abstract class ACodeGenerator {
     protected void fillVelocityContext(Object model, String modelFile, String templateFile, String destFile,
             Properties properties, final GeneratorUtility util, final VelocityContext context) {
         fillVelocityProperties(context, properties);
-        context.put("path", getDestinationPackageName(modelFile, destFile));
         context.put(KEY_MODEL, model);
-        context.put("postfix", getDestinationPostfix());
+        context.put(KEY_MODELFILE, modelFile);
+        context.put(KEY_TEMPLATE, templateFile);
         context.put("util", util);
         context.put("time", new Timestamp(System.currentTimeMillis()));
-        context.put(KEY_TEMPLATE, templateFile);
-        context.put("copyright", "Copyright (c) 2002-2019 Thomas Schneider");
+        context.put("copyright", "Copyright (c) 2002-2020 Thomas Schneider");
+        context.put("path", getDestinationPackageName(modelFile, destFile));
+        context.put("postfix", getDestinationPostfix(modelFile));
         util.setContext(context);
     }
 
@@ -283,18 +285,27 @@ public abstract class ACodeGenerator {
      * @return default classloader
      */
     protected String getDefaultDestinationFile(String modelFile) {
-        boolean unpackaged = Boolean.getBoolean(KEY_UNPACKAGED);
         boolean singleFile = Boolean.getBoolean(KEY_SINGLEFILE);
         if (singleFile)
             modelFile = ""; // only the destination postfix is the name!
         else
-            modelFile = unpackaged ? StringUtil.substring(modelFile, ".", null, true) : modelFile.replace('.', '/');
+            modelFile = getDestinationPrefix(modelFile);
         String path = Util.get(KEY_OUTPUTPATH, DEFAULT_DEST_PREFIX);
-        return (path.endsWith("/") ? path : path + "/") + modelFile + getDestinationPostfix();
+        return (path.endsWith("/") ? path : path + "/") + modelFile + getDestinationPostfix(modelFile);
     }
 
-    protected String getDestinationPostfix() {
-        return Util.get(KEY_NAMEPOSTFIX, StringUtil.toFirstUpper(extractName(codeTemplate)) + ".java");
+    private String getDestinationPrefix(String modelFile) {
+        boolean unpackaged = Boolean.getBoolean(KEY_UNPACKAGED);
+        String defaultPrefix = unpackaged ? StringUtil.substring(modelFile, ".", null, true) : modelFile.replace('.', '/');
+        String prefix =  Util.get(KEY_NAMEPREFIX, defaultPrefix);
+        String regexExtraction = StringUtil.extract(modelFile, prefix);
+        return Util.isEmpty(regexExtraction) ? prefix : regexExtraction;
+    }
+
+    protected String getDestinationPostfix(String modelFile) {
+        String postfix = Util.get(KEY_NAMEPOSTFIX, StringUtil.toFirstUpper(extractName(codeTemplate)) + ".java");
+        String regexExtraction = StringUtil.extract(modelFile, postfix);
+        return Util.isEmpty(regexExtraction) ? postfix : regexExtraction;
     }
 
     /**
@@ -332,8 +343,8 @@ public abstract class ACodeGenerator {
         man.put("system variables", new Arg("system variables", "\n"
         + " - " + KEY_PACKAGENAME + "     : only class in that package\n"
         + " - " + KEY_OUTPUTPATH + "      : output base path (default: src/gen)\n"
-        + " - " + KEY_NAMEPREFIX + "      : class+package name prefix (default: package + code-template)\n"
-        + " - " + KEY_NAMEPOSTFIX + "     : class name postfix (default: {code-template}.java)\n"
+        + " - " + KEY_NAMEPREFIX + "      : class+package name prefix (default: package + code-template) may be a regex of model\n"
+        + " - " + KEY_NAMEPOSTFIX + "     : class name postfix (default: {code-template}.java) may be a regex of model\n"
         + " - " + KEY_UNPACKAGED + "      : no package structure from origin will be inherited (default: false)\n"
         + " - " + KEY_SINGLEFILE + "      : generate only the first occurrency (default: false)\n"
         + " - " + KEY_INSTANCEABLE + ": filter all not instanceable classes\n"
