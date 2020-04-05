@@ -92,7 +92,7 @@ public class ScriptAgent {
         initializeAgent();
         AssistTransformer t = new AssistTransformer(scriptingInstrumentation);
         instrumentation.addTransformer(t, true);
-        Class[] allLoadedClasses = instrumentation.getAllLoadedClasses();
+        Class<?>[] allLoadedClasses = instrumentation.getAllLoadedClasses();
         supportClassFinder(allLoadedClasses);
         log("[Agent] searching in " + allLoadedClasses.length + " classes for filter: " + packages);
         for (Class<?> clazz : allLoadedClasses) {
@@ -106,7 +106,7 @@ public class ScriptAgent {
      * tries to support the tsl2.nano.core ClassFinder by adding all loaded classes
      * by reflection
      */
-    private static void supportClassFinder(Class[] allLoadedClasses) {
+    private static void supportClassFinder(Class<?>[] allLoadedClasses) {
         String strClassFinder = "de.tsl2.nano.core.cls.ClassFinder";
         try {
             Class<?> classFinder = Thread.currentThread().getContextClassLoader().loadClass(strClassFinder);
