@@ -11,9 +11,9 @@
     <description>TSL2 Framework Instrumentation (Agent-Loading, Javassist)</description>
     <properties>
         <module.parent>..</module.parent>
-        <java.agent>-javaagent:${project.build.directory}/${project.build.finalName}.${project.packaging}</java.agent>
+        <java.myagent>-javaagent:${project.build.directory}/${project.build.finalName}.${project.packaging}</java.myagent>
         <java.debug>-agentlib:jdwp=transport=dt_socket,address=localhost:8787,server=y,suspend=n</java.debug>
-        <exec.args>${java.debug} ${java.agent}</exec.args>
+        <exec.args>${java.debug} ${java.myagent}</exec.args>
         <exec.mainClass>org.test.App</exec.mainClass>
         <exec.arguments></exec.arguments>
     </properties>
@@ -44,8 +44,8 @@
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<version>2.22.2</version>
 				<configuration>
-                    <argLine>${java.agent}</argLine>
-                    <!-- <useSystemClassLoader>true</useSystemClassLoader> -->
+                    <argLine>${java.myagent}</argLine>
+                    <useSystemClassLoader>true</useSystemClassLoader>
                     <forkCount>0</forkCount>
 				</configuration>
 				<executions>

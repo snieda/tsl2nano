@@ -64,9 +64,9 @@
             "name": "Debug (Attach on 8787)",
             "type": "java",
             "request": "attach",
-            "remoteHost": "localhost",
+            "remoteHost": "http://localhost",
             "remotePort": 8787,
-            "hostName": "localhost",
+            "hostName": "http://localhost",
             "port": 8787,
             "projectName": "tsl2nano"
         },
@@ -74,11 +74,11 @@
             "name": "Debug (Heroku 8787)",
             "type": "java",
             "request": "attach",
-            "remoteHost": "https://damp-cove-99806.herokuapp.com",
+            "remoteHost": "localhost",
             "remotePort": 8787,
-            "hostName": "https://damp-cove-99806.herokuapp.com",
+            "hostName": "localhost",
             "port": 8787,
-            "projectName": "tsl2nano"
+            "projectName": "tsl2.app.logbook"
         },
         {
             "name": "Java",

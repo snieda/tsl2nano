@@ -111,7 +111,7 @@ commit;
 		<condition property="dbprovider" value="hsqldb" else="h2">
 			<contains string="${jdbc.driver}" substring="hsqldb" casesensitive="true"/>
 		</condition>
-		<condition property="cp" value="*" else="${dbprovider}*.jar">
+		<condition property="cp" value="&quot;*&quot;" else="&quot;*&quot;"> <!--else="${dbprovider}*.jar"  -->
 			<contains string="${os.name}" substring="windows" casesensitive="false"/>
 		</condition>
 		<condition property="cmdline"
