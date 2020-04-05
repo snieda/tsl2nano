@@ -108,6 +108,10 @@ public class ClassFinder {
 		}
 		return classLoader.getParent();
 	}
+	/** may be called by a java-agent using the instrumentation.getAllLoadedClass()  */
+	public static void addClasses(Class[] classes) {
+		self().classes.addAll((Collection<? extends Class<?>>) Arrays.asList(classes));
+	}
 
 //	private void collectPackageClasses(ClassLoader classLoader) {
 //		collectPackageClasses(ClassLoader.getSystemClassLoader(), classes);
