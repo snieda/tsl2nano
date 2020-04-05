@@ -23,6 +23,7 @@ import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
@@ -261,6 +262,8 @@ public class JarResolver {
 
     private void loadMvn() {
         File mvnFile = download((String) props.get(URL_MVN_DOWNLOAD), false, false);
+        if (mvnFile.length() == 0)
+            Message.send("jarresolver ist not able to work - mvn binary download failed!");
         mvnRoot = mvnFile.getParent();
         String extractedName = mvnRoot + "/" + StringUtil.substring(mvnFile.getName(), null, "-bin.zip");
         if (!new File(extractedName + "/bin").exists()) {
