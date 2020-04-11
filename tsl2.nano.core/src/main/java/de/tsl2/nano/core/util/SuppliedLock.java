@@ -8,19 +8,19 @@ import java.util.concurrent.locks.StampedLock;
 public class SuppliedLock {
     StampedLock lock = new StampedLock();
 
-    public void write(SupplierEx<?> supplierEx) {
+    public <T> T write(SupplierEx<T> supplierEx) {
         long stamp = lock.writeLock();
         try {
-            supplierEx.get();
+            return supplierEx.get();
         } finally {
             lock.unlockWrite(stamp);
         }
     }
 
-    public void read(SupplierEx<?> supplierEx) {
+    public <T> T read(SupplierEx<T> supplierEx) {
         long stamp = lock.readLock();
         try {
-            supplierEx.get();
+            return supplierEx.get();
         } finally {
             lock.unlockRead(stamp);
         }

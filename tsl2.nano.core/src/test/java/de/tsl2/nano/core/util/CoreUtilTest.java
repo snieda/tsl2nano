@@ -659,11 +659,20 @@ public class CoreUtilTest implements ENVTestPreparation {
 
 	@Test
 	public void testReadWriteLock() {
-		// new HashMap<>() {
-		// 	SupplierLock = ConcurrentUtil.createReadWriteLock();
-		// 	public V put(K key, V value) {
+		Map map =  new HashMap<String, String>() {
+			SuppliedLock lock = ConcurrentUtil.createReadWriteLock();
+			public String put(String key, String value) {
+				return lock.write(() -> super.put(key, value));
+			}
+			public String get(String key) {
+				return lock.read(() -> super.get(key)); 
+			}
+		};
 
-		// 	}
+		map.put("key", "value");
+		assertEquals("value", map.get("key"));
+
+		// TODO: test concurrent access ;-) -- but now, we trust in java.util.concurrent algorithms
 	}
 
 	boolean isTrue(List<Integer> list) {
