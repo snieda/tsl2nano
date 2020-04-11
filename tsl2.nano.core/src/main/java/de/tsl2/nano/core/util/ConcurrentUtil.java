@@ -170,10 +170,21 @@ public class ConcurrentUtil {
             ManagedException.forward(e);
         }
     }
+    public static final <T> T waitFor(Class<T> responseType) {
+        return waitFor(Util.get("tsl2.nano.concurrent.pullwaittime", 1000), responseType);
+    }
+
+    public static final <T> T waitFor(long pullWaitTime, Class<T> responseType) {
+        waitFor(pullWaitTime, () -> getCurrent(responseType) != null);
+        return getCurrent(responseType);
+    }
 
     public static final void waitFor(Supplier<Boolean> callback) {
+        waitFor(Util.get("tsl2.nano.concurrent.pullwaittime", 1000), callback);
+    }
+    public static final void waitFor(long pullWaitTime, Supplier<Boolean> callback) {
     	while (!callback.get())
-    		sleep(1000);
+    		sleep(pullWaitTime);
     }
     
     /**
@@ -197,6 +208,9 @@ public class ConcurrentUtil {
         return false;
     }
 
+    public static SuppliedLock createReadWriteLock() {
+        return new SuppliedLock();
+    }
     public static void runWorker(Runnable...runnables) {
     	createParallelWorker(runnables[0].toString()).run(runnables);
     }

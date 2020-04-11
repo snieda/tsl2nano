@@ -630,7 +630,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
             }
             return IAction.CANCELED;
         }
-
+        checkSecurity(parms);
         convertDates(parms);
 
         refreshCurrentBeanValues(parms);
@@ -695,6 +695,25 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
             responseObject = performAction(uri, nav.current(), parms, responseObject);
         }
         return responseObject;
+    }
+
+    static void checkSecurity(Map<String, String> parms) {
+        String strBlackList = ENV.get("app.input.blacklist", "</,/>");
+        String allowedFields = ENV.get("app.input.blacklist.fieldnames.allowed.regex", "ZZZZZZ");
+        List<String> blacklist = Arrays.asList(strBlackList.split(","));
+        String v;
+        for (String k : parms.keySet()) {
+            v = parms.get(k);
+            if (!Util.isEmpty(v)) {
+                for (String bad : blacklist) {
+                    if (v.contains(bad) && !k.matches(allowedFields)) {
+                        throw new IllegalArgumentException("content of field " + k
+                                + " is part of a defined blacklist. to allow such content on that field"
+                                + ", add field name in 'app.input.blacklist.fieldnames.allowed.regex'");
+                    }
+                }
+            }
+        }
     }
 
     private IAction<?> setNavigationGimmicks(Object responseObject, Map<String, String> parms) {

@@ -17,27 +17,23 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.ConcurrentUtil;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
- * To handle a message - not to be thrown. See UncaughtExceptionHandler
+ * To handle a message - not to be thrown. See UncaughtExceptionHandler. can be handled anywhere in the own thread.
  * 
  * @author Tom
  * @version $Revision$
  */
 public class Message extends RuntimeException {
-    /** (optional) if not a text has to be sent but an object. then the message text is BYTEBUFFER */
-    ByteBuffer byteBuffer;
-
-    /** serialVersionUID */
     private static final long serialVersionUID = 1L;
 
     private static final Log LOG = LogFactory.getLog(Message.class);
 
-    private static final String BYTEBUFFER = "BYTEBUFFER";
-
     protected Message() {
-	}
-    
+    }
+
     /**
      * constructor
      * 
@@ -54,8 +50,8 @@ public class Message extends RuntimeException {
      * @param byteBuffer
      */
     public Message(ByteBuffer byteBuffer) {
-        super(BYTEBUFFER);
-        this.byteBuffer = byteBuffer;
+        super(StringUtil.toHexString(byteBuffer.array()));
+        LOG.trace("creating message from bytebuffer ");
     }
 
     @Override
@@ -64,15 +60,15 @@ public class Message extends RuntimeException {
     }
 
     public static final void send(Throwable msgHolder) {
-        //the @ is a prefix to be shown as message on the client
+        // the @ is a prefix to be shown as message on the client
         send("@" + ManagedException.toRuntimeEx(msgHolder, false, false).getMessage());
     }
-    
+
     public static final void send(String message) {
-        //TODO: why the current thread doesn't have the right handler? using
-        //      the environment will create problems on multi-sessions!
+        // TODO: why the current thread doesn't have the right handler? using
+        // the environment will create problems on multi-sessions!
         send(ENV.get(UncaughtExceptionHandler.class), message);
-        
+
         send(Thread.currentThread().getUncaughtExceptionHandler(), message);
     }
 
@@ -98,6 +94,11 @@ public class Message extends RuntimeException {
         } else {
             LOG.info(message);
         }
+    }
+
+    public static final <T> T sendAndWaitForResponse(String message, Class<T> responseType) {
+        send(message);
+        return ConcurrentUtil.waitFor(responseType);
     }
 
     @Override

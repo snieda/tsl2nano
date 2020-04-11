@@ -31,6 +31,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -655,6 +656,16 @@ public class CoreUtilTest implements ENVTestPreparation {
 		ConcurrentUtil.waitFor(()->isTrue(list));
 		
 	}
+
+	@Test
+	public void testReadWriteLock() {
+		// new HashMap<>() {
+		// 	SupplierLock = ConcurrentUtil.createReadWriteLock();
+		// 	public V put(K key, V value) {
+
+		// 	}
+	}
+
 	boolean isTrue(List<Integer> list) {
 		int count = list.size();
 		System.out.println(count);

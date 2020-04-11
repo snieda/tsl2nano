@@ -31,10 +31,12 @@ import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.messaging.IListener;
 import de.tsl2.nano.core.messaging.IStatefulListener;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.h5.NanoH5Session;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
+import de.tsl2.nano.h5.websocket.dialog.WSResponse;
 import de.tsl2.nano.math.vector.Point;
 
 /**
@@ -69,6 +71,7 @@ public class NanoWebSocketServer extends WebSocketServer {
     public static final String TARGET_DEPENDENCY = "dependency";
     public static final String TARGET_INPUTASSIST = "inputassist";
     public static final String TARGET_ATTACHMENT = "attachment";
+    public static final String TARGET_DIALOG = "dialog";
 
     /**
      * constructor
@@ -157,6 +160,9 @@ public class NanoWebSocketServer extends WebSocketServer {
                  * attachments are handled through onMessage(WebSocket, ByteBuffer).
                  */
                 attachment_info = msg;
+                break;
+            case TARGET_DIALOG:
+                ConcurrentUtil.setCurrent(new WSResponse(getValue(msg)));
                 break;
             default:
                 LOG.error("unexptected message target: " + target);

@@ -122,6 +122,42 @@ i:hover + p {
     padding-bottom: 6;
 }
 
+/* tag dialog used by websockets */
+dialog {
+top: 28%;
+width: 400px;  
+border: 1px solid rgba(0, 0, 0, 0.3);
+border-radius: 15px;
+box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+border-top: 5px solid #eb9816;
+}
+button{
+display: inline-block;
+border-radius: 3px;
+border: none;
+font-size: 0.9rem;
+padding: 0.4rem 0.8em;
+background: #eb9816;
+border-bottom: 1px solid #f1b75c;
+color: white;
+font-weight: bold;
+margin: 0 0.25rem;
+text-align: center;
+}
+button:hover, button:focus {
+opacity: 0.92;
+cursor: pointer;
+}
+dialog::backdrop{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+
 @-ms-viewport only screen and (max-width: 640px){
   user-scalable: no;
 }

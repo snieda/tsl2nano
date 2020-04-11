@@ -9,12 +9,14 @@
  */
 package de.tsl2.nano.h5;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -32,6 +34,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
@@ -365,10 +368,7 @@ public class HtmlUtil {
             /*
              * now, parse the text
              */
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            InputSource is = new InputSource(new StringReader(text));
-            Document d = builder.parse(is);
+            Document d = createDocument(text);
 
             /*
              * fill the parsed nodes into our document
@@ -381,6 +381,21 @@ public class HtmlUtil {
         } catch (Exception e1) {
             //don't interrupt the html response but show the error message.
             e.setTextContent(e1.getLocalizedMessage());
+        }
+    }
+
+    public static Document createDocument(String text) {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            if (Util.isEmpty(text)) {
+                return builder.newDocument();
+            }
+            InputSource is = new InputSource(new StringReader(text));
+            return builder.parse(is);
+        } catch (Exception ex) {
+            ManagedException.forward(ex);
+            return null;
         }
     }
 
@@ -478,28 +493,35 @@ public class HtmlUtil {
         return styleKey + ": " + styleValue + "; ";
     }
 
-    /**
+    public static String toString(Document doc) {
+        return toString(doc, false);
+    }
+    
+        /**
      * creates an utf-8 string with indentation.
      * 
      * @param doc document to transform to a string
      * @return string
      */
-    public static String toString(Document doc) {
+    public static String toString(Document doc, boolean omitXmlAndDoctype) {
         //set up a transformer
         try {
             Transformer trans = TransformerFactory.newInstance().newTransformer();
-//            trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-            trans.setOutputProperty(OutputKeys.INDENT, "yes");
-//            trans.setOutputProperty(OutputKeys.METHOD, "xml");
-            trans.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-            trans.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "html");
-            trans.setOutputProperty(OutputKeys.VERSION, "text"); //-> to be ignored
-            
+            if (omitXmlAndDoctype) {
+                trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            } else {
+                trans.setOutputProperty(OutputKeys.INDENT, "yes");
+    //            trans.setOutputProperty(OutputKeys.METHOD, "xml");
+                trans.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+                trans.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "html");
+                trans.setOutputProperty(OutputKeys.VERSION, "text"); //-> to be ignored
+            }
             //create string from xml tree
             StringWriter sw = new StringWriter();
             StreamResult result = new StreamResult(sw);
             //on android systems we have problems on null-nodes
-            deleteNullNode(doc.getDocumentElement());
+            if (doc.getDocumentElement() != null)
+                deleteNullNode(doc.getDocumentElement());
             DOMSource source = new DOMSource(doc);
             trans.transform(source, result);
             return sw.toString();
@@ -580,7 +602,7 @@ public class HtmlUtil {
         return EMPTY_CONTENT;
     }
 
-    protected static final StringBuilder content(String str) {
+    public static final StringBuilder content(String str) {
         return str != null ? new StringBuilder(str) : EMPTY_CONTENT;
     }
 

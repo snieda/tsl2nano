@@ -20,12 +20,13 @@ import de.tsl2.nano.core.exception.ExceptionHandler;
 import de.tsl2.nano.h5.NanoH5Session;
 
 /**
- * ExceptionHandler sending all exceptions/message through the given websocket connection.
+ * ExceptionHandler sending all exceptions/message through the given websocket
+ * connection.
  * 
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
-public class WebSocketExceptionHandler extends ExceptionHandler implements Closeable{
+public class WebSocketExceptionHandler extends ExceptionHandler implements Closeable {
     NanoWebSocketServer socket;
 
     /**
@@ -47,16 +48,16 @@ public class WebSocketExceptionHandler extends ExceptionHandler implements Close
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
-        String msg = e.getMessage(); 
+        String msg = e.getMessage();
         if (msg != null && msg.startsWith(NanoH5Session.PREFIX_STATUS_LINE)) {
             super.uncaughtException(t, e);
         }
-//        else {
-            Collection<WebSocket> connections = socket.connections();
-            for (WebSocket webSocket : connections) {
-                webSocket.send(msg != null ? msg : e.toString());
-            }
-//        }
+        // else {
+        Collection<WebSocket> connections = socket.connections();
+        for (WebSocket webSocket : connections) {
+            webSocket.send(msg != null ? msg : e.toString());
+        }
+        // }
     }
 
     /**

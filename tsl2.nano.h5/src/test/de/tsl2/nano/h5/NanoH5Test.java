@@ -11,6 +11,7 @@ package de.tsl2.nano.h5;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -503,6 +504,44 @@ public class NanoH5Test implements ENVTestPreparation {
         Bean<Persistence> persistenceUI = PersistenceUI.createPersistenceUI(Persistence.current(), null);
         assertEquals("connectionUserName", persistenceUI.getAttributeNames()[0]);
     }
+
+    @Test
+    public void testCheckSecurity() {
+        //ok
+        NanoH5Session.checkSecurity(MapUtil.asProperties("myFieldName", "myValue"));
+
+        //not ok
+        try {
+            NanoH5Session.checkSecurity(MapUtil.asProperties("myFieldName", "</script>"));
+            fail();
+        } catch (IllegalArgumentException ex) {
+            //ok
+        }
+
+        try {
+            NanoH5Session.checkSecurity(MapUtil.asProperties("myFieldName", "<script/>"));
+            fail();
+        } catch (IllegalArgumentException ex) {
+            //ok
+        }
+    }
+        @Test
+        public void testCheckSecurityBlacklist() {
+            String strBlackList = ENV.get("app.input.blacklist", "</,/>,notallowed");
+            String allowedFields = ENV.get("app.input.blacklist.fieldnames.allowed.regex", "ZZZZZZ");
+
+            NanoH5Session.checkSecurity(MapUtil.asProperties("myFieldName", "myValue"));
+            //field is allowed
+            NanoH5Session.checkSecurity(MapUtil.asProperties("ZZZZZZ", "notallowed"));
+
+            //not ok
+            try {
+                NanoH5Session.checkSecurity(MapUtil.asProperties("myFieldName", "notallowed"));
+                fail();
+            } catch (IllegalArgumentException ex) {
+                //ok
+            }
+        }
 }
 //TODO: wieder rausschmeissen...
 class VerifyComparators

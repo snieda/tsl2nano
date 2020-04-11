@@ -1,6 +1,8 @@
 /*
  * javascript websocket-client implementation for nano.h5 (cr Thomas Schneider / 2014) 
  */
+// to see the source in browser dev source tab, we give it a name
+//# sourceURL=websocket.client.js
 
 /**
  * websocket client implementation.
@@ -17,7 +19,7 @@ socket.onopen = function() {
 socket.onerror = function(error) {
 	console.log('websocket error ' + error);
 	if (${websocket.window.alert.message})
-		window.alert("websocket error occurred! " + error + "\n\ndependency listeners, content assists and attachment uploading doesn't work!");
+		window.alert("websocket error occurred! " + error + "\n\ndependency listeners, content assists and attachment uploading dont work!");
 };
 
 /**
@@ -35,6 +37,8 @@ socket.onmessage = function(e) {
 		// TODO: impl.
 	} else if (e.data.indexOf('/broadcast') == 0) {
 		showBroadcastMessage(e.data);
+	} else if (e.data.indexOf('/dialog') == 0) {
+		showDialog(e.data);
 	} else
 		showStatusMessage(e.data);
 };
@@ -299,3 +303,31 @@ document.addEventListener('ondblclick', function(e){
 	disablePage(e);
 });
 
+function showDialog(htmlDlg) {
+	htmlDlg = htmlDlg.substring(8); // '/dialog:'
+	//create the html dialog
+	body = document.getElementsByTagName("body")[0];
+	body.insertAdjacentHTML('afterbegin', htmlDlg);
+
+	//show the dialog
+	var formDialog = document.getElementById('formDialog');
+	formDialog.showModal();
+
+	//listen to the events
+	document.getElementById('button').onclick = function() {
+		elements = document.getElementsByName("formDialog");
+		var values = value + ":: ";
+		for (let i = 0; i < elements.length; i++) {
+			const e = elements[i];
+			values += e.name + ":" + e.value + ",";
+		}
+		formDialog.close(values);
+
+		var result = createMessage('dialog', "returnvalue", formDialog.returnValue);
+		console.log('sending dialog result: \'' + result + '\'');
+		socket.send(result);
+	};
+	document.getElementById('formDialog').addEventListener('close', function() {
+		alert(formDialog.returnValue);
+	});
+}
