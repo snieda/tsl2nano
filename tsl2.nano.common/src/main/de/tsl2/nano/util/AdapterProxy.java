@@ -11,6 +11,7 @@ package de.tsl2.nano.util;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 /**
  * TODO: implement generic adapter to be usable as base class for interface implementations.
@@ -19,6 +20,11 @@ import java.lang.reflect.Method;
  * @version $Revision$
  */
 public class AdapterProxy implements InvocationHandler {
+    @SuppressWarnings("unchecked")
+    public static final <T> T create(Class<T> interfaze) {
+        return ((T) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
+            new Class[] { interfaze }, new AdapterProxy()));
+    }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {

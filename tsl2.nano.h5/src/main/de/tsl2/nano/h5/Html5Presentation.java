@@ -118,6 +118,7 @@ import de.tsl2.nano.h5.expression.QueryPool;
 import de.tsl2.nano.h5.plugin.IDOMDecorator;
 import de.tsl2.nano.h5.websocket.WSEvent;
 import de.tsl2.nano.h5.websocket.WebSocketRuleDependencyListener;
+import de.tsl2.nano.h5.websocket.dialog.WSDialog;
 import de.tsl2.nano.incubation.specification.actions.ActionPool;
 import de.tsl2.nano.incubation.specification.rules.RuleDependencyListener;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
@@ -451,88 +452,93 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 body = createMetaAndBody(session, html, title, interactive);
             }
 
-            /*
-             * create the header elements:
-             * c1: left: App-Info with image
-             * c2: center: Page-Title with image
-             * c3: Page-Buttons
-             */
-            Element row = appendTag(createGrid(body, "page.header.table", "page.header.table", 0), TABLE(TAG_ROW));
-            Element c1 = appendTag(row, TABLE(TAG_CELL));
-            Element c2 = appendTag(row, TABLE(TAG_CELL));
-            String localDoc = ENV.getConfigPath() + "nano.h5.html";
-            String docLink =
-                new File(localDoc).canRead() ? "./nano.h5.html" : "https://sourceforge.net/p/tsl2nano/wiki/";
-            c1 = appendElement(c1, TAG_LINK, ATTR_HREF, docLink);
-            appendElement(c1,
-                TAG_IMAGE,
-                content(),
-                ATTR_SRC,
-                "icons/beanex-logo-micro.jpg",
-                ATTR_TITLE,
-                "Framework Version: " + ENV.getBuildInformations());
-
-            if (image != null) {
-                c2 = appendElement(c2, TAG_H3, content(), ATTR_ALIGN, ALIGN_CENTER);
-                appendElement(c2,
-                    TAG_IMAGE,
-                    content(title),
-                    ATTR_SRC,
-                    image,
-                    ATTR_STYLE,
-                    style("display", "inline"));
-            } else {
-                String docURL;
-                if (bean != null && ENV.class.isAssignableFrom(bean.getClazz()))
-                    docURL = new File("./").getAbsolutePath();
-                else
-                    docURL = ENV.get("doc.url." + bean.getName().toLowerCase(),
-                        "doc/" + StringUtil.toFirstLower(title) + "/index.html");
-                if (new File(ENV.getConfigPath() + docURL).canRead() || (!docURL.contains(" ") && NetUtil.isURL(docURL))) {
-                    c2 = appendElement(c2, TAG_H3, ATTR_ALIGN, ALIGN_CENTER, ATTR_STYLE,
-                        style("display", "inline"));
-                    appendElement(c2, TAG_LINK, content(title), ATTR_HREF, ENV.getConfigPath() + docURL);
-                } else {
-                    c2 = appendElement(c2, TAG_H3, content(title), ATTR_ALIGN, ALIGN_CENTER, ATTR_STYLE,
-                        style("display", "inline"));
-                }
-            }
-            Element c3 = appendTag(row, TABLE(TAG_CELL, ATTR_ALIGN, ALIGN_RIGHT));
-            if (interactive && bean != null) {
-                if (useCSS) {
-                    Element menu = createMenu(c3, "Menu");
-                    createSubMenu(menu, ENV.translate("tsl2nano.application", true), "iconic home",
-                        getApplicationActions(session));
-                    createSubMenu(menu, ENV.translate("tsl2nano.session", true), "iconic map-pin",
-                        getSessionActions(session));
-                    createSubMenu(menu, ENV.translate("tsl2nano.page", true), "iconic magnifying-glass",
-                        getPageActions(session));
-                } else {
-                    //fallback: setting style from environment-properties
-                    appendAttributes((Element) c3.getParentNode(), ATTR_STYLE,
-                        ENV.get("layout.header.grid.style", "background-image: url(icons/spe.jpg);"));
-                    c3 = appendElement(c3,
-                        TAG_FORM,
-                        ATTR_ACTION,
-                        "?",
-                        ATTR_METHOD,
-                        ENV.get("html5.http.method", "post"), ATTR_STYLE,
-                        style("display", "inline"));
-                    Collection<IAction> actions = new ArrayList<IAction>(getPageActions(session));
-                    actions.addAll(getApplicationActions(session));
-                    actions.addAll(getSessionActions(session));
-                    if (!useSideNav(1 + actions.size()))
-                        c3 = createExpandable(c3, "Menu", ENV.get("layout.header.menu.open", false));
-                    createActionPanel(c3, actions,
-                        ENV.get("layout.header.button.text.show", true),
-                        ATTR_ALIGN, ALIGN_RIGHT);
-                }
-            }
-            return body;
+            return createHeaderElements(session, title, image, interactive, body, useCSS);
         } catch (ParserConfigurationException e) {
             ManagedException.forward(e);
             return null;
         }
+    }
+
+    private Element createHeaderElements(ISession session, String title, String image, boolean interactive, Element body,
+            boolean useCSS) {
+        /*
+         * create the header elements:
+         * c1: left: App-Info with image
+         * c2: center: Page-Title with image
+         * c3: Page-Buttons
+         */
+        Element row = appendTag(createGrid(body, "page.header.table", "page.header.table", 0), TABLE(TAG_ROW));
+        Element c1 = appendTag(row, TABLE(TAG_CELL));
+        Element c2 = appendTag(row, TABLE(TAG_CELL));
+        String localDoc = ENV.getConfigPath() + "nano.h5.html";
+        String docLink =
+            new File(localDoc).canRead() ? "./nano.h5.html" : "https://sourceforge.net/p/tsl2nano/wiki/";
+        c1 = appendElement(c1, TAG_LINK, ATTR_HREF, docLink);
+        appendElement(c1,
+            TAG_IMAGE,
+            content(),
+            ATTR_SRC,
+            "icons/beanex-logo-micro.jpg",
+            ATTR_TITLE,
+            "Framework Version: " + ENV.getBuildInformations());
+
+        if (image != null) {
+            c2 = appendElement(c2, TAG_H3, content(), ATTR_ALIGN, ALIGN_CENTER);
+            appendElement(c2,
+                TAG_IMAGE,
+                content(title),
+                ATTR_SRC,
+                image,
+                ATTR_STYLE,
+                style("display", "inline"));
+        } else {
+            String docURL;
+            if (bean != null && ENV.class.isAssignableFrom(bean.getClazz()))
+                docURL = new File("./").getAbsolutePath();
+            else
+                docURL = ENV.get("doc.url." + bean.getName().toLowerCase(),
+                    "doc/" + StringUtil.toFirstLower(title) + "/index.html");
+            if (new File(ENV.getConfigPath() + docURL).canRead() || (!docURL.contains(" ") && NetUtil.isURL(docURL))) {
+                c2 = appendElement(c2, TAG_H3, ATTR_ALIGN, ALIGN_CENTER, ATTR_STYLE,
+                    style("display", "inline"));
+                appendElement(c2, TAG_LINK, content(title), ATTR_HREF, ENV.getConfigPath() + docURL);
+            } else {
+                c2 = appendElement(c2, TAG_H3, content(title), ATTR_ALIGN, ALIGN_CENTER, ATTR_STYLE,
+                    style("display", "inline"));
+            }
+        }
+        Element c3 = appendTag(row, TABLE(TAG_CELL, ATTR_ALIGN, ALIGN_RIGHT));
+        if (interactive && bean != null) {
+            if (useCSS) {
+                Element menu = createMenu(c3, "Menu");
+                createSubMenu(menu, ENV.translate("tsl2nano.application", true), "iconic home",
+                    getApplicationActions(session));
+                createSubMenu(menu, ENV.translate("tsl2nano.session", true), "iconic map-pin",
+                    getSessionActions(session));
+                createSubMenu(menu, ENV.translate("tsl2nano.page", true), "iconic magnifying-glass",
+                    getPageActions(session));
+            } else {
+                //fallback: setting style from environment-properties
+                appendAttributes((Element) c3.getParentNode(), ATTR_STYLE,
+                    ENV.get("layout.header.grid.style", "background-image: url(icons/spe.jpg);"));
+                c3 = appendElement(c3,
+                    TAG_FORM,
+                    ATTR_ACTION,
+                    "?",
+                    ATTR_METHOD,
+                    ENV.get("html5.http.method", "post"), ATTR_STYLE,
+                    style("display", "inline"));
+                Collection<IAction> actions = new ArrayList<IAction>(getPageActions(session));
+                actions.addAll(getApplicationActions(session));
+                actions.addAll(getSessionActions(session));
+                if (!useSideNav(1 + actions.size()))
+                    c3 = createExpandable(c3, "Menu", ENV.get("layout.header.menu.open", false));
+                createActionPanel(c3, actions,
+                    ENV.get("layout.header.button.text.show", true),
+                    ATTR_ALIGN, ALIGN_RIGHT);
+            }
+        }
+        return body;
     }
 
     private boolean useSideNav(int actionCount) {
@@ -613,6 +619,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         }
     }
 
+    @Override
+    public String buildDialog(Object title, Object model) {
+        return WSDialog.createHtmlFromBean(String.valueOf(title), model);
+    }
+
     /**
      * builds a full html document
      * 
@@ -647,7 +658,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         }
 
         //navigation bar
-        if (interactive && navigation.length > 0) {
+        if (interactive && !Util.isEmpty(navigation)) {
             createNavigationbar(parent, navigation);
         }
 
@@ -1826,24 +1837,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             parent.getNodeName().equals(TAG_ROW) || TAG_ROW.equals(parent.getAttribute(ATTR_CLASS)) ? parent
                 : appendTag(parent, TABLE(TAG_ROW)/*, ATTR_STYLE, VAL_OPAC*/);
         //first the label
-        if (p.getLabel() != null) {
-            Element cellLabel = appendTag(row, TABLE(TAG_CELL, content(p.getLabel()
-                + (beanValue.nullable() ? "" : isGeneratedValue(beanValue) ? " (!)" : " (*)")), ATTR_ID,
-                beanValue.getId() + ".label",
-                ATTR_CLASS,
-                "beanfieldlabel",
-                ATTR_WIDTH,
-                ENV.get("layout.attribute.label.width", "250"), ATTR_STYLE, style(STYLE_FONT_COLOR,
-                    (String) BeanUtil.valueOf(asString(p.getForeground()),
-                        ENV.get("layout.attribute.label.color", "#0000cc"))),
-                enableFlag(ATTR_HIDDEN, !p.isVisible()),
-                enableFlag(ATTR_REQUIRED, !beanValue.nullable() && !isGeneratedValue(beanValue))));
-            if (p.getIcon() != null) {
-                appendElement(cellLabel, TAG_IMAGE, ATTR_SRC, p.getIcon());
-            }
-        } else {//create an empty label
-            appendTag(row, TABLE(TAG_CELL));
-        }
+        createFieldLabel(beanValue, p, row);
         //create the layout and layout-constraints
         Element cell = appendTag(row, TABLE(TAG_CELL));
         cell = createLayoutConstraints(cell, p);
@@ -1927,82 +1921,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 }
                 if (interactive) {
                     //create a finder button - on disabled items, show a view with details!
-                    if (beanValue.isSelectable()) {
-                        String shortcut = shortCut(++tabIndex);
-                        Element a = createAction(cell,
-                            beanValue.getName() + POSTFIX_SELECTOR,
-                            CSS_CLASS_ACTION,
-                            ENV.translate("tsl2nano.finder.action.label", false),
-                            ENV.translate("tsl2nano.selection", true),
-                            null,
-                            shortcut,
-                            null,
-                            beanValue.hasWriteAccess(),
-                            false,
-                            true);
-                        appendAttributes(a, "tabindex", shortcut);
-                        addManyToOnePicture(cell, beanValue);
-                    }
-                    if (p.getEnabler().isActive()) {
-                        //on focus gained, preselect text
-                        if (ENV.get("websocket.autoselect", true)) {
-                            appendAttributes(input, "onfocus", "this.select();");
-                        }
-
-                        if (ENV.get("websocket.use", true)) {
-                            //perhaps create an input assist listener
-                            if (beanValue.getValueExpression() != null && ENV.get("websocket.use.inputassist", true)) {
-                                appendAttributes(input, "onkeypress",
-                                    ENV.get("websocket.inputassist.function", "inputassist(event)"));
-                            }
-                            //perhaps create an dependency listener
-                            if (beanValue.hasListeners()) {
-                                appendAttributes(input, "onblur",
-                                    ENV.get("websocket.dependency.function", "evaluatedependencies(event)"));
-                                if (true/*(isData(beanValue)*/) {//provide mouseclicks on pictures
-                                    appendAttributes(input, "onclick",
-                                        ENV.get("websocket.dependency.function", "evaluatedependencies(event)"));
-                                }
-                            }
-                            //handle attachments
-                            if (BitUtil.hasBit(beanValue.getPresentation().getType(), TYPE_ATTACHMENT)) {
-                                appendAttributes(input, "onchange",
-                                    ENV.get("websocket.attachment.function", "transferattachment(this)"));
-                                /*
-                                 * save the attachment to file system to be transferred by http-server,
-                                 * using bean-id and attribute name
-                                 */
-                                Object v = beanValue.getValue();
-    //                        if (beanValue instanceof Attachment) {
-    //                            FileUtil.writeBytes(((Attachment)beanValue).getValue(), FileUtil.getValidFileName(beanValue.getName()), false);
-    //                        } else {
-                                if (!Util.isEmpty(v)) {
-                                    boolean writeFile = true;
-                                    if (v instanceof String)
-                                        if (new File((String) v).exists())
-                                            v =
-                                                FileUtil.getFileBytes(Attachment.getFilename(beanValue.getInstance(),
-                                                    beanValue.getName(), (String) v), null);
-                                        else //not a file name and no data --> do nothing
-                                            writeFile = false;
-    
-                                    if (writeFile && (ByteUtil.isByteStream(v.getClass())
-                                        || Serializable.class.isAssignableFrom(v.getClass())))
-                                        FileUtil.writeBytes(ByteUtil.getBytes(v),
-                                            beanValue.getValueFile().getPath(),
-                                            false);
-                                    else if (writeFile)
-                                        throw new IllegalStateException("attachment of attribute '"
-                                            + beanValue.getValueId()
-                                            + "' should be of type byte[], ByteBuffer, Blob or String - or at least Serializable!");
-                                }
-                            }
-                        }
-//                    }
-                    } else {//gray background on disabled
-                        appendAttributes(input, ATTR_STYLE,
-                            ENV.get("layout.field.disabled.style", STYLE_BACKGROUND_LIGHTGRAY));
-                    }
+                    createFieldFinderButton(beanValue, p, cell, input);
                 }
             }
         } else {
@@ -2019,6 +1938,106 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ATTR_STYLE, style(STYLE_FONT_COLOR, COLOR_RED)));
         }
         return input;
+    }
+
+    private void createFieldFinderButton(BeanValue<?> beanValue, IPresentable p, Element cell, Element input) {
+        if (beanValue.isSelectable()) {
+            String shortcut = shortCut(++tabIndex);
+            Element a = createAction(cell,
+                beanValue.getName() + POSTFIX_SELECTOR,
+                CSS_CLASS_ACTION,
+                ENV.translate("tsl2nano.finder.action.label", false),
+                ENV.translate("tsl2nano.selection", true),
+                null,
+                shortcut,
+                null,
+                beanValue.hasWriteAccess(),
+                false,
+                true);
+            appendAttributes(a, "tabindex", shortcut);
+            addManyToOnePicture(cell, beanValue);
+        }
+        if (p.getEnabler().isActive()) {
+            //on focus gained, preselect text
+            if (ENV.get("websocket.autoselect", true)) {
+                appendAttributes(input, "onfocus", "this.select();");
+            }
+
+            if (ENV.get("websocket.use", true)) {
+                //perhaps create an input assist listener
+                if (beanValue.getValueExpression() != null && ENV.get("websocket.use.inputassist", true)) {
+                    appendAttributes(input, "onkeypress",
+                        ENV.get("websocket.inputassist.function", "inputassist(event)"));
+                }
+                //perhaps create an dependency listener
+                if (beanValue.hasListeners()) {
+                    appendAttributes(input, "onblur",
+                        ENV.get("websocket.dependency.function", "evaluatedependencies(event)"));
+                    if (true/*(isData(beanValue)*/) {//provide mouseclicks on pictures
+                        appendAttributes(input, "onclick",
+                            ENV.get("websocket.dependency.function", "evaluatedependencies(event)"));
+                    }
+                }
+                //handle attachments
+                if (BitUtil.hasBit(beanValue.getPresentation().getType(), TYPE_ATTACHMENT)) {
+                    appendAttributes(input, "onchange",
+                        ENV.get("websocket.attachment.function", "transferattachment(this)"));
+                    /*
+                     * save the attachment to file system to be transferred by http-server,
+                     * using bean-id and attribute name
+                     */
+                    Object v = beanValue.getValue();
+   //                        if (beanValue instanceof Attachment) {
+   //                            FileUtil.writeBytes(((Attachment)beanValue).getValue(), FileUtil.getValidFileName(beanValue.getName()), false);
+   //                        } else {
+                    if (!Util.isEmpty(v)) {
+                        boolean writeFile = true;
+                        if (v instanceof String)
+                            if (new File((String) v).exists())
+                                v =
+                                    FileUtil.getFileBytes(Attachment.getFilename(beanValue.getInstance(),
+                                        beanValue.getName(), (String) v), null);
+                            else //not a file name and no data --> do nothing
+                                writeFile = false;
+   
+                        if (writeFile && (ByteUtil.isByteStream(v.getClass())
+                            || Serializable.class.isAssignableFrom(v.getClass())))
+                            FileUtil.writeBytes(ByteUtil.getBytes(v),
+                                beanValue.getValueFile().getPath(),
+                                false);
+                        else if (writeFile)
+                            throw new IllegalStateException("attachment of attribute '"
+                                + beanValue.getValueId()
+                                + "' should be of type byte[], ByteBuffer, Blob or String - or at least Serializable!");
+                    }
+                }
+            }
+//                    }
+        } else {//gray background on disabled
+            appendAttributes(input, ATTR_STYLE,
+                ENV.get("layout.field.disabled.style", STYLE_BACKGROUND_LIGHTGRAY));
+        }
+    }
+
+    private void createFieldLabel(BeanValue<?> beanValue, IPresentable p, Element row) {
+        if (p.getLabel() != null) {
+            Element cellLabel = appendTag(row, TABLE(TAG_CELL, content(p.getLabel()
+                + (beanValue.nullable() ? "" : isGeneratedValue(beanValue) ? " (!)" : " (*)")), ATTR_ID,
+                beanValue.getId() + ".label",
+                ATTR_CLASS,
+                "beanfieldlabel",
+                ATTR_WIDTH,
+                ENV.get("layout.attribute.label.width", "250"), ATTR_STYLE, style(STYLE_FONT_COLOR,
+                    (String) BeanUtil.valueOf(asString(p.getForeground()),
+                        ENV.get("layout.attribute.label.color", "#0000cc"))),
+                enableFlag(ATTR_HIDDEN, !p.isVisible()),
+                enableFlag(ATTR_REQUIRED, !beanValue.nullable() && !isGeneratedValue(beanValue))));
+            if (p.getIcon() != null) {
+                appendElement(cellLabel, TAG_IMAGE, ATTR_SRC, p.getIcon());
+            }
+        } else {//create an empty label
+            appendTag(row, TABLE(TAG_CELL));
+        }
     }
 
     private String asString(int[] color) {

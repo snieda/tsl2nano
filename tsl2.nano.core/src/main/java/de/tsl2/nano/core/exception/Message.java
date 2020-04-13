@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.core.exception;
 
+import java.io.Serializable;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.nio.ByteBuffer;
 
@@ -18,6 +19,7 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ConcurrentUtil;
+import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
@@ -31,27 +33,24 @@ public class Message extends RuntimeException {
 
     private static final Log LOG = LogFactory.getLog(Message.class);
 
+    public static final String PREFIX_DIALOG = "/dialog:";
+
     protected Message() {
     }
 
-    /**
-     * constructor
-     * 
-     * @param message
-     */
     public Message(String message) {
         super(message);
         LOG.trace("creating message: " + message);
     }
 
-    /**
-     * constructor
-     * 
-     * @param byteBuffer
-     */
     public Message(ByteBuffer byteBuffer) {
         super(StringUtil.toHexString(byteBuffer.array()));
         LOG.trace("creating message from bytebuffer ");
+    }
+
+    public Message(Serializable beanInstance) {
+        super(hex(beanInstance));
+        LOG.trace("creating message from serialize object ");
     }
 
     @Override
@@ -96,6 +95,14 @@ public class Message extends RuntimeException {
         }
     }
 
+    public static final <T> T ask(T askInstance) {
+        Object result = sendAndWaitForResponse(hex(askInstance), (Class<T>)askInstance.getClass());
+        return (T) ObjectUtil.convertToObject(StringUtil.fromHexString((String) result).getBytes());
+    }
+
+    public static <T> String hex(T askInstance) {
+        return PREFIX_DIALOG + StringUtil.toHexString(ObjectUtil.serialize(askInstance));
+    }
     public static final <T> T sendAndWaitForResponse(String message, Class<T> responseType) {
         send(message);
         return ConcurrentUtil.waitFor(responseType);

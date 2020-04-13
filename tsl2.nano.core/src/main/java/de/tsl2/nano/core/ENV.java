@@ -1046,6 +1046,9 @@ public class ENV implements Serializable {
             Message
                 .send("resolving dependencies: "
                     + StringUtil.toString(dependencyNames, 300));
+            
+            // Message.ask(new ValueHolder(Boolean.TRUE));
+
             Object result = get(CompatibilityLayer.class).run(clsJarResolver, "install", new Class[] { String[].class },
                 new Object[] { dependencyNames });
             if (result == null || result.toString().startsWith("FAILED"))

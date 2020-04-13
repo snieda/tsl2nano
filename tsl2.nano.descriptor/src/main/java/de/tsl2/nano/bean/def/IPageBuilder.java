@@ -27,6 +27,8 @@ public interface IPageBuilder<PAGE, OUTPUT> {
      */
     OUTPUT build(ISession session, BeanDefinition<?> model, Object message, boolean interactive, BeanDefinition<?>... navigation);
 
+    OUTPUT buildDialog(Object title, Object model);
+
     /**
      * create a full page and decorate a message
      * @param message
