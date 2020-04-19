@@ -1,5 +1,6 @@
 package de.tsl2.nano.h5.websocket.dialog;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class WSItem implements IHtmlItem {
@@ -33,12 +34,14 @@ public class WSItem implements IHtmlItem {
 
     @Override
     public Map<String, Object> getSpecificAttributes() {
+        if (attributes == null)
+            attributes = new HashMap<>();
         return attributes;
     }
 
     @Override
     public String getId() {
-        return getTag() + ".id";
+        return WSDialog.PREFIX_NAME + getTag() + "." + getName() + ".id";
     }
 
 }

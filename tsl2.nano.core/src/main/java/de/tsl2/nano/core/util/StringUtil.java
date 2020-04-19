@@ -855,10 +855,10 @@ public class StringUtil {
     public static boolean isHexString(String txt) {
         char[] carray = txt.toCharArray();
         for (int i = 0; i < carray.length; i++) {
-            if (Character.digit(carray[i], 16) != -1)
+            if (Character.digit(carray[i], 16) == -1)
                 return false;
         }
-        return false;
+        return true;
     }
     
     public static String fromBaseString(String hex, int base) {

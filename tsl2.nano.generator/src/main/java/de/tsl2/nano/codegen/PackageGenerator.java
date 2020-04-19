@@ -10,7 +10,6 @@
 package de.tsl2.nano.codegen;
 
 import java.io.File;
-import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;

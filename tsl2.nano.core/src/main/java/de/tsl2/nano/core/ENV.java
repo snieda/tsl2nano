@@ -1043,11 +1043,15 @@ public class ENV implements Serializable {
         String clsJarResolver = "de.tsl2.nano.jarresolver.JarResolver";
         if (get("classloader.usenetwork.loader", true) && NetUtil.isOnline()
             && get(CompatibilityLayer.class).isAvailable(clsJarResolver)) {
-            Message
-                .send("resolving dependencies: "
+            Message.send("resolving dependencies: "
                     + StringUtil.toString(dependencyNames, 300));
             
-            // Message.ask(new ValueHolder(Boolean.TRUE));
+            if (!get("classloader.usenetwork.loader.asked", false) 
+                && !Message.ask("load dependencies from maven: " + StringUtil.toString(dependencyNames, 300) + "? ", true)) {
+                setProperty("classloader.usenetwork.loader", false);
+                setProperty("classloader.usenetwork.loader.asked", true);
+                return "user denied - no dependencies loaded";
+            }
 
             Object result = get(CompatibilityLayer.class).run(clsJarResolver, "install", new Class[] { String[].class },
                 new Object[] { dependencyNames });

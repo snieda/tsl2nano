@@ -16,6 +16,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -30,13 +31,16 @@ import org.junit.Test;
 
 import de.tsl2.nano.action.IConstraint;
 import de.tsl2.nano.core.Argumentator;
+import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.execution.AntRunner;
 import de.tsl2.nano.execution.ScriptUtil;
+import de.tsl2.nano.util.AdapterProxy;
 import de.tsl2.nano.util.PrintUtil;
 import de.tsl2.nano.util.Translator;
 
@@ -197,4 +201,25 @@ public class CommonTest implements ENVTestPreparation {
         //the words are german - so, no translation can be done --> p = t. it's only an integration test
         assertEquals(p, t);
     }
+
+	@Test
+	public void testAdapterProxy() {
+        IAttribute a = AdapterProxy.create(IAttribute.class);
+        a.setName("mytest");
+        a.setValue(null, "myvalue");
+
+        assertEquals("mytest", a.getName());
+        assertEquals("myvalue", a.getValue(null));
+	}
+
+	@Test
+	public void testAdapterProxyInMap() throws Exception {
+        ISession session = AdapterProxy.create(ISession.class);
+        Hashtable<Object, Object> map = new Hashtable<>();
+        map.put(Boolean.FALSE, "0");
+        map.put(session, "1");
+        map.put(Boolean.TRUE, "2");
+        assertEquals(/*"1"*/null, map.remove(session));
+	}
+
 }

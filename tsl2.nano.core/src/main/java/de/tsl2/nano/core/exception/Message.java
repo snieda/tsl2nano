@@ -17,8 +17,11 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.ConcurrentUtil;
+import de.tsl2.nano.core.util.FormatUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
@@ -88,29 +91,64 @@ public class Message extends RuntimeException {
         if (exceptionHandler != null) {
             if (!(message instanceof Throwable)) 
                 LOG.info(message);
-            exceptionHandler.uncaughtException(Thread.currentThread(), message instanceof ByteBuffer ? new Message(
-                (ByteBuffer) message) : new Message(String.valueOf(message)));
+            exceptionHandler.uncaughtException(Thread.currentThread(), message instanceof ByteBuffer 
+                ? new Message((ByteBuffer) message) : new Message(String.valueOf(message)));
         } else {
             LOG.info(message);
         }
     }
 
-    public static final <T> T ask(T askInstance) {
-        Object result = sendAndWaitForResponse(hex(askInstance), (Class<T>)askInstance.getClass());
-        return (T) ObjectUtil.convertToObject(StringUtil.fromHexString((String) result).getBytes());
+    public static final <T> T ask(String message, T askInstance) {
+        T result = sendAndWaitForResponse(message + "@" + hex(askInstance), (Class<T>)askInstance.getClass());
+        return result != null ? result : askInstance;
     }
 
+    public static final <T> T sendAndWaitForResponse(String message, Class<T> responseType) {
+        // on dialog message, the exceptionhandler has to wait for a response in another thread
+        send(message);
+        Response response = ConcurrentUtil.getCurrent(Response.class);
+        ConcurrentUtil.removeCurrent(Response.class);
+        T value = response != null ? (T)response.value : null;
+        if (value instanceof String && PrimitiveUtil.isPrimitiveOrWrapper(responseType))
+            value = (T) FormatUtil.parse(responseType, (String)value);
+        LOG.info("message response: " + response + " ==> converting to (" + responseType + ") " + value);
+        return value;
+    }
+
+	public static Response createResponse(Object value) {
+		return new Response(value);
+    }
+    
+    public static Object obj(String hex) {
+        byte[] obj = ByteUtil.fromHex(hex.substring(Message.PREFIX_DIALOG.length()));
+        return ObjectUtil.convertToObject(obj);
+    }
+    
     public static <T> String hex(T askInstance) {
         return PREFIX_DIALOG + StringUtil.toHexString(ObjectUtil.serialize(askInstance));
-    }
-    public static final <T> T sendAndWaitForResponse(String message, Class<T> responseType) {
-        send(message);
-        return ConcurrentUtil.waitFor(responseType);
     }
 
     @Override
     public String toString() {
         return getMessage();
     }
+}
+/** used for asking messages */
+class Response {
+    Object value;
 
+    Response(Object value) {
+        this.value = value;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return value != null && value.equals(((Response) obj).value)
+                || value == null && ((Response) obj).value == null;
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(value);
+    }
 }

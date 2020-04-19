@@ -366,4 +366,16 @@ public class ByteUtil extends Util {
         }
     }
 
+    public static byte[] fromHex(String hex) {
+        return stringToBytes(hex, 16);
+    }
+
+    public static byte[] stringToBytes(String txt, int base) {
+        byte[] buf = new byte[txt.length() / 2];
+        for (int i = 0; i < txt.length(); i += 2) {
+            buf[i / 2] = (byte) Integer.parseInt(txt.substring(i, i + 2), base);
+        }
+        return buf;
+    }
+
 }

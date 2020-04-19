@@ -22,7 +22,6 @@ import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.net.InetAddress;
-import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -52,7 +51,6 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.Finished;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.classloader.NetworkClassLoader;
-import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.ClassFinder;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
@@ -103,8 +101,15 @@ public class CoreUtilTest implements ENVTestPreparation {
 		assertEquals("diesisteineinfacherspruch", sbstr.toString());
 
 		// test hex
+		assertFalse(StringUtil.isHexString(str));
 		String hex = StringUtil.toHexString(str.getBytes());
+		assertTrue(StringUtil.isHexString(hex));
 		assertEquals(str, StringUtil.fromHexString(hex));
+
+		Object o = true;
+		hex = StringUtil.toHexString(ObjectUtil.convertToByteArray(o));
+		assertTrue(StringUtil.isHexString(hex));
+		assertTrue((Boolean)ObjectUtil.convertToObject(ObjectUtil.fromHex(hex)));
 
 		// test crypto
 		String[] passwds = new String[] { "meinpass", "12345678", "azAzï¿½ï¿½ï¿½ï¿½" };
@@ -128,6 +133,17 @@ public class CoreUtilTest implements ENVTestPreparation {
 		url = "jdbc:mysql://db4free.net:3306";
 		port = StringUtil.extract(url, "[:](\\d+)([:/;]\\w+)?", 1);
 		assertEquals("3306", port);
+
+	}
+
+	@Test
+	public void testMapUtil() {
+		Map m = MapUtil.asMap("k1", "v1", "k2", "v2");
+
+		String json = MapUtil.toJSON(m);
+		Map m2 = MapUtil.fromJSON(json);
+		assertEquals(json, MapUtil.toJSON(m2));
+		assertEquals(MapUtil.asArray(m), MapUtil.asArray(m2));
 	}
 
 	@Test
@@ -654,7 +670,7 @@ public class CoreUtilTest implements ENVTestPreparation {
 	public void testWaitFor() {
 		LinkedList<Integer> list = new LinkedList<>();
 		ConcurrentUtil.waitFor(()->isTrue(list));
-		
+		//TODO: check		
 	}
 
 	@Test

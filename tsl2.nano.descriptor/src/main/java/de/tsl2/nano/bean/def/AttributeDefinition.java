@@ -155,7 +155,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
 
     protected AttributeDefinition(Method readAccessMethod) {
         super();
-        attribute = new BeanAttribute(readAccessMethod);
+        attribute = BeanAttribute.getBeanAttribute(readAccessMethod);
         defineDefaults();
     }
 

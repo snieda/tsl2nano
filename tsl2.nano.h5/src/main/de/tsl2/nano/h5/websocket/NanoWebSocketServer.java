@@ -28,15 +28,16 @@ import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.bean.def.ValueExpression;
 import de.tsl2.nano.core.ISession;
+import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.messaging.IListener;
 import de.tsl2.nano.core.messaging.IStatefulListener;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.h5.NanoH5Session;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
-import de.tsl2.nano.h5.websocket.dialog.WSResponse;
 import de.tsl2.nano.math.vector.Point;
 
 /**
@@ -119,11 +120,14 @@ public class NanoWebSocketServer extends WebSocketServer {
     @Override
     public void onMessage(WebSocket conn, String msg) {
         LOG.debug("receiving message: '" + msg + "' from " + conn);
-        ((NanoH5Session)session).assignSessionToCurrentThread(false, null);
+        if (session instanceof NanoH5Session)
+            ((NanoH5Session)session).assignSessionToCurrentThread(false, null);
         //if we are in configuration mode, do nothing
-        Package pck = ((BeanDefinition) session.getWorkingObject()).getDeclaringClass().getPackage();
-        if (pck.equals(BeanConfigurator.class.getPackage()) || pck.equals(BeanDefinition.class.getPackage())) {
-            return;
+        if (session.getWorkingObject() != null) {
+            Package pck = ((BeanDefinition) session.getWorkingObject()).getDeclaringClass().getPackage();
+            if (pck.equals(BeanConfigurator.class.getPackage()) || pck.equals(BeanDefinition.class.getPackage())) {
+                return;
+            }
         }
         //to be secure, no file is saved on wrong name
         attachment_info = null;
@@ -162,7 +166,8 @@ public class NanoWebSocketServer extends WebSocketServer {
                 attachment_info = msg;
                 break;
             case TARGET_DIALOG:
-                ConcurrentUtil.setCurrent(new WSResponse(getValue(msg)));
+                // ((WebSocketExceptionHandler) session.getExceptionHandler()).setResponseAndNotify(value);
+                ConcurrentUtil.notifyWith(session, value);
                 break;
             default:
                 LOG.error("unexptected message target: " + target);
@@ -172,8 +177,9 @@ public class NanoWebSocketServer extends WebSocketServer {
     }
 
     /**
-     * injects a temporary 'change' object, holding all changes to the current parent bean of the given attribute. will
-     * only be done on first time - all listeners will get the same change instance!
+     * injects a temporary 'change' object, holding all changes to the current
+     * parent bean of the given attribute. will only be done on first time - all
+     * listeners will get the same change instance!
      * 
      * @param attribute to get the parent bean and the event handler from
      */

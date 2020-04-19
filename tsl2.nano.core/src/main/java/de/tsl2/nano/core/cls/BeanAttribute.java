@@ -110,6 +110,19 @@ public class BeanAttribute<T> implements IAttribute<T> {
         }
     }
 
+    public static final BeanAttribute getBeanAttribute(Method readAccessMethod) {
+        /*
+         * performance: extensions of BeanClass will not be stored in cache, so
+         * define a new cached-class to get the methods from there.
+         */
+        BeanClass cachedBC = CachedBeanClass.getCachedBeanClass(readAccessMethod.getDeclaringClass());
+        if (cachedBC != null) {
+            return (BeanAttribute) cachedBC.getAttribute(getName(readAccessMethod), true);
+        } else {
+            return new BeanAttribute(readAccessMethod);
+        }
+    }
+
     /**
      * getReadAccessMethod
      * 
@@ -327,6 +340,12 @@ public class BeanAttribute<T> implements IAttribute<T> {
         final String name = readAccessMethod.getName().startsWith(PREFIX_READ_ACCESS) ? readAccessMethod.getName()
             .substring(PREFIX_READ_ACCESS.length()) : readAccessMethod.getName()
             .substring(PREFIX_BOOLEAN_READ_ACCESS.length());
+        return toFirstLower(name);
+    }
+
+    public static final String getNameFromSetter(Method writeAccessMethod) {
+        final String name = writeAccessMethod.getName().startsWith(PREFIX_WRITE_ACCESS) ? writeAccessMethod.getName()
+            .substring(PREFIX_WRITE_ACCESS.length()) : writeAccessMethod.getName();
         return toFirstLower(name);
     }
 

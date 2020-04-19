@@ -112,7 +112,7 @@ import de.tsl2.nano.util.operation.IRange;
  * @version $Revision$
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IListener<EMessage> {
+public class NanoH5Session extends BeanModifier implements ISession<BeanDefinition>, Serializable, IListener<EMessage> {
     /** serialVersionUID */
     private static final long serialVersionUID = -8299446546343086394L;
 
@@ -630,10 +630,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
             }
             return IAction.CANCELED;
         }
-        checkSecurity(parms);
-        convertDates(parms);
-
-        refreshCurrentBeanValues(parms);
+        refreshValues(nav.current(), parms);
 
         if (nav.current() instanceof Controller) {
             Controller ctrl = (Controller) nav.current();
@@ -695,25 +692,6 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
             responseObject = performAction(uri, nav.current(), parms, responseObject);
         }
         return responseObject;
-    }
-
-    static void checkSecurity(Map<String, String> parms) {
-        String strBlackList = ENV.get("app.input.blacklist", "</,/>");
-        String allowedFields = ENV.get("app.input.blacklist.fieldnames.allowed.regex", "ZZZZZZ");
-        List<String> blacklist = Arrays.asList(strBlackList.split(","));
-        String v;
-        for (String k : parms.keySet()) {
-            v = parms.get(k);
-            if (!Util.isEmpty(v)) {
-                for (String bad : blacklist) {
-                    if (v.contains(bad) && !k.matches(allowedFields)) {
-                        throw new IllegalArgumentException("content of field " + k
-                                + " is part of a defined blacklist. to allow such content on that field"
-                                + ", add field name in 'app.input.blacklist.fieldnames.allowed.regex'");
-                    }
-                }
-            }
-        }
     }
 
     private IAction<?> setNavigationGimmicks(Object responseObject, Map<String, String> parms) {
@@ -980,67 +958,6 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
             + (!Util.isEmpty(p) && !Persistence.class.isAssignableFrom(nav.current().getClazz()) ? "\n\t" + p : ""));
     }
 
-    /**
-     * refreshCurrentBeanValues
-     * 
-     * @param parms
-     */
-    private void refreshCurrentBeanValues(Map<String, String> parms) {
-        LOG.info("refreshing current bean values");
-        if (nav.current() instanceof Bean) {
-            Collection<Exception> exceptions = new LinkedList<Exception>();
-            Bean vmodel = (Bean) nav.current();
-            for (String p : parms.keySet()) {
-                if (vmodel.hasAttribute(p)) {
-                    try {
-                        /*
-                         * check, if input was changed - so, don't lose instances if unchanged
-                         * the oldString was sent to html-page - the newString returns from request
-                         */
-                        BeanValue bv = (BeanValue) vmodel.getAttribute(p);
-                        Class<?> type = bv.getType();
-                        /*
-                         * if the type is object, the bean doesn't know exactly it's real type, so
-                         * we assume it should be serializable...
-                         */
-                        if (!type.isPrimitive() && !Serializable.class.isAssignableFrom(type)
-                            && !Object.class.isAssignableFrom(type)) {
-                            LOG.debug("ignoring not-serializable attribute " + vmodel.getAttribute(p));
-                            continue;
-                        }
-                        String oldString = bv.getValueText();
-                        String newString = parms.get(p);
-                        // checkboxes will send 'on' as value
-                        if (boolean.class.isAssignableFrom(type) || Boolean.class.isAssignableFrom(type))
-                            if (newString.equals("on"))
-                                newString = "true";
-                        if (Date.class.isAssignableFrom(type))
-                            if (newString.matches("\\d{2,2}[:]\\d{2,2}"))
-                                newString += ":00"; //append 0 seconds to respect format HH:mm:ss
-                        
-                        if (oldString == null || !oldString.equals(newString)) {
-                            vmodel.setParsedValue(p, newString);
-                        } else {
-                            LOG.debug("ignoring unchanged attribute " + vmodel.getAttribute(p));
-                        }
-                    } catch (Exception e) {
-                        exceptions.add(e);
-                    }
-                }
-            }
-            /*
-             * create one exception, holding all messages of thrown sub-exceptions
-             */
-            if (exceptions.size() > 0) {
-                StringBuffer buf = new StringBuffer();
-                for (Exception ex : exceptions) {
-                    buf.append(ex.getMessage() + "\n");
-                }
-                throw new ManagedException(buf.toString(), exceptions.iterator().next());
-            }
-        }
-    }
-
     private BeanDefinition<?> putSelectionOnStack(BeanCollector c) {
         Collection selection = (Collection) c.getSelectionProvider().getValue();
         BeanDefinition<?> firstElement = null;
@@ -1179,22 +1096,6 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
             Bean.getBean(filter).setValue("from", BeanContainer.detachEntities(BeanUtil.clone(filter.getFrom())));
             Bean.getBean(filter).setValue("to", BeanContainer.detachEntities(BeanUtil.clone(filter.getTo())));
             context.put(PREFIX_CONTEXT_RANGE + model.getDeclaringClass().getName(), filter);
-        }
-    }
-
-    /**
-     * converts the standard date format yyyy-MM-dd to the locale specific date format - to be parseable
-     * 
-     * @param parms
-     */
-    private void convertDates(Map<String, String> parms) {
-        LOG.info("converting dates");
-        String v;
-        for (String p : parms.keySet()) {
-            v = parms.get(p);
-            if (v != null && v.matches(RegExpFormat.FORMAT_DATE_SQL)) {
-                parms.put(p, DateUtil.getFormattedDate(DateUtil.getDateSQL(v)));
-            }
         }
     }
 

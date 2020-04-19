@@ -2,6 +2,7 @@ package de.tsl2.nano.h5.websocket.dialog;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.w3c.dom.Document;
@@ -9,8 +10,11 @@ import org.w3c.dom.Element;
 
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.core.ISession;
+import de.tsl2.nano.core.Messages;
+import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.util.MapUtil;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.HtmlUtil;
 import de.tsl2.nano.util.AdapterProxy;
@@ -18,6 +22,8 @@ import de.tsl2.nano.util.AdapterProxy;
 /** creates a simple html5 dialog to be sent through websockets */
 public class WSDialog {
     public static final String PREFIX_DIALOG = Message.PREFIX_DIALOG;
+    static final String PREFIX_NAME = "wsdialog.";
+
     String title;
     String message;
     List<WSField> fields;
@@ -35,7 +41,14 @@ public class WSDialog {
                 b.getPresentable().getDescription(), true);
         return HtmlUtil.toString(dlg.getOwnerDocument(), true);
     }
+
     public static String createWSMessageFromBean(String title, Object beanInstance) {
+        if (PrimitiveUtil.isPrimitiveOrWrapper(beanInstance.getClass())) {
+            if (PrimitiveUtil.isAssignableFrom(Boolean.class, beanInstance.getClass()))
+                return new WSDialog(title, "", getYesNoButtons()).toWSMessage();
+            else
+                return new WSDialog(title, "", getDefaultButtons()).addFields(new WSField("value", beanInstance, null)).toWSMessage();
+        }
         return PREFIX_DIALOG + createHtmlFromBean(title, beanInstance);
     }
 
@@ -44,13 +57,19 @@ public class WSDialog {
         this.message = message;
         if (buttons != null && buttons.length > 0)
             addButtons(buttons);
+        else
+            this.buttons = new LinkedList<>();
     }
 
     public WSDialog addFields(WSField... fields) {
-        if (this.fields == null)
-            this.fields = new ArrayList<>(fields.length);
-        this.fields.addAll(Arrays.asList(fields));
+        getFields().addAll(Arrays.asList(fields));
         return this;
+    }
+
+    private List<WSField> getFields() {
+        if (this.fields == null)
+            this.fields = new ArrayList<>();
+        return fields;
     }
 
     public WSDialog addButtons(WSButton... buttons) {
@@ -61,27 +80,44 @@ public class WSDialog {
     }
 
     public String toHtmlDialog() {
-        Element e = createFormDialog();
-        HtmlUtil.appendElement(e, HtmlUtil.TAG_H2, HtmlUtil.content(title));
-        HtmlUtil.appendElement(e, HtmlUtil.TAG_PARAGRAPH, HtmlUtil.content(message));
-        for (WSField f : fields) {
-            HtmlUtil.appendElement(e, f.getTag(), MapUtil.asArray(f.getAttributes(), String.class));
+        if (Util.isEmpty(buttons))
+            addButtons(getDefaultButtons());
+
+        Element dlg = createFormDialog();
+        HtmlUtil.appendElement(dlg, HtmlUtil.TAG_H3, HtmlUtil.content(title));
+        HtmlUtil.appendElement(dlg, HtmlUtil.TAG_PARAGRAPH, HtmlUtil.content(message));
+        for (WSField f : getFields()) {
+            Element e = dlg;
+            if (f.hasLabel()) {
+                e = HtmlUtil.appendElement(dlg, HtmlUtil.TAG_DIV, HtmlUtil.content(Messages.getStringOpt(f.getName())));
+            }
+            HtmlUtil.appendElement(e, f.getTag(), HtmlUtil.content(f.getContent()), MapUtil.asArray(f.getAttributes(), String.class));
         }
+
         for (WSButton b : buttons) {
-            HtmlUtil.appendElement(e, b.getTag(), MapUtil.asArray(b.getAttributes(), String.class));
+            HtmlUtil.appendElement(dlg, b.getTag(), HtmlUtil.content(b.getContent()), MapUtil.asArray(b.getAttributes(), String.class));
         }
-        return HtmlUtil.toString(e.getOwnerDocument(), true);
+        return HtmlUtil.toString(dlg.getOwnerDocument(), true);
     }
 
     private static Element createFormDialog() {
         Document doc = HtmlUtil.createDocument("");
         Element e = doc.createElement("dialog");
         doc.appendChild(e);
-        HtmlUtil.appendAttributes(e, HtmlUtil.ATTR_ID, "formDialog");
+        HtmlUtil.appendAttributes(e, HtmlUtil.ATTR_ID, PREFIX_NAME + "formDialog");
         return HtmlUtil.appendElement(e, HtmlUtil.TAG_FORM, HtmlUtil.ATTR_METHOD, "dialog");
     }
 
     public String toWSMessage() {
         return PREFIX_DIALOG + toHtmlDialog();
     }
+
+    static WSButton[] getDefaultButtons() {
+        return new WSButton[]{new WSButton("Ok"), new WSButton("Cancel")};
+    }
+
+    static WSButton[] getYesNoButtons() {
+        return new WSButton[]{new WSButton("Yes"), new WSButton("No")};
+    }
+
 }

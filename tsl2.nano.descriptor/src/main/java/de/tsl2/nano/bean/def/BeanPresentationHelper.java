@@ -403,6 +403,10 @@ public class BeanPresentationHelper<T> {
         return type;
     }
 
+    public int getDefaultType(IAttribute attr) {
+        return getDefaultType(attr.getType());
+    }
+
     /**
      * evaluates the type of the given attribute to return the name of the constant to define the component.
      * 
@@ -413,24 +417,24 @@ public class BeanPresentationHelper<T> {
      * @param attr beanattribute to evaluate
      * @return the type-constant, defined by {@link IPresentable}.
      */
-    public int getDefaultType(IAttribute attr) {
+    public static int getDefaultType(Class<?> cls) {
         int type = -1;
 
-        if (Timestamp.class.isAssignableFrom(attr.getType())) {
+        if (Timestamp.class.isAssignableFrom(cls)) {
             type = TYPE_DATE | TYPE_TIME;
-        } else if (Time.class.isAssignableFrom(attr.getType())) {
+        } else if (Time.class.isAssignableFrom(cls)) {
             type = TYPE_TIME;
-        } else if (Date.class.isAssignableFrom(attr.getType())) {
+        } else if (Date.class.isAssignableFrom(cls)) {
             type = TYPE_DATE;
-        } else if (Boolean.class.isAssignableFrom(attr.getType()) || boolean.class.isAssignableFrom(attr.getType())) {
+        } else if (Boolean.class.isAssignableFrom(cls) || boolean.class.isAssignableFrom(cls)) {
             type = TYPE_OPTION;
-        } else if (ByteUtil.isByteStream(attr.getType())) {//perhaps for blobs
+        } else if (ByteUtil.isByteStream(cls)) {//perhaps for blobs
             type = TYPE_DATA | TYPE_ATTACHMENT;
-        } else if (attr.getType().isArray() || Collection.class.isAssignableFrom(attr.getType())) {//complex type --> list
+        } else if (cls.isArray() || Collection.class.isAssignableFrom(cls)) {//complex type --> list
             type = TYPE_TABLE;
-        } else if (BeanUtil.isStandardType(attr.getType())) {
+        } else if (BeanUtil.isStandardType(cls)) {
             type = TYPE_INPUT;
-            if (NumberUtil.isNumber(attr.getType())) {
+            if (NumberUtil.isNumber(cls)) {
                 type |= TYPE_INPUT_NUMBER;
             }
         } else {//complex type --> combo box list

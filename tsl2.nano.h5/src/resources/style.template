@@ -124,29 +124,35 @@ i:hover + p {
 
 /* tag dialog used by websockets */
 dialog {
-top: 28%;
-width: 400px;  
-border: 1px solid rgba(0, 0, 0, 0.3);
-border-radius: 15px;
-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
-border-top: 5px solid #eb9816;
+    top: 28%;
+    width: 400px;  
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    border-top: 5px solid #0099ff;
 }
 button{
-display: inline-block;
-border-radius: 3px;
-border: none;
-font-size: 0.9rem;
-padding: 0.4rem 0.8em;
-background: #eb9816;
-border-bottom: 1px solid #f1b75c;
-color: white;
-font-weight: bold;
-margin: 0 0.25rem;
-text-align: center;
+    display: inline-block;
+    border-radius: 3px;
+    border: none;
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8em;
+    opacity: 0.7;
+    background: #0055AA;
+    border-bottom: 1px solid #0099ff;
+    color: white;
+    font-weight: bold;
+    margin: 0 0.25rem;
+    text-align: center;
+}
+button:disabled,button[disabled]{
+  background: darkgray;
+  color: lightgray;
 }
 button:hover, button:focus {
-opacity: 0.92;
-cursor: pointer;
+    color: white;
+    background: black;
+    cursor: pointer;
 }
 dialog::backdrop{
     position: fixed;

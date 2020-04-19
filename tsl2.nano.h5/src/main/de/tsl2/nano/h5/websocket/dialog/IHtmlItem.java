@@ -9,7 +9,9 @@ public interface IHtmlItem {
     String getName();
     Object getValue();
     Map<String, Object> getSpecificAttributes();
-    
+    default boolean hasLabel() { return true;}
+    default String getContent() {return null;}
+
     default Map<String, String> getAttributes() {
         Map<String, String> attrs = new HashMap<>();
         attrs.put("id", getId());

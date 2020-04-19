@@ -15,6 +15,7 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
@@ -23,8 +24,8 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 
 /**
- * standard usage to create a daemon threads. defines parallel working jobs through
- * {@link #createParallelWorker(String, int, Class, Class)}.
+ * standard usage to create a daemon threads. defines parallel working jobs
+ * through {@link #createParallelWorker(String, int, Class, Class)}.
  * 
  * @author Tom
  * @version $Revision$
@@ -35,13 +36,15 @@ public class ConcurrentUtil {
     @SuppressWarnings("rawtypes")
     private static final Map<Class, ThreadLocal<?>> threadLocals = new Hashtable<Class, ThreadLocal<?>>();
 
+    private static final Map<Object, SuppliedWait> waiters = new Hashtable<>();
+
     /**
      * getCaller
      * 
      * @return calling method name
      */
     public static String getCaller() {
-        //without calling security manager like Thread.getStacktrace() do.
+        // without calling security manager like Thread.getStacktrace() do.
         StackTraceElement[] st = new Exception().getStackTrace();
         return st.length > 2 ? st[2].toString() : "<unknown>";
     }
@@ -61,9 +64,7 @@ public class ConcurrentUtil {
      * @param runtime
      * @param lowPriority
      */
-    public static Thread startDaemon(String name,
-            Runnable runtime,
-            boolean lowPriority,
+    public static Thread startDaemon(String name, Runnable runtime, boolean lowPriority,
             UncaughtExceptionHandler handler) {
         LOG.info("starting thread " + name);
         Thread thread = Executors.defaultThreadFactory().newThread(runtime);
@@ -80,7 +81,8 @@ public class ConcurrentUtil {
     }
 
     /**
-     * provides thread local values, stored before through {@link #setCurrent(Object)}. For further informations, see
+     * provides thread local values, stored before through
+     * {@link #setCurrent(Object)}. For further informations, see
      * {@link ThreadLocal} and {@link ThreadLocal#get()}
      * 
      * @param threadLocalType value type
@@ -93,7 +95,9 @@ public class ConcurrentUtil {
     }
 
     /**
-     * collects all values, given by {@link #getCurrent(Class)} and puts them into a map
+     * collects all values, given by {@link #getCurrent(Class)} and puts them into a
+     * map
+     * 
      * @param threadLocalTypes defines the values to be loaded
      * @return map holding types and values of current thread
      */
@@ -107,8 +111,8 @@ public class ConcurrentUtil {
     }
 
     /**
-     * sets a new value. for further informations, {@link #getCurrent(Class)}, {@link ThreadLocal} and
-     * {@link ThreadLocal#set(Object)}.
+     * sets a new value. for further informations, {@link #getCurrent(Class)},
+     * {@link ThreadLocal} and {@link ThreadLocal#set(Object)}.
      * 
      * @param values value to store as threadlocal inside the current thread.
      */
@@ -116,7 +120,7 @@ public class ConcurrentUtil {
     public static void setCurrent(Object... values) {
         for (int i = 0; i < values.length; i++) {
             if (values[i] == null)
-                continue; //nothing to do
+                continue; // nothing to do
             ThreadLocal tl = (ThreadLocal) threadLocals.get(values[i].getClass());
             if (tl == null) {
                 tl = new ThreadLocal();
@@ -127,7 +131,9 @@ public class ConcurrentUtil {
     }
 
     /**
-     * removes all values on the current thread, stored through {@link #setCurrent(Object...)}.
+     * removes all values on the current thread, stored through
+     * {@link #setCurrent(Object...)}.
+     * 
      * @param types defines the values to be removed from the current thread
      */
     @SuppressWarnings("rawtypes")
@@ -141,7 +147,9 @@ public class ConcurrentUtil {
     }
 
     /**
-     * removes all values on all threads, stored through {@link #setCurrent(Object...)}.
+     * removes all values on all threads, stored through
+     * {@link #setCurrent(Object...)}.
+     * 
      * @param types defines the values to be removed from all threads
      */
     public static void removeAllCurrent(Class... types) {
@@ -151,9 +159,9 @@ public class ConcurrentUtil {
     }
 
     public static final void sleep(long milliseconds) {
-    	sleep(milliseconds, true);
+        sleep(milliseconds, true);
     }
-    
+
     /**
      * sleep convenience
      * 
@@ -161,15 +169,35 @@ public class ConcurrentUtil {
      */
     public static final void sleep(long milliseconds, boolean doSysOutLog) {
         try {
-        	if (doSysOutLog)
-        		System.out.print("\n" + Thread.currentThread().getName() + " sleeping for " + milliseconds + " milliseconds...");
+            if (doSysOutLog)
+                System.out.print(
+                        "\n" + Thread.currentThread().getName() + " sleeping for " + milliseconds + " milliseconds...");
             Thread.sleep(milliseconds);
-        	if (doSysOutLog)
-        		System.out.print("...awake\n");
+            if (doSysOutLog)
+                System.out.print("...awake\n");
         } catch (InterruptedException e) {
             ManagedException.forward(e);
         }
     }
+
+    public static final <T> T waitOn(Object waitObject, long timeout, Consumer<T> doOnResponse) {
+        SuppliedWait<T> wait = new SuppliedWait<T>();
+        try {
+            if (waitObject != null)
+                waiters.put(waitObject, wait);
+            return wait.waitOn(waitObject, timeout, doOnResponse);
+        } finally {
+            if (waitObject != null)
+                waiters.remove(waitObject);
+        }
+    }
+    public static final void notifyWith(Object waitingObject, Object response) {
+        SuppliedWait w = waiters.get(waitingObject);
+        if (w != null)
+            w.setResponseAndNotify(response);
+    }
+
+    /** TODO not sure, if that szenario would work - we are only on the own thread */
     public static final <T> T waitFor(Class<T> responseType) {
         return waitFor(Util.get("tsl2.nano.concurrent.pullwaittime", 1000), responseType);
     }
@@ -182,9 +210,16 @@ public class ConcurrentUtil {
     public static final void waitFor(Supplier<Boolean> callback) {
         waitFor(Util.get("tsl2.nano.concurrent.pullwaittime", 1000), callback);
     }
+
     public static final void waitFor(long pullWaitTime, Supplier<Boolean> callback) {
-    	while (!callback.get())
-    		sleep(pullWaitTime);
+        // try {
+        //     Thread.currentThread().wait();
+        // } catch (InterruptedException e) {
+        //     e.printStackTrace();
+        // }
+        createReadWriteLock().read(() -> callback.get());
+    	// while (!callback.get())
+    	// 	sleep(pullWaitTime);
     }
     
     /**
@@ -250,6 +285,10 @@ public class ConcurrentUtil {
 //        
 //        t.set
 //    }
+    public static void reset() {
+        threadLocals.clear();
+        waiters.clear();
+    }
 }
 
 /**
@@ -323,4 +362,5 @@ class Worker<INPUT, OUTPUT> {
     public Map<INPUT, OUTPUT> getResult() {
         return result;
     }
+
 }

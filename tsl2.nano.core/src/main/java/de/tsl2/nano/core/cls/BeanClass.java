@@ -478,7 +478,7 @@ public class BeanClass<T> implements Serializable {
      * @return true, if there is a setter method for the given getter method.
      */
     boolean hasWriteAccessMethod(Method readAccessMethod) {
-        return new BeanAttribute(readAccessMethod).hasWriteAccess();
+        return BeanAttribute.getBeanAttribute(readAccessMethod).hasWriteAccess();
     }
 
     /**

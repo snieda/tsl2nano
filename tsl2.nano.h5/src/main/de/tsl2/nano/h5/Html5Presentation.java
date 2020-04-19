@@ -2283,15 +2283,19 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         }
     }
 
-    private String getType(BeanValue<?> beanValue) {
+    public String getType(BeanValue<?> beanValue) {
+        return getType(beanValue.getType(), 
+            beanValue.getPresentation().getType(), beanValue.getSecure() != null && !beanValue.getSecure().canDecrypt());
+    }
+
+    public static String getType(Class<?> objType, int presentationType, boolean secureCannotDecrypt) {
         String type;
-        int t = beanValue.getPresentation().getType();
         //let the specialized input types work
-        t = NumberUtil.filterBits(t, TYPE_INPUT, TYPE_INPUT_MULTILINE);
-        switch (t) {
+        presentationType = NumberUtil.filterBits(presentationType, TYPE_INPUT, TYPE_INPUT_MULTILINE);
+        switch (presentationType) {
         case TYPE_INPUT_NUMBER:
             //floatings are not supported in html input type=number
-            if (NumberUtil.isInteger(beanValue.getType())) {
+            if (NumberUtil.isInteger(objType)) {
                 type = "number";
                 break;
             }
@@ -2344,7 +2348,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             break;
         }
         //is it a text field and a hashed value?
-        if (type.equals("text") && beanValue.getSecure() != null && !beanValue.getSecure().canDecrypt())
+        if (type.equals("text") && secureCannotDecrypt)
             type = "password";
         return type;
     }

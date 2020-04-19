@@ -159,7 +159,7 @@ public class BeanProxy<T> extends DelegationHandler<T> {
         } else if (method.equals(METHOD_GET_PROPERTY)) {
             result = properties.get(args[0]);
         } else if (method.getName().startsWith(BeanAttribute.PREFIX_READ_ACCESS) && (args == null || args.length == 0)) {
-            final String attributeName = new BeanAttribute(method).getName();
+            final String attributeName = BeanAttribute.getName(method);
             result = properties.get(attributeName);
             //auto-boxing - storing the default value in properties
             if (result == null && method.getReturnType().isPrimitive()) {

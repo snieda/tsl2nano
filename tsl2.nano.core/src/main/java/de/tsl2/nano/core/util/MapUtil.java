@@ -203,14 +203,26 @@ public class MapUtil {
     }
 
     public static String toJSON(Map map) {
+        //TODO: are the "..." duty in json?
         Set keys = map.keySet();
         StringBuilder buf = new StringBuilder().append("{");
         for (Object k : keys) {
-            buf.append(k + ":" + map.get(k));
+            buf.append(k + ":" + map.get(k) + ",");
         }
+        if (buf.length() > 1)
+            buf.deleteCharAt(buf.length()-1);
         return buf.append("}").toString();
     }
     
+    public static Map fromJSON(String json) {
+        Map map = new HashMap<>();
+        String[] split = json.substring(1, json.length() - 1).split("[,:]");
+        for (int i = 0; i < split.length; i+=2) {
+            map.put(split[i], split[i+1]);
+        }
+        return map;
+    }
+
     /**
      * finds all values for a given key set
      * 

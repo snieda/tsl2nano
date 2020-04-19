@@ -24,6 +24,7 @@ public class ScriptAgentTest {
         ScriptAgent.initializeAgent();
         AssistTransformer at = new AssistTransformer(ScriptAgent.scriptingInstrumentation);
         at.transform(null, this.getClass().getName(), this.getClass(), null, null);
+        // TODO: check the result
     }
 
     public void callbackForInstrumentation() {

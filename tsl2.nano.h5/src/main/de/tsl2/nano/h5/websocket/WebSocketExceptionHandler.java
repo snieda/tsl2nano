@@ -12,14 +12,21 @@ package de.tsl2.nano.h5.websocket;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Map;
 
+import org.apache.commons.logging.Log;
 import org.java_websocket.WebSocket;
 
+import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.exception.ExceptionHandler;
 import de.tsl2.nano.core.exception.Message;
-import de.tsl2.nano.core.util.ObjectUtil;
+import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.ConcurrentUtil;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.h5.BeanModifier;
 import de.tsl2.nano.h5.NanoH5Session;
 import de.tsl2.nano.h5.websocket.dialog.WSDialog;
 
@@ -31,7 +38,11 @@ import de.tsl2.nano.h5.websocket.dialog.WSDialog;
  * @version $Revision$
  */
 public class WebSocketExceptionHandler extends ExceptionHandler implements Closeable {
+    private static final Log LOG = LogFactory.getLog(WebSocketExceptionHandler.class);
+
     NanoWebSocketServer socket;
+
+    private Object response;
 
     /**
      * constructor
@@ -52,22 +63,84 @@ public class WebSocketExceptionHandler extends ExceptionHandler implements Close
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
-        String msg = e.getMessage();
-        if (msg != null && msg.startsWith(NanoH5Session.PREFIX_STATUS_LINE)) {
-            super.uncaughtException(t, e);
-        }
-        else if (msg != null && msg.startsWith(Message.PREFIX_DIALOG)) {
-            //not very performant to serialize+hex and deserializ+unhex the object, but we can work on pojos!
-            String strObject = StringUtil.fromHexString(msg.substring(Message.PREFIX_DIALOG.length()));
-            Object object = ObjectUtil.convertToObject(strObject.getBytes());
-            msg = WSDialog.createWSMessageFromBean("Question", object);
-        }
-        
-        Collection<WebSocket> connections = socket.connections();
-        for (WebSocket webSocket : connections) {
-            webSocket.send(msg != null ? msg : e.toString());
+        try {
+            Object obj = null;
+            boolean waitForResponse = false;
+            String msg = e.getMessage();
+            if (msg != null && msg.startsWith(NanoH5Session.PREFIX_STATUS_LINE)) {
+                super.uncaughtException(t, e);
+            } else if (msg != null && msg.contains(Message.PREFIX_DIALOG)) {
+                // not very performant to serialize+hex and deserializ+unhex the object, but we
+                // can work on pojos!
+                String title = StringUtil.substring(msg, null, "@");
+                String msg0 = StringUtil.substring(msg, "@", null);
+                String data = StringUtil.substring(msg0, Message.PREFIX_DIALOG, null);
+                if (StringUtil.isHexString(data))
+                    msg = WSDialog.createWSMessageFromBean(title, obj = Message.obj(msg0));
+                LOG.info("\n==> sending dialog to websockets:\n\ttitle: " + title + "\n\tmsg  : " + msg0 + "\n\tdata : "
+                        + data + "\n\tdialog: " + msg);
+                waitForResponse = true;
+            }
+
+            Collection<WebSocket> connections = socket.connections();
+            for (WebSocket webSocket : connections) {
+                webSocket.send(msg != null ? msg : e.toString());
+            }
+
+            if (waitForResponse) {
+                final Object obj0 = obj;
+                ConcurrentUtil.waitOn(socket.session, 4000, r -> convertAndProvide(obj0, r));
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            ManagedException.forward(ex);
         }
     }
+
+    //TODO: untested yet!
+    private void convertAndProvide(Object obj, Object response) {
+        Object value = response;
+        if (response instanceof String && ((String)response).matches("[.*{].*[:].*[,].*[}].*")) {
+            String json = StringUtil.substring((String)response, "{", "}");
+            Map parms =  MapUtil.fromJSON(json);
+            if ((obj == null || PrimitiveUtil.isPrimitiveOrWrapper(obj.getClass())) && parms.size() == 1)
+                value = parms.values().iterator().next();
+            else {
+                new BeanModifier().refreshValues(Bean.getBean(obj), parms);
+                value = obj;
+            }
+        }
+        ConcurrentUtil.setCurrent(Message.createResponse(value));
+    }
+
+//     public void waitOnCurrentSession() {
+//         try {
+//             //setResponse() + notifyAll() on the current session will be called by nanowebsocketserver!
+//             if (socket.session != null) {
+//                 LOG.info("==> session " + socket.session + " waiting for websocket-user-response...");
+//                 synchronized (socket.session) {
+//                     socket.session.wait(4000);
+//                 }
+//                 LOG.info("<== session " + socket.session + " notified --> continue with response: " + response);
+//                 if (response != null) {
+//                     ConcurrentUtil.setCurrent(Message.createResponse(response));
+//                     response = null;
+//                 }
+//             }
+//         } catch (Exception e) {
+//             Message.send(e);
+//         }
+//     }
+
+// 	public void setResponseAndNotify(Object response) {
+//         this.response = response;
+//         if (socket.session != null) {
+//             synchronized (socket.session) {
+//                 LOG.info("websocket response message arrived. notifying session " + socket.session + " with response: " + response);
+//                 socket.session.notifyAll();
+//             }
+//         }
+// }
 
     /**
      * {@inheritDoc}
@@ -80,4 +153,5 @@ public class WebSocketExceptionHandler extends ExceptionHandler implements Close
             ManagedException.forward(e);
         }
     }
+
 }
