@@ -42,8 +42,6 @@ public class WebSocketExceptionHandler extends ExceptionHandler implements Close
 
     NanoWebSocketServer socket;
 
-    private Object response;
-
     /**
      * constructor
      */
@@ -112,35 +110,6 @@ public class WebSocketExceptionHandler extends ExceptionHandler implements Close
         }
         ConcurrentUtil.setCurrent(Message.createResponse(value));
     }
-
-//     public void waitOnCurrentSession() {
-//         try {
-//             //setResponse() + notifyAll() on the current session will be called by nanowebsocketserver!
-//             if (socket.session != null) {
-//                 LOG.info("==> session " + socket.session + " waiting for websocket-user-response...");
-//                 synchronized (socket.session) {
-//                     socket.session.wait(4000);
-//                 }
-//                 LOG.info("<== session " + socket.session + " notified --> continue with response: " + response);
-//                 if (response != null) {
-//                     ConcurrentUtil.setCurrent(Message.createResponse(response));
-//                     response = null;
-//                 }
-//             }
-//         } catch (Exception e) {
-//             Message.send(e);
-//         }
-//     }
-
-// 	public void setResponseAndNotify(Object response) {
-//         this.response = response;
-//         if (socket.session != null) {
-//             synchronized (socket.session) {
-//                 LOG.info("websocket response message arrived. notifying session " + socket.session + " with response: " + response);
-//                 socket.session.notifyAll();
-//             }
-//         }
-// }
 
     /**
      * {@inheritDoc}

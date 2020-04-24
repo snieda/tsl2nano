@@ -146,7 +146,7 @@ button{
     text-align: center;
 }
 button:disabled,button[disabled]{
-  background: darkgray;
+  background: #999999;
   color: lightgray;
 }
 button:hover, button:focus {

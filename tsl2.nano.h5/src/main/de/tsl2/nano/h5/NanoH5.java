@@ -453,6 +453,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         lastRequest = req;
         NanoH5Session session = sessions.get(requestor);
         // application commands
+        if (uri.endsWith("help"))
+            return help();
         if (isAdmin(uri)) {
             control(StringUtil.substring(uri, String.valueOf(hashCode())+"-", null), session);
         }
@@ -508,6 +510,11 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
 
     private boolean isAdmin(String uri) {
         return uri != null && uri.contains(String.valueOf(hashCode()));
+    }
+
+    private Response help() {
+        String help = "{application-hash}-{shutdown|close|back}";
+        return new Response(Status.OK, "text/html", StringUtil.toInputStream(help), -1);
     }
 
     //TODO: do some encryptions...

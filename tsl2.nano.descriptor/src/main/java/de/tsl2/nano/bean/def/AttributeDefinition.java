@@ -204,7 +204,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
             if (constraint == null && m.isAnnotationPresent(de.tsl2.nano.bean.annotation.Constraint.class)) {
                 de.tsl2.nano.bean.annotation.Constraint c =
                     m.getAnnotation(de.tsl2.nano.bean.annotation.Constraint.class);
-                Class<?> type = !c.equals(Object.class) ? c.type() : getType();
+                Class<?> type = !c.equals(Object.class) && !Proxy.isProxyClass(c.getClass()) ? c.type() : getType();
                 constraint = new Constraint(type, (Object[])ConstraintValueSet.preDefined(c.allowed()));
                 RegExpFormat format = !Util.isEmpty(c.pattern()) ? new RegExpFormat(c.pattern(), ENV.get("field.default.length", 64)) : null;
 				constraint.setBasicDef(c.length(), c.nullable(), format, (T)IConstraint.fromString(type, c.defaultValue()));               	

@@ -75,7 +75,9 @@ A cool way to see the power of this tool can be seen in chapter _Online Quick-St
 * supporting yaml on environment and bean configurations.
 * update mechanism
 * injecting own logic on the forms html dom document
-* planned interfaces: 
+* inject onw logic in all phases of presenting through annotations
+* show complex dialogs through websockets to edit beans without leaving the current page
+* planned interfaces:
 	* xsd-->bean
 	* java-interface-->java-bean (mock through internal proxy)
 
@@ -1995,6 +1997,79 @@ Each action is able to define a shortcut (keystroke). if not set, the default wi
 ### Tableheader Buttons
 
 Each standard table of beans will provide a table-header with Buttons to do up/down sorting (on first activation, up-sorting will be done, on second activation, down-sorting). On these Buttons we can't use the algorithm above to avoid shortcut collisions. These buttons will have shortcuts depending on their indexes. So, the first table-header column will be activated through a hit to _ALT+1_.
+
+### Providing Html Dialogs through WebSockets
+
+The API provides showing/controlling html dialogs through websockets. These dialogs wait for user interaction, blocking the current thread for given maximum time.
+
+There are several possibilities to create the html document to show as dialog:
+
+* directly through a html string : be sure to add the right answer buttons for that!
+* giving a simple primitve object like a boolean : a yes/no dialog will be shown
+* giving a complex bean object with bean attributes : the WSDialog will convert that automatically to a dialog 
+* using WSDialog : it provides a simple logic to add title, fields and buttons
+
+A dialog will be created through a call:
+
+giving an html dialog string directly as message:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   import de.tsl2.nano.core.exception.Message;
+   ...
+   T response = Message.sendAndWaitForResponse(String message, Class<T> responseType);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+or giving a simple or complex object, that will be converted to a dialog by WSDialog:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   T response = Message.ask(String title, T instance);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The response has to be of the same type as the instance.
+
+#### Examples to create a dialog
+
+##### Simple object of type boolean
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   T response = Message.ask("Do you want to Continue?", Boolean.TRUE);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+the instance is used as default value and to evaluate the response type.
+
+##### Complex bean, having getters/setters that will be presented as dialog inputs
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   T response = Message.ask("Please fill all given fields!", myBean);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+the instance is used as base and response. the bean attributes will be filled through
+their names+setters. so the response will hold the bean with filled attributes.
+
+##### using WSDialog to create the html dialog string
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   String dlg = new WSDialog("title", "message", 
+      new WSButton("myTestButton")).
+      addFields(new WSField("myTestField", "empty", MapUtil.asMap("type", "textarea"))).
+      toWSDialog();
+
+   String response = Message.sendAndWaitForResponse(dlg, inputText);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#### technical info
+
+While the *Message* class is owned by the *tsl2.nano.core module*, not knowing anything on dialogs,
+it will call the ExceptionHandler of the current thread.
+
+The *tsl2.nano.h5* module will set the WebSocketExceptinonHandler on all session threads, blocking the current session thread
+unless the websocket worker returns a message to the NanoWebSocketServer. The NanoWebSocketServer will notify the
+belonging session thread after providing the user input as response message.
+
+##### creating own html dialog string
+
+it is possible, to create the dialog string by yourself, but you have to provide an additional prefix '..mytitletext..@/dialog:'
+(with ..mytitletext.. as your title text) and the buttons have to have the id 'wsdialog.button'. So be carefull ;-)
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      String dlg = "My Dialog Title@/dialog:" +
+         "<dialog id=\"wsdialog.formDialog\"><form method=\"dialog\"><h3>My Dialog Title</h3><p>message</p><div>my Test Field<input id=\"wsdialog.input.myTestField.id\" name=\"myTestField\" type=\"textarea\" value=\"empty\"/></div><button id=\"wsdialog.button\" name=\"myTestButton\" value=\"myTestButton\">my Test Button</button></form></dialog>";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Injecting own logic on the forms html DOM document
 
@@ -4661,8 +4736,8 @@ Apps auf Serverway:
    - [ ] LogFactory: levels as enums
    - [ ] IPresentable type and style as enums
 
-- [ ] LibClassloader extracting all files in directory res
-- [ ] tutorials for generator mavengenerator and gp
+- [ ] LibClassloader extracting all files in directory unpack
+- [x] tutorials for generator mavengenerator and gp
 - [x] bibliothek: grc, bat, graphene, media-beschreibung: m3u, links, ...
 
 !!!URGENT!!!
@@ -4681,5 +4756,9 @@ Apps auf Serverway:
 - [ ] add undo/redo mechansim through cursus and provide it through menu
 - [ ] fix the time-info in status-line
 - [ ] heroku.logbook: Caused by: java.security.UnrecoverableKeyException: Password verification failed at sun.security.provider.JavaKeyStore.engineLoad(JavaKeyStore.java:783)
+- [x] WebSocketExceptionHandler aufräumen und nochmal response testen
+- [x] NanoH5AttachmentTest wieder aktivieren
+- [x] show help on url commands
+- [ ] copy to github (git clone --bare/mirror {old rep} --> push --mirror {new rep})
 
  -->
