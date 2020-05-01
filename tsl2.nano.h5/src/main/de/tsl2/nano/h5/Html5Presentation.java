@@ -1591,7 +1591,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         if (colDefs.size() > 0) {
             for (IPresentableColumn c : colDefs) {
                 attr = itemBean.hasAttribute(c.getName()) ? itemBean.getAttribute(c.getName()) : null;
-                colPres = attr != null ? attr.getColumnDefinition().getPresentable() : c.getPresentable();
+                colPres = attr != null && attr.getColumnDefinition() != null 
+                    ? attr.getColumnDefinition().getPresentable() : c.getPresentable();
                 //on byte[] show an image through attached file
                 //workaround: on virtuals searching the attribute may cause an error
                 //TODO: if a virtual bean is empty, no attributes are available --> show a warning!

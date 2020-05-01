@@ -138,6 +138,8 @@ public class Bean<T> extends BeanDefinition<T> {
 
     transient protected boolean addSaveAction = true;
 
+    transient private boolean onCallStack;
+
     /** used to registere/find extensions of BeanDefinition/Bean through ENV property */
     public static final String BEANWRAPPER = "BeanWrapper";
     
@@ -625,7 +627,7 @@ public class Bean<T> extends BeanDefinition<T> {
             "actions");
         bean.attributeFilter = beandef.attributeFilter != null ? CollectionUtil.copy(beandef.attributeFilter) : null;
         bean.attributeDefinitions =
-            (LinkedHashMap<String, IAttributeDefinition<?>>) Util.untyped(createValueDefinitions(beandef
+            (LinkedHashMap<String, IAttributeDefinition<?>>) Util.untyped(createValueDefinitions(bean, beandef
                 .getAttributeDefinitions()));
         if (beandef.presentable != null)
             bean.presentable = BeanUtil.copy(beandef.presentable);
@@ -652,7 +654,7 @@ public class Bean<T> extends BeanDefinition<T> {
      * @param attributeDefinitions attributes to copy and enhance
      * @return new map holding value definitions
      */
-    protected static LinkedHashMap<String, ? extends IValueAccess<?>> createValueDefinitions(
+    protected static LinkedHashMap<String, ? extends IValueAccess<?>> createValueDefinitions(Bean bean,
             Map<String, IAttributeDefinition<?>> attributeDefinitions) {
         LinkedHashMap<String, IValueAccess<?>> valueDefs =
             new LinkedHashMap<String, IValueAccess<?>>(attributeDefinitions.size());
@@ -671,7 +673,7 @@ public class Bean<T> extends BeanDefinition<T> {
                 if (attr instanceof AttributeDefinition) {
                 	AttributeDefinition attrDef = (AttributeDefinition) attr;
                     if (attr instanceof BeanValue) {
-                    	valueDef.setParent(((BeanValue)attrDef).getParent());
+                    	valueDef.setParent(bean /*((BeanValue)attrDef).getParent()*/);
                     }
                     if (attrDef.hasRuleCover()) {
     	                IPresentableColumn colDef = attrDef.getColumnDefinition();
@@ -770,7 +772,7 @@ public class Bean<T> extends BeanDefinition<T> {
         } else {
             Class type = instanceOrName.getClass();
             BeanDefinition<I> beandef =
-                    getBeanDefinition((Class<I>) BeanClass.getDefiningClass(instanceOrName.getClass()));
+                    getBeanDefinition((Class<I>) BeanClass.getDefiningClass(type));
             Class instanceBeanWrapper = ENV.get(type.getName() + BEANWRAPPER, null);
             if (instanceBeanWrapper != null) {
                 bean = createBean(instanceOrName, beandef, (Bean)BeanClass.createInstance(instanceBeanWrapper, instanceOrName));
@@ -806,7 +808,7 @@ public class Bean<T> extends BeanDefinition<T> {
         int length = Array.getLength(array);
         Bean bean = new Bean(array);
         for (int i = 0; i < length; i++) {
-            bean.addAttribute(new BeanValue(bean.instance, new ArrayValue(String.valueOf(i), i)));
+            bean.addAttribute(new BeanValue(bean.instance, new ArrayValue("a" + i, i)));
         }
         return bean;
     }
@@ -952,7 +954,16 @@ public class Bean<T> extends BeanDefinition<T> {
     @Override
     public String toString() {
         if (asString == null) {
-            asString = toString(instance);
+            if (onCallStack)
+                return super.toString();
+            else {
+                try {
+                    onCallStack = true;
+                    asString = toString(instance);
+                } finally {
+                    onCallStack = false;
+                }
+            }
         }
         return asString;
     }

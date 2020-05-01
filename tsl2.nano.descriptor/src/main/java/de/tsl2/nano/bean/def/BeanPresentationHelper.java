@@ -1026,7 +1026,7 @@ public class BeanPresentationHelper<T> {
 
     NavigableMap<Integer, Integer> getBestAttributeOrder(String[] names) {
         Class<?> bestType = ENV.get("bean.best.attribute.type", String.class);
-        String bestRegexp = ENV.get("bean.best.attribute.regexp", ".*(name|bezeichnung|description|id).*");
+        String bestRegexp = ENV.get("bean.best.attribute.regexp", ".*(name|bezeichnung|description|id|key).*");
         int bestminlength = ENV.get("bean.best.attribute.minlength", 2);
         int bestmaxlength = ENV.get("bean.best.attribute.maxlength", 99);
 
@@ -1035,7 +1035,7 @@ public class BeanPresentationHelper<T> {
          */
         int ml = 0;//matchinglevel: 5 criterias to match
         NavigableMap<Integer, Integer> levels = new TreeMap<Integer, Integer>();
-        for (int i = 0; i < names.length; i++) {
+        for (int i = names.length-1; i >= 0; i--) {
             IAttributeDefinition attr = bean.getAttribute(names[i]);
             if (attr.isMultiValue()) {
                 ml = Integer.MIN_VALUE;

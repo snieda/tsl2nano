@@ -131,6 +131,8 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
             throw new IllegalArgumentException("instance of virtual attribute " + this
                 + " must be of type IValueAccess, but is: " + beanInstance);
         }
+        if (!isVirtual())
+            setParent(null);
         this.instance = beanInstance;
     }
 
@@ -506,7 +508,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      * @return Returns a given parent or the standard parent evaluated from instance.
      */
     public Bean<?> getParent() {
-        return parent != null || instance == null ? parent : Bean.getBean((Serializable) instance);
+        return parent != null || instance == null ? parent : (parent = Bean.getBean((Serializable) instance));
     }
 
     /**

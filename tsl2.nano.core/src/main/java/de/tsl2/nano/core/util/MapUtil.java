@@ -10,6 +10,7 @@ package de.tsl2.nano.core.util;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -22,6 +23,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentNavigableMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 //import de.tsl2.nano.bean.BeanUtil;
 //import de.tsl2.nano.bean.def.Bean;
@@ -29,6 +36,7 @@ import java.util.Set;
 //import de.tsl2.nano.collection.NamedValue;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
+import de.tsl2.nano.core.cls.BeanClass;
 
 /**
  * utilities for maps.
@@ -203,11 +211,14 @@ public class MapUtil {
     }
 
     public static String toJSON(Map map) {
-        //TODO: are the "..." duty in json?
+        //the quotations enable content with json keys like ',' and ':'
         Set keys = map.keySet();
         StringBuilder buf = new StringBuilder().append("{");
         for (Object k : keys) {
-            buf.append(k + ":" + map.get(k) + ",");
+            Object v = map.get(k);
+            if (v == null)
+                continue;
+            buf.append("\"" + k + "\": \"" + v + "\",");
         }
         if (buf.length() > 1)
             buf.deleteCharAt(buf.length()-1);
@@ -216,9 +227,9 @@ public class MapUtil {
     
     public static Map fromJSON(String json) {
         Map map = new HashMap<>();
-        String[] split = json.substring(1, json.length() - 1).split("[,:]");
-        for (int i = 0; i < split.length; i+=2) {
-            map.put(split[i], split[i+1]);
+        String[] split = json.substring(1, json.length() - 1).split("[\"]");
+        for (int i = 0; i < split.length-2; i+=4) {
+            map.put(split[i+1], split[i+3]);
         }
         return map;
     }
@@ -317,4 +328,26 @@ public class MapUtil {
             }
         }
     }
+
+	public static <T extends Map> T toMapType(Map map, Class<T> wrapperInterface) {
+        assert wrapperInterface.isInterface() || wrapperInterface.equals(Properties.class) 
+            : "can't wrap to specialized class! wrapperInterface must be an interface or Properties.class";
+        
+        if (map != null && wrapperInterface.isAssignableFrom(map.getClass()))
+                return (T) map;
+        if (ConcurrentNavigableMap.class.isAssignableFrom(wrapperInterface))
+            return (T) new ConcurrentSkipListMap<>(map);
+        else if (ConcurrentMap.class.isAssignableFrom(wrapperInterface))
+            return (T) new ConcurrentHashMap<>(map);
+        else if (SortedMap.class.isAssignableFrom(wrapperInterface))
+            return (T) new TreeMap<>(map);
+        else if (Properties.class.isAssignableFrom(wrapperInterface)) {
+            Properties p = new Properties();
+            p.putAll(map);
+            return (T) p;
+        } else if (wrapperInterface.isInterface())
+            return (T) new LinkedHashMap<>(map);
+        else //ok, thats inconsistent to the assertion ;-)
+            return (T) BeanClass.createInstance(wrapperInterface, map);
+	}
 }

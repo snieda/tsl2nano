@@ -51,6 +51,7 @@ import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
@@ -1116,7 +1117,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             return null;
         }
         Object value;
-        value = attribute instanceof IValueDefinition ? ((IValueDefinition) attribute).getValue()
+        value = (attribute instanceof IValueDefinition) && !element.getClass().isArray()
+            ? ((IValueDefinition) attribute).getValue()
             : attribute.getValue(element);
         return (V) value;
     }
@@ -1493,7 +1495,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             int workingMode,
             Composition composition) {
         BeanDefinition<I> beandef =
-            (BeanDefinition<I>) (beanType.isArray() && !Util.isEmpty(collection) ? Bean
+            (BeanDefinition<I>) (beanType.isArray() || beanType.equals(String.class) && !Util.isEmpty(collection) ? Bean
                 .getBean((Serializable) collection.iterator().next())
                 : getBeanDefinition(beanType.getSimpleName() + (useExtraCollectorDefinition() ? POSTFIX_COLLECTOR
                     : ""),

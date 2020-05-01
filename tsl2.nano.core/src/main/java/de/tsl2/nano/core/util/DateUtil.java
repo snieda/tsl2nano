@@ -14,6 +14,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import de.tsl2.nano.core.ManagedException;
@@ -26,6 +27,10 @@ import de.tsl2.nano.core.ManagedException;
  * @version $Revision$
  */
 public final class DateUtil {
+    /**
+     *
+     */
+    private static final String FORMAT_ISO8601 = "yyyy-MM-dd'T'HH:mm'Z'";
     /** the default date-time format */
     private static DateFormat DEFAULT_DATETIME_FORMAT = DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
         DateFormat.MEDIUM);
@@ -1108,5 +1113,24 @@ public final class DateUtil {
 
     public static long cutTime(long timeInMillis) {
         return timeInMillis - (timeInMillis % (DAY_TO_HOUR * HOUR_TO_MINUTES * MILLI_TO_MINUTES));
+    }
+    
+    public static String toISO8601UTC(Date date) {
+        TimeZone tz = TimeZone.getTimeZone("UTC");
+        DateFormat df = new SimpleDateFormat(FORMAT_ISO8601);
+        df.setTimeZone(tz);
+        return df.format(date);
+    }
+      
+    public static Date fromISO8601UTC(String dateStr) {
+        TimeZone tz = TimeZone.getTimeZone("UTC");
+        DateFormat df = new SimpleDateFormat(FORMAT_ISO8601);
+        df.setTimeZone(tz);        
+        try {
+          return df.parse(dateStr);
+        } catch (ParseException e) {
+          ManagedException.forward(e);
+          return null;
+        }
     }
 }

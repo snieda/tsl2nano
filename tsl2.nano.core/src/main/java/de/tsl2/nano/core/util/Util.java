@@ -72,8 +72,12 @@ public class Util {
      * @return true if this class can be constructed (it is public and not abstract)
      */
     public static boolean isInstanceable(Class<?> cls) {
-        return !cls.isAnnotation() && !cls.isLocalClass() && !cls.isAnonymousClass() && !cls.isArray() && !cls.isInterface() && !Modifier.isAbstract(cls.getModifiers());
+        return !cls.isAnnotation() && !cls.isLocalClass() && !cls.isAnonymousClass() /*&& !cls.isArray()*/ && !cls.isInterface() && !isAbstract(cls);
     }
+
+	public static boolean isAbstract(Class<?> cls) {
+		return Modifier.isAbstract(cls.getModifiers());
+	}
     /**
      * isAllNull
      * 

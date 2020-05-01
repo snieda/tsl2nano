@@ -44,6 +44,7 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DefaultFormat;
 import de.tsl2.nano.core.util.FormatUtil;
 import de.tsl2.nano.core.util.ListSet;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -208,15 +209,7 @@ private static Object deepCopy(Object src, Object dest) throws Exception {
             boolean onlySingleValues,
             boolean onlyFilterAttributes,
             String... filterAttributes) {
-        BeanDefinition beandef;
-//        if (onlyFilterAttributes && filterAttributes.length > 0) {
-//            //attributes will be changed - so we have to use an own instance
-//            beandef = new BeanDefinition(BeanClass.getDefiningClass(o.getClass()));
-//            beandef.setAttributeFilter(filterAttributes);
-//        } else {
-        beandef = BeanDefinition.getBeanDefinition(BeanClass.getDefiningClass(o.getClass()));
-//        }
-        return beandef.toValueMap(o, useClassPrefix, onlySingleValues, onlyFilterAttributes, filterAttributes);
+        return Bean.getBean(o).toValueMap(o, useClassPrefix, onlySingleValues, onlyFilterAttributes, filterAttributes);
     }
 
     /**
@@ -256,6 +249,18 @@ private static Object deepCopy(Object src, Object dest) throws Exception {
         return beandef.toValueMap(o, keyPrefix, onlySingleValues, onlyFilteredAttributes, filterAttributes);
     }
 
+    public static <T> T fromValueMap(Class<T> type, Map<String, Object> values) {
+        return BeanDefinition.getBeanDefinition(type).fromValueMap(values);
+    }
+
+    public static String toJSON(Object instance) {
+        return MapUtil.toJSON(toValueMap(instance));
+    }
+
+    /** only flat object, no recursion yet! */
+    public static <T> T fromJSON(Class<T> type, String json) {
+        return (T) fromValueMap(type, MapUtil.fromJSON(json));
+    }
     /**
      * delegates to {@link #toFormattedMap(Object, String, boolean)}.
      */

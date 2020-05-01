@@ -341,7 +341,7 @@ public class BeanConfigurator<T> implements Serializable {
             @de.tsl2.nano.bean.annotation.Constraint(defaultValue = "%: RuleScript (--> JavaScript)", allowed = {
                 "§: Rule  (--> Operation)", "%: RuleScript (--> JavaScript)", "!: Action (--> Java)"
                 , "?: Query (--> SQL statement)", "@: Web   (--> URL/REST)" }) String actionType,
-            @de.tsl2.nano.bean.annotation.Constraint(pattern = ".*") String actionExpression) {
+            /*@de.tsl2.nano.bean.annotation.Constraint(pattern = ".*") */String actionExpression) {
 
         if (actionType.startsWith("%"))
             ENV.get(RulePool.class).add(new RuleScript<>(newActionName, actionExpression, null));

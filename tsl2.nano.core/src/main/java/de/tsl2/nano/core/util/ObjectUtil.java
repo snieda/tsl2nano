@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 
@@ -318,10 +319,11 @@ public class ObjectUtil extends ByteUtil {
      */
     @SuppressWarnings("unchecked")
     public static <T> T wrap(Object value, Class<T> wrapperType) {
+        if (value != null && wrapperType.isAssignableFrom(value.getClass()))
+            return (T) value;
         LOG.debug("trying to convert '" + value + "' to " + wrapperType);
         // check, if constructor for value is available in wrapper type
         try {
-            Constructor<T> c;
             if (value != null && !PrimitiveUtil.isAssignableFrom(wrapperType, value.getClass())) {
                 if (Class.class.isAssignableFrom(wrapperType))
                     return (T) BeanClass.load(value.toString());
@@ -332,8 +334,14 @@ public class ObjectUtil extends ByteUtil {
                         return ByteUtil.toByteStream((byte[])value, wrapperType);
                     else if (Collection.class.isAssignableFrom(wrapperType))
                         return (T )new ListSet(value);
-                    //IMPROVE: what's about FormatUtil.parse() <-- ObjectUtil.wrap() is called in FormatUtil!
-                    return BeanClass.createInstance(wrapperType, value);
+                    else if ((wrapperType.isInterface() || wrapperType.equals(Properties.class)) 
+                            && Map.class.isAssignableFrom(wrapperType))
+                        return (T) MapUtil.toMapType((Map)value, (Class<Map>)wrapperType);
+                    else if (isInstanceable(wrapperType))
+                        //IMPROVE: what's about FormatUtil.parse() <-- ObjectUtil.wrap() is called in FormatUtil!
+                        return BeanClass.createInstance(wrapperType, value);
+                    else
+                        LOG.warn("unknown wrapping of " + value.getClass() + value.hashCode() + " to " + wrapperType);
                 }
             }
         } catch (Exception e) {

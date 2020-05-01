@@ -366,8 +366,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             return CollectionUtil.getFiltering(attributes, new IPredicate<IAttribute>() {
                 @Override
                 public boolean eval(IAttribute arg0) {
-                    return getPresentationHelper().isDefaultAttribute(arg0)
-                        || getValueExpression().isExpressionPart(arg0.getName());
+                    return getValueExpression().isExpressionPart(arg0.getName()) || getPresentationHelper().isDefaultAttribute(arg0);
                 }
             });
         } else {
@@ -1009,15 +1008,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                 virtualBeanCache.add(beandef);
                 beandef.setName(name);
                 AnnotationFactory.with(beandef, type != null ? type : beandef.getDeclaringClass());
-//                if (fullInitStore)
-//                    if (true /*xmlFile.canWrite()*/) {
-//                        //be careful: having write access will introduce another behaviour
-//                        if (type != UNDEFINED.getClass())
                 if (ENV.get("beandef.autoinit", true) /*&& beandef.isSaveable()*/)
                     beandef.autoInit(name);
-//                        beandef.saveBeanDefinition(xmlFile);
-//                    } else
-//                        LOG.warn("couldn't write bean-definition cache to: " + xmlFile.getPath());
             }
         } else {
             beandef = virtualBeanCache.get(i);

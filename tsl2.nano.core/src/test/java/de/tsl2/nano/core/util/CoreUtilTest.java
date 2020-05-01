@@ -138,7 +138,7 @@ public class CoreUtilTest implements ENVTestPreparation {
 
 	@Test
 	public void testMapUtil() {
-		Map m = MapUtil.asMap("k1", "v1", "k2", "v2");
+		Map m = MapUtil.asMap("k1", "v1,v2", "k2", "v2;v3");
 
 		String json = MapUtil.toJSON(m);
 		Map m2 = MapUtil.fromJSON(json);
