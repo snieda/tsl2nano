@@ -139,7 +139,7 @@ public abstract class AbstractExpression<T> implements IValueExpression<T>, IAtt
 
     @Override
     public String getId() {
-        return (getDeclaringClass() != null ? getDeclaringClass().getSimpleName() : "[unknown]") + ":" + getExpression();
+        return (getDeclaringClass() != null ? getDeclaringClass().getSimpleName().toLowerCase() : "[unknown]") + "." + getExpression();
     }
 
     /**

@@ -663,7 +663,9 @@ public class BeanClass<T> implements Serializable {
                 //args = BeanAttribute.wrap(args, par[0]);
             } else {
                 for (int i = 0; i < args.length; i++) {
-                    args[i] = ObjectUtil.wrap(args[i], par[i]);
+                	if (par.length <= i)
+                		break;
+                	args[i] = ObjectUtil.wrap(args[i], par[i]);
                 }
             }
         }

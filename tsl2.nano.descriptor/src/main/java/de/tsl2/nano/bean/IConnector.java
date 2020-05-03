@@ -23,4 +23,5 @@ public interface IConnector<REFERENCE> extends Serializable {
     Object connect(REFERENCE connectionEnd);
     /** does some cleaning on dis-connection */
     void disconnect(REFERENCE connectionEnd);
+    default boolean isConnected() { throw new UnsupportedOperationException();}
 }

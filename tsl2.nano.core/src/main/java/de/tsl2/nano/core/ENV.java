@@ -682,7 +682,7 @@ public class ENV implements Serializable {
         name = StringUtil.substring(name, null, ".xml");
         String path = cleanpath(name);
         if (self().get("app.configuration.persist.yaml", false)) {
-            return self().get(YamlUtil.class).load(new File(path + ".yml"), type);
+            return self().get(YamlUtil.class).load(FileUtil.userDirFile(path + ".yml"), type);
         } else {
             return self().get(XmlUtil.class).loadXml(path + ".xml", type, renameOnError);
         }

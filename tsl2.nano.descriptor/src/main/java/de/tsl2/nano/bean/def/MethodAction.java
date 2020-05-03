@@ -122,10 +122,11 @@ public class MethodAction<T> extends CommonAction<T> implements IsPresentable {
 	}
 
 	@Override
-	public void setParameter(Object... parameter) {
+	public MethodAction<T> setParameter(Object... parameter) {
 		super.setParameter(parameter);
 		if (parameters().getTypes() == null && getConstraints() != null)
 			parameters().setConstraints(CollectionUtil.concat(new Constraint[] {new Constraint<>(Object.class)}, getConstraints()));
+		return this;
 	}
 	
 	private Object[] getArgumentValues() {

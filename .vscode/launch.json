@@ -68,8 +68,7 @@
             "remotePort": 8787,
             "hostName": "localhost",
             "port": 8787,
-            "sourcePaths": ["tsl2.nano.core/src/main/java"],
-            "projectName": "tsl2.nano.core"
+            "projectName": "tsl2.nano.h5-standalone"
         },
         {
             "name": "Debug (Heroku 8787)",

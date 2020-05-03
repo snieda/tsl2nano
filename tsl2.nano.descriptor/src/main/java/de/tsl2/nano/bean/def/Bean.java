@@ -635,7 +635,10 @@ public class Bean<T> extends BeanDefinition<T> {
         if (beandef.actions != null) {
             bean.actions = new ArrayList<IAction>(beandef.actions.size());
             for (IAction a : beandef.actions) {
-                bean.actions.add(a instanceof Serializable && !a.getClass().isAnonymousClass() ? BeanUtil.copy(a) : a);
+            	a = a instanceof Serializable && !a.getClass().isAnonymousClass() ? BeanUtil.copy(a) : a;
+            	if (a instanceof IConnector)
+            		((IConnector) a).connect(instance);
+                bean.actions.add(a);
             }
         }
         //give the new bean the chance to create actions...only if null
@@ -917,6 +920,14 @@ public class Bean<T> extends BeanDefinition<T> {
         return (B) this;
     }
 
+    @Override
+    public BeanDefinition<T> addAction(IAction action) {
+    	super.addAction(action);
+    	if (action instanceof IConnector && !((IConnector) action).isConnected())
+    		((IConnector) action).connect(instance);
+    	return this;
+    }
+    
     @Override
     public Bean<T> refreshed() {
         if (isStale() && !(isconnected))

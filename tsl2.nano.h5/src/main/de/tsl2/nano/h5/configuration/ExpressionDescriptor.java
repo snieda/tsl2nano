@@ -81,7 +81,7 @@ public class ExpressionDescriptor<T> extends AbstractExpression<T> {
     }
 
     public static boolean isJSON(String response) {
-        return response != null && response.matches("\\{\\s*\\w+\\s*\\:\\w+\\,");
+        return response != null && response.matches("\\{\\s*[\"]?\\w+[\"]?\\s*\\:[\"]?\\w+[\"]?.");
     }
 
     public static boolean isURL(String response) {

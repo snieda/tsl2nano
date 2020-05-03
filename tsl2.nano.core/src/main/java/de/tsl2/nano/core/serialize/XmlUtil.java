@@ -250,10 +250,10 @@ public class XmlUtil {
         try {
             return new org.simpleframework.xml.core.Persister(getSimpleXmlProxyStrategy(),
                 new SimpleXmlArrayWorkaround()).read(type,
-                    fileInputStream = new FileInputStream(new File(xmlFile)));
+                    fileInputStream = new FileInputStream(FileUtil.userDirFile(xmlFile)));
         } catch (Exception e) {
         	if (ENV.isAvailable())
-        		Message.send(e);
+        		Message.ask(e.getMessage(), true); //otherwise it may not be visible on reloading all...
         	else
         		e.printStackTrace();
         	if (fileInputStream != null)

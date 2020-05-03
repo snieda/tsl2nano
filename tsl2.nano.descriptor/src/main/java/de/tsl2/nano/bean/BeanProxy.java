@@ -68,13 +68,13 @@ public class BeanProxy<T> extends DelegationHandler<T> {
     }
 
     /** to be used to get the last proxy invocation - for test purpose only */
-    public static final String PROPERTY_INVOKATION_INFO = "BeanProxyInvokationInfo.";
+    public static final String PROPERTY_INVOKATION_INFO = "BeanProxyInvocationInfo.";
 
     /**
      * Constructor
      */
     protected BeanProxy() {
-        this(new HashMap<String, Object>(), false, null);
+        this(new HashMap<String, Object>(), false, (T)null);
     }
 
     /**
@@ -86,6 +86,12 @@ public class BeanProxy<T> extends DelegationHandler<T> {
     protected BeanProxy(Map<String, Object> beanProperties, boolean preferProperties, T delegate) {
         super(delegate, beanProperties);
         this.preferProperties = preferProperties;
+    }
+
+    protected BeanProxy(Map<String, Object> beanProperties, boolean preferProperties, Class<T>... interfazes) {
+        super((T)null, beanProperties);
+        this.preferProperties = preferProperties;
+        this.interfaces = interfazes;
     }
 
     public static <T> T createBeanImplementation(Class<T> interfaze) {
@@ -127,7 +133,8 @@ public class BeanProxy<T> extends DelegationHandler<T> {
             classLoader = Thread.currentThread().getContextClassLoader();
         return (T) Proxy.newProxyInstance(classLoader,
             new Class[] { interfaze, BeanProperty.class },
-            new BeanProxy(attributes, preferProperties, delegate));
+            delegate != null ? new BeanProxy(attributes, preferProperties, delegate)
+            				 : new BeanProxy<T>(attributes, preferProperties, interfaze));
     }
 
     public static void setReturnEmptyCollections(Object proxy, boolean returnEmptyCollections) {
@@ -170,7 +177,7 @@ public class BeanProxy<T> extends DelegationHandler<T> {
             //this spec. enables all values to be changed!
             properties.put((String) args[0], args[1]);
         } else if (method.getName().startsWith(BeanAttribute.PREFIX_WRITE_ACCESS) && args.length == 1) {
-            final String attributeName = new BeanAttribute(method).getName();
+            final String attributeName = BeanAttribute.getNameFromSetter(method);
             properties.put(attributeName, args[0]);
         } else {
             /*
@@ -193,9 +200,9 @@ public class BeanProxy<T> extends DelegationHandler<T> {
         if (preferProperties && result == null && delegate != null && method.getDeclaringClass().isAssignableFrom(delegate.getClass()))
             result = invokeDelegate(method, args);
         
-        if (result == null && Collection.class.isAssignableFrom(method.getReturnType()) && returnEmptyCollections) {
-            result = new ListSet<>();
-        }
+       if (result == null && Collection.class.isAssignableFrom(method.getReturnType()) && returnEmptyCollections) {
+           result = new ListSet<>();
+       }
         //for test purpose, we provide last invokation as property
         properties.put(PROPERTY_INVOKATION_INFO + method.getName(), getMethodArgsId(method, args));
 

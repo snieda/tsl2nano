@@ -49,6 +49,7 @@ public class Action<T> extends AbstractRunnable<T> {
     public Action(String name, Class<?> declaringClass, String operation, LinkedHashMap<String, ParType> parameter) {
         super(name, operation, parameter);
         this.declaringClass = declaringClass;
+        createParameter(getMethod(declaringClass.getName() + "." + operation));
     }
 
     public Action(String method) {
@@ -82,9 +83,13 @@ public class Action<T> extends AbstractRunnable<T> {
         this.declaringClass = method.getDeclaringClass();
         setOperation(method.getName());
         this.name = getOperation();
-        createParameter(method);
-        initDeserializing();
+        init(method);
     }
+
+	private void init(Method method) {
+		createParameter(method);
+        initDeserializing();
+	}
 
     private void createParameter(Method method) {
         Class<?>[] types = method.getParameterTypes();
@@ -98,6 +103,8 @@ public class Action<T> extends AbstractRunnable<T> {
     @Override
     public T run(Map<String, Object> context, Object... extArgs) {
         Object instance = context.remove("instance");
+        if (parameter == null)
+        	createParameter(getMethod(declaringClass.getName() + "." + getOperation()));
         return (T) BeanClass.getBeanClass(declaringClass).callMethod(instance, getOperation(),
             getParameterList().toArray(new Class[0]), checkedArguments(context, false).values()
                 .toArray());

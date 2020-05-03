@@ -1,10 +1,13 @@
-package de.tsl2.nano.h5;
+package de.tsl2.nano.h5.configuration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.anonymous.project.Address;
@@ -16,16 +19,23 @@ import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.annotation.ConstraintValueSet;
 import de.tsl2.nano.bean.def.Bean;
+import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.bean.def.MethodAction;
+import de.tsl2.nano.bean.def.Presentable;
+import de.tsl2.nano.bean.def.ValueColumn;
 import de.tsl2.nano.bean.def.ValueGroup;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.util.ConcurrentUtil;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.h5.NanoH5;
+import de.tsl2.nano.h5.NanoH5Test;
 import de.tsl2.nano.h5.configuration.AttributeConfigurator;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
+import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.incubation.specification.actions.Action;
-import de.tsl2.nano.incubation.specification.actions.ActionPool;
 
 public class BeanConfiguratorTest {
 
@@ -40,39 +50,63 @@ public class BeanConfiguratorTest {
 
     @SuppressWarnings("rawtypes")
     @Test
-    //TODO: check the results!
-    public void testConfigurators() throws Exception {
+    public void testConfigurators() throws Throwable {
         NanoH5Test.createENV("beanconf");
-        new NanoH5();
+        NanoH5 nanoH5 = new NanoH5();
         BeanContainer.initEmtpyServiceActions();
-        ENV.get(ActionPool.class).add(new Action("testaction", Address.class, "getCity", null));
+//        ENV.get(Pool.class).add(new Action("testaction", Address.class, "getCity", new LinkedHashMap<>()));
         BeanConfigurator<Address> bconf = BeanConfigurator.create(Address.class).getInstance();
-        bconf.actionAddAction("testaction");
-        bconf.actionAddAttribute("date", "expression");
         bconf.actionCreateCompositor(Address.class.getName(), "city", "code", "wrench.png");
         bconf.actionCreateController(Address.class.getName(), "city", null, "code", "wrench.png", "code", 1, 1);
         bconf.actionCreateRuleOrAction("testRule", "§", "1+1");
         bconf.actionCreateRuleOrAction("testRuleScript", "%", "1+1");
         bconf.actionCreateRuleOrAction("testaction", "!", Address.class.getName() + ".getCity");
         bconf.actionCreateRuleOrAction("testREST", "@", "http://web.de");
-        bconf.actionCreateRuleOrAction("testaction", "?", "select 1=1");
+        bconf.actionCreateRuleOrAction("testquery", "?", "select 1=1");
+        bconf.actionAddAttribute("§", "testRule");
+        bconf.actionAddAction("testaction");
         bconf.actionCreateSheet("sheet", 2, 2);
         bconf.setValueGroups(Arrays.asList(new ValueGroup("test", false, "city", "code")));
         
-        List<AttributeConfigurator> attributes = bconf.getAttributes();
-        for (AttributeConfigurator aconf : attributes) {
-            aconf.actionAddListener(aconf.getName(), "city", "test");
-            assertTrue(aconf.getListener() != null);
-
-            aconf.actionAddRuleCover("presentable", "test");
+        for (AttributeConfigurator aconf : bconf.getAttributes()) {
+        	if (!aconf.attr.isVirtual()) {
+	            aconf.setColumnDefinition(changeProperty((((ValueColumn)aconf.getColumnDefinition())), "width", 99));
+	            aconf.setConstraint(changeProperty((((Constraint)aconf.getConstraint())), "length", 99));
+	            aconf.setPresentable(changeProperty((((Presentable)aconf.getPresentable())), "type", 99));
+//	            changeProperty(aconf.getValueExpression().getClass(), "expression", "id");
+//	            changeProperty(aconf.getFormat().getClass(), "???");
+        	}
+            ConcurrentUtil.setCurrent(bconf);
+            aconf.actionAddListener(aconf.getName(), "city", "§testRule");
+            aconf.actionAddRuleCover("presentable", "§testRule");
             aconf.actionCreateRuleOrAction("testaction", "!", Address.class.getName() + ".getCity");
-            aconf.actionRemoveRuleCover("presentable");
+        }
+        bconf.actionSave();
+        nanoH5.reset();
+        
+        bconf = BeanConfigurator.create(Address.class).getInstance();
+        for (AttributeConfigurator aconf : bconf.getAttributes()) {
+            assertTrue(aconf.getListener() != null);
             if (aconf.getColumnDefinition() != null) //may be null on virtual attributes
                 assertEquals(aconf.getPresentable().getLabel(), aconf.getColumnDefinition().getPresentable().getLabel());
+            aconf.actionRemoveRuleCover("presentable");
         }
-        
+        Bean.getBean(new Address(1, "Berliner Str.1", "100000", "Buxdehude", "germany")).getAction("testaction").run();
         checkMethodActions(bconf, 9, 8);
+        
+        assertEquals("[]", FileUtil.getFileset("./", "**/*.failed").toString());
+        assertEquals("[]", FileUtil.getFileset("./", "**/*.stacktrace").toString());
     }
+
+    private <T extends Serializable> T changeProperty(T attrProperty, String propName, Object value) throws Throwable {
+    	BeanConfigurator bc = BeanConfigurator.create(attrProperty.getClass()).getInstance();
+    	bc.getAttributes().stream()
+    		.filter( a -> ((AttributeConfigurator)a).attr.getName().equals(propName))
+    		.peek(a -> ((AttributeConfigurator)a).attr.setValue(attrProperty, value))
+    		.findFirst()
+    		.orElseThrow(() -> new IllegalArgumentException(propName + " not found"));
+    	return attrProperty;
+	}
 
     private void checkMethodActions(BeanConfigurator<Address> bconf, int actionCount, int methodActionCount) {
         Bean bean = new Bean(bconf);
@@ -95,7 +129,7 @@ public class BeanConfiguratorTest {
                 try {
                     ma.activate();
                 } catch (Exception e) {
-                    //OK, generic parameters not working - the test checkes not the action content!
+                    //OK, generic parameters not working - the test checks not the action content!
                     String m = e.getMessage();
                     if (m.contains("FileNotFoundException") || m.contains("attribute Expression") || m.contains("Void")
                         || m.contains("ClassNotFoundException")  || m.contains("TableList"))
@@ -105,6 +139,9 @@ public class BeanConfiguratorTest {
                 }
             }
         }
+        List<File> fileset = FileUtil.getFileset("./", "**/java.xml.stacktrace");
+        assertEquals(1, fileset.size());
+        assertTrue(fileset.get(0).delete());
         assertEquals(StringUtil.toFormattedString(actions, -1, true), methodActionCount, count);
     }
 

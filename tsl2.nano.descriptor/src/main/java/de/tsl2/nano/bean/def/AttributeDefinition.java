@@ -372,7 +372,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
                         changeHandler().addListener(dl, eventType);
                     }
                     if (dl.attributeID != null) {
-                        String name = StringUtil.substring(dl.attributeID, ".", null);
+                        String name = dl.propertyName; //StringUtil.substring(dl.attributeID, ".", null);
                         LOG.debug(beandef.getId() + ": resetting value of attribute " + name);
                         dl.setAttribute((AttributeDefinition) beandef.getAttribute(name));
                     }

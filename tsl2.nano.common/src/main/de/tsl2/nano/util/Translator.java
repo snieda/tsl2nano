@@ -44,7 +44,7 @@ public class Translator {
     public static final String translate(Locale srcLang, Locale destLang, String words) {
         words = StringUtil.spaceCamelCase(words);
         words = URLEncoder.encode(words);
-        String request = MessageFormat.format(URL_TANSLATION_TEMPL, srcLang, destLang, words);
+        String request = MessageFormat.format(URL_TANSLATION_TEMPL, srcLang.getLanguage(), destLang.getLanguage(), words);
         try {
             return URLDecoder.decode(NetUtil.get(request).substring(2).trim(), "UTF-8");
         } catch (UnsupportedEncodingException e) {
@@ -67,7 +67,7 @@ public class Translator {
             Map origin,
             Locale srcLang,
             Locale destLang/*, int requestWordCount*/) {
-        LOG.info("starting translation of " + origin.size() + " words from <" + srcLang + "> to <" + destLang + ">");
+        LOG.info("starting translation of " + origin.size() + " words from <" + srcLang.getLanguage() + "> to <" + destLang.getLanguage() + ">");
         Set keySet = origin.keySet();
         Properties target = new Properties();
         int tries = 0;

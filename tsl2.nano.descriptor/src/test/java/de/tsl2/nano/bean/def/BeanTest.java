@@ -25,13 +25,12 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.logging.Log;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.tsl2.nano.action.CommonAction;
@@ -52,6 +51,7 @@ import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
+import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.currency.CurrencyUnit;
 import de.tsl2.nano.currency.CurrencyUtil;
 import de.tsl2.nano.format.GenericTypeMatcher;
@@ -740,5 +740,22 @@ public class BeanTest {
             typeMatcher.materialize("01.01.2010"));
         Assert.assertEquals(new SimpleDateFormat("dd.MM.yyyy").parse("01.01.2010").getTime(),
             ((Date) typeMatcher.materialize("01.01.2010")).getTime());
+    }
+
+    @Test
+    public void testJSON() {
+        TypeBean o = new TypeBean();
+        o.setString("test");
+        o.setBigDecimal(new BigDecimal("10"));
+        o.setDate(new Date());
+        o.setImmutableBoolean(true);
+        o.setPrimitiveChar('1');
+        
+        String json = BeanUtil.toJSON(o);
+        System.out.println(json);
+
+        TypeBean o1 = BeanUtil.fromJSON(TypeBean.class, json);
+        assertEquals(json, BeanUtil.toJSON(o1));
+//        assertTrue(ObjectUtil.equals(o, o1)); // date will differ on seconds part
     }
 }

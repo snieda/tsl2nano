@@ -19,6 +19,7 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FormatUtil;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * handler for primitives and their immutable wrappers. all wrappers have a static 'TYPE' providing the primitive class
@@ -266,6 +267,8 @@ public class PrimitiveUtil {
     public static <T> T convert(Object value, Class<T> conversionType) {
         if (value == null)
             return null;
+        if (conversionType.isAssignableFrom(value.getClass()))
+        	return (T) value;
         
         //first: convert the non-number values to numbers
         if (isAssignableFrom(Boolean.class, value.getClass())
@@ -273,9 +276,14 @@ public class PrimitiveUtil {
             value = Boolean.valueOf(value.toString()) ? 1 : 0;
         else if (isAssignableFrom(Character.class, value.getClass()))
             value = value.hashCode();
-        else if (isAssignableFrom(String.class, value.getClass()))
-            value = Double.valueOf((String) value);
-        
+        else if (isAssignableFrom(String.class, value.getClass()) && !Util.isEmpty(value, true))
+        	if (char.class == conversionType)
+        		value = value.hashCode();
+        	else
+        		value = Double.valueOf((String) value);
+        else if (!(value instanceof Number))
+            throw new IllegalArgumentException(value + " can't be converted to " + conversionType);
+                    
         //now we have a number
         double d = ((Number)value).doubleValue();
         
