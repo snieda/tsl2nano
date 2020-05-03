@@ -119,7 +119,7 @@ import de.tsl2.nano.h5.collector.Increaser;
 import de.tsl2.nano.h5.collector.QueryResult;
 import de.tsl2.nano.h5.collector.Statistic;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
-import de.tsl2.nano.h5.expression.QueryPool;
+import de.tsl2.nano.h5.expression.Query;
 import de.tsl2.nano.h5.expression.RuleExpression;
 import de.tsl2.nano.h5.expression.SQLExpression;
 import de.tsl2.nano.h5.navigation.BeanAct;
@@ -128,11 +128,11 @@ import de.tsl2.nano.h5.navigation.Workflow;
 import de.tsl2.nano.h5.websocket.WSEvent;
 import de.tsl2.nano.h5.websocket.WebSocketRuleDependencyListener;
 import de.tsl2.nano.incubation.specification.ParType;
+import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.incubation.specification.actions.Action;
-import de.tsl2.nano.incubation.specification.actions.ActionPool;
+import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RuleDecisionTable;
 import de.tsl2.nano.incubation.specification.rules.RuleDependencyListener;
-import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.specification.rules.RuleScript;
 import de.tsl2.nano.util.PrintUtil;
 import my.app.Times;
@@ -179,7 +179,7 @@ public class Timesheet extends NanoH5App {
         RuleScript<String> script =
             new RuleScript<String>(ATTR_WEEKDAY,
                 "charge.getFromdate() != null ? formatter.format(charge.getFromdate()) : \"\";", pt);
-        ENV.get(RulePool.class).add(script);
+        ENV.get(Pool.class).add(script);
         charge.addAttribute(ATTR_WEEKDAY, new RuleExpression<>(Charge.class, RuleScript.PREFIX + ATTR_WEEKDAY), null,
             null);
 
@@ -261,7 +261,7 @@ public class Timesheet extends NanoH5App {
         charge.getAttribute(ATTR_VALUE).getConstraint().setPrecision(4);
 
         // create dependency listeners for websocket and NOT standard bean-changing
-        ENV.get(RulePool.class).add(calcTime);
+        ENV.get(Pool.class).add(calcTime);
         Html5Presentation helper = charge.getPresentationHelper();
         helper.addRuleListener(ATTR_VALUE, RuleScript.PREFIX + calcTime.getName(), 2, ATTR_FROMTIME, ATTR_TOTIME, ATTR_PAUSE);
 
@@ -272,7 +272,7 @@ public class Timesheet extends NanoH5App {
             new RuleScript<String>(
                 "presValueColor", "var map = new java.util.HashMap(); map.put('style', (typeof value != 'undefined' ? value : 0) > 10 ? '" + redColorStyle
                     + "' : '" + greenColorStyle + "'); map;", null);
-        ENV.get(RulePool.class).add(presValueColor);
+        ENV.get(Pool.class).add(presValueColor);
         RuleCover.cover(Charge.class, ATTR_VALUE, "presentable.layoutConstraints", "%" + presValueColor.getName());
         RuleCover.cover(Charge.class, ATTR_VALUE, "columnDefinition.presentable.layoutConstraints", "%" + presValueColor.getName());
         //one rulecover on columndefs..presentable.layoutconstraints
@@ -285,18 +285,18 @@ public class Timesheet extends NanoH5App {
         tl.add("matrix", "<1>", "<2>", "<3>", "<4>", "<5>", "<6>", "<7>");
         tl.add("weekday", "Mo", "Di", "Mi", "Do", "Fr","Sa", "So");
         tl.add("result", greenColorStyle, greenColorStyle, greenColorStyle, greenColorStyle, greenColorStyle, redColorStyle, redColorStyle);
-        String ruleDir = ENV.get(RulePool.class).getDirectory();
+        String ruleDir = ENV.get(Pool.class).getDirectory(RuleDecisionTable.class);
         FileUtil.save(ruleDir + "weekcolor", tl.dump());
         tl.save(ruleDir);
         RuleDecisionTable dtRule = RuleDecisionTable.fromCSV(ruleDir + "weekcolor.csv");
-        ENV.get(RulePool.class).add(dtRule);
+        ENV.get(Pool.class).add(dtRule);
         RuleCover.cover(Charge.class, ATTR_FROMDATE, "presentable.layoutConstraints", "&" + dtRule.getName());
         RuleCover.cover(Charge.class, ATTR_FROMDATE, "columnDefinition.presentable.layoutConstraints", "&" + dtRule.getName());
         
         //copy fromdate to todate
         charge.getAttribute(ATTR_TODATE).getPresentation().setVisible(false);
         RuleScript<String> id = new RuleScript<String>("id", "value", null);
-        ENV.get(RulePool.class).add(id);
+        ENV.get(Pool.class).add(id);
         charge.getAttribute(ATTR_FROMDATE).changeHandler().addListener(new RuleDependencyListener<>(charge.getAttribute(ATTR_TODATE),ATTR_TODATE, "id"));
 
         charge.saveDefinition();
@@ -387,7 +387,7 @@ public class Timesheet extends NanoH5App {
         Action<Object> a = new Action<>(antCaller);
         a.addConstraint("arg1", new Constraint<String>(ENV.getConfigPath() + "antscripts.xml"));
         a.addConstraint("arg2", new Constraint<String>("help"));
-        ENV.get(ActionPool.class).add(a);
+        ENV.get(Pool.class).add(a);
 
         java.lang.reflect.Method icsHolidays = null;
         try {
@@ -395,7 +395,7 @@ public class Timesheet extends NanoH5App {
         } catch (Exception e) {
             ManagedException.forward(e);
         }
-        ENV.get(ActionPool.class).add(new Action<>(icsHolidays));
+        ENV.get(Pool.class).add(new Action<>(icsHolidays));
 
         java.lang.reflect.Method icsImport = null;
         try {
@@ -404,7 +404,7 @@ public class Timesheet extends NanoH5App {
             ManagedException.forward(e);
         }
         a = new Action<>(icsImport);
-        ENV.get(ActionPool.class).add(a);
+        ENV.get(Pool.class).add(a);
 
         java.lang.reflect.Method printAction = null;
         try {
@@ -413,7 +413,7 @@ public class Timesheet extends NanoH5App {
             ManagedException.forward(e);
         }
         a = new Action<>(printAction);
-        ENV.get(ActionPool.class).add(a);
+        ENV.get(Pool.class).add(a);
 
         BeanDefinition<Charge> chargeDef = BeanDefinition.getBeanDefinition(Charge.class);
         chargeDef.addAction(new ActionImportHolidays());
@@ -579,10 +579,10 @@ public class Timesheet extends NanoH5App {
         assertEquals(c, collector.nextRow());
 
         //test the queries
-        QueryPool qpool = ENV.get(QueryPool.class);
-        assertEquals(qpool.get(STAT_TIMESHEET_STATISTICS).getColumnNames(), Arrays.asList("Month", "Workdays", "Hours", "Dayhours", "Ill", "Holiday"));
-        assertEquals(qpool.get(STAT_PROJECTS).getColumnNames(), Arrays.asList("Project", "Hours"));
-        assertEquals(qpool.get(STAT_TYPES).getColumnNames(), Arrays.asList("Type", "Hours"));
+        Pool qpool = ENV.get(Pool.class);
+        assertEquals(qpool.get(STAT_TIMESHEET_STATISTICS, Query.class).getColumnNames(), Arrays.asList("Month", "Workdays", "Hours", "Dayhours", "Ill", "Holiday"));
+        assertEquals(qpool.get(STAT_PROJECTS, Query.class).getColumnNames(), Arrays.asList("Project", "Hours"));
+        assertEquals(qpool.get(STAT_TYPES, Query.class).getColumnNames(), Arrays.asList("Type", "Hours"));
         super.stop();
         
         //test virtual beans

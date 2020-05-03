@@ -14,7 +14,6 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.incubation.specification.rules.Rule;
-import de.tsl2.nano.incubation.specification.rules.RulePool;
 
 public class RuleTest implements ENVTestPreparation {
 
@@ -55,7 +54,7 @@ public class RuleTest implements ENVTestPreparation {
         assertEquals(new BigDecimal(4), r2);
         //XmlUtil.saveXml("test.xml", rule);
 
-        Pool pool = new RulePool();
+        Pool pool = ENV.get(Pool.class);
         pool.add(rule);
         ENV.addService(pool);
         Rule<BigDecimal> ruleWithImport =

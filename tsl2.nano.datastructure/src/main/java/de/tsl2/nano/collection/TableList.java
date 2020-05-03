@@ -334,12 +334,13 @@ public class TableList<H extends Comparable<H>, ID> implements Serializable {
      * 
      * @param rowId row identifier
      */
-    public void remove(ID rowId) {
+    public Object remove(ID rowId) {
         for (Row<?> r : rows) {
             if (r.rowId.equals(rowId)) {
-                rows.remove(r);
+                return rows.remove(r);
             }
         }
+        return null;
     }
 
     /**

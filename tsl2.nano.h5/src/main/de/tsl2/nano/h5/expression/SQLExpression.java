@@ -15,6 +15,7 @@ import java.util.Map;
 
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.execution.IPRunnable;
+import de.tsl2.nano.incubation.specification.Pool;
 
 /**
  * Usable as attribute getting it's value through a given sql-query.
@@ -70,7 +71,7 @@ public class SQLExpression<T extends Serializable> extends RunnableExpression<T>
 
     @Override
     protected IPRunnable<T, Map<String, Object>> createRunnable() {
-        return (IPRunnable<T, Map<String, Object>>) ENV.get(QueryPool.class).get(expression.substring(1));
+        return (IPRunnable<T, Map<String, Object>>) ENV.get(Pool.class).get(expression.substring(1));
     }
 
     @Override

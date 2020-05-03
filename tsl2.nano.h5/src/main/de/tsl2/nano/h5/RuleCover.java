@@ -16,7 +16,7 @@ import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.MapUtil;
-import de.tsl2.nano.incubation.specification.rules.RulePool;
+import de.tsl2.nano.incubation.specification.Pool;
 
 /**
  * See {@link AttributeCover}, using the {@link RulePool} from specification.
@@ -24,6 +24,7 @@ import de.tsl2.nano.incubation.specification.rules.RulePool;
  * @author Tom
  * @version $Revision$
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class RuleCover<T> extends AttributeCover<T> {
     private static final long serialVersionUID = -4157641723681767640L;
 
@@ -55,7 +56,6 @@ public class RuleCover<T> extends AttributeCover<T> {
      * @param ruleCoverDescriptor
      * @return {@link RuleCover} instance
      */
-    @SuppressWarnings({ "rawtypes" })
     public static RuleCover cover(Class cls, String ruleCoverDescriptor) {
         return AttributeCover.cover(RuleCover.class, cls, ruleCoverDescriptor);
     }
@@ -69,12 +69,15 @@ public class RuleCover<T> extends AttributeCover<T> {
      * @param rule rule to cover the attribute child
      * @return {@link RuleCover} instance
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static RuleCover cover(Class cls, String attr, String child, String rule) {
-        RuleCover cover = new RuleCover<>(rule, MapUtil.asMap(child, rule));
-        cover.connect(BeanDefinition.getBeanDefinition(cls).getAttribute(attr));
-        return cover;
+	public static RuleCover cover(Class cls, String attr, String child, String rule) {
+        return cover(BeanDefinition.getBeanDefinition(cls).getAttribute(attr), child, rule);
     }
+
+	public static RuleCover cover(IAttributeDefinition<?> attr, String child, String rule) {
+        RuleCover cover = new RuleCover<>(rule, MapUtil.asMap(child, rule));
+        cover.connect(attr);
+        return cover;
+	}
 
     @Override
     public Object connect(IAttributeDefinition<?> connectionEnd) {
@@ -83,7 +86,7 @@ public class RuleCover<T> extends AttributeCover<T> {
     
     @Override
     protected boolean checkRule(String ruleName) {
-        return ENV.get(RulePool.class).get(ruleName) != null;
+        return ENV.get(Pool.class).get(ruleName) != null;
     }
 
     /**
@@ -91,7 +94,7 @@ public class RuleCover<T> extends AttributeCover<T> {
      */
     @Override
     public Object eval(String propertyPath) {
-        return ENV.get(RulePool.class).get(rules.get(propertyPath)).run(getContext());
+        return ENV.get(Pool.class).get(rules.get(propertyPath)).run(getContext());
     }
 
 }

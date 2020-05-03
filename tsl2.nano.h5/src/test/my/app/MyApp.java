@@ -49,7 +49,6 @@ import de.tsl2.nano.h5.SpecifiedAction;
 import de.tsl2.nano.h5.collector.Controller;
 import de.tsl2.nano.h5.collector.QueryResult;
 import de.tsl2.nano.h5.expression.Query;
-import de.tsl2.nano.h5.expression.QueryPool;
 import de.tsl2.nano.h5.expression.RuleExpression;
 import de.tsl2.nano.h5.expression.SQLExpression;
 import de.tsl2.nano.h5.navigation.BeanAct;
@@ -59,10 +58,9 @@ import de.tsl2.nano.h5.websocket.WSEvent;
 import de.tsl2.nano.h5.websocket.WebSocketDependencyListener;
 import de.tsl2.nano.h5.websocket.WebSocketRuleDependencyListener;
 import de.tsl2.nano.incubation.specification.ParType;
+import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.incubation.specification.actions.Action;
-import de.tsl2.nano.incubation.specification.actions.ActionPool;
 import de.tsl2.nano.incubation.specification.rules.Rule;
-import de.tsl2.nano.incubation.specification.rules.RulePool;
 
 //import org.anonymous.project.Times;
 
@@ -137,13 +135,13 @@ public class MyApp extends NanoH5 {
             BigDecimal.TEN));
         testRule.addSpecification("notA-1-2", null, BigDecimal.valueOf(4), MapUtil.asMap("x1", BigDecimal.valueOf(1), "x2", BigDecimal.valueOf(2)));
         testRule.addSpecification("A-2-1", null, BigDecimal.valueOf(2), MapUtil.asMap("x1", BigDecimal.valueOf(2), "x2", BigDecimal.valueOf(1)));
-        ENV.get(RulePool.class).add(testRule);
+        ENV.get(Pool.class).add(testRule);
 
         //another rule to test sub-rule-imports
-        ENV.get(RulePool.class).add(new Rule<BigDecimal>("test-import", "A ? 1 + §test : (x2 * 3)", par));
+        ENV.get(Pool.class).add(new Rule<BigDecimal>("test-import", "A ? 1 + §test : (x2 * 3)", par));
 
         BigDecimal result =
-            (BigDecimal) ENV.get(RulePool.class).get("test-import")
+            (BigDecimal) ENV.get(Pool.class).get("test-import", Rule.class)
                 .run(MapUtil.asMap("A", true, "x1", new BigDecimal(1), "x2", new BigDecimal(2)));
 
         LOG.info("my test-import rule result:" + result);
@@ -155,7 +153,7 @@ public class MyApp extends NanoH5 {
 
         HashMap<String, Serializable> par1 = new HashMap<>();
         Query<Object> query = new Query<>("times.begin", qstr, true, par1);
-        QueryPool queryPool = ENV.get(QueryPool.class);
+        Pool queryPool = ENV.get(Pool.class);
         queryPool.add(query);
 
         /*
@@ -170,7 +168,7 @@ public class MyApp extends NanoH5 {
         Action<Object> a = new Action<>(antCaller);
         a.addConstraint("arg1", new Constraint<String>(ENV.getConfigPath() + "antscripts.xml"));
         a.addConstraint("arg2", new Constraint<String>("help"));
-        ENV.get(ActionPool.class).add(a);
+        ENV.get(Pool.class).add(a);
 
         /*
          * define a Controller as Collector of Actions of a Bean

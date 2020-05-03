@@ -30,6 +30,7 @@ import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.IPRunnable;
 import de.tsl2.nano.incubation.specification.AbstractRunnable;
+import de.tsl2.nano.incubation.specification.IPrefixed;
 import de.tsl2.nano.service.util.ServiceUtil;
 
 /**
@@ -39,7 +40,7 @@ import de.tsl2.nano.service.util.ServiceUtil;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
-public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>> {
+public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>>, IPrefixed {
     /** serialVersionUID */
     private static final long serialVersionUID = -9199837113877884921L;
 
@@ -196,6 +197,11 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>> {
         return args;
     }
 
+    @Override
+    public String prefix() {
+    	return "?";
+    }
+    
     @Override
     public String toString() {
         return Util.toString(getClass(), name);

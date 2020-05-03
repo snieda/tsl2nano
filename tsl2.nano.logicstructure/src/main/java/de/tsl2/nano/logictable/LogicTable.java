@@ -10,7 +10,9 @@
 package de.tsl2.nano.logictable;
 
 import java.text.Format;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -206,7 +208,7 @@ public class LogicTable<H extends Format & Comparable<H>, ID> extends TableList<
                     TEntry<H, ID> e = transform(key);
                     return _this.get(e.value, e.key);
                 } catch (Exception ex) {
-                    System.err.println(ex); //TODO print to log
+                    System.err.println("Cell " + key + ": " + ex); //TODO print to log
                     return null;
                 }
             }
@@ -219,12 +221,15 @@ public class LogicTable<H extends Format & Comparable<H>, ID> extends TableList<
 
             @Override
             public Object remove(Object key) {
-                throw new UnsupportedOperationException();
+                TEntry<H, ID> e = transform(key);
+                return _this.remove(e.value);
             }
 
             @Override
             public void putAll(Map<? extends String, ? extends Object> m) {
-                throw new UnsupportedOperationException();
+            	for (String k: m.keySet() ) {
+            		put(k, m.get(k));
+            	}
             }
 
             @Override
@@ -234,17 +239,35 @@ public class LogicTable<H extends Format & Comparable<H>, ID> extends TableList<
 
             @Override
             public Set<String> keySet() {
-                throw new UnsupportedOperationException();
+            	Set<String> keyset = new HashSet<String>();
+                for (int r = 0; r < _this.getRowCount(); r++) {
+					for (int c = 0; c < _this.getColumnCount(); c++) {
+						keyset.add(createKey(r, c));
+					}
+				}
+                return keyset;
             }
 
             @Override
             public Collection<Object> values() {
-                throw new UnsupportedOperationException();
+            	Collection<Object> values = new ArrayList<>(_this.getRowCount() * _this.getColumnCount());
+                for (int r = 0; r < _this.getRowCount(); r++) {
+					for (int c = 0; c < _this.getColumnCount(); c++) {
+						values.add(_this.get(r, c));
+					}
+				}
+                return values;
             }
 
             @Override
             public Set<java.util.Map.Entry<String, Object>> entrySet() {
-                throw new UnsupportedOperationException();
+            	Set<Map.Entry<String, Object>> entrySet = new HashSet<>();
+                for (int r = 0; r < _this.getRowCount(); r++) {
+					for (int c = 0; c < _this.getColumnCount(); c++) {
+						entrySet.add(new de.tsl2.nano.collection.Entry<String, Object>(createKey(r, c), _this.get(r, c)));
+					}
+				}
+                return entrySet;
             }
         };
     }

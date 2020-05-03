@@ -42,6 +42,7 @@ import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.h5.Html5Presentable;
 import de.tsl2.nano.incubation.specification.Pool;
+import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.logictable.ICellVisitor;
 import de.tsl2.nano.logictable.LogicForm;
 import de.tsl2.nano.logictable.LogicTable;
@@ -258,7 +259,7 @@ public class CSheet extends Bean<Object> {
     }
 
     protected String getDirectory() {
-        return ENV.get(Pool.class).getDirectory();
+        return ENV.get(Pool.class).getDirectory(Rule.class);
     }
     
     @Override

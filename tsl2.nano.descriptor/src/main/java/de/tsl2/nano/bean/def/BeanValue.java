@@ -132,7 +132,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                 + " must be of type IValueAccess, but is: " + beanInstance);
         }
         if (!isVirtual())
-            setParent(null);
+//            setParent(null);
         this.instance = beanInstance;
     }
 

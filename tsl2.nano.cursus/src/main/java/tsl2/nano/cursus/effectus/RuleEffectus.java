@@ -1,7 +1,8 @@
 package tsl2.nano.cursus.effectus;
 
 import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.incubation.specification.rules.RulePool;
+import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.incubation.specification.Pool;
 import tsl2.nano.cursus.Res;
 
 public class RuleEffectus<O, V> extends Effectus<O, V> {
@@ -21,7 +22,7 @@ public class RuleEffectus<O, V> extends Effectus<O, V> {
 	@SuppressWarnings("unchecked")
 	@Override
 	protected V evaluateNewValue() {
-		return (V) new RulePool().get(ruleName).run(BeanUtil.toValueMap(getItem()));
+		return (V) ENV.get(Pool.class).get(ruleName).run(BeanUtil.toValueMap(getItem()));
 	}
 
 	public String getRuleName() {

@@ -10,6 +10,7 @@
 package de.tsl2.nano.h5;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -27,8 +28,8 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.specification.ParType;
+import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.incubation.specification.actions.Action;
-import de.tsl2.nano.incubation.specification.actions.ActionPool;
 
 /**
  * action defined in action pool
@@ -78,8 +79,10 @@ public class SpecifiedAction<RETURNTYPE> extends SecureAction<RETURNTYPE> implem
                 break;
             pars.put(argName, getParameter(i++));
         }
-        if (instance != null)
+        if (instance != null) {
             pars.putAll(BeanUtil.toValueMap(instance));
+            pars.put("instance", instance);
+        }
         Action<?> a = getActionRunner();
         Object result = a.run(pars);
         if (BeanUtil.isStandardType(result)) {
@@ -95,7 +98,7 @@ public class SpecifiedAction<RETURNTYPE> extends SecureAction<RETURNTYPE> implem
      * @return
      */
     public Action<?> getActionRunner() {
-        return ENV.get(ActionPool.class).get(name);
+        return ENV.get(Pool.class).get(name, Action.class);
     }
 
     /**
@@ -109,6 +112,11 @@ public class SpecifiedAction<RETURNTYPE> extends SecureAction<RETURNTYPE> implem
         return this;
     }
 
+    @Override
+    public boolean isConnected() {
+    	return instance != null;
+    }
+    
     @SuppressWarnings("rawtypes")
     @Override
     public Class[] getArgumentTypes() {
@@ -116,7 +124,7 @@ public class SpecifiedAction<RETURNTYPE> extends SecureAction<RETURNTYPE> implem
     }
     
     public Set<String> getArgumentNames() {
-        return getActionRunner().getParameter().keySet();
+        return getActionRunner().getParameter() != null ?  getActionRunner().getParameter().keySet() : new HashSet<>();
     }
     
     @SuppressWarnings({ "unchecked", "rawtypes" })

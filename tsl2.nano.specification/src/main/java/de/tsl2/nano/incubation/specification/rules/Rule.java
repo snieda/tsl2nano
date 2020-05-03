@@ -18,6 +18,7 @@ import org.simpleframework.xml.core.Commit;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.incubation.specification.ParType;
+import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.util.operation.NumericConditionOperator;
 import de.tsl2.nano.util.operation.Operator;
 
@@ -89,7 +90,8 @@ public class Rule<T> extends AbstractRule<T> {
         if (!initialized) {
             importSubRules();
         }
-        arguments = checkedArguments(arguments, ENV.get("app.mode.strict", false));
+        if (parameter != null)
+        	arguments = checkedArguments(arguments, ENV.get("app.mode.strict", false));
         operator.reset();
         //in generics it is not possible to cast from Map(String,?) to Map(CharSequence, ?)
         Object a = arguments;

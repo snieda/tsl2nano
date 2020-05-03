@@ -50,13 +50,10 @@ import de.tsl2.nano.h5.collector.Compositor;
 import de.tsl2.nano.h5.collector.Controller;
 import de.tsl2.nano.h5.collector.Increaser;
 import de.tsl2.nano.h5.expression.Query;
-import de.tsl2.nano.h5.expression.QueryPool;
 import de.tsl2.nano.h5.expression.WebClient;
-import de.tsl2.nano.h5.expression.WebPool;
+import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.incubation.specification.actions.Action;
-import de.tsl2.nano.incubation.specification.actions.ActionPool;
 import de.tsl2.nano.incubation.specification.rules.Rule;
-import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.specification.rules.RuleScript;
 
 /**
@@ -344,15 +341,15 @@ public class BeanConfigurator<T> implements Serializable {
             /*@de.tsl2.nano.bean.annotation.Constraint(pattern = ".*") */String actionExpression) {
 
         if (actionType.startsWith("%"))
-            ENV.get(RulePool.class).add(new RuleScript<>(newActionName, actionExpression, null));
+            ENV.get(Pool.class).add(new RuleScript<>(newActionName, actionExpression, null));
         else if (actionType.startsWith("§"))
-            ENV.get(RulePool.class).add(new Rule(newActionName, actionExpression, null));
+            ENV.get(Pool.class).add(new Rule(newActionName, actionExpression, null));
         else if (actionType.startsWith("!"))
-            ENV.get(ActionPool.class).add(new Action(newActionName, actionExpression));
+            ENV.get(Pool.class).add(new Action(newActionName, actionExpression));
         else if (actionType.startsWith("@"))
-            ENV.get(WebPool.class).add(WebClient.create(actionExpression, def.getDeclaringClass()));
+            ENV.get(Pool.class).add(WebClient.create(actionExpression, def.getDeclaringClass()));
         else if (actionType.startsWith("?"))
-            ENV.get(QueryPool.class).add(new Query(newActionName, actionExpression, true, null));
+            ENV.get(Pool.class).add(new Query(newActionName, actionExpression, true, null));
         
     }
 
@@ -361,7 +358,7 @@ public class BeanConfigurator<T> implements Serializable {
             @de.tsl2.nano.bean.annotation.Constraint(allowed=ConstraintValueSet.ALLOWED_ENVFILES + ".*specification/action.*") String specifiedAction) {
         //check, if action available
         specifiedAction = StringUtil.substring(FileUtil.replaceToJavaSeparator(specifiedAction), "/", ".", true);
-        ENV.get(ActionPool.class).get(specifiedAction);
+        ENV.get(Pool.class).get(specifiedAction, Action.class);
         SpecifiedAction<Object> action = new SpecifiedAction(specifiedAction, null);
         def.addAction(action);
     }

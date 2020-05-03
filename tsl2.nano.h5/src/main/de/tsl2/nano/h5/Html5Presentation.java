@@ -114,14 +114,12 @@ import de.tsl2.nano.h5.collector.Statistic;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
 import de.tsl2.nano.h5.configuration.ExpressionDescriptor;
 import de.tsl2.nano.h5.expression.Query;
-import de.tsl2.nano.h5.expression.QueryPool;
 import de.tsl2.nano.h5.plugin.IDOMDecorator;
 import de.tsl2.nano.h5.websocket.WSEvent;
 import de.tsl2.nano.h5.websocket.WebSocketRuleDependencyListener;
 import de.tsl2.nano.h5.websocket.dialog.WSDialog;
-import de.tsl2.nano.incubation.specification.actions.ActionPool;
+import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.incubation.specification.rules.RuleDependencyListener;
-import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.persistence.DatabaseTool;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.plugin.Plugins;
@@ -266,7 +264,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                                     new Query(name, tool.getText(), tool.getSelectedAction().getId()
                                         .equals("scripttool.sql.id"),
                                         null);
-                                ENV.get(QueryPool.class).add(query);
+                                ENV.get(Pool.class).add(query);
                                 QueryResult qr = new QueryResult(query.getName());
                                 qr.getPresentable().setIcon("icons/barchart.png");
                                 qr.saveDefinition();
@@ -343,9 +341,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     @Override
     public void reset() {
         AttributeCover.resetTypeCache();
-        ENV.get(RulePool.class).reset();
-        ENV.get(QueryPool.class).reset();
-        ENV.get(ActionPool.class).reset();
+        ENV.get(Pool.class).reset();
         super.reset();
         //clear template cache
         jsWebsocketTemplate = null;

@@ -17,6 +17,7 @@ import org.simpleframework.xml.DefaultType;
 
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.execution.IPRunnable;
+import de.tsl2.nano.incubation.specification.Pool;
 
 /**
  * Usable as attribute getting it's value through a given restful service. the expression is here an url query path. The
@@ -71,14 +72,14 @@ public class URLExpression<T extends Serializable> extends RunnableExpression<T>
         if (runner == null) {
             WebClient client = WebClient.create(expression.substring(1), declaringClass);
             super.setExpression("@" + client.getName());
-            ENV.get(WebPool.class).add(client);
+            ENV.get(Pool.class).add(client);
         }
     }
     
     @SuppressWarnings("unchecked")
     @Override
     protected IPRunnable<T, Map<String, Object>> createRunnable() {
-        return (WebClient<T>) ENV.get(WebPool.class).get(WebClient.getName(expression.substring(1)));
+        return (WebClient<T>) ENV.get(Pool.class).get(WebClient.getName(expression.substring(1)));
     }
 
     @Override

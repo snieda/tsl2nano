@@ -1,9 +1,12 @@
 package de.tsl2.nano.logictable;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.AfterClass;
@@ -13,8 +16,9 @@ import org.junit.Test;
 import de.tsl2.nano.collection.TableList;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.ENVTestPreparation;
+import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.incubation.specification.rules.Rule;
-import de.tsl2.nano.incubation.specification.rules.RulePool;
 
 public class LogicTableTest implements ENVTestPreparation {
 
@@ -32,20 +36,23 @@ public class LogicTableTest implements ENVTestPreparation {
     @Test
     public void testEquationSolver() {
         String f = "1+ ((x1 + x2)*3 + 4)+5";
-//        char[] cs = f.toCharArray();
-//        List<String> s = new ArrayList<String>(cs.length);
-//        for (int i = 0; i < cs.length; i++) {
-//            s.add(String.valueOf(cs[i]));
-//        }
-//        String term = StringUtil.extract(f, "\\([^)(]*\\)");
-//        String op1 = StringUtil.extract(f, "[a-zA-Z0-9]+" + );
-//        Structure<List<String>, String, String, String> structure = new Structure<List<String>, String, String, String>(s,
-//            "(",
-//            ")");
-//        Collection<List<String>> items = structure.getTree().values();
-//        for (List<String> list : items) {
-//            log(items.toString());
-//        }
+       char[] cs = f.toCharArray();
+       List<String> s = new ArrayList<String>(cs.length);
+       for (int i = 0; i < cs.length; i++) {
+           s.add(String.valueOf(cs[i]));
+       }
+       String term = StringUtil.extract(f, "\\([^)(]*\\)");
+       String op1 = StringUtil.extract(f, "[a-zA-Z0-9]+");
+       Structure<List<String>, String, String, String> structure = new Structure<List<String>, String, String, String>(s,
+           "(",
+           ")");
+       Collection<List<String>> items = structure.getTree().values();
+       for (List<String> list : items) {
+           System.out.println(list.toString());
+       }
+
+       //TODO: check assertions
+       
         BigDecimal x1 = new BigDecimal(8);
         BigDecimal x2 = new BigDecimal(9);
         Map<String, Object> values = new Hashtable<String, Object>();
@@ -72,7 +79,7 @@ public class LogicTableTest implements ENVTestPreparation {
     @Test
     public void testLogicTableFuncions() {
         Rule<Object> testRule = new Rule("mul", "x*y", Rule.parameters("x", "y"));
-        ENV.get(RulePool.class).add(testRule);
+        ENV.get(Pool.class).add(testRule);
         
         TableList<DefaultHeader, String> table = new LogicTable<DefaultHeader, String>("test", 2).fill(String.class, 2);
         table.set(0, 0, new BigDecimal(10));

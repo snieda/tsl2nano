@@ -151,8 +151,11 @@ public abstract class AttributeCover<T> extends DelegationHandler<T> implements
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public static void removeCover(Class cls, String attr, String child) {
+        removeCover(BeanDefinition.getBeanDefinition(cls).getAttribute(attr), child);
+    }
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static void removeCover(IAttributeDefinition attribute, String child) {
         String parent = StringUtil.substring(child, null, ".", true);
-        IAttributeDefinition attribute = BeanDefinition.getBeanDefinition(cls).getAttribute(attr);
         Bean<IAttributeDefinition> bean = Bean.getBean(attribute);
         //first we try it through bean-attribute relation path
         Object parentProxy = bean.getAttribute(parent, false);
@@ -163,7 +166,7 @@ public abstract class AttributeCover<T> extends DelegationHandler<T> implements
             parentProxy = privAcc.member(StringUtil.substring(child, null, "."));
         }
         if (!Proxy.isProxyClass(parentProxy.getClass()))
-            LOG.error("no rule-cover found for " + attr + "." + child);
+            LOG.error("no rule-cover found for " + attribute.getName() + "." + child);
         InvocationHandler handler = Proxy.getInvocationHandler(parentProxy);
         if (handler instanceof AttributeCover) {
             Object realObject = ((AttributeCover) handler).getDelegate();
@@ -172,7 +175,7 @@ public abstract class AttributeCover<T> extends DelegationHandler<T> implements
             else //as bean attribute
                 bean.setValue(parent, realObject);
         } else {
-            LOG.error("proxy for " + attr + "." + child + " is not a AttributeCover instance!");
+            LOG.error("proxy for " + attribute.getName() + "." + child + " is not a AttributeCover instance!");
         }
         cachedConnectionEndTypes.remove(attribute);
         

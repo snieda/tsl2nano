@@ -18,10 +18,10 @@ import java.util.Set;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.IPRunnable;
+import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.incubation.specification.rules.AbstractRule;
 import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RuleDecisionTable;
-import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.specification.rules.RuleScript;
 
 /**
@@ -60,7 +60,7 @@ public class RuleExpression<T extends Serializable> extends RunnableExpression<T
 
     @Override
     protected IPRunnable<T, Map<String, Object>> createRunnable() {
-        return (AbstractRule<T>) ENV.get(RulePool.class).get(expression.substring(1), getRunnableType(expression));
+        return (AbstractRule<T>) ENV.get(Pool.class).get(expression.substring(1), getRunnableType(expression));
     }
 
     @Override

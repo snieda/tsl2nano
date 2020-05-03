@@ -10,15 +10,13 @@
 package de.tsl2.nano.incubation.specification;
 
 import java.io.File;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -29,12 +27,14 @@ import de.tsl2.nano.execution.IPRunnable;
 
 /**
  * Generic Pool holding all defined (loaded) instances of an {@link IPRunnable} implementation. Useful for e.g. Rules,
- * Queries and Actions.
+ * Queries and Actions.<p/>
+ * The runnable types must registere itself through {@link #registerTypes(Class...)} and must implement IPrefixed, used
+ * has prefix for the key name. So, on calling get(..) you should give the name with prefix or you provide the runnable type.
  * <p/>
  * should be used as singelton by a service-factory. persists its runnables in a directory, given by
  * {@link #getDirectory()} (using the pool instance generic type as directory name).
  * <p/>
- * It is possible to hold different extensions of the given generic type. Then you access them through ghe getter
+ * It is possible to hold different extensions of the given generic type. Then you access them through 
  * {@link #get(String, Class)} - otherwise it is sufficient to call {@link #get(String)} using internally the default
  * type, evaluated by {@link #getType()}.
  * 
@@ -42,34 +42,54 @@ import de.tsl2.nano.execution.IPRunnable;
  * @version $Revision$
  */
 @SuppressWarnings("rawtypes")
-public class Pool<T extends IPRunnable<?, ?>> {
+public class Pool {
 
     private static final Log LOG = LogFactory.getLog(Pool.class);
-    Map<String, T> runnables;
+    Map<String, IPRunnable> runnables;
 
-    private static List<Class<? extends Pool>> registeredPools = new ArrayList<>();
+
+    transient private String expressionPattern;
+
+    private static Set<Class<? extends IPRunnable>> registeredTypes = new HashSet<>();
     
-    protected static void registerPool(Class<? extends Pool> p) {
-        registeredPools.add(p);
+    public static void registerTypes(Class<? extends IPRunnable>...types) {
+        for (int i = 0; i < types.length; i++) {
+            if (!IPrefixed.class.isAssignableFrom(types[i]))
+    		throw new IllegalArgumentException("type " + types[i] + " must implement IPrefixed!");
+            registeredTypes.add(types[i]);
+        }
     }
     
-    private Map<String, T> runnables() {
+    private Map<String, IPRunnable> runnables() {
         if (runnables == null)
             loadRunnables();
         return runnables;
     }
 
-    private void loadRunnables() {
-        runnables = new HashMap<String, T>();
-        String dirName = getDirectory();
-        LOG.info("loading " + getType().getSimpleName().toLowerCase() + "(s) from " + dirName);
-        File dir = new File(dirName);
-        dir.mkdirs();
-        if (!Modifier.isAbstract(getType().getModifiers())) {
+    public String getFullExpressionPattern() {
+    	if (registeredTypes.isEmpty())
+    		throw new IllegalStateException("no types registered at pool. please register at least one runnable type!");
+        if (expressionPattern == null) {
+            StringBuilder buf = new StringBuilder("[");
+            for (Class<? extends IPRunnable> t : registeredTypes) {
+                buf.append(((IPrefixed)BeanClass.createInstance(t)).prefix());
+            }
+            buf.append("].*");
+            expressionPattern = buf.toString();
+        }
+        return expressionPattern;
+    }
+    
+    public void loadRunnables() {
+        runnables = new HashMap<>();
+        for (Class<? extends IPRunnable> type : registeredTypes) {
+            String dirName = getDirectory(type);
+            LOG.info("loading " + type.getSimpleName().toLowerCase() + "(s) from " + dirName);
+            File dir = new File(dirName);
             File[] runnableFiles = dir.listFiles();
-            Class<T> type = getType();
             for (int i = 0; i < runnableFiles.length; i++) {
                 try {
+                	if (runnableFiles[i].getPath().endsWith(".xml"))
                     loadRunnable(runnableFiles[i].getPath(), type);
                 } catch (Exception e) {
                     LOG.error(e);
@@ -78,56 +98,35 @@ public class Pool<T extends IPRunnable<?, ?>> {
         }
     }
 
-    /**
-     * getDirectory
-     * 
-     * @return
-     */
-    public String getDirectory() {
-        return ENV.getConfigPathRel()
-            + "specification/"
-            + StringUtil.substring(BeanClass.getDefiningClass(this.getClass()).getSimpleName().toLowerCase(), null,
-                Pool.class.getSimpleName().toLowerCase()) + "/";
+    public String getDirectory(Class<? extends IPRunnable> rType) {
+        String dir = ENV.getConfigPathRel() + "specification/" + (rType != null ? rType.getSimpleName().toLowerCase() + "/" : "");
+        new File(dir).mkdirs();
+        return dir;
     }
 
-    /**
-     * default type, given by generic of this instance
-     * 
-     * @return type to load
-     */
-    @SuppressWarnings("unchecked")
-    protected Class<T> getType() {
-        return (Class<T>) BeanUtil.getGenericType(this.getClass());
-    }
-
-    private <I extends T> I loadRunnable(String path, Class<I> type) {
+    private <I extends IPRunnable> I loadRunnable(String path, Class<I> type) {
         try {
             I r = ENV.load(path, type, false);
-            runnables.put(r.getName(), r);
+            runnables.put(getPrefixedName(r), r);
             return r;
         } catch (Exception e) {
-            ManagedException.forward(e);
+       		ManagedException.forward(e);
             return null;
         }
     }
 
-    public IPRunnable find(String name) {
-        IPRunnable runner;
-        for (Class<? extends Pool> p : registeredPools) {
-            if ((runner = ENV.get(p).get(name)) != null)
-                return runner;
-        }
-        return null;
-    }
-    
-    /**
+    private String getPrefixedName(IPRunnable r) {
+		return ((IPrefixed)r).prefix() + r.getName();
+	}
+
+	/**
      * gets the runnable by name
      * 
      * @param name rule/query to find
      * @return rule/query or null
      */
-    public T get(String name) {
-        return get(name, getType());
+    public IPRunnable get(String name) {
+        return get(name, null);
     }
 
     /**
@@ -138,27 +137,30 @@ public class Pool<T extends IPRunnable<?, ?>> {
      * @return runnable or null
      */
     @SuppressWarnings("unchecked")
-    public <I extends T> I get(String name, Class<I> type) {
-        T runnable = runnables().get(name);
-        //perhaps not loaded (new or recursive)
-        if (type == null || Pool.class.equals(type)) {
-            //TODO: if type not specified, try all...
-            return null;
-        } else  {
-        return (I) (runnable != null ? runnable : loadRunnable(getFileName(name), type));
+    public <I extends IPRunnable> I get(String name, Class<I> type) {
+        I runnable = (I) runnables().get(name);
+        if (runnable == null && type != null && !name.matches(getFullExpressionPattern())) {
+        	String n = ((IPrefixed)BeanClass.createInstance(type)).prefix() + name;
+        	runnable = (I) runnables().get(n);
         }
+        if (runnable == null && type == null)
+        	throw new IllegalArgumentException("Wrong runnable name: " + name 
+        	+ "\nPlease provide a runnable name with a prefix (expression: " + getFullExpressionPattern() 
+        	+ ")\n\tor the type as one of:\n" + StringUtil.toFormattedString(registeredTypes, -1));
+        //perhaps not loaded (new or recursive)
+        return (I) (runnable != null ? runnable : loadRunnable(getFileName(name, type), type));
     }
 
-    protected String getFileName(String name) {
+    protected String getFileName(String name, Class<? extends IPRunnable> type) {
     	name = FileUtil.getValidFileName(name);
-        return name.endsWith(".xml") ? name : getDirectory() + name + ".xml";
+        return name.matches(".*[.][a-z]{3}") ? name : getDirectory(type) + name + ".xml";
     }
 
     /**
      * delegates to {@link #add(String, IPRunnable)} using {@link IPRunnable#getName()}
      */
-    public void add(T runnable) {
-        add(runnable.getName(), runnable);
+    public void add(IPRunnable runnable) {
+        add(getPrefixedName(runnable), runnable);
     }
 
     /**
@@ -167,9 +169,9 @@ public class Pool<T extends IPRunnable<?, ?>> {
      * @param name runnable name
      * @param runnable runnable to add
      */
-    public void add(String name, T runnable) {
+    protected void add(String name, IPRunnable runnable) {
         runnables().put(name, runnable);
-        String fileName = getFileName(runnable.getName());
+        String fileName = getFileName(runnable.getName(), runnable.getClass());
         LOG.info("adding runnable '" + name + "' and saving it to " + fileName);
         ENV.save(fileName, runnable);
     }

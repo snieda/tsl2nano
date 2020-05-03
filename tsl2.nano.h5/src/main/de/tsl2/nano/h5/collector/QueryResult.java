@@ -30,7 +30,7 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.h5.expression.Query;
-import de.tsl2.nano.h5.expression.QueryPool;
+import de.tsl2.nano.incubation.specification.Pool;
 
 /**
  * Special {@link BeanCollector} to show the result of an SQL or JPAQL Query gotten by a defined query-name in a
@@ -108,7 +108,7 @@ public class QueryResult<COLLECTIONTYPE extends Collection<T>, T> extends BeanCo
     @Override
     @Commit
     protected void initDeserialization() {
-        query = (Query<Collection<Object[]>>) ENV.get(QueryPool.class).get(queryName);
+        query = (Query<Collection<Object[]>>) ENV.get(Pool.class).get(queryName, Query.class);
         if (query == null)
             throw new IllegalStateException(this + " can't load query '" + queryName + "'");
         beanFinder = new BeanFinder() {
@@ -129,7 +129,7 @@ public class QueryResult<COLLECTIONTYPE extends Collection<T>, T> extends BeanCo
 
     public static QueryResult createQueryResult(String title, String stmt) {
         Query<Object> query = new Query<>(title, stmt, true, null);
-        QueryPool queryPool = ENV.get(QueryPool.class);
+        Pool queryPool = ENV.get(Pool.class);
         queryPool.add(query);
         QueryResult<Collection<Object>, Object> qr = new QueryResult<>(query.getName());
         qr.getPresentable().setIcon("icons/barchart.png");

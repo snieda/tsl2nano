@@ -26,6 +26,7 @@ import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.messaging.ChangeEvent;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.incubation.specification.Pool;
 
 /**
  * dependency listener evaluating its value through a given rule.
@@ -80,7 +81,7 @@ public class RuleDependencyListener<T, E extends ChangeEvent> extends AbstractDe
         Map<String, Object> context = bean.toValueMap(null, false, false, false);
         context.put(StringUtil.substring(attributeID, null, ".", true), srcValue.getInstance());
 //        context.put(srcValue.getName(), source.newValue);
-        return (T) ENV.get(RulePool.class).get(ruleName).run(context);
+        return (T) ENV.get(Pool.class).get(ruleName).run(context);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })

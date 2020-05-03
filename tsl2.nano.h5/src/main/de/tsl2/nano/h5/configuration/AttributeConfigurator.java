@@ -39,10 +39,9 @@ import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.RuleCover;
+import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.incubation.specification.actions.Action;
-import de.tsl2.nano.incubation.specification.actions.ActionPool;
 import de.tsl2.nano.incubation.specification.rules.Rule;
-import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.specification.rules.RuleScript;
 
 /**
@@ -56,7 +55,7 @@ import de.tsl2.nano.incubation.specification.rules.RuleScript;
 public class AttributeConfigurator implements Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = 1L;
-    AttributeDefinition<?> attr;
+    AttributeDefinition attr;
     PrivateAccessor<AttributeDefinition<?>> attrAccessor;
 
     IIPresentable presentable;
@@ -266,17 +265,13 @@ public class AttributeConfigurator implements Serializable {
         helper.addRuleListener(observer, rule, 2, observable);
     }
 
-//    public void actionRemoveListener(String child, String rule) {
-//        RuleCover.removeCover(attr.getDeclaringClass(), attr.getName(), child);
-//    }
-//
     @de.tsl2.nano.bean.annotation.Action(name = "addRuleCover", argNames = { "propertyOfAttribute", "ruleName" })
     public void actionAddRuleCover(
             @Constraint(defaultValue = "presentable.layoutConstraints", pattern = "(\\w+[\\.]?)+", allowed = {
                 "presentable", "presentable.layout", "columnDefinition" }) String child,
             @Constraint(allowed=ConstraintValueSet.ALLOWED_ENVFILES + ".*specification/rule.*") String rule) {
         rule = StringUtil.substring(FileUtil.replaceToJavaSeparator(rule), "/", ".", true);
-        RuleCover.cover(attr.getDeclaringClass(), attr.getName(), child, rule);
+        RuleCover.cover(attr, child, rule);
     }
 
     /**
@@ -286,7 +281,7 @@ public class AttributeConfigurator implements Serializable {
     @de.tsl2.nano.bean.annotation.Action(name = "RemoveRuleCover", argNames = { "child"})
     public void actionRemoveRuleCover(@Constraint(defaultValue = "presentable.layoutConstraints", pattern = "(\\w+[\\.]?)+", allowed = {
         "presentable", "presentable.layout", "columnDefinition" }) String child) {
-        RuleCover.removeCover(attr.getDeclaringClass(), attr.getName(), child);
+        RuleCover.removeCover(attr, child);
     }
 
     @de.tsl2.nano.bean.annotation.Action(name = "createRuleOrAction", argNames = { "newRuleName", "actionType",
@@ -297,11 +292,11 @@ public class AttributeConfigurator implements Serializable {
             @de.tsl2.nano.bean.annotation.Constraint(pattern = ".*") String expression) {
 
         if (type.startsWith("%"))
-            ENV.get(RulePool.class).add(new RuleScript<>(name, expression, null));
+            ENV.get(Pool.class).add(new RuleScript<>(name, expression, null));
         else if (type.startsWith("§"))
-            ENV.get(RulePool.class).add(new Rule(name, expression, null));
+            ENV.get(Pool.class).add(new Rule(name, expression, null));
         else
-            ENV.get(ActionPool.class).add(new Action(name, expression));
+            ENV.get(Pool.class).add(new Action(name, expression));
     }
 
 }

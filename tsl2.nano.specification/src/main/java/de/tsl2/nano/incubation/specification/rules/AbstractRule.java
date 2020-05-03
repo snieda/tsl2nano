@@ -1,11 +1,13 @@
 package de.tsl2.nano.incubation.specification.rules;
 
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.incubation.specification.AbstractRunnable;
 import de.tsl2.nano.incubation.specification.ParType;
+import de.tsl2.nano.incubation.specification.Pool;
 
 /**
  * base rule with sub-rule importing
@@ -35,14 +37,19 @@ public abstract class AbstractRule<T> extends AbstractRunnable<T> {
     public String prefix() {
         return String.valueOf(PREFIX);
     }
+    @Override
+    public T run(Map<String, Object> context, Object... extArgs) {
+    	throw new UnsupportedOperationException();
+    }
+    
     /**
      * importSubRules
      */
     protected void importSubRules() {
-        RulePool pool = ENV.get(RulePool.class);
+        Pool pool = ENV.get(Pool.class);
         String subRule;
         while ((subRule = StringUtil.extract(getOperation(), prefix() + "\\w+")).length() > 0) {
-            AbstractRule<?> rule = pool.get(subRule);
+            AbstractRule<?> rule = (AbstractRule<?>) pool.get(subRule);
             if (rule == null) {
                 throw new IllegalArgumentException("Referenced rule " + subRule + " in " + this + " not found!");
             }

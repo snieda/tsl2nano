@@ -65,17 +65,20 @@ import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.h5.NanoHTTPD.Response.Status;
 import de.tsl2.nano.h5.collector.QueryResult;
 import de.tsl2.nano.h5.expression.Query;
-import de.tsl2.nano.h5.expression.QueryPool;
 import de.tsl2.nano.h5.expression.RuleExpression;
 import de.tsl2.nano.h5.expression.SQLExpression;
 import de.tsl2.nano.h5.expression.SimpleExpression;
 import de.tsl2.nano.h5.expression.URLExpression;
+import de.tsl2.nano.h5.expression.WebClient;
 import de.tsl2.nano.h5.navigation.EntityBrowser;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.h5.navigation.Workflow;
 import de.tsl2.nano.h5.plugin.INanoPlugin;
-import de.tsl2.nano.incubation.specification.actions.ActionPool;
-import de.tsl2.nano.incubation.specification.rules.RulePool;
+import de.tsl2.nano.incubation.specification.Pool;
+import de.tsl2.nano.incubation.specification.actions.Action;
+import de.tsl2.nano.incubation.specification.rules.Rule;
+import de.tsl2.nano.incubation.specification.rules.RuleDecisionTable;
+import de.tsl2.nano.incubation.specification.rules.RuleScript;
 import de.tsl2.nano.persistence.DatabaseTool;
 import de.tsl2.nano.persistence.GenericLocalBeanContainer;
 import de.tsl2.nano.persistence.Persistence;
@@ -165,15 +168,20 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         eventController = new EventController();
         sessions = Collections.synchronizedMap(
             new ExpiringMap<InetAddress, NanoH5Session>(ENV.get("session.timeout.millis", 12 * DateUtil.T_HOUR)));
-        //thought, the expression extensions would register themself - but it's not working
+        registereExpressionsAndPools();
+        
+        Plugins.process(INanoPlugin.class).configuration(ENV.getProperties(), ENV.services());
+    }
+
+	public static final void registereExpressionsAndPools() {
+		//the classes registere themselves on loading...
         AbstractExpression.registerExpression(PathExpression.class);
         AbstractExpression.registerExpression(RuleExpression.class);
         AbstractExpression.registerExpression(SQLExpression.class);
         AbstractExpression.registerExpression(URLExpression.class);
         AbstractExpression.registerExpression(SimpleExpression.class);
-        
-        Plugins.process(INanoPlugin.class).configuration(ENV.getProperties(), ENV.services());
-    }
+        Pool.registerTypes(Rule.class, RuleScript.class, RuleDecisionTable.class, Query.class, Action.class, WebClient.class);
+	}
 
     /**
      * main
@@ -1102,9 +1110,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         
         //TODO: the following is done in pagebuilder.reset, too?
         ENV.removeService(Workflow.class);
-        ENV.get(RulePool.class).reset();
-        ENV.get(QueryPool.class).reset();
-        ENV.get(ActionPool.class).reset();
+        ENV.get(Pool.class).reset();
         BeanContainer.reset();
         Bean.clearCache();
         AttributeCover.resetTypeCache();

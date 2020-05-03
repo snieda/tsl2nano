@@ -29,13 +29,13 @@ import java.util.Properties;
 
 import javax.ws.rs.Path;
 
-import com.sun.jersey.api.container.httpserver.HttpServerFactory;
-import com.sun.net.httpserver.HttpServer;
-
 import org.anonymous.project.Address;
 import org.anonymous.project.Charge;
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.sun.jersey.api.container.httpserver.HttpServerFactory;
+import com.sun.net.httpserver.HttpServer;
 
 import de.tsl2.nano.action.IStatus;
 import de.tsl2.nano.bean.BeanContainer;
@@ -66,12 +66,12 @@ import de.tsl2.nano.h5.NanoHTTPD.Method;
 import de.tsl2.nano.h5.NanoHTTPD.Response;
 import de.tsl2.nano.h5.collector.CSheet;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
-import de.tsl2.nano.h5.expression.QueryPool;
 import de.tsl2.nano.h5.navigation.Workflow;
 import de.tsl2.nano.h5.timesheet.Timesheet;
 import de.tsl2.nano.incubation.specification.ParType;
-import de.tsl2.nano.incubation.specification.actions.ActionPool;
-import de.tsl2.nano.incubation.specification.rules.RulePool;
+import de.tsl2.nano.incubation.specification.Pool;
+import de.tsl2.nano.incubation.specification.rules.Rule;
+import de.tsl2.nano.incubation.specification.rules.RuleDecisionTable;
 import de.tsl2.nano.incubation.specification.rules.RuleScript;
 import de.tsl2.nano.persistence.GenericLocalBeanContainer;
 import de.tsl2.nano.persistence.Persistence;
@@ -270,9 +270,8 @@ public class NanoH5Test implements ENVTestPreparation {
         if (workflow != null)
             assertTrue(!workflow.isEmpty());
         
-        ENV.get(RulePool.class);
-        ENV.get(QueryPool.class);
-        ENV.get(ActionPool.class);
+        NanoH5.registereExpressionsAndPools();
+        ENV.get(Pool.class).loadRunnables();
 
         app.stop();
         
@@ -413,14 +412,16 @@ public class NanoH5Test implements ENVTestPreparation {
     }
     
     @Test
-    public void testCSheet() throws Exception {
-        createENV("csheet");
+    public void testCSheetRule() throws Exception {
+        createENV("csheet-rule");
         /*
          * test csheet as logic table like excel
          */
+        NanoH5.registereExpressionsAndPools();
         ENV.addService(BeanPresentationHelper.class, new Html5Presentation<>());
+        new Pool().add(new Rule<>("test", "A1*B1", null));
         CSheet cSheet = new CSheet("test", 3, 3);
-        cSheet.set(0, 1, 2, 3);
+        cSheet.set(0, 1, 2, Rule.PREFIX + "test");
         cSheet.set(1, 4, 5, "=A2*B2");
         //test the bean button
         cSheet.getActions().iterator().next().activate();
@@ -431,7 +432,7 @@ public class NanoH5Test implements ENVTestPreparation {
         cSheet = (CSheet) loadedSheet;
         Assert.assertTrue(cSheet.getLogicForm().getRowCount() == 3);
         Assert.assertTrue(cSheet.getLogicForm().get(1, 2).equals(new BigDecimal(20)));
-
+        Assert.assertEquals("2", cSheet.get(0, 2));
         cSheet.set(1, 0, new BigDecimal(5));
         Assert.assertTrue(cSheet.get(1, 2).equals(new BigDecimal(25)));
     }

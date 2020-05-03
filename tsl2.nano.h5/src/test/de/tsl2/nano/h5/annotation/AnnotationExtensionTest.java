@@ -21,6 +21,7 @@ import de.tsl2.nano.bean.annotation.Constraint;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.fi.Bean;
 import de.tsl2.nano.core.util.ENVTestPreparation;
+import de.tsl2.nano.h5.NanoH5;
 import de.tsl2.nano.h5.annotation.DependencyListener.ListenerType;
 import de.tsl2.nano.h5.annotation.Specification.SpecificationType;
 import de.tsl2.nano.h5.expression.RuleExpression;
@@ -35,7 +36,7 @@ public class AnnotationExtensionTest implements ENVTestPreparation {
         BeanContainer.initEmtpyServiceActions();
         //load expression classes
         RuleExpression.expressionPattern();
-        
+        NanoH5.registereExpressionsAndPools();
         //process annotations...
         BeanDefinition.getBeanDefinition(BeanType.class).saveDefinition();
         BeanDefinition.getBeanDefinition(Composition.class).saveDefinition();
@@ -99,7 +100,7 @@ public class AnnotationExtensionTest implements ENVTestPreparation {
             Bean.getBean(base).setValue("name", "YYY");
             fail("icon should reference the rule '" + ruleDefinitionFile + " which is not defined! So a FileNotFoundException has to be thrown");
         } catch (Exception e) {
-            assertTrue(e.getMessage().contains(FileNotFoundException.class.getSimpleName()) && e.getMessage().contains(ruleDefinitionFile));
+            assertTrue(e.getClass().equals(IllegalArgumentException.class) && e.getMessage().contains(MYVIRTUALATTRIBUTE));
         }
     }
 

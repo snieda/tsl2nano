@@ -100,6 +100,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     /** the beans name. used, if bean is virtual */
     @Attribute
     protected String name;
+    @Attribute(required = false) //e.g. for json property evaluation
+    protected boolean strict = Boolean.getBoolean("app.mode.strict");
 
     /**
      * optional plugins - like rule names to cover properties of this beandefinition. perhaps you cover the value of
@@ -366,7 +368,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             return CollectionUtil.getFiltering(attributes, new IPredicate<IAttribute>() {
                 @Override
                 public boolean eval(IAttribute arg0) {
-                    return getValueExpression().isExpressionPart(arg0.getName()) || getPresentationHelper().isDefaultAttribute(arg0);
+                    return getPresentationHelper().isDefaultAttribute(arg0) || getValueExpression().isExpressionPart(arg0.getName());
                 }
             });
         } else {
@@ -1625,6 +1627,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                     BeanValue<?> bv = (BeanValue<?>) beanAttribute;
                     if (bv.getFormat() != null) {
                         value = bv.getFormat().format(value);
+                    } else if (value instanceof Date) {
+                        value = DateUtil.toISO8601UTC((Date)value);
                     } else {
                         value = value != null ? value.toString() : "";
                     }
@@ -1633,6 +1637,30 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             }
         }
         return map;
+    }
+
+    public T fromValueMap(Map<String, Object> values) {
+        return fromValueMap(createInstance(), values);
+    }
+    public T fromValueMap(T instance, Map<String, Object> values) {
+        IAttribute attr;
+        for (String name : values.keySet()) {
+            attr = getAttribute(name, strict);
+            if (attr != null) {
+                Object value = values.get(name);
+                if (Util.isEmpty(value) && attr.getValue(instance) == null)
+                    continue;
+                if (Date.class.isAssignableFrom( attr.getType()) && value instanceof String)
+                    value = DateUtil.fromISO8601UTC((String)value);
+                if (attr instanceof IValueAccess)
+                    ((IValueAccess)attr).setValue(value);
+                else
+                    attr.setValue(instance, value);
+            } else {
+                LOG.warn("ignoring value of " + name + " - it is not an attribute of " + getClazz());
+            }
+        }
+        return instance;
     }
 
     /**

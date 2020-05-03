@@ -11,8 +11,11 @@ package de.tsl2.nano.logictable;
 
 import java.text.Format;
 
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.CollectionUtil;
 import de.tsl2.nano.core.util.FormatUtil;
+import de.tsl2.nano.execution.IPRunnable;
+import de.tsl2.nano.incubation.specification.Pool;
 
 /**
  * Adds direct cell formatting to the {@link LogicTable}.
@@ -26,6 +29,7 @@ import de.tsl2.nano.core.util.FormatUtil;
  */
 public class LogicForm<H extends Format & Comparable<H>, ID> extends LogicTable<H, ID> {
     static final String CONFIG_EXPRESSION = ">>";
+	transient private boolean locked;
 
     /**
      * constructor
@@ -65,22 +69,36 @@ public class LogicForm<H extends Format & Comparable<H>, ID> extends LogicTable<
      * {@inheritDoc}
      */
     @Override
-    public Object get(int row, int column) {
-        Object e = super.get(row, column);
-        if (e instanceof String) {
-            String expression = (String) e;
-            if (expression.contains(CONFIG_EXPRESSION)) {
-                try {
-                    String[] c = expression.split(CONFIG_EXPRESSION);
-                    createFormat(c[1]);
-                    return header[column].format(c[0]);
-                } catch (Exception ex) {
-                    return e;
-                }
-            }
-        }
-        return e;
-    }
+	public Object get(int row, int column) {
+		Object e = super.get(row, column);
+		if (e instanceof String) {
+			String expression = (String) e;
+			if (expression.contains(CONFIG_EXPRESSION)) {
+				try {
+					String[] c = expression.split(CONFIG_EXPRESSION);
+					createFormat(c[1]);
+					return header[column].format(c[0]);
+				} catch (Exception ex) {
+					return e;
+				}
+			} else if (expression.matches(ENV.get(Pool.class).getFullExpressionPattern())) {
+				IPRunnable r = ENV.get(Pool.class).get(expression);
+				if (r != null) {
+					if (locked) {
+						return null;
+					} else {
+						try {
+							locked = true;
+							return r.run(this.getValueMap());
+						} finally {
+							locked = false;
+						}
+					}
+				}
+			}
+		}
+		return e;
+	}
 
     @SuppressWarnings("unchecked")
     private H createFormat(String string) {

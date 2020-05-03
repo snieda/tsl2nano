@@ -21,6 +21,7 @@ import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.IPRunnable;
 import de.tsl2.nano.incubation.specification.AbstractRunnable;
 import de.tsl2.nano.incubation.specification.Pool;
+import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.util.operation.NumericOperator;
 
 /**
@@ -135,7 +136,7 @@ public class EquationSolver extends NumericOperator {
             func = new StringBuilder(sfunc);
             fname = StringUtil.extract(tempFunc=new StringBuilder(func), OPERAND, "");
             args = getFunctionArgs(tempFunc, values);
-            IPRunnable runner = ENV.get(Pool.class).find(fname);
+            IPRunnable runner = ENV.get(Pool.class).get(Rule.PREFIX + fname);
             result = runner.run(args);
             if (replace) {
                 sresult = StringUtil.toString(result);
