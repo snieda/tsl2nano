@@ -67,6 +67,6 @@ public class Rectangle extends Coordinate {
      * @return true, if point x, y is contained
      */
     public boolean contains(float x, float y) {
-        return x() < x && x < x() + w() && y() < y && y < y() + h();
+        return x() <= x && x <= x() + w() && y() <= y && y <= y() + h();
     }
 }

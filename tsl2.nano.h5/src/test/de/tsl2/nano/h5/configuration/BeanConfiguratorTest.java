@@ -4,10 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.anonymous.project.Address;
@@ -16,15 +16,19 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.tsl2.nano.action.IAction;
+import de.tsl2.nano.action.IConstraint;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.annotation.ConstraintValueSet;
+import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
+import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.bean.def.Constraint;
+import de.tsl2.nano.bean.def.IAttributeDefinition;
+import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.bean.def.MethodAction;
 import de.tsl2.nano.bean.def.Presentable;
 import de.tsl2.nano.bean.def.ValueColumn;
 import de.tsl2.nano.bean.def.ValueGroup;
-import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.ConcurrentUtil;
@@ -32,10 +36,6 @@ import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.h5.NanoH5;
 import de.tsl2.nano.h5.NanoH5Test;
-import de.tsl2.nano.h5.configuration.AttributeConfigurator;
-import de.tsl2.nano.h5.configuration.BeanConfigurator;
-import de.tsl2.nano.incubation.specification.Pool;
-import de.tsl2.nano.incubation.specification.actions.Action;
 
 public class BeanConfiguratorTest {
 
@@ -94,8 +94,8 @@ public class BeanConfiguratorTest {
         Bean.getBean(new Address(1, "Berliner Str.1", "100000", "Buxdehude", "germany")).getAction("testaction").run();
         checkMethodActions(bconf, 9, 8);
         
-        assertEquals("[]", FileUtil.getFileset("./", "**/*.failed").toString());
-        assertEquals("[]", FileUtil.getFileset("./", "**/*.stacktrace").toString());
+        assertEquals("[]", FileUtil.getFileset("./", "**/*beanconf/**/*.failed").toString());
+        assertEquals("[]", FileUtil.getFileset("./", "**/*beanconf/**/*.stacktrace").toString());
     }
 
     private <T extends Serializable> T changeProperty(T attrProperty, String propName, Object value) throws Throwable {
@@ -145,4 +145,39 @@ public class BeanConfiguratorTest {
         assertEquals(StringUtil.toFormattedString(actions, -1, true), methodActionCount, count);
     }
 
+    @Test
+	public void testConfigureConstraint() throws Exception {
+		NanoH5Test.createENV("beanconf");
+		NanoH5 nanoH5 = new NanoH5();
+		BeanContainer.initEmtpyServiceActions();
+		Bean<Address> address = Bean.getBean(new Address());
+		BeanConfigurator<Address> bconfAddress = BeanConfigurator.create(Address.class).getInstance();
+		for (AttributeConfigurator attrAddressConf : bconfAddress.getAttributes()) {
+			if (attrAddressConf.getName().equals("city")) {
+				BeanConfigurator<? extends AttributeDefinition> bconf = BeanConfigurator.create(attrAddressConf.attr.getClass()).getInstance();
+				for (AttributeConfigurator ac : bconf.getAttributes()) {
+					if (ac.attr.getName().equals("constraint")) {
+						BeanConfigurator<? extends IConstraint> bc = BeanConfigurator
+								.create(((Constraint) ac.attr.getConstraint()).getClass()).getInstance();
+						System.out.println(bc.def.getValueExpression());
+						for (AttributeConfigurator aci : bc.getAttributes()) {
+							if (aci.getName().contentEquals("length")) {
+								aci.attr.setValue(ac.attr.getConstraint(), 99);
+								ac.setConstraint(ac.getConstraint());
+								bc.setAttributes(bc.getAttributes());
+								bconf.setAttributes(bconf.getAttributes());
+								bconfAddress.actionSave();
+								break;
+							}
+						}
+						break;
+					}
+				}
+			}
+		}
+		nanoH5.reset();
+
+		address = Bean.getBean(new Address());
+		assertEquals(99, address.getAttribute("city").getConstraint().getLength());
+	}
 }

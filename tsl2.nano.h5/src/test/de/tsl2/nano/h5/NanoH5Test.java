@@ -464,7 +464,7 @@ public class NanoH5Test implements ENVTestPreparation {
             };
     
             // filter the 'standalones'
-            assertEquals(26, cl.getNestedJars().length);
+            assertEquals(30, cl.getNestedJars().length);
         }
     }
 

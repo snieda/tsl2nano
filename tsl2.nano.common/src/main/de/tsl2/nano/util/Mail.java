@@ -6,8 +6,6 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
 
-import de.tsl2.nano.core.ManagedException;
-
 public class Mail {
     private DataOutputStream os = null;
     private BufferedReader is = null;
@@ -69,7 +67,7 @@ public class Mail {
             writeRead(true, "250", ".\n");
             writeRead(true, "221", "QUIT\n");
         } catch (Exception ex) {
-            ManagedException.forward(ex);
+            throw new IllegalStateException(ex);
         } finally {
             try {
                 if (is != null) {
@@ -107,9 +105,9 @@ public class Mail {
 
     public static void main(String[] args) {
         System.out.println(
-            "usage: mail smtp-server from-address [from-real-name] to-address [to-real-name] [subject] [message]\n" +
+            "usage: mail <smtp-server> <from-address> [from-real-name] <to-address> [to-real-name] [subject] [message]\n" +
                 "Example:\n" +
-                "  java SmtpSimple mail.gmx.net MeinName@MeinProvider.de \"Torsten Horn\" x@y.z xyz S T\n");
+                "  Mail mail.web.org MyName@MyProvider.org \"My Realname\" HisName@y.z xyz hello greetings\n");
         if (null == args || 6 > args.length) {
             System.out.println("Error: parameters missing!");
             System.exit(1);

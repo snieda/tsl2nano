@@ -352,7 +352,7 @@ public class PrintUtil {
         man.put("example-1", "print source=printer-info");
         man.put("example-2", "print source=printer-info printer=PDFCreator");
         man.put("example-3", "print source=myfile.pdf printer=PDFCreator");
-        man.put("example-3", "print source=**/*.pdf printer=PDFCreator papersize=ISO_A4");
+        man.put("example-4", "print source=**/*.pdf printer=PDFCreator papersize=ISO_A4");
         return man;
     }
 

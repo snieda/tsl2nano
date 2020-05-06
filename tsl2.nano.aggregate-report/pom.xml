@@ -9,7 +9,7 @@
 	</parent>
 	<artifactId>tsl2.nano.aggregate-report</artifactId>
 	<name>TSL2 Framework Aggregate Report</name>
-	<description>TSL2 Framework  Aggregate Report</description>
+	<description>TSL2 Framework Aggregate Report</description>
 	<properties>
 		<module.parent>..</module.parent>
 	</properties>
@@ -47,6 +47,35 @@
 							<goal>report-aggregate</goal>
 						</goals>
 					</execution>
+               <execution>
+                    <id>check</id>
+                    <goals>
+                        <goal>check</goal>
+                    </goals>
+                    <configuration>
+                        <dataFile>${project.build.directory}/aggregate.exec</dataFile>
+                        <rules>
+                            <rule>
+                                <element>BUNDLE</element>
+                                <limits>
+                                    <limit>
+                                        <counter>LINE</counter>
+                                        <value>COVEREDRATIO</value>
+                                        <minimum>0.60</minimum>
+                                    </limit>
+                                    <limit>
+                                        <counter>BRANCH</counter>
+                                        <value>COVEREDRATIO</value>
+                                        <minimum>0.60</minimum>
+                                    </limit>
+                                </limits>
+                                <excludes>
+                                    <exclude>com.xyz.ClassToExclude</exclude>
+                                </excludes>
+                            </rule>
+                        </rules>
+                    </configuration>
+                </execution>
 				</executions>
 			</plugin>
 		</plugins>
@@ -54,12 +83,42 @@
 	<dependencies>
 		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>
+			<artifactId>tsl2.nano.instrumentation</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.tsl2nano</groupId>
+			<artifactId>tsl2.nano.aspects</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>tsl2.nano.core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>
+			<artifactId>tsl2.nano.datastructure</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.tsl2nano</groupId>
+			<artifactId>tsl2.nano.gp</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>tsl2.nano.common</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.tsl2nano</groupId>
+			<artifactId>tsl2.nano.generator</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.tsl2nano</groupId>
+			<artifactId>tsl2.nano.mavengenerator</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -70,6 +129,11 @@
 		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>tsl2.nano.descriptor</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.tsl2nano</groupId>
+			<artifactId>tsl2.nano.replication</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -85,6 +149,11 @@
 		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>tsl2.nano.specification</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.tsl2nano</groupId>
+			<artifactId>tsl2.nano.cursus</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -131,6 +200,16 @@
 		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>tsl2.nano.h5</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.tsl2nano</groupId>
+			<artifactId>tsl2.nano.h5.thymeleaf</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.tsl2nano</groupId>
+			<artifactId>tsl2.nano.archetype</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

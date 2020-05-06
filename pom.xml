@@ -230,7 +230,20 @@
 						<goals>
 							<goal>prepare-agent</goal>
 						</goals>
+						<configuration>
+							<append>true</append>
+						</configuration>
 					</execution>
+				      <execution>
+				        <id>prepare-agent-integration</id>
+				        <goals>
+				          <goal>prepare-agent-integration</goal>
+				        </goals>
+				        <configuration>
+				          <destFile>${project.build.directory}/jacoco-integration.exec</destFile>
+				          <append>true</append>
+				        </configuration>
+				      </execution>
 					<!-- <execution>
 						<id>report-aggregate</id>
 						<inherited>true</inherited>
@@ -394,7 +407,7 @@
    			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.0</version>
+				<version>0.8.4</version>
 				<configuration>
 				<includes>
 					<include>de/tsl2/**/*.class</include>
