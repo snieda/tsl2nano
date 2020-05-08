@@ -234,9 +234,19 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     public void setAttributeFilter(String... availableAttributes) {
         this.attributeFilter = availableAttributes;
         isdefault = false;
+        checkAndResetValueExpression(availableAttributes);
         refreshAttributeDefinitions();
         setColumnDefinitionOrder(availableAttributes);
     }
+
+	private void checkAndResetValueExpression(String... availableAttributes) {
+		if (valueExpression != null && !Util.isEmpty(valueExpression.getAttributeNames())) {
+            if (!Arrays.asList(availableAttributes).containsAll(valueExpression.getAttributeNames())) {
+            	LOG.error(valueExpression + " doesn't fit to new attributes anymore and will be resetted: " + Arrays.toString(availableAttributes));
+                valueExpression = null;
+            }
+        }
+	}
 
     /**
      * setColumnDefinitionOrder
@@ -951,6 +961,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     public static <T> BeanDefinition<T> getBeanDefinition(Class<T> type) {
         return getBeanDefinition(BeanClass.getName(type), type, true);
     }
+    public static <T> BeanDefinition<T> getBeanDefinition(Class<T> type, boolean fullInitStore) {
+        return getBeanDefinition(BeanClass.getName(type), type, fullInitStore);
+    }
 
     /**
      * provides predefined virtual beans - loaded initially from serialized xml. virtual beans (see {@link #isVirtual()}
@@ -1010,7 +1023,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                 virtualBeanCache.add(beandef);
                 beandef.setName(name);
                 AnnotationFactory.with(beandef, type != null ? type : beandef.getDeclaringClass());
-                if (ENV.get("beandef.autoinit", true) /*&& beandef.isSaveable()*/)
+                if (ENV.get("beandef.autoinit", true) && fullInitStore/*&& beandef.isSaveable()*/)
                     beandef.autoInit(name);
             }
         } else {

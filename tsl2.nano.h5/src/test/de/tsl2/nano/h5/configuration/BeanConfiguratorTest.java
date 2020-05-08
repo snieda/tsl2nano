@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
@@ -13,6 +12,7 @@ import java.util.List;
 import org.anonymous.project.Address;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import de.tsl2.nano.action.IAction;
@@ -21,10 +21,7 @@ import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.annotation.ConstraintValueSet;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
-import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.bean.def.Constraint;
-import de.tsl2.nano.bean.def.IAttributeDefinition;
-import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.bean.def.MethodAction;
 import de.tsl2.nano.bean.def.Presentable;
 import de.tsl2.nano.bean.def.ValueColumn;
@@ -32,15 +29,17 @@ import de.tsl2.nano.bean.def.ValueGroup;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.ConcurrentUtil;
+import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.h5.NanoH5;
 import de.tsl2.nano.h5.NanoH5Test;
 
-public class BeanConfiguratorTest {
+public class BeanConfiguratorTest implements ENVTestPreparation {
 
     @BeforeClass
     public static void setUp() {
+		ENVTestPreparation.setUp("beanconfigurator", false);
     }
 
     @AfterClass
@@ -145,6 +144,7 @@ public class BeanConfiguratorTest {
         assertEquals(StringUtil.toFormattedString(actions, -1, true), methodActionCount, count);
     }
 
+    @Ignore("doesn't do the assignment on the right instances...under construction")
     @Test
 	public void testConfigureConstraint() throws Exception {
 		NanoH5Test.createENV("beanconf");

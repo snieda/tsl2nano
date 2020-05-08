@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Formatter;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -298,6 +299,8 @@ public class ValueExpression<TYPE> implements
         if (hasArguments) {
             Map<String, Object> valueMap = BeanUtil.toValueMap(fromValue, false, false, true, attributes);
             if (valueMap.size() == 0) {
+            	Bean bean = Bean.getBean(fromValue);
+            	LOG.error("wrong value expression: " + Arrays.toString(attributes) + " not contained in : " + bean.getName() + " with attributes: " + Arrays.toString(bean.getAttributeNames()));
                 return "?" + Util.asString(fromValue) + "?";
             }
             Object[] args = mapToAttributeOrder(valueMap);
@@ -549,4 +552,8 @@ public class ValueExpression<TYPE> implements
         }
         return comparator;
     }
+
+	public List<String> getAttributeNames() {
+		return Arrays.asList(attributes);
+	}
 }
