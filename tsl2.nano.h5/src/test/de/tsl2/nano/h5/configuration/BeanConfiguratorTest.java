@@ -12,7 +12,6 @@ import java.util.List;
 import org.anonymous.project.Address;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import de.tsl2.nano.action.IAction;
@@ -31,7 +30,9 @@ import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.h5.BeanModifier;
 import de.tsl2.nano.h5.NanoH5;
 import de.tsl2.nano.h5.NanoH5Test;
 
@@ -39,7 +40,7 @@ public class BeanConfiguratorTest implements ENVTestPreparation {
 
     @BeforeClass
     public static void setUp() {
-		ENVTestPreparation.setUp("beanconfigurator", false);
+//		ENVTestPreparation.setUp("beanconfigurator", false);
     }
 
     @AfterClass
@@ -50,6 +51,7 @@ public class BeanConfiguratorTest implements ENVTestPreparation {
     @SuppressWarnings("rawtypes")
     @Test
     public void testConfigurators() throws Throwable {
+        System.setProperty("app.mode.strict", "true");
         NanoH5Test.createENV("beanconf");
         NanoH5 nanoH5 = new NanoH5();
         BeanContainer.initEmtpyServiceActions();
@@ -144,25 +146,29 @@ public class BeanConfiguratorTest implements ENVTestPreparation {
         assertEquals(StringUtil.toFormattedString(actions, -1, true), methodActionCount, count);
     }
 
-    @Ignore("doesn't do the assignment on the right instances...under construction")
     @Test
 	public void testConfigureConstraint() throws Exception {
 		NanoH5Test.createENV("beanconf");
 		NanoH5 nanoH5 = new NanoH5();
 		BeanContainer.initEmtpyServiceActions();
 		Bean<Address> address = Bean.getBean(new Address());
+		IConstraint constraint = address.getAttribute("city").getConstraint();
 		BeanConfigurator<Address> bconfAddress = BeanConfigurator.create(Address.class).getInstance();
+		//TODO: use bean actions to walk through
 		for (AttributeConfigurator attrAddressConf : bconfAddress.getAttributes()) {
 			if (attrAddressConf.getName().equals("city")) {
 				BeanConfigurator<? extends AttributeDefinition> bconf = BeanConfigurator.create(attrAddressConf.attr.getClass()).getInstance();
 				for (AttributeConfigurator ac : bconf.getAttributes()) {
 					if (ac.attr.getName().equals("constraint")) {
-						BeanConfigurator<? extends IConstraint> bc = BeanConfigurator
+						BeanConfigurator<Constraint> bc = (BeanConfigurator<Constraint>) BeanConfigurator
 								.create(((Constraint) ac.attr.getConstraint()).getClass()).getInstance();
 						System.out.println(bc.def.getValueExpression());
 						for (AttributeConfigurator aci : bc.getAttributes()) {
 							if (aci.getName().contentEquals("length")) {
-								aci.attr.setValue(ac.attr.getConstraint(), 99);
+								//TODO: thats a trick to use the right instance - why the ac.attr doesnt't work?
+//								aci.attr.setValue(ac.attr.getConstraint(), 99);
+								new BeanModifier().refreshValues(Bean.getBean(constraint), MapUtil.asMap("length", "99"));
+								bc.def.getValueExpression().to((Constraint)constraint);
 								ac.setConstraint(ac.getConstraint());
 								bc.setAttributes(bc.getAttributes());
 								bconf.setAttributes(bconf.getAttributes());

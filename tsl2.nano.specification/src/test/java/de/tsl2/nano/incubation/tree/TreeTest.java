@@ -1,10 +1,8 @@
 package de.tsl2.nano.incubation.tree;
 
-import java.io.File;
 import java.util.Scanner;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class TreeTest {

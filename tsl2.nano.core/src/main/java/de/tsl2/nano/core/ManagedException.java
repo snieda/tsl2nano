@@ -216,4 +216,15 @@ public class ManagedException extends RuntimeException {
     public static String toString(Throwable ex) {
     	return StringUtil.printToString(c->ex.printStackTrace(c));
     }
+
+	public static void handleError(String msg, Object...args) {
+		for (int i=0; i < args.length; i++) {
+			args[i] = StringUtil.toString(args[i], -1);
+		}
+		msg = String.format(msg, args);
+    	if (ENV.get("app.mode.strict", false))
+    		throw new IllegalStateException(msg);
+    	else
+    		LOG.error(msg);
+	}
 }

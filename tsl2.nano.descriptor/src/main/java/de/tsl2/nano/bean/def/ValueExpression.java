@@ -300,7 +300,8 @@ public class ValueExpression<TYPE> implements
             Map<String, Object> valueMap = BeanUtil.toValueMap(fromValue, false, false, true, attributes);
             if (valueMap.size() == 0) {
             	Bean bean = Bean.getBean(fromValue);
-            	LOG.error("wrong value expression: " + Arrays.toString(attributes) + " not contained in : " + bean.getName() + " with attributes: " + Arrays.toString(bean.getAttributeNames()));
+            	ManagedException.handleError("wrong value expression: %s not contained in %s :  with attributes: %s"
+            			, attributes, bean.getName(), bean.getAttributeNames());
                 return "?" + Util.asString(fromValue) + "?";
             }
             Object[] args = mapToAttributeOrder(valueMap);

@@ -25,7 +25,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import org.apache.commons.logging.Log;
 import org.junit.After;
@@ -51,7 +50,6 @@ import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
-import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.currency.CurrencyUnit;
 import de.tsl2.nano.currency.CurrencyUtil;
 import de.tsl2.nano.format.GenericTypeMatcher;
@@ -720,6 +718,8 @@ public class BeanTest {
 
     @Test
     public void testFiBean() throws Exception {
+    	//TODO: the test doesn't work in cause of not putting the bean to the cache - an empty virtual bean will be printed!
+//    	System.setProperty("app.mode.strict", "true");
         de.tsl2.nano.bean.fi.Bean fiBean = new de.tsl2.nano.bean.fi.Bean("test");
         de.tsl2.nano.bean.fi.Bean abean =
             fiBean.add("testAttribute", "testAttributeValue").constrain(18, null, false).description(new Presentable());
@@ -744,6 +744,7 @@ public class BeanTest {
 
     @Test
     public void testJSON() {
+    	System.setProperty("bean.format.date.iso8601", "true");
         TypeBean o = new TypeBean();
         o.setString("test");
         o.setBigDecimal(new BigDecimal("10"));

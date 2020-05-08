@@ -242,7 +242,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
 	private void checkAndResetValueExpression(String... availableAttributes) {
 		if (valueExpression != null && !Util.isEmpty(valueExpression.getAttributeNames())) {
             if (!Arrays.asList(availableAttributes).containsAll(valueExpression.getAttributeNames())) {
-            	LOG.error(valueExpression + " doesn't fit to new attributes anymore and will be resetted: " + Arrays.toString(availableAttributes));
+            	ManagedException.handleError(valueExpression + " doesn't fit to new attributes anymore and will be resetted: " 
+            			+ Arrays.toString(availableAttributes));
                 valueExpression = null;
             }
         }
@@ -1640,11 +1641,11 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                     BeanValue<?> bv = (BeanValue<?>) beanAttribute;
                     if (bv.getFormat() != null) {
                         value = bv.getFormat().format(value);
-                    } else if (value instanceof Date) {
-                        value = DateUtil.toISO8601UTC((Date)value);
                     } else {
                         value = value != null ? value.toString() : "";
                     }
+                } else if (ENV.get("bean.format.date.iso8601", false) && value instanceof Date) {
+                    value = DateUtil.toISO8601UTC((Date)value);
                 }
                 map.put(keyPrefix + beanAttribute.getName(), value);
             }
@@ -1663,7 +1664,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                 Object value = values.get(name);
                 if (Util.isEmpty(value) && attr.getValue(instance) == null)
                     continue;
-                if (Date.class.isAssignableFrom( attr.getType()) && value instanceof String)
+                if (Date.class.isAssignableFrom( attr.getType()) && value instanceof String && ENV.get("bean.format.date.iso8601", false))
                     value = DateUtil.fromISO8601UTC((String)value);
                 if (attr instanceof IValueAccess)
                     ((IValueAccess)attr).setValue(value);

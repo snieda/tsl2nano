@@ -1,13 +1,12 @@
 package de.tsl2.nano.bean;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
 import de.tsl2.nano.action.IConstraint;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
-import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.util.test.TypeBean;
 
