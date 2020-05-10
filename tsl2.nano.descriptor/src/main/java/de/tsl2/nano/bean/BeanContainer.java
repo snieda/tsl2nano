@@ -148,8 +148,8 @@ public class BeanContainer implements IBeanContainer {
      * will call {@link #initServiceActions(IAction, IAction, IAction)} with simple actions, doing nothing. useful for
      * testing.
      */
-    public static final Collection initEmtpyServiceActions() {
-        final Collection<?> EMPTY_LIST = new ListSet();
+    public static final Collection initEmtpyServiceActions(Object...testInstances) {
+        final Collection<?> EMPTY_LIST = new ListSet(testInstances);
         final IAction idFinder = new CommonAction("empty.service.idFinder") {
             @Override
             public Object action() {

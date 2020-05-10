@@ -77,6 +77,7 @@ A cool way to see the power of this tool can be seen in chapter _Online Quick-St
 * injecting own logic on the forms html dom document
 * inject onw logic in all phases of presenting through annotations
 * show complex dialogs through websockets to edit beans without leaving the current page
+* REST service for access/modification of all loaded entities
 * planned interfaces:
 	* xsd-->bean
 	* java-interface-->java-bean (mock through internal proxy)
@@ -463,6 +464,37 @@ The following service may be set to override the default mechanisms:
 * Workflow: defines the navigation stack. On default a simple entity browser is used.
 * IGenericService: generic service to modify/query beans from
 * EntityManager: will be invoked into the GenericeService implementation. On default, the _javax.persistence_ will be used by calling _Persistence.createEntityManagerFactory(persistenceUnitName).createEntityManager()_. If the desired orm framework doesn't provide a javax.persistence implementation, a simple _EntityManager_ implementation can be set (see project _tsl2.nano.directaccess_ class tsl2.nano.persistence.provider.NanoEntityManagerFactory).
+
+##### REST service
+
+There is a REST service, providing access/modification for all loaded entities.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------- RESTDynamic usage informations ------------------------------
+
+REQUEST FORMAT: /rest/{entity}/{attribute-or-action}/{query}/{optional-output-attribute}/{PUT:value}
+GET,PUT,DELETE:
+	entity              : simple class lower name of entity to be accessed
+	attribte-or-action  : entities bean attribute name to be accessed
+	query               : query value for attribute
+	optional-output-attr: if only this attribute should be returned
+	PUT:value           : value to be set on output-attribute
+	example-1           : GET:/rest/address/city/Buxdehude
+	example-2           : GET:/rest/address/city/Buxdehude/street
+	example-3           : PUT:/rest/address/id/1/city/Berlin
+	example-4           : DELETE:/rest/address/id/1
+POST:
+	entity              : simple class lower name of entity to be accessed
+	attribte-or-action  : action 'create' or entity bean action name
+	PAYLOAD             : 'postData' entry in payolad map - only JSON!
+	example-1           : POST:/rest/address/create
+
+HEADER:
+	authorization       : user date digest for basic authentication
+	user                : user for method authorization
+	password            : password for method authorization
+---------------------------------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ## Starting / Test
 
@@ -3892,7 +3924,7 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.2.2  | 22.04.2019 | bugfixing on cursus, linux-start-scripts, messages constraint on app.secure.login=true in cause of security aspects
  2.3.0  | 31.08.2019 | NEW: tsl2.nano.archetype, tsl2.nano.mavengenerator, REF: tsl2.nano.generator, tsl2.nano.datastructure
  2.3.1  | 26.01.2020 | NEW: tsl2.nano.gp, generator velocity-templates enhanced, logfactory and terminal enhanced with colors
- 2.3.2  | 26.04.2020 | NEW: tsl2.nano.aspects, tsl2.nano.instrumentation, websocket-dialogs, generator enhanced with additional filters
+ 2.3.2  | 10.05.2020 | NEW: tsl2.nano.aspects, tsl2.nano.instrumentation, websocket-dialogs, REST service, generator enhanced with additional filters
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
 
@@ -4771,14 +4803,14 @@ Apps auf Serverway:
 - [ ] add listener testen
 - [ ] Scripttool mit named result (as MyName) testen
 - [ ] cumulate integration test to be covered by Jacoco
-- [ ] fix h2 server shutdown
+- [ ] fix h2 server shutdown <- database is shutdown, the external h2 application must stop
 - [ ] htmlunit test for configuration
 
 ### REST
 
-- [ ] fromValueMap() implementieren (full json support for beans!)
-   - [ ] +BeanDefinition.strict: import all attributes!
-- [ ] dynamic REST implementieren
-- [ ] show REST infos on bean
+- [v] fromValueMap() implementieren (full json support for beans!)
+   - [v] +BeanDefinition.strict: import all attributes!
+- [v] dynamic REST implementation
+- [-] show REST infos on bean
 
  -->

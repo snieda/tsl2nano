@@ -57,7 +57,7 @@ public class AccessChecker {
             String packageName = Messages.class.getPackage().getName();
             StringBuffer callerName = new StringBuffer();
             if (!checkCaller(packageName + ".*", 4, callerName)) {
-                throw new ManagedException("This method should only be called by framework classes!",
+                throw new ManagedException("This method should only be called by framework classes! {0}",
                     "method " + callerName + ": <method call outside of package: " + packageName + ">");
             }
         }

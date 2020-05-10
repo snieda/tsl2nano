@@ -253,8 +253,12 @@ private static Object deepCopy(Object src, Object dest) throws Exception {
         return BeanDefinition.getBeanDefinition(type).fromValueMap(values);
     }
 
-    public static String toJSON(Object instance) {
-        return MapUtil.toJSON(toValueMap(instance));
+    public static String toJSON(Object... instances) {
+    	StringBuilder buf = new StringBuilder();
+    	for (int i = 0; i < instances.length; i++) {
+            buf.append(MapUtil.toJSON(toValueMap(instances[i])) + ",");
+		}
+    	return instances.length > 0 ? buf.deleteCharAt(buf.length() - 1).toString(): buf.toString();
     }
 
     /** only flat object, no recursion yet! */

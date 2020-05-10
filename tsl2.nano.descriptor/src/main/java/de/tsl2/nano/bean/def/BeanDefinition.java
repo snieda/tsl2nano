@@ -916,7 +916,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
 
     @Override
     public int hashCode() {
-        return name != null ? name.hashCode() : super.hashCode();
+        return name != null ? name.toLowerCase().hashCode() : super.hashCode();
     }
 
     @Override

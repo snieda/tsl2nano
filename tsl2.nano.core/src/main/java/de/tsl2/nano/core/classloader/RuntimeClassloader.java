@@ -164,7 +164,7 @@ public class RuntimeClassloader extends URLClassLoader {
         String p = null;
         classNames = FileUtil.readFileNamesFromZip(beanjar, "*" + CLS);
         if (classNames == null) {
-            throw new ManagedException("The given jar-file '" + beanjar + "' doesn't exist!");
+            throw new ManagedException("The given jar-file '" + beanjar + "' has no classes or doesn't exist!");
         }
 
         beanClasses = new ArrayList<Class>(classNames.length);

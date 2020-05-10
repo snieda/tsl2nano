@@ -402,6 +402,8 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
                     MapUtil.filter(header, "http-client-ip", "User-Agent"),
                     parms));
             }
+            if (RESTDynamic.canRest(uri))
+            	return new RESTDynamic().serve(uri, method, header, parms, files);
             //WORKAROUND for uri-problem
             String referer = header.get("referer");
             if (parms.containsKey(IAction.CANCELED)

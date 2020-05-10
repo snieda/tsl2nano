@@ -441,7 +441,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             Map<String, String> files) {
         Plugins.process(INanoPlugin.class).requestHandler(uri, m, header, parms, files);
         String method = m.name();
-        if (method.equals("GET") && !isAdmin(uri)) {
+        if (method.equals("GET") && !isAdmin(uri) && !RESTDynamic.canRest(uri)) {
             // serve files
             if (!NumberUtil.isNumber(uri.substring(1)) && HtmlUtil.isURI(uri)
                 && !uri.contains(Html5Presentation.PREFIX_BEANREQUEST)) {
@@ -494,7 +494,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                     //don't lose the connection - the first item is the login
 //                    session.nav.next(session.nav.toArray()[1]);
                 }
-            } else if (session.response != null && method.equals("GET") && parms.size() < 2 /* contains 'QUERY_STRING = null' */
+            } else if (session.response != null && method.equals("GET") && parms.size() < 2  && !RESTDynamic.canRest(uri)/* contains 'QUERY_STRING = null' */
                 && (uri.length() < 2 || header.get("referer") == null) || isDoubleClickDelay(session)) {
                 LOG.debug("reloading cached page...");
                 try {
@@ -548,7 +548,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         return createResponse(Response.Status.OK, MIME_HTML, msg);
     }
 
-    public Response createResponse(Status status, String type, String msg) {
+    public static Response createResponse(Status status, String type, String msg) {
         byte[] bytes = msg.getBytes();
         return new NanoHTTPD.Response(status, type, new ByteArrayInputStream(bytes), bytes.length);
     }

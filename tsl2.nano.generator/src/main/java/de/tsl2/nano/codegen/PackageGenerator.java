@@ -109,7 +109,7 @@ public class PackageGenerator extends ClassGenerator {
             p = null;
             classNames = FileUtil.readFileNamesFromZip(packagePath, "*" + POSTFIX_CLS);
             if (classNames == null) {
-                throw new ManagedException("the given jar-file doesn't exist!");
+                throw new ManagedException("the given jar-file has no classes or doesn't exist: " + packagePath);
             }
         } else if (packagePath.matches("(\\w+\\.)+\\w+") && !(new File(packagePath).isDirectory())) {
             LOG.info("packagePath was given as java-class-package -> searching through ClassFinder!");
