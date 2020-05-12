@@ -10,26 +10,6 @@
 	<properties>
 		<module.parent>..</module.parent>
 	</properties>
-	<build>
-		<sourceDirectory>src/main</sourceDirectory>
-		<testSourceDirectory>src/test</testSourceDirectory>
-		<resources>
-			<resource>
-				<directory>src/resources</directory>
-				<excludes>
-					<exclude>**/*.java</exclude>
-				</excludes>
-			</resource>
-		</resources>
-		<testResources>
-			<testResource>
-				<directory>src/test</directory>
-				<excludes>
-					<exclude>**/*.java</exclude>
-				</excludes>
-			</testResource>
-		</testResources>
-	</build>
 	<dependencies><!-- https://mvnrepository.com/artifact/com.j256.ormlite/ormlite-core -->
 		<dependency>
 			<groupId>com.j256.ormlite</groupId>
@@ -46,6 +26,18 @@
 			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>tsl2.nano.directaccess</artifactId>
 			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>1.4.199</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+		    <groupId>org.hibernate</groupId>
+		    <artifactId>hibernate-entitymanager</artifactId>
+		    <version>5.4.15.Final</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 	<name>TSL2 ORMlite provider</name>

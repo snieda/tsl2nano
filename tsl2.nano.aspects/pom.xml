@@ -20,6 +20,8 @@
         <exec.args>${java.debug} ${aspectj.javaagent}</exec.args>
         <exec.mainClass>org.test.App</exec.mainClass>
         <exec.arguments></exec.arguments>
+		<!-- this argline normally is in surefire-configuration - but there it would create a collision with jacoco  -->
+        <argLine>${aspectj.javaagent}</argLine>
     </properties>
     <dependencies>
         <dependency>
@@ -46,9 +48,6 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.10</version>
                 <configuration>
-                    <argLine>
-                        ${aspectj.javaagent}
-                    </argLine>
                     <useSystemClassLoader>true</useSystemClassLoader>
                     <forkMode>always</forkMode>
                 </configuration>

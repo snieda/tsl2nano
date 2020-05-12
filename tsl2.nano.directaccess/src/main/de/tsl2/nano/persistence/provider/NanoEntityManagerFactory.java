@@ -542,10 +542,12 @@ public class NanoEntityManagerFactory implements javax.persistence.EntityManager
             //TODO: not-complete evaluation
             String clsName = StringUtil.substring(qstr, "from ", " t");
             Collection<Class> beanTypes = ENV.get("service.loadedBeanTypes", null);
-            for (Class t : beanTypes) {
-                if (t.getSimpleName().equals(clsName)) {
-                    return t;
-                }
+            if (beanTypes != null) {
+	            for (Class t : beanTypes) {
+	                if (t.getSimpleName().equals(clsName)) {
+	                    return t;
+	                }
+	            }
             }
             throw new IllegalArgumentException("The result type is not evaluable through the given select: " +qstr);
         }

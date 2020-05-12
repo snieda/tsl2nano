@@ -1,0 +1,25 @@
+<project>
+  <build>
+    <plugins>
+            <plugin>
+                <groupId>net.sf.tsl2nano</groupId>
+                <artifactId>tsl2.nano.mavengenerator</artifactId>
+                <configuration></configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <template>${basedir}/src/main/resources/gen-postfix.vm</template>
+                            <model>${project.build.outputDirectory}/WEB-INF/classes/my.org.project</model>
+                            <filter>my.org.project.[A-Z]+MyModel</filter>
+                            <outputPath>${basedir}/target/generated-sources</outputPath>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+    </plugins>
+  </build>
+</project>
+

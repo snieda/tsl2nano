@@ -115,7 +115,7 @@ public class EntityManager extends AbstractEntityManager {
     @Override
     public <T> T find(Class<T> arg0, Object arg1) {
         try {
-            dao(arg0).queryForId(arg1);
+            return (T) dao(arg0).queryForId(arg1);
         } catch (SQLException e) {
             ManagedException.forward(e);
         }
@@ -145,7 +145,8 @@ public class EntityManager extends AbstractEntityManager {
     public void detach(Object arg0) {
         Dao dao = dao(arg0.getClass());
         try {
-            dao.getObjectCache().remove(arg0.getClass(), dao.extractId(arg0));
+        	if (dao.getObjectCache() != null)
+        		dao.getObjectCache().remove(arg0.getClass(), dao.extractId(arg0));
         } catch (SQLException e) {
             ManagedException.forward(e);
         }
@@ -179,7 +180,7 @@ public class EntityManager extends AbstractEntityManager {
     public boolean contains(Object arg0) {
         Dao dao = dao(arg0.getClass());
         try {
-            return dao.getObjectCache().get(arg0.getClass(), dao.extractId(arg0)) != null;
+            return dao.getObjectCache() != null ? dao.getObjectCache().get(arg0.getClass(), dao.extractId(arg0)) != null : false;
         } catch (SQLException e) {
             ManagedException.forward(e);
             return false;

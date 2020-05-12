@@ -38,7 +38,7 @@ add the following plugin configuration to your pom:
                             <outputPath>target/generated-sources</outputPath>
                         </configuration>
                     </execution>
-                <executions>
+                </executions>
             </plugin>
 
 this would be a minimalistic configuration to do a simple package generation.

@@ -11,18 +11,6 @@
 	<properties>
 		<module.parent>..</module.parent>
 	</properties>
-	<build>
-		<sourceDirectory>src/main</sourceDirectory>
-		<testSourceDirectory>src/test</testSourceDirectory>
-		<resources>
-			<resource>
-				<directory>src/resources</directory>
-				<excludes>
-					<exclude>**/*.java</exclude>
-				</excludes>
-			</resource>
-		</resources>
-	</build>
 	<dependencies><!-- https://mvnrepository.com/artifact/org.avaje.ebeanorm/avaje-ebeanorm -->
 		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>
@@ -38,6 +26,24 @@
 			<groupId>org.avaje.ebeanorm</groupId>
 			<artifactId>avaje-ebeanorm</artifactId>
 			<version>3.4.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>1.4.199</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+		    <groupId>org.hibernate</groupId>
+		    <artifactId>hibernate-entitymanager</artifactId>
+		    <version>5.4.15.Final</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency><!-- internally used by thymeleaf!!! -->
+		    <groupId>org.slf4j</groupId>
+		    <artifactId>slf4j-simple</artifactId>
+		    <version>1.7.30</version>
+		    <scope>test</scope>
 		</dependency>
 	</dependencies>
 	<description>TSL2 ORM EBean (providing an EntityManager for ebean)</description>

@@ -61,10 +61,14 @@ public class GeneratorMojo extends AbstractMojo {
 			System.setProperty(KEY_UNPACKAGED, unpackaged);
 			System.setProperty(KEY_SINGLEFILE, singleFile);
 			System.setProperty(KEY_INSTANCEABLE, filterInstanceable);
-			System.setProperty(KEY_ANNOTATED, filterAnnotated);
-			System.setProperty(KEY_INSTANCEOF, filterInstanceOf);
-			System.setProperty(KEY_KEYWORDLIST, keywordList);
-			System.setProperty(KEY_KEYWORDREPL, keywordReplacement);
+			if (filterAnnotated != null)
+				System.setProperty(KEY_ANNOTATED, filterAnnotated);
+			if (filterInstanceOf != null)
+				System.setProperty(KEY_INSTANCEOF, filterInstanceOf);
+			if (keywordList != null)
+				System.setProperty(KEY_KEYWORDLIST, keywordList);
+			if (keywordReplacement != null)
+				System.setProperty(KEY_KEYWORDREPL, keywordReplacement);
 
 			Properties properties = new Properties();
 			properties.putAll(System.getenv());
@@ -73,7 +77,7 @@ public class GeneratorMojo extends AbstractMojo {
 			properties.put("project", project);
 
 			ACodeGenerator.start(model == null ? new String[0] 
-				: new String[] {algorithm, model, template, filter, propertyFile }, properties);
+				: new String[] {algorithm, model, template, filter, propertyFile }, properties, 0);
 
 		} catch (Exception e) {
 			e.printStackTrace();

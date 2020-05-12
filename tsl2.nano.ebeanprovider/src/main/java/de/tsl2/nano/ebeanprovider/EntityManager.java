@@ -69,7 +69,8 @@ public class EntityManager extends AbstractEntityManager {
         Properties ep = new Properties();
         try {
             ep.load(FileUtil.getFile(ENV.getConfigPath() + ebeanTemplate));
-            ep.setProperty("ebean.search.jars", (String) props.get("jpa.beansjar"));
+            if (props.containsKey("jpa.beansjar"))
+            	ep.setProperty("ebean.search.jars", (String) props.get("jpa.beansjar"));
             ep.setProperty("datasource.custom.username", (String) props.get("jdbc.username"));
             ep.setProperty("datasource.custom.password", (String) props.get("jdbc.password"));
             ep.setProperty("datasource.custom.databaseUrl", (String) props.get("jdbc.url"));

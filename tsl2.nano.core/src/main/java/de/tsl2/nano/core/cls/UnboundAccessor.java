@@ -323,7 +323,19 @@ public class UnboundAccessor<T> {
      * @return call result
      */
     public <M> M call(String name, Class<M> returnType, Object... args) {
-        return call(name, returnType, null, args);
+    	Class[] pars = null;
+    	if (methodCache.get(name) == null) {
+    		if (!Util.isEmpty(args)) {
+    			pars = new Class[args.length];
+    			for (int i = 0; i < args.length; i++) {
+    				if (args[i] == null)
+    					throw new IllegalArgumentException("please register method " + name + " with its parameters or give arguments that are not null!");
+					pars[i] = args[i].getClass();
+				}
+    		} else
+    			pars = new Class[0];
+    	}
+        return call(name, returnType, pars, args);
     }
 
     /**

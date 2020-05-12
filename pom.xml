@@ -204,7 +204,7 @@
  			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.0</version>
+				<version>0.8.4</version>
 				<!-- TODO: the configuration is duplicated in the reporting section and h5... -->
 				<configuration>
 					<outputDirectory>../target</outputDirectory>
@@ -226,6 +226,7 @@
 						is passed as VM argument when Maven the Surefire plugin is executed. -->
 					<execution>
 						<id>pre-unit-test</id>
+						<phase>initialize</phase>
 						<inherited>true</inherited>
 						<goals>
 							<goal>prepare-agent</goal>
@@ -240,8 +241,8 @@
 				          <goal>prepare-agent-integration</goal>
 				        </goals>
 				        <configuration>
-				          <destFile>${project.build.directory}/jacoco-integration.exec</destFile>
-				          <append>true</append>
+				          <destFile>${project.build.directory}/jacoco-it.exec</destFile>
+						  <append>true</append>
 				        </configuration>
 				      </execution>
 					<!-- <execution>

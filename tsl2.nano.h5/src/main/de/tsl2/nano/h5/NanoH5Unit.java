@@ -4,8 +4,15 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Stack;
 
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -13,7 +20,9 @@ import com.gargoylesoftware.htmlunit.html.HtmlButton;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
+import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
@@ -24,6 +33,8 @@ import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.h5.navigation.EntityBrowser;
+import de.tsl2.nano.serviceaccess.Authorization;
 
 /**
  * ONLY TO BE EXTENDED BY JUNIT TESTS! USES JUNIT+HTMLUNIT
@@ -180,4 +191,28 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
     protected static void shutdown() {
         System.exit(0);
     }
+
+    /*
+     * conveniences to create a testable nanoh5 application + session
+     */
+    public static NanoH5Session createApplicationAndSession(String name, Serializable... instances) throws IOException, UnknownHostException {
+		return createApplicationAndSession(name, Arrays.stream(instances).map(i -> Bean.getBean(i)).toArray(Bean[]::new));
+	}
+	// public static NanoH5Session createApplicationAndSession(String name, Class...classes) throws IOException, UnknownHostException {
+	// 	return createApplicationAndSession(name, Arrays.stream(classes).map(c -> BeanDefinition.getBeanDefinition(c)).toArray(BeanDefinition[]::new));
+	// }
+	public static NanoH5Session createApplicationAndSession(String name, BeanDefinition...beandefs) throws IOException, UnknownHostException {
+		NanoH5 server = new NanoH5();
+//		NanoH5Session session = (NanoH5Session) new PrivateAccessor<NanoH5>(server).call("createSession", NanoH5Session.class
+//				, new Class[] {InetAddress.class}, InetAddress.getLocalHost());
+        Stack<BeanDefinition<?>> nav = new Stack<BeanDefinition<?>>();
+        nav.addAll((List) Arrays.asList(beandefs));
+		EntityBrowser entities = new EntityBrowser("test", nav);
+		entities.next(null);
+		NanoH5Session session = NanoH5Session.createSession(server, InetAddress.getLocalHost()
+				, entities, Thread.currentThread().getContextClassLoader()
+				, Authorization.create(name, false), new HashMap());
+		return session;
+	}
+
 }

@@ -42,7 +42,7 @@
 				</configuration>
 				<executions>
 					<execution>
-						<phase>post-site</phase>
+						<phase>pre-site</phase>
 						<goals>
 							<goal>report-aggregate</goal>
 						</goals>
@@ -170,7 +170,6 @@
 			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>tsl2.nano.terminal</artifactId>
 			<version>${project.version}</version>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>
