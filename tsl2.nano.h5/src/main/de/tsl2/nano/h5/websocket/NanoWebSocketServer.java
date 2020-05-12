@@ -287,6 +287,11 @@ public class NanoWebSocketServer extends WebSocketServer {
     public boolean isConnected() {
         return isConnected;
     }
+
+    @Override
+    public void onStart() {
+        LOG.debug("starting websocket");
+    }
     
     
 }

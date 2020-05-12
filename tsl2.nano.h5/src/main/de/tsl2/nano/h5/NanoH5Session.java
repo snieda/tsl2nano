@@ -306,7 +306,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
                 @Override
                 public void run() {
                     try {
-                        Collection<WebSocket> sockets = socketServer.connections();
+                        Collection<WebSocket> sockets = socketServer.getConnections();
                         for (WebSocket webSocket : sockets) {
                             webSocket.send(" === APPLICATION STOPPED! === ");
 //                            Message.send("APPLICATION STOPPED!");

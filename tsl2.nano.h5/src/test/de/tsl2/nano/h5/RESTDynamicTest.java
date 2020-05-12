@@ -23,6 +23,7 @@ public class RESTDynamicTest {
 
 	@Before
 	public void setUp() {
+		NanoH5Test.createENV("restdynamic");
 		ENV.setProperty("app.login.administration", false); // -> with authentication
         Bean<Address> beanAddress = Bean.getBean(new Address(1, "Berliner Str.1", "100000", "Buxdehude", "germany"));
 		BeanContainer.initEmtpyServiceActions(beanAddress.getInstance());

@@ -375,7 +375,7 @@
 		<dependency>
 			<groupId>org.java-websocket</groupId>
 			<artifactId>Java-WebSocket</artifactId>
-			<version>1.3.0</version>
+			<version>1.5.1</version>
 		</dependency><!-- https://mvnrepository.com/artifact/net.sourceforge.htmlunit/htmlunit -->
 		<dependency>
 			<groupId>net.sourceforge.htmlunit</groupId>
@@ -450,7 +450,7 @@
 		<dependency><!-- internally used by thymeleaf!!! -->
 		    <groupId>org.slf4j</groupId>
 		    <artifactId>slf4j-simple</artifactId>
-		    <version>1.5.8</version>
+		    <version>1.7.30</version>
 		</dependency>
 		<dependency>
 		    <groupId>com.hynnet</groupId>
@@ -472,7 +472,7 @@
 		<dependency>
 		  <groupId>org.apache.lucene</groupId>
 		  <artifactId>lucene-core</artifactId>
-		  <version>3.6.2</version>
+		  <version>7.1.0</version>
 		<scope>test</scope>
 	</dependency>
 	</dependencies>

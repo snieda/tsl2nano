@@ -80,7 +80,7 @@ public class WebSocketExceptionHandler extends ExceptionHandler implements Close
                 waitForResponse = true;
             }
 
-            Collection<WebSocket> connections = socket.connections();
+            Collection<WebSocket> connections = socket.getConnections();
             for (WebSocket webSocket : connections) {
                 webSocket.send(msg != null ? msg : e.toString());
             }
