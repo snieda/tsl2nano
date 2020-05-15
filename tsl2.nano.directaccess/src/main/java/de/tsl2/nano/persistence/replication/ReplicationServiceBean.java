@@ -133,19 +133,19 @@ public class ReplicationServiceBean extends GenericLocalServiceBean {
         return bean;
     }
 
-    private Object getDependentBean(Exception ex) {
-        String txt = ex.toString();
-        String stype = StringUtil.substring(txt, "Unable to find ", " with");
-        String id = StringUtil.substring(txt, "with id ", null);
-        if (stype == null || id == null)
-            return null;
-        BeanClass bc = BeanClass.createBeanClass(stype);
-        Object instance = bc.createInstance();
-        bc.setValue(instance, BeanContainer.getIdAttribute(instance).getName(), id);
-        Collection<Object> result = BeanContainer.instance().getBeansByExample(instance);
-        return result.size() > 0 ? result.iterator().next() : null;
-//        return ServiceFactory.getGenService().findById(bc.getClazz(), id);
-    }
+//    private Object getDependentBean(Exception ex) {
+//        String txt = ex.toString();
+//        String stype = StringUtil.substring(txt, "Unable to find ", " with");
+//        String id = StringUtil.substring(txt, "with id ", null);
+//        if (stype == null || id == null)
+//            return null;
+//        BeanClass bc = BeanClass.createBeanClass(stype);
+//        Object instance = bc.createInstance();
+//        bc.setValue(instance, BeanContainer.getIdAttribute(instance).getName(), id);
+//        Collection<Object> result = BeanContainer.instance().getBeansByExample(instance);
+//        return result.size() > 0 ? result.iterator().next() : null;
+////        return ServiceFactory.getGenService().findById(bc.getClazz(), id);
+//    }
 
     @Override
     public <T> T persistNoTransaction(T bean, boolean refreshBean, boolean flush, Class... lazyRelations) {
