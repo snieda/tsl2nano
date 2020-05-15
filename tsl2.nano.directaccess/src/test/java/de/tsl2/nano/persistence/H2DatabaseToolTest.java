@@ -26,7 +26,7 @@ public class H2DatabaseToolTest {
     public void testReplaceKeyWordsInFile() {
         String ddl = "ddlcopy-test";
         String targetDDL = "target/" + ddl;
-        FileUtil.copy("src/test/" + ddl + ".sql", targetDDL + ".sql");
+        FileUtil.copy("src/test/resources/" + ddl + ".sql", targetDDL + ".sql");
         ddl = targetDDL;
         
         Persistence p = new Persistence();

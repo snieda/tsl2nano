@@ -32,7 +32,8 @@ public abstract class AbstractFinder<T> implements Serializable {
     Class<Object>[] relationsToLoad;
     int maxResult = 0;
     int index = 0;
-    private boolean isSubSelect = false;
+    private boolean isSubSelect;
+	private boolean hasWhereClause;
 
     public AbstractFinder(Class<T> resultType, Class<Object>... relationsToLoad) {
         this.resultType = resultType;
@@ -160,10 +161,16 @@ public abstract class AbstractFinder<T> implements Serializable {
      * @return and-clause or where-clause
      */
     protected String getAndClause() {
-        return  isSubSelect() ? CLAUSE_WHERE : CLAUSE_AND;
+        return  provideWhereClause() ? CLAUSE_AND : CLAUSE_WHERE;
     }
     
-    /**
+    boolean provideWhereClause() {
+    	boolean hasWhereClause = this.hasWhereClause;
+    	this.hasWhereClause = ! this.hasWhereClause;
+		return hasWhereClause;
+	}
+
+	/**
      * getFinderIndex
      * 
      * @return {@link #index}

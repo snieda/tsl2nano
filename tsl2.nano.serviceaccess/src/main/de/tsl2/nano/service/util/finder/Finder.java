@@ -51,11 +51,22 @@ public final class Finder {
             finder[i].addToQuery(i, qStr, parameter, lazyRelations);
             finder[i].getMaxResult();
         }
+        arrangeParameterIndexes(qStr, 0, 0);
         LOG.debug(getLogInfo(qStr, parameter));
         return qStr.toString();
     }
 
-    /**
+    static void arrangeParameterIndexes(StringBuffer qStr, int fromIndex, int parameterIndex) {
+		int pi = qStr.indexOf("?", fromIndex);
+		if (pi == -1 || qStr.indexOf("?X") == -1)
+			return;
+		++parameterIndex;
+		if (qStr.substring(pi, pi+2).equals("?X"))
+			qStr.replace(pi+1, pi+2, String.valueOf(parameterIndex));
+		arrangeParameterIndexes(qStr, pi+1, parameterIndex);
+	}
+
+	/**
      * creates an or-condition for the given finder
      * @param <FINDER> finder type
      * @param <T> result type

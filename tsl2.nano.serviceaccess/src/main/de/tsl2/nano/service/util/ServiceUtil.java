@@ -328,7 +328,7 @@ public class ServiceUtil {
                              * the between mechanism (e.g.: between abc000 and abczzz) doesn't respect the full match!
                              * so we have to add an and-condition (with brackets!) to the full match with EQUAL.
                              */
-                            qStr.append(and_cond + BRACKET_OPEN + varName + OP_EQ + VALUE_PH);
+                            qStr.append(and_cond + BRACKET_OPEN + varName + OP_EQ + VALUE_PH + (parameter.size()+1));
                             and_cond = CLAUSE_OR;
                             parameter.add(caseInsensitive ? ((String) value).toLowerCase() : (String) value);
                         } else if (operator.equals(OP_LE) || operator.equals(OP_LT)) {
@@ -338,13 +338,13 @@ public class ServiceUtil {
                             bracket_close = BRACKET_CLOSE;
                         }
                     }
-                    qStr.append(and_cond + varName + (isLikeValue ? OP_LIKE : operator) + VALUE_PH + bracket_close);
+                    qStr.append(and_cond + varName + (isLikeValue ? OP_LIKE : operator) + VALUE_PH + (parameter.size()+1) + bracket_close);
                     value = strValue;
                 } else if (isManyToOne && value instanceof String) {
-                    qStr.append(and_cond + attrPrefix + name + OP_EQ + VALUE_PH);
+                    qStr.append(and_cond + attrPrefix + name + OP_EQ + VALUE_PH + (parameter.size()+1));
                 } else {// if no string, like is not possible
                     final String op = OP_LIKE.equals(operator) ? OP_GE : operator;
-                    qStr.append(and_cond + attrPrefix + name + op + VALUE_PH);
+                    qStr.append(and_cond + attrPrefix + name + op + VALUE_PH + (parameter.size()+1));
                 }
                 parameter.add(value);
                 and_cond = CLAUSE_AND;
@@ -441,7 +441,7 @@ public class ServiceUtil {
                         if (attributeDef.length() > 0) {
                             strValue = StringUtil.fixString(strValue, attributeDef.length(), '0', true);
                         }
-                        qStr.append(and_cond + bracket_open + varName + OP_EQ + VALUE_PH);
+                        qStr.append(and_cond + bracket_open + varName + OP_EQ + VALUE_PH + (parameter.size()+1));
                         and_cond = CLAUSE_OR;
                         bracket_open = "";
                         parameter.add(caseInsensitive ? ((String) fromValue).toLowerCase() : (String) fromValue);
@@ -451,7 +451,7 @@ public class ServiceUtil {
                      * now, the standard between: start with greater equal
                      */
                     if (fromValue != null) {
-                        qStr.append(and_cond + bracket_open + varName + OP_GE + VALUE_PH + bracket_close);
+                        qStr.append(and_cond + bracket_open + varName + OP_GE + VALUE_PH + (parameter.size()+1) + bracket_close);
                         parameter.add(fromValue);
                         and_cond = CLAUSE_AND;
                         bracket_close = BRACKET_CLOSE;
@@ -470,14 +470,14 @@ public class ServiceUtil {
                         toValue = strValue;
                     }
                     if (toValue != null) {
-                        qStr.append(and_cond + varName + OP_LE + VALUE_PH + bracket_close);
+                        qStr.append(and_cond + varName + OP_LE + VALUE_PH + (parameter.size()+1) + bracket_close);
                         parameter.add(toValue);
                     } else {
                         qStr.append(bracket_close);
                     }
                 } else {// no range: we create a simple equals
                     if (toValue != null) {
-                        qStr.append(and_cond + attrPrefix + name + OP_EQ + VALUE_PH);
+                        qStr.append(and_cond + attrPrefix + name + OP_EQ + VALUE_PH + (parameter.size()+1));
                         parameter.add(toValue);
                     }
                 }
@@ -537,7 +537,7 @@ public class ServiceUtil {
             + tm
             + "."
             + idAttribute
-            + " = ? and "
+            + " = ?X and "
             + substName
             + " member of "
             + tm
@@ -597,7 +597,7 @@ public class ServiceUtil {
             + th
             + "."
             + idAttribute
-            + " = ? and "
+            + " = ?X and "
             + th
             + " member of "
             + substName
@@ -621,7 +621,7 @@ public class ServiceUtil {
             String substName,
             String attribute,
             Collection<?> selection) {
-        return qStr.append(" " + clause + " " + substName + "." + attribute + " in (?)");
+        return qStr.append(" " + clause + " " + substName + "." + attribute + " in (?X)");
     }
 
     /**

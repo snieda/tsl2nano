@@ -133,8 +133,9 @@ public class Part<T> implements Serializable {
     /**
      * @param finders The {@link #finders} to set.
      */
-    public void setFinders(AbstractFinder<T>[] finders) {
+    public Part<T> setFinders(AbstractFinder<T>... finders) {
         this.finders = finders;
+        return this;
     }
 
     /**

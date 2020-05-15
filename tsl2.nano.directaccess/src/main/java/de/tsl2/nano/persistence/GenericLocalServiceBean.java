@@ -24,13 +24,18 @@ import de.tsl2.nano.persistence.replication.GenericReplicatingServiceBean;
  */
 @SuppressWarnings("rawtypes")
 public class GenericLocalServiceBean extends GenericReplicatingServiceBean {
-    private static final Log LOG = LogFactory.getLog(GenericLocalServiceBean.class);
+    public static final String GENERIC_PERSISTENCE_UNIT = "genericPersistenceUnit";
+	private static final Log LOG = LogFactory.getLog(GenericLocalServiceBean.class);
 
     /**
      * default
      */
     public GenericLocalServiceBean() {
-        this(createEntityManager("genericPersistenceUnit"));
+        this(GENERIC_PERSISTENCE_UNIT);
+    }
+
+    public GenericLocalServiceBean(String persistenceUnit) {
+        this(createEntityManager(persistenceUnit));
     }
 
     /**
