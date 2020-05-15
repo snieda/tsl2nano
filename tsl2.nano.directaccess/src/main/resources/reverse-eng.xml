@@ -10,7 +10,7 @@
 	<property name="packagename" value="org.anonymous.project" />
 	<property name="packagepath" value="org/anonymous/project" />
 	<property name="bean.jar.path" value="${jdbc.database}.jar" />
-	<property name="resources.dir" value="src/resources" />
+	<property name="resources.dir" value="src/main/resources" />
 	<property name="resources.db.dir" value="${resources.dir}/db" />
 	<property name="server.db-config.file" value="jdbc-connection.properties" />
 	<property name="schema" value="PUBLIC" />
