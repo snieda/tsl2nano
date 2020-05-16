@@ -14,10 +14,18 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
+import org.junit.Before;
 import org.junit.Test;
 
-public class ReplicationServiceBeanTest {
+import de.tsl2.nano.core.util.ENVTestPreparation;
 
+public class ReplicationServiceBeanTest implements ENVTestPreparation {
+
+	@Before
+	public void setUp() {
+		ENVTestPreparation.setUp("replication", false);
+	}
+	
 	@Test
 	public void testReplication() {
 		Person p = new Person("1", "Muster", Arrays.asList(new Address("Bangkok")));

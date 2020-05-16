@@ -85,7 +85,7 @@ public class Pool {
         for (Class<? extends IPRunnable> type : registeredTypes) {
             String dirName = getDirectory(type);
             LOG.info("loading " + type.getSimpleName().toLowerCase() + "(s) from " + dirName);
-            File dir = new File(dirName);
+            File dir = FileUtil.userDirFile(dirName);
             File[] runnableFiles = dir.listFiles();
             for (int i = 0; i < runnableFiles.length; i++) {
                 try {
@@ -100,7 +100,7 @@ public class Pool {
 
     public String getDirectory(Class<? extends IPRunnable> rType) {
         String dir = ENV.getConfigPathRel() + "specification/" + (rType != null ? rType.getSimpleName().toLowerCase() + "/" : "");
-        new File(dir).mkdirs();
+        FileUtil.userDirFile(dir).mkdirs();
         return dir;
     }
 

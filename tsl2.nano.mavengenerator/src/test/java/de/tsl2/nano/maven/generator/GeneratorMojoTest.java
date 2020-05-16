@@ -13,10 +13,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import de.tsl2.nano.core.util.ENVTestPreparation;
+
 public class GeneratorMojoTest extends AbstractMojoTestCase {
 
 	@Before
 	public void setUp() throws Exception {
+		ENVTestPreparation.setUp();
 		// required for mojo lookups to work
 		super.setUp();
 	}

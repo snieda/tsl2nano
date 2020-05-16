@@ -5,12 +5,18 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.util.ENVTestPreparation;
 
 public class GeneratorUtilityTest {
 
+	@Before
+	public void setUp() {
+		ENVTestPreparation.setUp("generator", true);
+	}
     @Test
     public void testObjectCreation() {
         GeneratorUtility util = new GeneratorUtility();

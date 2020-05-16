@@ -2,16 +2,23 @@ package de.tsl2.nano.h5;
 
 import static org.junit.Assert.*;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.incubation.specification.actions.Action;
 import de.tsl2.nano.util.test.TypeBean;
 
 public class SpecifiedActionTest {
+	
+	@Before
+	public void setUp() {
+		ENVTestPreparation.setUp("h5", false);
+	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test

@@ -1,23 +1,22 @@
 package de.tsl2.nano.ebeanprovider;
 
-import static org.junit.Assert.assertTrue;
-
 import java.util.Arrays;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.MapUtil;
 
 public class EntityManagerTest {
 
 	@Before
 	public void setUp() {
+		ENVTestPreparation.setUp("ebeanprovider", false);
 		//create a h2 datbase with the table for our test: Address
 	    EntityManagerFactory factory = Persistence.createEntityManagerFactory("test");
 	    javax.persistence.EntityManager emPrepare = factory.createEntityManager();

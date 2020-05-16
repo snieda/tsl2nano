@@ -10,7 +10,9 @@ import java.util.Collection;
 import java.util.List;
 
 import org.anonymous.project.Address;
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -38,13 +40,13 @@ import de.tsl2.nano.h5.NanoH5Test;
 
 public class BeanConfiguratorTest implements ENVTestPreparation {
 
-    @BeforeClass
-    public static void setUp() {
-//		ENVTestPreparation.setUp("beanconfigurator", false);
+    @Before
+    public void setUp() {
+		ENVTestPreparation.setUp("h5", true);
     }
 
-    @AfterClass
-    public static void tearDown() {
+    @After
+    public void tearDown() {
     }
 
 

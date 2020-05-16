@@ -11,12 +11,15 @@ import org.junit.Before;
 import org.junit.Test;
 
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.MapUtil;
 
-public class EntityManagerTest {
+public class EntityManagerTest implements ENVTestPreparation {
 
 	@Before
 	public void setUp() {
+		ENVTestPreparation.setUp("ormliteprovider", true);
+		
 		//create a h2 datbase with the table for our test: Address
 	    EntityManagerFactory factory = Persistence.createEntityManagerFactory("test");
 	    javax.persistence.EntityManager emPrepare = factory.createEntityManager();

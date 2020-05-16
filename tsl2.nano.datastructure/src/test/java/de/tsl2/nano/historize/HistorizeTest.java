@@ -2,13 +2,19 @@ package de.tsl2.nano.historize;
 
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.ConcurrentUtil;
+import de.tsl2.nano.core.util.ENVTestPreparation;
 
 public class HistorizeTest {
 
+	@Before
+	public void setUp() {
+		ENVTestPreparation.setUp("datastructure", true);
+	}
     @Test
     public void testHistorize() throws Exception {
         HistorizedInputFactory.setPath(ENV.getConfigPath());

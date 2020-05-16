@@ -19,7 +19,7 @@ public class RuleTest implements ENVTestPreparation {
 
     @BeforeClass
     public static void setUp() {
-    	ENVTestPreparation.setUp();
+    	ENVTestPreparation.setUp("specification", false);
     }
 
     @AfterClass
