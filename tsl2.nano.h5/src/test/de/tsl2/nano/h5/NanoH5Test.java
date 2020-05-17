@@ -71,7 +71,6 @@ import de.tsl2.nano.h5.timesheet.Timesheet;
 import de.tsl2.nano.incubation.specification.ParType;
 import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.incubation.specification.rules.Rule;
-import de.tsl2.nano.incubation.specification.rules.RuleDecisionTable;
 import de.tsl2.nano.incubation.specification.rules.RuleScript;
 import de.tsl2.nano.persistence.GenericLocalBeanContainer;
 import de.tsl2.nano.persistence.Persistence;

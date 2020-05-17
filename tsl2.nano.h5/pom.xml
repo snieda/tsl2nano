@@ -357,6 +357,7 @@
 									  spawn="true"
 									  >
 	                                <sysproperty key="app.server.running" value="true" />
+	                                <sysproperty key="app.database.run.h2.internal" value="true" />
 	                                <sysproperty key="websocket.use" value="false" />
 	                                <sysproperty key="tsl2nano.offline" value="true" />
 	                                <sysproperty key="app.show.startpage" value="false" />
@@ -431,6 +432,12 @@
 			<artifactId>h2</artifactId>
 			<version>1.4.196</version>
 			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>1.4.196</version>
+			<scope>test</scope>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
 		<dependency>

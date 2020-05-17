@@ -528,12 +528,20 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     //TODO: do some encryptions...
     //TODO: provide generic semantics on beans
     private void control(String cmd, NanoH5Session session) {
-        if (cmd.equals("shutdown"))
-            System.exit(0);
-        else if (cmd.equals("close"))
+        if (cmd.equals("close"))
             session.close();
         else if (cmd.equals("back"))
             session.nav.next(null);
+        else if (cmd.equals("shutdown")) {
+        	//give the server the chance to return the current request
+            ConcurrentUtil.startDaemon(new Runnable() {
+				@Override
+				public void run() {
+					ConcurrentUtil.sleep(1000);
+					System.exit(0);
+				}
+			});
+        }
     }
 
     protected Map<InetAddress, NanoH5Session> getSessions() {
@@ -986,13 +994,14 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         ENV.loadClassDependencies("org.apache.tools.ant.taskdefs.Taskdef",
             generatorTask, persistence.getConnectionDriverClass(), persistence.getProvider());
 
-        if ((dbTool.isLocalDatabase(persistence) && !dbTool.canConnectToLocalDatabase(persistence))
-            || persistence.autoDllIsCreateDrop()) {
+        if ((dbTool.isLocalDatabase(persistence) 
+        		&& (!dbTool.canConnectToLocalDatabase(persistence) || !dbTool.checkJDBCConnection(false)))
+        		|| persistence.autoDllIsCreateDrop()) {
             if (ENV.get("app.db.generate.database", true))
                 generateDatabase(persistence);
         }
         if (ENV.get("app.db.check.connection", true))
-            dbTool.checkJDBCConnection();
+            dbTool.checkJDBCConnection(true);
         
         Boolean generationComplete =
             generateJarFile(jarName, persistence.getGenerator(), persistence.getDefaultSchema());
@@ -1011,13 +1020,18 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     }
 
     protected void runLocalDatabase(final Persistence persistence) {
-        String runserverFile = "runServer.cmd";
-        if (!new File(ENV.getConfigPathRel() + runserverFile).exists())
-            generateDatabase(persistence);
-        String[] cmd =
-            AppLoader.isUnix() ? new String[] { "sh", runserverFile } : new String[] { "cmd", "/C", "start",
-                runserverFile };
-        SystemUtil.execute(new File(ENV.getConfigPathRel()), cmd);
+    	if (DatabaseTool.isH2RunInternally()) {
+    		new DatabaseTool(persistence).runH2Server();
+    		ConcurrentUtil.sleep(1000);
+    	} else {
+	        String runserverFile = "runServer.cmd";
+	        if (!new File(ENV.getConfigPathRel() + runserverFile).exists())
+	            generateDatabase(persistence);
+	        String[] cmd =
+	            AppLoader.isUnix() ? new String[] { "sh", runserverFile } : new String[] { "cmd", "/C", "start",
+	                runserverFile };
+	        SystemUtil.execute(new File(ENV.getConfigPathRel()), cmd);
+    	}
         //prepare shutdown and backup
         DatabaseTool dbTool = new DatabaseTool(persistence);
         dbTool.addShutdownHook();
@@ -1045,6 +1059,10 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     }
 
     private void generateDatabase(Persistence persistence) {
+    	if (DatabaseTool.isH2RunInternally()) {
+    		new DatabaseTool(persistence).runH2Server();
+    		ConcurrentUtil.sleep(1000);
+    	}
         ENV.extractResource(REVERSE_ENG_SCRIPT);
         Message.send("creating new database " + persistence.getDatabase() + " for url "
             + persistence.getConnectionUrl());

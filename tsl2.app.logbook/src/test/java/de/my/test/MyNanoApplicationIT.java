@@ -22,7 +22,6 @@ public class MyNanoApplicationIT extends NanoH5Unit {
     
 	@Test
 	public void testBeanDefinition() throws Exception {
-		ConcurrentUtil.sleep(10000); //otherwise the nano-server is not started
 		HtmlPage page = runWebClient();
 		page = submit(page, BTN_LOGIN_OK);
 //		assertTrue(page.getElementById("Location") != null);

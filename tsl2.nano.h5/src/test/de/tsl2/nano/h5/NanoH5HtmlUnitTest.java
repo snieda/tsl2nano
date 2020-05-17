@@ -20,7 +20,7 @@ import org.junit.Test;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 import de.tsl2.nano.core.execution.SystemUtil;
-import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.specification.rules.ActionScript;
 
@@ -29,21 +29,22 @@ import de.tsl2.nano.incubation.specification.rules.ActionScript;
  * @author Tom, Thomas Schneider
  * @version $Revision$ 
  */
-public class NanoH5IT extends NanoH5Unit {
+public class NanoH5HtmlUnitTest extends NanoH5Unit {
 
     @Before
     public void setUp() {
-        System.setProperty("app.server.running", "true");
+        System.setProperty("app.server.running", "false");
         super.setUp();
+        //workaround: let the collision test (using a h2 database) end before
+        ConcurrentUtil.sleep(10000);
     }
     
     @After
     public void tearDown() {
        super.tearDown();
-       String idPath = "pre-integration-test/.nanoh5.environment/temp/instance-id.txt";
-       shutdownNanoHttpServer(FileUtil.userDirFile(idPath));
     }
 
+//    @Ignore
     @Test
     public void testNano() throws Exception {
         Process process = null;

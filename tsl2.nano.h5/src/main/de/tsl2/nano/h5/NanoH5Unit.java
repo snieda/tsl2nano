@@ -9,7 +9,6 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
@@ -19,7 +18,7 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlButton;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
-import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
@@ -34,6 +33,8 @@ import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.h5.navigation.EntityBrowser;
+import de.tsl2.nano.persistence.DatabaseTool;
+import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.serviceaccess.Authorization;
 
 /**
@@ -46,7 +47,7 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
     protected static final String BTN_LOGIN_OK = "tsl2nano.login.ok";
     protected static final String BTN_RESET = ".reset";
     protected static final String BTN_DELETE = ".delete";
-    protected static final String BTN_CANCEL = "de.tsl2.nano.action.action_cancelled";
+    protected static final String BTN_CANCEL = IAction.CANCELED;
     protected static final String BTN_NEW = ".new";
     protected static final String BTN_EXPORT = ".export";
     protected static final String BTN_PRINT = ".print";
@@ -57,36 +58,55 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
     protected static final String BTN_OPEN = ".open";
     protected static final String BTN_ADMINISTRATION = ".administration";
     protected static final String BTN_SELECTALL = ".selectall";
+    protected static final String BEANCOLLECTORLIST = (BeanCollector.class.getSimpleName()
+            + Messages.getString("tsl2nano.list")).toLowerCase();
 
     protected static String TEST_DIR;
-    protected static boolean nanoAlreadyRunning;
-    protected static int port = -1;
-    protected static final String BEANCOLLECTORLIST = (BeanCollector.class.getSimpleName()
-        + Messages.getString("tsl2nano.list")).toLowerCase();
+    protected boolean nanoAlreadyRunning;
+    protected int port = -1;
 
-    protected static String getServiceURL(boolean nextFreePort) {
+    protected String getServiceURL(boolean nextFreePort) {
         return "http://localhost:" + (port == -1 && nextFreePort ? port = NetUtil.getNextFreePort(8067) : port == -1 ? port = 8067 : port);
     }
 
-    public static void setUp() {
+    protected int dbPort() {
+    	return 9092;
+    }
+    
+    public void setUp() {
         nanoAlreadyRunning = Boolean.getBoolean("app.server.running");
         NanoH5UnitPlugin.setEnabled(!nanoAlreadyRunning);
-        TEST_DIR = ENVTestPreparation.setUp(false) + TARGET_TEST;
+        TEST_DIR = ENVTestPreparation.setUp("h5", false);
         if (!nanoAlreadyRunning) {
-            ENV.setProperty("service.url", getServiceURL(!nanoAlreadyRunning));
+//    		GenericLocalBeanContainer.initLocalContainer();
+        	setPersistenceConnectionPort();
+//        	DatabaseTool.shutdownH2TcpServerDefault();
+        	DatabaseTool.runH2ServerDefault(); //in the test it seems not enough (forks?) to let nanoh5 start h2 internally....
+        	ENV.setProperty("app.database.run.h2.internal", true);
+        	ENV.setProperty("service.url", getServiceURL(!nanoAlreadyRunning));
             startApplication();
             ConcurrentUtil.waitFor(()->NetUtil.isOpen(port));
         } else {
             System.out.println("NanoH5TestBase: nanoAlreadyRunning=true ==> trying to connect to external NanoH5");
         }
+		ConcurrentUtil.sleep(10000); //otherwise the nano-server is not started completely
     }
+
+	protected void setPersistenceConnectionPort() {
+		try {
+			Persistence persistence = Persistence.current();
+			String url = persistence.getConnectionUrl().replace("9092", String.valueOf(dbPort()));
+			persistence.setConnectionUrl(url);
+			persistence.save();
+		} catch (IOException e) {
+			ManagedException.forward(e);
+		}
+	}
     
-    public static void tearDown() {
-        // String target = StringUtil.subEnclosing(new File(TEST_DIR).getAbsolutePath(), null, "target", false);
-        // String instanceId = FileUtil.getFileString(target + "/pre-integration-test/.nanoh5.environment/temp/instance-id.txt");
-        // NetUtil.get(getServiceURL(false) + "/" + instanceId);
-        if (BeanContainer.isInitialized())
-            BeanContainer.instance().executeStmt(ENV.get("app.shutdown.statement", "SHUTDOWN"), true, null);
+    public void tearDown() {
+    	if (webClient != null)
+    		webClient.close();
+    	DatabaseTool.shutdownH2TcpServerDefault();
     }
     
     protected static void startApplication() {
@@ -108,6 +128,7 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
             }
         });
     }
+	private WebClient webClient;
 
     protected HtmlPage runWebClient() {
         return runWebClient(getServiceURL(!nanoAlreadyRunning));
@@ -115,7 +136,7 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
     
     protected HtmlPage runWebClient(String serviceURL) {
         HtmlPage page = null;
-        WebClient webClient = new WebClient();
+        webClient = new WebClient();
         webClient.getOptions().setJavaScriptEnabled(true);
         webClient.getOptions().setTimeout(1200000); //20min
         webClient.getOptions().setPrintContentOnFailingStatusCode(true);
@@ -139,10 +160,10 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
         try {
             HtmlButton htmlButton = (HtmlButton) page.getElementById(buttonName);
             if (htmlButton == null) {
-                throw new IllegalArgumentException("button " + buttonName + " not found!");
+                throw new IllegalArgumentException("button " + buttonName + " not found! page: " + page.asXml());
             }
             page = htmlButton.click();
-            page.getWebClient().waitForBackgroundJavaScript(500);
+            page.getWebClient().waitForBackgroundJavaScript(1000);
             return page;
         } catch (Exception e) {
             List<Throwable> exceptions = ((ExceptionHandler)ENV.get(UncaughtExceptionHandler.class)).getExceptions();
@@ -165,31 +186,33 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
     }
 
     protected HtmlPage crudBean(HtmlPage page) throws Exception {
-        String pageId = page.getBody().getId();
+        String pageId = page.getBody().getId(); //thats not the best solution - perhaps a bean has a translated name
         if (Util.isEmpty(pageId))
             throw new IllegalStateException("pageId is empty!");
         String beanName = StringUtil.toFirstLower(pageId);
+        if (BeanDefinition.getBeanDefinition(beanName).isVirtual()) {
+        	System.out.println("beanname was translated....ignoring");
+        	return submit(page, BTN_CANCEL);
+        }
         String beanList = beanName + Messages.getString("tsl2nano.list").toLowerCase();
 
         //TODO: check pages with with saved last current state
         page = submit(page, beanList + BTN_SEARCH);
         page = submit(page, beanList + BTN_FORWARD);
         page = submit(page, beanList + BTN_BACK);
-//                submit(page, beanList + BTN_PRINT);
-//                page = back(page);
-//                submit(page, beanList + BTN_EXPORT);
-//                page = back(page);
+                submit(page, beanList + BTN_PRINT);
+                page = back(page);
+                submit(page, beanList + BTN_EXPORT);
+                page = back(page);
 
         page = submit(page, beanList + BTN_NEW);
+        if (page.getElementById(BTN_CANCEL) == null)
+        	return back(page); //workaround
         page = submit(page, BTN_CANCEL);
         //        page = submit(page, beanName + ".save");
 //                page = submit(page, beanList + BTN_DELETE);
 //                page = submit(page, beanName + BTN_RESET);
         return page;
-    }
-
-    protected static void shutdown() {
-        System.exit(0);
     }
 
     /*
@@ -214,5 +237,20 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
 				, Authorization.create(name, false), new HashMap());
 		return session;
 	}
-
+	
+	protected void shutdownNanoHttpServer() {
+		shutdownNanoHttpServer(FileUtil.userDirFile(ENV.getTempPath() + "instance-id.txt"));
+	}
+	protected void shutdownNanoHttpServer(File idFile) {
+		if (!idFile.exists())
+			return;
+		String id = FileUtil.getFileString(idFile.getAbsolutePath());
+		String cmdShutdown = "/" + id + "-shutdown";
+		String url = getServiceURL(false) + cmdShutdown;
+		try {
+			NetUtil.browse(url, System.out);
+		} catch (Exception e) {
+			System.out.println("couldn't shutdown nanohttp server on: " + url + " exception: " + e.toString());
+		}
+	}
 }

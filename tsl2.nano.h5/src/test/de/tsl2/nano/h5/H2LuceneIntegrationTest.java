@@ -24,7 +24,7 @@ public class H2LuceneIntegrationTest implements ENVTestPreparation {
     @Before
     public void setUp() throws SQLException {
         final String BASE_DIR = ENVTestPreparation.setUp("h5", false);
-        Server.createTcpServer("-baseDir", new File(BASE_DIR).getAbsolutePath(), "-tcpPort", "9092").start();
+        DatabaseTool.runH2ServerDefault();
         createTestDatabase();
 //        BeanContainerUtil.initGenericServices(Thread.currentThread().getContextClassLoader());
     }
@@ -38,7 +38,7 @@ public class H2LuceneIntegrationTest implements ENVTestPreparation {
 
     @After
     public void tearDown() throws SQLException {
-        Server.shutdownTcpServer(Persistence.current().getConnectionUrl(), "", true, true);
+        DatabaseTool.shutdownDatabaseDefault();
     }
     
     @AfterClass

@@ -15,6 +15,7 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.messaging.EMessage;
 import de.tsl2.nano.core.util.FileUtil;
@@ -67,14 +68,8 @@ public class DatabaseTool {
             public void run() {
                 if (BeanContainer.isInitialized()) {
                     EMessage.broadcast(this, "APPLICATION SHUTDOWN INITIALIZED...", "*");
-                    LOG.info("preparing shutdown of local database " + persistence.getConnectionUrl());
-                    try {
-                        BeanContainer.instance().executeStmt(ENV.get("app.shutdown.statement", "SHUTDOWN"), true,
-                            null);
-                        Thread.sleep(2000);
-                    } catch (Exception e) {
-                        LOG.error(e.toString());
-                    }
+                    shutdownDatabase();
+                    shutdownH2TcpServer();
                     String hsqldbScript = isH2(persistence.getConnectionUrl())
                         ? persistence.getDefaultSchema() + ".mv.db" : persistence.getDatabase() + ".script";
                     String backupFile =
@@ -87,6 +82,23 @@ public class DatabaseTool {
         }));
     }
 
+	public static void shutdownDatabaseDefault() {
+		shutdownDatabase(Persistence.DERBY_DATABASE_URL);
+	}
+	public void shutdownDatabase() {
+		shutdownDatabase(persistence.getConnectionUrl());
+	}
+	public static void shutdownDatabase(String url) {
+		if (BeanContainer.isInitialized()) {
+			LOG.info("preparing shutdown of local database " + url);
+			try {
+			    BeanContainer.instance().executeStmt(ENV.get("app.shutdown.statement", "SHUTDOWN"), true, null);
+			    Thread.sleep(2000);
+			} catch (Exception e) {
+			    LOG.error(e.toString());
+			}
+		}
+	}
     public void doPeriodicalBackup() {
         //do a periodical backup
         SchedulerUtil.runAt(0, -1, TimeUnit.DAYS, new Runnable() {
@@ -114,7 +126,7 @@ public class DatabaseTool {
         return con;
     }
     
-    public void checkJDBCConnection() {
+    public boolean checkJDBCConnection(boolean throwExceptionOnEmpty) {
         Connection con = null;
         try {
             con = getConnection();
@@ -122,10 +134,14 @@ public class DatabaseTool {
             
             if (!tables.next()) {
                 LOG.info("Available tables are:\n" + getTablesAsString(con.getMetaData().getTables(null, null, null, null)));
-                throw new ManagedException("The desired jdbc connection provides no tables to work on!");
+                if (throwExceptionOnEmpty)
+                	throw new ManagedException("The desired jdbc connection provides no tables to work on!");
+                return false;
             }
+            return true;
         } catch (Exception e) {
             ManagedException.forward(e);
+            return false;
         } finally {
             close(con);
         }
@@ -248,4 +264,37 @@ public class DatabaseTool {
         if (isH2(persistence.getConnectionUrl()))
             H2DatabaseTool.replaceKeyWords(persistence);
     }
+	public static Boolean isH2RunInternally() {
+		return ENV.get("app.database.run.h2.internal", false);
+	}
+
+	/* pure H2 functions - without linking to dependencies */
+	
+	public void runH2Server() {
+		runH2Server(ENV.getConfigPath(), persistence.getPort());
+	}
+	public static void runH2ServerDefault() {
+		runH2Server(ENV.getConfigPath(), Persistence.current().getPort());
+	}
+	public static void runH2Server(String baseDir, String port) {
+		String[] args = new String[] {"-baseDir", baseDir, "-tcp", "-tcpPort", port, "-trace"};
+		LOG.info("running h2 database internally: " + Arrays.toString(args));
+		BeanClass.call("org.h2.tools.Server", "main", new Object[] {args});
+	}
+	
+	public static void shutdownH2TcpServerDefault() {
+		shutdownH2TcpServer(Persistence.current().getConnectionUrl(), "");
+	}
+	public void shutdownH2TcpServer() {
+		shutdownH2TcpServer(persistence.getConnectionUrl(), persistence.getConnectionPassword());
+	}
+	public static void shutdownH2TcpServer(String url, String password) {
+		Object[] args = new Object[] {url, password, true, true};
+		LOG.info("shutdown h2 tcp server: " + Arrays.toString(args));
+        try {
+        	BeanClass.call("org.h2.tools.Server", "shutdownTcpServer", true, args);
+        } catch (Exception e) {
+            LOG.error(e.toString());
+        }
+	}
 }
