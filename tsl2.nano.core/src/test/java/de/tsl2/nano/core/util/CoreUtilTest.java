@@ -10,6 +10,7 @@
 
 package de.tsl2.nano.core.util;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -501,6 +502,9 @@ public class CoreUtilTest implements ENVTestPreparation {
 		long l = PrimitiveUtil.convert(i, long.class);
 		// Long l = long.class.cast(i);
 		assertEquals(i, l);
+		
+		Object[] expteced = new Object[] {"test", true, false, 99, 1.1};
+		assertArrayEquals(expteced, PrimitiveUtil.string2Wrapper(new String[] {"test", "true", "false", "99", "1.1"}));
 	}
 
 	@Test

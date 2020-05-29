@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Map;
 
 import org.anonymous.project.Address;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -28,6 +29,14 @@ public class RESTDynamicTest {
         Bean<Address> beanAddress = Bean.getBean(new Address(1, "Berliner Str.1", "100000", "Buxdehude", "germany"));
 		BeanContainer.initEmtpyServiceActions(beanAddress.getInstance());
 	}
+	
+	@After
+	public void tearDown() {
+		ENV.reset();
+		Bean.clearCache();
+		BeanContainer.reset();
+	}
+	
 	private Map<String, String> header(String url, String method) {
 		String digest = new RESTDynamic().createDigest(url, method, "test2020-05-10");
 		System.out.println("digest: " + digest);

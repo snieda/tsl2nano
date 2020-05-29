@@ -124,7 +124,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
              * while it not possible to use convenience method from other base classes,
              * because the all use this logfactory, we have to create some not-nice code.
              */
-            if (new File(logFactoryXml).canRead()) {
+            if (new File(logFactoryXml).getAbsoluteFile().canRead()) {
                 try {
                     self = XmlUtil.loadSimpleXml_(logFactoryXml, LogFactory.class, true);
                     if (self.loglevels == null) {
@@ -285,7 +285,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
      */
     private void initPrintStream(String outputFile) {
         try {
-            new File(outputFile).createNewFile();
+            new File(outputFile).getAbsoluteFile().createNewFile();
             PrintStream outFile = new PrintStream(outputFile);
             out = outFile;
             err = outFile;

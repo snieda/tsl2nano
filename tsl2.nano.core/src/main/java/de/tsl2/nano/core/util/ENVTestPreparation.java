@@ -6,6 +6,7 @@ package de.tsl2.nano.core.util;
 import java.io.File;
 
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
 
 /**
@@ -27,31 +28,38 @@ public interface ENVTestPreparation {
 	
 	static String setUp(boolean deleteExistingEnvironment) {
 		//baseDir path is absolute!
-		return setUp(System.getProperty("user.dir"), "", false, deleteExistingEnvironment);
+		return setUp(System.getProperty("user.dir"), "", TEST_DIR, false, deleteExistingEnvironment);
 	}
 	
+	default String setUp(String moduleShort) {
+		return setUp(BASE_DIR, moduleShort, getTestEnv(), true, false);
+	}
 	static String setUp(String moduleShort, boolean strict) {
 		return setUp(moduleShort, strict, true);
 	}
 	static String setUp(String moduleShort, boolean strict, boolean deleteExistingEnvironment) {
 		//ATTENTION: here the BASE_DIR path is relative!
-		return setUp(BASE_DIR, moduleShort, strict, deleteExistingEnvironment);
+		return setUp(BASE_DIR, moduleShort, TEST_DIR, strict, deleteExistingEnvironment);
 	}
 	
-	static String setUp(String baseDir, String moduleShort, boolean strict, boolean deleteExistingEnvironment) {
+	static String setUp(String baseDir, String moduleShort, String envDir, boolean strict, boolean deleteExistingEnvironment) {
 		String baseDirModule = baseDir + moduleShort + "/";
 		if (!System.getProperty("user.dir").endsWith(TARGET_DIR.substring(0, TARGET_DIR.length() - 1)))
 			setUserDirToTarget(baseDirModule);
-		LogFactory.setLogFactoryXml(baseDirModule + TARGET_TEST + "test-logging.xml");
-		LogFactory.setLogFile(baseDirModule + TARGET_TEST + "test.log");
-		ENV.create(baseDirModule + TARGET_TEST);
-		ENV.setProperty(ENV.KEY_CONFIG_PATH, new File(TEST_DIR).getAbsolutePath() + "/");
+		LogFactory.setLogFactoryXml(envDir + "test-logging.xml");
+		LogFactory.setLogFile(envDir + "test.log");
+		ENV.create(envDir);
+//		ENV.setProperty(ENV.KEY_CONFIG_PATH, new File(envDir).getAbsolutePath() + "/");
 		ENV.setProperty("app.strict.mode", strict);
 		if (deleteExistingEnvironment)
 			ENV.deleteEnvironment();
 		return baseDirModule;
 	}
 
+	default String getTestEnv() {
+		String name = StringUtil.substring(this.getClass().getSimpleName(), null, "Test") + "/";
+		return TEST_DIR + StringUtil.toFirstLower(name);
+	}
 	static void tearDown() {
 		try {
 			ENV.deleteEnvironment();
@@ -61,6 +69,10 @@ public interface ENVTestPreparation {
 		}
 	}
 
+	static void removeCaches() {
+		ENV.reset();
+		BeanClass.clearCache();
+	}
 	static void setUserDirToTarget(String baseDir) {
 		String userDir = System.getProperty("user.dir");
 		if (!userDir.endsWith(baseDir))

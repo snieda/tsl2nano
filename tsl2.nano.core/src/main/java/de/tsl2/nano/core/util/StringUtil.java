@@ -1008,4 +1008,11 @@ public class StringUtil {
         return StringUtil.replaceAll(txt, "[^\\w\\d]+([\\w\\d])", 1, s -> s.toUpperCase());
     }
 
+	public static String[] trim(String[] args) {
+		for (int i = 0; i < args.length; i++) {
+			args[i] = args[i].trim();
+		}
+		return args;
+	}
+
 }

@@ -11,9 +11,7 @@ import java.util.List;
 
 import org.anonymous.project.Address;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.tsl2.nano.action.IAction;
@@ -42,11 +40,12 @@ public class BeanConfiguratorTest implements ENVTestPreparation {
 
     @Before
     public void setUp() {
-		ENVTestPreparation.setUp("h5", true);
+		ENVTestPreparation.super.setUp("h5");
     }
 
     @After
     public void tearDown() {
+//    	ENVTestPreparation.removeCaches();
     }
 
 

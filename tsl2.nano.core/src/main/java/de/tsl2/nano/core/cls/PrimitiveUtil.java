@@ -328,6 +328,25 @@ public class PrimitiveUtil {
         }
         return null;
     }
+
+	public static Object[] string2Wrapper(String[] args) {
+		return Arrays.stream(args).map(a -> string2Wrapper(a)).toArray();
+	}
+
+	/**
+	 * @param a
+	 * @return converts a string to a boolean, double or integer - or returns the string itself
+	 */
+	public static Object string2Wrapper(String a) {
+		a = a.trim();
+		if (a.matches("true|false"))
+			return Boolean.valueOf(a);
+		else if (a.matches("[+-]?\\d+[.,]{1}\\d+"))
+			return Double.valueOf(a);
+		else if (a.matches("[+-]?\\d+"))
+			return Integer.valueOf(a);
+		return a;
+	}
 }
 
 class SimpleClassComparator implements Comparator<Class> {

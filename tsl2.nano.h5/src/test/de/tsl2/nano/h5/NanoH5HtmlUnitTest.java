@@ -20,7 +20,6 @@ import org.junit.Test;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 import de.tsl2.nano.core.execution.SystemUtil;
-import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.specification.rules.ActionScript;
 
@@ -29,14 +28,14 @@ import de.tsl2.nano.incubation.specification.rules.ActionScript;
  * @author Tom, Thomas Schneider
  * @version $Revision$ 
  */
+@net.jcip.annotations.NotThreadSafe
 public class NanoH5HtmlUnitTest extends NanoH5Unit {
 
     @Before
     public void setUp() {
         System.setProperty("app.server.running", "false");
+        port = 8068;
         super.setUp();
-        //workaround: let the collision test (using a h2 database) end before
-        ConcurrentUtil.sleep(10000);
     }
     
     @After
@@ -44,7 +43,11 @@ public class NanoH5HtmlUnitTest extends NanoH5Unit {
        super.tearDown();
     }
 
-//    @Ignore
+    @Override
+    protected int dbPort() {
+    	return 9093;
+    }
+    
     @Test
     public void testNano() throws Exception {
         Process process = null;

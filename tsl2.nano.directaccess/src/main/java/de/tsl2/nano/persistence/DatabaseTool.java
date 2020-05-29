@@ -5,8 +5,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Scanner;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -69,7 +71,7 @@ public class DatabaseTool {
                 if (BeanContainer.isInitialized()) {
                     EMessage.broadcast(this, "APPLICATION SHUTDOWN INITIALIZED...", "*");
                     shutdownDatabase();
-                    shutdownH2TcpServer();
+                    shutdownDBServer();
                     String hsqldbScript = isH2(persistence.getConnectionUrl())
                         ? persistence.getDefaultSchema() + ".mv.db" : persistence.getDatabase() + ".script";
                     String backupFile =
@@ -83,7 +85,7 @@ public class DatabaseTool {
     }
 
 	public static void shutdownDatabaseDefault() {
-		shutdownDatabase(Persistence.DERBY_DATABASE_URL);
+		shutdownDatabase(Persistence.H2_DATABASE_URL);
 	}
 	public void shutdownDatabase() {
 		shutdownDatabase(persistence.getConnectionUrl());
@@ -264,35 +266,35 @@ public class DatabaseTool {
         if (isH2(persistence.getConnectionUrl()))
             H2DatabaseTool.replaceKeyWords(persistence);
     }
-	public static Boolean isH2RunInternally() {
-		return ENV.get("app.database.run.h2.internal", false);
+	public static Boolean isDBRunInternally() {
+		return ENV.get("app.database.internal.server.run", false);
 	}
 
 	/* pure H2 functions - without linking to dependencies */
 	
-	public void runH2Server() {
-		runH2Server(ENV.getConfigPath(), persistence.getPort());
+	public void runDBServer() {
+		runDBServer(ENV.getConfigPath(), persistence.getPort());
 	}
-	public static void runH2ServerDefault() {
-		runH2Server(ENV.getConfigPath(), Persistence.current().getPort());
+	public static void runDBServerDefault() {
+		runDBServer(ENV.getConfigPath(), Persistence.current().getPort());
 	}
-	public static void runH2Server(String baseDir, String port) {
-		String[] args = new String[] {"-baseDir", baseDir, "-tcp", "-tcpPort", port, "-trace"};
-		LOG.info("running h2 database internally: " + Arrays.toString(args));
-		BeanClass.call("org.h2.tools.Server", "main", new Object[] {args});
+	public static void runDBServer(String... args) {
+		String cmd = ENV.get("app.database.internal.server.run.cmd", "org.h2.tools.Server.main(-baseDir, {0}, -tcp, -tcpPort, {1}, -trace)");
+		LOG.info("running database internally: " + cmd + "[" + Arrays.toString(args) + "]");
+		BeanClass.call(cmd, args);
 	}
 	
-	public static void shutdownH2TcpServerDefault() {
-		shutdownH2TcpServer(Persistence.current().getConnectionUrl(), "");
+	public static void shutdownDBServerDefault() {
+		shutdownDBServer(Persistence.current().getConnectionUrl(), "");
 	}
-	public void shutdownH2TcpServer() {
-		shutdownH2TcpServer(persistence.getConnectionUrl(), persistence.getConnectionPassword());
+	public void shutdownDBServer() {
+		shutdownDBServer(persistence.getConnectionUrl(), persistence.getConnectionPassword());
 	}
-	public static void shutdownH2TcpServer(String url, String password) {
-		Object[] args = new Object[] {url, password, true, true};
-		LOG.info("shutdown h2 tcp server: " + Arrays.toString(args));
+	public static void shutdownDBServer(String... args) {
+		String cmd = ENV.get("app.database.internal.server.shutdown.cmd", "org.h2.tools.Server.shutdownTcpServer({0}, {1}, true, true)");
+		LOG.info("shutdown database server: " + cmd + "[" + args[0] + ", ***]");
         try {
-        	BeanClass.call("org.h2.tools.Server", "shutdownTcpServer", true, args);
+        	BeanClass.call(cmd, args);
         } catch (Exception e) {
             LOG.error(e.toString());
         }

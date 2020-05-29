@@ -547,7 +547,7 @@ public class TableList<H extends Comparable<H>, ID> implements Serializable {
         //TODO: load from dump...
         T logic = null;
         try {
-            Scanner sc = new Scanner(new File(file));
+            Scanner sc = new Scanner(new File(file).getAbsoluteFile());
             if (sc.hasNextLine()) {//header
                 String[] header = sc.nextLine().split(div);
                 Object[] args = new Object[1];

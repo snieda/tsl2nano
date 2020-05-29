@@ -1020,8 +1020,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     }
 
     protected void runLocalDatabase(final Persistence persistence) {
-    	if (DatabaseTool.isH2RunInternally()) {
-    		new DatabaseTool(persistence).runH2Server();
+    	if (DatabaseTool.isDBRunInternally()) {
+    		new DatabaseTool(persistence).runDBServer();
     		ConcurrentUtil.sleep(1000);
     	} else {
 	        String runserverFile = "runServer.cmd";
@@ -1059,8 +1059,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     }
 
     private void generateDatabase(Persistence persistence) {
-    	if (DatabaseTool.isH2RunInternally()) {
-    		new DatabaseTool(persistence).runH2Server();
+    	if (DatabaseTool.isDBRunInternally()) {
+    		new DatabaseTool(persistence).runDBServer();
     		ConcurrentUtil.sleep(1000);
     	}
         ENV.extractResource(REVERSE_ENG_SCRIPT);

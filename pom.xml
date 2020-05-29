@@ -177,6 +177,7 @@
 						<configuration>
 							<!-- <parallel>true</parallel> -->
 							<!-- <skipTests>true</skipTests>  -->
+							<!-- <workingDirectory>FORK_DIRECTORY_${surefire.forkNumber}</workingDirectory> -->
 						</configuration>
 					</execution>
 				</executions>
@@ -204,7 +205,7 @@
  			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.4</version>
+				<version>0.8.5</version>
 				<!-- TODO: the configuration is duplicated in the reporting section and h5... -->
 				<configuration>
 					<outputDirectory>../target</outputDirectory>
@@ -408,7 +409,7 @@
    			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.4</version>
+				<version>0.8.5</version>
 				<configuration>
 				<includes>
 					<include>de/tsl2/**/*.class</include>

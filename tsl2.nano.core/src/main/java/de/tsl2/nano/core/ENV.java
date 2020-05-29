@@ -234,7 +234,7 @@ public class ENV implements Serializable {
     }
 
     public static ENV create(String dir) {
-        new File(dir).mkdirs();
+        new File(dir).getAbsoluteFile().mkdirs();
         String name = StringUtil.substring(dir, PREFIX_ENVNAME, "/");
         LogFactory.setLogFile(FileUtil.concat(dir, name) + ".log");
         LogFactory.setLogFactoryXml(dir + "/" + "logfactory.xml");

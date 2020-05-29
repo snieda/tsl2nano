@@ -29,6 +29,7 @@ import de.tsl2.nano.incubation.specification.rules.ActionScript;
  * @author Tom, Thomas Schneider
  * @version $Revision$ 
  */
+@net.jcip.annotations.NotThreadSafe
 public class NanoH5IT extends NanoH5Unit {
 
     @Before

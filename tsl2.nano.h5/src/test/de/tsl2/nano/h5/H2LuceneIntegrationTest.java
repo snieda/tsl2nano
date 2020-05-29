@@ -24,7 +24,7 @@ public class H2LuceneIntegrationTest implements ENVTestPreparation {
     @Before
     public void setUp() throws SQLException {
         final String BASE_DIR = ENVTestPreparation.setUp("h5", false);
-        DatabaseTool.runH2ServerDefault();
+        DatabaseTool.runDBServerDefault();
         createTestDatabase();
 //        BeanContainerUtil.initGenericServices(Thread.currentThread().getContextClassLoader());
     }

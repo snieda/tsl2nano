@@ -17,6 +17,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -597,6 +598,30 @@ public class BeanClass<T> implements Serializable {
         }
     }
 
+    /**
+     * @param expression like org.myorg.MyClass.myMethod(fixedArg, {0}, fixedArg2, {1})
+     * @param args arguments to be filled in
+     * @return result of method call
+     */
+    public static Object call(String expression, Object...args) {
+    	return call(expression, true, args);
+    }
+    public static Object call(String expression, boolean usePrimitives, Object...args) {
+    	Object result = null;
+		String cmd = MessageFormat.format(expression, args);
+		String cls = StringUtil.substring(cmd, null, "(");
+		String mtd = StringUtil.substring(cls, ".", null, true);
+		cls = StringUtil.substring(cls, null, ".", true);
+		String[] cmdArgs = StringUtil.substring(cmd, "(", ")").split("[,]+");
+		if (mtd.equals("main"))
+			args = new Object[] {StringUtil.trim(cmdArgs)};
+		else if (usePrimitives)
+			args = PrimitiveUtil.string2Wrapper(cmdArgs);
+		else
+			args = StringUtil.trim(cmdArgs);
+		BeanClass.call(cls, mtd, usePrimitives, args);
+    	return result;
+    }
     /**
      * simple method reflection call without parameter
      * 
@@ -1230,7 +1255,7 @@ public class BeanClass<T> implements Serializable {
      * 
      * @return amount of cleared objects
      */
-    protected static int clearCache() {
+    public static int clearCache() {
         return CachedBeanClass.clear();
     }
 

@@ -19,6 +19,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlButton;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 import de.tsl2.nano.action.IAction;
+import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
@@ -61,7 +62,7 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
     protected static final String BEANCOLLECTORLIST = (BeanCollector.class.getSimpleName()
             + Messages.getString("tsl2nano.list")).toLowerCase();
 
-    protected static String TEST_DIR;
+    protected String TEST_DIR;
     protected boolean nanoAlreadyRunning;
     protected int port = -1;
 
@@ -76,20 +77,19 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
     public void setUp() {
         nanoAlreadyRunning = Boolean.getBoolean("app.server.running");
         NanoH5UnitPlugin.setEnabled(!nanoAlreadyRunning);
-        TEST_DIR = ENVTestPreparation.setUp("h5", false);
+        TEST_DIR = ENVTestPreparation.super.setUp("h5");
         if (!nanoAlreadyRunning) {
 //    		GenericLocalBeanContainer.initLocalContainer();
         	setPersistenceConnectionPort();
-//        	DatabaseTool.shutdownH2TcpServerDefault();
-        	DatabaseTool.runH2ServerDefault(); //in the test it seems not enough (forks?) to let nanoh5 start h2 internally....
-        	ENV.setProperty("app.database.run.h2.internal", true);
+        	DatabaseTool.runDBServerDefault(); //in the test it seems not enough (forks?) to let nanoh5 start h2 internally....
+//        	ENV.setProperty("app.database.internal.run", true);
         	ENV.setProperty("service.url", getServiceURL(!nanoAlreadyRunning));
             startApplication();
             ConcurrentUtil.waitFor(()->NetUtil.isOpen(port));
         } else {
             System.out.println("NanoH5TestBase: nanoAlreadyRunning=true ==> trying to connect to external NanoH5");
         }
-		ConcurrentUtil.sleep(10000); //otherwise the nano-server is not started completely
+		ConcurrentUtil.sleep(20000); //otherwise the nano-server is not started completely on parallel testing
     }
 
 	protected void setPersistenceConnectionPort() {
@@ -97,6 +97,7 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
 			Persistence persistence = Persistence.current();
 			String url = persistence.getConnectionUrl().replace("9092", String.valueOf(dbPort()));
 			persistence.setConnectionUrl(url);
+			persistence.setDatabase(Persistence.DEFAULT_DATABASE);
 			persistence.save();
 		} catch (IOException e) {
 			ManagedException.forward(e);
@@ -106,14 +107,19 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
     public void tearDown() {
     	if (webClient != null)
     		webClient.close();
-    	DatabaseTool.shutdownH2TcpServerDefault();
+    	if (NetUtil.isOpen(dbPort()))
+    		DatabaseTool.shutdownDBServerDefault();
+    	if (NetUtil.isOpen(port))
+    		shutdownNanoHttpServer();
+//    	ENV.reset();
+    	Bean.clearCache();
+        BeanContainer.reset();
     }
     
-    protected static void startApplication() {
-        startApplication(new String[0]);
+    protected void startApplication() {
+		startApplication(getTestEnv(), String.valueOf(port));
     }
-
-    protected static void startApplication(String[] args) {
+    protected static void startApplication(String...args) {
         System.setProperty("file.encoding", "UTF-8");
         System.setProperty("sun.jnu.encoding", "UTF-8");
         System.setProperty("JAVA_OPTS", "-Xmx512m -Djava.awt.headless -agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=n");
@@ -123,7 +129,7 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
         ConcurrentUtil.startDaemon(new Runnable() {
             @Override
             public void run() {
-                new Loader().start("de.tsl2.nano.h5.NanoH5", args);
+                new Loader().start(NanoH5.class.getName(), args);
 //                Main.startApplication(NanoH5.class, null, args);
             }
         });
@@ -142,7 +148,8 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
         webClient.getOptions().setPrintContentOnFailingStatusCode(true);
         webClient.getOptions().setCssEnabled(true);
         webClient.getOptions().setThrowExceptionOnScriptError(false);
-//        webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
+        webClient.getOptions().setCssEnabled(false);
+        webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
 //        webClient.getOptions().setRedirectEnabled(true);
         try {
             page = webClient.getPage(serviceURL);

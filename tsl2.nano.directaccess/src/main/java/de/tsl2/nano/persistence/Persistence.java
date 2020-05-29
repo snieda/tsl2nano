@@ -40,7 +40,7 @@ public class Persistence implements Serializable, Cloneable {
     /** serialVersionUID */
     private static final long serialVersionUID = 2360829578078838714L;
     
-    private static final String DEFAULT_DATABASE = "anyway";
+    public static final String DEFAULT_DATABASE = "anyway";
     public static final String DEFAULT_SCHEMA = "PUBLIC";
     public static final String DEFAULT_CATALOG = DEFAULT_SCHEMA;
     
@@ -181,7 +181,7 @@ public class Persistence implements Serializable, Cloneable {
         this.connectionUrl = connectionUrl;
         setPort(DatabaseTool.getPort(connectionUrl));
 
-        setDatabase(StringUtil.substring(connectionUrl, getPort() + ":", null));
+        setDatabase(StringUtil.substring(connectionUrl, getPort() + "/", null));
     }
 
     /**
