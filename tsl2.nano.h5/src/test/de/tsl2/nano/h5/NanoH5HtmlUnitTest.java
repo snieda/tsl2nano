@@ -34,6 +34,7 @@ public class NanoH5HtmlUnitTest extends NanoH5Unit {
     @Before
     public void setUp() {
         System.setProperty("app.server.running", "false");
+        System.setProperty("app.database.internal.server.run", "true");
         port = 8068;
         super.setUp();
     }

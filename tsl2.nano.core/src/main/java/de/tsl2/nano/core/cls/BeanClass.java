@@ -619,8 +619,7 @@ public class BeanClass<T> implements Serializable {
 			args = PrimitiveUtil.string2Wrapper(cmdArgs);
 		else
 			args = StringUtil.trim(cmdArgs);
-		BeanClass.call(cls, mtd, usePrimitives, args);
-    	return result;
+		return BeanClass.call(cls, mtd, usePrimitives, args);
     }
     /**
      * simple method reflection call without parameter

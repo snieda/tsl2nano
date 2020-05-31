@@ -32,9 +32,9 @@ public class RESTDynamicTest {
 	
 	@After
 	public void tearDown() {
-		ENV.reset();
-		Bean.clearCache();
-		BeanContainer.reset();
+//		ENV.reset();
+//		Bean.clearCache();
+//		BeanContainer.reset();
 	}
 	
 	private Map<String, String> header(String url, String method) {

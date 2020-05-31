@@ -33,6 +33,9 @@ import de.tsl2.nano.core.util.StringUtil;
  */
 public class Main {
 
+	public static final int DEFAULT_PORT = 8067;
+	public static final String DEFAULT_URL = "http://localhost:" + DEFAULT_PORT;
+	
     /**
      * constructor
      */
@@ -93,7 +96,7 @@ public class Main {
         if (port == null)
         	port = ENV.get("service.port", null);
         if (port != null) {
-            String url = ENV.get("service.url", "http://localhost:8067");
+            String url = ENV.get("service.url", DEFAULT_URL);
             ENV.setProperty("service.url", StringUtil.substring(url, null, ":", true) + ":" + port);
             
         }

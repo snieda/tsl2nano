@@ -153,7 +153,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     private static final String BEAN_GENERATION_PACKAGENAME = "bean.generation.packagename";
 
     public NanoH5() throws IOException {
-        this(ENV.get("service.url", "http://localhost:8067"), ENV.get(IPageBuilder.class));
+        this(ENV.get("service.url", DEFAULT_URL), ENV.get(IPageBuilder.class));
     }
 
     public NanoH5(String serviceURL, IPageBuilder<?, String> builder) throws IOException {
@@ -377,7 +377,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     
     public static URL getServiceURL(String serviceURLString) {
         if (serviceURLString == null) {
-            serviceURLString = ENV.get("service.url", "http://localhost:8067");
+            serviceURLString = ENV.get("service.url", DEFAULT_URL);
             //set defaults
             ENV.get("app.ssl.activate", false);
             ENV.get("app.ssl.shortcut", "");

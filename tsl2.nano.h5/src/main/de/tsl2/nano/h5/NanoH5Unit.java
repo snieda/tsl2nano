@@ -24,6 +24,7 @@ import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.Main;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.exception.ExceptionHandler;
@@ -62,12 +63,11 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
     protected static final String BEANCOLLECTORLIST = (BeanCollector.class.getSimpleName()
             + Messages.getString("tsl2nano.list")).toLowerCase();
 
-    protected String TEST_DIR;
     protected boolean nanoAlreadyRunning;
     protected int port = -1;
 
     protected String getServiceURL(boolean nextFreePort) {
-        return "http://localhost:" + (port == -1 && nextFreePort ? port = NetUtil.getNextFreePort(8067) : port == -1 ? port = 8067 : port);
+        return "http://localhost:" + (port == -1 && nextFreePort ? port = NetUtil.getNextFreePort(Main.DEFAULT_PORT) : port == -1 ? port = Main.DEFAULT_PORT : port);
     }
 
     protected int dbPort() {
@@ -77,7 +77,7 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
     public void setUp() {
         nanoAlreadyRunning = Boolean.getBoolean("app.server.running");
         NanoH5UnitPlugin.setEnabled(!nanoAlreadyRunning);
-        TEST_DIR = ENVTestPreparation.super.setUp("h5");
+        ENVTestPreparation.super.setUp("h5");
         if (!nanoAlreadyRunning) {
 //    		GenericLocalBeanContainer.initLocalContainer();
         	setPersistenceConnectionPort();
@@ -87,6 +87,8 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
             startApplication();
             ConcurrentUtil.waitFor(()->NetUtil.isOpen(port));
         } else {
+        	setPersistenceConnectionPort();
+//        	DatabaseTool.runDBServerDefault(); //in the test it seems not enough (forks?) to let nanoh5 start h2 internally....
             System.out.println("NanoH5TestBase: nanoAlreadyRunning=true ==> trying to connect to external NanoH5");
         }
 		ConcurrentUtil.sleep(20000); //otherwise the nano-server is not started completely on parallel testing
@@ -107,11 +109,11 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
     public void tearDown() {
     	if (webClient != null)
     		webClient.close();
-    	if (NetUtil.isOpen(dbPort()))
-    		DatabaseTool.shutdownDBServerDefault();
     	if (NetUtil.isOpen(port))
     		shutdownNanoHttpServer();
-//    	ENV.reset();
+    	if (NetUtil.isOpen(dbPort()))
+    		DatabaseTool.shutdownDBServerDefault();
+//    	ENVTestPreparation.removeCaches();
     	Bean.clearCache();
         BeanContainer.reset();
     }

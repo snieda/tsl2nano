@@ -49,7 +49,7 @@ public class NanoHandlerTest implements ENVTestPreparation {
 
     @Test
     public void testNanoHandlerCallbacks() {
-        Thread thread = ConcurrentUtil.startDaemon("test", ()->NanoHandlerApp.main(new String[] {"http://localhost:8067", MEINHANDLERTEST}));
+        Thread thread = ConcurrentUtil.startDaemon("test", ()->NanoHandlerApp.main(new String[] {Main.DEFAULT_URL, MEINHANDLERTEST}));
         ConcurrentUtil.sleep(9000);
         
         assertEquals(MEINHANDLERTEST, ENV.get(MEINHANDLERTEST));

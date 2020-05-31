@@ -13,14 +13,15 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.PipedOutputStream;
 
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.execution.SystemUtil;
-import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.specification.rules.ActionScript;
 
@@ -32,8 +33,20 @@ import de.tsl2.nano.incubation.specification.rules.ActionScript;
 @net.jcip.annotations.NotThreadSafe
 public class NanoH5IT extends NanoH5Unit {
 
+	@Override
+	public String getTestEnv() {
+		return "pre-integration-test/.nanoh5.environment";
+	}
+
+    @Override
+    protected int dbPort() {
+    	return 9092;
+    }
+    
+
     @Before
     public void setUp() {
+//    	ENVTestPreparation.removeCaches();
         System.setProperty("app.server.running", "true");
         super.setUp();
     }
@@ -41,8 +54,6 @@ public class NanoH5IT extends NanoH5Unit {
     @After
     public void tearDown() {
        super.tearDown();
-       String idPath = "pre-integration-test/.nanoh5.environment/temp/instance-id.txt";
-       shutdownNanoHttpServer(FileUtil.userDirFile(idPath));
     }
 
     @Test

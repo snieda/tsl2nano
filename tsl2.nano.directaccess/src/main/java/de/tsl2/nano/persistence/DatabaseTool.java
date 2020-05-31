@@ -70,8 +70,8 @@ public class DatabaseTool {
             public void run() {
                 if (BeanContainer.isInitialized()) {
                     EMessage.broadcast(this, "APPLICATION SHUTDOWN INITIALIZED...", "*");
-                    shutdownDatabase();
                     shutdownDBServer();
+                    shutdownDatabase(); //doppelt gemoppelt hält besser ;-)
                     String hsqldbScript = isH2(persistence.getConnectionUrl())
                         ? persistence.getDefaultSchema() + ".mv.db" : persistence.getDatabase() + ".script";
                     String backupFile =
@@ -259,7 +259,8 @@ public class DatabaseTool {
      * @return optional SQL Tool like the one of H2 on port 8082
      */
     public String getSQLToolURL() {
-        return isEmbeddedDatabase() && isH2(persistence.getConnectionUrl()) ? "http://localhost:8082" : null;
+        return isEmbeddedDatabase() && isH2(persistence.getConnectionUrl()) 
+        		? ENV.get("app.database.sqltool.url", "http://localhost:8082") : null;
     }
 
     public void replaceKeyWords() {
@@ -270,7 +271,7 @@ public class DatabaseTool {
 		return ENV.get("app.database.internal.server.run", false);
 	}
 
-	/* pure H2 functions - without linking to dependencies */
+	/* mostly H2 functions - generalized and without linking to dependencies */
 	
 	public void runDBServer() {
 		runDBServer(ENV.getConfigPath(), persistence.getPort());
