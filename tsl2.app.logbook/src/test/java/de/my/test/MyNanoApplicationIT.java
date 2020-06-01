@@ -2,8 +2,8 @@ package de.my.test;
 
 import static org.junit.Assert.assertTrue;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -15,9 +15,16 @@ import de.tsl2.nano.core.util.ConcurrentUtil;
 
 public class MyNanoApplicationIT extends NanoH5Unit {
 
-    @BeforeClass
-    public static void setUp() {
-        NanoH5Unit.setUp();
+	@Override
+	public String getTestEnv() {
+		return "pre-integration-test/.nanoh5.environment";
+	}
+
+    @Before
+    public void setUp() {
+		port = 8067;
+        System.setProperty("app.server.running", "true");
+        super.setUpUnit(null);
     }
     
 	@Test
@@ -28,8 +35,8 @@ public class MyNanoApplicationIT extends NanoH5Unit {
 		page = submit(page, BEANCOLLECTORLIST + BTN_OPEN);
 	}
 
-	@AfterClass
-	public static void tearDown() {
-//		shutdown();
+	@After
+	public void tearDown() {
+		super.tearDown();
 	}
 }

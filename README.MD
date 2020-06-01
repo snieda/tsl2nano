@@ -3,6 +3,7 @@
 ## Homepage
 
 ![home on sourceforge](https://sourceforge.net/projects/tsl2nano/)
+
 ## Content
 
 ![pom](./pom.xml) 
@@ -13,4 +14,5 @@
 
 ## Code
 
-![GIT](https://git.code.sf.net/p/tsl2nano/code tsl2nano-code)
+* ![sourceforge](https://git.code.sf.net/p/tsl2nano/code tsl2nano-code)
+* ![github](https://github.com/snieda/tsl2nano.git)

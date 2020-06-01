@@ -16,7 +16,7 @@ import de.tsl2.nano.core.log.LogFactory;
  */
 public interface ENVTestPreparation {
 	static final String BASE_DIR_PREF = "tsl2.nano.";
-	static final String BASE_DIR = (System.getProperty("user.dir").contains(BASE_DIR_PREF) ? "../" : "") + BASE_DIR_PREF;
+	String BASE_DIR = (System.getProperty("user.dir").contains(BASE_DIR_PREF) ? "../" : "") + BASE_DIR_PREF;
 	static final String TARGET_DIR = "target/";
 	static final String TEST_DIR = ENV.PREFIX_ENVNAME + "test/";
 	static final String TARGET_TEST = TARGET_DIR + TEST_DIR;
@@ -43,7 +43,7 @@ public interface ENVTestPreparation {
 	}
 	
 	static String setUp(String baseDir, String moduleShort, String envDir, boolean strict, boolean deleteExistingEnvironment) {
-		String baseDirModule = baseDir + moduleShort + "/";
+		String baseDirModule = Util.isEmpty(moduleShort) ? "./" : baseDir + moduleShort + "/";
 		if (!System.getProperty("user.dir").endsWith(TARGET_DIR.substring(0, TARGET_DIR.length() - 1)))
 			setUserDirToTarget(baseDirModule);
 		LogFactory.setLogFactoryXml(envDir + "test-logging.xml");

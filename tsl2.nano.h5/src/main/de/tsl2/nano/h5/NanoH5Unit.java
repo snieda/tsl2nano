@@ -46,7 +46,8 @@ import de.tsl2.nano.serviceaccess.Authorization;
  */
 public abstract class NanoH5Unit implements ENVTestPreparation {
 
-    protected static final String BTN_LOGIN_OK = "tsl2nano.login.ok";
+    protected static final int DEFAULT_H2_PORT = 9092;
+	protected static final String BTN_LOGIN_OK = "tsl2nano.login.ok";
     protected static final String BTN_RESET = ".reset";
     protected static final String BTN_DELETE = ".delete";
     protected static final String BTN_CANCEL = IAction.CANCELED;
@@ -71,13 +72,17 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
     }
 
     protected int dbPort() {
-    	return 9092;
+    	return DEFAULT_H2_PORT;
     }
     
     public void setUp() {
+    	setUpUnit("h5");
+    }
+    
+    public void setUpUnit(String moduleShort) {
         nanoAlreadyRunning = Boolean.getBoolean("app.server.running");
         NanoH5UnitPlugin.setEnabled(!nanoAlreadyRunning);
-        ENVTestPreparation.super.setUp("h5");
+        ENVTestPreparation.super.setUp(moduleShort);
         if (!nanoAlreadyRunning) {
 //    		GenericLocalBeanContainer.initLocalContainer();
         	setPersistenceConnectionPort();
@@ -97,7 +102,7 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
 	protected void setPersistenceConnectionPort() {
 		try {
 			Persistence persistence = Persistence.current();
-			String url = persistence.getConnectionUrl().replace("9092", String.valueOf(dbPort()));
+			String url = persistence.getConnectionUrl().replace(String.valueOf(DEFAULT_H2_PORT), String.valueOf(dbPort()));
 			persistence.setConnectionUrl(url);
 			persistence.setDatabase(Persistence.DEFAULT_DATABASE);
 			persistence.save();

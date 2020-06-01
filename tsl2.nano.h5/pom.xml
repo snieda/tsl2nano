@@ -14,6 +14,7 @@
 		<keystore>${module.parent}/tsl2store</keystore>
 		<alias>tsl2</alias>
 		<storepass>${gpg.passphrase}</storepass>
+		<jar-extension>-standalone</jar-extension>
 		<build.name>${project.artifactId}</build.name>
 		<build.java>${maven.compiler.target}</build.java>
 		<build.version>${project.version}</build.version>
@@ -222,6 +223,7 @@
 							</archive>
 							<excludes>
 								<exclude>standalone.zip</exclude>
+								<exclude>**/persistence.xml</exclude>
 							</excludes>
 						</configuration>
 					</execution>
@@ -246,6 +248,9 @@
 									<Permissions>all-permissions</Permissions>
 								</manifestEntries>
 							</archive>
+							<excludes>
+								<exclude>**/persistence.xml</exclude>
+							</excludes>
 						</configuration>
 					</execution>
 					<execution>
@@ -273,6 +278,9 @@
 								</manifest> </archive> <includes> <include>../**/core/**</include> <include>../**/resources/**</include> 
 								<include>${project.build.outputDirectory}/**/h5/**</include> <include>${project.build.directory}/${project.build.finalName}.lib/**</include> 
 								</includes> -->
+							<excludes>
+								<exclude>**/persistence.xml</exclude>
+							</excludes>
 						</configuration>
 					</execution>
 				</executions>
@@ -329,6 +337,7 @@
 							</archive>
 							<!-- excludes don't work! -->
 							<packagingExcludes>standalone.zip</packagingExcludes>
+							<packagingExcludes>**/persistence.xml</packagingExcludes>
 							<webXml>src/resources/WEB-INF/web.xml</webXml>
 						</configuration>
 					</execution>
@@ -351,7 +360,7 @@
 	                        <target>
 								<echo>${project.build.finalName}</echo>
 								<mkdir dir="${project.build.directory}/pre-integration-test" />
-	                            <java jar="${project.build.directory}/${artifactId}-${project.version}-standalone.jar"
+	                            <java jar="${project.build.directory}/${artifactId}-${project.version}${jar-extension}.jar"
 	                            	  dir="${project.build.directory}/pre-integration-test"
 	                                  fork="true"
 									  spawn="true"
