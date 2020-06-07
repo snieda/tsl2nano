@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jnlp spec="1.0+" codebase=
-"http://sourceforge.net/projects/tsl2nano/files/2.3.2/" 
+"http://sourceforge.net/projects/tsl2nano/files/2.4.0/" 
     href="nano.h5.jnlp">
     <information>
         <title>Nano H5</title>
@@ -12,7 +12,7 @@
         <!-- Application Resources -->
         <j2se version="1.8+"
               href="http://java.sun.com/products/autodl/j2se"/>
-        <jar href="tsl2.nano.h5.2.3.2-signed.jar"
+        <jar href="tsl2.nano.h5.2.4.0-signed.jar"
             main="true" />
 
     </resources>
