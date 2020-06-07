@@ -14,5 +14,6 @@
 	<name>TSL2NANO ${artifactId}</name>
 	<properties>
 		<project.mainclass>${package}.MyApplication</project.mainclass>
+		<skipIntegrationTest>true</skipIntegrationTest> <!-- the real integration-test (MyNanoApplicationIntTest -> MyNanoApplicationIT)  does not connect to server -->
 	</properties>
 </project>

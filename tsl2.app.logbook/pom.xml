@@ -13,6 +13,6 @@
 	<name>TSL2NANO Logbook</name>
 	<properties>
 		<project.mainclass>de.my.logbook.LogbookApplication</project.mainclass>
-		<jar-extension></jar-extension> <!--overwrite '-standalone' from h5 -->
+		<skipIntegrationTest>true</skipIntegrationTest> <!-- the real integration-test (MyNanoApplicationIntTest -> MyNanoApplicationIT)  does not connect to server -->
 	</properties>
 </project>

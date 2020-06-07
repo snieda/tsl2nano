@@ -13,17 +13,18 @@ import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.h5.NanoH5Unit;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 
-public class MyNanoApplicationIT extends NanoH5Unit {
+public class MyNanoApplicationIntTest extends NanoH5Unit {
 
-	@Override
-	public String getTestEnv() {
-		return "pre-integration-test/.nanoh5.environment";
-	}
+	// @Override
+	// public String getTestEnv() {
+	// 	return "pre-integration-test/.logbookapplication.environment";
+	// }
 
     @Before
     public void setUp() {
 		port = 8067;
-        System.setProperty("app.server.running", "true");
+        System.setProperty("app.server.running", "false");
+        // System.setProperty("app.database.internal.server.run", "true");
         super.setUpUnit(null);
     }
     
