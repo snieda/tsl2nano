@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>net.sf.tsl2nano</groupId>
 		<artifactId>tsl2.nano.h5-package</artifactId>
-		<version>2.4.0</version>
+		<version>2.4.1-SNAPSHOT</version>
 	</parent>
 	<artifactId>tsl2.nano.aggregate-report</artifactId>
 	<name>TSL2 Framework Aggregate Report</name>
