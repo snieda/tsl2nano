@@ -358,7 +358,7 @@
 	                    	<failOnError>true</failOnError>
 	                    	<skip>${skipTests}</skip>
 	                        <target>
-								<echo>${project.build.finalName}</echo>
+								<echo>STARTING ${project.build.finalName} on pre-integration-test</echo>
 								<mkdir dir="${project.build.directory}/pre-integration-test" />
 	                            <java jar="${project.build.directory}/${artifactId}-${project.version}${jar-extension}.jar"
 	                            	  dir="${project.build.directory}/pre-integration-test"
@@ -367,12 +367,13 @@
 									  >
 	                                <sysproperty key="app.server.running" value="true" />
 	                                <sysproperty key="app.database.internal.server.run" value="true" />
-	                                <sysproperty key="websocket.use" value="false" />
-	                                <sysproperty key="tsl2nano.offline" value="true" />
+	                                <sysproperty key="websocket.use" value="true" />
+	                                <sysproperty key="tsl2nano.offline" value="false" />
 	                                <sysproperty key="app.show.startpage" value="false" />
 	                                <!-- <arg value="-xyz" /> <arg value="123" /> -->
 	                            </java>
 								<sleep seconds="10" />
+								<echo>RESUMING ${project.build.finalName} integration-test</echo>
 	                        </target>
 	                    </configuration>
 	                </execution>

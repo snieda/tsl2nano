@@ -98,17 +98,19 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
-     * delegates to {@link #getBeanClass(Class)} using {@link #getDefiningClass(Class)} to evaluate the real class of
-     * given instance.
+     * delegates to {@link #getBeanClass(Class)} using
+     * {@link #getDefiningClass(Class)} to evaluate the real class of given
+     * instance.
      */
     public static final <C> BeanClass<C> getBeanClass(C instance) {
         return (BeanClass<C>) getBeanClass(instance.getClass());
     }
 
     /**
-     * uses an internal cache through {@link CachedBeanClass} to perform on getting all attributes
+     * uses an internal cache through {@link CachedBeanClass} to perform on getting
+     * all attributes
      * 
-     * @param <C> bean type
+     * @param <C>       bean type
      * @param beanClass bean type
      * @return new or cached instance
      */
@@ -123,7 +125,7 @@ public class BeanClass<T> implements Serializable {
     /**
      * convenience delegating to {@link #getField(Object, String)}.
      * 
-     * @param cls class holding the static field
+     * @param cls             class holding the static field
      * @param staticFieldName static field of cls
      * @return instance of static field
      */
@@ -142,14 +144,14 @@ public class BeanClass<T> implements Serializable {
         Field[] fields = clazz.getFields();
         for (int i = 0; i < fields.length; i++) {
             if (type.isAssignableFrom(fields[i].getType())
-                && (!staticOnly || Modifier.isStatic(fields[i].getModifiers()))) {
+                    && (!staticOnly || Modifier.isStatic(fields[i].getModifiers()))) {
                 names.add(fields[i].getName());
             }
         }
         fields = clazz.getDeclaredFields();
         for (int i = 0; i < fields.length; i++) {
             if (type.isAssignableFrom(fields[i].getType())
-                && (!staticOnly || Modifier.isStatic(fields[i].getModifiers()))) {
+                    && (!staticOnly || Modifier.isStatic(fields[i].getModifiers()))) {
                 names.add(fields[i].getName());
             }
         }
@@ -167,14 +169,14 @@ public class BeanClass<T> implements Serializable {
         Method[] methods = clazz.getMethods();
         for (int i = 0; i < methods.length; i++) {
             if (type.isAssignableFrom(methods[i].getReturnType())
-                && (!staticOnly || Modifier.isStatic(methods[i].getModifiers()))) {
+                    && (!staticOnly || Modifier.isStatic(methods[i].getModifiers()))) {
                 names.add(methods[i]);
             }
         }
         methods = clazz.getDeclaredMethods();
         for (int i = 0; i < methods.length; i++) {
             if (type.isAssignableFrom(methods[i].getReturnType())
-                && (!staticOnly || Modifier.isStatic(methods[i].getModifiers()))) {
+                    && (!staticOnly || Modifier.isStatic(methods[i].getModifiers()))) {
                 names.add(methods[i]);
             }
         }
@@ -212,7 +214,8 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
-     * returns the simple class name. if class is a proxy, we return the simple name of the first interface.
+     * returns the simple class name. if class is a proxy, we return the simple name
+     * of the first interface.
      * 
      * @param clazz normal class or proxy class
      * @return simple class name
@@ -255,17 +258,20 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
-     * returns all bean attributes. the collection is a linkedlist, the order is the same as returned by
-     * {@linkplain Class#getMethods()}. The elements in the array returned are not sorted and are not in any particular
-     * order, but in most cases, they will be ordered equal to their definitions in their source files.
+     * returns all bean attributes. the collection is a linkedlist, the order is the
+     * same as returned by {@linkplain Class#getMethods()}. The elements in the
+     * array returned are not sorted and are not in any particular order, but in
+     * most cases, they will be ordered equal to their definitions in their source
+     * files.
      * 
-     * @param readAndWriteAccess if false, only a public read access method must be defined.
+     * @param readAndWriteAccess if false, only a public read access method must be
+     *                           defined.
      * @return list of methods having at least an read access method.
      */
     public List<IAttribute> getAttributes(boolean readAndWriteAccess) {
         /*
-         * performance: extensions of BeanClass will not be stored in cache, so
-         * define a new cached-class to get the methods from there.
+         * performance: extensions of BeanClass will not be stored in cache, so define a
+         * new cached-class to get the methods from there.
          */
         BeanClass cachedBC = CachedBeanClass.getCachedBeanClass(clazz);
         if (cachedBC != null && cachedBC != this) {
@@ -277,26 +283,28 @@ public class BeanClass<T> implements Serializable {
         final LinkedList<String> accessedMethods = new LinkedList<String>();
         final List<IAttribute> beanAccessMethods = new LinkedList<IAttribute>();
         for (int i = 0; i < allMethods.length; i++) {
-            if (allMethods[i].getParameterTypes().length == 0 && (allMethods[i].getName()
-                .startsWith(BeanAttribute.PREFIX_READ_ACCESS) || allMethods[i].getName()
-                    .startsWith(BeanAttribute.PREFIX_BOOLEAN_READ_ACCESS))) {
+            if (allMethods[i].getParameterTypes().length == 0
+                    && (allMethods[i].getName().startsWith(BeanAttribute.PREFIX_READ_ACCESS)
+                            || allMethods[i].getName().startsWith(BeanAttribute.PREFIX_BOOLEAN_READ_ACCESS))) {
                 if (allMethods[i].getName().equals("getClass")) {
                     continue;
                 }
-                //an attribute can be defined in more than one interface --> create only one bean attribute
+                // an attribute can be defined in more than one interface --> create only one
+                // bean attribute
                 if (accessedMethods.contains(allMethods[i].getName())) {
                     continue;
                 }
                 if (!readAndWriteAccess || hasWriteAccessMethod(allMethods[i])) {
                     BeanAttribute attr = new BeanAttribute(allMethods[i]);
-                    //check, if attribute is BeanAttribute-compatible - but only if not boolean-type (because of get and is)
+                    // check, if attribute is BeanAttribute-compatible - but only if not
+                    // boolean-type (because of get and is)
                     if (isAssignableFrom(Boolean.class, allMethods[i].getReturnType())
-                        || BeanAttribute.hasExpectedName(allMethods[i])) {
+                            || BeanAttribute.hasExpectedName(allMethods[i])) {
                         beanAccessMethods.add(attr);
                         accessedMethods.add(allMethods[i].getName());
                     } else {
                         LOG.warn("method " + allMethods[i]
-                            + " doesn't respect uppercase-starting getter ==> will be ignored!");
+                                + " doesn't respect uppercase-starting getter ==> will be ignored!");
                     }
 
                 }
@@ -318,7 +326,7 @@ public class BeanClass<T> implements Serializable {
         }
         if (throwException)
             throw new IllegalArgumentException("attribute '" + name + "' not available in " + clazz
-                + "\n\tavailable attributes are:\n" + StringUtil.toFormattedString(attrs, -1, true));
+                    + "\n\tavailable attributes are:\n" + StringUtil.toFormattedString(attrs, -1, true));
         else
             return null;
     }
@@ -344,7 +352,8 @@ public class BeanClass<T> implements Serializable {
      * 
      * @see #getAttributes(boolean)
      * 
-     * @param readAndWriteAccess if false, only a public read access method must be defined.
+     * @param readAndWriteAccess if false, only a public read access method must be
+     *                           defined.
      * @return list of methods having at least an read access method.
      */
     public SortedSet<IAttribute> getSortedAttributes(boolean readAndWriteAccess) {
@@ -363,7 +372,8 @@ public class BeanClass<T> implements Serializable {
     /**
      * getAttributeNames
      * 
-     * @param readAndWriteAccess if true, only attributes having getter and setter will be returned
+     * @param readAndWriteAccess if true, only attributes having getter and setter
+     *                           will be returned
      * @return available attribute names
      */
     public String[] getAttributeNames(boolean readAndWriteAccess) {
@@ -377,8 +387,8 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
-     * all obtained attributes will be filtered through the given filter. the filter-parameters must be of type
-     * {@linkplain BeanAttribute}.
+     * all obtained attributes will be filtered through the given filter. the
+     * filter-parameters must be of type {@linkplain BeanAttribute}.
      * 
      * @param filter attribute filter
      * @return filtered attributes
@@ -412,10 +422,11 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
-     * tries to find methods with given annotation. if not existing, return empty list. it is a generic method with poor
-     * performance.
+     * tries to find methods with given annotation. if not existing, return empty
+     * list. it is a generic method with poor performance.
      * 
-     * @param annotationType annotation to find attributes for (will look on methods and declared field!)
+     * @param annotationType annotation to find attributes for (will look on methods
+     *                       and declared field!)
      * @return annotation attributes.
      */
     public Collection<BeanAttribute> findAttributes(Class<? extends Annotation> annotationType) {
@@ -430,10 +441,10 @@ public class BeanClass<T> implements Serializable {
                     attributes.add(attr);
                 else
                     LOG.warn("method " + m + " is annotated with " + annotationType
-                        + " but no BeanAttribute could be found on it!");
+                            + " but no BeanAttribute could be found on it!");
             }
         }
-        //on a declared or base (perhaps private) field?
+        // on a declared or base (perhaps private) field?
         Class<?> hierClass = clazz;
         while (hierClass != null) {
             final Field[] fields = hierClass.getDeclaredFields();
@@ -445,11 +456,11 @@ public class BeanClass<T> implements Serializable {
                         attributes.add(attr);
                     else
                         LOG.warn("field " + f + " is annotated with " + annotationType
-                            + " but no BeanAttribute could be found on it!");
+                                + " but no BeanAttribute could be found on it!");
                 }
             }
             // it's not possible to call a private field from extending class
-            hierClass = null;//hierClass.getSuperclass();
+            hierClass = null;// hierClass.getSuperclass();
         }
         return attributes;
     }
@@ -473,7 +484,8 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
-     * searches for the write access method belonging to the given read access method.
+     * searches for the write access method belonging to the given read access
+     * method.
      * 
      * @param readAccessMethod
      * @return true, if there is a setter method for the given getter method.
@@ -483,8 +495,9 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
-     * asks for the given annotation. this is a 'soft' implementation, means: will not use objects reference, but
-     * class.getName(). so, different classloaders will not be respected!
+     * asks for the given annotation. this is a 'soft' implementation, means: will
+     * not use objects reference, but class.getName(). so, different classloaders
+     * will not be respected!
      * 
      * @throws NullPointerException {@inheritDoc}
      * @since 1.5
@@ -495,14 +508,16 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
-     * soft evaluation of annotation values. uses reflection instead of direct calls on annotation properties.
+     * soft evaluation of annotation values. uses reflection instead of direct calls
+     * on annotation properties.
      * <p/>
-     * evaluates annotation values and returns an object array holding the annotation values in the same order like the
-     * member names where given
+     * evaluates annotation values and returns an object array holding the
+     * annotation values in the same order like the member names where given
      * 
      * @param annotationClass type of annotation to be found
-     * @param memberNames annotation members to evaluate the values for
-     * @return values of given member names or null, if no annotation of given type was found
+     * @param memberNames     annotation members to evaluate the values for
+     * @return values of given member names or null, if no annotation of given type
+     *         was found
      */
     public <A extends Annotation> Object[] getAnnotationValues(Class<A> annotationClass, String... memberNames) {
         Class a = getAnnotation(annotationClass);
@@ -518,8 +533,9 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
-     * asks for the given annotation. this is a 'soft' implementation, means: will not use objects reference, but
-     * class.getName(). so, different classloaders will not be respected!
+     * asks for the given annotation. this is a 'soft' implementation, means: will
+     * not use objects reference, but class.getName(). so, different classloaders
+     * will not be respected!
      * 
      * @throws NullPointerException {@inheritDoc}
      * @since 1.5
@@ -535,7 +551,7 @@ public class BeanClass<T> implements Serializable {
     /**
      * getField
      * 
-     * @param instance object instance having the field
+     * @param instance  object instance having the field
      * @param fieldName fields name
      * @return field value
      */
@@ -555,7 +571,7 @@ public class BeanClass<T> implements Serializable {
     /**
      * getField
      * 
-     * @param instance object instance having the field
+     * @param instance  object instance having the field
      * @param fieldName fields name
      * @return field value
      */
@@ -573,9 +589,9 @@ public class BeanClass<T> implements Serializable {
     /**
      * setField
      * 
-     * @param instance object instance having the field
+     * @param instance  object instance having the field
      * @param fieldName fields name
-     * @param value fields new value
+     * @param value     fields new value
      */
     public void setField(T instance, String fieldName, Object value) {
         setField(instance, fieldName, value, false);
@@ -584,9 +600,9 @@ public class BeanClass<T> implements Serializable {
     /**
      * setField
      * 
-     * @param instance object instance having the field
+     * @param instance  object instance having the field
      * @param fieldName fields name
-     * @param value fields new value
+     * @param value     fields new value
      */
     public void setField(T instance, String fieldName, Object value, boolean declared) {
         try {
@@ -599,32 +615,35 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
-     * @param expression like org.myorg.MyClass.myMethod(fixedArg, {0}, fixedArg2, {1})
-     * @param args arguments to be filled in
+     * @param expression like org.myorg.MyClass.myMethod(fixedArg, {0}, fixedArg2,
+     *                   {1})
+     * @param args       arguments to be filled in
      * @return result of method call
      */
-    public static Object call(String expression, Object...args) {
-    	return call(expression, true, args);
+    public static Object call(String expression, Object... args) {
+        return call(expression, true, args);
     }
-    public static Object call(String expression, boolean usePrimitives, Object...args) {
-    	Object result = null;
-		String cmd = MessageFormat.format(expression, args);
-		String cls = StringUtil.substring(cmd, null, "(");
-		String mtd = StringUtil.substring(cls, ".", null, true);
-		cls = StringUtil.substring(cls, null, ".", true);
-		String[] cmdArgs = StringUtil.substring(cmd, "(", ")").split("[,]+");
-		if (mtd.equals("main"))
-			args = new Object[] {StringUtil.trim(cmdArgs)};
-		else if (usePrimitives)
-			args = PrimitiveUtil.string2Wrapper(cmdArgs);
-		else
-			args = StringUtil.trim(cmdArgs);
-		return BeanClass.call(cls, mtd, usePrimitives, args);
+
+    public static Object call(String expression, boolean usePrimitives, Object... args) {
+        Object result = null;
+        String cmd = MessageFormat.format(expression, args);
+        String cls = StringUtil.substring(cmd, null, "(");
+        String mtd = StringUtil.substring(cls, ".", null, true);
+        cls = StringUtil.substring(cls, null, ".", true);
+        String[] cmdArgs = StringUtil.substring(cmd, "(", ")").split("[,]+");
+        if (mtd.equals("main"))
+            args = new Object[] { StringUtil.trim(cmdArgs) };
+        else if (usePrimitives)
+            args = PrimitiveUtil.string2Wrapper(cmdArgs);
+        else
+            args = StringUtil.trim(cmdArgs);
+        return BeanClass.call(cls, mtd, usePrimitives, args);
     }
+
     /**
      * simple method reflection call without parameter
      * 
-     * @param instance object
+     * @param instance   object
      * @param methodName method name to call
      * @return method call result
      */
@@ -653,7 +672,8 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
-     * delegates to {@link #callMethod(Object, String, Class[], Object...)} - instance must not be null!
+     * delegates to {@link #callMethod(Object, String, Class[], Object...)} -
+     * instance must not be null!
      */
     public static Object call(Object instance, String methodName, Class[] par, Object... args) {
         return BeanClass.getBeanClass(instance.getClass()).callMethod(instance, methodName, par, args);
@@ -666,17 +686,18 @@ public class BeanClass<T> implements Serializable {
     /**
      * simple method reflection call
      * 
-     * @param instance object
-     * @param methodName method name to call
-     * @param par (optional, if null, args-classes will be used) method parameter
-     * @param usePrimitives if par is null and usePrimitives is true, all evaluated parameters will primitives if
-     *            possible!
-     * @param args method argument objects
+     * @param instance      object
+     * @param methodName    method name to call
+     * @param par           (optional, if null, args-classes will be used) method
+     *                      parameter
+     * @param usePrimitives if par is null and usePrimitives is true, all evaluated
+     *                      parameters will primitives if possible!
+     * @param args          method argument objects
      * @return method call result
      */
     public Object callMethod(Object instance, String methodName, Class[] par, boolean usePrimitives, Object... args) {
-        //if par is null we try to fill through the objects
-        //but no object should be null!
+        // if par is null we try to fill through the objects
+        // but no object should be null!
         if (par == null) {
             par = new Class[args.length];
             for (int i = 0; i < args.length; i++) {
@@ -686,25 +707,21 @@ public class BeanClass<T> implements Serializable {
                     par[i] = Object.class;
                 }
             }
-        } else {//wrap argument objects to have the right types
+        } else {// wrap argument objects to have the right types
             if (args.length == 1 && par.length == 1 && par[0].isArray()) {
-                //args = BeanAttribute.wrap(args, par[0]);
+                // args = BeanAttribute.wrap(args, par[0]);
             } else {
                 for (int i = 0; i < args.length; i++) {
-                	if (par.length <= i)
-                		break;
-                	args[i] = ObjectUtil.wrap(args[i], par[i]);
+                    if (par.length <= i)
+                        break;
+                    args[i] = ObjectUtil.wrap(args[i], par[i]);
                 }
             }
         }
         Method method;
         try {
             LOG.debug("calling " + (clazz.getClassLoader() != null ? clazz.getClassLoader().toString() + ":" : "")
-                + clazz.getName()
-                + "."
-                + methodName
-                + " with parameters:"
-                + StringUtil.toString(par, 80));
+                    + clazz.getName() + "." + methodName + " with parameters:" + StringUtil.toString(par, 80));
             method = clazz.getMethod(methodName, par);
             LOG.trace(method);
             method.setAccessible(true);
@@ -737,37 +754,39 @@ public class BeanClass<T> implements Serializable {
     }
 
     public static Object getValue(Object bean, String... path) {
-    	IValueAccess access = ValuePath.getValueAccess(bean, path);
-    	return access != null ? access.getValue() : null;
+        IValueAccess access = ValuePath.getValueAccess(bean, path);
+        return access != null ? access.getValue() : null;
     }
+
     /**
      * is able to set a value of a bean.
      * 
-     * @param instance bean instance
+     * @param instance      bean instance
      * @param attributeName attribute name
-     * @param value new attribute value
+     * @param value         new attribute value
      */
     public void setValue(T instance, String attributeName, Object value) {
         getAttribute(attributeName, true).setValue(instance, value);
     }
 
     /**
-     * @param attributePath can be given as e.g: myAttr1.myAttr2 or as String array MYATTR1, MYATTR2
+     * @param attributePath can be given as e.g: myAttr1.myAttr2 or as String array
+     *                      MYATTR1, MYATTR2
      * @return last attribute in given path
      */
     public IAttribute getAttributePath(String... attributePath) {
-    	if (Util.isEmpty(attributePath))
-    		return null;
-    	if (attributePath.length == 1) //if attributePath was not given as array but as 'myattr1.myaatr2'
-    		attributePath = attributePath[0].split("\\.");
-    	
-		IAttribute attr = getAttribute(attributePath[0]);
-    	if (attributePath.length == 1) {
-			return attr;
-		}
-    	return new BeanClass(attr.getType()).getAttributePath(CollectionUtil.copyOfRange(attributePath, 1));
+        if (Util.isEmpty(attributePath))
+            return null;
+        if (attributePath.length == 1) // if attributePath was not given as array but as 'myattr1.myaatr2'
+            attributePath = attributePath[0].split("\\.");
+
+        IAttribute attr = getAttribute(attributePath[0]);
+        if (attributePath.length == 1) {
+            return attr;
+        }
+        return new BeanClass(attr.getType()).getAttributePath(CollectionUtil.copyOfRange(attributePath, 1));
     }
-    
+
     /**
      * creates a new instance through the given arguments
      * 
@@ -783,7 +802,8 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
-     * @delegates to {@link #hasDefaultConstructor(Class, boolean)} with mustBePublic = false
+     * @delegates to {@link #hasDefaultConstructor(Class, boolean)} with
+     *            mustBePublic = false
      */
     public static boolean hasDefaultConstructor(Class<?> clazz) {
         return hasDefaultConstructor(clazz, false);
@@ -792,10 +812,11 @@ public class BeanClass<T> implements Serializable {
     public boolean isDefaultInstanceable() {
         return Util.isInstanceable(clazz) && hasDefaultConstructor(clazz);
     }
+
     /**
      * hasDefaultConstructor
      * 
-     * @param clazz to be checked for the default constructor
+     * @param clazz        to be checked for the default constructor
      * @param mustBePublic if true, the constructors accessible has to be true
      * @return true, if default constructor available
      */
@@ -823,17 +844,19 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
-     * delegates to {@link #createInstance(Class, Object...)} using {@link #load(String, ClassLoader)}.
+     * delegates to {@link #createInstance(Class, Object...)} using
+     * {@link #load(String, ClassLoader)}.
      */
     public static <T> T createInstance(String clsName, Object... args) {
         return (T) createInstance(load(clsName, null), args);
     }
 
     /**
-     * creating a new instance of clsName. searches the constructor inside the declared constructors of that class.
+     * creating a new instance of clsName. searches the constructor inside the
+     * declared constructors of that class.
      * 
      * @param parmTypes constructor parameter types
-     * @param args constructor arguments
+     * @param args      constructor arguments
      * @return
      */
     public static <T> T createInstance(String clsName, Class[] parmTypes, Object... args) {
@@ -846,9 +869,11 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
-     * creates a new instance through the given arguments. if you don't call the default constructor, the performance
-     * will go down on searching the right constructor. if the given class is a primitive the wrapper class will be used
-     * instead. if it is an array the args must specify the dimensions of that array.
+     * creates a new instance through the given arguments. if you don't call the
+     * default constructor, the performance will go down on searching the right
+     * constructor. if the given class is a primitive the wrapper class will be used
+     * instead. if it is an array the args must specify the dimensions of that
+     * array.
      * 
      * @param args constructor arguments
      * @return new bean instance
@@ -858,8 +883,8 @@ public class BeanClass<T> implements Serializable {
         if (clazz.isPrimitive()) {
             clazz = PrimitiveUtil.getWrapper(clazz);
         }
-        if (clazz.isArray()) {//fill the new array with given args
-            //create a new multi-dim array with args as dimensions
+        if (clazz.isArray()) {// fill the new array with given args
+            // create a new multi-dim array with args as dimensions
 
             if (!Integer.class.isAssignableFrom(clazz.getComponentType()) && numbers(args)) {
                 int[] dims = new int[args.length];
@@ -875,7 +900,7 @@ public class BeanClass<T> implements Serializable {
             }
             return instance;
         }
-        if (args.length == 0) {//--> default constructor
+        if (args.length == 0) {// --> default constructor
             if (PrimitiveUtil.isPrimitiveOrWrapper(clazz)) {
                 instance = PrimitiveUtil.getDefaultValue(clazz);
             } else {
@@ -883,9 +908,9 @@ public class BeanClass<T> implements Serializable {
                     Constructor<T> constructor = clazz.getConstructor(new Class[0]);
                     constructor.setAccessible(true);
                     instance = constructor.newInstance();
-//                instance = (T) clazz.newInstance();
+                    // instance = (T) clazz.newInstance();
                 } catch (final Exception e) {
-                    //ok, try it on declared constructors
+                    // ok, try it on declared constructors
                     try {
                         Constructor<T> constructor = clazz.getDeclaredConstructor(new Class[0]);
                         if (constructor != null) {
@@ -897,13 +922,13 @@ public class BeanClass<T> implements Serializable {
                     }
                 }
             }
-        } else {//searching for the right constructor
+        } else {// searching for the right constructor
             final Constructor<?>[] constructors = clazz.getDeclaredConstructors();
             for (int i = 0; i < constructors.length; i++) {
                 Class<?>[] pars = constructors[i].getParameterTypes();
                 if (pars.length == args.length) {
                     for (int j = 0; j < args.length; j++) {
-                        //if one argument type mismatches, we search for another constructor
+                        // if one argument type mismatches, we search for another constructor
                         if (args[j] != null && !isAssignableFrom(pars[j], args[j].getClass())) {
                             pars = null;
                             break;
@@ -921,10 +946,9 @@ public class BeanClass<T> implements Serializable {
                 }
             }
             if (instance == null) {
-                throw ManagedException.implementationError("BeanClass could not create the desired instance of type "
-                    + clazz,
-                    args,
-                    (Object[]) constructors);
+                throw ManagedException.implementationError(
+                        "BeanClass could not create the desired instance of type " + clazz, args,
+                        (Object[]) constructors);
             }
         }
         return instance;
@@ -939,7 +963,8 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
-     * delegates to {@link #createInstance(Class, Object...)} using Threads current classloader
+     * delegates to {@link #createInstance(Class, Object...)} using Threads current
+     * classloader
      */
     public static BeanClass createBeanClass(String className) {
         return createBeanClass(className, null);
@@ -967,19 +992,20 @@ public class BeanClass<T> implements Serializable {
     }
 
     static Class load(String className, ClassLoader classloader) {
-    	return load(className, classloader, true);
+        return load(className, classloader, true);
     }
-    
+
     /**
      * load
      * 
-     * @param className class to load
-     * @param classloader (optional) if null, the threads context classloader will be used.
+     * @param className   class to load
+     * @param classloader (optional) if null, the threads context classloader will
+     *                    be used.
      * @return loaded class
      */
     public static Class load(String className, ClassLoader classloader, boolean logException) {
         if (classloader == null) {
-                classloader = Util.getContextClassLoader();
+            classloader = Util.getContextClassLoader();
         }
         try {
             LOG.debug("loading class " + className + " through classloader " + classloader);
@@ -991,7 +1017,8 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
-     * delegates to {@link #copyValues(Object, Object, String...)} using all destination attributes having a setter.
+     * delegates to {@link #copyValues(Object, Object, String...)} using all
+     * destination attributes having a setter.
      */
     public static <D> D copyValues(Object src, D dest, boolean onlyDestAttributes) {
         final BeanClass destClass = BeanClass.getBeanClass(dest.getClass(), false);
@@ -1000,7 +1027,8 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
-     * delegates to {@link #copyValues(Object, Object, boolean, String...)} with onlyIfNotNull = false.
+     * delegates to {@link #copyValues(Object, Object, boolean, String...)} with
+     * onlyIfNotNull = false.
      * 
      */
     public static <D> D copyValues(Object src, D dest, String... attributeNames) {
@@ -1008,23 +1036,22 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
-     * copy equal-named attributes from src to dest. if no attributeNames are defined, all source attributes will be
-     * copied.
+     * copy equal-named attributes from src to dest. if no attributeNames are
+     * defined, all source attributes will be copied.
      * <p>
      * Warning: not performance optimized!
      * 
-     * @param src source bean
-     * @param dest destination bean (may be an extension of source bean - or simply a bean with some equal-named
-     *            attributes)
-     * @param onlyIfNotNull if true, the source values will not overwrite existing destination-values with null.
-     * @param onlyIfDestIsNull if true, the source values will not overwrite existing destination-values.
-     * @param attributeNames (optional) fixed attribute names
+     * @param src              source bean
+     * @param dest             destination bean (may be an extension of source bean
+     *                         - or simply a bean with some equal-named attributes)
+     * @param onlyIfNotNull    if true, the source values will not overwrite
+     *                         existing destination-values with null.
+     * @param onlyIfDestIsNull if true, the source values will not overwrite
+     *                         existing destination-values.
+     * @param attributeNames   (optional) fixed attribute names
      * @return destination object
      */
-    public static <D> D copyValues(Object src,
-            D dest,
-            boolean onlyIfNotNull,
-            boolean onlyIfDestIsNull,
+    public static <D> D copyValues(Object src, D dest, boolean onlyIfNotNull, boolean onlyIfDestIsNull,
             String... attributeNames) {
         int copied = 0;
         if (attributeNames.length == 0) {
@@ -1032,17 +1059,14 @@ public class BeanClass<T> implements Serializable {
             attributeNames = srcClass.getAttributeNames();
         }
         if (LOG.isTraceEnabled()) {
-            LOG.trace("copying " + attributeNames.length
-                + " attributes from "
-                + src.getClass().getSimpleName()
-                + " to "
-                + dest.getClass().getSimpleName());
+            LOG.trace("copying " + attributeNames.length + " attributes from " + src.getClass().getSimpleName() + " to "
+                    + dest.getClass().getSimpleName());
         }
         Collection<String> unavailable = new LinkedList<String>();
         for (int i = 0; i < attributeNames.length; i++) {
             final BeanAttribute srcAttribute = BeanAttribute.getBeanAttribute(src.getClass(), attributeNames[i], false);
             if (srcAttribute == null)
-            	continue; //virtual attributes cannot be found through BeanAttribute.getBeanAttribute()
+                continue; // virtual attributes cannot be found through BeanAttribute.getBeanAttribute()
             BeanAttribute destAttribute = BeanAttribute.getBeanAttribute(dest.getClass(), attributeNames[i], false);
             if (destAttribute == null) {
                 unavailable.add(attributeNames[i]);
@@ -1051,7 +1075,7 @@ public class BeanClass<T> implements Serializable {
             if (destAttribute.hasWriteAccess()) {
                 Object value = srcAttribute.getValue(src);
                 if ((!onlyIfNotNull || value != null)
-                    && (!onlyIfDestIsNull || (destAttribute.getValue(dest) != null))) {
+                        && (!onlyIfDestIsNull || (destAttribute.getValue(dest) != null))) {
                     destAttribute.setValue(dest, value);
                     copied++;
                 }
@@ -1060,20 +1084,21 @@ public class BeanClass<T> implements Serializable {
             }
         }
         if (copied < attributeNames.length) {
-            LOG.warn("couldn't set all values for " + dest.getClass().getSimpleName()
-                + "! unavailable attributes: "
-                + StringUtil.toString(unavailable, 200));
+            LOG.warn("couldn't set all values for " + dest.getClass().getSimpleName() + "! unavailable attributes: "
+                    + StringUtil.toString(unavailable, 200));
         }
         return dest;
     }
 
     /**
-     * sets all attributes from src to the value of a new created instance (mostly null values). if no attributeNames
-     * are defined, all source attributes will be copied.
+     * sets all attributes from src to the value of a new created instance (mostly
+     * null values). if no attributeNames are defined, all source attributes will be
+     * copied.
      * <p>
-     * f Warning: Works only, if src class provides a default constructor. not performance optimized!
+     * f Warning: Works only, if src class provides a default constructor. not
+     * performance optimized!
      * 
-     * @param src source bean
+     * @param src            source bean
      * @param attributeNames (optional) fixed attribute names
      * @return reseted source object
      */
@@ -1081,6 +1106,13 @@ public class BeanClass<T> implements Serializable {
         return copyValues(createInstance(src.getClass()), src, false);
     }
 
+    public boolean hasField(String name) {
+        try {
+            return clazz.getField(name) != null;
+        } catch (NoSuchFieldException | SecurityException e) {
+            return false;
+        }
+    }
     /**
      * collects recursive all fields of this class and all of its super classes
      * 

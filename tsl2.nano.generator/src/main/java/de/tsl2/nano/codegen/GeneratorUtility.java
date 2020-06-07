@@ -2,14 +2,12 @@ package de.tsl2.nano.codegen;
 
 import java.util.Map;
 import java.util.Properties;
-import java.util.function.Function;
 
 import org.apache.velocity.VelocityContext;
 
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.CallingPath;
-import de.tsl2.nano.core.cls.ValuePath;
 import de.tsl2.nano.core.util.CUtil;
 import de.tsl2.nano.core.util.CollectionUtil;
 import de.tsl2.nano.core.util.DateUtil;

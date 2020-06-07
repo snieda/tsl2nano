@@ -472,7 +472,7 @@ public class NanoH5Test implements ENVTestPreparation {
     public void testNetUtilDownload() throws Exception {
         //the test checks the current download path of sourceforge...
         if (NetUtil.isOnline()) {
-            Profiler.si().stressTest("downloader", 2, new Runnable() {
+            Profiler.si().stressTest("downloader", 1, new Runnable() {
                 @Override
                 public void run() {
                     String url;

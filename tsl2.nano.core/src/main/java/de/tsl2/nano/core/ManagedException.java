@@ -204,12 +204,16 @@ public class ManagedException extends RuntimeException {
         }
     }
     
-    /**let the trY to the standard exception handling  */
     public static <T> T trY(SupplierEx<T> callback) {
+        return trY(callback, true);
+    }
+    /**let the trY to the standard exception handling  */
+    public static <T> T trY(SupplierEx<T> callback, boolean escalate) {
         try {
             return callback.get();
         } catch(Exception ex) {
-            return (T) forward(ex);
+            LOG.error(ex);
+            return escalate ? (T) forward(ex) : null;
         }
     }
 

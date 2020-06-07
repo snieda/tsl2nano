@@ -683,10 +683,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Element nav = appendElement(parent, "nav", ATTR_ID, "navigation");
         for (BeanDefinition<?> bean : navigation) {
             link = appendElement(nav, TAG_LINK, ATTR_HREF, PREFIX_BEANLINK
-                + bean.getName(),
-                ATTR_STYLE, ENV.get("layout.page.navigation.section.style", "color: #AAAAAA;"));
+                + bean.getName()
+                /*ATTR_STYLE, ENV.get("layout.page.navigation.section.style", "color: #AAAAAA;")*/);
             appendElement(link, TAG_IMAGE, content(ENV.translate(bean.toString(), true)), ATTR_SRC,
-                "icons/forward.png");
+                "icons/goback.png");
         }
     }
 

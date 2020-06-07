@@ -212,6 +212,7 @@
 					<excludes>
 						<exclude>**/*.jar</exclude>
 						<exclude>**/*.zip</exclude>
+						<exclude>**/HelpMojo.class</exclude>
 					</excludes>
 					<!-- <fileSets>
 						<fileSet implementation="org.apache.maven.shared.model.fileset.FileSet">

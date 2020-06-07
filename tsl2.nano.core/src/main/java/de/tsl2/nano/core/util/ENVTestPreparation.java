@@ -43,7 +43,7 @@ public interface ENVTestPreparation {
 	}
 	
 	static String setUp(String baseDir, String moduleShort, String envDir, boolean strict, boolean deleteExistingEnvironment) {
-		String baseDirModule = Util.isEmpty(moduleShort) ? "./" : baseDir + moduleShort + "/";
+		String baseDirModule = moduleShort == null ? "./" : baseDir + moduleShort + "/";
 		if (!System.getProperty("user.dir").endsWith(TARGET_DIR.substring(0, TARGET_DIR.length() - 1)))
 			setUserDirToTarget(baseDirModule);
 		LogFactory.setLogFactoryXml(envDir + "test-logging.xml");

@@ -45,22 +45,22 @@ public class CachingBatchloader {
     Collection<Part<?>> nextBatchParts;
 
     /** mode on getting cached data through {@link #get(Class, String)} */
-    int mode = MODE_AUTO;
+    boolean autoExecute = true;
 
-    /** if data wasn't loaded, it will be done automatic */
-    private static final int MODE_AUTO = 0;
-    /** if data wasn't loaded, an exception will be thrown */
-    private static final int MODE_ERROR = 1;
-
-    /**
-     * singelton constructor
-     */
     private CachingBatchloader() {
-        genService = ServiceFactory.getGenService();
+        this(ServiceFactory.getGenService());
+    }
+    private CachingBatchloader(IGenericService genService) {
+        this.genService = genService;
         nextBatchParts = new LinkedList<Part<?>>();
         cache = new HashMap<String, Part<?>>();
     }
 
+    public static CachingBatchloader init(IGenericService genService, boolean autoExecute) {
+    	self = new CachingBatchloader(genService);
+    	self.autoExecute = autoExecute;
+    	return self;
+    }
     /**
      * instance
      * 
@@ -73,6 +73,10 @@ public class CachingBatchloader {
         return self;
     }
 
+    public static void reset() {
+        self = null;
+    }
+    
     /**
      * adds the given part to the batch loading list - to be executed later
      * 
@@ -127,8 +131,9 @@ public class CachingBatchloader {
     public <T> Collection<T> get(Class<T> type, String partId) {
         Part<?> part = cache.get(partId);
         if (part == null && nextBatchParts.contains(new Part(partId))) {
-            if (mode == MODE_AUTO) {
+            if (autoExecute) {
                 execute();
+                part = cache.get(partId);
             } else {
                 throw ManagedException.implementationError("the batch-loading wasn't started yet! you have to call 'execute' before getting the data",
                     partId);

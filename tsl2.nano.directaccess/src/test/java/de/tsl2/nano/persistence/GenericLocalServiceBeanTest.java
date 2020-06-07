@@ -1,5 +1,12 @@
 package de.tsl2.nano.persistence;
 
+import static de.tsl2.nano.service.util.finder.Finder.and;
+import static de.tsl2.nano.service.util.finder.Finder.between;
+import static de.tsl2.nano.service.util.finder.Finder.example;
+import static de.tsl2.nano.service.util.finder.Finder.inSelection;
+import static de.tsl2.nano.service.util.finder.Finder.not;
+import static de.tsl2.nano.service.util.finder.Finder.or;
+import static de.tsl2.nano.service.util.finder.Finder.orderBy;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -14,18 +21,22 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
+import org.junit.After;
 import org.junit.Test;
 
 import de.tsl2.nano.bean.BeanFindParameters;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.service.util.IGenericService;
+import de.tsl2.nano.service.util.batch.CachingBatchloader;
 import de.tsl2.nano.service.util.batch.Part;
 import de.tsl2.nano.service.util.finder.Finder;
 
-import static de.tsl2.nano.service.util.finder.Finder.*;
-
 public class GenericLocalServiceBeanTest {
 
+	@After
+	public void tearDown() {
+		CachingBatchloader.reset();
+	}
 	@Test
 	public void testGenericLocalFinder() {
 		GenericLocalBeanContainer.initLocalContainer();
@@ -71,6 +82,12 @@ public class GenericLocalServiceBeanTest {
 		
 		Part<Person1>[] part = genService.findBatch(new Part<Person1>("test").setFinders(Finder.example(p1)));
 		assertEquals(p1, part[0].getResult().iterator().next());
+		assertEquals(new Part("test", Person1.class, true), part[0]);
+
+//		ServiceFactory.createInstance(null).setInitialServices(MapUtil.asMap(IGenericService.class.getName(), genService));
+		
+		CachingBatchloader.init(genService, true).add(new Part<Person1>("test1", Person1.class, true).setFinders(Finder.example(p1)));
+		assertEquals(p1, CachingBatchloader.instance().getSingle(Person1.class, "test1"));
 	}
 
 }
