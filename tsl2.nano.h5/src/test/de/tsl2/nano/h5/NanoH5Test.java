@@ -525,23 +525,39 @@ public class NanoH5Test implements ENVTestPreparation {
             //ok
         }
     }
-        @Test
-        public void testCheckSecurityBlacklist() {
-            String strBlackList = ENV.get("app.input.blacklist", "</,/>,notallowed");
-            String allowedFields = ENV.get("app.input.blacklist.fieldnames.allowed.regex", "ZZZZZZ");
+    @Test
+    public void testCheckSecurityBlacklist() {
+        String strBlackList = ENV.get("app.input.blacklist", "</,/>,notallowed");
+        String allowedFields = ENV.get("app.input.blacklist.fieldnames.allowed.regex", "ZZZZZZ");
 
-            NanoH5Session.checkSecurity(MapUtil.asProperties("myFieldName", "myValue"));
-            //field is allowed
-            NanoH5Session.checkSecurity(MapUtil.asProperties("ZZZZZZ", "notallowed"));
+        NanoH5Session.checkSecurity(MapUtil.asProperties("myFieldName", "myValue"));
+        //field is allowed
+        NanoH5Session.checkSecurity(MapUtil.asProperties("ZZZZZZ", "notallowed"));
 
-            //not ok
-            try {
-                NanoH5Session.checkSecurity(MapUtil.asProperties("myFieldName", "notallowed"));
-                fail();
-            } catch (IllegalArgumentException ex) {
-                //ok
-            }
+        //not ok
+        try {
+            NanoH5Session.checkSecurity(MapUtil.asProperties("myFieldName", "notallowed"));
+            fail();
+        } catch (IllegalArgumentException ex) {
+            //ok
         }
+    }
+    
+    @Test
+    public void testGetServiceURL() {
+    	assertEquals("http://localhost:8067", NanoH5.getServiceURL(null).toString());
+    	
+    	// offline it is only the localhost
+    	ENV.setProperty("service.access.remote", true);
+    	assertEquals("http://localhost:8067", NanoH5.getServiceURL(null).toString());
+    	
+    	// with null it does only a reset to the defaults!
+    	ENV.setProperty("app.ssl.activate", true);
+    	assertEquals("http://localhost:8067", NanoH5.getServiceURL(null).toString());
+    	
+    	ENV.setProperty("app.ssl.activate", true);
+    	assertEquals("https://localhost:8067", NanoH5.getServiceURL("http://localhost:8067").toString());
+    }
 }
 //TODO: wieder rausschmeissen...
 class VerifyComparators

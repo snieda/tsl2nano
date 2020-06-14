@@ -40,6 +40,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
 import java.util.Properties;
@@ -60,6 +61,7 @@ import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.classloader.NetworkClassLoader;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -78,6 +80,7 @@ import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.GenericParser;
 import de.tsl2.nano.format.RegExpFormat;
+import de.tsl2.nano.util.Translator;
 
 /**
  * class to provide presentation definitions/algorithms for sets of attributes. this class holds only its parent
@@ -1413,6 +1416,16 @@ public class BeanPresentationHelper<T> {
                 return null;
             }
         });
+        bEnv.addAction(new SecureAction<Object>(bean.getClazz(), "translation",
+                IAction.MODE_UNDEFINED, false, "icons/people.png") {
+                @Override
+                public Object action() throws Exception {
+                    Message.send("doing machine translation for locale " + Locale.getDefault());
+                    Translator.translateBundle(ENV.getConfigPath() + "messages", Messages.keySet(), Locale.ENGLISH,
+                        Locale.getDefault());
+                    return null;
+                }
+            });
     }
 
     /**

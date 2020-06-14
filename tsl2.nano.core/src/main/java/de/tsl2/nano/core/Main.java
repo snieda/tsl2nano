@@ -58,9 +58,9 @@ public class Main {
      * @param nanoH5
      * @param args
      */
-    public static void startApplication(Class<?> application, Map<Integer, String> argMapping, String[] args) {
+    public static void startApplication(Class<?> application, Map<Integer, String> argMapping, String... args) {
         try {
-            setEnvironmentArguments(args, argMapping);
+            setEnvironmentArguments(argMapping, args);
             //use reflection on construction to handle exception inside this method
             Main main = (Main) application.getConstructor(new Class[0]).newInstance(new Object[0]);
             main.start();
@@ -76,8 +76,8 @@ public class Main {
      * @param argMapping application specific mapping of args. each name is an argument name for an argument at
      *            key-position.
      */
-    protected static void setEnvironmentArguments(String[] args, Map<Integer, String> argMapping) {
-    	String port = null;
+    protected static void setEnvironmentArguments(Map<Integer, String> argMapping, String... args) {
+    	String url = null, port = null;
         if (argMapping != null && argMapping.size() > 0) {
             for (int i = 0; i < args.length; i++) {
                 String argName = argMapping.get(i);
@@ -87,18 +87,26 @@ public class Main {
             }
         } else {
         	for (int i = 0; i < args.length; i++) {
-				if (args[i].matches("\\d{4,5}")) {
+				if (args[i].matches("https?[:]//.*[:]\\d{3,7}")) {
+					url = args[i];
+					break;
+				}
+				else if (args[i].matches("\\d{3,7}")) {
 					port = args[i];
 					break;
 				}
 			}
         }
-        if (port == null)
-        	port = ENV.get("service.port", null);
-        if (port != null) {
-            String url = ENV.get("service.url", DEFAULT_URL);
-            ENV.setProperty("service.url", StringUtil.substring(url, null, ":", true) + ":" + port);
-            
+        if (url != null) {
+            ENV.setProperty("service.url", url);
+        } else {
+            if (port == null)
+                port = ENV.get("service.port", null);
+            if (port != null) {
+                url = ENV.get("service.url", DEFAULT_URL);
+                ENV.setProperty("service.url", StringUtil.substring(url, null, ":", true) + ":" + port);
+                
+            }
         }
     }
 

@@ -178,6 +178,11 @@ public class Util {
         return Arrays.asList(elements).contains(entry);
     }
 
+    public static final <T> boolean in_(T entry, T... elements) {
+        Arrays.sort(elements);
+        return Arrays.binarySearch(elements, entry) > -1;
+    }
+
     /**
      * checks whether data contains one of items
      * 

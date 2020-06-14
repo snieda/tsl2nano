@@ -528,7 +528,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 actions.addAll(getApplicationActions(session));
                 actions.addAll(getSessionActions(session));
                 if (!useSideNav(1 + actions.size()))
-                    c3 = createExpandable(c3, "Menu", ENV.get("layout.header.menu.open", false));
+                   ;//c3 = createExpandable(c3, "Menu", ENV.get("layout.header.menu.open", false));
                 createActionPanel(c3, actions,
                     ENV.get("layout.header.button.text.show", true),
                     ATTR_ALIGN, ALIGN_RIGHT);
@@ -1202,7 +1202,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             Collection<IAction> actions,
             boolean showText,
             String... attributes) {
-        int width = -1;
+        String width = "-1";
         Element cell = null;
         try {
             if (useSideNav(actions.size())) {
@@ -1225,17 +1225,17 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             }
         } finally {
             if (useSideNav(actions.size())) {
-                if (width == -1)
+                if (width.equals("-1"))
                     ENV.setProperty("layout.action.width", width);
             }
         }
         return cell;
     }
 
-    private int setTemporaryFullWidth() {
-        int width;
-        width = ENV.get("layout.action.width", -1);
-        if (width == -1)
+    private String setTemporaryFullWidth() {
+        String width;
+        width = ENV.get("layout.action.width", "-1");
+        if (width.equals("-1"))
             ENV.setProperty("layout.action.width", "100%");
         return width;
     }
@@ -1347,7 +1347,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             boolean asDefault,
             boolean formnovalidate) {
         return createAction(cell, id, cssClass, label, tooltip, type, shortcut, image, 
-            ENV.get("layout.action.width", -1), enabled, asDefault, formnovalidate);
+            ENV.get("layout.action.width", "-1"), enabled, asDefault, formnovalidate);
     }
 
     /**
@@ -1367,7 +1367,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             String type,
             Object shortcut,
             String image,
-            int width,
+            String width,
             boolean enabled,
             boolean asDefault,
             boolean formnovalidate) {
@@ -1415,7 +1415,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         }
         String style =
             ENV.get("layout.action.style", ""/*STYLE_BACKGROUND_TRANSPARENT + style(STYLE_COLOR, COLOR_WHITE)*/);
-        if (width != -1) {
+        if (!width.equals("-1")) {
             style += (style.isEmpty() || style.endsWith(";") ? "" : ";") + style(ATTR_WIDTH, width);
         }
         appendAttributes(action, ATTR_STYLE, style);

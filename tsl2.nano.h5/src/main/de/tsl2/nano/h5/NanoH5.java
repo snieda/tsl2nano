@@ -313,14 +313,19 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         System.setProperty("java.net.preferIPv6Addresses", "true");
         super.start();
 
-        if (System.getProperty("os.name").startsWith("Windows")
-                && ENV.get("app.show.startpage", true)) {
-            SystemUtil.executeRegisteredWindowsPrg(applicationHtmlFile());
-        } else if (System.getProperty("os.name").startsWith("Linux")
+        try {
+            if (System.getProperty("os.name").startsWith("Windows")
                     && ENV.get("app.show.startpage", true)) {
-                SystemUtil.executeRegisteredLinuxBrowser(applicationHtmlFile());
-        } else {
-            LOG.info("Please open the URL '" + serviceURL.toString() + "' in your browser");
+                SystemUtil.executeRegisteredWindowsPrg(applicationHtmlFile());
+            } else if (System.getProperty("os.name").startsWith("Linux")
+                        && ENV.get("app.show.startpage", true)) {
+                    SystemUtil.executeRegisteredLinuxBrowser(applicationHtmlFile());
+            } else {
+                LOG.info("Please open the URL '" + serviceURL.toString() + "' in your browser");
+            }
+        } catch(Exception ex) {
+            //ok, no problem - server run should continue...
+            LOG.warn("couldn't start browser", ex);
         }
 
         try {
@@ -377,7 +382,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     
     public static URL getServiceURL(String serviceURLString) {
         if (serviceURLString == null) {
-            serviceURLString = ENV.get("service.url", DEFAULT_URL);
+            serviceURLString = ENV.get("service.url", getDefaultURL());
             //set defaults
             ENV.get("app.ssl.activate", false);
             ENV.get("app.ssl.shortcut", "");
@@ -393,8 +398,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             ENV.setProperty("app.ssl.shortcut", "");
             serviceURLString = serviceURLString.replace("https://", "http://");
         }
-        if (!serviceURLString.matches(".*[:][0-9]{3,5}")) {
-            serviceURLString = "localhost:" + serviceURLString;
+        if (!serviceURLString.matches(".*[:][0-9]{3,7}")) {
+            serviceURLString = (ENV.get("service.access.remote", false) ? NetUtil.getMyIP() + ":" : "localhost:") + serviceURLString;
         }
         if (!serviceURLString.contains("://")) {
             serviceURLString = "http" + ENV.get("app.ssl.shortcut", "") + "://" + serviceURLString;
@@ -407,6 +412,10 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             ManagedException.forward(e);
         }
         return serviceURL;
+    }
+
+    private static String getDefaultURL() {
+        return ENV.get("service.access.remote", false) ? DEFAULT_URL.replace("localhost", NetUtil.getMyIP()) : DEFAULT_URL;
     }
 
     public static int getPort(String serviceURL) {

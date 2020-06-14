@@ -165,23 +165,23 @@ public class BeanClass<T> implements Serializable {
      * @return all method names of class hierarchy that return of the given type.
      */
     public Method[] getMethods(Class<?> type, boolean staticOnly) {
-        Set<Method> names = new LinkedHashSet<Method>();
-        Method[] methods = clazz.getMethods();
-        for (int i = 0; i < methods.length; i++) {
-            if (type.isAssignableFrom(methods[i].getReturnType())
-                    && (!staticOnly || Modifier.isStatic(methods[i].getModifiers()))) {
-                names.add(methods[i]);
-            }
-        }
-        methods = clazz.getDeclaredMethods();
-        for (int i = 0; i < methods.length; i++) {
-            if (type.isAssignableFrom(methods[i].getReturnType())
-                    && (!staticOnly || Modifier.isStatic(methods[i].getModifiers()))) {
-                names.add(methods[i]);
-            }
-        }
-        return names.toArray(new Method[0]);
+    	return staticOnly ? getMethods(type, Modifier.STATIC) : getMethods(type);
     }
+    public Method[] getMethods(Class<?> type, int...modifiers) {
+        Set<Method> result = new LinkedHashSet<Method>();
+        filterMethods(result, clazz.getMethods(), type, modifiers);
+        filterMethods(result, clazz.getDeclaredMethods(), type, modifiers);
+        return result.toArray(new Method[0]);
+    }
+
+	protected void filterMethods(Set<Method> result, Method[] methods, Class<?> type, int...modifiers) {
+		for (int i = 0; i < methods.length; i++) {
+            if (type.isAssignableFrom(methods[i].getReturnType())
+                    && (modifiers.length == 0 || BitUtil.hasBit(methods[i].getModifiers(), modifiers))) {
+                result.add(methods[i]);
+            }
+        }
+	}
 
     /**
      * getName
@@ -1256,7 +1256,7 @@ public class BeanClass<T> implements Serializable {
         //TODO: how to check for enhancing class
         return (Class<C>) (cls.isEnum() ? cls : Proxy.isProxyClass(cls) ? cls.getInterfaces()[0]
             : (cls.getEnclosingClass() != null || cls
-                .getSimpleName().contains("$")) && cls.getSuperclass() != null ? getDefiningClass(cls.getSuperclass())
+                .getSimpleName().contains("$")) || cls.isSynthetic() && cls.getSuperclass() != null ? getDefiningClass(cls.getSuperclass())
                     : cls);
     }
 

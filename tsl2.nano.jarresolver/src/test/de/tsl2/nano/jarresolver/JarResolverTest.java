@@ -2,6 +2,7 @@ package de.tsl2.nano.jarresolver;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.logging.Log;
 import org.junit.AfterClass;
@@ -115,9 +116,9 @@ public class JarResolverTest   implements ENVTestPreparation {
     @Test
     public void testFindJar() throws Exception {
         if (NetUtil.isOnline()) {
-            String jarName = new JarResolver(BASE_DIR_JARRESOLVER).findJarOnline("org.apache.log4j.config.PropertyGetter");
+            String jarName = new JarResolver(BASE_DIR_JARRESOLVER).findJarOnline("org.java_websocket.WrappedByteChannel");
             LOG.info("jar-file: " + jarName);
-            assertTrue(StringUtil.extract(jarName, "\\w+").equals("log4j"));
+            assertEquals("sparql", StringUtil.extract(jarName, "\\w+"));
         } else {
             System.out.println("ignoring test 'testFindJar() - we are offline!");
         }

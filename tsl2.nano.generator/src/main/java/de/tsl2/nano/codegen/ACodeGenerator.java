@@ -223,6 +223,7 @@ public abstract class ACodeGenerator {
         context.put("copyright", "Copyright (c) 2002-2020 Thomas Schneider");
         context.put("path", getDestinationPackageName(modelFile, destFile));
         context.put("postfix", getDestinationPostfix(modelFile));
+        context.put("eventhandler.methodexception.class", EvalOrNullExceptionHandler.class);
         util.setContext(context);
     }
 
@@ -351,7 +352,10 @@ public abstract class ACodeGenerator {
         + " - " + KEY_ANNOTATED + "   : annotation to search for. all not annotated classes will be filtered\n"
         + " - " + KEY_INSTANCEOF + "  : base/super class. all not extending classes will be filtered\n"
         + " - " + KEY_KEYWORDLIST + " : list of comma-separated keywords to be replaced through keyword.replacement\n"
-        + " - " + KEY_KEYWORDREPL + " : list of csv keyword replacements. may be a single string to be added to all keywords\n"));
+        + " - " + KEY_KEYWORDREPL + " : list of csv keyword replacements. may be a single string to be added to all keywords\n"
+        + " - " + KEY_PREFIX + "catchedclass : class name not throwing exceptions on method 'cachedmethod'\n"
+        + " - " + KEY_PREFIX + "catchedmethod: method name not throwing exceptions on class 'cachedclass'\n"
+        ));
     return man;
     }
 }
