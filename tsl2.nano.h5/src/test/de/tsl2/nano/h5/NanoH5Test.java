@@ -31,6 +31,7 @@ import javax.ws.rs.Path;
 
 import org.anonymous.project.Address;
 import org.anonymous.project.Charge;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -94,6 +95,10 @@ public class NanoH5Test implements ENVTestPreparation {
         return "http://localhost:" + NetUtil.getFreePort();
     }
 
+    @After
+    public void tearDown() {
+    	ENV.reset();
+    }
     @Test
     @Path("/")
     public void testNetUtilRestful() throws Exception {

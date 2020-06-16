@@ -175,6 +175,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     static final String ICON_DEFAULT = "icons/trust_unknown.png";
     private static final String CSS_CLASS_PANEL_ACTION = "panelaction";
     private static final String CSS_CLASS_ACTION = "action";
+	private static final String CSS_CLASS_SELECTOR = "selector";
 
     /**
      * constructor
@@ -460,12 +461,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         /*
          * create the header elements:
          * c1: left: App-Info with image
-         * c2: center: Page-Title with image
-         * c3: Page-Buttons
+         * c2: Page-Buttons
+         * c3: center: Page-Title with image
          */
         Element row = appendTag(createGrid(body, "page.header.table", "page.header.table", 0), TABLE(TAG_ROW));
         Element c1 = appendTag(row, TABLE(TAG_CELL));
         Element c2 = appendTag(row, TABLE(TAG_CELL));
+        Element c3 = appendTag(row, TABLE(TAG_CELL));
         String localDoc = ENV.getConfigPath() + "nano.h5.html";
         String docLink =
             new File(localDoc).canRead() ? "./nano.h5.html" : "https://sourceforge.net/p/tsl2nano/wiki/";
@@ -479,8 +481,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             "Framework Version: " + ENV.getBuildInformations());
 
         if (image != null) {
-            c2 = appendElement(c2, TAG_H3, content(), ATTR_ALIGN, ALIGN_CENTER);
-            appendElement(c2,
+            c3 = appendElement(c3, TAG_H3, content(), ATTR_ALIGN, ALIGN_CENTER);
+            appendElement(c3,
                 TAG_IMAGE,
                 content(title),
                 ATTR_SRC,
@@ -495,41 +497,40 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 docURL = ENV.get("doc.url." + bean.getName().toLowerCase(),
                     "doc/" + StringUtil.toFirstLower(title) + "/index.html");
             if (new File(ENV.getConfigPath() + docURL).canRead() || (!docURL.contains(" ") && NetUtil.isURL(docURL))) {
-                c2 = appendElement(c2, TAG_H3, ATTR_ALIGN, ALIGN_CENTER, ATTR_STYLE,
+                c3 = appendElement(c3, TAG_H3, ATTR_ALIGN, ALIGN_CENTER, ATTR_STYLE,
                     style("display", "inline"));
-                appendElement(c2, TAG_LINK, content(title), ATTR_HREF, ENV.getConfigPath() + docURL);
+                appendElement(c3, TAG_LINK, content(title), ATTR_HREF, ENV.getConfigPath() + docURL);
             } else {
-                c2 = appendElement(c2, TAG_H3, content(title), ATTR_ALIGN, ALIGN_CENTER, ATTR_STYLE,
+                c3 = appendElement(c3, TAG_H3, content(title), ATTR_ID, "title", ATTR_ALIGN, ALIGN_CENTER, ATTR_STYLE,
                     style("display", "inline"));
             }
         }
-        Element c3 = appendTag(row, TABLE(TAG_CELL, ATTR_ALIGN, ALIGN_RIGHT));
         if (interactive && bean != null) {
-            if (useCSS) {
-                Element menu = createMenu(c3, "Menu");
-                createSubMenu(menu, ENV.translate("tsl2nano.application", true), "iconic home",
+            //fallback: setting style from environment-properties
+            appendAttributes((Element) c2.getParentNode(), ATTR_STYLE,
+                ENV.get("layout.header.grid.style", /*"background-image: url(icons/spe.jpg);"*/"background: transparent;"));
+            c2 = appendElement(c2,
+                TAG_FORM,
+                ATTR_ACTION,
+                "?",
+                ATTR_METHOD,
+                ENV.get("html5.http.method", "post"), ATTR_STYLE,
+                style("display", "inline"));
+            if (!useSideNav(99)) {
+                Element menu = createMenu(c2, "Menu");
+                createSubMenu(menu, ENV.translate("tsl2nano.application", true), "icons/equipment.png",
                     getApplicationActions(session));
-                createSubMenu(menu, ENV.translate("tsl2nano.session", true), "iconic map-pin",
+                createSubMenu(menu, ENV.translate("tsl2nano.session", true), "icons/home.png",
                     getSessionActions(session));
-                createSubMenu(menu, ENV.translate("tsl2nano.page", true), "iconic magnifying-glass",
+                createSubMenu(menu, ENV.translate("tsl2nano.page", true), "icons/full_screen.png",
                     getPageActions(session));
             } else {
-                //fallback: setting style from environment-properties
-                appendAttributes((Element) c3.getParentNode(), ATTR_STYLE,
-                    ENV.get("layout.header.grid.style", "background-image: url(icons/spe.jpg);"));
-                c3 = appendElement(c3,
-                    TAG_FORM,
-                    ATTR_ACTION,
-                    "?",
-                    ATTR_METHOD,
-                    ENV.get("html5.http.method", "post"), ATTR_STYLE,
-                    style("display", "inline"));
                 Collection<IAction> actions = new ArrayList<IAction>(getPageActions(session));
                 actions.addAll(getApplicationActions(session));
                 actions.addAll(getSessionActions(session));
                 if (!useSideNav(1 + actions.size()))
                    ;//c3 = createExpandable(c3, "Menu", ENV.get("layout.header.menu.open", false));
-                createActionPanel(c3, actions,
+                createActionPanel(c2, actions,
                     ENV.get("layout.header.button.text.show", true),
                     ATTR_ALIGN, ALIGN_RIGHT);
             }
@@ -550,7 +551,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         appendAttributes(html, "manifest", ENV.get("html5.manifest.file", "tsl2nano-appcache.mf"));
         Element head = appendElement(html, TAG_HEAD, ATTR_TITLE, "Nano-H5 Application: " + title);
 
-        appendElement(head, "meta", "name", "author", "content", "tsl2.nano.h5 (by Thomas Schneider/2012-2017)");
+        appendElement(head, "meta", "name", "author", "content", "tsl2.nano.h5 (by Thomas Schneider/2012-2020)");
         appendElement(head, "meta", "name", "viewport", "content",
             "width=device-width, height=device-height, initial-scale=1");
 //        appendElement(head, "link", "rel", "stylesheet", "href", "css/style.css");
@@ -680,7 +681,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      */
     protected void createNavigationbar(Element parent, BeanDefinition<?>... navigation) {
         Element link;
-        Element nav = appendElement(parent, "nav", ATTR_ID, "navigation");
+        Element nav = appendElement(parent, "nav", ATTR_ID, "navigation", ATTR_ALIGN, ALIGN_RIGHT);
         for (BeanDefinition<?> bean : navigation) {
             link = appendElement(nav, TAG_LINK, ATTR_HREF, PREFIX_BEANLINK
                 + bean.getName()
@@ -1182,14 +1183,16 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
          */
         Element list = appendElement(menu, "li");
         Element alink =
-            appendElement(list, TAG_LINK, content(name), ATTR_HREF, PREFIX_ACTION + actions.iterator().next().getId());
-        appendElement(alink, "span", "class", icon);
+            appendElement(list, TAG_LINK, content(name));
+        appendElement(alink, TAG_IMAGE, ATTR_SRC, icon);
         Element sub = appendElement(list, "ul");
         for (IAction a : actions) {
             Element li = appendElement(sub, "li");
-            appendElement(li, TAG_LINK, content(Messages.stripMnemonics(a.getShortDescription())),
-                ATTR_HREF,
-                PREFIX_ACTION + a.getId());
+            createAction(li, a);
+//            li = appendElement(li, TAG_LINK, content(Messages.stripMnemonics(a.getShortDescription())),
+//                enable(ATTR_HREF, a.isEnabled()),
+//                enable(PREFIX_ACTION + a.getId(), a.isEnabled()));
+//            appendElement(li, TAG_IMAGE, ATTR_SRC, a.getImagePath());
         }
         return list;
     }
@@ -1236,7 +1239,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         String width;
         width = ENV.get("layout.action.width", "-1");
         if (width.equals("-1"))
-            ENV.setProperty("layout.action.width", "100%");
+            ENV.setProperty("layout.action.width", "13em");
         return width;
     }
 
@@ -1942,7 +1945,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             String shortcut = shortCut(++tabIndex);
             Element a = createAction(cell,
                 beanValue.getName() + POSTFIX_SELECTOR,
-                CSS_CLASS_ACTION,
+                CSS_CLASS_SELECTOR,
                 ENV.translate("tsl2nano.finder.action.label", false),
                 ENV.translate("tsl2nano.selection", true),
                 null,
@@ -2090,7 +2093,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             String html = Util.asString(beanValue.getValue());
             if (html != null && !NetUtil.isURL(html))
                 appendAttributes(data, ATTR_SRCDOC, html);
-            appendAttributes(data, ATTR_WIDTH, "100%");
+            appendAttributes(data, ATTR_WIDTH, "13em");
         }
         return data;
     }

@@ -350,4 +350,16 @@ public class MapUtil {
         else //ok, thats inconsistent to the assertion ;-)
             return (T) BeanClass.createInstance(wrapperInterface, map);
 	}
+
+	/**
+	 * @param args argument values
+	 * @return index sorted map containing zero-indexed integers as keys, and args as values
+	 */
+	public static Map<Integer, Object> asIndexedMap(Object[] args) {
+		LinkedHashMap<Integer,Object> map = new LinkedHashMap<>();
+		for (int i = 0; i < args.length; i++) {
+			map.put(i, args[i]);
+		}
+		return map;
+	}
 }

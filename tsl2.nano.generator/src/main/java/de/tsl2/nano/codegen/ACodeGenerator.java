@@ -223,7 +223,7 @@ public abstract class ACodeGenerator {
         context.put("copyright", "Copyright (c) 2002-2020 Thomas Schneider");
         context.put("path", getDestinationPackageName(modelFile, destFile));
         context.put("postfix", getDestinationPostfix(modelFile));
-        context.put("eventhandler.methodexception.class", EvalOrNullExceptionHandler.class);
+        context.put("eventhandler.methodexception.class", DontEscalateExceptionHandler.class);
         util.setContext(context);
     }
 

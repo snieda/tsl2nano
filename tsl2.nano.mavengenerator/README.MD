@@ -12,9 +12,18 @@ This will generate interfaces with constants for class members for all classes i
 ## System-Properties
 
 + bean.generation.packagename     : only class in that package
-+ bean.generation.outputpath      : output base path
-+ bean.generation.nameprefix      : class+package name prefix (default: package + code-template)
-+ bean.generation.namepostfix     : class name postfix (default: {code-template}.java)
++ bean.generation.outputpath      : output base path (default: src/gen)
++ bean.generation.nameprefix      : class+package name prefix (default: package + code-template) may be a regex of model
++ bean.generation.namepostfix     : class name postfix (default: {code-template}.java) may be a regex of model
++ bean.generation.unpackaged      : no package structure from origin will be inherited (default: false)
++ bean.generation.singlefile      : generate only the first occurrency (default: false)
++ bean.generation.instanceable    : filter all not instanceable classes
++ bean.generation.annotated       : annotation to search for. all not annotated classes will be filtered
++ bean.generation.instanceof      : base/super class. all not extending classes will be filtered
++ bean.generation.keyworklist     : list of comma-separated keywords to be replaced through keyword.replacement
++ bean.generation.keywordrepl     : list of csv keyword replacements. may be a single string to be added to all keywords
++ bean.generation.catchedclass    : class name not throwing exceptions on method 'cachedmethod'
++ bean.generation.catchedmethod   : method name not throwing exceptions on class 'cachedclass'
 
 ### Tutorial
 
@@ -151,6 +160,11 @@ this will stop the generation of that file at that position. normally you would 
 ##### call any method of that instance giving the model class and evaluating the first element of a list
 
     #set( $myMethodCall = $myFactory.myMethod($model.Clazz).get(0))
+
+## define catching exception handler DontEscalateExceptionHandler
+
+	#set ($catchedClass = $util.get("cls:java.lang.System").setProperty("bean.generation.catchedClass", "de.lv1871.shared.model.persistent.vertrag.gevo.BetreuerwechselGeVo") )
+	#set ($catchedMethod = $util.get("cls:java.lang.System").setProperty("bean.generation.catchedMethod", "giveBewegungsschluesselZugang") )
 
 ##### return a list of enums
 

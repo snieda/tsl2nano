@@ -3,9 +3,10 @@ body {
     font-family: Lato, sans-serif;
     transition: background-color .5s;
 }
-.table {
-   	display: table;
-   	width: 100%; 
+.table .fieldpanel {
+       display: table;
+       margin: 0 auto;
+   	/* width: 100%;  */
 } 
 tbody, .tbody {
    	display: table-row-group; 
@@ -20,7 +21,7 @@ tfoot, .tfoot {
    	font-weight: bold;
 	background-color: rgba(247,247,247,.5); 
 } 
-tr, .tr {
+tr, .tr, .beancollectorsearchrow {
    	display: table-row; 
 } 
 td, th, .td, .th {
@@ -160,11 +161,11 @@ a{
     vertical-align: middle;
     text-decoration: none;
 }
-button:disabled,button[disabled]{
+button:disabled,button[disabled],ul:not(.menu)>li>a:not([href]){
   background: #999999;
   color: lightgray;
 }
-button,a:hover, button,a:focus {
+button:hover,a:hover, button:focus,a:focus {
     color: white;
     background: black;
     cursor: pointer;
@@ -194,6 +195,10 @@ td, th, .td, .th {
 	display: none;
 }
 }
+#title {
+    color: white;
+}
+
 @media only screen and (max-width: 480px) {
 thead, .thead {
 	display: none;
@@ -210,4 +215,61 @@ button, input, #field§quicksearch, .actionpanel {
 .sidenav {padding-top: 15px;}
 .sidenav a {font-size: 18px;}
 .sidenav button {font-size: 18px; width: 100%}
+}
+
+body{
+    margin: 0;
+    padding: 0;
+}
+nav {
+    background: transparent;
+    border: 1px solid #333;
+    color: white;
+    display: block;
+    margin: 0;
+    overflow: hidden;
+}
+nav ul{
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+nav ul li {
+    margin: 0;
+    display: inline-block;
+    list-style-type: none;
+    transition: all 0.2s;
+}
+
+nav > ul > li > a {
+    color: white;
+    display: block !important;
+    line-height: 2em;
+    padding: 0.5em 2em;
+}
+
+nav li > ul{
+    display : none;
+    margin-top:1px;
+    background-color: #bbb;
+}
+
+nav li > ul li{
+    display: block !important;
+}
+
+nav  li > ul li button {
+    color: white;
+    display: block;
+    line-height: 2em;
+    padding: 0.5em 2em;
+    width: 13em;
+}
+
+nav li:hover {
+    background-color: #666 !important;
+}
+nav li:hover > ul, li:focus > ul, li:active > ul {
+    position:absolute  !important;
+    display : block !important;
 }

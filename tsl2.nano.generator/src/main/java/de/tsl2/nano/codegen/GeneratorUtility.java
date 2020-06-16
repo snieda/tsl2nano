@@ -180,9 +180,9 @@ public class GeneratorUtility {
     }
 
     /** tries to evaluate the given expression. if expression is not invokable, returns false */
-    public Object evalOrNull(String expression) {
+    public Object evalOrNull(Object obj, String expression, Object...args) {
         try {
-            return eval(expression);
+            return eval(obj, expression);
         } catch (Exception ex) {
             System.err.println("expression is not invokable: " + expression + " => " + ex.toString());
             return null;
@@ -194,8 +194,9 @@ public class GeneratorUtility {
         return eval(get(objRef), expression);
     }
 
-    public Object eval(Object obj, String expression) {
-        return CallingPath.eval(obj, expression, (Map)props);
+    public Object eval(Object obj, String expression, Object... args) {
+    	Map margs = !Util.isEmpty(args) ? MapUtil.asIndexedMap(args) : (Map)props;
+        return CallingPath.eval(obj, expression, margs);
     }
 
     public void setContext(VelocityContext context) {

@@ -47,8 +47,9 @@
 
 ## Documentation
 
-[Documentation on SourceForge](https://sourceforge.net/p/tsl2nano/wiki/tsl2-nano%20Home/)
-[Wiki-Documentation](tsl2.nano.h5/nano.h5.md.html)
+* [Wiki-Documentation on SourceForge](https://sourceforge.net/p/tsl2nano/wiki/tsl2-nano%20Home/)
+* [Wiki-Documentation](tsl2.nano.h5/nano.h5.md.html)
+* [Video Tutorial on Youtube](https://www.youtube-nocookie.com/embed/WuC37CLdxSA?rel=0)
 
 ## Code
 
