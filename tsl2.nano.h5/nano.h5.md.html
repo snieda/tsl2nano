@@ -4778,22 +4778,24 @@ Apps auf Serverway:
 - [v] jarresolver is not able to download maven-zip correctly (file is empty) <-- url to maven-bin-zip changed
 - [v] jarresolver.properties online refresh
 - [-] add mvn search from sonatype: e.g.: 'https://search.maven.org/search?q=org.jboss.logmanager'
+- [v] ask before downloading through jarresolver
+   - [v] extend websocket to do background dialog communication
 - [ ] heroku.logbook: login is not possible!!!
 - [ ] after bugfixing: test deployment of logbook on heroku
+- [ ] heroku.logbook: Caused by: java.security.UnrecoverableKeyException: Password verification failed at sun.security.provider.JavaKeyStore.engineLoad(JavaKeyStore.java:783)
+- [ ] replace application-cache mf with service workers
+   
+ ### NICE
 - [-] tsl2.nano.instrumentation: test ScriptAgentIT
 - [x] tsl2.nano.instrumentation: add classfinder
 - [x] fix cross site scripting bug
-- [ ] replace application-cache mf with service workers
-- [v] ask before downloading through jarresolver
-   - [v] extend websocket to do background dialog communication
 - [ ] add undo/redo mechansim through cursus and provide it through menu
 - [ ] fix the time-info in status-line
-- [ ] heroku.logbook: Caused by: java.security.UnrecoverableKeyException: Password verification failed at sun.security.provider.JavaKeyStore.engineLoad(JavaKeyStore.java:783)
 - [x] WebSocketExceptionHandler aufräumen und nochmal response testen
 - [v] NanoH5AttachmentTest wieder aktivieren
 - [x] show help on url commands
 - [v] copy to github (git clone --bare/mirror {old rep} --> push --mirror {new rep})
-- [ ] translate button in administration
+- [v] translate button in administration
 - [v] navigation styling
 - [x] help -> graph datamodel like ponyorm
 - [ ] help on compositor, controller
@@ -4806,13 +4808,14 @@ Apps auf Serverway:
 - [x] CSheet with action/query/rule sql-statements
 - [x] create Compositor
 - [x] create Controller
+- [v] test Scripttool with named result (as MyName)
+- [v] cumulate integration test to be covered by Jacoco
+- [v] fix h2 server shutdown <- database is shutdown, the external h2 application must stop
 - [ ] test on add Attribute (rule/web/ etc.)
 - [ ] test add Action (rule/action/web etc.)
 - [ ] test on add listener
-- [ ] test Scripttool with named result (as MyName)
-- [v] cumulate integration test to be covered by Jacoco
-- [v] fix h2 server shutdown <- database is shutdown, the external h2 application must stop
 - [ ] htmlunit test for configuration
+- [ ] Lucene Test aktivieren
 
 ### REST
 
@@ -4822,7 +4825,6 @@ Apps auf Serverway:
 - [-] show REST infos on bean
 
 - [v] NanoHtmlUnitTest in anderem Verzeichnis starten - Kollision und 10 Sekunden entfernen
-- [ ] Lucene Test aktivieren
 - [x] auf GitHub hosten
 - [x] manuell testen (auf serverway deployen)
 - [v] release hochladen
