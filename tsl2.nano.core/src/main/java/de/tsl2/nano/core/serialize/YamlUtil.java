@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -229,6 +230,18 @@ class PreRepresenter extends Representer {
                 public Object get(Object arg0) {
                     return ((Class) data).getName();
                 }
+
+				@Override
+				public List<Annotation> getAnnotations() {
+					// TODO Auto-generated method stub
+					return null;
+				}
+
+				@Override
+				public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+					// TODO Auto-generated method stub
+					return null;
+				}
             });
         }
         if (acc.findMethod("initSerialization", null).size() > 0)

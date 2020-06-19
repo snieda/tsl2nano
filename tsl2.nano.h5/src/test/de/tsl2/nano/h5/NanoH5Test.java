@@ -97,6 +97,7 @@ public class NanoH5Test implements ENVTestPreparation {
 
     @After
     public void tearDown() {
+    	ENV.getProperties().keySet().forEach(k->System.getProperties().remove(k));
     	ENV.reset();
     }
     @Test

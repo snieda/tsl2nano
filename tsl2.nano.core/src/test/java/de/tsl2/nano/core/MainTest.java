@@ -13,7 +13,8 @@ public class MainTest {
 
 	@After
 	public void tearDown() {
-		ENV.reset();
+    	ENV.getProperties().keySet().forEach(k->System.getProperties().remove(k));
+    	ENV.reset();
 	}
 	@Test
 	public void teststartParameterWithArgMapping() {

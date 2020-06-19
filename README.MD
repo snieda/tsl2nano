@@ -1,5 +1,8 @@
 # TSL2 Html5 Application Framework
 
+![Java CI with Maven](https://github.com/snieda/tsl2nano/workflows/Java%20CI%20with%20Maven/badge.svg)
+![Coveralls github](https://img.shields.io/coveralls/github/snieda/tsl2nano?style=plastic)
+
 ## Homepage
 
 [home on sourceforge](https://sourceforge.net/projects/tsl2nano/)

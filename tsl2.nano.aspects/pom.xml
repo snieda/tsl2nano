@@ -21,7 +21,7 @@
         <exec.mainClass>org.test.App</exec.mainClass>
         <exec.arguments></exec.arguments>
 		<!-- this argline normally is in surefire-configuration - but there it would create a collision with jacoco  -->
-        <argLine>${aspectj.javaagent}</argLine>
+        <argLine>${aspectj.javaagent} ${tsl2.argline.options}</argLine>
     </properties>
     <dependencies>
         <dependency>
