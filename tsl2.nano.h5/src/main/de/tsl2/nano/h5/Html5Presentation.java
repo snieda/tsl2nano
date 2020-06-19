@@ -124,6 +124,8 @@ import de.tsl2.nano.persistence.DatabaseTool;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.plugin.Plugins;
 import de.tsl2.nano.script.ScriptTool;
+import de.tsl2.nano.serviceaccess.Authorization;
+import de.tsl2.nano.serviceaccess.IAuthorization;
 
 /**
  * is able to present a bean as an html page. main method is {@link #build(Element, String)}.
@@ -484,9 +486,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             c3 = appendElement(c3, TAG_H3, content(), ATTR_ALIGN, ALIGN_CENTER);
             appendElement(c3,
                 TAG_IMAGE,
-                content(title),
+                content(getTitleWithLink(title, session)),
                 ATTR_SRC,
                 image,
+                ATTR_CLASS,
+                "title",
                 ATTR_STYLE,
                 style("display", "inline"));
         } else {
@@ -499,9 +503,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             if (new File(ENV.getConfigPath() + docURL).canRead() || (!docURL.contains(" ") && NetUtil.isURL(docURL))) {
                 c3 = appendElement(c3, TAG_H3, ATTR_ALIGN, ALIGN_CENTER, ATTR_STYLE,
                     style("display", "inline"));
-                appendElement(c3, TAG_LINK, content(title), ATTR_HREF, ENV.getConfigPath() + docURL);
+                appendElement(c3, TAG_LINK, content(title), ATTR_HREF, ENV.getConfigPath() + docURL, ATTR_CLASS, "title");
             } else {
-                c3 = appendElement(c3, TAG_H3, content(title), ATTR_ID, "title", ATTR_ALIGN, ALIGN_CENTER, ATTR_STYLE,
+                c3 = appendElement(c3, TAG_H3, content(getTitleWithLink(title, session)), ATTR_ID, "title", ATTR_ALIGN, ALIGN_CENTER, ATTR_STYLE,
                     style("display", "inline"));
             }
         }
@@ -538,7 +542,18 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         return body;
     }
 
-    private boolean useSideNav(int actionCount) {
+    private String getTitleWithLink(String title, ISession session) {
+    	if (session.getUserAuthorization() == null) {
+    		return title;
+    	} else {
+	    	String ddlName = StringUtil.substring(Persistence.current().getJarFile(), "/", ".jar", true);
+			String defaultUrl = "https://editor.ponyorm.com/user/pony/" + ddlName + "/designer";
+			String url = ENV.get("app.database.ddl.designer.url", defaultUrl);
+			return "<a href=\"" + url + "\" class=\"title\">" + title + "</a>";
+    	}
+	}
+
+	private boolean useSideNav(int actionCount) {
         // use sideNav after login...
         return isAuthenticated && ENV.get("layout.sidenav", false) 
                 && actionCount > ENV.get("layout.sidenav.min.count.action", 3);

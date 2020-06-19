@@ -3935,59 +3935,59 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
 
 ## TODOs
 
-* (v) BeanCollector.createItem() --> replace common BeanUtils call to be able to run on android
-* (v) main arguments: bean-jar, jdbc-url, user, passwd
-* (v) Show count of items
-* (v) Navigation Links have Problems
-* (v) show logging
-* (v) visible icons read by page
-* (v) Button-Panel for
-* (v) Use Xml-Configuration for BeanDefinitions
-	* (v) Print
-	* (v) Export
-	* (v) select all
-	* (v) deselect all
-* (v) Use Environment
-* (v) *Extend BeanContainer:*
-	* (-) new action: 'getValueBetween()'
-	* (v) extend all finders with start index (see maxresult) to have a result range
-	* (v) beancollector with next() and previous() data (using 'start' index and 'maxresult')
-* (v) tooltips for buttons
-* (v) check running in java 7
-* (v) add java-compiler (tools.jar, 12MB) of jdk6
-* (v) create ide for sample project
-* (v) If search result is only one element, select it
-* (v) *hibernate-tools*: (solved through beancollector.createNewItem() setting UUID
-* (v) on multiple selection, put all selected elements to the stack
-* (v) *Problem: creating a new element, copying an existing one, one-to-many connections will be lost*
+* [v] BeanCollector.createItem() --> replace common BeanUtils call to be able to run on android
+* [v] main arguments: bean-jar, jdbc-url, user, passwd
+* [v] Show count of items
+* [v] Navigation Links have Problems
+* [v] show logging
+* [v] visible icons read by page
+* [v] Button-Panel for
+* [v] Use Xml-Configuration for BeanDefinitions
+	* [v] Print
+	* [v] Export
+	* [v] select all
+	* [v] deselect all
+* [v] Use Environment
+* [v] *Extend BeanContainer:*
+	* [-] new action: 'getValueBetween()'
+	* [v] extend all finders with start index (see maxresult) to have a result range
+	* [v] beancollector with next() and previous() data (using 'start' index and 'maxresult')
+* [v] tooltips for buttons
+* [v] check running in java 7
+* [v] add java-compiler (tools.jar, 12MB) of jdk6
+* [v] create ide for sample project
+* [v] If search result is only one element, select it
+* [v] *hibernate-tools*: (solved through beancollector.createNewItem() setting UUID
+* [v] on multiple selection, put all selected elements to the stack
+* [v] *Problem: creating a new element, copying an existing one, one-to-many connections will be lost*
 * *Dependencies*
-	* (v) Log and LogFactory
-	* (v) DefaultFormat: StandardToStringStyle and ToStringBuilder
-	* (v) StringUtil --> BeanUtil
-	* (v) BeanClass --> StringUtil --> CollectionUtil --> DefaultFormat
-* (v) extract jars through constants
+	* [v] Log and LogFactory
+	* [v] DefaultFormat: StandardToStringStyle and ToStringBuilder
+	* [v] StringUtil --> BeanUtil
+	* [v] BeanClass --> StringUtil --> CollectionUtil --> DefaultFormat
+* [v] extract jars through constants
 * (x) Application Menu: reset (--> caches, environment, navigation), restart, login, logout
 * (x) default attribute names without @id field
 * (x) Nesting Beans
 * (x) Bean with Layout
-* (v) Right-Alignments for Numbers
+* [v] Right-Alignments for Numbers
 * Problem on NanoHttp cancelling button panel (sometimes)
-* (-) Check for single selection
+* [-] Check for single selection
 * Check navigation (check input on button action like 'open' without selecting an item. At the moment it will return to the last bean)
 * Styling (Collector, Details)
 * Show Progress-Page (using Statistics)
 * *Html-Table:*
-	* (v) Sorting-Header
-	* (v) Previous, Next
+	* [v] Sorting-Header
+	* [v] Previous, Next
 	* Style (of sorting header etc.)
 	* up, down (for sorting values)
 * configure to have generated IDs
 * read documentation
 * *Searches on big data:*
 	* first count data
-	* (v) button to show one-to-many in table
+	* [v] button to show one-to-many in table
 	* use thread to be interupted
-* (v) internal export and view (replacing ant-like variables and showing the document)
+* [v] internal export and view (replacing ant-like variables and showing the document)
 * generate const class from property file
 * (x) create xsd through CommonTest with trang.jar
 * (x) add configuration action (html-tool to edit xml files)
@@ -4002,12 +4002,12 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
 	* create GenericOperator from SOperator to read available Operations from xml.
 	* eval language per session
 * *Refactoring:*
-	* (v) RegularExpressionFormat ==> RegExpFormat
-	* (v) refactore ScriptUtil: extract Ant calls
-	* (v) util.bean ==> bean
+	* [v] RegularExpressionFormat ==> RegExpFormat
+	* [v] refactore ScriptUtil: extract Ant calls
+	* [v] util.bean ==> bean
 	* extract bean-package as project
 	* nano.h5 ==> fullrelation
-	* (?) refactore environment property names to use logic path-algorithm
+	* [?] refactore environment property names to use logic path-algorithm
 	* (x) file-access: use Environment.getResource() reading through jar or file system
 	* extract api
 * *Interfaces:*
@@ -4015,8 +4015,8 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
 	* reading xsd through dom - creating beandefinitions (as xml)
 	* BeanEnhancer enhancing Beans having only attributes with getters/setters
 * *Replication / Offline*
-	* (-) FileBeanContainer serializing all lists of all BeanCollectors
-	* (-) GenericBeanContainer using filled FileBeanContainer re-attaching all serialized bean lists
+	* [-] FileBeanContainer serializing all lists of all BeanCollectors
+	* [-] GenericBeanContainer using filled FileBeanContainer re-attaching all serialized bean lists
 	* mechanism to synchronize local and remote database - no serialization needed.
 * Validate against Html5-xsd in debug mode
 * include LogicTable?
@@ -4025,33 +4025,33 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
 		* The new item has to be put to the list of it's parent container. This list has to be saved before the new item!
 		* The beancollector now holds a 
 * *Problem: Filtering on Entities doesn't work (findBetween is not able to do a between for 'entity-columns')*
-* *(v) Problem: Filtering BeanCollectors of Entities doesn't work after sorting twice*
-* ( ) internationalization: english RegExpFormat on date, date-time
-* (v) remove config path from environment (-->transient)
+* *[v] Problem: Filtering BeanCollectors of Entities doesn't work after sorting twice*
+* [ ] internationalization: english RegExpFormat on date, date-time
+* [v] remove config path from environment (-->transient)
 * dynamic jar-loading inside used standard jars does not work without static entry in manifest
 * *Argo-UML 0.34*
 	* how to create ddl from model
 * *PowerDesigner*
-	* (v) create ant-script:
-		* (v) sql-statements with ddl
-		* (v) hibtool hbm2java
-		* (v) replace jdbc-connection-properties
-		* (v) start nano.h5
+	* [v] create ant-script:
+		* [v] sql-statements with ddl
+		* [v] hibtool hbm2java
+		* [v] replace jdbc-connection-properties
+		* [v] start nano.h5
 		* jmeter integration test
 		* automated crud test (pushing search/new/delete buttons for all entity types), profiling and counting errors in log-file
 * multiple type/format evaluation in BeanValue (new member for type?) Presentable and BeanPresentationHelper
 * (x) permission configuration
 * waiting message - new thread, answering on finish (e.g. on generating)
 * provide last exception of log-file
-* ( ) use actual h2 or hsqldb
-* (-) extend layout-managment for nested beans <- extend your bean-definition with attributes of other beans.
+* [ ] use actual h2 or hsqldb
+* [-] extend layout-managment for nested beans <- extend your bean-definition with attributes of other beans.
 * (x) *generic navigation through hsql statements*
-* ( ) *bean navigation actions*
+* [ ] *bean navigation actions*
 * *ERRORS*
 	* hsqldb 1.8 is not able to do _select max(count(color)) from Colors group by color_
 	* hibernate3 is - on special circumstances - not able to load fields with empty ('') strings. This results in an __java.lang.StringIndexOutOfBoundsException: String index out of range: 0__
 	* failure: presentable.layout --> simple-xml: Transform of class java.util.LinkedHashMap not supported
-	* (v) failure: sorting numbers/currencies sorts as strings
+	* [v] failure: sorting numbers/currencies sorts as strings
 	* BeanPresentationHelper.defineAdditionalAttributes(): how to avoid javaassist class
 	* presentation not written to xml --> see first failure
 	* every bean gets a new beandef copy with copies of attributedefs --> attributedef evaluations for every bean!
@@ -4068,7 +4068,7 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
 * temp value registering through environment
 * all generic interfaces registered in environment (IAttributeDefinition, IBeanDefinition, IBeanContainer, ..) to be extendable
 
-* (v) refactore attribute-def-hierarchy: attributedefinition should not extend beanattribute. what to do with beanvalue?
+* [v] refactore attribute-def-hierarchy: attributedefinition should not extend beanattribute. what to do with beanvalue?
 	* how to fill virtual beans ? default-values may be checked with errors, serializings...?
 * AttributeConfiguration with value-expression
 * Views with expression as listing output
@@ -4076,12 +4076,12 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
 	* TableProcessor
 	* LogivView: LogicTable
 * JMeter as macro configuration
-* (-) html-frames as perspective (left side: beans and views)
-* (v) refactore ForwardedException. delete FormattedException. Stacktrace with member-info
+* [-] html-frames as perspective (left side: beans and views)
+* [v] refactore ForwardedException. delete FormattedException. Stacktrace with member-info
 * ParseObject <-- Bean(Map)
 * *TESTS*
-	* ( ) test with multi values - using best id's
-	* (-) test on android
+	* [ ] test with multi values - using best id's
+	* [-] test on android
 
 	* languages
 	* on appserver
@@ -4094,40 +4094,40 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
 * TAGs: crud, grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper
 * perhaps use findjar.com before invoking maven-repository
 * in jdk1.7 it is possible to close a classloader (unlocking and reloading jar-files is now possible). but the URLClassLoader doesn't use this mechanism yet.
-* (v) NetworkClassLoader should recognize resources (e.g. for loggers) to avoid reloading from network every time.
+* [v] NetworkClassLoader should recognize resources (e.g. for loggers) to avoid reloading from network every time.
 
 * ebean uses an own query language but is able to 'parse' an ansi sql statement
 * ormlite needs field-annotations - while hibernate-tools only create property/method annotations
 
-* (v) problems on event 'onchange' with value = 'function() {...}' on attachments
+* [v] problems on event 'onchange' with value = 'function() {...}' on attachments
 * problems on de/-serializing 'EventController'
 * create uml documentation (websockets, bean-package)
-* (v) changing beandefs value expression will not change attributes value expressions.
+* [v] changing beandefs value expression will not change attributes value expressions.
 
 * *TODO*
 * wenn �bernehmen aktiv, diesen button als default deklarieren
-* (?) l�schen: navigations-fehler
+* [?] l�schen: navigations-fehler
 * collector mehrfach verwendet --> nav nicht als set
-* (v) jpa: was, wenn collection-joincolumn nullable = false? <== composition!
-* (v) persist von composition-kette
-* (v) ve von composition darf nicht id sein - da bei neu-anlage erst mit parent erstellt
-* (v) enum.toString() mit Punkten (siehe Festsetzungsmethode)
+* [v] jpa: was, wenn collection-joincolumn nullable = false? <== composition!
+* [v] persist von composition-kette
+* [v] ve von composition darf nicht id sein - da bei neu-anlage erst mit parent erstellt
+* [v] enum.toString() mit Punkten (siehe Festsetzungsmethode)
 * l�schen von transientem und persistentem composite l�uft manchmal schief!
 * deaktivieren von neuen composites zeigt nicht erw�nschtes ergebnis an
-* (v) verwende incubation-rule in constraint (-->check())
-* (v) verwende incubation-rule in bean (-->check())
-* (v) attribute.presentable +isSearchable
+* [v] verwende incubation-rule in constraint (-->check())
+* [v] verwende incubation-rule in bean (-->check())
+* [v] attribute.presentable +isSearchable
 * lose kopplung von apache fop?
 * Verwendung von sourceforges Admin/MySQL Webhosting
 * Untersuche Verwendung von sourceforge VHost (tsl2-nano.org)
 * declaration over programmation
 * print-Verzeichnis: Suche nach jrxml und xsl-fo
 * rule-definition: Zur Anbindung anderer rule-engines
-* (v) fade-in, fade-out
-* (v) show if application was stopped
+* [v] fade-in, fade-out
+* [v] show if application was stopped
 * (x) show message if offline
 * where to use instrumentation agents?
-* (v) how to ignore unset primitive search attributes?
+* [v] how to ignore unset primitive search attributes?
 * add database-logging to genericservice (if exist 'Log'-Table: user: action, bean-diff old and new)
 * *evaluate reverse tools:*
 	* DBRE http://docs.spring.io/spring-roo/reference/html/base-dbre.html
@@ -4182,7 +4182,7 @@ Net:Connection-->Link-->Cover(content, descriptor)
 ** file-selector
 ** picture viewer (asciipicture)
 ** beanexaminer ;-)
-* (-) automatische Uebersetzungen einer messages.properties ueber restful (--> Google �bersetzer)
+* [-] automatische Uebersetzungen einer messages.properties ueber restful (--> Google �bersetzer)
 * Volltextsuche
 * Query wird bei jeder Aktion ausgef�hrt - um den Context zu aktualisieren
 * (x) Sequence (action through a selector)
@@ -4193,9 +4193,9 @@ Net:Connection-->Link-->Cover(content, descriptor)
 * checker (polling action)
 
 *TODO* f�r zeiterfassung
-* (v) id --> sequence
-* (v) Vorbelegungen und Suche in Suchmaske (z.B. aktueller Monat <-- 'Merken')
-* (v) labels, tooltips not from presentable but from messages* charge=Erfassung, order: fromdate + wochentag, party-k�rzel, fromtime, totime, value, comment 
+* [v] id --> sequence
+* [v] Vorbelegungen und Suche in Suchmaske (z.B. aktueller Monat <-- 'Merken')
+* [v] labels, tooltips not from presentable but from messages* charge=Erfassung, order: fromdate + wochentag, party-k�rzel, fromtime, totime, value, comment 
 ** pause=(end-start)-value, +chargeitems.item.name
 ** -todate, -discharges
 ** dependeny: fromdate --> todate
@@ -4206,26 +4206,26 @@ Net:Connection-->Link-->Cover(content, descriptor)
 * Classification: Klasse (frei, ?)
 * Item: Projekt (Standard)
 * messages �bersetzen
-* (v) +Bankverbindung (+Paypal, ...)
+* [v] +Bankverbindung (+Paypal, ...)
 * +Party.k�rzel
 * ER-Diagramme link
 * frm an online-model zum verlinken
 * Digital Identity (mail, twitter, homepage...)
-* (v) Bilder mit blob?
-* (v) Summenzeile (beandef oder columndef: + summarize=$feld1-$feld2)
+* [v] Bilder mit blob?
+* [v] Summenzeile (beandef oder columndef: + summarize=$feld1-$feld2)
 * Wochentage + unterschiedliche Farben am WE+Feiertage
 * DependencyListener f�r Stunden-Berechnung: Ende-Beginn
 * Sekunden entfernen
 * macros aufnehmen und abspielen
 * verschiedene workflows zur verf�gung stellen
 * datenbank-user --> benutzer --> session-context + actions
-* (v) Statistik eingeschr�nkt auf Suchparameter
+* [v] Statistik eingeschr�nkt auf Suchparameter
 * https://editor.ponyorm.com/explore
 * erweiterte attribut-sortierung: von --> bis, string --> date --> time --> value --> timestamp --> blob
 
 * NanoTask, NanoProc, NanoLogic?
-* (-) TODO: simplexml --> xstream
-* (v) simplexml: type = java.lang.byte[] --> [B
+* [-] TODO: simplexml --> xstream
+* [v] simplexml: type = java.lang.byte[] --> [B
 * how to show a pdf file inside the html response
 * interactions on svg-pictures?
 ** using jax-rs: javascript implementieren
@@ -4239,55 +4239,55 @@ Net:Connection-->Link-->Cover(content, descriptor)
 ** Checkstyle warnungen bearbeiten
 
 * RasterBean like TslTableProcessor?
-* (v) Nesting panels in collectors
-* (v) Nesting Attributes
-* (v) Page for Environment
+* [v] Nesting panels in collectors
+* [v] Nesting Attributes
+* [v] Page for Environment
 * Triggers: 
-** (v) start search, if not more than 20 entries
-** (-) create new, if no entry available
-** (v) assign entry , if only one available
-* (v) show count on beancollectors
+** [v] start search, if not more than 20 entries
+** [-] create new, if no entry available
+** [v] assign entry , if only one available
+* [v] show count on beancollectors
 * (x) Terminal: +pegdown (markdown processor)
 * home-page on: /home/user-web/s/sn/snieda/htdocs
 * Test App starten!
 * beandef.xsd in *.xml integrieren
 * terminal: flat mode (super-tree with selection e.g. 1.1.1)
-* (v) terminal: scans --> varargs like String...
+* [v] terminal: scans --> varargs like String...
 * (x) SecurityManager ausschalten und eigene policy in jar ausliefern
 * signing: probleme beim start von ant script reverseeng.xml: LogFactory
 * property jnlpx.origFilenameArg (how to get the root jar from jnlp)
 * *admin-anyway.sql* verlagern, damit es bei jnlp nicht angezogen wird
-* (v) jnlp: funktioniert erst beim zweiten Start <-- jars abwarten
+* [v] jnlp: funktioniert erst beim zweiten Start <-- jars abwarten
 * was tun, wenn zum zweiten Mal generiert wird und schon Klassen in generated-src vorhanden sind? diese sind dann von jpa nicht ladbar.
 * doc+test rulescript, actionscript (javascript)
-* (v) kion: javax.persistence.PersistenceException: org.hibernate.PropertyValueException: not-null property references a null or transient value : de.eom.kion.beans.festsetzung.steuerakte.Austrittregel._austrittregel_BUNDESLANDIDBackref
+* [v] kion: javax.persistence.PersistenceException: org.hibernate.PropertyValueException: not-null property references a null or transient value : de.eom.kion.beans.festsetzung.steuerakte.Austrittregel._austrittregel_BUNDESLANDIDBackref
 * Doc: Verwende am besten Chrome+Hibernate+Hsqldb
 * implement XmlPresentableConverter to provide readable xml files
 * test: create random data through lists with: german-names.lst, cities.lst, countries.lst, banks.lst
 * rules:
-** (v) RuleCover
+** [v] RuleCover
 ** integration of external rule engines like visual rules, drools
 ** entscheidungstabelle --> csv-Datei --> rule-xml, --> tree (graphviz)
 * trace: Runtime.traceInstructions
 * webstart: JAVA_VM_ARGS
 * SEO: page ranking mit Seorch, diagnoSEO
 * Argumentator --> GetOpts
-* (v) QueryResult, Statistics sollten wie BeanDefinition konfigurierbar sein.
-* (v) DecisionTableInterpreter --> Rule, LogicTable
+* [v] QueryResult, Statistics sollten wie BeanDefinition konfigurierbar sein.
+* [v] DecisionTableInterpreter --> Rule, LogicTable
 ** (x) table <--> tree
 ** table.rotate
 * BeanCollector --> LogicTable, LogicTableUI mit dependency listeners
 * FormattedLogFactory per session
 * java 8 Probleme:
 	* ant start erst beim 2.mal
-	* (v) javascript engine = null
-* (v) bean.action<Name> --> annotation
-* (v) bean.action<Name>(arguments) --> create Dialog for action arguments
+	* [v] javascript engine = null
+* [v] bean.action<Name> --> annotation
+* [v] bean.action<Name>(arguments) --> create Dialog for action arguments
 * do more integration of packages like timesheet - perhaps link to the zip file
 * (x) HOTFIX for image integration
-* ( ) Integration of REST(map of properties, with serialization) with XML/JSON response
-* ( ) store map/json to database (service-URL, fixed properties, user properties, result xml/json)
-* ( ) Html-Tree element (details+table+css?)
+* [ ] Integration of REST(map of properties, with serialization) with XML/JSON response
+* [ ] store map/json to database (service-URL, fixed properties, user properties, result xml/json)
+* [ ] Html-Tree element (details+table+css?)
 * x/y --> svg
 * Statistics graph: select function (like sum, avg, ...), x-column/y-column
 * responsive design (table-->div+span+css)
@@ -4309,8 +4309,8 @@ war:
 * jdbc-properties: wenn hsqldb dann default-schema PUBLIC
 
 ponyorm:
-* (v) CR werden aus type=text entfernt --> type=textarea
-* (v) Das Zeichen ` rausschmeissen
+* [v] CR werden aus type=text entfernt --> type=textarea
+* [v] Das Zeichen ` rausschmeissen
 * (x) AUTO_INCREMENT, LONGBLOB,... <-- hsqldb compatibility mode
 *     mysql   : AUTO_INCREMENT must be before PRIMARY KEY
 *     postgres: BYTEA
@@ -4318,7 +4318,7 @@ ponyorm:
 
 erdplus: kann nichts allgemeines exportieren
 
-* (v) environment.keys
+* [v] environment.keys
 * Messages.send uses ENV to evaluate the right exceptionhandler
 * only singelton beancontainer with one user
 * RegexFormat only with german formats
@@ -4329,7 +4329,7 @@ erdplus: kann nichts allgemeines exportieren
 * (x) timestamp --> date ?
 * Feiertage:
 ** http://feiertage.jarmedia.de/api/?jahr=2014&nur_land=BY
-** (v) http://holidays.kayaposoft.com/public_holidays.php?country=deu&region=Bavaria&year=2016#
+** [v] http://holidays.kayaposoft.com/public_holidays.php?country=deu&region=Bavaria&year=2016#
 ** ICSCalendarImport implementieren
 * remove h5 test classes from jar
 * remove disabled buttons in menu
@@ -4337,8 +4337,8 @@ erdplus: kann nichts allgemeines exportieren
 * ICSImportCharge in timesheet Test (script) integrieren
 * export to ICS
 * (x) rest-call with ?-=-&
-* (v) correction on new actions not having mode-ok
-* (v) NEW: OneClick-Charger / Fast-Collector
+* [v] correction on new actions not having mode-ok
+* [v] NEW: OneClick-Charger / Fast-Collector
 ** base-type, charge-type
 ** charge-type constraints
 ** value-attribute
@@ -4356,30 +4356,30 @@ erdplus: kann nichts allgemeines exportieren
 * sometimes session-context.xml with Stackoverflow
 * Holiday import (file name/path, chargeitem)
 * workflow: organisation, ma, project
-* (v) pause --> UTC
+* [v] pause --> UTC
 * +Charge.creation, Discharge.creation
-* (v) +Admin:see full bean (inclusive all attributes)
+* [v] +Admin:see full bean (inclusive all attributes)
 * PROBLEM: value --> change-event should only do something if value is empty
 * (x) persistence.xml: javax.persistence.schema-generation.* properties
 * REST generator for each entity using BeanContainer
 * CRUD generator for each entity using REST
 * H2: 
-** (v) mda-->runServer.bat <-- define the h2-script-file
-** (v) jdbc:h2:tcp://localhost:9092/PUBLIC
+** [v] mda-->runServer.bat <-- define the h2-script-file
+** [v] jdbc:h2:tcp://localhost:9092/PUBLIC
 ** LUCENE integration?
 
-* (v) HTTPS:
+* [v] HTTPS:
 ** keytool -genkey -keyalg RSA -alias nanoh5 -keystore nanoh5.jks -storepass nanoh5 -keysize 2048 -ext SAN=DNS:localhost,IP:127.0.0.1  -validity 9999
 ** server.makeSecure(NanoHTTPD.makeSSLSocketFactory("nanoh5.jks", "nanoh5".toCharArray()), null);
-** ( ) websockets (org.java_websockets) on wss:// not working 
-** (v) Chrome not working <-- GET + '/' redoing response
+** [ ] websockets (org.java_websockets) on wss:// not working 
+** [v] Chrome not working <-- GET + '/' redoing response
 
 YAML --> ObjectMapper
 MDA: manyToMany Error
 slf-api Version (1.5.8 --> 1.7.5) Problem
-* (v) login for simple-remote users only with name and passwd
-* (v) more styling for pages
-* (v) how to inherit foreground-color?
+* [v] login for simple-remote users only with name and passwd
+* [v] more styling for pages
+* [v] how to inherit foreground-color?
 * principal not with simple wildcard but with regex
 * configuration: +AddVirtualAttribute
 * configuration->action: read annotations to show dropdowns etc.
@@ -4414,7 +4414,7 @@ MapExpressionFormat.parseObject(..) --> ve.from() raus
   FormatUtil <-- DefaultFormat <-- GenericParser <-- RegExpFormat
   twice ant (ant-1.6.5) on running ant-task
   hibernate not depending slf4j-simple --> ant-task error
-  (v) login ok-button not working on ALT-o
+  [v] login ok-button not working on ALT-o
   status-line with tooltip not working
   MS InternetExplorer: first app login --> Inet6Address, second session request: Inet4Address
 createDataTag, isData <-- iframe + srcdoc, +svg
@@ -4576,9 +4576,9 @@ version-update-script:
 	- previous->next: java-action-script (like "copy old env.xml", "remove property app.frame.style")
 	
 CSheet-TODO:
-	- (v) sql
-	- (v) formula extensions
-	- (v) labels
+	- [v] sql
+	- [v] formula extensions
+	- [v] labels
 	- growing fields
 	
 Controller:
@@ -4588,14 +4588,14 @@ Controller:
 analyse integration with REST etc.
 	
 (x) maven+refactoring TODO:
-	- (v) integration test NanoH5
+	- [v] integration test NanoH5
 	- (x) jars: war, sign, standalone, pure, sishell
-	- (v) Cp1252 -> UTF-8
-	- ( ) clean code (unused imports etc.)
-	- (v) Test timing app
-	- (?) dependencies (ant+hibernate -> javax validation-api)
-	- (-) build: replace src/resources/standalone.zip with maven build
-	- (v) release
+	- [v] Cp1252 -> UTF-8
+	- [ ] clean code (unused imports etc.)
+	- [v] Test timing app
+	- [?] dependencies (ant+hibernate -> javax validation-api)
+	- [-] build: replace src/resources/standalone.zip with maven build
+	- [v] release
 	
 	
 derby.jar + derbynet.jar aus JAVA_HOME/db/lib kopieren
@@ -4619,59 +4619,59 @@ java -cp * org.apache.derby.tools.ij
 refresh default-resources.jar
 
 
-(v) refresh MANIFEST.MF in h5:
+[v] refresh MANIFEST.MF in h5:
 Application-Name: Nano.H5
 Application-Source: http://downloads.sourceforge.net/project/tsl2nano/
  1.1.0/tsl2.nano.h5.1.1.0-signed.jar
 Application-redirect: /download
 Permissions: all-permissions
 
-- (v) log info for extract standalone.zip
+- [v] log info for extract standalone.zip
 
 on external database, anyway-scripts are used 'anyway'
 	
 - Bean: multi-instance holder?
 
-- (v) PROBLEM: style.template saved as UTF-8 becomes NULNULNUL at the end on saving it in environment.xml
-- (v) NanoHandler -> replace Loader or Main-Class in h5 manifest
-- (v) test timesheet with rulecover
-- ( ) test EntityReplication with JMockit
-- (v) int test: shell.xml not found by mda.xml
-- ( ) int test: DelegationHander in environment.xml
-- ( ) deploy 2.1.3 EINZELNE KOMPONENTEN, pom fehlt!!!
-- (v) merge inspection brunch
-- ( ) create tag 2.1.5
+- [v] PROBLEM: style.template saved as UTF-8 becomes NULNULNUL at the end on saving it in environment.xml
+- [v] NanoHandler -> replace Loader or Main-Class in h5 manifest
+- [v] test timesheet with rulecover
+- [ ] test EntityReplication with JMockit
+- [v] int test: shell.xml not found by mda.xml
+- [ ] int test: DelegationHander in environment.xml
+- [ ] deploy 2.1.3 EINZELNE KOMPONENTEN, pom fehlt!!!
+- [v] merge inspection brunch
+- [ ] create tag 2.1.5
 - (x) don't try to reload unresolved classes!
-- (v) no script engine on jdk8
+- [v] no script engine on jdk8
 - (x) &.*; wird in tables angezeigt...
 - (x) button size ???
 - (x) useSideNav > 3 buttons
 - (x) resorting fetched data
-- (v) compositor -> RunnableExpression.setValue() -> UnsupportedOperation
-- ( ) timesheet test: presentations without jpa informations (e.g. nullable=true)
-- ( ) test in android
-- (-) vNet jar vervollständigen (Classfinder: find all implementations)
+- [v] compositor -> RunnableExpression.setValue() -> UnsupportedOperation
+- [ ] timesheet test: presentations without jpa informations (e.g. nullable=true)
+- [ ] test in android
+- [-] vNet jar vervollständigen (Classfinder: find all implementations)
 - (x) vNet in terminal
 - (x) error on actions in sidenavbar if more than 3
-- ( ) Statistik aus Haushalt in TimesheetTest einfügen
+- [ ] Statistik aus Haushalt in TimesheetTest einfügen
 
-- (v) Ablauf (Undo/Rdo -> Repeat)
+- [v] Ablauf (Undo/Rdo -> Repeat)
 
 - Migration 1.1.0 -> 2.1.3
 - (!) alle environment jar-files löschen - ausser dem generierten beans jar file
-- (v) ClassFinder -> InputStream.readLine -> NPE <- install new jdk8 version
-- (v) policy file problem <- java_home to jre
+- [v] ClassFinder -> InputStream.readLine -> NPE <- install new jdk8 version
+- [v] policy file problem <- java_home to jre
 - (!) de.tsl2.nano.DefaultFormat -> de.tsl2.nano.core.util.DefaultFormat
 - (!) de.tsl2.nano.messaging.ChangeEvent -> de.tsl2.nano.core.messaging.ChangeEvent
-- (v) de.tsl2.nano.h5.timesheet.ActionImportHolidays in test ?
+- [v] de.tsl2.nano.h5.timesheet.ActionImportHolidays in test ?
 
 - Message beim Öffnen, Schliessen, Neu, ...
 - Zeitmessung falsch
 - Exception 'collection is empty but must contain at least one item'
 - [x] quicksearch schränkt such-ergebnis nicht ein
-- (v) Performance bei BeanCollector.onActivation
+- [v] Performance bei BeanCollector.onActivation
 - [v] ETimer -> keine Entity? <- from, until muss umbenannt werden
-- (v) Relationen alle als Binary <- bijective manytoone, joincolumn
+- [v] Relationen alle als Binary <- bijective manytoone, joincolumn
 - [v] jarFile mit Suchvorschlägen aus sql, jar funzt nicht, wegen falscher BeanValue-instance
 - [v] ref. RuleCover --> bean extracting super class AttributeCover (RulePool is in specification)
 
@@ -4795,7 +4795,7 @@ Apps auf Serverway:
 - [v] copy to github (git clone --bare/mirror {old rep} --> push --mirror {new rep})
 - [ ] translate button in administration
 - [v] navigation styling
-- [ ] help -> graph datamodel like ponyorm
+- [x] help -> graph datamodel like ponyorm
 - [ ] help on compositor, controller
 - [ ] admin-button: show beancollectors for : not-default, only-virtuals, all
 - [ ] memorized values are present - but too late so dialog shows up
