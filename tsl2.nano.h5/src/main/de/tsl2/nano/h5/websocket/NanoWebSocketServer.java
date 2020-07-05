@@ -38,7 +38,9 @@ import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.h5.NanoH5Session;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
+import de.tsl2.nano.h5.plugin.INanoPlugin;
 import de.tsl2.nano.math.vector.Point;
+import de.tsl2.nano.plugin.Plugins;
 
 /**
  * Html5 WebSocket Server to provide a rich client gui interaction.
@@ -120,6 +122,7 @@ public class NanoWebSocketServer extends WebSocketServer {
     @Override
     public void onMessage(WebSocket conn, String msg) {
         LOG.debug("receiving message: '" + msg + "' from " + conn);
+        Plugins.process(INanoPlugin.class).handleWebSocketMessage(conn, msg);
         if (session instanceof NanoH5Session)
             ((NanoH5Session)session).assignSessionToCurrentThread(false, null);
         //if we are in configuration mode, do nothing
@@ -211,7 +214,7 @@ public class NanoWebSocketServer extends WebSocketServer {
     @Override
     public void onMessage(WebSocket conn, ByteBuffer message) {
         super.onMessage(conn, message);
-
+        Plugins.process(INanoPlugin.class).handleWebSocketMessage(conn, message);
         //save the received file blob to environment
 //        String attachment_filename = session.getId() + "." + session.getWorkingObject();
 

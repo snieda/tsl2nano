@@ -1,12 +1,17 @@
 package de.tsl2.nano.h5.plugin;
 
+import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.SortedMap;
+
+import org.java_websocket.WebSocket;
 
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IPageBuilder;
+import de.tsl2.nano.h5.NanoH5Session;
 import de.tsl2.nano.h5.NanoHTTPD.Method;
+import de.tsl2.nano.h5.NanoHTTPD.Response;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.plugin.Plugin;
@@ -67,7 +72,7 @@ public interface INanoPlugin extends Plugin {
     void actionBeforeHandler(IAction<?> action);
 
     /** after running the requested user interaction, you can inspect the action that was called */
-    void actionAfterHandler(IAction<?> action);
+    default void actionAfterHandler(IAction<?> action) {}
 
     /**
      * on creating a new session, the workflow / navigation stack is defined by loading from 'workflow.xml' or if not
@@ -83,4 +88,23 @@ public interface INanoPlugin extends Plugin {
             Map<String, String> header,
             Map<String, String> parms,
             Map<String, String> files);
+
+    /** on each html response you are able to manipulate the dom transformed html response string */
+	default String manipulateHtmlResponse(String html) {
+		return html;
+	}
+
+	/** lets you change the response object - perhaps adding header values etc. */
+	default Response handleResponse(Response response) {
+		return response;
+	}
+
+	/** do anything on receiving a new message from a websocket client */
+	default void handleWebSocketMessage(WebSocket conn, String msg) {}
+
+	/** do anything on receiving a new message from a websocket client */
+	default void handleWebSocketMessage(WebSocket conn, ByteBuffer message) {}
+
+	/** the request has entered the session to work on. all request values were transferred to the workflow bean */
+	default void handleSessionRequest(NanoH5Session nanoH5Session, Map<String, String> parms) {}
 }

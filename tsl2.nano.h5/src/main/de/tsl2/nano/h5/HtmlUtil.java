@@ -44,6 +44,9 @@ import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.h5.plugin.INanoPlugin;
+import de.tsl2.nano.persistence.Persistence;
+import de.tsl2.nano.plugin.Plugins;
 
 /**
  * defines html tag- and attribute-names und helper methods. android doesn't support the full w3c implementation like
@@ -510,7 +513,7 @@ public class HtmlUtil {
             if (omitXmlAndDoctype) {
                 trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             } else {
-                trans.setOutputProperty(OutputKeys.INDENT, "yes");
+                trans.setOutputProperty(OutputKeys.INDENT, ENV.get("html.dom.indent", "yes"));
     //            trans.setOutputProperty(OutputKeys.METHOD, "xml");
                 trans.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
                 trans.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "html");
@@ -524,7 +527,17 @@ public class HtmlUtil {
                 deleteNullNode(doc.getDocumentElement());
             DOMSource source = new DOMSource(doc);
             trans.transform(source, result);
-            return sw.toString();
+            String html = sw.toString();
+            
+            String regexRepl = ENV.get("html.regex.replacement.sed", "");
+            if (Util.isEmpty(regexRepl)) {
+            	return Plugins.process(INanoPlugin.class).manipulateHtmlResponse(sw.toString());
+            } else {
+	            String regex = StringUtil.substring(regexRepl, "/", "/");
+	            String repl = StringUtil.substring(regexRepl, "/", null, true);
+	            LOG.info("doing regex replacement: regex=" + regex + ", replacement=" + repl);
+	            return Plugins.process(INanoPlugin.class).manipulateHtmlResponse(html.replaceAll(regex, repl));
+            }
         } catch (TransformerException e) {
             ManagedException.forward(e);
             return null;

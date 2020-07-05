@@ -488,7 +488,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
         Message.send(exceptionHandler, createStatusText(startTime));
         if (ex != null)
             Message.send(exceptionHandler, ex.toString());
-        return response;
+        return Plugins.process(INanoPlugin.class).handleResponse(response);
     }
 
     /**
@@ -633,7 +633,8 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
             return IAction.CANCELED;
         }
         refreshValues(nav.current(), parms);
-
+        Plugins.process(INanoPlugin.class).handleSessionRequest(this, parms);
+        
         if (nav.current() instanceof Controller) {
             Controller ctrl = (Controller) nav.current();
             Set<String> keys = parms.keySet();

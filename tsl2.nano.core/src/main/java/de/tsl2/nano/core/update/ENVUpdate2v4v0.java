@@ -39,6 +39,8 @@ public class ENVUpdate2v4v0 implements Runnable {
         //TODO:
         //package incubation,specification -> specification
         //rules: specification: rule, rulescript, ruledecisiontable, action, query, webclient
+        //replace in environment.xml : action.layout.width Integer -> String
+        //add in environment.xml: frame.style add style.template from body to all nav tags (at the end)
     }
 
     void runPreviousVersionUpdate() {
