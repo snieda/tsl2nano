@@ -534,7 +534,7 @@ public class HtmlUtil {
             	return Plugins.process(INanoPlugin.class).manipulateHtmlResponse(sw.toString());
             } else {
 	            String regex = StringUtil.substring(regexRepl, "/", "/");
-	            String repl = StringUtil.substring(regexRepl, "/", null, true);
+	            String repl = StringUtil.substring(regexRepl, regex + "/", "/");
 	            LOG.info("doing regex replacement: regex=" + regex + ", replacement=" + repl);
 	            return Plugins.process(INanoPlugin.class).manipulateHtmlResponse(html.replaceAll(regex, repl));
             }

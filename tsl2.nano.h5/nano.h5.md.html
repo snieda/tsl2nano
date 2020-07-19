@@ -168,6 +168,14 @@ To let the websocket communicate between your client (browser) and the nano-serv
 
 To test the websocket use the echo site https://www.websocket.org/echo.html.
 
+To test the available ciphers: 
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+nmap --script ssl-enum-ciphers -p 443 {HOSTNAME}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Add debugging informations: -Djavax.net.debug=all
+
 ##### Import the nanoh5.pks certificate into your google Chrome browser
 
 * Menu->Properties
@@ -659,6 +667,16 @@ This hashcode then can be used inside the __usercheck.xml for the synthetic user
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ...here the synthetic auth user name was changed from default SA to MUSTER and the synthetic password was changed to the new hashcode.
+
+### Authentication and SessionID
+
+The session-id is a hex presentation of a hashcode through the authorization-object.
+
+There are three methods to remember a client session, defined in environement property "app.session.id":
+
+* *Cookie*   : (default) with a session-id
+* *ETag*     : (not working allways) with a session-id
+* *Client-IP*: simple client ip - not working on dynamic ips and any forwarding like in cloud systems
 
 ### Run directly into a Bean after starting a session
 
@@ -3927,6 +3945,7 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.3.1  | 26.01.2020 | NEW: tsl2.nano.gp, generator velocity-templates enhanced, logfactory and terminal enhanced with colors
  2.4.0  | 07.06.2020 | NEW: tsl2.nano.aspects, tsl2.nano.instrumentation, websocket-dialogs, REST service, generator enhanced with additional filters
  2.4.1  | 21.06.2020 | css styling enhanced (collapsable menu), service-url as start-parameter, snake-yaml: 1.18->1.26, bugfixes
+ 2.4.2  | 26.07.2020 | plugin enhanced, configurable regexp/replace on html response, session-id as cookie or etag
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
 
@@ -4402,7 +4421,7 @@ Mannschaft
 
 
 h5.sessions, ENV.properties, ENV.services, ConcurrentUtil -> Collections.synchronizedMap(.)
-h5.builder �berfl�ssig
+h5.builder überflüssig
 h5.serve synchronized raus
 info: min --> sec
 h5.request --> info tooltip
@@ -4834,5 +4853,6 @@ Apps auf Serverway:
 
 - [v] configurable doc regex/replacement (to respect http 1.1 CR + LF, needed for heroku)
 - [v] plugin can manipualte respone html string
- 
+- [v] session-id as cookie or etag
+
  -->

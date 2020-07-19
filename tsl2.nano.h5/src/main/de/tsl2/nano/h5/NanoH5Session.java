@@ -83,6 +83,7 @@ import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.NumberUtil;
+import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.RegExpFormat;
@@ -158,6 +159,8 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
 
     /** workaround if nano sends the same page twice */
     boolean cacheReloaded;
+
+    private String key;
 
     public static final String PREFIX_STATUS_LINE = "@";
 
@@ -359,6 +362,9 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
     public void setUserAuthorization(Object authorization) {
         this.authorization = (IAuthorization) authorization;
         initContext((IAuthorization) authorization, context);
+
+        server.sessions.remove(inetAddress, this);
+        server.sessions.put(getKey(), this);
     }
 
     void setBeanContainer(BeanContainer beanContainer) {
@@ -488,6 +494,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
         Message.send(exceptionHandler, createStatusText(startTime));
         if (ex != null)
             Message.send(exceptionHandler, ex.toString());
+        server.addSessionID(this, response);
         return Plugins.process(INanoPlugin.class).handleResponse(response);
     }
 
@@ -1152,6 +1159,12 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
         return id;//inetAddress.getHostName() + "&" + authorization.getUser();
     }
 
+    public String getKey() {
+        if (key == null && authorization != null)
+            key =  StringUtil.toHexString(Util.cryptoHash(ObjectUtil.serialize(authorization)));
+        return key;
+    }
+    
     @Override
     public Context getContext() {
         return context;

@@ -10,7 +10,9 @@
 package de.tsl2.nano.serviceaccess;
 
 import java.io.File;
+import java.io.Serializable;
 import java.security.Principal;
+import java.util.Date;
 import java.util.Set;
 
 import javax.security.auth.Subject;
@@ -31,11 +33,11 @@ import de.tsl2.nano.serviceaccess.aas.principal.UserPrincipal;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
-public class Authorization implements IAuthorization {
+public class Authorization implements IAuthorization, Serializable {
     private static final Log LOG = LogFactory.getLog(IAuthorization.class);
 
     Subject subject;
-
+    long timestamp;
     /**
      * constructor
      * 
@@ -44,6 +46,7 @@ public class Authorization implements IAuthorization {
     public Authorization(Subject subject) {
         super();
         this.subject = subject;
+        this.timestamp = System.currentTimeMillis();
         LOG.info("authorization with subject:\n" + subject);
     }
 

@@ -133,7 +133,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
      */
     static final String LIBS_STANDALONE = "standalone/";
 
-    Map<InetAddress, NanoH5Session> sessions;
+    Map<Object, NanoH5Session> sessions;
     long requests = 0;
     IPageBuilder<?, String> builder;
     URL serviceURL;
@@ -167,7 +167,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         ENV.addService(ClassLoader.class, appstartClassloader);
         eventController = new EventController();
         sessions = Collections.synchronizedMap(
-            new ExpiringMap<InetAddress, NanoH5Session>(ENV.get("session.timeout.millis", 12 * DateUtil.T_HOUR)));
+            new ExpiringMap<Object, NanoH5Session>(ENV.get("session.timeout.millis", 12 * DateUtil.T_HOUR)));
         registereExpressionsAndPools();
         
         Plugins.process(INanoPlugin.class).configuration(ENV.getProperties(), ENV.services());
@@ -468,7 +468,9 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             ConcurrentUtil.sleep(2000);
         }
         lastRequest = req;
-        NanoH5Session session = sessions.get(requestor);
+        //ETag from Browser: If-None-Match
+        Object sessionID = getSessionID(header, requestor);
+        NanoH5Session session = sessions.get(sessionID);
         // application commands
         if (uri.endsWith("help"))
             return help();
@@ -479,7 +481,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         if (session != null && session.getUserAuthorization() != null && parms.containsKey("connectionUserName")
             && !parms.get("connectionUserName").equals(session.getUserAuthorization().getUser().toString())) {
             session.close();
-            sessions.remove(session.inetAddress);
+            sessions.remove(sessionID);
             session = null;
         }
         if (session == null) {
@@ -525,6 +527,27 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         return session.serve(uri, method, header, parms, files);
     }
 
+    private Object getSessionID(Map<String, String> header, InetAddress requestor) {
+        //header keys are case insenstive and are stored by NanoHttpd in lower case!
+        return header.containsKey("if-none-match") ? header.get("if-none-match") 
+            : header.containsKey("cookie") ? StringUtil.substring(header.get("cookie"), "session-id=", ";")
+                : requestor;
+    }
+
+	public void addSessionID(NanoH5Session session, Response response) {
+        if (session.getKey() != null) {
+            String sessionMode = ENV.get("app.session.id", "Cookie");
+            if (sessionMode.equals("Cookie")) {
+                response.addHeader("Set-Cookie", "session-id=" + session.getKey() + "; HttpOnly;");                    
+            } else if (sessionMode.equals("ETag")) {
+                response.addHeader("ETag", "\"" + session.getKey() + "\"");
+                // response.addHeader("Vary", "User-Agent");
+                response.addHeader("Cache-Control","max-age=7200");
+            } else { // client-id
+            }
+        }
+	}
+
     private boolean isAdmin(String uri) {
         return uri != null && uri.contains(String.valueOf(hashCode()));
     }
@@ -553,7 +576,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         }
     }
 
-    protected Map<InetAddress, NanoH5Session> getSessions() {
+    protected Map<Object, NanoH5Session> getSessions() {
         return sessions;
     }
     
