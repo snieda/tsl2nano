@@ -3641,6 +3641,255 @@ Other restrictions on android:
 * adding eclipse-link to the apk file results in error: _Unable to execute dex: method ID not in [0, 0xffff]: 65536_
 	*  Your project is too large. You have to many methods. There can only be 65536 methods per application. see here https://code.google.com/p/android/issues/detail?id=7147#c6
 
+## Deploying to the cloud
+
+### Heroku
+
+To deploy your app as maven application to heroku, follow the instructions of heroku tutorials.
+First, you should run you application on http - in the second step you may use the https protocol on your application and the websocket.
+There are two possibilities to depoy your tsl2 app:
+
+* as jar-file + configuration - without any source code - copied from src/main/resouces to target/classes
+* as source code compiledd and packed into a new jar file by maven
+
+both will have similar configuration files for heroku. To start your application, heroku needs a *Procfile*. heroku variables may be set by reading an *.env* file.
+
+Example Procfile:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# start local with .env and debug app  : heroku local
+# push to heroku master                : git push heroku master
+# restart the web process              : heroku ps:scale web=1
+# see the running configuration folder : heroku ps:exec
+# see the deployed remote files        : heroku ps bash
+# see the logs                         : heroku logs --tail
+# open app in browser                  : heroku apps:open tsl2-timesheet
+# all-in-one: git add Procfile && git commit -m "..." && git push heroku master && heroku logs --tail
+#
+# NOTE: start the internal database with heroku ps:exec -> ls target/logbook -> source runServer.cmd
+# NOTE: change the path of jar file to be relative, starting on target/
+#
+# see .env vor environment variables - only for local start
+web: java $NOLOGIN $NOSTARTPAGE $DEBUG $INTERNAL_DB $NO_DB_CHECK $TSL_SERVICE $TSL_SSL_ACTIVATE $TSL_SSL $TSL_SSL_FILE $TSL_SSL_PASSWORD $JAVAX_TSL12 $JAVAX_NET_DEBUG $JAVAX_TRUSTSTORE $JAVAX_TRUSTPASSWD -jar target/classes/tsl2.nano.h5-2.4.2-SNAPSHOT-standalone.jar target/classes/.nanoh5.timesheet "$APP_URL:$PORT"
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Example .env file:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# heroku/foreman (Procfile) local environment variables
+# heroku config:set $(cat .env | sed '/^$/d; /#[[:print:]]*$/d')
+
+APP_URL=http://tsl2-timesheet.herokuapp.com
+#APP_URL=http://localhost
+PORT=5001
+OFFLINE=-Dtsl2nano.offline=true
+#DEBUG="-agentlib:jdwp=transport=dt_socket,address=localhost:8787,server=y,suspend=n"
+NOSTARTPAGE=-Dapp.show.startpage=false
+NO_DB_CHECK=-Dapp.db.check.connection=false
+INTERNAL_DB=-Dapp.database.internal.server.run=true
+#TSL_SERVICE=-Dservice.url=https://tsl2-timesheet.herokuapp.com:5001
+TSL_SSL_ACTIVATE=-Dapp.ssl.activate=false
+# TSL_SSL=-Dapp.ssl.protocol=TLSv1_2
+# TSL_SSL_FILE=-Dapp.ssl.keystore.file=nanoh5.pks
+# TSL_SSL_PASSWORD=-Dapp.ssl.keystore.password=XXXXX
+# JAVAX_TSL12=-Dhttps.protocols=TLSv1.2
+JAVAX_NET_DEBUG=-Djavax.net.debug=all
+# JAVAX_TRUSTSTORE=-Djavax.net.ssl.trustStore=nanoh5.pks
+# JAVAX_TRUSTPASSWD=-Djavax.net.ssl.trustStorePassword=nanoh5
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you start the second line comment of the .env example file, you can set all that variables on heroku for you remote application.
+
+To configure your heroku applications, you should start the dashboard web interface 
+
+https://dashboard.heroku.com/apps
+
+but most things can be done through a bash terminal.
+
+#### Deploying with source code
+
+The TSL2 framework provides a plugin interface to do inspection on the most important parts.
+
+You may implement this plugin (the INanoPlugin) and use TSL2 module *tsl2.nano.h5.thymeleaf-pack* as parent module.
+
+Example pom.xml:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<!-- NOTE: always do a clean before install! -->
+	<parent>
+		<groupId>net.sf.tsl2nano</groupId>
+		<artifactId>tsl2.nano.h5.thymeleaf-pack</artifactId>
+		<version>2.4.2-SNAPSHOT</version>
+		<relativePath>../</relativePath>
+	</parent>
+	<groupId>de.tsl2nano.example</groupId>
+	<artifactId>tsl2.app.logbook</artifactId>
+	<!-- <version>0.0.1-SNAPSHOT</version> -->
+	<name>TSL2NANO Logbook</name>
+	<properties>
+		<project.version>2.4.2-SNAPSHOT</project.version>
+		<project.mainclass>de.my.logbook.LogbookApplication</project.mainclass>
+		<skipIntegrationTest>true</skipIntegrationTest> <!-- the real integration-test (MyNanoApplicationIntTest -> MyNanoApplicationIT)  does not connect to server -->
+	</properties>
+	<repositories>
+		<repository>
+			<id>project.local</id>
+			<name>project</name>
+			<!-- <url>file:${project.basedir}/repo</url> seems not to resolve ${project.basedir} - so we do it relative (unspecified on urls!) -->
+			<url>file://repo</url>
+			<releases><enabled>false</enabled></releases>
+		</repository>
+	</repositories>
+</project>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Example Plugin:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+public class LogbookApplication implements INanoPlugin, IDOMDecorator {
+
+	public static void main(String[] args) {
+		Main.startApplication(NanoH5.class, null, args);
+	}
+	
+	public void onAuthentication(IAuthorization auth) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void configuration(SortedMap<Object, Object> properties, Map<Class<?>, Object> services) {
+		properties.put("app.login.administration", false);
+		properties.put("websocket.use", true);
+		properties.put("app.ssl.activate", true);
+		properties.put("tsl2nano.offline", true);
+		properties.put("app.show.startpage", true);
+		properties.put("session.navigation.gimmick.onemptycollector.create.newitem", true);
+		properties.put("session.navigation.gimmick.ononeitemincollector.select.first", true);
+		properties.put("session.navigation.start.beandefinitions", "virtual.Controller (ValueType-Entry), Entry");
+		properties.put("app.page.style", "background-image: url(icons/fenz.gif); color: white; -webkit-animation: fade 2s; -webkit-animation-fill-mode: both; -moz-animation: fade 2s; -moz-animation-fill-mode: both; -o-animation: fade 2s; -o-animation-fill-mode: both; animation: fade 2s; animation-fill-mode: both;");
+        
+		Users users = Users.load();
+		users.auth("TOM", "tomtom", "SA", "", true);
+		users.auth("MONE", "monemone", "SA", "", true);
+		properties.put("app.login.secure", true);
+		
+		createStatistics();
+	}
+
+	public <PAGE, OUTPUT, T extends IPageBuilder<PAGE, OUTPUT>> T definePresentationType(T pageBuilder) {
+		return pageBuilder;
+	}
+
+	public void defineBeanDefinition(BeanDefinition<?> beanDef) {
+	}
+
+	public void definePersistence(Persistence persistence) {
+		persistence.setAutoddl("update");
+		persistence.setDatabase("logbook");
+		persistence.setJarFile(System.getProperty("user.dir") + "/tsl2.app.logbook" + "-2.4.2-SNAPSHOT.jar");
+	}
+
+	public void actionBeforeHandler(IAction<?> action) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void actionAfterHandler(IAction<?> action) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void workflowHandler(IBeanNavigator workflow) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void exceptionHandler(Exception ex) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void requestHandler(String uri, Method m, Map<String, String> header, Map<String, String> parms,
+			Map<String, String> files) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void decorate(Document doc, ISession<?> session) {
+	}
+
+	@Override
+	public void databaseGenerated(Persistence persistence) {
+	}
+
+	@Override
+	public void beansGenerated(Persistence persistence) {
+	}
+
+	private void createStatistics() {
+		/*
+         * statistic queries
+         */
+        String stmt = "\n-- get a statistic table from logbook entries\n" +
+              "-- user and log-category should be given...\n" +
+        	"select lg.Name as LogCategory, vt.Name as ValueType, MIN(e.value) as Minimum, MAX(e.value - e1.value) as MaxDiff, AVG(e.value) as Average, MAX(e.value) as Maximum, SUM(e.value) as Sum\r\n" + 
+        	"from Entry e \r\n" + 
+        	"  join Entry e1 on e1.TYPE_ID= e.TYPE_ID\r\n" + 
+        	"  join LogCategory lg on lg.ID = e.CATEGORY_ID\r\n" + 
+        	"  join ValueType vt on vt.ID = e.TYPE_ID\r\n" + 
+        	"where e1.date < e.date or (e1.date = e.date and e1.time < e.time)\r\n" + //TODO: thats not enough...
+        	"group by 1, 2\r\n" + 
+        	"order by 1, 2";
+        QueryResult.createQueryResult("Logbook-Statistics", stmt);
+        
+        stmt = "\n-- get a statistic table from logbook entries\n" +
+                "-- user and log-category should be given...\n" +
+                "select lg.Name as LogCategory, vt.Name as ValueType, e.date as Date, e.time as Time, e.value as Value\r\n" + 
+                "from Entry e \r\n" + 
+                "  join LogCategory lg on lg.ID = e.CATEGORY_ID\r\n" + 
+                "  join ValueType vt on vt.ID = e.TYPE_ID\r\n" + 
+                "order by 1, 2, 3, 4";
+        		
+        QueryResult.createQueryResult("Logbook-Course", stmt);
+	}
+
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#### Deploying only configurations
+
+You may copy the tsl2 framework jar *tsl2.nano.h5-<version>-standalone.jar* and your configuration files to your src/main/resources folder.
+on building with maven, all resources will be copied to target/classes
+
+The configuration may include:
+* presentation xml files
+* specification xml files
+* environment.xml
+* users.xml
+* [myuser]-permissions.xml
+* workflow.xml
+* messages.properties
+* META-INF/persistence.xml
+
+Example pom.xml
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>de.tsl2nano.example</groupId>
+	<artifactId>tsl2.app.timesheet</artifactId>
+	<version>2.4.2-SNAPSHOT</version>
+	<name>TSL2NANO Timesheet</name>
+</project>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+So, inside the target/classes folder the application can be started (see Procfile)
+
 ## Tutorials
 
 ### Starting from beginning with a new project
@@ -3945,7 +4194,7 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.3.1  | 26.01.2020 | NEW: tsl2.nano.gp, generator velocity-templates enhanced, logfactory and terminal enhanced with colors
  2.4.0  | 07.06.2020 | NEW: tsl2.nano.aspects, tsl2.nano.instrumentation, websocket-dialogs, REST service, generator enhanced with additional filters
  2.4.1  | 21.06.2020 | css styling enhanced (collapsable menu), service-url as start-parameter, snake-yaml: 1.18->1.26, bugfixes
- 2.4.2  | 26.07.2020 | plugin enhanced, configurable regexp/replace on html response, session-id as cookie or etag
+ 2.4.2  | 02.08.2020 | plugin enhanced, configurable regexp/replace on html response, session-id as cookie or etag
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
 
@@ -4802,7 +5051,7 @@ Apps auf Serverway:
 - [ ] heroku.logbook: login is not possible!!!
 - [ ] after bugfixing: test deployment of logbook on heroku
 - [ ] heroku.logbook: Caused by: java.security.UnrecoverableKeyException: Password verification failed at sun.security.provider.JavaKeyStore.engineLoad(JavaKeyStore.java:783)
-- [ ] replace application-cache mf with service workers
+- [-] replace application-cache mf with service workers <- caching is done by ETags
    
  ### NICE
  

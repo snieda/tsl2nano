@@ -725,12 +725,15 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             panel = createController(session, panel, (Controller) bean, interactive, fullwidth);
         } else if (bean instanceof BeanCollector) {
             panel = createCollector(session, panel, (BeanCollector) bean, interactive, fullwidth);
-        } else {
+        } else if (bean instanceof Bean) {
             //prefill a new bean with the current navigation stack objects
             if (BeanContainer.isConnected() && BeanContainer.instance().isTransient(((Bean) bean).getInstance())) {
                 addSessionValues(session, (Bean) bean);
             }
             panel = createBean(session, panel, (Bean<?>) bean, interactive, fullwidth);
+        } else {
+            throw new IllegalStateException(bean.toString() + " is only a base definition but must be an explicit instance (Bean) or collection (BeanCollector)!"
+                + "\nThis happens, if an extension of BeanCollector crashes on construction. Perhaps wrong database?");
         }
         return panel;
     }

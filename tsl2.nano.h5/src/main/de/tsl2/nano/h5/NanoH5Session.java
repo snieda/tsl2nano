@@ -505,7 +505,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
         if (newRequest) {
             lastAccess = System.currentTimeMillis();
             requests++;
-            if (nav.current() instanceof Bean && ((Bean) nav.current()).getInstance() instanceof BeanConfigurator) {
+            if (nav != null && nav.current() instanceof Bean && ((Bean) nav.current()).getInstance() instanceof BeanConfigurator) {
                 this.beanConfigurator = (BeanConfigurator) ((Bean) nav.current()).getInstance();
             }
             if (properties != null && !properties.isEmpty()) {
@@ -1225,7 +1225,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
     @Override
     public boolean check(long timeout, boolean throwException) {
         boolean authenicatedButNotConnected =
-            nav.current() != null && !Persistence.class.isAssignableFrom(nav.current().getDeclaringClass())
+            nav != null && nav.current() != null && !Persistence.class.isAssignableFrom(nav.current().getDeclaringClass())
                 && authorization != null && !BeanContainer.isConnected();
         boolean expired = System.currentTimeMillis() - getLastAccess() > timeout || nav == null || nav.isEmpty()
             || authenicatedButNotConnected;

@@ -49,5 +49,11 @@ JSU_ENC=-Dsun.jnu.encoding=UTF-8
 JAVA_OPTS="-Xmx512m -Djava.awt.headless=true"
 #LOG=">$PRJ.log"
 IPv4="-Djava.net.preferIPv4Stack=true"
-java $IPv4 $OFFLINE $UH $LLANG $ENCODING $JSU_ENC $USERDIR $NANO_DEBUG $AGENT $PROXY  $DEBUG $UH $PROFILER $JAVA_OPTS -jar $NAME-$VERSION$EXTENSION.jar $PRJ $PORT $LOG 
+#NOSTARTPAGE=-Dapp.show.startpage=false
+#NO_DB_CHECK=-Dapp.db.check.connection=false
+#INTERNAL_DB=-Dapp.database.internal.server.run=true
+#TSL_SERVICE=-Dservice.url=https://tsl2-timesheet.herokuapp.com:5000
+java $IPv4 $OFFLINE $UH $LLANG $ENCODING $JSU_ENC $USERDIR $NANO_DEBUG $AGENT $PROXY  $DEBUG \
+	$UH $PROFILER $NO_DB_CHECK $NOSTARTPAGE $INTERNAL_DB $TSL_SERVICE \
+	$JAVA_OPTS -jar $NAME-$VERSION$EXTENSION.jar $PRJ $PORT $LOG 
 #if [ not "$NOPAUSE" == "nopause" ] then 'read -p' fi

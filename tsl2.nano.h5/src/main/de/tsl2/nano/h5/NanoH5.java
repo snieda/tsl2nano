@@ -189,7 +189,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
      * @param args
      */
     public static void main(String[] args) {
-        startApplication(NanoH5.class, MapUtil.asMap(0, "service.port"), args);
+        startApplication(NanoH5.class, MapUtil.asMap(0, "service.url"), args);
     }
 
     /**
@@ -471,11 +471,18 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         //ETag from Browser: If-None-Match
         Object sessionID = getSessionID(header, requestor);
         NanoH5Session session = sessions.get(sessionID);
+        //fallback to requestor - if cookie or etag is wrong!
+        if (session == null && sessionID != requestor) //yes, id. object!
+            session = sessions.get(requestor);
         // application commands
         if (uri.endsWith("help"))
             return help();
         if (isAdmin(uri)) {
             control(StringUtil.substring(uri, String.valueOf(hashCode())+"-", null), session);
+        }
+        if (session != null && session.getNavigationStack() == null) {
+            sessions.remove(sessionID);
+            session = null;
         }
         //if a user reconnects on the same machine, we remove his old session
         if (session != null && session.getUserAuthorization() != null && parms.containsKey("connectionUserName")
@@ -495,7 +502,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                 // session expired!
                 if (ENV.get("session.workflow.close", false)) {
                     session.close();
-                    sessions.remove(session.inetAddress);
+                    sessions.remove(sessionID);
                     session = createSession(requestor);
                 }
                 if (done) {
@@ -537,13 +544,15 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
 	public void addSessionID(NanoH5Session session, Response response) {
         if (session.getKey() != null) {
             String sessionMode = ENV.get("app.session.id", "Cookie");
+            String maxAge = "Max-Age=" + (ENV.get("session.timeout.millis", 30 * DateUtil.T_MINUTE) / 1000) + ";";
             if (sessionMode.equals("Cookie")) {
-                response.addHeader("Set-Cookie", "session-id=" + session.getKey() + "; HttpOnly;");                    
+                String secure = ENV.get("app.ssl.activate", false) ? "secure; " : "";
+                response.addHeader("Set-Cookie", "session-id=" + session.getKey() + "; HttpOnly;" + secure + maxAge);                    
             } else if (sessionMode.equals("ETag")) {
                 response.addHeader("ETag", "\"" + session.getKey() + "\"");
                 // response.addHeader("Vary", "User-Agent");
-                response.addHeader("Cache-Control","max-age=7200");
-            } else { // client-id
+                response.addHeader("Cache-Control",maxAge);
+            } else { // client-ip
             }
         }
 	}
