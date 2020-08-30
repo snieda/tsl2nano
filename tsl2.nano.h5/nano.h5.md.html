@@ -5098,10 +5098,33 @@ Apps auf Serverway:
 - [x] manuell testen (auf serverway deployen)
 - [v] release hochladen
 
-### heroku - http 1.1
+### Cloud
+
+####  heroku - http 1.1
 
 - [v] configurable doc regex/replacement (to respect http 1.1 CR + LF, needed for heroku)
 - [v] plugin can manipualte respone html string
 - [v] session-id as cookie or etag
 
- -->
+#### RedHat Openshift
+
+#### GitHub release
+
+https://www.appveyor.com/docs/deployment/github/
+
+deploy:
+  release: myproduct-v$(appveyor_build_version)
+  description: 'Release description'
+  provider: GitHub
+  auth_token:
+    secure: <your encrypted token> # your encrypted token from GitHub
+  artifact: /.*\.nupkg/            # upload all NuGet packages to release assets
+  draft: false
+  prerelease: false
+  on:
+    branch: master                 # release from master branch only
+    APPVEYOR_REPO_TAG: true        # deploy on tag push only
+
+#### GitLab source + release
+
+-->
