@@ -17,6 +17,5 @@ package de.tsl2.nano.structure;
  */
 public interface IConnection<CORE, DESCRIPTOR> {
     INode<CORE, DESCRIPTOR> getDestination();
-
     DESCRIPTOR getDescriptor();
 }

@@ -9,7 +9,10 @@
  */
 package de.tsl2.nano.incubation.vnet;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Time;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -28,6 +31,7 @@ import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.structure.IConnection;
 import de.tsl2.nano.structure.INode;
+import de.tsl2.nano.util.GraphLog;
 
 /**
  * provides a virtual net with {@link Node}s having {@link Connection}s to several other {@link Node}s. Each
@@ -425,6 +429,10 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
             + notifications
             + " notifications\n");
         return buf.toString();
+    }
+
+    public void graph() {
+    	new GraphLog(name).create(elements.values()).write();
     }
 
     public String getName() {

@@ -18,6 +18,7 @@ import org.apache.commons.logging.Log;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Transient;
 import org.simpleframework.xml.core.Commit;
+import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
@@ -77,7 +78,7 @@ public class Workflow extends EntityBrowser implements Cloneable {
      */
     @Override
     public void add(BeanDefinition<?> bean) {
-        //no beans will be added - only the activities define editable beans.
+    	throw new UnsupportedOperationException("no beans should be added - only the activities define editable beans!");
     }
 
     /**
@@ -169,6 +170,10 @@ public class Workflow extends EntityBrowser implements Cloneable {
         return status;
     }
     
+    @Persist
+    private void initSerializing() {
+    	net.graph();
+    }
     @Commit
     private void initDeserializing() {
         net.addAll(activities);

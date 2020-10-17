@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.structure;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import de.tsl2.nano.collection.CollectionUtil;
@@ -31,7 +32,24 @@ public class ANode<T, D> implements INode<T, D> {
     /** controller, handling notification events for other nodes */
     protected EventController controller;
 
-    /**
+    public ANode() {
+	}
+    
+    public ANode(T core) {
+		this(core, null);
+	}
+	public ANode(T core, List<IConnection<T, D>> connections) {
+		this(core, connections, null);
+	}
+	public ANode(T core, List<IConnection<T, D>> connections, EventController controller) {
+		super();
+		this.core = core;
+		this.connections = connections;
+		this.controller = controller;
+	}
+	
+	
+	/**
      * @return Returns the {@link #core}.
      */
     @Override
@@ -43,6 +61,8 @@ public class ANode<T, D> implements INode<T, D> {
      * @return Returns the controller.
      */
     public EventController getController() {
+    	if (controller == null)
+    		controller = new EventController();
         return controller;
     }
 
@@ -51,6 +71,8 @@ public class ANode<T, D> implements INode<T, D> {
      */
     @Override
     public List<IConnection<T, D>> getConnections() {
+    	if (connections == null)
+    		connections = new LinkedList<IConnection<T,D>>();
         return connections;
     }
 
@@ -86,7 +108,7 @@ public class ANode<T, D> implements INode<T, D> {
     @SuppressWarnings("rawtypes")
     public IConnection<T, D> connect(ANode<T, D> destination, D descriptor) {
         IConnection<T, D> connection = createConnection(destination, descriptor);
-        connections.add(connection);
+        getConnections().add(connection);
         if (connection instanceof IListener) {
             getController().addListener(((IListener) connection));
         }

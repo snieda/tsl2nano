@@ -28,4 +28,13 @@ public interface INode<CORE, CONNECTOR> {
 
     /** goes through the given path filter */
     INode<CORE, CONNECTOR> path(String... nodeFilters);
+
+	/**
+	 * creates a new connection
+	 * 
+	 * @param destination node to connect to
+	 * @param descriptor connection description
+	 * @return new created connection
+	 */
+	IConnection<CORE, CONNECTOR> connect(ANode<CORE, CONNECTOR> destination, CONNECTOR descriptor);
 }
