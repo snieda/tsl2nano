@@ -499,9 +499,9 @@ public class BeanContainer implements IBeanContainer {
      * @return count(*) for type
      */
     public static final long getCount(Class<?> beanType) {
-        return ((Number) instance()
-            .getBeansByQuery("select count(*) from " + beanType.getSimpleName(), true, (Object[]) null).iterator()
-            .next()).longValue();
+        Collection<Object> beanCount = instance()
+            .getBeansByQuery("select count(*) from " + beanType.getSimpleName(), true, (Object[]) null);
+		return beanCount.size() > 0 ? ((Number) beanCount.iterator().next()).longValue() : 0 /*may be on empty tests*/;
     }
 
     /**

@@ -67,7 +67,7 @@ public class Persistence implements Serializable, Cloneable {
      * whether to enable auto-ddl creation of the current provider. possible values: false, validate, update, create,
      * create-drop
      */
-    private String autoddl = System.getProperty(KEY_PREF + "persistenceunit", "false");
+    private String autoddl = System.getProperty(KEY_PREF + "autoddl", "false");
     /** jdbc connection properties - used by ejb creator */
     public static final String FILE_JDBC_PROP_FILE = "jdbc-connection.properties";
     /** xml serialization of Persistence object */

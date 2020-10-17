@@ -52,7 +52,8 @@ public class Users {
     public static Users load() {
         Users userCheck = null;
         try {
-            userCheck = ENV.load(NAME_USERMAPPING, Users.class);
+        	if (ENV.get("app.login.secure", false))
+        		userCheck = ENV.load(NAME_USERMAPPING, Users.class);
         } catch (Exception e) {
             LOG.error(e);
         } finally {
