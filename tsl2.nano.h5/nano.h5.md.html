@@ -4195,6 +4195,7 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.4.0  | 07.06.2020 | NEW: tsl2.nano.aspects, tsl2.nano.instrumentation, websocket-dialogs, REST service, generator enhanced with additional filters
  2.4.1  | 21.06.2020 | css styling enhanced (collapsable menu), service-url as start-parameter, snake-yaml: 1.18->1.26, bugfixes
  2.4.2  | 02.08.2020 | plugin enhanced, configurable regexp/replace on html response, session-id as cookie or etag
+ 2.4.3  | 18.10.2020 | session-id direct on session-start (before authentication), beancollector presents hor on simple lists, vnet -> gravizo, bugfixes
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
 
@@ -5048,11 +5049,12 @@ Apps auf Serverway:
 - [-] add mvn search from sonatype: e.g.: 'https://search.maven.org/search?q=org.jboss.logmanager'
 - [v] ask before downloading through jarresolver
    - [v] extend websocket to do background dialog communication
-- [ ] heroku.logbook: login is not possible!!!
-- [ ] after bugfixing: test deployment of logbook on heroku
-- [ ] heroku.logbook: Caused by: java.security.UnrecoverableKeyException: Password verification failed at sun.security.provider.JavaKeyStore.engineLoad(JavaKeyStore.java:783)
+- [v] heroku.logbook: login is not possible!!!
+- [v] after bugfixing: test deployment of logbook on heroku
+- [-] heroku.logbook: Caused by: java.security.UnrecoverableKeyException: Password verification failed at sun.security.provider.JavaKeyStore.engineLoad(JavaKeyStore.java:783)
 - [-] replace application-cache mf with service workers <- caching is done by ETags
-   
+- [ ] ssl on heroku
+
  ### NICE
  
 - [-] tsl2.nano.instrumentation: test ScriptAgentIT
@@ -5071,6 +5073,12 @@ Apps auf Serverway:
 - [ ] admin-button: show beancollectors for : not-default, only-virtuals, all
 - [ ] memorized values are present - but too late so dialog shows up
 - [ ] oldstyle tables are active. style the .table to be centered, double-click on rows not working
+- [x] present beancollector with one table-row to do CR by renderer (for simple lists with pictures)
+- [ ] refactore/restructure IBeanNavigator+EntityBrowser+Workflow --> Stack+INavigation -> Workflow
+   - [ ] Flow + FlexibleFlow
+   - [ ] re-structure Activity...BeanAct (e.g.: use interfaces, delegate to commonaction, use of expression)
+- [x] VNet: +toGraph() -> GraphViz
+- [ ] VNet: +toProtocol() -> markdown-log
 
 ### TEST
 
@@ -5126,5 +5134,11 @@ deploy:
     APPVEYOR_REPO_TAG: true        # deploy on tag push only
 
 #### GitLab source + release
+
+### mda-spring-archetype: integrate BPMN with Camunda
+
+* point 'formkey' in camunda usertask to thymeleaf template views (e.g.: /myview)
+* use rest services of spring app
+* define default usertasks, start event? optional camunda start?
 
 -->

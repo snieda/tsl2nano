@@ -25,8 +25,10 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 
+import javax.persistence.EntityManager;
 import javax.ws.rs.Path;
 
 import org.anonymous.project.Address;
@@ -40,18 +42,23 @@ import com.sun.net.httpserver.HttpServer;
 
 import de.tsl2.nano.action.IStatus;
 import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.bean.BeanProxy;
 import de.tsl2.nano.bean.IBeanContainer;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.IValueDefinition;
+import de.tsl2.nano.bean.def.SStatus;
+import de.tsl2.nano.bean.def.StatusInfo;
 import de.tsl2.nano.codegen.ACodeGenerator;
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.Main;
 import de.tsl2.nano.core.classloader.NestedJarClassLoader;
 import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.DeclaredMethodComparator;
+import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.messaging.ChangeEvent;
@@ -175,8 +182,6 @@ public class NanoH5Test implements ENVTestPreparation {
 
         Persistence.current().save();
         
-        ENV.addService(BeanPresentationHelper.class, new Html5Presentation<>());
-
         initServices();
         
         app.start();
@@ -198,11 +203,27 @@ public class NanoH5Test implements ENVTestPreparation {
         System.out.print(preloadThyme.toString());
 
 //        ENV.create(DIR_TEST);
+    	ENV.addService(Main.class, app);
         initServices();
         NanoH5Session session = app.createSession(NetUtil.getInetAddress());
         
+        Map pars;
+        if (isDeepTest()) {
+        	//runs model-creation and session login-ok action
+        	ENV.setProperty("app.database.internal.server.run", true);
+        	session.nav.next(null);
+            Bean login = Bean.getBean(Persistence.current());
+	        pars = login.toValueMap(null);
+	        pars.remove("persistence.jdbcProperties");
+	        pars.put("jtaDataSource", "nix");
+	        pars.put("tsl2nano.login.ok", "true");
+        } else {
+        	pars = new HashMap<>();
+        }
         Socket sampleSocket = new Socket();
-        app.serve("/", Method.POST, MapUtil.asMap("socket", sampleSocket), new HashMap<>(), new HashMap<>());
+        Map header = MapUtil.asMap("socket", sampleSocket, "cookie", "session-id=" + session.getKey() + ";");
+		Response response = app.serve("/", Method.POST, header, pars, new HashMap<>());
+
         String html = null, exptectedHtml;
         for (int i = 0; i < beanTypesToCheck.length; i++) {
             Bean bean = Bean.getBean(BeanClass.createInstance(beanTypesToCheck[i]));
@@ -233,7 +254,9 @@ public class NanoH5Test implements ENVTestPreparation {
                     Bean.getBean(attr.getColumnDefinition()).toValueMap(null, false, false, false, "value");
             }
             ((Html5Presentation)bean.getPresentationHelper()).build(session, bean, "test", true, session.getNavigationStack());
-            Response response = app.serve("/" + i+1, Method.POST, MapUtil.asMap("socket", sampleSocket), new HashMap<>(), new HashMap<>());
+    		if (!isDeepTest()) {
+    			response = app.serve("/" + i+1, Method.POST, header, new HashMap<>(), new HashMap<>());
+    		}
             html = ByteUtil.toString(response.getData(), "UTF-8");
             assertTrue(html.contains(DOMExtender.class.getName())); // see DOMExtender class
             bean.onDeactivation(null);
@@ -245,7 +268,7 @@ public class NanoH5Test implements ENVTestPreparation {
          assertTrue("possible encoding problems found in html-output", !html.contains("ï»¿"));
          
          //create a new expected file (after new changes in the gui)
-         String expFileName = "test-" + name + "-output.html";
+         String expFileName = "test-" + name + "-output" + (isDeepTest() ? "-deep" : "") + ".html";
          FileUtil.writeBytes(html.getBytes(), ENV.getConfigPath() + expFileName, false);
          
         //static check against last expteced state
@@ -330,7 +353,11 @@ public class NanoH5Test implements ENVTestPreparation {
 //        AntRunner.runTask(AntRunner.TASK_DELETE, p, (String)null);
     }
 
-    private void initServices() {
+    private boolean isDeepTest() {
+		return "true".equals((System.getProperty("nanoh5test.run.deep")));
+	}
+
+	private void initServices() {
         ENV.addService(BeanPresentationHelper.class, new Html5Presentation<>());
         String userName = Persistence.current().getConnectionUserName();
         Authorization auth = Authorization.create(userName, false);
@@ -344,6 +371,7 @@ public class NanoH5Test implements ENVTestPreparation {
         ServiceFactory.instance().setSubject(auth.getSubject());
         ENV.addService(IBeanContainer.class, BeanContainer.instance());
         ConcurrentUtil.setCurrent(BeanContainer.instance());
+        ENV.addService(EntityManager.class, BeanProxy.createBeanImplementation(EntityManager.class));
     }
 
     //workaround for different base-paths on starting the tests (windows+maven <-> linux+maven)
@@ -381,10 +409,16 @@ public class NanoH5Test implements ENVTestPreparation {
 
     @Test
     public void testTimesheet() throws Exception {
+        System.setProperty("nanoh5test.run.deep", "true");
         Properties mapper = new Properties();
         createAndTest(new Timesheet(getServiceURL(), null) {
             @Override
             public void start() {
+                if (isDeepTest()) {
+	            	createStartPage();
+	                extractJarScripts();
+	                extractDefaultResources();
+                }
                 createBeanCollectors(null);
             }
         }, mapper, Charge.class);

@@ -16,7 +16,7 @@
  * websocket client implementation.
  */
 var socket = new WebSocket(
-		'ws://' + window.document.location.hostname + ':40101');
+		'ws://' + window.document.location.hostname + ':34317');
 console.log('websocket created:' + socket);
 
 socket.onopen = function() {
@@ -361,7 +361,7 @@ function isHex(h) {
 <table border="0" frame="box" id="page.header.table" sortable="" width="100%">
 <tbody>
 <tr style="background: transparent;">
-<td><a href="https://sourceforge.net/p/tsl2nano/wiki/"><img src="icons/beanex-logo-micro.jpg" title="Framework Version: tsl2.nano.h5-2.4.3-SNAPSHOT-2438-16-10-2020 18:55-d"></a></td><td>
+<td><a href="https://sourceforge.net/p/tsl2nano/wiki/"><img src="icons/beanex-logo-micro.jpg" title="Framework Version: tsl2.nano.h5-2.4.3-SNAPSHOT-2438-16-10-2020 14:45-d"></a></td><td>
 <form action="?" method="post" style="display: inline; ">
 <div>
 <nav>
@@ -381,7 +381,7 @@ function isHex(h) {
 <button accesskey="m" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="statusinfoliste.memorize" name="statusinfoliste.memorize" onclick="fade(this)" style="" title="Memorize (ALT+m)" type="submit">Merken<img alt="Merken" src="icons/yellow_pin.png"></button>
 </li>
 <li>
-<button accesskey="l" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="statusinfoliste.logout" name="statusinfoliste.logout" onclick="fade(this)" style="" title="Logout (ALT+l)" type="submit">Logout<img alt="Logout" src="icons/exit.png"></button>
+<button accesskey="l" class="panelactionsimple" formnovalidate="" formtarget="_self" id="statusinfoliste.logout" name="statusinfoliste.logout" onclick="fade(this)" style="" title="Logout (ALT+l)" type="submit">Logout<img alt="Logout" src="icons/exit.png"></button>
 </li>
 </ul>
 </li>
@@ -389,16 +389,16 @@ function isHex(h) {
 <a>Seite<img src="icons/full_screen.png"></a>
 <ul>
 <li>
-<button accesskey="d" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="statusinfoliste.print" name="statusinfoliste.print" onclick="fade(this)" style="" title="Print (ALT+d)" type="submit">Drucken<img alt="Drucken" src="icons/print.png"></button>
+<button accesskey="d" class="panelactionsimple" formnovalidate="" formtarget="_self" id="statusinfoliste.print" name="statusinfoliste.print" onclick="fade(this)" style="" title="Print (ALT+d)" type="submit">Drucken<img alt="Drucken" src="icons/print.png"></button>
 </li>
 <li>
-<button accesskey="p" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="statusinfoliste.plaintext" name="statusinfoliste.plaintext" onclick="fade(this)" style="" title="Plaintext (ALT+p)" type="submit">Plaintext<img alt="Plaintext" src="icons/view.png"></button>
+<button accesskey="p" class="panelactionsimple" formnovalidate="" formtarget="_self" id="statusinfoliste.plaintext" name="statusinfoliste.plaintext" onclick="fade(this)" style="" title="Plaintext (ALT+p)" type="submit">Plaintext<img alt="Plaintext" src="icons/view.png"></button>
 </li>
 <li>
-<button accesskey="!" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="statusinfoliste.document" name="statusinfoliste.document" onclick="fade(this)" style="" title="exporting (see environment.properties, variable names are starting and ending with &sect;&sect;) to: /home/ts/workspace/tsl2nano-code/tsl2.nano.h5/.nanoh5.timesheet//statusinfo.rtf (ALT+!)" type="submit">Dokument<img alt="Dokument" src="icons/images_all.png"></button>
+<button accesskey="!" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="statusinfoliste.document" name="statusinfoliste.document" onclick="fade(this)" style="" title="exporting (see environment.properties, variable names are starting and ending with &sect;&sect;) to: /home/ts/workspace/tsl2nano-code/tsl2.nano.h5/target/test/.nanoh5.timesheet//statusinfo.rtf (ALT+!)" type="submit">Dokument<img alt="Dokument" src="icons/images_all.png"></button>
 </li>
 <li>
-<button accesskey="h" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="statusinfoliste.help" name="statusinfoliste.help" onclick="fade(this)" style="" title="/home/ts/workspace/tsl2nano-code/tsl2.nano.h5/target/test/.nanoh5.timesheet/doc/statusinfo.help.html or /home/ts/workspace/tsl2nano-code/tsl2.nano.h5/target/test/.nanoh5.timesheet/doc/statusinfo.help.pdf (ALT+h)" type="submit">Hilfe<img alt="Hilfe" src="icons/trust_unknown.png"></button>
+<button accesskey="h" class="panelactionsimple" formnovalidate="" formtarget="_self" id="statusinfoliste.help" name="statusinfoliste.help" onclick="fade(this)" style="" title="/home/ts/workspace/tsl2nano-code/tsl2.nano.h5/target/test/.nanoh5.timesheet/doc/statusinfo.help.html or /home/ts/workspace/tsl2nano-code/tsl2.nano.h5/target/test/.nanoh5.timesheet/doc/statusinfo.help.pdf (ALT+h)" type="submit">Hilfe<img alt="Hilfe" src="icons/trust_unknown.png"></button>
 </li>
 </ul>
 </li>
@@ -424,7 +424,7 @@ function isHex(h) {
 <tr>
 <td class="beanfieldlabel" id="statusInfo.message.label" style="color: #0000cc; " width="250">Message</td><td>
 <table>
-<input align="start" autofocus="autofocus" class="beanfieldinput" disabled id="statusInfo.message" max="" maxlength="2147483647" min="" name="message" pattern="[\x00-\xFF &euro;]{0,5000}" readonly size="50" style="background-color: rgba(247,247,247,.5);" tabindex="1" title="statusInfo.message" type="text" value="test.workflow finished with status: OK{startedAt: 2020-10-16 20:57:58.671, endedAt: 2020-10-16 20:57:59.754}" width="50">
+<input align="start" autofocus="autofocus" class="beanfieldinput" disabled id="statusInfo.message" max="" maxlength="2147483647" min="" name="message" pattern="[\x00-\xFF &euro;]{0,5000}" readonly size="50" style="background-color: rgba(247,247,247,.5);" tabindex="1" title="statusInfo.message" type="text" value="test.workflow finished with status: OK{startedAt: 2020-10-16 18:07:38.592, endedAt: 2020-10-16 18:07:46.207}" width="50">
 </table>
 </td>
 </tr>
@@ -449,7 +449,7 @@ function isHex(h) {
 <table border="0" frame="box" id="action.panel" sortable="" width="100%">
 <tbody>
 <tr class="actionpanel">
-<td align="center" style=""><button accesskey="s" class="panelactionsimple" disabled formtarget="_self" id="statusinfo.save" name="statusinfo.save" onclick="fade(this)" style="" title="&amp;Speichern (ALT+s)" type="submit">Speichern<img alt="Speichern" src="icons/save.png"></button><button accesskey="c" class="panelactionsimple" formnovalidate="" formtarget="_self" id="de.tsl2.nano.action.action_cancelled" name="de.tsl2.nano.action.action_cancelled" style="" title="S&amp;chlie&szlig;en (ALT+c)">Schlie&szlig;en<img alt="Schlie&szlig;en" src="icons/stop.png"></button></td>
+<td align="center" style=""><button accesskey="&uuml;" class="panelactionsimple" formtarget="_self" id="statusinfo.save" name="statusinfo.save" onclick="fade(this)" style="" title="&amp;&Uuml;bernehmen (ALT+&uuml;)" type="submit">&Uuml;bernehmen<img alt="&Uuml;bernehmen" src="icons/save.png"></button><button accesskey="c" class="panelactionsimple" formnovalidate="" formtarget="_self" id="de.tsl2.nano.action.action_cancelled" name="de.tsl2.nano.action.action_cancelled" style="" title="S&amp;chlie&szlig;en (ALT+c)">Schlie&szlig;en<img alt="Schlie&szlig;en" src="icons/stop.png"></button></td>
 </tr>
 </tbody>
 </table>
@@ -458,19 +458,7 @@ function isHex(h) {
 <table border="0" frame="box" id="page.footer.table" sortable="" style="background-image: url(icons/spe.jpg);" width="100%">
 <tbody>
 <tr>
-<td><span id="footer"><img src="icons/properties.png"><b color="#0000FF">@Benutzer  </b><i color="#000000" title="Subjekt:
-	Principal: UserPrincipal:  SA
-	Principal: Role:  admin
-
-RequestID: 1">SA  <p class="tooltip">Subjekt:
-	Principal: UserPrincipal:  SA
-	Principal: Role:  admin
-
-RequestID: 1</p>
-</i><img src="icons/properties.png"><b color="#0000FF">Online  </b><i color="#000000">00:00 Min  </i><img src="icons/properties.png"><b color="#0000FF">Zeit  </b><i color="#000000">2020 20:57:58  </i><img src="icons/properties.png"><b color="#0000FF">Sitzung  </b><i color="#000000" title="SA (items:  [0]: 
-)">Workflow  <p class="tooltip">SA (items:  [0]: 
-)</p>
-</i><img src="icons/properties.png"><b color="#0000FF">Anforderung  </b><i color="#000000">0 Sec 43 KB  </i><img src="icons/properties.png"><progress hidden="true" id="progressbar"></progress>
+<td><span id="footer"><img src="icons/properties.png"><b color="#0000FF">@Null  </b><i color="#000000">@Null  </i><img src="icons/properties.png"><b color="#0000FF">@/home/ts/workspace/tsl2nano-code/tsl2.nano.h5/target/test/.nanoh5.timesheet/mda.xml:158  </b><i color="#000000">Mda Generation Task Successful Finished!  </i><img src="icons/properties.png"><b color="#0000FF">@/home/ts/workspace/tsl2nano-code/tsl2.nano.h5/target/test/.nanoh5.timesheet/mda.xml:158  </b><i color="#000000">Mda Generation Task Successful Finished!  </i><img src="icons/properties.png"><progress hidden="true" id="progressbar"></progress>
 <span id="progress"> 	WAITING FOR WEBSOCKET TO CONNECT...!</span></span></td>
 </tr>
 </tbody>

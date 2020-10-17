@@ -189,7 +189,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
      * @param args
      */
     public static void main(String[] args) {
-        startApplication(NanoH5.class, MapUtil.asMap(0, "service.url"), args);
+        startApplication(NanoH5.class, null, args);
     }
 
     /**
@@ -246,7 +246,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         }
     }
 
-    private void extractDefaultResources() {
+    protected void extractDefaultResources() {
         String dir = ENV.getConfigPath();
         File icons = new File(dir + "icons");
         if (!icons.exists()) {
@@ -281,7 +281,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         }
     }
 
-    private void extractJarScripts() {
+    protected void extractJarScripts() {
         try {
             if (AppLoader.isUnixFS()) {
                 ENV.extractResourceToDir("run.sh", "../", false, true, true);
@@ -448,89 +448,95 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             Map<String, String> header,
             Map<String, String> parms,
             Map<String, String> files) {
-        Plugins.process(INanoPlugin.class).requestHandler(uri, m, header, parms, files);
-        String method = m.name();
-        if (method.equals("GET") && !isAdmin(uri) && !RESTDynamic.canRest(uri)) {
-            // serve files
-            if (!NumberUtil.isNumber(uri.substring(1)) && HtmlUtil.isURI(uri)
-                && !uri.contains(Html5Presentation.PREFIX_BEANREQUEST)) {
-                return super.serve(uri, method, header, parms, files);
-            }
-        }
 
-        long startTime = System.currentTimeMillis();
-        //TODO: in InternetExporer/Edge we get sometimes IP4 and sometimes IP6. should we set system property java.net.preferIPv6Addresses?
-        //           sessions.keySet().iterator().next().getAllByName(requestor.getHostName()).equals(requestor) returns false
-        InetAddress requestor = ((Socket) ((Map) header).get("socket")).getInetAddress();
-        Request req = new Request(requestor, uri, m, header, parms, files);
-        if (lastRequest != null && lastRequest.equals(req)) {//waiting for the first request to 
-            LOG.warn("duplicated request from " + requestor);
-            ConcurrentUtil.sleep(2000);
-        }
-        lastRequest = req;
-        //ETag from Browser: If-None-Match
-        Object sessionID = getSessionID(header, requestor);
-        NanoH5Session session = sessions.get(sessionID);
-        //fallback to requestor - if cookie or etag is wrong!
-        if (session == null && sessionID != requestor) //yes, id. object!
-            session = sessions.get(requestor);
-        // application commands
-        if (uri.endsWith("help"))
-            return help();
-        if (isAdmin(uri)) {
-            control(StringUtil.substring(uri, String.valueOf(hashCode())+"-", null), session);
-        }
-        if (session != null && session.getNavigationStack() == null) {
-            sessions.remove(sessionID);
-            session = null;
-        }
-        //if a user reconnects on the same machine, we remove his old session
-        if (session != null && session.getUserAuthorization() != null && parms.containsKey("connectionUserName")
-            && !parms.get("connectionUserName").equals(session.getUserAuthorization().getUser().toString())) {
-            session.close();
-            sessions.remove(sessionID);
-            session = null;
-        }
-        if (session == null) {
-            //on a new session, no parameter should be set
-            session = createSession(requestor);
-        } else {//perhaps session was interrupted/closed but not removed
-            boolean done = session.nav != null && session.nav.done();
-            if (!session.check(ENV.get("session.timeout.millis", 30 * DateUtil.T_MINUTE),
-                ENV.get("session.timeout.throwexception", false))) {
-                //TODO: show page with 'session expired'
-                // session expired!
-                if (ENV.get("session.workflow.close", false)) {
-                    session.close();
-                    sessions.remove(sessionID);
-                    session = createSession(requestor);
-                }
-                if (done) {
-                    // the workflow was done, now create the entity browser
-                    LOG.info("session-workflow of " + session + " was done. creating an entity-browser now...");
-                    session.nav = createGenericNavigationModel(true);
-                    //don't lose the connection - the first item is the login
-//                    session.nav.next(session.nav.toArray()[1]);
-                }
-            } else if (session.response != null && method.equals("GET") && parms.size() < 2  && !RESTDynamic.canRest(uri)/* contains 'QUERY_STRING = null' */
-                && (uri.length() < 2 || header.get("referer") == null) || isDoubleClickDelay(session)) {
-                LOG.debug("reloading cached page...");
-                try {
-                    session.response.getData().reset();
-                    if (!session.cacheReloaded) {
-                        session.cacheReloaded = true;
-                        return new Response(Status.OK, "text/html", session.response.getData(), -1);
-                    }
-                } catch (IOException e) {
-                    LOG.error(e);
+            String method = m.name();
+            NanoH5Session session = null;
+            long startTime = 0;
+            try {
+            Plugins.process(INanoPlugin.class).requestHandler(uri, m, header, parms, files);
+            if (method.equals("GET") && !isAdmin(uri) && !RESTDynamic.canRest(uri)) {
+                // serve files
+                if (!NumberUtil.isNumber(uri.substring(1)) && HtmlUtil.isURI(uri)
+                    && !uri.contains(Html5Presentation.PREFIX_BEANREQUEST)) {
+                    return super.serve(uri, method, header, parms, files);
                 }
             }
+
+            startTime = System.currentTimeMillis();
+            //TODO: in InternetExporer/Edge we get sometimes IP4 and sometimes IP6. should we set system property java.net.preferIPv6Addresses?
+            //           sessions.keySet().iterator().next().getAllByName(requestor.getHostName()).equals(requestor) returns false
+            InetAddress requestor = ((Socket) ((Map) header).get("socket")).getInetAddress();
+            Request req = new Request(requestor, uri, m, header, parms, files);
+            if (lastRequest != null && lastRequest.equals(req)) {//waiting for the first request to 
+                LOG.warn("duplicated request from " + requestor);
+                ConcurrentUtil.sleep(2000);
+            }
+            lastRequest = req;
+            //ETag from Browser: If-None-Match
+            Object sessionID = getSessionID(header, requestor);
+            session = sessions.get(sessionID);
+            //fallback to requestor - if cookie or etag is wrong!
+            if (session == null && sessionID != requestor) //yes, id. object!
+                session = sessions.get(requestor);
+            // application commands
+            if (uri.endsWith("help"))
+                return help();
+            if (isAdmin(uri)) {
+                control(StringUtil.substring(uri, String.valueOf(hashCode())+"-", null), session);
+            }
+            if (session != null && session.getNavigationStack() == null) {
+                sessions.remove(sessionID);
+                session = null;
+            }
+            //if a user reconnects on the same machine, we remove his old session
+            if (session != null && session.getUserAuthorization() != null && parms.containsKey("connectionUserName")
+                && !parms.get("connectionUserName").equals(session.getUserAuthorization().getUser().toString())) {
+                sessions.remove(sessionID);
+                session.close();
+                session = null;
+            }
+            if (session == null) {
+                //on a new session, no parameter should be set
+                session = createSession(requestor);
+            } else {//perhaps session was interrupted/closed but not removed
+                boolean done = session.nav != null && session.nav.done();
+                if (!session.check(ENV.get("session.timeout.millis", 30 * DateUtil.T_MINUTE),
+                    ENV.get("session.timeout.throwexception", false))) {
+                    //TODO: show page with 'session expired'
+                    // session expired!
+                    if (ENV.get("session.workflow.close", false)) {
+                        session.close();
+                        sessions.remove(sessionID);
+                        session = createSession(requestor);
+                    }
+                    if (done) {
+                        // the workflow was done, now create the entity browser
+                        LOG.info("session-workflow of " + session + " was done. creating an entity-browser now...");
+                        session.nav = createGenericNavigationModel(true);
+                        //don't lose the connection - the first item is the login
+    //                    session.nav.next(session.nav.toArray()[1]);
+                    }
+                } else if (session.response != null && method.equals("GET") && parms.size() < 2  && !RESTDynamic.canRest(uri)/* contains 'QUERY_STRING = null' */
+                    && (uri.length() < 2 || header.get("referer") == null) || isDoubleClickDelay(session)) {
+                    LOG.debug("reloading cached page...");
+                    try {
+                        session.response.getData().reset();
+                        if (!session.cacheReloaded) {
+                            session.cacheReloaded = true;
+                            return new Response(Status.OK, "text/html", session.response.getData(), -1);
+                        }
+                    } catch (IOException e) {
+                        LOG.error(e);
+                    }
+                }
+            }
+    //        //workaround to avoid doing a cached request twice
+    //        lastHeader = header;
+        } catch(Exception ex) {
+            Message.send(ex);//don't let the server go down on any exception
         }
         requests++;
         session.startTime = startTime;
-//        //workaround to avoid doing a cached request twice
-//        lastHeader = header;
-
         return session.serve(uri, method, header, parms, files);
     }
 
@@ -628,7 +634,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                 Thread.currentThread().getContextClassLoader(), ConcurrentUtil.getCurrent(Authorization.class),
                 createSessionContext());
             //TODO: the new created session is not yet authorized...is it the right time to add it as known session?
-            sessions.put(inetAddress, session);
+            sessions.put(session.getKey(), session);
             return session;
         } catch (Throwable e) {
             //to avoid an application halt without error message, we catch all to re-throw and log.
@@ -860,6 +866,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         root.setName(StringUtil.toFirstUpper(StringUtil
             .substring(Persistence.current().getJarFile().replace("\\", "/"), "/", ".jar", true)));
         root.setAttributeFilter("name");
+        root.setSimpleList(ENV.get("collector.root.listhorizontal", false));
         root.getAttribute("name").setFormat(new Format() {
             /** serialVersionUID */
             private static final long serialVersionUID = 1725704131355509738L;
@@ -1238,7 +1245,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     }
 
     public void removeSession(NanoH5Session session) {
-        sessions.remove(session.inetAddress);
+        sessions.remove(session.getKey());
         getEventController().removeListener(session);
 
         if (sessions.isEmpty() && requests > 0) {
