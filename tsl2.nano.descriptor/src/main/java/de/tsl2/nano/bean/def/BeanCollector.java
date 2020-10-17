@@ -128,6 +128,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     @Transient
     protected boolean reloadBean = true;
 
+    @Transient /* whether this collector contains simple items having only one property (like enums and objects with one field) */
+    protected boolean simpleList = false;
+
 //    @ElementList(name = "column", inline = true, required = false/*, type=ValueColumn.class*/)
     private transient Collection<IPresentableColumn> columnDefinitions;
 
@@ -619,6 +622,14 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         this.reloadBean = reloadBean;
     }
 
+    public boolean isSimpleList() {
+        return simpleList;
+    }
+
+    public void setSimpleList(boolean simpleList) {
+        this.simpleList = simpleList;
+    }
+    
     /**
      * {@inheritDoc}
      */

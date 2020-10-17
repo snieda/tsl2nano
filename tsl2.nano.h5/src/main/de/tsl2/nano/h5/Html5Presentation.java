@@ -124,8 +124,6 @@ import de.tsl2.nano.persistence.DatabaseTool;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.plugin.Plugins;
 import de.tsl2.nano.script.ScriptTool;
-import de.tsl2.nano.serviceaccess.Authorization;
-import de.tsl2.nano.serviceaccess.IAuthorization;
 
 /**
  * is able to present a bean as an html page. main method is {@link #build(Element, String)}.
@@ -973,7 +971,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         /*
          * append a quick search panel
          */
-        if (interactive) {
+        if (interactive && !bean.isSimpleList()) {
             createQuickSearchPanel(parent, bean.getValueExpression().getExpression(), bean.getQuickSearchAction());
         }
 
@@ -997,7 +995,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
         addAttributes(grid, bean.getPresentable(), true);
 
-        if (interactive && ENV.get("layout.grid.searchrow.show", true)
+        if (interactive && !bean.isSimpleList() && ENV.get("layout.grid.searchrow.show", true)
             && bean.hasMode(IBeanCollector.MODE_SEARCHABLE)
             && (!(session instanceof NanoH5Session) || !((NanoH5Session) session).isMobile())) {
             Collection<T> data = new LinkedList<T>(bean.getSearchPanelBeans());
@@ -1080,7 +1078,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             vef = new ValueExpressionFormat(BeanClass.getDefiningClass(data.iterator().next().getClass()));
         }
         int i = 0;
-        boolean hasSearchFilter = tableDescriptor.getBeanFinder().getFilterRange() != null;
+        boolean hasSearchFilter = tableDescriptor.getBeanFinder().getFilterRange() != null && !tableDescriptor.isSimpleList();
         tabIndex = data.size() > editableRowNumbers.length ? editableRowNumbers.length * -1 : 0;
 
         // provide expandable details for search and group panels
@@ -1107,6 +1105,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             }
             i++;
         }
+        if (!tableDescriptor.isSimpleList())
+            createTableFooter(session, grid, tableDescriptor);
+    }
+
+    private void createTableFooter(ISession session, Element grid, BeanCollector<?, T> tableDescriptor) {
         Element footer =
             appendElement(grid, "tfoot", ATTR_STYLE, ENV.get("layout.grid.footer.style", ""));
         Element footerRow = appendTag(footer, TABLE(TAG_ROW));
@@ -1141,9 +1144,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     /**
      * fill the given data to the grid
      * 
-     * @param grid table grid to add rows to
+     * @param grid              table grid to add rows to
      * @param columnDefinitions columns
-     * @param data collection holding data
+     * @param data              collection holding data
      */
     void createActionTableContent(Element grid,
             Controller<?, T> tableDescriptor,
@@ -1501,35 +1504,37 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ATTR_STYLE,
                 VAL_TRANSPARENT + VAL_ROUNDCORNER,
                 enable("sortable", true)));
-        if (ENV.get("layout.grid.caption.show", false)) {
-            appendElement(table, TABLE(TAG_CAPTION)[0], content(title));
-        }
-        Element head = appendTag(table, TABLE(TAG_THEAD));
-        if (collector.getPresentable() != null) {
-            addAttributes(table, collector.getPresentable(), true);
-        }
-        Element colgroup = appendTag(head, TABLE(TAG_ROW, ATTR_BORDER, "1"));
-        if (collector.hasMode(MODE_MULTISELECTION)) {
-            appendElement(colgroup, TABLE(TAG_HEADERCELL)[0], content());
-        }
-        Collection<IPresentableColumn> columns = collector.getColumnDefinitionsIndexSorted();
-        for (IPresentableColumn c : columns) {
-            Element th = appendTag(colgroup,
-                TABLE(TAG_HEADERCELL,
-                    ATTR_ID,
-                    c.getIndex() + ":" + c.getName(),
-                    ATTR_BORDER,
-                    "1",
-                    ATTR_WIDTH,
-                    Presentable.asText(c.getWidth()),
-                    //                "style",
-//                "-webkit-transform: scale(1.2);",
-                    ATTR_STYLE,
-                    ENV.get("layout.grid.header.column.style", "")));
-            if (c.getPresentable() != null) {
-                addAttributes(th, c.getPresentable(), true);
+        if (!collector.isSimpleList()) {
+            if (ENV.get("layout.grid.caption.show", false)) {
+                appendElement(table, TABLE(TAG_CAPTION)[0], content(title));
             }
-            createAction(th, c.getSortingAction(collector));
+            Element head = appendTag(table, TABLE(TAG_THEAD));
+            if (collector.getPresentable() != null) {
+                addAttributes(table, collector.getPresentable(), true);
+            }
+            Element colgroup = appendTag(head, TABLE(TAG_ROW, ATTR_BORDER, "1"));
+            if (collector.hasMode(MODE_MULTISELECTION)) {
+                appendElement(colgroup, TABLE(TAG_HEADERCELL)[0], content());
+            }
+            Collection<IPresentableColumn> columns = collector.getColumnDefinitionsIndexSorted();
+            for (IPresentableColumn c : columns) {
+                Element th = appendTag(colgroup,
+                    TABLE(TAG_HEADERCELL,
+                        ATTR_ID,
+                        c.getIndex() + ":" + c.getName(),
+                        ATTR_BORDER,
+                        "1",
+                        ATTR_WIDTH,
+                        Presentable.asText(c.getWidth()),
+                        //                "style",
+    //                "-webkit-transform: scale(1.2);",
+                        ATTR_STYLE,
+                        ENV.get("layout.grid.header.column.style", "")));
+                if (c.getPresentable() != null) {
+                    addAttributes(th, c.getPresentable(), true);
+                }
+                createAction(th, c.getSortingAction(collector));
+            }
         }
         return appendTag(table, TABLE(TAG_TBODY));
     }
@@ -1556,19 +1561,17 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
         String tab = String.valueOf(++tabIndex);
         String shortCut = shortCut(tabIndex);
-        Element row =
-            appendTag(grid,
+        Element row;
+        // pack all items to one row - let the renderer decide to do carriage returns
+        if (tableDescriptor.isSimpleList() && grid.getElementsByTagName(TAG_ROW).getLength() > 0) {
+            row = (Element)grid.getElementsByTagName(TAG_ROW).item(0);
+        } else { // create a row for each item
+            row = appendTag(grid,
                 TABLE(TAG_ROW,
                     ATTR_ID,
                     Util.asString(itemBean.getId()),
                     ATTR_CLASS,
                     "beancollectorrow",
-                    "onclick",
-                    true/*tableDescriptor.hasMode(IBeanCollector.MODE_EDITABLE)*/
-                        ? "/*if (e.originalEvent.detail < 2 || window.event.originalEvent.detail < 2) */this.getElementsByTagName('input')[0].checked = !this.getElementsByTagName('input')[0].checked"
-                        : null,
-                    "ondblclick",
-                    "location=this.getElementsByTagName('a')[0];disablePage(e);",
                     ATTR_TABINDEX,
                     tab,
                     ATTR_ACCESSKEY,
@@ -1580,7 +1583,16 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     VAL_FRM_SELF,
                     ATTR_STYLE, row1style
                 /*ATTR_BGCOLOR, rowBGColor*/));
-
+                
+                if (!tableDescriptor.isSimpleList()) {
+                    appendAttributes(row, "ondblclick", "location=this.getElementsByTagName('a')[0];disablePage(e);",
+                    "onclick",
+                    true/*tableDescriptor.hasMode(IBeanCollector.MODE_EDITABLE)*/
+                        ? "/*if (e.originalEvent.detail < 2 || window.event.originalEvent.detail < 2) */this.getElementsByTagName('input')[0].checked = !this.getElementsByTagName('input')[0].checked"
+                        : null
+                    );
+                }
+        }
         //first cell: bean reference as link
         String length = String.valueOf(index/*grid.getChildNodes().getLength() - 1*/);
         Element firstCell = appendTag(row, TABLE(TAG_CELL));
@@ -1598,7 +1610,16 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
         String icon = getIcon(itemBean, (Serializable) item);
         if (icon != null) {
-            appendElement(firstCell, TAG_IMAGE, ATTR_SRC, icon);
+            appendElement(firstCell, TAG_IMAGE, ATTR_SRC, icon, ATTR_ALT, itemBean.toString(), ATTR_TITLE, itemBean.toString());
+            if (tableDescriptor.isSimpleList()) {
+                appendAttributes(firstCell, "ondblclick", "location=this.getElementsByTagName('a')[0];disablePage(e);",
+                "onclick",
+                true/*tableDescriptor.hasMode(IBeanCollector.MODE_EDITABLE)*/
+                    ? "/*if (e.originalEvent.detail < 2 || window.event.originalEvent.detail < 2) */this.getElementsByTagName('input')[0].checked = !this.getElementsByTagName('input')[0].checked"
+                    : null
+                );
+            return row;
+            }
         }
         Collection<IPresentableColumn> colDefs = tableDescriptor.getColumnDefinitionsIndexSorted();
         Element cell;

@@ -150,7 +150,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
     private long sessionStart;
 
     /** session access */
-    private long lastAccess;
+    private long lastAccess = System.currentTimeMillis();
     transient int requests;
 
     transient private IAuthorization authorization;
@@ -245,7 +245,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
         initContext(authorization, context);
         this.sessionStart = System.currentTimeMillis();
         Persistence p = Persistence.current(); //only for id-creation
-        this.id = inetAddress + p.getConnectionUrl() + "&" + p.getConnectionUserName() + "&" + p.getJarFile();
+        this.id = inetAddress + p.getConnectionUrl() + "&" + p.getConnectionUserName() + "&" + p.getJarFile() + "&" + sessionStart;
     }
 
     /**
@@ -363,8 +363,9 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
         this.authorization = (IAuthorization) authorization;
         initContext((IAuthorization) authorization, context);
 
-        server.sessions.remove(inetAddress, this);
-        server.sessions.put(getKey(), this);
+        // <-- out-comment: we use the session-id on first request!
+        // server.sessions.remove(inetAddress, this);
+        // server.sessions.put(getKey(), this);
     }
 
     void setBeanContainer(BeanContainer beanContainer) {
@@ -667,7 +668,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
                 } else {
                     ListSet listSet = CollectionUtil.asListSet(data);
                     int selectedIndex = uriLinkNumber.intValue()
-                        - (ENV.get("layout.grid.searchrow.show", true) && collector.hasMode(MODE_SEARCHABLE)
+                        - (!collector.isSimpleList() && ENV.get("layout.grid.searchrow.show", true) && collector.hasMode(MODE_SEARCHABLE)
                             && collector.hasFilter() ? 2 : 0);
                     Object selectedItem = listSet.get(selectedIndex);
                     boolean isTypeList = BeanCollector.class.isAssignableFrom(collector.getClazz());
@@ -1127,7 +1128,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
                 //evaluate selected element to be used by an action
                 Object selectedBean = CollectionUtil.getList(data.iterator())
                     .get(selection.intValue()
-                        - (ENV.get("layout.grid.searchrow.show", true) && c.hasMode(MODE_SEARCHABLE) && c.hasFilter()
+                        - (ENV.get("layout.grid.searchrow.show", true) && !c.isSimpleList() && c.hasMode(MODE_SEARCHABLE) && c.hasFilter()
                             ? OFFSET_FILTERLINES : 0));
                 selectedElements.add(selectedBean);
             }
@@ -1156,12 +1157,12 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
 
     @Override
     public Object getId() {
-        return id;//inetAddress.getHostName() + "&" + authorization.getUser();
+        return id;
     }
 
     public String getKey() {
-        if (key == null && authorization != null)
-            key =  StringUtil.toHexString(Util.cryptoHash(ObjectUtil.serialize(authorization)));
+        if (key == null)
+            key =  StringUtil.toHexString(Util.cryptoHash(ObjectUtil.serialize(id)));
         return key;
     }
     
