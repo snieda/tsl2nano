@@ -94,6 +94,7 @@ import de.tsl2.nano.h5.collector.Controller;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.h5.navigation.Parameter;
+import de.tsl2.nano.h5.navigation.Workflow;
 import de.tsl2.nano.h5.plugin.INanoPlugin;
 import de.tsl2.nano.h5.websocket.NanoWebSocketServer;
 import de.tsl2.nano.h5.websocket.WebSocketExceptionHandler;
@@ -570,11 +571,14 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
                 + StringUtil.toHexString((getUserAuthorization() + "\n" + "RequestID: " + requests).getBytes())
                 + ", " + "Online: "
                 + DateUtil.getFormattedMinutes(getDuration()) + " min, " : "";
+        String workflow = /*nav instanceof Workflow 
+        		? "<a href=\"" + ((Workflow)nav).getGraphFileName() + "\">" + ENV.translate(nav.getName(), true) + "</a>"
+        			: */ENV.translate(nav.getName(), true);
         return PREFIX_STATUS_LINE + user
             + ENV.translate("tsl2nano.time", true)
             + ": " + DateUtil.getFormattedDateTime(new Date()) + ", "
             + (nav != null ? ENV.translate("tsl2nano.session", true)
-                + ": " + ENV.translate(nav.getName(), true) + "§"
+                + ": " + workflow + "§"
                 + StringUtil.toHexString(getContext().toString().getBytes()) : "")
             + ", "
             + ENV.translate("tsl2nano.request", true) + ": "

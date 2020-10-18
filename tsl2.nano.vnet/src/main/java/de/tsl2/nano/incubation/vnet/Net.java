@@ -9,10 +9,7 @@
  */
 package de.tsl2.nano.incubation.vnet;
 
-import java.io.IOException;
 import java.io.Serializable;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.sql.Time;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -132,7 +129,7 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
     @SuppressWarnings("unchecked")
     public Node<T, D> addAndConnect(T newNodeCore, T connection, D connectionDescriptor) {
         Node<T, D> node = new Node<T, D>(newNodeCore,
-            new ListSet<IConnection<T, D>>(new Connection<T, D>(getNode(connection),
+            new ListSet<IConnection<T, D>>(new Connection<T, D>(getNode(connection, true),
                 connectionDescriptor)));
         elements.put(node.getPath(), node);
         return node;
@@ -392,7 +389,13 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
      * @return found node or null
      */
     public Node<T, D> getNode(T nodeCore) {
-        return elements.get(nodeCore.getPath());
+    	return getNode(nodeCore, false);
+    }
+    public Node<T, D> getNode(T nodeCore, boolean createIfNotExists) {
+        Node<T, D> d = elements.get(nodeCore.getPath());
+        if (d == null && createIfNotExists)
+        	return add(nodeCore);
+        return d;
     }
 
     /**

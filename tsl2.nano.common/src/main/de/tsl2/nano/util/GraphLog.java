@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.structure.IConnection;
 import de.tsl2.nano.structure.INode;
 
@@ -53,9 +54,12 @@ public class GraphLog {
 	}
 	public void write() {
         try {
-			Files.write(Paths.get(name + "-graph.md.html"), toString().getBytes());
+			Files.write(Paths.get(getFileName()), toString().getBytes());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	public String getFileName() {
+		return ENV.getConfigPath() + name + "-graph.md.html";
 	}
 }

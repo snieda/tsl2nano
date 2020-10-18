@@ -26,10 +26,12 @@ import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.StatusInfo;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.vnet.Net;
 import de.tsl2.nano.incubation.vnet.Notification;
+import de.tsl2.nano.util.GraphLog;
 
 /**
  * EJB-Query Navigator reading it's configuration from xml. The Navigator itself uses a parallel-working net
@@ -67,11 +69,25 @@ public class Workflow extends EntityBrowser implements Cloneable {
         context = new Parameter();
         net = new Net<BeanAct, Parameter>();
         cache = new HashMap<String, BeanDefinition<?>>();
-        if (activities != null) {
-            net.addAll(activities);
-        }
+        setActivities(activities);
         status = new StatusInfo();
     }
+
+	private void setActivities(Collection<BeanAct> activities) {
+		if (activities != null) {
+	        BeanAct prev = null;
+        	for (BeanAct a : activities) {
+        		if (prev != null)
+        			net.addAndConnect(prev, a, MapUtil.asMap(new Parameter(), "condition", a.getCondition()
+        					.replaceAll("[}{)(]", "").replace("&", "&amp;")));
+				prev = a;
+			}
+        }
+	}
+	
+	public String getGraphFileName() {
+		return new GraphLog(net.getName()).getFileName();
+	}
 
     /**
      * {@inheritDoc}

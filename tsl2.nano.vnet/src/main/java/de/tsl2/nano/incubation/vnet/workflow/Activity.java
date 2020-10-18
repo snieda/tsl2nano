@@ -75,6 +75,10 @@ public abstract class Activity<S, T> extends CommonAction<T> {
     protected void setName(String name) {
         new PrivateAccessor(this).set("shortDescription", name);
     }
+
+    public S getCondition() {
+		return condition;
+	}
     
     @Override
     public String toString() {
