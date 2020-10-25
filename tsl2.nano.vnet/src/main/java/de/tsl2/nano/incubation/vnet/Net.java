@@ -29,6 +29,7 @@ import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.structure.IConnection;
 import de.tsl2.nano.structure.INode;
 import de.tsl2.nano.util.GraphLog;
+import de.tsl2.nano.util.MarkdownLog;
 
 /**
  * provides a virtual net with {@link Node}s having {@link Connection}s to several other {@link Node}s. Each
@@ -417,8 +418,10 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
      * @return net and node descriptions
      */
     public String dump() {
+        graph();
         StringBuilder buf = new StringBuilder(30 + 30 * elements.size());
         buf.append(toString() + "\n");
+        buf.append("graph (graphviz) stored in: " + new GraphLog(name).getFileName() + "\n");
         Collection<Node<T, D>> nodes = elements.values();
         long totalWorkingTime = 0;
         int notifications = 0;

@@ -182,7 +182,7 @@ dialog::backdrop{
 @-ms-viewport only screen and (max-width: 800px){
   user-scalable: no;
 }
-@media only screen and (max-width: 800px) {
+@media only screen and (max-width: ${layout.tablewrap.width}px) {
 tr, .tr {
    	display: flex; flex-wrap: wrap; 
 } 

@@ -668,6 +668,8 @@ public class HtmlUtil {
         if (tableDivStyle == null) {
             InputStream stream = ENV.getResource("style.template");
             tableDivStyle = StringUtil.removeFormatChars(String.valueOf(FileUtil.getFileData(stream, "UTF-8")));
+            ENV.get("layout.tablewrap.width", "800");
+            tableDivStyle = StringUtil.insertProperties(tableDivStyle, ENV.getProperties());
         }
         return tableDivStyle;
     }

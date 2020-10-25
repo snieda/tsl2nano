@@ -26,7 +26,7 @@ import de.tsl2.nano.core.util.StringUtil;
 public class TextComparison {
     public static String REGEX_DATE_DE = "\\d\\d\\.\\d\\d\\.\\d\\d\\d\\d";
     public static String REGEX_DATE_US = "\\d\\d\\d\\d\\-\\d\\d\\-\\d\\d";
-    public static String REGEX_TIME_DE = "\\d\\d\\:\\d\\d(\\:\\d\\d([.,]\\d\\d(\\d)?)?)?";
+    public static String REGEX_TIME_DE = "\\d\\d\\:\\d\\d(\\:\\d\\d([.,]\\d(\\d(\\d)?)?)?)?";
     public static String XXX = "XXX";
     
     public static void assertEquals(String exptected, String result, boolean ignoreWhitespace, Map<String, String> replacements) {

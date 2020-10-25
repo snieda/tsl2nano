@@ -55,6 +55,8 @@ public class VNetTest implements ENVTestPreparation {
 		Node<VNeuron, Float> nHabe = net.addAndConnect(new VNeuron("habe"), nHunger.getCore(), -1f);
 		net.addAndConnect(new VNeuron("ich"), nHabe.getCore(), -1f);
 
+		net.dump();
+		
 		List<Object> output = new LinkedList<>();
 		// create a callback for responses
 		IListener<Notification> responseHandler = new IListener<Notification>() {
@@ -160,7 +162,9 @@ public class VNetTest implements ENVTestPreparation {
 		heilbronn.connect(wuerzburg, 102f);
 		frankfurt.connect(wuerzburg, 116f);
 		ludwigshafen.connect(wuerzburg, 183f);
-
+		
+		net.dump();
+		
 		RoutingAStar routing = new RoutingAStar();
 		IConnection<Location, Float> route = routing.route(saarbruecken, wuerzburg);
 		if (route == null) {

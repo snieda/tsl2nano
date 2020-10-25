@@ -467,6 +467,7 @@ public class ENV implements Serializable {
      */
     public static final <T extends Number> T counter(String key, T diff) {
         Object value = self().properties.get(key);
+    	assert value != null || diff != null;
         if (value == null && diff != null) {
             value = diff;
         } else {

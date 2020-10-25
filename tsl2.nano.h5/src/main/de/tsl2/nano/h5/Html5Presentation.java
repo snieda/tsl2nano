@@ -1327,7 +1327,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * @return html table containing the buttons
      */
     Element createBeanActions(Element form, BeanDefinition<?> model) {
-        Element panel = createActionPanel(form, model.getActions(), true, ATTR_ALIGN, ALIGN_CENTER);
+        Element panel = createActionPanel(form, model.getActions(), true, ATTR_ALIGN, ALIGN_CENTER, ATTR_WIDTH, VAL_100PERCENT);
         if (model.isMultiValue() && model instanceof BeanCollector
             && ((BeanCollector) model).hasMode(MODE_ASSIGNABLE)) {
             String assignLabel = Messages.getStringOpt("tsl2nano.assign", true);
@@ -1610,7 +1610,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
         String icon = getIcon(itemBean, (Serializable) item);
         if (icon != null) {
-            appendElement(firstCell, TAG_IMAGE, ATTR_SRC, icon, ATTR_ALT, itemBean.toString(), ATTR_TITLE, itemBean.toString());
+            String iconOrImage = tableDescriptor.isSimpleList() ? "image" : "icon";
+            String width = ENV.get("layout." + iconOrImage + ".width", tableDescriptor.isSimpleList() ? "200" : "-1");
+            String height = ENV.get("layout."+ iconOrImage + ".height", tableDescriptor.isSimpleList() ? "200" : "-1");
+            appendElement(firstCell, TAG_IMAGE, ATTR_SRC, icon, ATTR_ALT, itemBean.toString(), ATTR_TITLE, itemBean.toString()
+                , ATTR_WIDTH, width, ATTR_HEIGHT, height);
+
             if (tableDescriptor.isSimpleList()) {
                 appendAttributes(firstCell, "ondblclick", "location=this.getElementsByTagName('a')[0];disablePage(e);",
                 "onclick",
@@ -1618,7 +1623,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     ? "/*if (e.originalEvent.detail < 2 || window.event.originalEvent.detail < 2) */this.getElementsByTagName('input')[0].checked = !this.getElementsByTagName('input')[0].checked"
                     : null
                 );
-            return row;
+                return row;
             }
         }
         Collection<IPresentableColumn> colDefs = tableDescriptor.getColumnDefinitionsIndexSorted();
@@ -2072,7 +2077,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 enableFlag(ATTR_HIDDEN, !p.isVisible()),
                 enableFlag(ATTR_REQUIRED, !beanValue.nullable() && !isGeneratedValue(beanValue))));
             if (p.getIcon() != null) {
-                appendElement(cellLabel, TAG_IMAGE, ATTR_SRC, p.getIcon());
+                String width = ENV.get("layout.icon.width", "-1");
+                String height = ENV.get("layout.icon.height", "-1");
+                appendElement(cellLabel, TAG_IMAGE, ATTR_SRC, p.getIcon(), ATTR_WIDTH, width, ATTR_HEIGHT, height);
             }
         } else {//create an empty label
             appendTag(row, TABLE(TAG_CELL));
@@ -2111,6 +2118,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 }
             }
         }
+        String width = ENV.get("layout.picture.width", "250");
+        String height = ENV.get("layout.picture.height", "-1");
         data =
             appendElement(
                 cell,
@@ -2123,6 +2132,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     ENV.getConfigPath()) : Util.asString(beanValue.getValue()),
                 ATTR_CLASS,
                 "beanfielddata",
+                ATTR_WIDTH,
+                width,
+                ATTR_HEIGHT,
+                height,
                 ATTR_TITLE, //fallback to show an info text, if data couldn't be shown
                 file != null
                     ? file

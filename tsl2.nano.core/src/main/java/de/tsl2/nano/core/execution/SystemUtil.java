@@ -36,7 +36,10 @@ public class SystemUtil {
     protected static final Log LOG = LogFactory.getLog(SystemUtil.class);
 
     public static final Process executeShell(File directory, String... command) {
-        String shell[] = AppLoader.isWindows() ? new String[]{"cmd", "/C"} :  new String[] {"sh", "-c"};
+    	return executeShell(directory, false, command);
+    }
+    public static final Process executeShell(File directory, boolean readCommandsFromInput, String... command) {
+        String shell[] = AppLoader.isWindows() ? new String[]{"cmd", "/C"} :  new String[] {"sh", readCommandsFromInput ? "" : "-c"};
         return execute(directory, CollectionUtil.concat(shell, command));
     }
         /**

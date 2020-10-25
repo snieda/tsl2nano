@@ -208,7 +208,7 @@ public class NanoH5Test implements ENVTestPreparation {
         NanoH5Session session = app.createSession(NetUtil.getInetAddress());
         
         Map pars;
-        if (isDeepTest()) {
+        if ((app instanceof Timesheet) && isDeepTest()) {
         	//runs model-creation and session login-ok action
         	ENV.setProperty("app.database.internal.server.run", true);
         	session.nav.next(null);
@@ -286,7 +286,7 @@ public class NanoH5Test implements ENVTestPreparation {
            "Ended At", BaseTest.XXX,
            "tsl2.nano.h5-\\d+\\.\\d+\\.\\d+(-SNAPSHOT)?[\\-\\.0-9]*", "tsl2.nano.h5-X.X.X",
            ".quicksearch", "?quicksearch", // the '?' does not match between the two sources!
-           "(\\w+[:])?((/|[\\\\])\\w+(\\.\\w+)*){2,99}", BaseTest.XXX //absolute file pathes
+           "(\\w+[:])?((/|[\\\\])([.]?\\w+)*){2,99}", BaseTest.XXX //absolute file pathes
            ));
        
         //check xml failed files - these are written, if simple-xml has problems on deserializing from xml
@@ -307,8 +307,8 @@ public class NanoH5Test implements ENVTestPreparation {
         final String PATH_TRANG_JAR = "../../../../tsl2.nano.common/lib-tools/trang.jar";
         assertTrue(FileUtil.userDirFile(DIR_TEST + "/" + PATH_TRANG_JAR).exists());
         int trangResult = SystemUtil.executeShell(FileUtil.userDirFile(DIR_TEST),
-        "java -jar " + PATH_TRANG_JAR + " presentation/*.xml presentation/beandef.xsd")
-        .exitValue();
+        		"java -jar " + PATH_TRANG_JAR + " presentation/*.xml presentation/beandef.xsd")
+        		.exitValue();
         assertTrue(trangResult == 0);
 
         //extract language messages

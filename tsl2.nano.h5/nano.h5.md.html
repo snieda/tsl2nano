@@ -4195,7 +4195,7 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.4.0  | 07.06.2020 | NEW: tsl2.nano.aspects, tsl2.nano.instrumentation, websocket-dialogs, REST service, generator enhanced with additional filters
  2.4.1  | 21.06.2020 | css styling enhanced (collapsable menu), service-url as start-parameter, snake-yaml: 1.18->1.26, bugfixes
  2.4.2  | 02.08.2020 | plugin enhanced, configurable regexp/replace on html response, session-id as cookie or etag
- 2.4.3  | 18.10.2020 | session-id direct on session-start (before authentication), beancollector presents hor on simple lists, vnet -> gravizo, bugfixes
+ 2.4.3  | 01.11.2020 | session-id direct on session-start (before authentication), beancollector presents hor on simple lists, vnet -> gravizo, h2-199, bugfixes
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
 
@@ -4993,6 +4993,18 @@ Apps auf Serverway:
 	
 - population 23.8.: ~7.600.314.137 (http://live-counter.com/weltbevoelkerung/)
 
+anyway foreign keys:
+
+Charge -> {ChargeItem, ChargeStatus, Party}
+Party -> {Organisation, MISSION}
+ChargeItem -> Item
+Area -> {Category}
+Item -> {Organisation, Classification, Type}
+Type -> Area
+Discharge -> {Charge, Account}
+Location -> {Address, Coordinate, Digital}
+Property -> {Organisation, Party, Item}
+
 - [ ] OWASP-ZAP message: SQL-injection possible <- websocket info text
 - [x] action-logging + exceptions as link, exception-stack on client: remove that on production mode
 - [x] hsqldb/h2 server only local availability on default!
@@ -5054,6 +5066,10 @@ Apps auf Serverway:
 - [-] heroku.logbook: Caused by: java.security.UnrecoverableKeyException: Password verification failed at sun.security.provider.JavaKeyStore.engineLoad(JavaKeyStore.java:783)
 - [-] replace application-cache mf with service workers <- caching is done by ETags
 - [ ] ssl on heroku
+- [ ] This CLOB or BLOB reference timed out: "14/-1" [90039-197]: 
+   - ? System property h2.lobCloseBetweenReads (default: false). Close LOB files between read operations.
+   - <-- new H2 Version 1.99 (200 is incompatible!)
+
 
  ### NICE
  
@@ -5079,6 +5095,13 @@ Apps auf Serverway:
    - [ ] re-structure Activity...BeanAct (e.g.: use interfaces, delegate to commonaction, use of expression)
 - [x] VNet: +toGraph() -> GraphViz
 - [ ] VNet: +toProtocol() -> markdown-log
+- [ ] http://viz-js.com/ or https://sketchviz.com/new  ???
+- [ ] sql2dot.jar or https://github.com/rm-hull/sql_graphviz
+- [ ] https://dbdiagram.io/home
+- [ ] provide an ICSCalendarExport
+- [ ] find a possiblity to create a gantt chart from ics 
+   - e.g. TomsPlanner: https://www.tomsplanner.com/blog/turn-your-google-calendars-into-a-gantt-chart-with-just-a-few-mouse-clicks/)
+   - e.g. Google Chart: javascript https://developers.google.com/chart/interactive/docs/gallery/ganttchart
 
 ### TEST
 

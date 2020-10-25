@@ -12,19 +12,48 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import com.ibm.icu.text.MessageFormat;
+
 import de.tsl2.nano.action.Parameter;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.StringUtil;
-
+import static java.text.MessageFormat.format;
 /**
- * prints out all values of given methods of a stream of class instances
+ * <pre>
+ * creates two kinds of markdown logs:
+ * print      : logs in markdown foramt
+ * printTable : prints out all values of given methods of a stream of class instances
+ * </pre>
  */
 public class MarkdownLog {
 	static final int DEFAULT_WIDTH = 48;
 	int width = DEFAULT_WIDTH;
+	String title;
+	StringBuilder buf;
 	
+	static final String CTAG = "<span style=\"color:{0}\">$1</span>";
+	enum Style {H1("\n# "), H2("\n## "), H3("\n### "), H4("\n#### "), H5("\n##### "), H6("\n###### ")
+		, STD("\n"), LIST("\n* "), CHECKED("\n- [x] "), UNCHECKED("\n- [ ] "), IMAGE("![]($1)"), LINK("[]($1)")
+		, BOLD("*$1*"), CURSIVE("_$1_)")
+		, GRAY(ctag("gray")), RED(ctag("red")), GREEN(ctag("green"))
+		, BLUE(ctag("blue")), YELLOW(ctag("yellow")), ORANGE(ctag("orange"));
+		String txt;
+		private Style(String txt) {
+			this.txt = txt;
+		}
+	};
+
+	static String ctag(String v) {
+		return MessageFormat.format(CTAG, v);
+	}
 	
+	MarkdownLog(String title) {
+		this.title = title;
+		buf = new StringBuilder(Style.H2.txt + title + "\n");
+	}
+
 	/**
 	 * @param title table title
 	 * @param rows class instances to invoke the columnHeader-methods on
@@ -32,6 +61,7 @@ public class MarkdownLog {
 	 * @throws IOException
 	 */
 	public void printTable(String title, Stream<?> rows, Method... columnHeaders) throws IOException {
+		buf.append("\n");
 		if (columnHeaders.length == 0)
 			columnHeaders = getSortedMethodsWithoutParameters();
 		List<Method> headers = new LinkedList<Method>(Arrays.asList(columnHeaders));
@@ -55,6 +85,19 @@ public class MarkdownLog {
 		System.out.println(str);
 		
 		addMarkDeepStyle(str);
+		write(title, str);
+	}
+
+	public void write() {
+		addMarkDeepStyle(buf);
+		try {
+			write(title, buf);
+		} catch (IOException e) {
+			ManagedException.forward(e);
+		}
+	}
+	
+	protected void write(String title, StringBuilder str) throws IOException {
 		log("writing markdown table to " + getFileName(title));
 		Files.write(Paths.get(getFileName(title)), str.toString().getBytes());
 	}
@@ -71,16 +114,15 @@ public class MarkdownLog {
 	}
 
 	String getFileName(String title) {
-		return title + "md.html";
+		return ENV.getConfigPath() + title + "md.html";
 	}
 
 	StringBuilder createHeader(String title, List<Method> columnHeaders) {
-		StringBuilder str = new StringBuilder("\n## " + title + "\n\n");
 		columnHeaders.add(0, getPrincipalColumn());
-		columnHeaders.forEach(m -> appendRow(str, m.getName(), width(m), ' '));
-		str.append("\n");
-		columnHeaders.forEach(m -> appendRow(str, "", width(m), '-'));
-		return str;
+		columnHeaders.forEach(m -> appendRow(buf, m.getName(), width(m), ' '));
+		buf.append("\n");
+		columnHeaders.forEach(m -> appendRow(buf, "", width(m), '-'));
+		return buf;
 	}
 
 	Method getPrincipalColumn() {
@@ -121,5 +163,20 @@ public class MarkdownLog {
 
 	void log(Object o) {
 		System.out.println(o);
+	}
+
+	public void print(Object obj) {
+		print(obj, Style.STD);
+	}
+	public void print(Object obj, Style style) {
+		print(obj, style, null, null);
+	}
+	public void print(Object obj, Style style, String regex, Style regexStyle) {
+		String tact = obj.toString();
+		if (regex != null) {
+			ManagedException.assertion(regexStyle != null, "regexStyle must not be null!");
+			tact = tact.replaceAll(regex, regexStyle.txt);
+		}
+		buf.append(style.txt + tact);
 	}
 }

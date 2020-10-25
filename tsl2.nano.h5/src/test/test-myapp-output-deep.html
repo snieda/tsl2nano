@@ -1,0 +1,470 @@
+<!DOCTYPE html SYSTEM "html">
+<html manifest="tsl2nano-appcache.mf">
+<style>@-webkit-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @-moz-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @-o-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}}; /* will be assigned as tag style under the html header */body {    font-family: Lato, sans-serif;    transition: background-color .5s;}.table .fieldpanel {       display: table;       margin: 0 auto;   /* width: 100%;  */} tbody, .tbody {   display: table-row-group; }thead, .thead {   display: table-header-group;   background-color: rgba(247,247,247,.5);   font-weight: bold; } tfoot, .tfoot {   display: table-footer-group;   font-weight: bold;background-color: rgba(247,247,247,.5); } tr, .tr, .beancollectorsearchrow {   display: table-row; } td, th, .td, .th {   display: table-cell;   padding: 3px 10px;   border: 1px; } tr:nth-child(even), .tr:nth-child(even) {  background-color: rgba(255,255,255,.3);}tr:nth-child(odd), .tr:nth-child(odd) {  background-color: rgba(196,196,196,.3);}tr:hover, .tr:hover {  background-color: rgba(247,247,247,.5);}.fade-out {opacity:0;}.fade-in {opacity:1;}.tooltip {     display: none;     position: relative;    top: 0    left: 0;    z-index: 99;    border: 1px solid #333;    background: #eee;    width: 300px;    text-align: left;}i:hover + p { display: block;}.sidenav {    height: 100%;    width: 0;    position: fixed;    z-index: 1;    top: 0;    left: 0;    background-color: #111;    overflow-x: hidden;    transition: 0.5s;    padding-top: 60px;}.sidenav a, .panelaction {    #padding: 8px 8px 8px 32px;    text-decoration: none;    display: block;    transition: 0.3s;}.sidenav a:hover, .offcanvas a:focus{    color: #f1f1f1;}.sidenav .closebtn {    position: absolute;    top: 0;    right: 25px;    font-size: 36px;    margin-left: 50px;}/*.openbtn {    position: absolute;    top: 0;    left: 0;    font-size: 36px;}*/.openbtn, .closebtn {font-size: 36px;cursor: pointer;color: white;background: radial-gradient(#9999FF, #000000);}#glasspane {    transition: margin-left .5s;    padding: 16px;}#field§quicksearch {padding-top: 3;    padding-bottom: 2;}#beancollectorliste§quicksearch {padding-top: 0;    padding-bottom: 6;}/* tag dialog used by websockets */dialog {    top: 28%;    width: 400px;      border: 1px solid rgba(0, 0, 0, 0.3);    border-radius: 15px;    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);    border-top: 5px solid #0099ff;}button {    display: inline-block;    border-radius: 3px;    border: none;    font-size: 0.9rem;    padding: 0.4rem 0.8em;    opacity: 0.7;    background: #0055AA;    border-bottom: 1px solid #0099ff;    color: white;    font-weight: bold;    margin: 0 0.1rem;    text-align: center;}a{    display: inline-block;    border-radius: 0px;    border: none;    font-size: 0.9rem;    padding: 0.0rem 0.0em;    opacity: 0.7;    background: #0055AA;    color: white;    font-weight: bold;    margin: 0 0.0rem;    text-align: center;    vertical-align: middle;    text-decoration: none;}button:disabled,button[disabled],ul:not(.menu)>li>a:not([href]){  background: #999999;  color: lightgray;}button:hover,a:hover, button:focus,a:focus {    color: white;    background: black;    cursor: pointer;}dialog::backdrop{    position: fixed;    top: 0;    left: 0;    right: 0;    bottom: 0;    background-color: rgba(0, 0, 0, 0.7);}@-ms-viewport only screen and (max-width: 800px){  user-scalable: no;}@media only screen and (max-width: 800px) {tr, .tr {   display: flex; flex-wrap: wrap; } td, th, .td, .th {   display: table-cell;   padding: 3px 10px;   border: 1px; }.beancollectorsearchrow {display: none;}}#title,.title {background: transparent;    color: white;font-size: 1.4em; }@media only screen and (max-width: 480px) {thead, .thead {display: none;}tr, .tr {   width: 100%;} td, th, .td, .th {   width: 100%;}button, input, #field§quicksearch, .actionpanel {width: 100%;}.sidenav {padding-top: 15px;}.sidenav a {font-size: 18px;}.sidenav button {font-size: 18px; width: 100%}}body{    margin: 0;    padding: 0;}nav {    background: transparent;    border: 1px solid #333;    color: white;    display: block;    margin: 0;    overflow: hidden;}nav ul{    margin: 0;    padding: 0;    list-style: none;}nav ul li {    margin: 0;    display: inline-block;    list-style-type: none;    transition: all 0.2s;}nav > ul > li > a {    color: white;    display: block !important;    line-height: 2em;    padding: 0.5em 2em;}nav li > ul{    display : none;    margin-top:1px;    background-color: #bbb;}nav li > ul li{    display: block !important;}nav  li > ul li button {    color: white;    display: block;    line-height: 2em;    padding: 0.5em 2em;    width: 13em;}nav li:hover {    background-color: #666 !important;}nav li:hover > ul, li:focus > ul, li:active > ul {    position:absolute  !important;    display : block !important;}   </style>
+<head title="Nano-H5 Application: Status Info">
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta content="tsl2.nano.h5 (by Thomas Schneider/2012-2020)" name="author">
+<meta content="width=device-width, height=device-height, initial-scale=1" name="viewport">
+<meta charset="UTF-8">
+<script type="text/javascript">/*
+ * javascript websocket-client implementation for nano.h5 (cr Thomas Schneider / 2014) 
+ */
+// to see the source in browser dev source tab, we give it a name
+//# sourceURL=websocket.client.js
+
+/**
+ * websocket client implementation.
+ */
+var socket = new WebSocket(
+		'ws://' + window.document.location.hostname + ':39399');
+console.log('websocket created:' + socket);
+
+socket.onopen = function() {
+	console.log('connecting websocket');
+	// socket.send('websocket connected');
+};
+
+socket.onerror = function(error) {
+	console.log('websocket error ' + error);
+	if (true)
+		window.alert("websocket error occurred! " + error + "\n\ndependency listeners, content assists and attachment uploading dont work!");
+};
+
+/**
+ * print messages from server, or fill input-assist options
+ */
+socket.onmessage = function(e) {
+	console.log('handling message \'' + e.data + '\'');
+	if (e.data == 'submit')
+		document.getElementById('progressbar').removeAttribute('hidden');
+	else if (e.data.indexOf('/inputassist') == 0) {
+		fillInputOptions(e.data);
+	} else if (e.data.indexOf('/dependency') == 0) {
+		refreshdependency(e.data);
+	} else if (e.data.indexOf('/attachment') == 0) {
+		// TODO: impl.
+	} else if (e.data.indexOf('/broadcast') == 0) {
+		showBroadcastMessage(e.data);
+	} else if (e.data.indexOf('/dialog') >= 0) {
+		showDialog(e.data);
+	} else
+		showStatusMessage(e.data);
+};
+
+socket.onclose = function(e) {
+	console.log('websocket closed! code: ' + e.code + ', reason: \'' + e.reason
+			+ '\'');
+};
+
+/*
+ * // Sending canvas ImageData as ArrayBuffer var img =
+ * canvas_context.getImageData(0, 0, 400, 320); var binary = new
+ * Uint8Array(img.data.length); for (var i = 0; i < img.data.length; i++) {
+ * binary[i] = img.data[i]; } socket.send(binary.buffer); // Sending file as
+ * Blob var file = document.querySelector('input[type="file"]').files[0];
+ * socket.send(file);
+ */
+
+/**
+ * prints the given status message to the status line
+ */
+function showStatusMessage(msg) {
+	console.log(msg);
+	var wsElement = document.getElementById('progress');
+	if (wsElement != null)
+		wsElement.childNodes[0].nodeValue = ' \t' + msg;
+	//user must enable this feature in his browser...
+	window.status = msg;
+}
+
+/**
+ * prints the given broadcast message
+ */
+function showBroadcastMessage(msg) {
+//	document.getElementById('${broadcast.element.id}').childNodes[0].nodeValue = ' \t'
+//			+ msg;
+	if (true)
+		speek(msg);
+	if (true)
+		window.alert(getValue(msg));
+}
+
+function speek(msg) {
+	var synth = window.speechSynthesis;
+	var utterThis = new SpeechSynthesisUtterance(msg);
+	synth.speak(utterThis);
+}
+
+/**
+ * different browser implementations: IE and Chrome use event.srcElement - all others event.target
+ */
+function target(e) {
+	return e.srcElement || e.target; 
+}
+
+/**
+ * each field having an InputAssist implementation will call this function on
+ * 'onkeypress'.
+ */
+function inputassist(e) {
+	var code;
+	if (e.keyCode)
+		code = e.keyCode;
+	else if (e.which)
+		code = e.which;
+	var text = target(e).value + String.fromCharCode(code);
+	var request = createMessage('inputassist', target(e).id, text);
+	console.log('sending input-assist request: \'' + request + '\'');
+	socket.send(request);
+}
+
+/**
+ * will be called, if websocket-server returns with a response like:
+ * 
+ * @fieldID:value1,value2,...
+ */
+function fillInputOptions(msg) {
+	showStatusMessage('input-assist-response: ' + msg);
+	var id = getId(msg);
+	var value = getValue(msg);
+	var list = value.substring(1, value.length - 1);
+	console.log('creating input assist for ' + id + ' with elements: ' + list);
+
+	// first, we remove the last input-assist
+	var e = document.getElementById(id);
+	e.setAttribute('list', id + '.datalist');
+	//e = e.parentNode;
+	var lastSelect = e.getElementsByTagName('datalist');
+	if (lastSelect.length > 0)
+		e.removeChild(lastSelect[0]);
+
+	// now, the new options should be filled
+	var select = e.appendChild(document.createElement('datalist'));
+	select.setAttribute('name', id + '.datalist');
+	select.setAttribute('id', id + '.datalist');
+	var items = list.split(',');
+	var option;
+	for ( var i = 0; i < items.length; i++) {
+		console.log('creating option \'' + items[i] + '\'');
+		option = select.appendChild(document.createElement('option'));
+		option.setAttribute('value', items[i]);
+		// select.setAttribute('onclick', 'inputassistselect(event)');
+		option.appendChild(document.createTextNode(items[i]));
+	}
+
+}
+
+function getTarget(msg) {
+	return msg.substring(1, msg.indexOf('@'));
+}
+
+function getId(msg) {
+	return msg.substring(msg.indexOf('@') + 1, msg.indexOf(':'));
+}
+
+function getValue(msg) {
+	return msg.substring(msg.indexOf(':') + 1);
+}
+
+function createMessage(target, id, value) {
+	return createMessage(target, id, value, -1, -1);
+}
+
+function createMessage(target, id, value, clientX, clientY) {
+	return '/' + target + '@' + id + '?' + clientX + ',' + clientY + ':'
+			+ value;
+}
+
+/**
+ * after an input-assist request and the following server response, a
+ * selection list was provided for the user. if the user selects an item of this
+ * list, the selected item value should be transferred to the input field and
+ * the selection-element should be removed.
+ */
+/*
+function inputassistselect(e) {
+	console.log('transerring selected value \'' + target(e).value
+			+ '\' to element: ' + target(e).name);
+	var inputelement = document.getElementById(target(e).name);
+	// setAttribute doesn't work here (on chrome), so we set the value directly.
+	inputelement.setAttribute('value', target(e).value);
+	inputelement.value = target(e).value;
+
+	target(e).parentNode.removeChild(target(e));
+}
+*/
+function getPosition(element) {
+	var xPosition = 0;
+	var yPosition = 0;
+
+	while (element) {
+		xPosition += (element.offsetLeft - element.scrollLeft + element.clientLeft);
+		yPosition += (element.offsetTop - element.scrollTop + element.clientTop);
+		element = element.offsetParent;
+	}
+	return {
+		x : xPosition,
+		y : yPosition
+	};
+}
+
+/**
+ * if an attribute has change listeners, the server will evaluate the new values
+ * for that listeners, calling refreshdependency() for each listener to refresh
+ * it's value on client side.
+ */
+function evaluatedependencies(e) {
+	var x = -1, y = -1;
+	if (e.clientX) {
+		var parentPosition = getPosition(e.currentTarget);
+		x = e.clientX - parentPosition.x;
+		y = e.clientY - parentPosition.y;
+	}
+	var msg = createMessage('dependency', target(e).id, target(e).value,
+			x, y);
+	if (!false) {
+		showStatusMessage(msg);
+	}
+	socket.send(msg);
+}
+
+/**
+ * if dependency-listeners are defined for value changes on an input field, the
+ * server will inform these for the changes.
+ */
+function refreshdependency(msg) {
+	if (!false) {
+		showStatusMessage('refreshing dependency: ' + msg);
+	}
+	var id = getId(msg);
+	var value = getValue(msg);
+	if (value != null)
+		document.getElementById(id).value = value;
+}
+
+/**
+ * sends a selected file to the server
+ */
+function transferattachment(src) {
+	// Sending file as Blob
+	var file = document.querySelector('input[type="file"]').files[0];
+	showStatusMessage('sending attachment: ' + file.name);
+	// first send the file name
+	socket.send(createMessage('attachment', src.id, file.name));
+	// now, send the bytes
+	socket.send(file);
+}
+
+/**
+ * html5 clipboard api (not used yet!)
+ */
+document.addEventListener('paste', function(e){
+    if(e.clipboardData.types.indexOf('text/plain') > -1){
+        processDataFromClipboard(e.clipboardData.getData('text/plain'));
+//        e.preventDefault(); // We are already handling the data from the clipboard, we do not want it inserted into the document
+    }
+});
+
+function processDataFromClipboard(clipboard) {
+	var target = document.getElementById('clipboard.paste.target');
+	if (target != null) {
+		target.nodeValue = clipboard;
+	}
+}
+
+/*
+ * not working yet...
+ */
+function fade(btn) {
+	document.getElementsByTagName("body")[0].className = "fade-out";
+}
+
+function disablePage(e) {
+	e = e || window.event;
+	gp = document.getElementById('glasspane');    
+	gp.style.display='none';
+//	e.stopPropagation();
+}
+
+ /**
+  * used in HtmlUtil.java
+  */
+function openNav() {
+    document.getElementById("tslSidenav").style.width = "250px";
+    document.getElementById("glasspane").style.marginLeft = "250px";
+    document.body.style.backgroundColor = "rgba(0,0,0,0.4)";
+}
+
+function closeNav() {
+    document.getElementById("tslSidenav").style.width = "0";
+    document.getElementById("glasspane").style.marginLeft= "0";
+    document.body.style.backgroundColor = "white";
+}
+
+/**
+ * if a submit (reload page from server) was requested, disable the current page and don't handle the event further...
+ */
+window.addEventListener('onsubmit', function(e){
+	disablePage(e);
+});
+document.addEventListener('ondblclick', function(e){
+	disablePage(e);
+});
+
+function showDialog(htmlDlg) {
+	htmlDlg = htmlDlg.substring(8); // '/dialog:'
+	if (isHex(htmlDlg))
+		htmlDlg = hex2a(htmlDlg);
+	//create the html dialog
+	body = document.getElementsByTagName("body")[0];
+	body.insertAdjacentHTML('afterbegin', htmlDlg);
+
+	//show the dialog
+	var formDialog = document.getElementById('wsdialog.formDialog');
+	formDialog.showModal();
+
+	//listen to the events
+	document.getElementById('wsdialog.button').onclick = function() {
+		elements = document.getElementsByName("wsdialog.formDialog");
+		var values = value;
+		if (elements.length > 0) {
+			values += "::{";
+			for (let i = 0; i < elements.length; i++) {
+				const e = elements[i];
+				values += e.name + ":" + e.value + ",";
+			}
+			values += "}";
+		}
+		formDialog.close(values);
+	};
+	document.getElementById('wsdialog.formDialog').addEventListener('close', function() {
+		var result = createMessage('dialog', "returnvalue", formDialog.returnValue);
+		console.log('sending dialog result: \'' + result + '\'');
+		socket.send(result);
+	});
+}
+
+function hex2a(hexx) {
+    var hex = hexx.toString();//force conversion
+    var str = '';
+    for (var i = 0; (i < hex.length && hex.substr(i, 2) !== '00'); i += 2)
+		str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+	console.log('hex2ascii: ' + str);
+    return str;
+}
+function isHex(h) {
+	var a = parseInt(h,16);
+	return (a.toString(16) ===h.toLowerCase())
+}</script>
+</head>
+<body id="Status Info" onoffline="showStatusMessage('-- OFFLINE --')" ononline="showStatusMessage('ONLINE')" style="background: radial-gradient(#9999FF, #000000);-webkit-animation: fade 2s; -webkit-animation-fill-mode: both; -moz-animation: fade 2s; -moz-animation-fill-mode: both; -o-animation: fade 2s; -o-animation-fill-mode: both; animation: fade 2s; animation-fill-mode: both;">
+<table border="0" frame="box" id="page.header.table" sortable="" width="100%">
+<tbody>
+<tr style="background: transparent;">
+<td><a href="https://sourceforge.net/p/tsl2nano/wiki/"><img src="icons/beanex-logo-micro.jpg" title="Framework Version: tsl2.nano.h5-2.4.3-SNAPSHOT-2438-24-10-2020 20:25-d"></a></td><td>
+<form action="?" method="post" style="display: inline; ">
+<div>
+<nav>
+<ul class="menu">
+<li>
+<a>Anwendung<img src="icons/equipment.png"></a>
+<ul>
+<li>
+<button accesskey="a" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="statusinfoliste.administration" name="statusinfoliste.administration" onclick="fade(this)" style="" title="Administration (ALT+a)" type="submit">Administration<img alt="Administration" src="icons/equipment.png"></button>
+</li>
+</ul>
+</li>
+<li>
+<a>Sitzung<img src="icons/home.png"></a>
+<ul>
+<li>
+<button accesskey="m" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="statusinfoliste.memorize" name="statusinfoliste.memorize" onclick="fade(this)" style="" title="Memorize (ALT+m)" type="submit">Merken<img alt="Merken" src="icons/yellow_pin.png"></button>
+</li>
+<li>
+<button accesskey="l" class="panelactionsimple" formnovalidate="" formtarget="_self" id="statusinfoliste.logout" name="statusinfoliste.logout" onclick="fade(this)" style="" title="Logout (ALT+l)" type="submit">Logout<img alt="Logout" src="icons/exit.png"></button>
+</li>
+</ul>
+</li>
+<li>
+<a>Seite<img src="icons/full_screen.png"></a>
+<ul>
+<li>
+<button accesskey="d" class="panelactionsimple" formnovalidate="" formtarget="_self" id="statusinfoliste.print" name="statusinfoliste.print" onclick="fade(this)" style="" title="Print (ALT+d)" type="submit">Drucken<img alt="Drucken" src="icons/print.png"></button>
+</li>
+<li>
+<button accesskey="p" class="panelactionsimple" formnovalidate="" formtarget="_self" id="statusinfoliste.plaintext" name="statusinfoliste.plaintext" onclick="fade(this)" style="" title="Plaintext (ALT+p)" type="submit">Plaintext<img alt="Plaintext" src="icons/view.png"></button>
+</li>
+<li>
+<button accesskey="!" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="statusinfoliste.document" name="statusinfoliste.document" onclick="fade(this)" style="" title="exporting (see environment.properties, variable names are starting and ending with &sect;&sect;) to: /home/ts/workspace/tsl2nano-code/tsl2.nano.h5/target/test/.nanoh5.myapp//statusinfo.rtf (ALT+!)" type="submit">Dokument<img alt="Dokument" src="icons/images_all.png"></button>
+</li>
+<li>
+<button accesskey="h" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="statusinfoliste.help" name="statusinfoliste.help" onclick="fade(this)" style="" title="/home/ts/workspace/tsl2nano-code/tsl2.nano.h5/target/test/.nanoh5.myapp/doc/statusinfo.help.html or /home/ts/workspace/tsl2nano-code/tsl2.nano.h5/target/test/.nanoh5.myapp/doc/statusinfo.help.pdf (ALT+h)" type="submit">Hilfe<img alt="Hilfe" src="icons/trust_unknown.png"></button>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</div>
+</form>
+</td><td>
+<h3 align="center" id="title" style="display: inline; ">
+<span><a class="title" href="https://editor.ponyorm.com/user/pony/anyway/designer">Status Info</a></span>
+</h3>
+</td>
+</tr>
+</tbody>
+</table>
+<div id="glasspane" style="background: transparent;z-index:1001;">
+<form action="?" autocomplete="" id="page.form" method="post">
+<div style="overflow: auto; height: 70vh;">
+<details open="">
+<summary accesskey="U" align="left" style="color: #6666FF;" title="ALT+U">StatusInfo</summary>
+<table align="center" border="0" class="fieldpanel" frame="box" id="field.panel" sortable="" style="background-image: url(icons/art029.jpg);padding:6px;-webkit-border-radius:6px;-moz-border-radius:6px;border-radius:6px;">
+<tbody>
+<tr>
+<td class="beanfieldlabel" id="statusInfo.message.label" style="color: #0000cc; " width="250">Message</td><td>
+<table>
+<input align="start" autofocus="autofocus" class="beanfieldinput" disabled id="statusInfo.message" max="" maxlength="2147483647" min="" name="message" pattern="[\x00-\xFF &euro;]{0,5000}" readonly size="50" style="background-color: rgba(247,247,247,.5);" tabindex="1" title="statusInfo.message" type="text" value="test.workflow finished with status: OK{startedAt: 2020-10-24 22:28:14.365, endedAt: 2020-10-24 22:28:17.835}" width="50">
+</table>
+</td>
+</tr>
+<tr>
+<td class="beanfieldlabel" id="statusInfo.endedAt.label" style="color: #0000cc; " width="250">Ended At</td><td>
+<table>
+<input align="start" class="beanfieldinput" disabled id="statusInfo.endedAt" max="" maxlength="2147483647" min="" name="endedAt" pattern="[0-3]\d\.[0-1]\d(\.[1-2]\d\d\d)?( [0-2]\d\:[0-5]\d(\:[0-5]\d)?)?" readonly size="50" style="background-color: rgba(247,247,247,.5);" tabindex="2" title="statusInfo.endedAt" type="date" value="2020-10-24" width="50">
+</table>
+</td>
+</tr>
+<tr>
+<td class="beanfieldlabel" id="statusInfo.startedAt.label" style="color: #0000cc; " width="250">Started At</td><td>
+<table>
+<input align="start" class="beanfieldinput" disabled id="statusInfo.startedAt" max="" maxlength="2147483647" min="" name="startedAt" pattern="[0-3]\d\.[0-1]\d(\.[1-2]\d\d\d)?( [0-2]\d\:[0-5]\d(\:[0-5]\d)?)?" readonly size="50" style="background-color: rgba(247,247,247,.5);" tabindex="3" title="statusInfo.startedAt" type="date" value="2020-10-24" width="50">
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</details>
+</div>
+<table border="0" frame="box" id="action.panel" sortable="" width="100%">
+<tbody>
+<tr class="actionpanel">
+<td align="center" style="" width="100%"><button accesskey="&uuml;" class="panelactionsimple" formtarget="_self" id="statusinfo.save" name="statusinfo.save" onclick="fade(this)" style="" title="&amp;&Uuml;bernehmen (ALT+&uuml;)" type="submit">&Uuml;bernehmen<img alt="&Uuml;bernehmen" src="icons/save.png"></button><button accesskey="c" class="panelactionsimple" formnovalidate="" formtarget="_self" id="de.tsl2.nano.action.action_cancelled" name="de.tsl2.nano.action.action_cancelled" style="" title="S&amp;chlie&szlig;en (ALT+c)">Schlie&szlig;en<img alt="Schlie&szlig;en" src="icons/stop.png"></button></td>
+</tr>
+</tbody>
+</table>
+</form>
+</div>
+<table border="0" frame="box" id="page.footer.table" sortable="" style="background-image: url(icons/spe.jpg);" width="100%">
+<tbody>
+<tr>
+<td><span id="footer"><img src="icons/properties.png"><b color="#0000FF">@Null  </b><i color="#000000">@Null  </i><img src="icons/properties.png"><progress hidden="true" id="progressbar"></progress>
+<span id="progress"> 	WAITING FOR WEBSOCKET TO CONNECT...!</span></span></td>
+</tr>
+</tbody>
+</table>
+<embed mediatype="text/html" src="/home/ts/workspace/tsl2nano-code/tsl2.nano.h5/target/test/.nanoh5.myapp/temp/thymeoutput.html"></embed>
+</body>
+<h1>de.tsl2.nano.h5.DOMExtender</h1>
+</html>
+   

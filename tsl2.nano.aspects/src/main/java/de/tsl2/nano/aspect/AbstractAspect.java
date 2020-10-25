@@ -48,7 +48,7 @@ public abstract class AbstractAspect {
     }
 
     static int getInt(String key, Integer defaultValue) {
-        return Integer.valueOf(System.getProperty(PREFIX + key, defaultValue.toString()));
+        return Integer.parseInt(System.getProperty(PREFIX + key, defaultValue.toString()));
     }
 
     void collect(ProceedingJoinPoint pjp, long duration, long mem) {
