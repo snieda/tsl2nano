@@ -36,7 +36,7 @@ import de.tsl2.nano.replication.util.Util;
  *   - create a META-INF/persistence.xml in your classpath
  *   - describe the two persistence-units (source and destination)
  *   - call: new EntityReplication(mySourceUnit, myDestUnit).replicate(new HibReplication(myDestUnit)::strategyHibReplicate, myBeans)
- * or through serliazition:
+ * or through serlialization:
  *   - EntityReplication.setPersistableID(e -> (IPersistable)e).getId)
  *   - new EntityReplication().replicate(myBeans)
  *   - ...
@@ -75,7 +75,7 @@ public class EntityReplication {
 		if (!isKeywordOrNull(destPersistenceUnit)) {
 			dest = createEntityManager(destPersistenceUnit, false);
 		}
-		assert src != null || dest != null : "at least one persistence-unit-name must be given!";
+		Util.assert_(src != null || dest != null, "at least one persistence-unit-name must be given!");
 	}
 
 	private ClassLoader definePersitenceXmlPath() {
@@ -108,7 +108,8 @@ public class EntityReplication {
 			thread.start();
 			try {
 				thread.join();
-			} catch (InterruptedException e) {
+			} catch (Exception e) {
+				log("ERROR on creating entitymanager: ", e);
 				throw new IllegalStateException(e);
 			}
 		} else {
@@ -138,13 +139,14 @@ public class EntityReplication {
     
     public <T> void replicateFromIDs(Class<T> entityClass, Serializer ser, Object...ids) {
         T[] entities = fromIDs(entityClass, ids);
-        //TODO: involve serializer instead of static using JAXB
-        replicate((Consumer<T>)null, (Consumer<T>)EntityReplication::strategySerializeJAXB, entities);
+        replicate((Consumer<T>)null, (Consumer<T>)ser, entities);
     }
     
 	protected <T> T[] fromIDs(Class<T> entityClass, Object... ids) {
+		EntityManager em = src != null ? src : dest;
+		Util.assert_(em != null, "to find entities through their ids, source or destination entitymanager must not be null!");
 		long start = System.currentTimeMillis();
-		ULog.log("loading entities for " + ids.length + " ids");
+		ULog.log("loading entities of type " + entityClass.getName() + " for " + ids.length + " ids");
 		T[] entities = Arrays.stream(ids).
 				map(id -> src.find(entityClass, id, readOnlyHints())).filter(e -> e != null).
 				toArray(s -> (T[])java.lang.reflect.Array.newInstance(entityClass, s));
@@ -156,7 +158,7 @@ public class EntityReplication {
 	
 	protected <T> T[] fromIDs(JndiLookup.FindByIdAccess ejbSession, Class<T> entityClass, Object... ids) {
 		long start = System.currentTimeMillis();
-		ULog.log("loading entities for " + ids.length + " ids");
+		ULog.log("loading entities of type " + entityClass.getName() + " for " + ids.length + " ids");
 		T[] entities = Arrays.stream(ids).
 				map(id -> ejbSession.call(entityClass, (Serializable)id)).filter(o -> o != null).
 				toArray(s -> (T[])java.lang.reflect.Array.newInstance(entityClass, s));
@@ -314,9 +316,9 @@ public class EntityReplication {
         for (int i = 0; i < ids.length; i++) {
             srcObj = repl.src.find(entityClass, ids[i]);
             dstObj = repl.dest.find(entityClass, ids[i]);
-            assert srcObj != null : ids[i] + " not found in " + repl.src;
-            assert dstObj != null : ids[i] + " not found in " + repl.dest;
-            assert Arrays.equals(s.serialize(srcObj).toByteArray(), s.serialize(dstObj).toByteArray()) : "objects for " + ids[i] + " differ between both persistences!";
+            Util.assert_(srcObj != null, ids[i] + " not found in " + repl.src);
+            Util.assert_(dstObj != null, ids[i] + " not found in " + repl.dest);
+            Util.assert_(Arrays.equals(s.serialize(srcObj).toByteArray(), s.serialize(dstObj).toByteArray()), "objects for " + ids[i] + " differ between both persistences!");
         }
     }
     
@@ -351,7 +353,7 @@ public class EntityReplication {
 			EntityReplication repl = new EntityReplication(pers1, pers2);
 			Class cls = Thread.currentThread().getContextClassLoader().loadClass(args[2]);
 			boolean useHibernateReplication = Util.getProperty("use.hibernate.replication", Boolean.class);
-			assert pers2 != PERS_JNDI : "persistence-unit-2 must not be " + PERS_JNDI;
+			Util.assert_(pers2 != PERS_JNDI, "persistence-unit-2 must not be " + PERS_JNDI);
 			
 			Object[] ids = Arrays.copyOfRange(args, 3, args.length);
 			if (ids.length == 1 && ids[0].getClass().equals(String.class))

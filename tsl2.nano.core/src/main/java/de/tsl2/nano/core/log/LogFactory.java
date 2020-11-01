@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Attribute;
@@ -103,6 +104,8 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
     @Attribute
     private boolean useFilter = true;
 
+    private static transient AtomicBoolean isPreparing = new AtomicBoolean(false);
+    
     /**
      * used for formatted logging using outputformat as pattern. see {@link #log(Class, State, Object, Throwable)}. (-->
      * performance)
@@ -120,6 +123,8 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
 
     protected static LogFactory instance() {
         if (self == null) {
+        	isPreparing.set(true);
+        	try {
             /*
              * while it not possible to use convenience method from other base classes,
              * because the all use this logfactory, we have to create some not-nice code.
@@ -160,10 +165,18 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
                         self.logMessages();
                 }
             }));
+        	} finally {
+        		isPreparing.set(false);
+        		System.out.println("<== Logfactory is READY!");
+        	}
         }
         return self;
     }
 
+    public static boolean isInitialized() {
+    	return self != null && self.loglevels != null;
+    }
+    
     public static void stop() {
         //this will stop the thread, too.
         self = null;
@@ -534,6 +547,11 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
      * @param ex (optional) exception to log
      */
     protected static void log(Class<?> logClass, int state, Object message, Throwable ex) {
+    	if (isPreparing.get()) {
+    		System.out.println("==> Logfactory in preparing mode -> printing to system.out:\n\t" 
+    				+ logClass.getSimpleName() + ": " + message + " " + ex);
+    		return;
+    	}
         final LogFactory factory = instance();
         if (LogFactory.isEnabled(state) && factory.hasLogLevel(logClass, state)) {
             if (message != null) {

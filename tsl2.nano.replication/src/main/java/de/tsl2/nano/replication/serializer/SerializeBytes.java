@@ -15,7 +15,7 @@ public class SerializeBytes implements Serializer {
     }
     @Override
     public String getExtension() {
-        return ".bytes";
+        return "bytes";
     }
     @Override
     public ByteArrayOutputStream serialize(Object obj) throws IOException {

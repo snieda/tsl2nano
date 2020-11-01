@@ -15,7 +15,7 @@ public class H2Util {
 	public static void startH2Datbase() throws Exception {
 		if (!isOpen()) {
 			ULog.call("creating H2 database", 
-					() -> Server.createTcpServer("-tcpPort", String.valueOf(tcpPort), "-tcpAllowOthers").start(),
+					() -> Server.createTcpServer("-tcpPort", String.valueOf(tcpPort), "-tcpAllowOthers", "-ifNotExists").start(),
 					() -> Server.createWebServer("-webPort", "8082", "-webAllowOthers").start());
 		} else {
 			ULog.log("H2 database seems already to be open on port " + tcpPort);

@@ -482,4 +482,8 @@ public class Util {
     public static <T> T trY(SupplierEx<T> callback) {
         return ManagedException.trY(callback);
     }
+	public static final void assert_(boolean assertion, String message, Object... args) {
+		if (!assertion && !Boolean.getBoolean("tsl2.nano.disable.assertion"))
+			throw new IllegalArgumentException(String.format(message, args));
+	}
 }

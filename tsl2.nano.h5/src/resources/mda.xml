@@ -115,8 +115,8 @@ commit;
 			<contains string="${os.name}" substring="windows" casesensitive="false"/>
 		</condition>
 		<condition property="cmdline"
-			value="${cmdpref}java -cp ${cp} org.hsqldb.Server -database ${jdbc.database} -port ${jdbc.port} -silent false -trace true ${cmdargs}" 
-			else="${cmdpref}java -cp ${cp} org.h2.tools.Server -baseDir ${basedir} -tcp -tcpPort ${jdbc.port} -trace ${cmdargs}">
+			value="${cmdpref}java -cp ${cp} org.hsqldb.Server -database ${jdbc.database} -port ${jdbc.port} -silent false -trace true -ifNotExists ${cmdargs}" 
+			else="${cmdpref}java -cp ${cp} org.h2.tools.Server -baseDir ${basedir} -tcp -tcpPort ${jdbc.port} -trace -ifNotExists ${cmdargs}">
 			<contains string="${jdbc.driver}" substring="hsqldb" casesensitive="true"/>
 		</condition>
 		<condition property="dotslash" value="" else="./">

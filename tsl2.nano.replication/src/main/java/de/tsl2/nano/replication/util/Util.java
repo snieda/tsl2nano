@@ -131,5 +131,9 @@ public class Util {
         Thread.currentThread().getContextClassLoader().loadClass(clsName).getMethod(mthName, new Class[0]).invoke(null);
 	}
 
+	public static final void assert_(boolean assertion, String message, Object... args) {
+		if (!assertion && !Boolean.getBoolean("tsl2.nano.disable.assertion"))
+			throw new IllegalArgumentException(String.format(message, args));
+	}
 }
 

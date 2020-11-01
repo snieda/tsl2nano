@@ -15,6 +15,7 @@ import java.io.PipedOutputStream;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -29,6 +30,7 @@ import de.tsl2.nano.incubation.specification.rules.ActionScript;
  * @version $Revision$ 
  */
 @net.jcip.annotations.NotThreadSafe
+//@Ignore
 public class NanoH5HtmlUnitTest extends NanoH5Unit {
 
     @Before

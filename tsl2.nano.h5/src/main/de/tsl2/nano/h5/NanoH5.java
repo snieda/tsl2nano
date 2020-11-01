@@ -39,6 +39,7 @@ import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
+import de.tsl2.nano.bean.def.IIPresentable;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.PathExpression;
 import de.tsl2.nano.collection.ExpiringMap;
@@ -346,7 +347,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
      * scripts. for more informations, see {@link #LIBS_STANDALONE}.
      */
     private void onStandaloneExtractJars() {
-        final String JAR_JPA_API = "hibernate-jpa-2.1-api-1.0.0.Final.jar";
+        final String JAR_JPA_API = ENV.get("app.standalone.zip.file.check", "hibernate-jpa-2.1-api-1.0.2.Final.jar");
         if (FileUtil.hasResource(ZIP_STANDALONE) && !new File(ENV.getConfigPath() + JAR_JPA_API).exists()) {
             LOG.info("extracting " + ZIP_STANDALONE + " and " + JAR_JPA_API);
             ENV.extractResource(JAR_JPA_API, true, false);
@@ -865,6 +866,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             ENV.get("collector.root.mode", MODE_EDITABLE | MODE_SEARCHABLE), null);
         root.setName(StringUtil.toFirstUpper(StringUtil
             .substring(Persistence.current().getJarFile().replace("\\", "/"), "/", ".jar", true)));
+        
+        ((IIPresentable)root.getPresentable()).setLabel(root.getName());
         root.setAttributeFilter("name");
         root.setSimpleList(ENV.get("collector.root.listhorizontal", false));
         root.getAttribute("name").setFormat(new Format() {

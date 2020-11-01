@@ -1659,7 +1659,6 @@ public class BeanPresentationHelper<T> {
                         return "exports " + bean.getName() + " visible elements to file " + file;
                     }
                 });
-
             }
             pageActions
                 .add(new SecureAction(bean.getClazz(), "print", IAction.MODE_UNDEFINED, false, "icons/print.png") {

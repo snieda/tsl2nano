@@ -100,7 +100,8 @@ public class MethodAction<T> extends CommonAction<T> implements IsPresentable {
     }
 
     private static String createName(Method method) {
-        final String name = method.getName().substring(ACTION_PREFIX.length());
+        final String name = method.getName().startsWith(ACTION_PREFIX) 
+        		? method.getName().substring(ACTION_PREFIX.length()) : method.getName();
         return ENV.translate(name, true);
     }
 

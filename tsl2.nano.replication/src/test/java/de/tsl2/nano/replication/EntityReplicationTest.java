@@ -119,6 +119,7 @@ public class EntityReplicationTest implements ENVTestPreparation {
 		}};
 	}
 }
+
 class MyEntity implements Serializable {
     String id;
     public MyEntity() {

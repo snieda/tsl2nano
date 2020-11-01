@@ -298,7 +298,7 @@ The base for the model is any JPA-provider, the presentation of entity-beans wil
 
 Nano.h5 provides mechanisms to create a full configurable application from a given database definition file (ddl).
 
-Creating an UML-Diagram with perhaps _ArgoUML_, or creating an ER-Diagram with f.e. _architect_ you may generate a ddl (database-definition) script. Nano.H5 provides an ant-script (_mda.xml_) to generate an hsqldb-database generating entity beans through hibernate-tools or openjpa (script: _reverse-eng.xml_) for the given jdbc-connection. The ant-scripts use hibernate-tools or openjpa since there are no similar possibilities on other frameworks at the moment. We prefer the reverse engineering on _openjpa_ because there are lots of options to be set.
+Creating an UML-Diagram with perhaps _ArgoUML_, or creating an ER-Diagram with f.e. _architect_ (or online on _ponyorm_) you may generate a ddl (database-definition) script. Nano.H5 provides an ant-script (_mda.xml_) to generate an hsqldb-database generating entity beans through hibernate-tools or openjpa (script: _reverse-eng.xml_) for the given jdbc-connection. The ant-scripts use hibernate-tools or openjpa since there are no similar possibilities on other frameworks at the moment. We prefer the reverse engineering on _openjpa_ because there are lots of options to be set.
 
 The other option would be to have an existing _beans.jar_. This could be selected on the entry- or login-page of nano-h5. If you enter an absolute path for the attribute _JarFile_ inside the _Persistence_ page, this bean-file will be used to load the entity-classes. If you enter a relative path and the given file doesn't exist, it will be generated through hibernate-tools (if hibernate is in your environment!).
 
@@ -396,7 +396,7 @@ To switch to yaml, change the following environment property:
 
 	app.configuration.persist.yaml=true
 	
-On starting the application, the environment doesn't not know whether to load from xml or yaml - not having load the environment properties yet. so it tries to load first from xml and the from yaml.
+On starting the application, the environment doesn't not know whether to load from xml or yaml - not having load the environment properties yet. so it tries to load first from xml and then from yaml.
 
 A simple bean-definition configuration file will then look like:
 
@@ -4195,7 +4195,7 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.4.0  | 07.06.2020 | NEW: tsl2.nano.aspects, tsl2.nano.instrumentation, websocket-dialogs, REST service, generator enhanced with additional filters
  2.4.1  | 21.06.2020 | css styling enhanced (collapsable menu), service-url as start-parameter, snake-yaml: 1.18->1.26, bugfixes
  2.4.2  | 02.08.2020 | plugin enhanced, configurable regexp/replace on html response, session-id as cookie or etag
- 2.4.3  | 01.11.2020 | session-id direct on session-start (before authentication), beancollector presents hor on simple lists, vnet -> gravizo, h2-199, bugfixes
+ 2.4.3  | 01.11.2020 | session-id direct on session-start (before authentication), beancollector presents hor on simple lists, vnet -> gravizo, h2-199 (-ifNotExists), h5+entityreplication, bugfixes
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
 
@@ -5116,6 +5116,7 @@ Property -> {Organisation, Party, Item}
 - [ ] test on add listener
 - [ ] htmlunit test for configuration
 - [ ] Lucene Test aktivieren
+- [ ] re-activate refactored test 'NanoH5NetUtilTest' (problems with jersey HtmlServer)
 
 ### REST
 
@@ -5165,3 +5166,14 @@ deploy:
 * define default usertasks, start event? optional camunda start?
 
 -->
+
+
+##### analyze session scoped properties - used for generic application scope:
+
+* ENV.get(EntityManager.class) --> OK
+* ENV.get(IBeanContainer.class) --> OK
+* ENV.get(UncaughtExceptionHandler.class) --> on messages with workaround, on replication
+* ENV.get(IAuthorization.class) --> unused --> OK
+* ENV.get(IGenericService.class) --> OK
+
+* Repllication: included into h5 page - but not working with given hibernate/jpa libraries

@@ -280,7 +280,7 @@ public class DatabaseTool {
 		runDBServer(ENV.getConfigPath(), Persistence.current().getPort());
 	}
 	public static void runDBServer(String... args) {
-		String cmd = ENV.get("app.database.internal.server.run.cmd", "org.h2.tools.Server.main(-baseDir, {0}, -tcp, -tcpPort, {1}, -trace)");
+		String cmd = ENV.get("app.database.internal.server.run.cmd", "org.h2.tools.Server.main(-baseDir, {0}, -tcp, -tcpPort, {1}, -trace, -ifNotExists)");
 		LOG.info("running database internally: " + cmd + "[" + Arrays.toString(args) + "]");
 		BeanClass.call(cmd, args);
 	}

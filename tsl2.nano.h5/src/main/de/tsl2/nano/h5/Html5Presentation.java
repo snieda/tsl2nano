@@ -61,6 +61,8 @@ import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.ValueHolder;
+import de.tsl2.nano.bean.annotation.Action;
+import de.tsl2.nano.bean.annotation.Constraint;
 import de.tsl2.nano.bean.def.Attachment;
 import de.tsl2.nano.bean.def.AttributeCover;
 import de.tsl2.nano.bean.def.AttributeDefinition;
@@ -83,6 +85,7 @@ import de.tsl2.nano.bean.def.Presentable;
 import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.bean.def.ValueExpressionFormat;
 import de.tsl2.nano.bean.def.ValueGroup;
+import de.tsl2.nano.bean.def.ValueStream;
 import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ISession;
@@ -123,6 +126,7 @@ import de.tsl2.nano.incubation.specification.rules.RuleDependencyListener;
 import de.tsl2.nano.persistence.DatabaseTool;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.plugin.Plugins;
+import de.tsl2.nano.replication.EntityReplication;
 import de.tsl2.nano.script.ScriptTool;
 
 /**
@@ -334,6 +338,25 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 public boolean isEnabled() {
                     return super.isEnabled() && bean.isPersistable() && !bean.getDeclaringClass().isArray();
                 }
+            });
+            pageActions
+            .add(new MethodAction(Replication.getReplicationMethod()) {
+                @Override
+                public Object action() throws Exception {
+                	setParameter(new Replication(((BeanCollector)bean).getCurrentData()));
+                	return super.action();
+                }
+
+                @Override
+                public String getLongDescription() {
+                    return "replicates the selected beans";
+                }
+                
+                @Override
+                public boolean isEnabled() {
+                    return super.isEnabled() && bean.isPersistable() && !bean.getDeclaringClass().isArray();
+                }
+                
             });
         }
         return pageActions;
