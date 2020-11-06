@@ -184,7 +184,7 @@ public class ServiceFactory {
      * @param subject the subject to set
      */
     public void setSubject(Subject subject) {
-        auth = new Authorization(subject);
+        auth = subject != null ? new Authorization(subject) : null;
 
         /*
          * for server side checks (e.g. sessioncontext.getCallerPrincipal()), we have to add 
@@ -517,14 +517,14 @@ public class ServiceFactory {
         } catch (Exception e) {
             LOG.error(e);
         }
-        self.properties.clear();
+        self.properties = null;
         if (complete) {
             self.userProperties = null;
             self.auth = null;
             self.services.clear();
             self.classLoader = null;
             self.serviceLocator = null;
-            CachingBatchloader.instance().reset();
+            CachingBatchloader.reset();
             self = null;
         }
     }

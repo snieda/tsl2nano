@@ -264,4 +264,10 @@ abstract public class AbstractStatelessServiceBean implements IStatelessService 
         return entityManager.getEntityManagerFactory().getMetamodel().getEntities();
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+    	super.finalize();
+    	if (entityManager != null && entityManager.isOpen())
+    		entityManager.close();
+    }
 }

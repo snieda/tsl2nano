@@ -300,4 +300,15 @@ public class DatabaseTool {
             LOG.error(e.toString());
         }
 	}
+	
+	public static void dbDump(String... args) {//unused yet!
+		FileUtil.writeBytes("SCRIPT TO 'db-dump.sql'".getBytes(), "dump.sql", false);
+		String cmd = ENV.get("app.database.internal.server.dump.cmd", "org.h2.tools.RunScript -url \"{0}\" -user {1} -password {2} -script dump.sql -showResults");
+		LOG.info("dump database : " + cmd + "[" + args[0] + ", ***]");
+        try {
+        	BeanClass.call(cmd, args);
+        } catch (Exception e) {
+            LOG.error(e.toString());
+        }
+	}
 }

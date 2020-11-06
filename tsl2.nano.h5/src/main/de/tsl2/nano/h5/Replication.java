@@ -8,9 +8,11 @@ import de.tsl2.nano.bean.annotation.Action;
 import de.tsl2.nano.bean.annotation.Constraint;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.replication.EntityReplication;
+import de.tsl2.nano.replication.util.H2Util;
 
 public class Replication {
 	Collection<?> data;
@@ -21,8 +23,8 @@ public class Replication {
 	}
 
 	@Action(name = "replicate", argNames = {"source", "destination"})
-    public void replicate(@Constraint(defaultValue = "PUNIT1", allowed = {"PUNIT1", "PUNIT2", "JNDI", "XML", "JAXB", "BYTES"}) String src
-    		     , @Constraint(defaultValue = "XML", allowed = {"PUNIT1", "PUNIT2", "JNDI", "XML", "JAXB", "BYTES"}) String dest) {
+    public void replicate(@Constraint(defaultValue = "PUNIT1", allowed = {"PUNIT1", "PUNIT2", "JNDI", "XML", "JAXB", "BYTES", "SIMPLE_XML", "YAML", "JSON"}) String src
+    		     , @Constraint(defaultValue = "XML", allowed = {"PUNIT1", "PUNIT2", "JNDI", "XML", "JAXB", "BYTES", "SIMPLE_XML", "YAML", "JSON"}) String dest) {
     	String p1 = getTransition(src);
     	String p2 = getTransition(dest);
     	if (src.startsWith("PUNIT") && dest.startsWith("PUNIT"))
@@ -30,14 +32,17 @@ public class Replication {
     	Collection<String> args = new ArrayList<String>(data.size() + 3);
     	args.add(p1);
     	args.add(p2);
-    	args.add(data.iterator().next().getClass().getName());
+    	args.add(!Util.isEmpty(data) ? data.iterator().next().getClass().getName() : "java.lang.Object");
     	for (Object d : data) {
 			args.add(Bean.getBean(d).getId().toString());
 		}
     	try {
 			EntityReplication.main(args.toArray(new String[0]));
+			Message.send("replication done from: " + p1 + " to " + p2 + " on " + data.size() + " elements");
 		} catch (ClassNotFoundException e) {
 			ManagedException.forward(e);
+		} finally { // this may slow down the performance, but unused beans are removed from cache
+			Bean.clearCache();
 		}
     }
 
@@ -46,7 +51,14 @@ public class Replication {
 		case "PUNIT1":
 			return Persistence.current().getPersistenceUnit();
 		case "PUNIT2":
-			return Persistence.current().getReplication().getPersistenceUnit();
+			if (Persistence.current().getReplication() != null) {
+				try {
+					H2Util.startH2Datbase(Integer.parseInt(Persistence.current().getReplication().getPort()));
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return Persistence.current().getReplication().getPersistenceUnit();
+			}
 		default:
 			return src;
 		}

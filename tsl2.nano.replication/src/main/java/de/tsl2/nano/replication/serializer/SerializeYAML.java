@@ -1,32 +1,35 @@
 package de.tsl2.nano.replication.serializer;
 
-import java.beans.XMLDecoder;
-import java.beans.XMLEncoder;
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
-public class SerializeXML implements Serializer {
-    public static final String KEY = "XML";
+import org.yaml.snakeyaml.Yaml;
+
+
+public class SerializeYAML implements Serializer {
+    public static final String KEY = "YAML";
     @Override
     public String getKey() {
         return KEY;
     }
     @Override
     public String getExtension() {
-        return "xml";
+        return "yml";
     }
     @Override
     public ByteArrayOutputStream serialize(Object obj) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        try (XMLEncoder encoder = new XMLEncoder(new BufferedOutputStream(out))) {
-	        encoder.writeObject(obj);
-        }
+        String str = new Yaml().dump(obj);
+        try {
+			out.write(str.getBytes());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
         return out;
     }
-    @SuppressWarnings("unchecked")
     @Override
     public <T> T deserialize(InputStream stream, Class<T> type) {
-        try (XMLDecoder dec = new XMLDecoder(stream)) { return (T) dec.readObject();}
+        return new Yaml().loadAs(stream, type);
     }
 }

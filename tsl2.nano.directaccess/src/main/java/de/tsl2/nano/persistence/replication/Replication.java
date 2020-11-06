@@ -55,15 +55,15 @@ public class Replication extends Persistence implements Runnable {
         super();
         persistenceUnit = "replication";
         transactionType = "RESOURCE_LOCAL";
-        provider = "org.hibernate.ejb.HibernatePersistence";
-        connectionDriverClass = "org.hsqldb.jdbcDriver";
-        connectionUrl = "jdbc:hsqldb:hsql://localhost:9898";
+        provider = "org.hibernate.jpa.HibernatePersistenceProvider";
+        connectionDriverClass = STD_LOCAL_DATABASE_DRIVER;
+        connectionUrl = "jdbc:h2:tcp://localhost:9992/PUBLIC";
         connectionUserName = "SA";
         connectionPassword = "";
-        hibernateDialect = "org.hibernate.dialect.HSQLDialect";
-        defaultSchema = "PUBLIC";
-        datasourceClass = "org.hsqldb.jdbc.jdbcDataSource";
-        port = "9898";
+        hibernateDialect = "org.hibernate.dialect.H2Dialect";
+        defaultSchema = DEFAULT_SCHEMA;
+        datasourceClass = STD_LOCAL_DATABASE_DRIVER;
+        port = "9992";
         database = "replication";
     }
 

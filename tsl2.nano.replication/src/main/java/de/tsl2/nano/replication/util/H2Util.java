@@ -1,5 +1,6 @@
 package de.tsl2.nano.replication.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Arrays;
@@ -11,11 +12,15 @@ import org.h2.tools.Server;
 
 @SuppressWarnings("unchecked")
 public class H2Util {
-	static int tcpPort = 9092;
+	static final int DEFAULT_H2_PORT = 9092;
+	
 	public static void startH2Datbase() throws Exception {
-		if (!isOpen()) {
+		startH2Datbase(DEFAULT_H2_PORT);
+	}
+	public static void startH2Datbase(int tcpPort) throws Exception {
+		if (!isOpen(tcpPort)) {
 			ULog.call("creating H2 database", 
-					() -> Server.createTcpServer("-tcpPort", String.valueOf(tcpPort), "-tcpAllowOthers", "-ifNotExists").start(),
+					() -> Server.createTcpServer("-baseDir", new File("").getAbsolutePath(), "-tcpPort", String.valueOf(tcpPort), "-tcpAllowOthers", "-ifNotExists").start(),
 					() -> Server.createWebServer("-webPort", "8082", "-webAllowOthers").start());
 		} else {
 			ULog.log("H2 database seems already to be open on port " + tcpPort);
@@ -23,12 +28,15 @@ public class H2Util {
 	}
 	
 	public static void stopH2Datbase() throws Exception {
+		stopH2Datbase(DEFAULT_H2_PORT);
+	}
+	public static void stopH2Datbase(int tcpPort) throws Exception {
 		ULog.call("stopping H2 database", 
 				() -> {Server.createTcpServer("-tcpPort", String.valueOf(tcpPort), "-tcpAllowOthers").stop(); return Optional.empty();},
 				() -> {Server.createWebServer("-webPort", "8082", "-webAllowOthers").stop(); return Optional.empty();});
 	}
 	
-	public static boolean isOpen() {
+	static boolean isOpen(int tcpPort) {
 		ServerSocket socket = null;
 		try {
 			socket = new ServerSocket(tcpPort);

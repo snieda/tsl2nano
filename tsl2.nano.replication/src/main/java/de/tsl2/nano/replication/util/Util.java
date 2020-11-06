@@ -95,7 +95,7 @@ public class Util {
 	public static String toString(Throwable e) {
 		while (e.getCause() != null)
 			e = e.getCause();
-		return e.toString() + ": " + e.getStackTrace()[0];
+		return e.toString() + ": " + (e.getStackTrace().length > 0 ? e.getStackTrace()[0] : "[no stacktrace available]");
 	}
 
 	public static Object handleException(Exception e) {

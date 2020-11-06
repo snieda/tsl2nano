@@ -627,6 +627,8 @@ public class BeanContainerUtil {
     public static final void clear() {
         LOG.info("removing " + attrDefCache.size() + " cached IAttrDefinitions");
         attrDefCache.clear();
+        ENV.removeService(IGenericService.class);
+        resetServices();
     }
 
     /**

@@ -8,7 +8,6 @@ import java.io.ObjectOutputStream;
 
 public class SerializeBytes implements Serializer {
     public static final String KEY = "BYTES";
-
     @Override
     public String getKey() {
         return KEY;
@@ -18,15 +17,19 @@ public class SerializeBytes implements Serializer {
         return "bytes";
     }
     @Override
-    public ByteArrayOutputStream serialize(Object obj) throws IOException {
+    public ByteArrayOutputStream serialize(Object obj) {
         ByteArrayOutputStream bs = new ByteArrayOutputStream();
-        new ObjectOutputStream(bs).writeObject(obj);
+        try(ObjectOutputStream stream = new ObjectOutputStream(bs)) {
+			stream.writeObject(obj);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
         return bs;
     }
     
     @SuppressWarnings("unchecked")
     @Override
     public <T> T deserialize(InputStream stream, Class<T> type) throws ClassNotFoundException, IOException {
-        return (T) new ObjectInputStream(stream).readObject();
+        try(ObjectInputStream in = new ObjectInputStream(stream)) {return (T) in.readObject();}
     }
 }

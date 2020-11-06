@@ -49,6 +49,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.UnboundAccessor;
+import de.tsl2.nano.core.exception.ExceptionHandler;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.execution.SystemUtil;
@@ -1173,20 +1174,29 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
 
         ConcurrentUtil.removeAllCurrent(NanoH5Session.getThreadLocalTypes());
 
+        DatabaseTool databaseTool = new DatabaseTool(Persistence.current());
+        if (databaseTool.isEmbeddedDatabase())
+        	databaseTool.shutdownDBServerDefault();
+        
+        //TODO: the following is done in pagebuilder.reset, too?
+        ENV.removeService(Workflow.class);
+        ENV.removeService(Persistence.class);
+        if (ENV.get(UncaughtExceptionHandler.class) instanceof ExceptionHandler)
+        	((ExceptionHandler)ENV.get(UncaughtExceptionHandler.class)).clearExceptions();
+        ENV.get(Pool.class).reset();
+        BeanContainer.reset();
+        ENV.removeService(IBeanContainer.class);
+        BeanContainerUtil.clear();
+        Bean.clearCache();
+        AttributeCover.resetTypeCache();
+        sessions.clear();
+
         IPageBuilder pageBuilder = ENV.get(IPageBuilder.class);
         if (pageBuilder != null)
             pageBuilder.reset();
         else
             new Html5Presentation<>().reset();
         
-        //TODO: the following is done in pagebuilder.reset, too?
-        ENV.removeService(Workflow.class);
-        ENV.get(Pool.class).reset();
-        BeanContainer.reset();
-        Bean.clearCache();
-        AttributeCover.resetTypeCache();
-        
-        sessions.clear();
         ENV.reload();
         ENV.setProperty(ENV.KEY_CONFIG_PATH, configPath);
         ENV.setProperty("service.url", serviceURL.toString());

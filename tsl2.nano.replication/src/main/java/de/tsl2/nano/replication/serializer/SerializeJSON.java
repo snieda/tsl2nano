@@ -1,32 +1,38 @@
 package de.tsl2.nano.replication.serializer;
 
-import java.beans.XMLDecoder;
-import java.beans.XMLEncoder;
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
-public class SerializeXML implements Serializer {
-    public static final String KEY = "XML";
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+
+public class SerializeJSON implements Serializer {
+    public static final String KEY = "JSON";
     @Override
     public String getKey() {
         return KEY;
     }
     @Override
     public String getExtension() {
-        return "xml";
+        return "json";
     }
     @Override
     public ByteArrayOutputStream serialize(Object obj) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        try (XMLEncoder encoder = new XMLEncoder(new BufferedOutputStream(out))) {
-	        encoder.writeObject(obj);
-        }
+        try {
+            new ObjectMapper().writer().writeValue(out, obj);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
         return out;
     }
-    @SuppressWarnings("unchecked")
     @Override
     public <T> T deserialize(InputStream stream, Class<T> type) {
-        try (XMLDecoder dec = new XMLDecoder(stream)) { return (T) dec.readObject();}
+        try {
+			return new ObjectMapper().readerFor(type).readValue(stream);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
     }
 }

@@ -35,6 +35,7 @@ import org.anonymous.project.Address;
 import org.anonymous.project.Charge;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.sun.jersey.api.container.httpserver.HttpServerFactory;
@@ -104,7 +105,7 @@ public class NanoH5Test implements ENVTestPreparation {
 
     @After
     public void tearDown() {
-    	ENV.getProperties().keySet().forEach(k->System.getProperties().remove(k));
+//    	ENV.getProperties().keySet().forEach(k->System.getProperties().remove(k));
     	ENV.reset();
     }
 

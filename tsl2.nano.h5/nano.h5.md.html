@@ -4195,7 +4195,7 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.4.0  | 07.06.2020 | NEW: tsl2.nano.aspects, tsl2.nano.instrumentation, websocket-dialogs, REST service, generator enhanced with additional filters
  2.4.1  | 21.06.2020 | css styling enhanced (collapsable menu), service-url as start-parameter, snake-yaml: 1.18->1.26, bugfixes
  2.4.2  | 02.08.2020 | plugin enhanced, configurable regexp/replace on html response, session-id as cookie or etag
- 2.4.3  | 01.11.2020 | session-id direct on session-start (before authentication), beancollector presents hor on simple lists, vnet -> gravizo, h2-199 (-ifNotExists), h5+entityreplication, bugfixes
+ 2.4.3  | 08.11.2020 | session-id direct on session-start (before authentication), beancollector presents hor on simple lists, vnet -> gravizo, h2-199 (-ifNotExists), h5+entityreplication, bugfixes
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
 
@@ -5117,6 +5117,15 @@ Property -> {Organisation, Party, Item}
 - [ ] htmlunit test for configuration
 - [ ] Lucene Test aktivieren
 - [ ] re-activate refactored test 'NanoH5NetUtilTest' (problems with jersey HtmlServer)
+- [v] hibernate-tools on external  database
+   - [v] add new database driver
+   - [v] export schema from external, import to h2, remove tech tables (explain, flyway), remove keywords, remove schema and catalogs on create table
+   - [v] on generated java classes remove schema+catalog infos (replace: '  ,catalog="PUBLIC"' and recompile with compilejar.cmd
+   - [v] activate gimmick only, if pre-search is activated
+   - [ ] environment properties cannot be deactivated (true -> false)
+   - [-] include jaxson json into h5
+   - [x] entityreplication: memory leak on entitymanagers? (h2, hibernate)
+   - [x] h2 database dump: SCRIP TO 'db-dump.sql'
 
 ### REST
 
@@ -5176,4 +5185,5 @@ deploy:
 * ENV.get(IAuthorization.class) --> unused --> OK
 * ENV.get(IGenericService.class) --> OK
 
-* Repllication: included into h5 page - but not working with given hibernate/jpa libraries
+* [v] Repllication: included into h5 page - but not working with given hibernate/jpa libraries
+   * [v] don't run in extra thread!

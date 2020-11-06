@@ -389,9 +389,9 @@ public class FileUtil {
      */
     public static void saveXml(Serializable serializable, OutputStream outputStream) throws Exception {
         if (outputStream != null) {
-            final XMLEncoder encoder = new XMLEncoder(outputStream);
-            encoder.writeObject(serializable);
-            encoder.close();
+            try (XMLEncoder encoder = new XMLEncoder(outputStream)) {
+            	encoder.writeObject(serializable);
+            }
         }
     }//serialize()
 
@@ -427,9 +427,9 @@ public class FileUtil {
         Serializable result = null;
 
         if (inputStream != null) {
-            final XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(inputStream));
-            result = (Serializable) decoder.readObject();
-            decoder.close();
+            try (XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(inputStream))) {
+            	result = (Serializable) decoder.readObject();
+            }
         }
 
         return result;
@@ -477,12 +477,11 @@ public class FileUtil {
         } else {
         	Thread.currentThread().setContextClassLoader(classLoader);
         }
-        final InputStream resource = classLoader.getResourceAsStream(resourceFile);
-        if (resource == null) {
-            throw new IllegalArgumentException("file: " + resourceFile + " not found");
-        }
-        final Properties properties = new Properties();
-        try {
+        try (InputStream resource = classLoader.getResourceAsStream(resourceFile)) {
+	        if (resource == null) {
+	            throw new IllegalArgumentException("file: " + resourceFile + " not found");
+	        }
+	        final Properties properties = new Properties();
             LOG.info("loading resource: " + resourceFile);
             properties.load(resource);
             return properties;
@@ -499,9 +498,8 @@ public class FileUtil {
      * @param p properties to save
      */
     public static void saveProperties(String resourceFile, Properties p) {
-        try {
-            p.store(
-                new FileOutputStream(userDirFile(resourceFile)),
+        try (FileOutputStream out = new FileOutputStream(userDirFile(resourceFile))) {
+			p.store(out,
                 "generated at " + DateFormat.getDateTimeInstance()
                     .format(new Date()) + " from code " + ConcurrentUtil.getCaller() + " by user "
                     + System.getProperty("user.name"));

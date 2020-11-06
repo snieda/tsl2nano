@@ -715,8 +715,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
         if (responseObject instanceof BeanCollector) {
             collector = (BeanCollector) responseObject;
             if (collector.hasMode(MODE_CREATABLE) && collector.getActionByName(BeanCollector.ACTION_NEW).isEnabled()) {
-                if (collector.getCurrentData().isEmpty() && ENV.get("session.navigation.gimmick.onemptycollector.create.newitem", false)) {
-                    collector.doAutomaticSearch();
+                if (collector.getCurrentData().isEmpty() && collector.doAutomaticSearch() && ENV.get("session.navigation.gimmick.onemptycollector.create.newitem", true)) {
                     if (collector.getCurrentData().isEmpty()) {
                         Message.send("empty collector -> creating new item...");
                         action = collector.getActionByName(BeanCollector.ACTION_NEW);

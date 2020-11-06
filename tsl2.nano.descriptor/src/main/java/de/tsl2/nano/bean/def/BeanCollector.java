@@ -295,7 +295,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         return (B) this;
     }
 
-	public void doAutomaticSearch() {
+	public boolean doAutomaticSearch() {
 		if (!isStaticCollection && Util.isEmpty(collection)) {
             long countCheck = ENV.get("collector.search.auto.count.lowerthan", 20);
             boolean dosearch = countCheck > 0 && count() < countCheck;
@@ -313,7 +313,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             if (dosearch) {
                 getBeanFinder().getData();
             }
+            return dosearch;
         }
+		return false;
 	}
 
     protected long count() {
