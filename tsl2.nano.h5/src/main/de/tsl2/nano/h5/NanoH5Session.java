@@ -298,7 +298,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
      */
     private void createExceptionHandler() {
         if (ENV.get("websocket.use", true)) {
-            final NanoWebSocketServer socketServer = createWebSocketServer(
+            NanoWebSocketServer socketServer = createWebSocketServer(
                 ENV.get("app.ssl.keystore.file", "nanoh5.pks"), 
                 ENV.get("app.ssl.keystore.password", "nanoh5"));
             this.exceptionHandler =
@@ -306,22 +306,6 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
                     new WebSocketExceptionHandler(socketServer));
             socketServer.start();
 
-            Runtime.getRuntime().addShutdownHook(Executors.defaultThreadFactory().newThread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Collection<WebSocket> sockets = socketServer.getConnections();
-                        for (WebSocket webSocket : sockets) {
-                            webSocket.send(" === APPLICATION STOPPED! === ");
-//                            Message.send("APPLICATION STOPPED!");
-
-                        }
-                        socketServer.stop();
-                    } catch (Exception e) {
-                        LOG.error(e);
-                    }
-                }
-            }));
         } else {
             this.exceptionHandler =
                 (ExceptionHandler) ENV.addService(UncaughtExceptionHandler.class, new ExceptionHandler());
@@ -1261,4 +1245,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
         return getId().toString();
     }
 
+	public void sendMessage(String txt) {
+   		exceptionHandler.uncaughtException(Thread.currentThread(), new Message(txt));
+	}
 }

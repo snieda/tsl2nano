@@ -105,6 +105,7 @@ public class NanoWebSocketServer extends WebSocketServer {
         LOG.debug("closing websocket (reason: " + arg2 + "): " + arg0);
         attachment_info = null;
         changeObjects = null;
+        session = null;
         arg0.send("websocket closed: reason=" + arg2);
     }   
 

@@ -137,14 +137,15 @@ public class EventController implements Serializable {
             return false;
         }
         if (eventType == null) {
+        	boolean result = false;
             //search in all eventTypes
             for (ListWrapper<IListener> ls : listener.values()) {
                 if (ls != null) {
                     if (ls.getList().remove(l))
-                        return true;
+                        result = true;
                 }
             }
-            return false;
+            return result;
         } else {
             return listener(eventType).remove(l);
         }

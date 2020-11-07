@@ -25,10 +25,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Stack;
+import java.util.concurrent.Executors;
 
 import javax.persistence.EntityManager;
 
 import org.apache.commons.logging.Log;
+import org.java_websocket.WebSocket;
 
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.IBeanContainer;
@@ -66,6 +68,7 @@ import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.h5.NanoHTTPD.Response.Status;
 import de.tsl2.nano.h5.collector.QueryResult;
+import de.tsl2.nano.h5.configuration.BeanConfigurator;
 import de.tsl2.nano.h5.expression.Query;
 import de.tsl2.nano.h5.expression.RuleExpression;
 import de.tsl2.nano.h5.expression.SQLExpression;
@@ -1088,9 +1091,21 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         DatabaseTool dbTool = new DatabaseTool(persistence);
         dbTool.addShutdownHook();
         dbTool.doPeriodicalBackup();
+        addShutdownHookMessageToSessions();
     }
 
-    private void provideScripts(Persistence persistence) {
+    private void addShutdownHookMessageToSessions() {
+        Runtime.getRuntime().addShutdownHook(Executors.defaultThreadFactory().newThread(new Runnable() {
+            @Override
+            public void run() {
+            	for (NanoH5Session s : sessions.values()) {
+					s.sendMessage(" === APPLICATION STOPPED! === ");
+				}
+            }
+        }));
+	}
+
+	private void provideScripts(Persistence persistence) {
         System.setProperty(HIBREVNAME_TEMPLATE + ".destination", HIBREVNAME);
 
         //check if an equal named ddl-script is inside our jar file. should be done on 'anyway' or 'timedb'.
@@ -1181,6 +1196,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         //TODO: the following is done in pagebuilder.reset, too?
         ENV.removeService(Workflow.class);
         ENV.removeService(Persistence.class);
+        ENV.removeService(BeanConfigurator.class);
         if (ENV.get(UncaughtExceptionHandler.class) instanceof ExceptionHandler)
         	((ExceptionHandler)ENV.get(UncaughtExceptionHandler.class)).clearExceptions();
         ENV.get(Pool.class).reset();

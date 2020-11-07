@@ -69,6 +69,7 @@ public class DatabaseTool {
             @Override
             public void run() {
                 if (BeanContainer.isInitialized()) {
+                	Persistence persistence = Persistence.current();
                     EMessage.broadcast(this, "APPLICATION SHUTDOWN INITIALIZED...", "*");
                     shutdownDBServer();
                     shutdownDatabase(); //doppelt gemoppelt hält besser ;-)

@@ -18,11 +18,9 @@ import javax.persistence.EntityNotFoundException;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ITransformer;
-import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;

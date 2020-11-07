@@ -118,6 +118,7 @@ public class WebSocketExceptionHandler extends ExceptionHandler implements Close
     public void close() throws IOException {
         try {
             socket.stop();
+            socket = null;
         } catch (InterruptedException e) {
             ManagedException.forward(e);
         }
