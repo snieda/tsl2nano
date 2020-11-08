@@ -16,7 +16,7 @@ import de.tsl2.nano.core.ENV;
  * @author Tom
  * @version $Revision$ 
  */
-public class ENVUpdate2v4v0 implements Runnable {
+public class ENVUpdate2v4v3 implements Runnable {
     private String VERS_PREVIOUS = null;
     private ENV env;
     private String currentVersion;
@@ -24,7 +24,7 @@ public class ENVUpdate2v4v0 implements Runnable {
     /**
      * constructor
      */
-    public ENVUpdate2v4v0(Object env, String currentVersion) {
+    public ENVUpdate2v4v3(Object env, String currentVersion) {
         this.env = (ENV) env;
         this.currentVersion = currentVersion;
     }
@@ -36,10 +36,8 @@ public class ENVUpdate2v4v0 implements Runnable {
     public void run() {
         // runPreviousVersionUpdate();
         //TODO:
-        //package incubation,specification -> specification
-        //rules: specification: rule, rulescript, ruledecisiontable, action, query, webclient
-        //replace in environment.xml : action.layout.width Integer -> String
-        //add in environment.xml: frame.style add style.template from body to all nav tags (at the end)
+    	//remove old hibernate and h2 jars
+    	//runserver.cmd, environment.xml: add -ifNotExists
     }
 
     void runPreviousVersionUpdate() {

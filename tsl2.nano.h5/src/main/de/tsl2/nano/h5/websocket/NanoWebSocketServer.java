@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.h5.websocket;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
@@ -28,13 +29,11 @@ import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.bean.def.ValueExpression;
 import de.tsl2.nano.core.ISession;
-import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.messaging.IListener;
 import de.tsl2.nano.core.messaging.IStatefulListener;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.FileUtil;
-import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.h5.NanoH5Session;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
@@ -105,7 +104,6 @@ public class NanoWebSocketServer extends WebSocketServer {
         LOG.debug("closing websocket (reason: " + arg2 + "): " + arg0);
         attachment_info = null;
         changeObjects = null;
-        session = null;
         arg0.send("websocket closed: reason=" + arg2);
     }   
 
@@ -297,5 +295,9 @@ public class NanoWebSocketServer extends WebSocketServer {
         LOG.debug("starting websocket");
     }
     
-    
+    @Override
+    public void stop() throws IOException, InterruptedException {
+    	super.stop();
+    	session = null;
+    }
 }
