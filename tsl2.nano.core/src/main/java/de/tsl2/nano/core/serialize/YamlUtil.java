@@ -102,6 +102,7 @@ public class YamlUtil {
 	            if (isContructable(cls))
 	                representer.addClassTag(cls, new Tag(cls.getSimpleName()));
 	        }
+	        representer.addClassTag(Class.class, new Tag(Class.class.getSimpleName()));
     	}
 //        DumperOptions doptions = new DumperOptions();
 //        doptions.setDefaultFlowStyle(FlowStyle.AUTO);
@@ -152,7 +153,7 @@ public class YamlUtil {
 	        TypeDescription typeDef;
 	        for (Class cls : classes.values()) {
 	            if (isContructable(cls)) {
-	                typeDef = new TypeDescription(cls, cls.getSimpleName());
+	                typeDef = new TypeDescription(cls, new Tag(cls.getSimpleName()), cls);
 	                constructor.addTypeDescription(typeDef);
 	            }
 	        }

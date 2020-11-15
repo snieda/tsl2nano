@@ -38,6 +38,7 @@ public class YamlBeanTest {
 		BeanDefinition beancopy = YamlUtil.load(dump, BeanDefinition.class);
 		if (compare)
 			assertEquals(maskId(dump), maskId(YamlUtil.dump(beancopy)));
+		YamlUtil.reset();
 	}
 
 	private String maskId(String dump) {

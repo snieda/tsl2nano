@@ -393,7 +393,7 @@ public class CoreUtilTest implements ENVTestPreparation {
 	public void testFileChecksum() throws Exception {
 		// use a verified example from internet...
 		String test = "sha1 this string";
-		String expectedHash = "cf23df2207d99a74fbe169e3eba035e633b65d94";
+		String expectedHash = "9fa0e351fdebee319238741ddc998691b604d2c8";
 
 		String file = ENV.getConfigPath() + "testchecksum";
 		FileUtil.writeBytes(test.getBytes(), file, false);

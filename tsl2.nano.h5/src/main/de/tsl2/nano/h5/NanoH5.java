@@ -1291,7 +1291,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
 
 	@Override
 	public void accept(ChangeEvent t) {
-		if (t.getSource().equals("*")|| t.getSource().equals("app.configuration.persist.yaml")) {
+		if (t.getSource().equals("*") || (t.getSource().equals("app.configuration.persist.yaml") && (boolean)t.newValue)) {
 			createYAMLFiles();
 		}
 	}
