@@ -372,7 +372,9 @@ public class Crypt implements ISecure {
      */
     public static byte[] hash(InputStream stream, String algorithm) {
         try {
-            DigestInputStream digestStream = new DigestInputStream(stream, MessageDigest.getInstance(algorithm));
+            MessageDigest digest = MessageDigest.getInstance(algorithm);
+            digest.update(salt16);
+			DigestInputStream digestStream = new DigestInputStream(stream, digest);
          // Read the stream and do nothing with it
             while (digestStream.read() != -1) {}
             return digestStream.getMessageDigest().digest();
@@ -626,8 +628,8 @@ public class Crypt implements ISecure {
      * @param hashLength hashcode length
      * @return signed data
      */
-    public byte[] sign(byte[] data, String hashAlgorithm, int hashLength) {
-        byte[] hash = Util.cryptoHash(data, hashAlgorithm, hashLength);
+    public byte[] sign(byte[] data, String hashAlgorithm) {
+        byte[] hash = Util.cryptoHash(data, hashAlgorithm);
         String sign = null;
         try {
             //do an encryption with the private key --> decryption
@@ -646,7 +648,7 @@ public class Crypt implements ISecure {
      * @param hashLength hashcode length
      * @throws Exception on invalid signification
      */
-    public void checkSignification(byte[] data, byte[] sign, String hashAlgorithm, int hashLength) {
+    public void checkSignification(byte[] data, byte[] sign, String hashAlgorithm) {
         //TODO: implement
         throw new UnsupportedOperationException();
     }
@@ -659,8 +661,8 @@ public class Crypt implements ISecure {
         if (args.length == 4 && args[0].equals("hash")) {
             log(args[2]
                 + ":"
-                + StringUtil.toHexString(StringUtil.cryptoHash(getData(args[3], String.class), args[2],
-                    Integer.valueOf(args[1]))));
+                + StringUtil.toHexString(StringUtil.cryptoHash(getData(args[3], String.class), args[2]
+                    /*Integer.valueOf(args[1])*/))); //TODO remove 'length' as it is not used in cryptohash
         } else if (args.length >= 3) {
             Crypt c = new Crypt(args[0].getBytes(), args[1]);
             String txt = args[2];

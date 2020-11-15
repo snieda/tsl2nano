@@ -38,6 +38,7 @@ public class ENVUpdate2v4v3 implements Runnable {
         //TODO:
     	//remove old hibernate and h2 jars
     	//runserver.cmd, environment.xml: add -ifNotExists
+    	//hash changed: re-create users.xml and <user-name>.xml, presentation-xml seals
     }
 
     void runPreviousVersionUpdate() {

@@ -14,12 +14,18 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Proxy;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.AbstractConstruct;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.introspector.BeanAccess;
 import org.yaml.snakeyaml.introspector.Property;
@@ -33,8 +39,10 @@ import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.ClassFinder;
 import de.tsl2.nano.core.cls.PrivateAccessor;
+import de.tsl2.nano.core.util.DelegationHandler;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.Util;
 
@@ -47,8 +55,8 @@ import de.tsl2.nano.core.util.Util;
  * @version $Revision$
  */
 public class YamlUtil {
-    private static Yaml yamlWriter;
-    private static Yaml yamlLoader;
+    private static Representer representer;
+    private static Constructor constructor;
 
     /**
      * dumps the given object (document / bean) to the given file.
@@ -65,9 +73,7 @@ public class YamlUtil {
      *            {@link Util#FRAMEWORK_PACKAGE}
      */
     public static String dump(Object obj) {
-        if (yamlWriter == null)
-            yamlWriter = createYamlWriter(true, true, Util.FRAMEWORK_PACKAGE);
-        return yamlWriter.dump(obj);
+        return dump(obj, true, true, Util.FRAMEWORK_PACKAGE);
     }
 
     /**
@@ -80,23 +86,26 @@ public class YamlUtil {
      * @return dumps as string
      */
     public static String dump(Object obj, boolean skipEmpties, boolean fields, String shortCutPackage) {
-        return createYamlWriter(skipEmpties, fields, shortCutPackage).dump(obj);
+        Yaml yaml = new Yaml(getRepresenter(skipEmpties, shortCutPackage));
+        if (fields)
+        	yaml.setBeanAccess(BeanAccess.FIELD);
+        return yaml.dump(obj);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    static Yaml createYamlWriter(boolean skipEmpties, boolean fields, String shortCutPackage) {
-        Representer representer = skipEmpties ? new SkipEmptyRepresenter() : new Representer();
-        Map<Double, Class> classes = ClassFinder.self().fuzzyFind(shortCutPackage);
-        for (Class cls : classes.values()) {
-            if (cls.getSimpleName().length() > 0)
-                representer.addClassTag(cls, new Tag(cls.getSimpleName()));
-        }
+    static Representer getRepresenter(boolean skipEmpties, String shortCutPackage) {
+    	if (representer == null) {
+        	representer = skipEmpties ? new SkipEmptyRepresenter() : new Representer();
+	        Map<Double, Class> classes = ClassFinder.self().fuzzyFind(shortCutPackage);
+	        classes.put(-1d, Class.class);
+	        for (Class cls : classes.values()) {
+	            if (isContructable(cls))
+	                representer.addClassTag(cls, new Tag(cls.getSimpleName()));
+	        }
+    	}
 //        DumperOptions doptions = new DumperOptions();
 //        doptions.setDefaultFlowStyle(FlowStyle.AUTO);
-        Yaml yaml = new Yaml(representer);
-        if (fields)
-            yaml.setBeanAccess(BeanAccess.FIELD);
-        return yaml;
+        return representer;
     }
 
     /**
@@ -116,34 +125,50 @@ public class YamlUtil {
     }
 
     public static <T> T load(InputStream stream, Class<T> type) {
-        if (yamlLoader == null)
-            yamlLoader = createYamlLoader(true, Util.FRAMEWORK_PACKAGE);
-        return yamlLoader.loadAs(stream, type);
+        return createLoaderYaml().loadAs(stream, type);
     }
 
     public static <T> T load(String txt, Class<T> type) {
-        if (yamlLoader == null)
-            yamlLoader = createYamlLoader(true, Util.FRAMEWORK_PACKAGE);
-        return yamlLoader.loadAs(txt, type);
+        return createLoaderYaml().loadAs(txt, type);
     }
+
+	private static Yaml createLoaderYaml() {
+		Yaml yaml = new Yaml(getConstructor(true, Util.FRAMEWORK_PACKAGE), new Representer(), new DumperOptions(), getLoaderOptions());
+        yaml.setBeanAccess(BeanAccess.FIELD);
+		return yaml;
+	}
+
+	private static LoaderOptions getLoaderOptions() {
+		LoaderOptions loaderOptions = new LoaderOptions();
+        loaderOptions.setMaxAliasesForCollections(200);
+		return loaderOptions;
+	}
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    static Yaml createYamlLoader(boolean fields, String shortCutPackage) {
-        Constructor constructor = new PostConstructor();
-        Map<Double, Class> classes = ClassFinder.self().fuzzyFind(shortCutPackage);
-        TypeDescription typeDef;
-        for (Class cls : classes.values()) {
-            if (cls.getSimpleName().length() > 0) {
-                typeDef = new TypeDescription(cls, cls.getSimpleName());
-                constructor.addTypeDescription(typeDef);
-            }
-        }
-        Yaml yaml = new Yaml(constructor);
-        if (fields)
-            yaml.setBeanAccess(BeanAccess.FIELD);
-        return yaml;
+    static Constructor getConstructor(boolean fields, String shortCutPackage) {
+    	if (constructor == null) {
+	        constructor = new PostConstructor();
+	        Map<Double, Class> classes = ClassFinder.self().fuzzyFind(shortCutPackage);
+	        TypeDescription typeDef;
+	        for (Class cls : classes.values()) {
+	            if (isContructable(cls)) {
+	                typeDef = new TypeDescription(cls, cls.getSimpleName());
+	                constructor.addTypeDescription(typeDef);
+	            }
+	        }
+    	}
+        return constructor;
     }
 
+	private static boolean isContructable(Class cls) {
+		return cls.getSimpleName().length() > 0  && !cls.getSimpleName().endsWith("Util") 
+				&& BeanClass.hasDefaultConstructor(cls) && !cls.isAnnotation();
+	}
+
+    public static void reset() {
+    	representer = null;
+    	constructor = null;
+    }
 }
 
 /**
@@ -154,6 +179,14 @@ public class YamlUtil {
  */
 //TODO: use more generic algorithms through annotations instead of fixed method name 'initDeserialization'
 class PostConstructor extends Constructor {
+	public PostConstructor() {
+		ClassConstructor classConstructor = new ClassConstructor();
+		classConstructor.setPropertyUtils(getPropertyUtils());
+		this.yamlConstructors.put(new Tag(Class.class), classConstructor.new ConstructClass());
+		ProxyConstructor proxyConstructor = new ProxyConstructor();
+		proxyConstructor.setPropertyUtils(getPropertyUtils());
+		this.yamlConstructors.put(new Tag(DelegationHandler.class), proxyConstructor.new ConstructProxy());
+	}
     @Override
     public TypeDescription addTypeDescription(TypeDescription definition) {
         TypeDescription typeDescription = super.addTypeDescription(definition);
@@ -161,7 +194,7 @@ class PostConstructor extends Constructor {
         this.yamlConstructors.put(tag, new PostConstruct());
         return typeDescription;
     }
-
+    
     @Override
     protected Object constructObject(Node node) {
         if (Class.class.isAssignableFrom(node.getType())) {
@@ -250,7 +283,7 @@ class PreRepresenter extends Representer {
     }
 }
 
-class SkipEmptyRepresenter extends PreRepresenter {
+class SkipEmptyRepresenter extends ProxyRepresenter {
     @Override
     protected NodeTuple representJavaBeanProperty(Object javaBean,
             Property property,
@@ -279,3 +312,50 @@ class SkipEmptyRepresenter extends PreRepresenter {
         return tuple;
     }
 }
+
+class ClassConstructor extends Constructor {
+	class ConstructClass extends AbstractConstruct {
+	    public Object construct(Node node) {
+	        String val = constructScalar((ScalarNode) ((MappingNode) node).getValue().get(0).getValueNode());
+	        try {
+				return Class.forName(val, true, Thread.currentThread().getContextClassLoader());
+			} catch (ClassNotFoundException e) {
+				ManagedException.forward(e);
+				return null;
+			}
+	    }
+	}
+}
+
+class ProxyRepresenter extends PreRepresenter {
+	@Override
+	public Node represent(Object data) {
+			return super.represent(Proxy.isProxyClass(data.getClass()) ? Proxy.getInvocationHandler(data) : data);
+	}
+}
+
+class ProxyConstructor extends Constructor {
+	public ProxyConstructor() {
+		ClassConstructor classConstructor = new ClassConstructor();
+		classConstructor.setPropertyUtils(getPropertyUtils());
+		this.yamlConstructors.put(new Tag(Class.class.getSimpleName()), classConstructor.new ConstructClass());
+	}
+	class ConstructProxy extends ConstructYamlObject {
+	    public Object construct(Node node) {
+	    	ProxyConstructor.this.getPropertyUtils().setBeanAccess(BeanAccess.FIELD);
+//	    	node.setUseClassConstructor(true);
+//	    	node.setTwoStepsConstruction(true);
+	        DelegationHandler val = (DelegationHandler) super.construct(node);
+//	        construct2ndStep(node, val);
+	        workaroundSnakeBug(val);
+			return DelegationHandler.createProxy(val);
+	    }
+
+		private void workaroundSnakeBug(DelegationHandler dh) {
+			//snakeyaml fills all the same interfaces (the first one found)  to the array
+			Object[] uniqueInterfaces = new HashSet(Arrays.asList(dh.getInterfaces())).toArray(new Class[0]);
+			new PrivateAccessor<DelegationHandler>(dh).set("interfaces", uniqueInterfaces);
+		}
+	}
+}
+

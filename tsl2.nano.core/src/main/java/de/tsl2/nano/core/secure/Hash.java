@@ -24,15 +24,12 @@ public class Hash implements ISecure {
     /** algorithm */
     @Attribute
     private String algorithm;
-    /** length */
-    @Attribute
-    private int length;
 
     /**
      * constructor
      */
     public Hash() {
-        this("SHA", 32);
+        this("SHA-512");
     }
 
     /**
@@ -40,10 +37,9 @@ public class Hash implements ISecure {
      * @param algorithm
      * @param length
      */
-    public Hash(String algorithm, int length) {
+    public Hash(String algorithm) {
         super();
         this.algorithm = algorithm;
-        this.length = length;
     }
 
     /**
@@ -51,7 +47,7 @@ public class Hash implements ISecure {
      */
     @Override
     public String encrypt(String data) {
-        return String.valueOf(Util.cryptoHash(data.getBytes(), algorithm, length));
+        return String.valueOf(Util.cryptoHash(data.getBytes(), algorithm));
     }
 
     /**

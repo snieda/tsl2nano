@@ -557,7 +557,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
                 + DateUtil.getFormattedMinutes(getDuration()) + " min, " : "";
         String workflow = /*nav instanceof Workflow 
         		? "<a href=\"" + ((Workflow)nav).getGraphFileName() + "\">" + ENV.translate(nav.getName(), true) + "</a>"
-        			: */ENV.translate(nav.getName(), true);
+        			: */nav != null ? ENV.translate(nav.getName(), true) : "unknown";
         return PREFIX_STATUS_LINE + user
             + ENV.translate("tsl2nano.time", true)
             + ": " + DateUtil.getFormattedDateTime(new Date()) + ", "

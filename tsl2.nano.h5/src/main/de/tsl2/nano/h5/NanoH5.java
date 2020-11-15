@@ -30,7 +30,6 @@ import java.util.concurrent.Executors;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.logging.Log;
-import org.java_websocket.WebSocket;
 
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.IBeanContainer;
@@ -47,6 +46,7 @@ import de.tsl2.nano.bean.def.PathExpression;
 import de.tsl2.nano.collection.ExpiringMap;
 import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.IEnvChangeListener;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -56,11 +56,11 @@ import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.messaging.ChangeEvent;
 import de.tsl2.nano.core.messaging.EventController;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
-import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
@@ -93,6 +93,7 @@ import de.tsl2.nano.plugin.Plugins;
 import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.service.util.IGenericService;
 import de.tsl2.nano.serviceaccess.Authorization;
+import de.tsl2.nano.serviceaccess.IAuthorization;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
 import de.tsl2.nano.util.Translator;
 
@@ -111,7 +112,7 @@ import de.tsl2.nano.util.Translator;
  * </pre>
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
+public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, IEnvChangeListener {
     private static final Log LOG = LogFactory.getLog(NanoH5.class);
 
     public static final String JAR_COMMON = "tsl2.nano.common.jar";
@@ -1287,4 +1288,24 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             ENV.removeService(IGenericService.class);
         }
     }
+
+	@Override
+	public void accept(ChangeEvent t) {
+		if (t.getSource().equals("*")|| t.getSource().equals("app.configuration.persist.yaml")) {
+			createYAMLFiles();
+		}
+	}
+
+	public void createYAMLFiles() {
+		ENV.persist(Users.load());
+		if (ENV.get(IAuthorization.class) != null)
+			ENV.persist(ENV.get(IAuthorization.class)); //TODO: that's only the current user!
+		ENV.persist(Persistence.current());
+		Collection<Class> beantypes = (Collection<Class>) ENV.get("service.loadedBeanTypes");
+		if (beantypes != null) {
+			for (Class c: beantypes) {
+				BeanDefinition.getBeanDefinition(c).saveDefinition();
+			}
+		}
+	}
 }

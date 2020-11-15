@@ -36,6 +36,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
@@ -54,6 +55,7 @@ import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.messaging.ChangeEvent;
 import de.tsl2.nano.core.serialize.XmlUtil;
 import de.tsl2.nano.core.serialize.YamlUtil;
 import de.tsl2.nano.core.update.Updater;
@@ -508,13 +510,27 @@ public class ENV implements Serializable {
      * @param value value
      */
     public static void setProperty(String key, Object value) {
+    	Object oldValue = self().properties.get(key);
         self().properties.put(key, value);
         if (self().autopersist) {
             self().persist();
         }
+        self().handleChange(key, oldValue, value); 
     }
 
-    /**
+    private void handleChange(String key, Object oldValue, Object value) {
+    	ChangeEvent e = null;
+    	for (Object s : services.values()) {
+			if ( s instanceof IEnvChangeListener) {
+				if (e == null) {
+					e = new ChangeEvent(key, oldValue, value);
+				}
+				((IEnvChangeListener) s).accept(e);
+			}
+		}
+	}
+
+	/**
      * @param properties The properties to set.
      */
     @SuppressWarnings("rawtypes")
@@ -522,6 +538,7 @@ public class ENV implements Serializable {
         if (self().properties == null)
             self().properties = createPropertyMap();
         self().properties.putAll(properties);
+        self().handleChange("*", null, null);
         if (self().autopersist) {
             self().persist();
         }

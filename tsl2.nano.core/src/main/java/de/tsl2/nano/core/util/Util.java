@@ -26,6 +26,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.secure.Crypt;
 
 /**
  * utils for general purpose on simple objects.
@@ -41,6 +42,13 @@ public class Util {
         String[] p = pck.split("\\.");
         FRAMEWORK_PACKAGE = StringUtil.concat(new char[] { '.' }, p[0], p[1], p[2]);
     }
+
+    private static final byte[] salt16 = {
+            (byte) 0x71, (byte) 0x37, (byte) 0x30, (byte) 0x23,
+            (byte) 0x45, (byte) 0x52, (byte) 0x01, (byte) 0x15,
+            (byte) 0x63, (byte) 0x82, (byte) 0x27, (byte) 0x72,
+            (byte) 0x81, (byte) 0xd7, (byte) 0xde, (byte) 0x89
+        };
 
     protected Util() {
     }
@@ -224,7 +232,7 @@ public class Util {
      * delegates to {@link #cryptoHash(byte[], String)} using SHA and length of 32.
      */
     public static final byte[] cryptoHash(byte[] data) {
-        return cryptoHash(data, "SHA", 32);
+        return cryptoHash(data, "SHA-512");
     }
 
     /**
@@ -235,9 +243,11 @@ public class Util {
      * @param algorithm one of MD2, MD5, SHA, SHA-1, SHA-256, SHA-384, SHA-512
      * @return hashed data encoded with UTF-8
      */
-    public static final byte[] cryptoHash(byte[] data, String algorithm, int length) {
+    public static final byte[] cryptoHash(byte[] data, String algorithm) {
         try {
-            return MessageDigest.getInstance(algorithm).digest(data);
+        	MessageDigest md = MessageDigest.getInstance(algorithm);
+            md.update(salt16);
+            return md.digest(data);
         } catch (Exception e) {
             ManagedException.forward(e);
             return null;

@@ -32,6 +32,10 @@ public class ChangeEvent extends EventObject {
     /** new value */
     public Object newValue;
 
+    public ChangeEvent(Object source, Object oldValue, Object newValue) {
+    	this(source, true, false, oldValue, newValue);
+    }
+    
     /**
      * constructor
      * 

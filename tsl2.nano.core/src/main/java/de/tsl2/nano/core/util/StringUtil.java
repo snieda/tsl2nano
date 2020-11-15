@@ -820,12 +820,11 @@ public class StringUtil {
      * 
      * @param data data to hash
      * @param algorithm one of MD2, MD5, SHA, SHA-1, SHA-256, SHA-384, SHA-512
-     * @param length result length
      * @return hashed data encoded with UTF-8
      */
-    public static final byte[] cryptoHash(String data, String algorithm, int length) {
+    public static final byte[] cryptoHash(String data, String algorithm) {
         try {
-            return Util.cryptoHash(data.getBytes("UTF-8"), algorithm, length);
+            return Util.cryptoHash(data.getBytes("UTF-8"), algorithm);
         } catch (Exception e) {
             ManagedException.forward(e);
             return null;

@@ -51,9 +51,9 @@ public class CoreSecureTest implements ENVTestPreparation {
         try {
             Crypt sender = new Crypt(keyPair.getPublic());
             Crypt receiver = new Crypt(keyPair.getPrivate());
-            byte[] sign = sender.sign("test".getBytes(), "SHA-256", 10);
+            byte[] sign = sender.sign("test".getBytes(), "SHA-256");
             receiver.validate(null);
-            receiver.checkSignification("test".getBytes(), sign, "SHA-256", 10);
+            receiver.checkSignification("test".getBytes(), sign, "SHA-256");
         } catch (UnsupportedOperationException ex) {
             //not implemented yet!
         } catch (IllegalArgumentException ex) {
