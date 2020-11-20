@@ -26,7 +26,7 @@ public class YamlBeanTest {
 
 	@Test
 	public void testBeanDefinitionDumpAndLoadTypeBean() {
-		System.setProperty("casc.yaml.max.aliases", "100");
+//		System.setProperty("casc.yaml.max.aliases", "100");
 		checkDumpAndLoad(TypeBean.class, false); // reference id differ!
 	}
 

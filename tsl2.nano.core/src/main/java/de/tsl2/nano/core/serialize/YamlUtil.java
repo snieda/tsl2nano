@@ -21,10 +21,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.constructor.AbstractConstruct;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.introspector.BeanAccess;
@@ -38,10 +40,13 @@ import org.yaml.snakeyaml.nodes.SequenceNode;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.ClassFinder;
+import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.cls.PrivateAccessor;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DelegationHandler;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.Util;
@@ -55,6 +60,8 @@ import de.tsl2.nano.core.util.Util;
  * @version $Revision$
  */
 public class YamlUtil {
+	private static final Log LOG = LogFactory.getLog(YamlUtil.class);
+	
     private static Representer representer;
     private static Constructor constructor;
 
@@ -86,7 +93,13 @@ public class YamlUtil {
      * @return dumps as string
      */
     public static String dump(Object obj, boolean skipEmpties, boolean fields, String shortCutPackage) {
-        Yaml yaml = new Yaml(getRepresenter(skipEmpties, shortCutPackage));
+    	DumperOptions doptions = new DumperOptions();
+    	if (ENV.get("app.configuration.persist.yaml.flowstyle", false)) {
+			doptions.setDefaultFlowStyle(FlowStyle.FLOW);
+    	} else {
+    		doptions.setDefaultFlowStyle(FlowStyle.AUTO);
+    	}
+        Yaml yaml = new Yaml(getRepresenter(skipEmpties, shortCutPackage), doptions);
         if (fields)
         	yaml.setBeanAccess(BeanAccess.FIELD);
         return yaml.dump(obj);
@@ -94,18 +107,18 @@ public class YamlUtil {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     static Representer getRepresenter(boolean skipEmpties, String shortCutPackage) {
-    	if (representer == null) {
-        	representer = skipEmpties ? new SkipEmptyRepresenter() : new Representer();
-	        Map<Double, Class> classes = ClassFinder.self().fuzzyFind(shortCutPackage);
-	        classes.put(-1d, Class.class);
-	        for (Class cls : classes.values()) {
-	            if (isContructable(cls))
-	                representer.addClassTag(cls, new Tag(cls.getSimpleName()));
-	        }
-	        representer.addClassTag(Class.class, new Tag(Class.class.getSimpleName()));
-    	}
-//        DumperOptions doptions = new DumperOptions();
-//        doptions.setDefaultFlowStyle(FlowStyle.AUTO);
+    	Representer representer = skipEmpties ? new SkipEmptyRepresenter() : new PreRepresenter();
+        Map<Double, Class> classes = ClassFinder.self().fuzzyFind(shortCutPackage);
+        int c = 0;
+        for (Class cls : classes.values()) {
+            if (isContructable(cls)) {
+                representer.addTypeDescription(new TypeDescription(cls, cls.getSimpleName()));
+                c++;
+            }
+        }
+        representer.addClassTag(Class.class, new Tag(Class.class.getSimpleName()));
+        representer.addClassTag(Long.class, new Tag(Long.class));
+        LOG.info(representer + " created! added " + c + " classtags for '" + shortCutPackage + "'");
         return representer;
     }
 
@@ -120,7 +133,8 @@ public class YamlUtil {
         try {
             return load(new FileInputStream(file), type);
         } catch (FileNotFoundException e) {
-            ManagedException.forward(e);
+        	LOG.warn(e.toString());
+            ManagedException.forward(e, false);
             return null;
         }
     }
@@ -147,17 +161,18 @@ public class YamlUtil {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     static Constructor getConstructor(boolean fields, String shortCutPackage) {
-    	if (constructor == null) {
-	        constructor = new PostConstructor();
-	        Map<Double, Class> classes = ClassFinder.self().fuzzyFind(shortCutPackage);
-	        TypeDescription typeDef;
-	        for (Class cls : classes.values()) {
-	            if (isContructable(cls)) {
-	                typeDef = new TypeDescription(cls, new Tag(cls.getSimpleName()), cls);
-	                constructor.addTypeDescription(typeDef);
-	            }
-	        }
-    	}
+        Constructor constructor = new PostConstructor();
+        Map<Double, Class> classes = ClassFinder.self().fuzzyFind(shortCutPackage);
+        TypeDescription typeDef;
+        int c = 0;
+        for (Class cls : classes.values()) {
+            if (isContructable(cls)) {
+                typeDef = new TypeDescription(cls, new Tag(cls.getSimpleName()), cls);
+                constructor.addTypeDescription(typeDef);
+                c++;
+            }
+        }
+        LOG.info(constructor + " created! added " + c + " typedefinitions for '" + shortCutPackage + "'");
         return constructor;
     }
 
@@ -180,10 +195,13 @@ public class YamlUtil {
  */
 //TODO: use more generic algorithms through annotations instead of fixed method name 'initDeserialization'
 class PostConstructor extends Constructor {
+	PostConstruct myConstruct;
 	public PostConstructor() {
+		myConstruct = new PostConstruct();
+		this.yamlConstructors.put(null, myConstruct);
 		ClassConstructor classConstructor = new ClassConstructor();
 		classConstructor.setPropertyUtils(getPropertyUtils());
-		this.yamlConstructors.put(new Tag(Class.class), classConstructor.new ConstructClass());
+		this.yamlConstructors.put(new Tag(Class.class.getSimpleName()), classConstructor.new ConstructClass());
 		ProxyConstructor proxyConstructor = new ProxyConstructor();
 		proxyConstructor.setPropertyUtils(getPropertyUtils());
 		this.yamlConstructors.put(new Tag(DelegationHandler.class), proxyConstructor.new ConstructProxy());
@@ -192,7 +210,8 @@ class PostConstructor extends Constructor {
     public TypeDescription addTypeDescription(TypeDescription definition) {
         TypeDescription typeDescription = super.addTypeDescription(definition);
         Tag tag = new Tag(definition.getType().getSimpleName());
-        this.yamlConstructors.put(tag, new PostConstruct());
+        this.yamlConstructors.put(tag, myConstruct);
+        this.yamlConstructors.put(new Tag(definition.getType()), myConstruct);
         return typeDescription;
     }
     
@@ -216,13 +235,13 @@ class PostConstructor extends Constructor {
         }
         return super.constructObject(node);
     }
-
     class PostConstruct extends ConstructYamlObject {
         @Override
         public Object construct(Node node) {
-            if (!Class.class.isAssignableFrom(node.getType()))
+            Object result = super.construct(node);
+            if (node instanceof MappingNode && !PrimitiveUtil.isPrimitiveOrWrapper(node.getType()))
                 node.setTwoStepsConstruction(true);
-            return super.construct(node);
+            return result;
         }
 
         @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -234,6 +253,9 @@ class PostConstructor extends Constructor {
                 acc.call("initDeserialization", null);
         }
     }
+	public boolean hasDeserializationMethod(Node node) {
+		return Arrays.stream(node.getType().getDeclaredMethods()).anyMatch(m -> m.getName().equals("initDeserialization"));
+	}
 }
 
 /**

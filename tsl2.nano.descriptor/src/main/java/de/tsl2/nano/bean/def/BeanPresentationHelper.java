@@ -1144,11 +1144,11 @@ public class BeanPresentationHelper<T> {
                         IAttribute id = bean.getIdAttribute();
                         if (id != null) {
                             LOG.warn("couldn't check attribute for unique data: " + bean.getName() + "." + names[i]
-                                + ". Using id-attribute " + id.getId(), ex);
+                                + ". Using id-attribute " + id.getId() + "\n" + ManagedException.getRootCause(ex).toString());
                             return id.getName();
                         } else {
-                            LOG.warn("couldn't check attribute for unique data: " + bean.getName() + "." + names[i],
-                                ex);
+                            LOG.warn("couldn't check attribute for unique data: " + bean.getName() + "." + names[i]
+                            		 + "\n" + ManagedException.getRootCause(ex).toString());
                             return names[i];
                         }
                     }

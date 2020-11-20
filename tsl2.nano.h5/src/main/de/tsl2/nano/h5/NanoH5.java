@@ -204,12 +204,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
     @Override
     public void start() {
         //print errors directly
-        Thread.currentThread().setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread t, Throwable e) {
-                e.printStackTrace();
-            }
-        });
+        createExceptionhandler();
         try {
 //            LogFactory.setLogLevel(LogFactory.LOG_ALL);
                 
@@ -235,6 +230,15 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
             System.exit(-1);
         }
     }
+
+	private void createExceptionhandler() {
+		Thread.currentThread().setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread t, Throwable e) {
+                e.printStackTrace();
+            }
+        });
+	}
 
     private void enableSSL(boolean ssl) throws IOException {
         if (ssl) {
@@ -1200,6 +1204,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         ENV.removeService(BeanConfigurator.class);
         if (ENV.get(UncaughtExceptionHandler.class) instanceof ExceptionHandler)
         	((ExceptionHandler)ENV.get(UncaughtExceptionHandler.class)).clearExceptions();
+        ENV.removeService(UncaughtExceptionHandler.class);
         ENV.get(Pool.class).reset();
         BeanContainer.reset();
         ENV.removeService(IBeanContainer.class);

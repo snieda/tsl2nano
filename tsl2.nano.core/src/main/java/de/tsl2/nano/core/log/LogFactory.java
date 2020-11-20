@@ -22,6 +22,7 @@ import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.core.Commit;
 import org.simpleframework.xml.core.Persist;
 
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.serialize.XmlUtil;
 import de.tsl2.nano.core.util.BitUtil;
@@ -112,7 +113,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
      */
     static final String apacheLogFactory = "org.apache.commons.logging.LogFactory";
 
-    static String logFactoryXml = "logfactory.xml";
+    static String logFactoryXml = "logfactory" + (ENV.isAvailable() ? ENV.getFileExtension() : ".xml");
     static String logOutputFile = "logfactory.log";
 
     /**

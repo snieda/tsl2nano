@@ -628,7 +628,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 InputStream jsStream = ENV.getResource("websocket.client.js.template");
                 jsWebsocketTemplate = String.valueOf(FileUtil.getFileData(jsStream, "UTF-8"));
                 ENV.get("websocket.window.alert.message", true);
-                ENV.get("websocket.speek.alert.message", true);
+                ENV.get("websocket.speak.alert.message", true);
                 ENV.get("app.login.secure", false);
             }
             Element script = appendElement(parent, TAG_SCRIPT, ATTR_TYPE, ATTR_TYPE_JS);

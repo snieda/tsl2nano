@@ -155,7 +155,6 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     };
 
     public static final String PREFIX_VIRTUAL = "virtual";
-    protected static final String POSTFIX_FILE_EXT = ".xml";
 
     private static final List<BeanDefinition> virtualBeanCache = new ListSet<BeanDefinition>();
     private static final BeanDefinition volatileBean = new BeanDefinition(Object.class);
@@ -1168,7 +1167,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
 
     protected static File getDefinitionFile(String name) {
         return new File(getDefinitionDirectory()
-            + FileUtil.getValidPathName(FileUtil.getFilePath(name).toLowerCase()) + POSTFIX_FILE_EXT);
+            + FileUtil.getValidPathName(FileUtil.getFilePath(name).toLowerCase()) + ENV.getFileExtension());
     }
 
     public void saveDefinition() {
@@ -1220,7 +1219,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      * Load virtual BeanCollectors like QueryResult from directory. name-convention: beandef/virtual/*.xml
      */
     public static Collection<BeanDefinition<?>> loadVirtualDefinitions() {
-        File[] virtDefs = FileUtil.getFiles(getDefinitionDirectory() + PREFIX_VIRTUAL, ".*.xml");
+        File[] virtDefs = FileUtil.getFiles(getDefinitionDirectory() + PREFIX_VIRTUAL, ".*" + ENV.getFileExtension());
         if (virtDefs == null) {
             return new ArrayList<BeanDefinition<?>>();
         }
@@ -1228,7 +1227,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         String name;
         BeanDefinition<?> bean;
         for (File file : virtDefs) {
-            name = StringUtil.substring(PREFIX_VIRTUAL + "." + file.getName(), null, POSTFIX_FILE_EXT);
+            name = StringUtil.substring(PREFIX_VIRTUAL + "." + file.getName(), null, ENV.getFileExtension());
             bean = getBeanDefinition(name);
             if (bean.getPresentable().isVisible())
                 types.add(bean);

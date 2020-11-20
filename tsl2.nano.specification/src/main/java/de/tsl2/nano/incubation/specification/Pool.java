@@ -89,7 +89,7 @@ public class Pool {
             File[] runnableFiles = dir.listFiles();
             for (int i = 0; i < runnableFiles.length; i++) {
                 try {
-                	if (runnableFiles[i].getPath().endsWith(".xml"))
+                	if (runnableFiles[i].getPath().endsWith(ENV.getFileExtension()))
                     loadRunnable(runnableFiles[i].getPath(), type);
                 } catch (Exception e) {
                     LOG.error(e);
@@ -153,7 +153,7 @@ public class Pool {
 
     protected String getFileName(String name, Class<? extends IPRunnable> type) {
     	name = FileUtil.getValidFileName(name);
-        return name.matches(".*[.][a-z]{3}") ? name : getDirectory(type) + name + ".xml";
+        return name.matches(".*[.][a-z]{3}") ? name : getDirectory(type) + name + ENV.getFileExtension();
     }
 
     /**

@@ -888,6 +888,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
      * @return init mask
      */
     protected String getInitMask(String source) {
+    	assureInit();
         String mask = null;
         if (source != null) {
             mask = initMap.get(source);
@@ -1150,6 +1151,10 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
         initDeserialization();
     }
 
+    private final void assureInit() {
+    	initDeserialization();
+    }
+    
     @Commit
     @Complete
     private void initDeserialization() {

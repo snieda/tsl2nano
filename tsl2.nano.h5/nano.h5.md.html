@@ -396,7 +396,12 @@ To switch to yaml, change the following environment property:
 
 	app.configuration.persist.yaml=true
 	
-On starting the application, the environment doesn't not know whether to load from xml or yaml - not having load the environment properties yet. so it tries to load first from xml and then from yaml.
+On starting the application, the environment doesn't know whether to load from xml or yaml - not having load the environment properties yet. so it tries to load first from xml and then from yaml.
+So, you should rename the _environement.xml_ file to something like _environement.xml__. This will let the application to search for a file named _environement.yml_.
+
+Now, most configuration files will be stored and load from *.yml.
+
+WARNING: Not all functions of tsl2.nano.h5 may be available - this feature is not tested in deep yet! internal covers and compositors may not work.
 
 A simple bean-definition configuration file will then look like:
 
@@ -4195,7 +4200,7 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.4.0  | 07.06.2020 | NEW: tsl2.nano.aspects, tsl2.nano.instrumentation, websocket-dialogs, REST service, generator enhanced with additional filters
  2.4.1  | 21.06.2020 | css styling enhanced (collapsable menu), service-url as start-parameter, snake-yaml: 1.18->1.26, bugfixes
  2.4.2  | 02.08.2020 | plugin enhanced, configurable regexp/replace on html response, session-id as cookie or etag
- 2.4.3  | 15.11.2020 | session-id direct on session-start (before authentication), beancollector presents hor on simple lists, vnet -> gravizo, h2-199 (-ifNotExists), h5+entityreplication, bugfixes
+ 2.4.3  | 22.11.2020 | session-id direct on session-start (before authentication), beancollector presents hor on simple lists, vnet -> gravizo, h2-199 (-ifNotExists), h5+entityreplication, yaml-support, bugfixes
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
 
@@ -5127,11 +5132,12 @@ Property -> {Organisation, Party, Item}
    - [x] entityreplication: memory leak on entitymanagers? (h2, hibernate)
    - [x] h2 database dump: SCRIP TO 'db-dump.sql'
 - [ ] test yaml
-   - [ ] test switch from xml to yaml
+   - [x] test switch from xml to yaml
    - [ ] test save boolean values
-   - [ ] check other simple-xml files like user, users, ...
-   - [ ] env has structured string names - only object hierarchies would be stored in a structured way 
-   - [ ] env:DefaultFormat , timeout.in.millis integer -> long (!!java.lang.Long)
+   - [x] check other simple-xml files like user, users, ...
+   - [!] env has structured string names - only object hierarchies would be stored in a structured way 
+   - [v] env:DefaultFormat , timeout.in.millis integer -> long (!!java.lang.Long)
+   - [x] assureInit() as replacement for initDeserialization (created for simplexml) (new: see ValueExpression, RegExpFormat)
 
 ### REST
 

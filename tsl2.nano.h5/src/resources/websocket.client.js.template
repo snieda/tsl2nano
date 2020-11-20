@@ -75,13 +75,13 @@ function showStatusMessage(msg) {
 function showBroadcastMessage(msg) {
 //	document.getElementById('${broadcast.element.id}').childNodes[0].nodeValue = ' \t'
 //			+ msg;
-	if (${websocket.speek.alert.message})
-		speek(msg);
+	if (${websocket.speak.alert.message})
+		speak(msg);
 	if (${websocket.window.alert.message})
 		window.alert(getValue(msg));
 }
 
-function speek(msg) {
+function speak(msg) {
 	var synth = window.speechSynthesis;
 	var utterThis = new SpeechSynthesisUtterance(msg);
 	synth.speak(utterThis);

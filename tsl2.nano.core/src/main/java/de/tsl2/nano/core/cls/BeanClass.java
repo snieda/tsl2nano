@@ -1254,10 +1254,13 @@ public class BeanClass<T> implements Serializable {
      */
     public static final <C> Class<C> getDefiningClass(Class<C> cls) {
         //TODO: how to check for enhancing class
-        return (Class<C>) (cls.isEnum() ? cls : Proxy.isProxyClass(cls) ? cls.getInterfaces()[0]
-            : (cls.getEnclosingClass() != null || cls
-                .getSimpleName().contains("$")) || cls.isSynthetic() && cls.getSuperclass() != null ? getDefiningClass(cls.getSuperclass())
-                    : cls);
+        return (Class<C>) (cls.isEnum() 
+        	? cls 
+        		: Proxy.isProxyClass(cls) 
+        			? cls.getInterfaces()[0]
+        				: (cls.getEnclosingClass() != null  || cls.getSimpleName().contains("$") || cls.isSynthetic()) && cls.getSuperclass() != null 
+        					? getDefiningClass(cls.getSuperclass())
+        						: cls);
     }
 
     /**

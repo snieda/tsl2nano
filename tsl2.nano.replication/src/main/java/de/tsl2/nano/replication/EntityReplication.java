@@ -238,7 +238,7 @@ public class EntityReplication {
         File file = getFile(entity.getClass(), getID(entity), serializer.getExtension());
         log("serializing (" + serializer.getKey() + ") " + entity.getClass() + " to " + file);
         try {
-            Files.write(Paths.get(file.getPath()), serializer.serialize(entity).toByteArray());
+            Files.write(Paths.get(file.getAbsolutePath()), serializer.serialize(entity).toByteArray());
         } catch (IOException e) {
             Util.handleException(e);
         }

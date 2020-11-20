@@ -231,6 +231,7 @@ public class ValueExpression<TYPE> implements
      * @return example bean holding attributes given by toValue
      */
     public TYPE createExampleBean(String toValue, boolean addSearchPostfix) {
+    	assureInit();
         TYPE exampleBean = createInstance(toValue);
         if (String.class.isAssignableFrom(getType())) // the following Bean.getBean() doesn't know, that the string is an instance and not a name!
         	return exampleBean;
@@ -293,6 +294,7 @@ public class ValueExpression<TYPE> implements
      */
     @Override
     public String to(TYPE fromValue) {
+    	assureInit();
         if (fromValue == null) {
             return "";
         }
@@ -454,7 +456,7 @@ public class ValueExpression<TYPE> implements
      * @return attribute values
      */
     protected String[] getAttributeValues(String toValue) {
-        if (attributeSplitters.length == 0) {
+        if (Util.isEmpty(attributeSplitters)) {
             return new String[] { toValue };
         }
         String splittedValues[] = new String[attributeSplitters.length + 1];
@@ -502,7 +504,7 @@ public class ValueExpression<TYPE> implements
      * @return true, if given attribute is part of value expression
      */
     public boolean isExpressionPart(String attribute) {
-        return Arrays.asList(attributes).contains(attribute);
+        return getAttributeNames().contains(attribute);
     }
 
     @Override
@@ -555,6 +557,12 @@ public class ValueExpression<TYPE> implements
     }
 
 	public List<String> getAttributeNames() {
+		assureInit();
 		return Arrays.asList(attributes);
+	}
+
+	private final void assureInit() {
+		if (attributes == null)
+			init(expression, type);
 	}
 }

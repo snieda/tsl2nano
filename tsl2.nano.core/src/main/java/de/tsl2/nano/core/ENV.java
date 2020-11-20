@@ -127,17 +127,14 @@ public class ENV implements Serializable {
     public static final String KEY_CONFIG_RELPATH = PREFIX + "config.relative.path";
     public static final String KEY_CONFIG_PATH = PREFIX + "config.path";
 
+	public static final String PREFIX_ENVNAME = ".nanoh5.";
     public static final String CONFIG_NAME = "environment";
-
     public static final String KEY_BUILDINFO = "tsl2.nano.build.informations";
 
     private static final String KEY_TESTMODE = "tsl2.nano.test";
 
     static final String DEF_PATHSEPRATOR = "/";
-
     static final String UNKNOWN_BUILD_INFORMATIONS = "<unknown build informations>";
-
-	public static final String PREFIX_ENVNAME = ".nanoh5.";
 
     private ENV() {
         self = this;
@@ -203,7 +200,7 @@ public class ENV implements Serializable {
         if (s == null) {
             debug(self, "no service found for " + service);
             debug(self, "available services:\n" + StringUtil.toFormattedString(services(), 500, true));
-            String path = getConfigPath(service) + ".xml";
+            String path = getConfigPath(service) + getFileExtension();
             if (new File(path).canRead()) {
                 self().info("loading service from " + path);
                 self().addService(service, self().get(XmlUtil.class).loadXml(path, service));
@@ -282,10 +279,12 @@ public class ENV implements Serializable {
 //                setProperty(KEY_CONFIG_PATH, configPath + "/");
         } else if ((configFile = getConfigFile(dir, ".yml")).canRead()) {
             self = YamlUtil.load(new File(configFile.getPath()), ENV.class);
+            //maybe this is an early action - lots of classes nre not yet loaded, so let the next one init yamlutil with more classes
+            YamlUtil.reset();
         } else {
             self = new ENV();
             self.properties = createPropertyMap();
-            configFile = getConfigFile(dir, ".xml");
+            configFile = getConfigFile(dir, getFileExtension());
 //          LOG.warn("no environment.properties available");
         }
 
@@ -310,6 +309,7 @@ public class ENV implements Serializable {
         //add frameworks beandef classes as standard-types
 //        BeanUtil.addStandardTypePackages("de.tsl2.nano.bean.def");
 //        self.persist();
+        LogFactory.log("==> ENV " + name + " created successful!");
         return self;
     }
 
@@ -336,7 +336,7 @@ public class ENV implements Serializable {
 
     public File getConfigFile() {
         //TODO: ext: xml or yaml
-        return getConfigFile(getConfigPath() + CONFIG_NAME, ".xml");
+        return getConfigFile(getConfigPath() + CONFIG_NAME, getFileExtension());
     }
 
     private static File getConfigFile(String dir, String ext) {
@@ -439,6 +439,7 @@ public class ENV implements Serializable {
     	T value = null;
     	if (sysValue != null) { //system properties win...
     		if (defaultValue != null && !(defaultValue instanceof String)) {
+    			//TODO: perhaps we can extend that with ObjectUtil.wrap()?
     			if (PrimitiveUtil.isPrimitiveOrWrapper(defaultValue.getClass())) {
     				value = (T) PrimitiveUtil.convert(sysValue, defaultValue.getClass());
     			} else {
@@ -519,6 +520,8 @@ public class ENV implements Serializable {
     }
 
     private void handleChange(String key, Object oldValue, Object value) {
+    	if (!isAvailable())
+    		return;
     	ChangeEvent e = null;
     	for (Object s : services.values()) {
 			if ( s instanceof IEnvChangeListener) {
@@ -697,17 +700,17 @@ public class ENV implements Serializable {
      * @return java instance
      */
     public static <T> T load(String name, Class<T> type, boolean renameOnError) {
-        name = StringUtil.substring(name, null, ".xml");
+        name = StringUtil.substring(name, null, getFileExtension());
         String path = cleanpath(name);
         if (self().get("app.configuration.persist.yaml", false)) {
-            return self().get(YamlUtil.class).load(FileUtil.userDirFile(path + ".yml"), type);
+            return self().get(YamlUtil.class).load(FileUtil.userDirFile(path + getFileExtension()), type);
         } else {
-            return self().get(XmlUtil.class).loadXml(path + ".xml", type, renameOnError);
+            return self().get(XmlUtil.class).loadXml(path + getFileExtension(), type, renameOnError);
         }
     }
 
     private static String cleanpath(String name) {
-        name = StringUtil.substring(name, null, ".xml");
+        name = StringUtil.substring(name, null, getFileExtension());
         return name.contains(getName().toLowerCase()) || FileUtil.isAbsolute(name) ? name : getConfigPath() + name;
     }
 
@@ -720,10 +723,14 @@ public class ENV implements Serializable {
     public static void save(String name, Object obj) {
         String path = cleanpath(name);
         if (self().get("app.configuration.persist.yaml", false)) {
-            self().get(YamlUtil.class).dump(obj, path + ".yml");
+            self().get(YamlUtil.class).dump(obj, path + getFileExtension());
         } else {
-            self().get(XmlUtil.class).saveXml(path + ".xml", obj);
+            self().get(XmlUtil.class).saveXml(path + getFileExtension(), obj);
         }
+    }
+    
+    public static String getFileExtension() {
+    	return ENV.get("app.configuration.persist.yaml", false) ? ".yml" : ".xml";
     }
 
     /**
@@ -756,9 +763,9 @@ public class ENV implements Serializable {
      */
     public static void persist(String name, Object obj) {
         if (self().get("app.configuration.persist.yaml", false)) {
-            self().get(YamlUtil.class).dump(obj, getConfigPath() + name + ".yml");
+            self().get(YamlUtil.class).dump(obj, getConfigPath() + name + getFileExtension());
         } else {
-            self().get(XmlUtil.class).saveXml(getConfigPath() + name + ".xml", obj);
+            self().get(XmlUtil.class).saveXml(getConfigPath() + name + getFileExtension(), obj);
         }
     }
 
@@ -768,7 +775,7 @@ public class ENV implements Serializable {
      * @return true, if an environment was created on file system
      */
     public final static boolean isPersisted() {
-        return new File(getConfigPath() + CONFIG_NAME + ".xml").exists();
+        return new File(getConfigPath() + CONFIG_NAME + getFileExtension()).exists();
     }
 
     /**

@@ -636,6 +636,11 @@ public class BeanAttribute<T> implements IAttribute<T> {
         initDeserialization();
     }
 
+    private final void assureInit() {
+    	if (readAccessMethod == null && writeAccessMethod == null)
+    		initDeserialization();
+    }
+    
     @Commit
     private void initDeserialization() {
         readAccessMethod = getReadAccessMethod(declaringClass, name, true);
