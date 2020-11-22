@@ -1174,7 +1174,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         saveResourceEntries();
         //non-serializable actions will be removed - so we add them after serialization
         Collection<IAction> actionCopy = actions != null ? new ArrayList<IAction>(actions) : new ArrayList<IAction>();
-        saveBeanDefinition(getDefinitionFile((isVirtual() ? PREFIX_VIRTUAL + "." : "") + getName()));
+        saveBeanDefinition(getDefinitionFile((isVirtual() && !getName().startsWith(PREFIX_VIRTUAL) ? PREFIX_VIRTUAL + "." : "") + getName()));
         if (actions == null)
             actions = actionCopy;
         else {
@@ -1215,11 +1215,14 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         FileUtil.saveProperties(ENV.getConfigPath() + fileName, p);
     }
 
+    public static Collection<BeanDefinition<?>> loadVirtualDefinitions() {
+    	return loadVirtualDefinitions(ENV.getFileExtension());
+    }
     /**
      * Load virtual BeanCollectors like QueryResult from directory. name-convention: beandef/virtual/*.xml
      */
-    public static Collection<BeanDefinition<?>> loadVirtualDefinitions() {
-        File[] virtDefs = FileUtil.getFiles(getDefinitionDirectory() + PREFIX_VIRTUAL, ".*" + ENV.getFileExtension());
+    public static Collection<BeanDefinition<?>> loadVirtualDefinitions(String fileExtension) {
+        File[] virtDefs = FileUtil.getFiles(getDefinitionDirectory() + PREFIX_VIRTUAL, ".*" + fileExtension);
         if (virtDefs == null) {
             return new ArrayList<BeanDefinition<?>>();
         }
@@ -1227,7 +1230,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         String name;
         BeanDefinition<?> bean;
         for (File file : virtDefs) {
-            name = StringUtil.substring(PREFIX_VIRTUAL + "." + file.getName(), null, ENV.getFileExtension());
+            name = StringUtil.substring(PREFIX_VIRTUAL + "." + file.getName(), null, fileExtension);
             bean = getBeanDefinition(name);
             if (bean.getPresentable().isVisible())
                 types.add(bean);

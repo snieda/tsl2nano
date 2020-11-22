@@ -14,6 +14,7 @@ import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.FieldPosition;
 import java.text.Format;
@@ -1306,6 +1307,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
 	}
 
 	public synchronized void createYAMLFiles() {
+		String originalFileExtension = ".xml";
 		ENV.persist(Users.load());
 		if (ENV.get(IAuthorization.class) != null)
 			ENV.persist(ENV.get(IAuthorization.class)); //TODO: that's only the current user!
@@ -1316,7 +1318,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
 				BeanDefinition.getBeanDefinition(c).saveDefinition();
 			}
 		}
-		Collection<BeanDefinition<?>> virtualDefinitions = BeanDefinition.loadVirtualDefinitions();
+		Collection<BeanDefinition<?>> virtualDefinitions = BeanDefinition.loadVirtualDefinitions(originalFileExtension);
 		virtualDefinitions.forEach(vd -> vd.saveDefinition() );
 		
 		// TODO: save all context files - use ENV.save(..) in Context
@@ -1326,7 +1328,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
 		// deactivate the 
 		if (ENV.get("app.configuration.persist.yaml", false)) {
 			try {
-				Files.move(Paths.get(ENV.getConfigPath() + ENV.CONFIG_NAME), Paths.get(ENV.getConfigPath() + ENV.CONFIG_NAME + "_"));
+				String envXml = ENV.getConfigPath() + ENV.CONFIG_NAME + originalFileExtension;
+				Files.move(Paths.get(envXml), Paths.get(envXml + "_"));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
