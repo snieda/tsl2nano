@@ -8,6 +8,7 @@ import java.util.Date;
 import org.junit.Test;
 
 import de.tsl2.nano.bean.def.BeanDefinition;
+import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.core.serialize.YamlUtil;
 import de.tsl2.nano.core.util.DefaultFormat;
 import de.tsl2.nano.util.test.TypeBean;
@@ -27,10 +28,13 @@ public class YamlBeanTest {
 	@Test
 	public void testBeanDefinitionDumpAndLoadTypeBean() {
 //		System.setProperty("casc.yaml.max.aliases", "100");
-		checkDumpAndLoad(TypeBean.class, false); // reference id differ!
+		BeanDefinition beandef = checkDumpAndLoad(TypeBean.class, false); // reference id differ!
+		
+		IAttributeDefinition attrDate = beandef.getAttribute(TypeBean.ATTR_DATE);
+		assertEquals(Date.class, attrDate.getConstraint().getType());
 	}
 
-	private void checkDumpAndLoad(Class<?> cls, boolean compare) {
+	private BeanDefinition checkDumpAndLoad(Class<?> cls, boolean compare) {
 		BeanDefinition beandef = BeanDefinition.getBeanDefinition(cls);
 		String dump = YamlUtil.dump(beandef);
 		System.out.println(dump);
@@ -38,7 +42,7 @@ public class YamlBeanTest {
 		BeanDefinition beancopy = YamlUtil.load(dump, BeanDefinition.class);
 		if (compare)
 			assertEquals(maskId(dump), maskId(YamlUtil.dump(beancopy)));
-		YamlUtil.reset();
+		return beancopy;
 	}
 
 	private String maskId(String dump) {

@@ -18,7 +18,6 @@ import org.simpleframework.xml.core.Commit;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.incubation.specification.ParType;
-import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.util.operation.NumericConditionOperator;
 import de.tsl2.nano.util.operation.Operator;
 

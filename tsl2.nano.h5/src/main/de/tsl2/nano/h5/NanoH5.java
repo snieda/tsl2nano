@@ -13,6 +13,8 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
@@ -1192,6 +1194,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
     public void reset() {
         String configPath = ENV.get(ENV.KEY_CONFIG_PATH, "config");
 
+        accept(new ChangeEvent("app.configuration.persist.yaml", null, ENV.get("app.configuration.persist.yaml", false)));
+
         ConcurrentUtil.removeAllCurrent(NanoH5Session.getThreadLocalTypes());
 
         DatabaseTool databaseTool = new DatabaseTool(Persistence.current());
@@ -1301,7 +1305,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
 		}
 	}
 
-	public void createYAMLFiles() {
+	public synchronized void createYAMLFiles() {
 		ENV.persist(Users.load());
 		if (ENV.get(IAuthorization.class) != null)
 			ENV.persist(ENV.get(IAuthorization.class)); //TODO: that's only the current user!
@@ -1310,6 +1314,21 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
 		if (beantypes != null) {
 			for (Class c: beantypes) {
 				BeanDefinition.getBeanDefinition(c).saveDefinition();
+			}
+		}
+		Collection<BeanDefinition<?>> virtualDefinitions = BeanDefinition.loadVirtualDefinitions();
+		virtualDefinitions.forEach(vd -> vd.saveDefinition() );
+		
+		// TODO: save all context files - use ENV.save(..) in Context
+		
+		ENV.get(Pool.class).saveAll();
+
+		// deactivate the 
+		if (ENV.get("app.configuration.persist.yaml", false)) {
+			try {
+				Files.move(Paths.get(ENV.getConfigPath() + ENV.CONFIG_NAME), Paths.get(ENV.getConfigPath() + ENV.CONFIG_NAME + "_"));
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 	}

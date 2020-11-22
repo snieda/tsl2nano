@@ -279,8 +279,6 @@ public class ENV implements Serializable {
 //                setProperty(KEY_CONFIG_PATH, configPath + "/");
         } else if ((configFile = getConfigFile(dir, ".yml")).canRead()) {
             self = YamlUtil.load(new File(configFile.getPath()), ENV.class);
-            //maybe this is an early action - lots of classes nre not yet loaded, so let the next one init yamlutil with more classes
-            YamlUtil.reset();
         } else {
             self = new ENV();
             self.properties = createPropertyMap();
@@ -519,7 +517,7 @@ public class ENV implements Serializable {
         self().handleChange(key, oldValue, value); 
     }
 
-    private void handleChange(String key, Object oldValue, Object value) {
+    private synchronized void handleChange(String key, Object oldValue, Object value) {
     	if (!isAvailable())
     		return;
     	ChangeEvent e = null;
@@ -538,9 +536,17 @@ public class ENV implements Serializable {
      */
     @SuppressWarnings("rawtypes")
 	public static void setProperties(SortedMap properties) {
-        if (self().properties == null)
+        if (self().properties == null) {
             self().properties = createPropertyMap();
-        self().properties.putAll(properties);
+        	self().properties.putAll(properties);
+        } else { // perhaps a property map holding only strings
+        	SortedMap p = self().properties;
+            properties.forEach( (k, v) -> {
+            	if (p.containsKey(k)) 
+            		p.put(k, ObjectUtil.wrap(v, p.get(k).getClass()));
+            	else 
+            		p.put(k, v);});
+        }
         self().handleChange("*", null, null);
         if (self().autopersist) {
             self().persist();

@@ -20,18 +20,17 @@ public class YamlUtilTest {
 		String expected = "!<Reference>\n"
 				+ "type: !<Class> {name: de.tsl2.nano.core.serialize.Reference}\n"
 				+ "value: !<Reference>\n"
-				+ "  type: !<Class> {name: de.tsl2.nano.core.serialize.Reference}\n";
+				+ "  type: !<Class> {name: java.lang.Object}\n";
 		assertEquals(expected, dump);
 		
 		Reference load = YamlUtil.load(expected, Reference.class);
 		//yaml handles back-references
 		expected = "!<Reference>\n"
-				+ "type: &id001 !<Class> {name: de.tsl2.nano.core.serialize.Reference}\n"
+				+ "type: !<Class> {name: de.tsl2.nano.core.serialize.Reference}\n"
 				+ "value: !<Reference>\n"
-				+ "  type: *id001\n";
+				+ "  type: !<Class> {name: java.lang.Object}\n";
 		assertEquals(expected, YamlUtil.dump(load));
 		assertTrue(initSerializationPassed && initDeserializationPassed);
-		YamlUtil.reset();
 	}
 
 	@Test
@@ -42,7 +41,6 @@ public class YamlUtilTest {
 		System.out.println("\n" + dump);
 		
 		YamlUtil.load(dump, DelegationHandler.class);
-		YamlUtil.reset();
 	}
 }
 

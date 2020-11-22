@@ -9,7 +9,6 @@
  */
 package de.tsl2.nano.core.util;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -326,7 +325,7 @@ public class ObjectUtil extends ByteUtil {
         try {
             if (value != null && !PrimitiveUtil.isAssignableFrom(wrapperType, value.getClass())) {
                 if (Class.class.isAssignableFrom(wrapperType))
-                    return (T) BeanClass.load(value.toString());
+                    return (T) BeanClass.load(StringUtil.substring(value.toString(), "class ", "@"));
                 else {
                     if (PrimitiveUtil.isPrimitiveOrWrapper(wrapperType))
                         return PrimitiveUtil.convert(value, wrapperType);
@@ -337,6 +336,8 @@ public class ObjectUtil extends ByteUtil {
                     else if ((wrapperType.isInterface() || wrapperType.equals(Properties.class)) 
                             && Map.class.isAssignableFrom(wrapperType))
                         return (T) MapUtil.toMapType((Map)value, (Class<Map>)wrapperType);
+                    else if (hasValueOfMethod(wrapperType, value))
+                    	return (T) BeanClass.call(wrapperType, "valueOf", false, value);
                     else if (isInstanceable(wrapperType))
                         //IMPROVE: what's about FormatUtil.parse() <-- ObjectUtil.wrap() is called in FormatUtil!
                         return BeanClass.createInstance(wrapperType, value);
@@ -350,7 +351,16 @@ public class ObjectUtil extends ByteUtil {
         return (T) value;
     }
 
-    /**
+    private static boolean hasValueOfMethod(Class<?> wrapperType, Object value) {
+		try {
+			return wrapperType.getDeclaredMethod("valueOf", new Class[] {value.getClass()}) != null;
+		} catch (NoSuchMethodException | SecurityException e) {
+			//ok, no problem
+			return false;
+		}
+	}
+
+	/**
      * wraps (see {@link #wrap(Object, Class)}) the given value through the castInfo information to the desired cast.
      * 
      * @param value to wrap into an object defined by castInfo
@@ -414,4 +424,13 @@ public class ObjectUtil extends ByteUtil {
 		return null;
 	}
 
+	public static Object loadClass(String clsName) {
+		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		try {
+			return clsName.contains(".") || clsName.startsWith("[") ? loader.getClass().forName(clsName)
+			        : PrimitiveUtil.getPrimitiveClass(clsName);
+		} catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+		}
+	}
 }

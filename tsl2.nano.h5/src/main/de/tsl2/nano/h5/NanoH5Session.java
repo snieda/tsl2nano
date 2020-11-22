@@ -953,7 +953,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
 
     private void logaction(String id, Map<String, String> p) {
         actionLog.add(DateUtil.getFormattedTimeStamp() + " ==> " + id + " (" + nav.current() + ")"
-            + (!Util.isEmpty(p) && !Persistence.class.isAssignableFrom(nav.current().getClazz()) ? "\n\t" + p : ""));
+            + (!Util.isEmpty(p) && (nav.current() != null && !Persistence.class.isAssignableFrom(nav.current().getClazz())) ? "\n\t" + p : ""));
     }
 
     private BeanDefinition<?> putSelectionOnStack(BeanCollector c) {

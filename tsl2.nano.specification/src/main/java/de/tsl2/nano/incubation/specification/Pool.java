@@ -80,6 +80,10 @@ public class Pool {
         return expressionPattern;
     }
     
+    public void saveAll() {
+    	runnables().forEach( (k, v) -> add(k, v));
+    }
+    
     public void loadRunnables() {
         runnables = new HashMap<>();
         for (Class<? extends IPRunnable> type : registeredTypes) {

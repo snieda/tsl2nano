@@ -5138,7 +5138,25 @@ Property -> {Organisation, Party, Item}
    - [!] env has structured string names - only object hierarchies would be stored in a structured way 
    - [v] env:DefaultFormat , timeout.in.millis integer -> long (!!java.lang.Long)
    - [x] assureInit() as replacement for initDeserialization (created for simplexml) (new: see ValueExpression, RegExpFormat)
-
+   - [ ] RuleCover? (see XmlUtil for simplexml), Charge? (see anyway)
+- [ ] serviceaccess + directaccess
+   - [ ] generice replication
+   - [ ] script tool
+   - [ ] persistence provider (NanoEntityManagerFactory)
+- [ ] MANUEL INTEGRATION TESTS
+   - [ ] mvn deploy
+   - [ ] local test from scratch with anyway --> login --> change address --> save --> admin --> change to yaml --> restart
+   - [ ] local test timesheet adding time entry
+   - [ ] local test school layout
+   - [ ] heroku tsl2.app.timesheet -> version to src/main/resources -> stage commit -> git push heroku master
+      - [ ] heroku config:set $(cat .env | sed '/^$/d; /#[[:print:]]*$/d'
+   - [ ] heroku tsl2.app.logbook -> repo/deploy.sh -> stage commit -> git push heroku master
+      - [ ] heroku config:set $(cat .env | sed '/^$/d; /#[[:print:]]*$/d'
+   - [ ] copy to serverway and restart-all
+      - [ ] copy h5-standalone-jar through ssh 
+      - [ ] tsl2.app.logbook --> mvn clean install --> copy ja through ssh
+      - [ ] login to serverway tsl2nano --> ./restart-all.sh
+   
 ### REST
 
 - [v] fromValueMap() implementieren (full json support for beans!)

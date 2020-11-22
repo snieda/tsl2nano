@@ -63,6 +63,7 @@ import de.tsl2.nano.core.util.AnnotationProxy;
 import de.tsl2.nano.core.util.DelegationHandler;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
+import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
@@ -411,9 +412,7 @@ class SimpleXmlArrayWorkaround implements Matcher {
                 @Override
                 public Object read(String clsName) throws Exception {
                     //loading the class through the ClassLoder.loadClass(name) may fail on object arrays, so we load it through Class.forName(name)
-                    return clsName.contains(".") || clsName.startsWith("[") ? loader.getClass().forName(clsName)
-                        : PrimitiveUtil
-                            .getPrimitiveClass(clsName);
+                    return ObjectUtil.loadClass(clsName);
                 }
 
                 @Override

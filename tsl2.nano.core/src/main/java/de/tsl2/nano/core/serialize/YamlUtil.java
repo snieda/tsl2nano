@@ -49,6 +49,7 @@ import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DelegationHandler;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.Util;
 
 /**
@@ -62,9 +63,6 @@ import de.tsl2.nano.core.util.Util;
 public class YamlUtil {
 	private static final Log LOG = LogFactory.getLog(YamlUtil.class);
 	
-    private static Representer representer;
-    private static Constructor constructor;
-
     /**
      * dumps the given object (document / bean) to the given file.
      * 
@@ -181,10 +179,6 @@ public class YamlUtil {
 				&& BeanClass.hasDefaultConstructor(cls) && !cls.isAnnotation();
 	}
 
-    public static void reset() {
-    	representer = null;
-    	constructor = null;
-    }
 }
 
 /**
@@ -195,10 +189,8 @@ public class YamlUtil {
  */
 //TODO: use more generic algorithms through annotations instead of fixed method name 'initDeserialization'
 class PostConstructor extends Constructor {
-	PostConstruct myConstruct;
 	public PostConstructor() {
-		myConstruct = new PostConstruct();
-		this.yamlConstructors.put(null, myConstruct);
+		this.yamlConstructors.put(null, new PostConstruct());
 		ClassConstructor classConstructor = new ClassConstructor();
 		classConstructor.setPropertyUtils(getPropertyUtils());
 		this.yamlConstructors.put(new Tag(Class.class.getSimpleName()), classConstructor.new ConstructClass());
@@ -210,27 +202,25 @@ class PostConstructor extends Constructor {
     public TypeDescription addTypeDescription(TypeDescription definition) {
         TypeDescription typeDescription = super.addTypeDescription(definition);
         Tag tag = new Tag(definition.getType().getSimpleName());
-        this.yamlConstructors.put(tag, myConstruct);
-        this.yamlConstructors.put(new Tag(definition.getType()), myConstruct);
+        this.yamlConstructors.put(tag, new PostConstruct());
+        this.yamlConstructors.put(new Tag(definition.getType()), new PostConstruct());
         return typeDescription;
     }
     
     @Override
     protected Object constructObject(Node node) {
         if (Class.class.isAssignableFrom(node.getType())) {
-            try {
-                if (node instanceof MappingNode) {
-                    List<NodeTuple> values = ((MappingNode) node).getValue();
-                    for (NodeTuple tuple : values) {
-                        if (tuple.getKeyNode() instanceof ScalarNode) {
-                            if (((ScalarNode) tuple.getKeyNode()).getValue().equals("name"))
-                                return Thread.currentThread().getContextClassLoader()
-                                    .loadClass(((ScalarNode) tuple.getValueNode()).getValue());
+            if (node instanceof MappingNode) {
+                List<NodeTuple> values = ((MappingNode) node).getValue();
+                for (NodeTuple tuple : values) {
+                    if (tuple.getKeyNode() instanceof ScalarNode) {
+                        if (((ScalarNode) tuple.getKeyNode()).getValue().equals("name")) {
+                        	//loading the class through the ClassLoder.loadClass(name) may fail on object arrays, so we load it through Class.forName(name)                            	
+                        	String clsName = ((ScalarNode) tuple.getValueNode()).getValue();
+							return ObjectUtil.loadClass(clsName);
                         }
                     }
                 }
-            } catch (ClassNotFoundException e) {
-                ManagedException.forward(e);
             }
         }
         return super.constructObject(node);
@@ -269,7 +259,7 @@ class PostConstructor extends Constructor {
 class PreRepresenter extends Representer {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    protected MappingNode representJavaBean(Set<Property> props, final Object data) {
+    protected MappingNode representJavaBean(Set<Property> props, Object data) {
         PrivateAccessor acc = new PrivateAccessor(data);
         if (data instanceof Class) {
             props.add(new Property("name", Class.class) {
@@ -284,7 +274,7 @@ class PreRepresenter extends Representer {
 
                 @Override
                 public Object get(Object arg0) {
-                    return ((Class) data).getName();
+                    return arg0 instanceof Class ? ((Class) arg0).getName() : arg0.getClass().getName();
                 }
 
 				@Override
@@ -340,12 +330,7 @@ class ClassConstructor extends Constructor {
 	class ConstructClass extends AbstractConstruct {
 	    public Object construct(Node node) {
 	        String val = constructScalar((ScalarNode) ((MappingNode) node).getValue().get(0).getValueNode());
-	        try {
-				return Class.forName(val, true, Thread.currentThread().getContextClassLoader());
-			} catch (ClassNotFoundException e) {
-				ManagedException.forward(e);
-				return null;
-			}
+			return ObjectUtil.loadClass(val);
 	    }
 	}
 }

@@ -21,6 +21,7 @@ import de.tsl2.nano.bean.annotation.ConstraintValueSet;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.Constraint;
+import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.MethodAction;
 import de.tsl2.nano.bean.def.Presentable;
 import de.tsl2.nano.bean.def.ValueColumn;
@@ -74,7 +75,7 @@ public class BeanConfiguratorTest implements ENVTestPreparation {
         	if (!aconf.attr.isVirtual()) {
 	            aconf.setColumnDefinition(changeProperty((((ValueColumn)aconf.getColumnDefinition())), "width", 99));
 	            aconf.setConstraint(changeProperty((((Constraint)aconf.getConstraint())), "length", 99));
-	            aconf.setPresentable(changeProperty((((Presentable)aconf.getPresentable())), "type", 99));
+	            aconf.setPresentable(changeProperty((((IPresentable)aconf.getPresentable())), "type", 99));
 //	            changeProperty(aconf.getValueExpression().getClass(), "expression", "id");
 //	            changeProperty(aconf.getFormat().getClass(), "???");
         	}
