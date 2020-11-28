@@ -1245,6 +1245,9 @@ public class BeanClass<T> implements Serializable {
         return allInterfaces.toArray(new Class[0]);
     }
 
+    public static final <C> Class<C> getDefiningClass(C obj) {
+    	return (Class<C>) getDefiningClass(obj.getClass());
+    }
     /**
      * useful on anonymous/inner classes, proxies or bytecode-enhancing
      * 

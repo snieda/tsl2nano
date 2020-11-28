@@ -163,8 +163,8 @@ this will stop the generation of that file at that position. normally you would 
 
 ## define catching exception handler DontEscalateExceptionHandler
 
-	#set ($catchedClass = $util.get("cls:java.lang.System").setProperty("bean.generation.catchedClass", "de.lv1871.shared.model.persistent.vertrag.gevo.BetreuerwechselGeVo") )
-	#set ($catchedMethod = $util.get("cls:java.lang.System").setProperty("bean.generation.catchedMethod", "giveBewegungsschluesselZugang") )
+	#set ($catchedClass = $util.get("cls:java.lang.System").setProperty("bean.generation.catchedClass", "de.my.package.MyGeschaeftsvorfall") )
+	#set ($catchedMethod = $util.get("cls:java.lang.System").setProperty("bean.generation.catchedMethod", "getMyData") )
 
 ##### return a list of enums
 

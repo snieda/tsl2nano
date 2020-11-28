@@ -57,7 +57,7 @@ public class Replication extends Persistence implements Runnable {
         transactionType = "RESOURCE_LOCAL";
         provider = "org.hibernate.jpa.HibernatePersistenceProvider";
         connectionDriverClass = STD_LOCAL_DATABASE_DRIVER;
-        connectionUrl = "jdbc:h2:tcp://localhost:9992/PUBLIC";
+        connectionUrl = "jdbc:h2:./jdbc-replication";
         connectionUserName = "SA";
         connectionPassword = "";
         hibernateDialect = "org.hibernate.dialect.H2Dialect";

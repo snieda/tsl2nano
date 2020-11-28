@@ -8,6 +8,7 @@ import de.tsl2.nano.bean.annotation.Action;
 import de.tsl2.nano.bean.annotation.Constraint;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.persistence.Persistence;
@@ -32,7 +33,7 @@ public class Replication {
     	Collection<String> args = new ArrayList<String>(data.size() + 3);
     	args.add(p1);
     	args.add(p2);
-    	args.add(!Util.isEmpty(data) ? data.iterator().next().getClass().getName() : "java.lang.Object");
+    	args.add(!Util.isEmpty(data) ? BeanClass.getDefiningClass(data.iterator().next()).getName() : "java.lang.Object");
     	for (Object d : data) {
 			args.add(Bean.getBean(d).getId().toString());
 		}

@@ -13,6 +13,7 @@ echo ======================================================
 export NAME=../tsl2.nano.h5
 export VERSION=${project.version}
 export EXTENSION="-standalone"
+#export RESTART_ALL='-Dapp.login.secure=false -Dapp.login.administration=true -Dapp.login.jarfile.fileselector=false'
 
 if [[ $1 == "help" ]]; then
 	echo "usage:=========================================================================="

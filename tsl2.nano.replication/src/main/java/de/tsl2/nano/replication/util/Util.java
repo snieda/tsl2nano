@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -134,6 +135,19 @@ public class Util {
 	public static final void assert_(boolean assertion, String message, Object... args) {
 		if (!assertion && !Boolean.getBoolean("tsl2.nano.disable.assertion"))
 			throw new IllegalArgumentException(String.format(message, args));
+	}
+	/**
+	 * @return 
+	 */
+	@SuppressWarnings("unchecked")
+	public static <P> P decode(Class<P> cls, Object obj) {
+		try {
+			cls = (Class<P>) MethodType.methodType(cls).wrap().returnType(); // get the wrapper
+			return (P) cls.getMethod("decode", new Class[] {String.class}).invoke(null, obj.toString());
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
+				| SecurityException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }
 

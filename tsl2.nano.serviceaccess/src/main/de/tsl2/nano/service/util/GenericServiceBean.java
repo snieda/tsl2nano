@@ -511,7 +511,7 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
         /*
          * reloads the bean - to be loaded in the current transaction!
          */
-        return (T) connection().find(bean.getClass(), getId(bean));
+        return (T) (connection().contains(bean) ? connection().find(BeanClass.getDefiningClass(bean), getId(bean)) : null);
     }
 
     /** {@inheritDoc} */

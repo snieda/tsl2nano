@@ -109,6 +109,7 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
         } catch (Exception e) {
             //Ok, continue without replication - this shouldn't break the application!
             LOG.error("couldn't create standard replication", e);
+        	Message.send(new RuntimeException("couldn't create standard replication", e));
             return new ArrayList<IGenericBaseService>();
         }
         return Arrays.asList((IGenericBaseService) rep);

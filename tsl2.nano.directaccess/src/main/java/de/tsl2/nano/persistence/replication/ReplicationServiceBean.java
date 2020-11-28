@@ -75,6 +75,7 @@ public class ReplicationServiceBean extends GenericLocalServiceBean {
                     newBeans.add(bean);
                     it.remove();
                 } catch (EntityNotFoundException ex) {
+                	// TODO: on both-side linked entities that cannot work - if both sides are fully loaded and no cascadetype merge/persist/all is given!
                     LOG.error(ex.toString());
                     //try to persist the not found entity first
 //                    Object d = getDependentBean(ex);

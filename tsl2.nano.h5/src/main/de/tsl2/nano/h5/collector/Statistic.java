@@ -34,6 +34,7 @@ import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.CollectionUtil;
 import de.tsl2.nano.core.util.FileUtil;
@@ -173,7 +174,9 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
          * do all group by selects
          */
         Collection<T> collection = new ArrayList<>();
+        int i=0, g=statColumns.getList().size();
         for (String n : statColumns) {
+        	Message.send("creating statistic groupby column: " + n + " (" + i + "/" + g + ")");
             collection.addAll(createStatistics(def, n, valueColumns, from, to));
         }
         /*

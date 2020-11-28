@@ -58,6 +58,7 @@
 
 * [sourceforge](https://sourceforge.net/p/tsl2nano/code/ci/master/tree/)
 * [github](https://github.com/snieda/tsl2nano.git)
+* [gitlab](https://gitlab.com/snieda/tsl2nano.git)
 
 ## Screenshots
 

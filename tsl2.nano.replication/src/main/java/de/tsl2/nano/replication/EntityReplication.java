@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -145,6 +146,7 @@ public class EntityReplication {
 		Util.assert_(em != null, "to find entities through their ids, source or destination entitymanager must not be null!");
 		long start = System.currentTimeMillis();
 		ULog.log("loading entities of type " + entityClass.getName() + " for " + ids.length + " ids");
+		ids = getWellTypedIds(em, entityClass, ids);
 		T[] entities = Arrays.stream(ids).
 				map(id -> src.find(entityClass, id, readOnlyHints())).filter(e -> e != null).
 				toArray(s -> (T[])java.lang.reflect.Array.newInstance(entityClass, s));
@@ -158,6 +160,18 @@ public class EntityReplication {
 		return entities;
 	}
 	
+	private Object[] getWellTypedIds(EntityManager em, Class<?> entityClass, Object[] ids) {
+		Class<?> idType = em.getMetamodel().entity(entityClass).getIdType().getJavaType();
+		if (idType != null && !String.class.isAssignableFrom(idType)) {
+			Object[] ids_ = new Object[ids.length];
+			for (int i = 0; i < ids.length; i++) {
+				ids_[i] = Util.decode(idType, ids[i]);
+			}
+			return ids_;
+		}
+		return ids;
+	}
+
 	protected <T> T[] fromIDs(JndiLookup.FindByIdAccess ejbSession, Class<T> entityClass, Object... ids) {
 		long start = System.currentTimeMillis();
 		ULog.log("loading entities of type " + entityClass.getName() + " for " + ids.length + " ids");

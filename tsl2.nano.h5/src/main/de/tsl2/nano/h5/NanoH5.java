@@ -1210,6 +1210,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         if (ENV.get(UncaughtExceptionHandler.class) instanceof ExceptionHandler)
         	((ExceptionHandler)ENV.get(UncaughtExceptionHandler.class)).clearExceptions();
         ENV.removeService(UncaughtExceptionHandler.class);
+        createExceptionhandler();
         ENV.get(Pool.class).reset();
         BeanContainer.reset();
         ENV.removeService(IBeanContainer.class);

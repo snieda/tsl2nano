@@ -1078,7 +1078,7 @@ public class BeanPresentationHelper<T> {
     }
 
     /**
-     * tries to evalute the best attribute as unique bean presenter. this algorithmus is used, if no attribute filter
+     * tries to evaluate the best attribute as unique bean presenter. this algorithmus is used, if no attribute filter
      * (defining the attribute order) was defined.
      * 
      * @return bean presenting attribute name

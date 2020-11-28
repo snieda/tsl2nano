@@ -1,5 +1,5 @@
 <h6 align="center">FullRelation Nano.H5<br/>
-<font size="-1">&copy; Thomas Schneider 2012-2018
+<font size="-1">&copy; Thomas Schneider 2012-2020
 <br/>
 <a href="http://sourceforge.net/projects/tsl2nano/files/1.1.0/tsl2.nano.h5.1.1.0.jar/download">Download on sourceforge</a>
 <br/>
@@ -636,7 +636,7 @@ The default _app.login.administration_ value is true. all database and persisten
 
 #### Login with secure Authentification
 
-On default, then environment property __app.login.secure__ is false. All persistence user will be added to __users.xml__.
+On default, the environment property __app.login.secure__ is false. All persistence user will be added to __users.xml__.
 If you set it to true, the synthetic user will be the user asked by the login. If user, hashed password and validity time-period are ok, the mapped real database user will be evaluated to be given to the persistence provider. 
 
 To create a hash for a new password start the following:
@@ -2413,17 +2413,36 @@ TODO: use bean-path to inspect condition expressions like 'times.type = F'.
 
 ## Database Replication - Working Offline
 
-It is possible to replicate the data loaded from a remote database. The environments property _use.database.replication_ must be true (default is false!). The replication will be done through a second persistence-unit 'replication' (see _persistence.xml_). For each user an own local replication database will be created.
+It is possible to replicate the data loaded from a remote database. The environments property _service.use.database.replication_ must be true (default is false!). The replication will be done through a second persistence-unit 'replication' (see _persistence.tml_ and finally _persistence.xml_). For each user an own local replication database (default url: _jdbc-replication_) will be created.
 
-The replication is done in it's own thread to avoid conflictions with the application. The O/R mapper will create all tables through bean informations. A special bean holds the information (time, id, change-type) about the changes done by the user. All data, loaded and edited by the current user will be replicated to a local database. Of course the dependent data will be replicated, too, to have a valid datastore.
+The replication is done in it's own thread to avoid conflictions with the application. The O/R mapper will create all tables through bean informations. A special bean holds the information (time, id, change-type) about the changes done by the user. All data, loaded and edited by the current user will be replicated to a local database. Dependent data will be replicated, too, to have a valid datastore.
+*Warning*: On cycling bindings (@OneToMany <-> @ManyToOne) the mechanism will fail, if no cascading is defined! Then the relational data is not persisted yet but and therefor not persistable by the O/R mapper. There is no possibility to invoke that cascading on runtime. As alternative, NanoH5 provides a manual so called _entity-replication_ provided on each list of beans (inside the beancollector). 
 
-The replication connection is configurable like the persistence-unit is. But at the moment, only the combination hsqldb and hibernate are tested - and it's only usable in standalone-mode - without application-server!
+The replication connection is configurable like the persistence-unit is. But at the moment, only the combination hsqldb/h2 and hibernate are tested - and it's only usable in standalone-mode - without application-server!
 
-The replications hsqldb database will be started internally (configuration :see META-INF/persistence.tml).
-- database: replication-<user-name>
-- port: 9898
+The replications h2 database will be started internally (configuration :see META-INF/persistence.tml).
+- database: jdbc:h2:./jdbc-replication
 
 If the model cycles entity relations, replication may fail. Sometimes, it helps to increase the heap memory (specially for the permormance) - if not, you should select other bean instance (base instances) before to replicate.
+
+### Entity Replication
+
+Each bean list (BeanCollector) provides a menu action for _replication_ of current loaded beans. The following dialog will ask for a source and a destination. If you export your data, the source should always be _PUNIT1_. If you import your data, the destination should always be _PUNIT1_.
+
+* PUNIT1    : standard persistence unit and database connection (_genericPersistenceUnit_)
+* PUNIT2    : secondary persistence unit (_replication_). only active, if _service.use.database.replication_ is true.
+* BYTES     : java object serialization
+* XML       : java object xml serialization
+* JAXB      : java object jaxb serialization. external libraries are needed!
+* SIMPLE_XML: java object serialization with _simplexml_. included in nanoh5.
+* YAML      : java object serialization with snakeyaml
+
+#### Examples
+
+* Source=PUNIT1, Destination=YAML   : current visible data will be *exported* from standard database to YAML files in the projects root directory
+* Source=YAML, Destination=PUNIT1   : data will be *imported* from YAML files in the projects root directory into the standard database
+* Source=PUNIT1, Destination=PUNIT2 : current visible data will be *exported* from standard database to the replication database
+* Source=PUNIT2, Destination=PUNIT1 : undefined! not able to select data from PUNIT2!
 
 ## Working on multiple Databases
 
@@ -2520,7 +2539,7 @@ Some hints:
 * don't define more than one persistence-unit in your persistence.xml
 * constrain the _schema_ otherwise all schemats will be respected
 * the provider should be set to _org.apache.openjpa.persistence.PersistenceProviderImpl_
-* openjpa-2.3.0 is not able to find/generate primary keys --> no class can be generated! Please at least 2.4.0
+* openjpa-2.3.0 is not able to find/generate primary keys --> no class can be generated! Please use at least 2.4.0
 * edit the *persistence.xml* and set the property *openjpa.jdbc.DBDictionary* to  value="hsql(SupportsSchemaForGetTables=false)"
 
 ## Interactive attribute content
@@ -4201,6 +4220,7 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.4.1  | 21.06.2020 | css styling enhanced (collapsable menu), service-url as start-parameter, snake-yaml: 1.18->1.26, bugfixes
  2.4.2  | 02.08.2020 | plugin enhanced, configurable regexp/replace on html response, session-id as cookie or etag
  2.4.3  | 22.11.2020 | session-id direct on session-start (before authentication), beancollector presents hor on simple lists, vnet -> gravizo, h2-199 (-ifNotExists), h5+entityreplication, yaml-support, bugfixes
+ 2.4.4  | 06.01.2020 | menu-hover now opaque, database-replication corrections, minor fixes
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
 
@@ -5107,6 +5127,10 @@ Property -> {Organisation, Party, Item}
 - [ ] find a possiblity to create a gantt chart from ics 
    - e.g. TomsPlanner: https://www.tomsplanner.com/blog/turn-your-google-calendars-into-a-gantt-chart-with-just-a-few-mouse-clicks/)
    - e.g. Google Chart: javascript https://developers.google.com/chart/interactive/docs/gallery/ganttchart
+- [-] replace 'number values' through message resource property map. e.g.: status=2 -> enum/status.properties -> 2: AKTIV
+   - [-] present selection box if enum properties exist
+   - [-] re-translate to number value
+   - [v] ...or simply do that on message translation for tooltip
 
 ### TEST
 
@@ -5127,23 +5151,23 @@ Property -> {Organisation, Party, Item}
    - [v] export schema from external, import to h2, remove tech tables (explain, flyway), remove keywords, remove schema and catalogs on create table
    - [v] on generated java classes remove schema+catalog infos (replace: '  ,catalog="PUBLIC"' and recompile with compilejar.cmd
    - [v] activate gimmick only, if pre-search is activated
-   - [ ] environment properties cannot be deactivated (true -> false)
+   - [v] environment properties cannot be deactivated (true -> false)
    - [-] include jaxson json into h5
    - [x] entityreplication: memory leak on entitymanagers? (h2, hibernate)
    - [x] h2 database dump: SCRIP TO 'db-dump.sql'
 - [ ] test yaml
    - [x] test switch from xml to yaml
-   - [ ] test save boolean values
+   - [v] test save boolean values
    - [x] check other simple-xml files like user, users, ...
    - [!] env has structured string names - only object hierarchies would be stored in a structured way 
    - [v] env:DefaultFormat , timeout.in.millis integer -> long (!!java.lang.Long)
    - [x] assureInit() as replacement for initDeserialization (created for simplexml) (new: see ValueExpression, RegExpFormat)
    - [ ] RuleCover? (see XmlUtil for simplexml), Charge? (see anyway)
 - [ ] serviceaccess + directaccess
-   - [ ] generice replication
+   - [ ] generic database replication
    - [ ] script tool
    - [ ] persistence provider (NanoEntityManagerFactory)
-- [ ] MANUEL INTEGRATION TESTS
+- [v] MANUEL INTEGRATION TESTS
    - [ ] mvn deploy
    - [ ] local test from scratch with anyway --> login --> change address --> save --> admin --> change to yaml --> restart
    - [ ] local test timesheet adding time entry

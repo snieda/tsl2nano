@@ -273,5 +273,6 @@ nav li:hover {
 }
 nav li:hover > ul, li:focus > ul, li:active > ul {
     position:absolute  !important;
+    z-index: 1000;
     display : block !important;
 }
