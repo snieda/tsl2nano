@@ -3,7 +3,7 @@
   <parent>
     <groupId>net.sf.tsl2nano</groupId>
     <artifactId>tsl2.nano.h5-package</artifactId>
-    <version>2.4.4</version>
+    <version>2.4.5-SNAPSHOT</version>
   </parent>
   <artifactId>tsl2.nano.descriptor</artifactId>
   <name>TSL2 Framework Descriptor</name>
