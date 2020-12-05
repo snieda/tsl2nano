@@ -38,8 +38,8 @@ public class SystemUtil {
     public static final Process executeShell(File directory, String... command) {
     	return executeShell(directory, false, command);
     }
-    public static final Process executeShell(File directory, boolean readCommandsFromInput, String... command) {
-        String shell[] = AppLoader.isWindows() ? new String[]{"cmd", "/C"} :  new String[] {"sh", readCommandsFromInput ? "" : "-c"};
+    public static final Process executeShell(File directory, boolean readCommandsFromStandardInput, String... command) {
+        String shell[] = AppLoader.isWindows() ? new String[]{"cmd", "/C"} :  new String[] {"sh", readCommandsFromStandardInput ? "" : "-c"};
         return execute(directory, CollectionUtil.concat(shell, command));
     }
         /**

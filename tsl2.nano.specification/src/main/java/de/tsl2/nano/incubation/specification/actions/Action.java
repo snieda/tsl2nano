@@ -99,6 +99,11 @@ public class Action<T> extends AbstractRunnable<T> {
         }
     }
 
+    @Override
+    public String prefix() {
+    	return "!";
+    }
+    
     @SuppressWarnings("unchecked")
     @Override
     public T run(Map<String, Object> context, Object... extArgs) {

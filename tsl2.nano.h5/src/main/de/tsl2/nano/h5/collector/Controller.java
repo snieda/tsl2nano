@@ -128,7 +128,7 @@ public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends Composi
         bean.setAddSaveAction(false);
         //if controlling from baseType (annotation on baseType), we want exactly one creation-action
         if (getDeclaringClass().equals(parentType) || isCreationOnly()) {
-            if (!getDeclaringClass().equals(parentType)) {
+            if (parentType != null && !getDeclaringClass().equals(parentType)) {
                 instance = getParentInstance(instance);
             }
             if (collected == null || !collected.contains(instance)) {

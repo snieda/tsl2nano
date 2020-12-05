@@ -236,8 +236,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             }
         }
 
-//        if (beanFinder != null) {
-        actions = new LinkedHashSet<IAction>();
+       	actions = actions == null ? new LinkedHashSet<IAction>() : new LinkedHashSet<IAction>(actions);
         if (hasMode(MODE_SEARCHABLE)) {
             createSearchAction();
             if (hasFilter()) {
@@ -251,7 +250,6 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             createNewAction();
             createDeleteAction();
         }
-//        }
         assignColumnValues();
         if (ENV.get("beandef.autoinit", true))
             autoInit(name);

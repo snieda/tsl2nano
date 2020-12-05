@@ -96,6 +96,7 @@ import my.app.Times;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
+@net.jcip.annotations.NotThreadSafe
 public class NanoH5Test implements ENVTestPreparation {
     static final String MVN_BUILD_PATH = "target";
     

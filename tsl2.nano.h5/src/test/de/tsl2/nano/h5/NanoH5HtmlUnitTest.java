@@ -11,18 +11,21 @@ package de.tsl2.nano.h5;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.PipedOutputStream;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.specification.rules.ActionScript;
+import de.tsl2.nano.persistence.DatabaseTool;
+import de.tsl2.nano.persistence.Persistence;
 
 /**
  * 
@@ -30,7 +33,6 @@ import de.tsl2.nano.incubation.specification.rules.ActionScript;
  * @version $Revision$ 
  */
 @net.jcip.annotations.NotThreadSafe
-//@Ignore
 public class NanoH5HtmlUnitTest extends NanoH5Unit {
 
     @Before
@@ -43,6 +45,7 @@ public class NanoH5HtmlUnitTest extends NanoH5Unit {
     
     @After
     public void tearDown() {
+    	DatabaseTool.dbDump(Persistence.current());
        super.tearDown();
     }
 
@@ -75,6 +78,7 @@ public class NanoH5HtmlUnitTest extends NanoH5Unit {
                 page = crudBean(page);
             }
 
+            assertTrue( new File(ENV.getConfigPath() + "doc/graph/anyway.sql.svg").exists());
         } finally {
             if (page != null) {
                 int i = 0;

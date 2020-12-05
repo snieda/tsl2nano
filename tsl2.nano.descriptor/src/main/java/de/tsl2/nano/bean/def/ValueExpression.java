@@ -247,12 +247,14 @@ public class ValueExpression<TYPE> implements
                     BeanDefinition.getBeanDefinition(attr.getType()).getValueExpression().from(attributeValues[i]);
                 b.setValue(attributes[i], v);
             } else {//here we are able to directly parse the string to a value
-                b.setParsedValue(
-                    attributes[i],
-                    attributeValues[i]
-                        + (addSearchPostfix
-                            && (attr.getType() == null || CharSequence.class.isAssignableFrom(attr.getType())) ? "*"
-                            : ""));
+            	if (attributeValues[i] != null) {
+	                b.setParsedValue(
+	                    attributes[i],
+	                    attributeValues[i]
+	                        + (addSearchPostfix
+	                            && (attr.getType() == null || CharSequence.class.isAssignableFrom(attr.getType())) ? "*"
+	                            : ""));
+            	}
             }
         }
         return b.instance;

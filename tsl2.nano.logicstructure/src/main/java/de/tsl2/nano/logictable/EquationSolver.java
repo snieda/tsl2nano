@@ -21,12 +21,11 @@ import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.IPRunnable;
 import de.tsl2.nano.incubation.specification.AbstractRunnable;
 import de.tsl2.nano.incubation.specification.Pool;
-import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.util.operation.NumericOperator;
 
 /**
- * 
- * TODO: optimize performance (StringBuilder) TODO: use NumericOperator
+ * Tries to solve a given string expression as action or function (specification rule, or query) in a cell of a logictable.<br>
+ * to have a rule, the expression starts with '=', actions are surrounded with '<<' and '>>'
  * 
  * @author Thomas Schneider
  * @version $Revision$
@@ -37,11 +36,12 @@ public class EquationSolver extends NumericOperator {
     static final String BETWEEN = ":";
     static final String SEPARATOR = ",";
     static final String CONCAT = "\\s*[" + SEPARATOR + BETWEEN + "]\\s*";
-    static final String OPERATION = "([+-/*%])";
+    static final String OPERATION = "([+*/%-])";
     static final String EQUATION = "=";
     static final String ACTION = "<<";
     static final String TERM = B_OPEN + "[^)(]*" + B_CLOSE;
-    static final String OPERAND = "([a-zA-Z0-9_]+)";
+    static final String OPERAND = (ENV.get(Pool.class).getExpressionPattern().length() > 2 
+    		? ENV.get(Pool.class).getExpressionPattern() + "?" : "") + "([a-zA-Z0-9_]+)";
     static final String SET = "(" + OPERAND + "(" + CONCAT + OPERAND + ")*)*";
     static final String FUNC = OPERAND + B_OPEN + SET + B_CLOSE;
 
@@ -136,18 +136,17 @@ public class EquationSolver extends NumericOperator {
             func = new StringBuilder(sfunc);
             fname = StringUtil.extract(tempFunc=new StringBuilder(func), OPERAND, "");
             args = getFunctionArgs(tempFunc, values);
-            IPRunnable runner = ENV.get(Pool.class).get(Rule.PREFIX + fname);
+            IPRunnable runner = ENV.get(Pool.class).get(fname);
             result = runner.run(args);
             if (replace) {
-                sresult = StringUtil.toString(result);
+                sresult = StringUtil.toString(result, 255);
                 StringUtil.replace(expression, func.toString(), sresult, i);
-//                i += sresult.length();
             }
             i += func.length();
         } while (true);
     }
 
-    private Map getFunctionArgs(StringBuilder func, Map<String, Object> values) {
+	private Map getFunctionArgs(StringBuilder func, Map<String, Object> values) {
         Map<String, Object> args = new LinkedHashMap<String, Object>();
         AbstractRunnable.markArgumentsAsSequence(args);
         String a;

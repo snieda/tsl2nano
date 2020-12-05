@@ -5,10 +5,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Scanner;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -118,13 +116,23 @@ public class DatabaseTool {
         });
     }
 
+    public boolean isOpen() {
+    	return getConnection(persistence, false) != null;
+    }
+    
     public Connection getConnection() {
+    	return getConnection(persistence, true);
+    }
+    public static Connection getConnection(Persistence p, boolean throwException) {
         Connection con = null;
         try {
-            Class.forName(persistence.getConnectionDriverClass());
-            con = DriverManager.getConnection(persistence.getConnectionUrl(), persistence.getConnectionUserName(), persistence.getConnectionPassword());
+            Class.forName(p.getConnectionDriverClass());
+            con = DriverManager.getConnection(p.getConnectionUrl(), p.getConnectionUserName(), p.getConnectionPassword());
         } catch (Exception e) {
-            ManagedException.forward(e);
+        	if (throwException)
+        		ManagedException.forward(e);
+        	else
+        		LOG.warn(e.toString());
         }
         return con;
     }
@@ -236,22 +244,30 @@ public class DatabaseTool {
     }
 
     /**
-     * see {@link #isEmbeddedDatabase(String)}
+     * see {@link #isInternalDatabase(String)}
      */
-    public boolean isEmbeddedDatabase() {
-        return isEmbeddedDatabase(persistence.getConnectionUrl());
+    public boolean isInternalDatabase() {
+        return isInternalDatabase(persistence.getConnectionUrl());
     }
 
     /**
-     * isEmbeddedDatabase
+     * started for this application only
      * @param urlOrDriver
      * @return true, if it contains hsqldb or h2
      */
-    public static boolean isEmbeddedDatabase(String urlOrDriver) {
+    public static boolean isInternalDatabase(String urlOrDriver) {
         return (urlOrDriver.contains("hsqldb")
                 || urlOrDriver.contains("h2"));
     }
 
+    public boolean isEmbeddedDatabase() {
+    	return isInternalDatabase() && isEmbeddedDatabase(persistence.getConnectionUrl());
+    }
+    
+    public static boolean isEmbeddedDatabase(String urlOrDriver) {
+    	return isInternalDatabase(urlOrDriver) && !urlOrDriver.contains(":tcp:") && !urlOrDriver.matches(".*[:](hsql|http)[s]?[:].*");
+    }
+    
     public static boolean isH2(String url) {
         return url.matches("jdbc[:]h2[:].*");
     }
@@ -260,7 +276,7 @@ public class DatabaseTool {
      * @return optional SQL Tool like the one of H2 on port 8082
      */
     public String getSQLToolURL() {
-        return isEmbeddedDatabase() && isH2(persistence.getConnectionUrl()) 
+        return isInternalDatabase() && isH2(persistence.getConnectionUrl()) 
         		? ENV.get("app.database.sqltool.url", "http://localhost:8082") : null;
     }
 
@@ -278,7 +294,8 @@ public class DatabaseTool {
 		runDBServer(ENV.getConfigPath(), persistence.getPort());
 	}
 	public static void runDBServerDefault() {
-		runDBServer(ENV.getConfigPath(), Persistence.current().getPort());
+		if (getConnection(Persistence.current(), false) == null)
+			runDBServer(ENV.getConfigPath(), Persistence.current().getPort());
 	}
 	public static void runDBServer(String... args) {
 		String cmd = ENV.get("app.database.internal.server.run.cmd", "org.h2.tools.Server.main(-baseDir, {0}, -tcp, -tcpPort, {1}, -trace, -ifNotExists)");
@@ -289,9 +306,14 @@ public class DatabaseTool {
 	public static void shutdownDBServerDefault() {
 		shutdownDBServer(Persistence.current().getConnectionUrl(), "");
 	}
+	
 	public void shutdownDBServer() {
-		shutdownDBServer(persistence.getConnectionUrl(), persistence.getConnectionPassword());
+		if (isEmbeddedDatabase())
+			shutdownDatabase();
+		else
+			shutdownDBServer(persistence.getConnectionUrl(), persistence.getConnectionPassword());
 	}
+	
 	public static void shutdownDBServer(String... args) {
 		String cmd = ENV.get("app.database.internal.server.shutdown.cmd", "org.h2.tools.Server.shutdownTcpServer({0}, {1}, true, true)");
 		LOG.info("shutdown database server: " + cmd + "[" + args[0] + ", ***]");
@@ -302,9 +324,21 @@ public class DatabaseTool {
         }
 	}
 	
-	public static void dbDump(String... args) {//unused yet!
-		FileUtil.writeBytes("SCRIPT TO 'db-dump.sql'".getBytes(), "dump.sql", false);
-		String cmd = ENV.get("app.database.internal.server.dump.cmd", "org.h2.tools.RunScript -url \"{0}\" -user {1} -password {2} -script dump.sql -showResults");
+	public void dbDump() {
+		dbDump(persistence);
+	}
+	
+	public static void dbDump(Persistence p) {
+		dbDump(p.getConnectionDriverClass(), p.getConnectionUrl(), p.getConnectionUserName(), p.getConnectionPassword());
+	}
+	
+	/**
+	 * args: driver, url, user, password
+	 */
+	public static void dbDump(String... args) {
+		FileUtil.writeBytes("SCRIPT TO 'db-dump.sql'".getBytes(), "backup.sql", false);
+		FileUtil.writeBytes("SCRIPT TO 'db-dump.sql'".getBytes(), "../backup.sql", false); //for tests...
+		String cmd = ENV.get("app.database.internal.server.dump.cmd", "org.h2.tools.RunScript.main(-driver, {0}, -url, {1}, -user, {2}, -password, {3}"); //, -script, dump.sql"); //, -showResults");
 		LOG.info("dump database : " + cmd + "[" + args[0] + ", ***]");
         try {
         	BeanClass.call(cmd, args);

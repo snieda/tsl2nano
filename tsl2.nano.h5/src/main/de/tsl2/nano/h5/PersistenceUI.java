@@ -217,7 +217,7 @@ public class PersistenceUI {
                                 Object userName = Util.asString(value);
                                 String eval;
                                 if (userName != null && Util.isEmpty(defaultSchema)) {
-                                    if (value != null && DatabaseTool.isEmbeddedDatabase(persistence.getConnectionUrl())) {
+                                    if (value != null && DatabaseTool.isInternalDatabase(persistence.getConnectionUrl())) {
                                         eval = Persistence.DEFAULT_SCHEMA;
                                     } else {
                                         eval = userName.toString().toUpperCase();
@@ -339,7 +339,7 @@ public class PersistenceUI {
                                 Object userName = login.getAttribute("connectionUserName").getValue();
                                 String eval = null;
                                 if (userName != null) {
-                                    if (value != null && DatabaseTool.isEmbeddedDatabase((String) value)) {
+                                    if (value != null && DatabaseTool.isInternalDatabase((String) value)) {
                                         eval = Persistence.DEFAULT_SCHEMA;
                                     } else {
                                         eval = userName.toString().toUpperCase();

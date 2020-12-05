@@ -4,6 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.security.Policy;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.AfterClass;
@@ -14,6 +17,7 @@ import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.CallingPath;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.MapUtil;
+import de.tsl2.nano.core.util.StringUtil;
 
 public class CoreTest implements ENVTestPreparation {
 	static int aufrufe = 0;
@@ -76,5 +80,17 @@ public class CoreTest implements ENVTestPreparation {
 		Map args = MapUtil.asMap("0", 0, "2", 2, "3", 3);
 		Object result = CallingPath.eval("test", "substring(0, 3).substring(2)", args);
 		assertEquals("s", result);
+	}
+	
+	@Test
+	public void testStringUtilToString() {
+		Object[] arr = new Object[] {"1", 2, 3.};
+		List<Object> asList = Arrays.asList(arr); //Arrays.ArrayList
+		assertEquals("[1, 2, 3.0]", StringUtil.toString(asList, -1));
+		assertEquals("1:2:3.0:", StringUtil.toFormattedString(asList, -1, false, ":"));
+
+		asList = new ArrayList<Object>(asList); //java.util.ArrayList
+		assertEquals("[1, 2, 3.0]", StringUtil.toString(asList, -1));
+		assertEquals("1:2:3.0:", StringUtil.toFormattedString(asList, -1, false, ":"));
 	}
 }

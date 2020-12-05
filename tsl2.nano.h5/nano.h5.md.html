@@ -576,7 +576,7 @@ A sample environment is contained in the _tsl2.nano.h5.<version>.jar_ file, cont
 * sample databae _anyway_
 * sample icons for all buttons
 
-_nano.h5_, will start the sample hsqldb database for you calling the script:
+_nano.h5_, will start the sample h2 or hsqldb database for you calling the script:
 
 <environment-directory>/runServer.cmd
 
@@ -1357,6 +1357,81 @@ Example:
    </extension>
 </controller>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Additional controller actions should have IDs starting with 'controller'.
+To have a simple construction controller, set the property 'creationOnly' to true. You have to have an creation action - at start, no items will be shown.
+
+A good example is the logbook application:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+...
+<presentable class="de.tsl2.nano.h5.Html5Presentable" type="0" style="0" visible="true" searchable="true" nesting="false" gridWidth="0" gridHeight="0">
+   <label>ValueType</label>
+   <description>ValueType</description>
+   <enabler class="de.tsl2.nano.action.IActivable$1" active="true"/>
+   <icon>icons/cascade.png</icon>
+   <iconFromField>picture</iconFromField>
+</presentable>
+<valueExpression expression="{name}/{unit}" type="de.my.logbook.entity.ValueType"/>
+<isconnected>false</isconnected>
+<extension declaringClass="de.tsl2.nano.h5.collector.Controller">
+   <member name="workingMode">
+      <object class="java.lang.Integer">16</object>
+   </member>
+   <member name="reloadBean">
+      <object class="java.lang.Boolean">true</object>
+   </member>
+   <member name="simpleList">
+      <object class="java.lang.Boolean">false</object>
+   </member>
+   <member name="parentType">
+      <object class="java.lang.Class">de.my.logbook.entity.ValueType</object>
+   </member>
+   <member name="baseAttribute">
+      <object class="java.lang.String">entries</object>
+   </member>
+   <member name="targetType">
+      <object class="java.lang.Class">de.my.logbook.entity.Entry</object>
+   </member>
+   <member name="targetAttribute">
+      <object class="java.lang.String">type</object>
+   </member>
+   <member name="forceUserInteraction">
+      <object class="java.lang.Boolean">false</object>
+   </member>
+   <member name="showText">
+      <object class="java.lang.Boolean">false</object>
+   </member>
+   <member name="isTransparent">
+      <object class="java.lang.Boolean">true</object>
+   </member>
+   <member name="creationOnly">
+      <object class="java.lang.Boolean">false</object>
+   </member>
+</extension>
+...
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you add actions to the controller, the ids of the actions have to start with prefix 'controller.'!
+
+Example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+...
+<action class="de.tsl2.nano.h5.timesheet.ActionImportHolidays">
+   <id>controller.ics.import.holidays</id>
+   <shortDescription>Holidays</shortDescription>
+   <longDescription>holidays</longDescription>
+   <isDefault>false</isDefault>
+   <isEnabled>true</isEnabled>
+   <synchron>true</synchron>
+   <actionMode>0</actionMode>
+   <allPermission>false</allPermission>
+</action>
+...
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+But the best way is to create the controller through the UI of *BeanConfigurator*.
 
 #### direct creating a set of beans through the _Compositor_
 
@@ -2444,6 +2519,9 @@ Each bean list (BeanCollector) provides a menu action for _replication_ of curre
 * Source=PUNIT1, Destination=PUNIT2 : current visible data will be *exported* from standard database to the replication database
 * Source=PUNIT2, Destination=PUNIT1 : undefined! not able to select data from PUNIT2!
 
+*NOTE*: If you have cycling bindings (assozations in both directions) and no cascading defined, the replication import to the second persistence unit may fail.
+In that case, you may do an entity replication from PUNIT1 to any file-serialization (YAML, XML, etc.). Edit the file and remove the redirections from onetomany children to their parent (manytoone).
+
 ## Working on multiple Databases
 
 In standalone mode, database connections are defined inside the _persistence.xml_. Define multiple _persistence_untit_s if you need access to multiple databases. Of course, they need their mapping entity beans. So define the beans jar file in the persistence.xml and store it in the environments directory.
@@ -2541,6 +2619,22 @@ Some hints:
 * the provider should be set to _org.apache.openjpa.persistence.PersistenceProviderImpl_
 * openjpa-2.3.0 is not able to find/generate primary keys --> no class can be generated! Please use at least 2.4.0
 * edit the *persistence.xml* and set the property *openjpa.jdbc.DBDictionary* to  value="hsql(SupportsSchemaForGetTables=false)"
+
+### Generating beans in an continously changing database structure
+
+If you are working in a project, where the database model often changes, you have to re-generate your entity-beans and perhaps edit your presentation configurations.
+The following steps should be done:
+
+* be sure, the ddl changes are applied to your current database connection
+* rename folders (e.g. add '_') that have to be changed:
+   * generated-src
+   * presentation
+   * doc
+* rename the beans jar file
+* do either a restart of the application and re-login (which will start the generation) - or simply start the file <compilejar class="cmd"></compilejar>
+* do a diff on the old and new *generated-src*, *presentation* and *doc* folders
+* resolve collisions and merge the files in your folders
+* review the folder *specification* to use the correct fields and database columns
 
 ## Interactive attribute content
 
@@ -4220,7 +4314,9 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.4.1  | 21.06.2020 | css styling enhanced (collapsable menu), service-url as start-parameter, snake-yaml: 1.18->1.26, bugfixes
  2.4.2  | 02.08.2020 | plugin enhanced, configurable regexp/replace on html response, session-id as cookie or etag
  2.4.3  | 22.11.2020 | session-id direct on session-start (before authentication), beancollector presents hor on simple lists, vnet -> gravizo, h2-199 (-ifNotExists), h5+entityreplication, yaml-support, bugfixes
- 2.4.4  | 06.01.2020 | menu-hover now opaque, database-replication corrections, minor fixes
+ 2.4.4  | 06.12.2020 | menu-hover now opaque, bugfixes on database-replication, quicksearch etc.
+
+ 2.5.0  | xx.xx.2021 | see EnvUpdate2v5v0: refactorings: serialization of actions with primitive attributes, move incubation packages
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
 
@@ -5131,6 +5227,7 @@ Property -> {Organisation, Party, Item}
    - [-] present selection box if enum properties exist
    - [-] re-translate to number value
    - [v] ...or simply do that on message translation for tooltip
+- [ ] change simple-xml presentation of CommonAction: use simple attributes on simple types
 
 ### TEST
 
@@ -5180,7 +5277,8 @@ Property -> {Organisation, Party, Item}
       - [ ] copy h5-standalone-jar through ssh 
       - [ ] tsl2.app.logbook --> mvn clean install --> copy ja through ssh
       - [ ] login to serverway tsl2nano --> ./restart-all.sh
-   
+- [v] quicksearch not working
+
 ### REST
 
 - [v] fromValueMap() implementieren (full json support for beans!)
@@ -5241,3 +5339,6 @@ deploy:
 
 * [v] Repllication: included into h5 page - but not working with given hibernate/jpa libraries
    * [v] don't run in extra thread!
+
+
+* check create-sql-graphviz.cmd

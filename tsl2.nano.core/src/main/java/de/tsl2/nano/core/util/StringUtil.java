@@ -369,6 +369,9 @@ public class StringUtil {
      * @return string
      */
     public static String toFormattedString(Object o, int maxLineCount, boolean showLines) {
+    	return toFormattedString(o, maxLineCount, showLines, "\n");
+    }
+    public static String toFormattedString(Object o, int maxLineCount, boolean showLines, String sep) {
         maxLineCount = maxLineCount < 0 ? Integer.MAX_VALUE : maxLineCount;
         String result;
         if (o instanceof Map) {
@@ -385,7 +388,7 @@ public class StringUtil {
             final StringBuilder strBuilder = new StringBuilder(array.length * 50);
             final int c = array.length > maxLineCount ? maxLineCount : array.length;
             for (int i = 0; i < c; i++) {
-                strBuilder.append((showLines ? " [" + i + "]: " : "") + array[i] + "\n");
+                strBuilder.append((showLines ? " [" + i + "]: " : "") + array[i] + sep);
             }
             if (maxLineCount < array.length) {
                 strBuilder.append(MessageFormat.format(Messages.getString("tsl2nano.more.elements"),

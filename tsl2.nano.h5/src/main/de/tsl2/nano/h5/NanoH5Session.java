@@ -421,6 +421,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
                 } else {
                     userResponse = processInput(uri, parms, uriLinkNumber);
                 }
+                Message.send("trying to load response " + userResponse);
                 if (userResponse instanceof String && !userResponse.equals(IAction.CANCELED)) {
                     msg = (String) userResponse;
                     if (HtmlUtil.isURI(msg)) {

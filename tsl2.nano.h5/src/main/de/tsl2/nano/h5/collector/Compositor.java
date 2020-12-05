@@ -345,7 +345,8 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
     @Override
     @Commit
     protected void initDeserialization() {
-        beanFinder = new BeanFinder(super.getClazz());
+    	if (hasMode(MODE_SEARCHABLE))
+    		beanFinder = new BeanFinder(super.getClazz());
         //without commit annotation in this class, the super wont be called
         super.initDeserialization();
     }

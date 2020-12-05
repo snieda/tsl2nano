@@ -365,7 +365,7 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
 
                 @Override
                 public String toString() {
-                    return "replication-job [persist: " + entity.getName() + "@" + id + "]";
+                    return "replication-job [persist: " + (entity != null ? entity.getName() + "@" + id : bean.toString()) + "]";
                 }
             });
         }

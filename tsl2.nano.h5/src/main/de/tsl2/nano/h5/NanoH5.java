@@ -1121,8 +1121,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
             ENV.extractResource(persistence.getDatabase() + ".sql", false, false, false);
             ENV.extractResource("drop-" + persistence.getDatabase() + ".sql", false, false, false);
             ENV.extractResource("init-" + persistence.getDatabase() + ".sql", false, false, false);
-            ENV.extractResource("create-sql-graphviz.cmd", false, false, false);
-            SystemUtil.executeShell(new File(ENV.getConfigPathRel()), true, "create-sql-graphviz.cmd");
+            ENV.extractResource("create-sql-graphviz.cmd", true, true);
+            SystemUtil.executeShell(new File(ENV.getConfigPathRel()), false, "./create-sql-graphviz.cmd");
         } catch (Exception e) {
             LOG.warn(e);
             //ok, it was only a try ;-)
@@ -1137,8 +1137,11 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
 
     private void generateDatabase(Persistence persistence) {
     	if (DatabaseTool.isDBRunInternally()) {
-    		new DatabaseTool(persistence).runDBServer();
-    		ConcurrentUtil.sleep(1000);
+    		DatabaseTool databaseTool = new DatabaseTool(persistence);
+    		if (!databaseTool.isOpen()) {
+				databaseTool.runDBServer();
+	    		ConcurrentUtil.sleep(1000);
+    		}
     	}
         ENV.extractResource(REVERSE_ENG_SCRIPT);
         Message.send("creating new database " + persistence.getDatabase() + " for url "
@@ -1200,7 +1203,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         ConcurrentUtil.removeAllCurrent(NanoH5Session.getThreadLocalTypes());
 
         DatabaseTool databaseTool = new DatabaseTool(Persistence.current());
-        if (databaseTool.isEmbeddedDatabase())
+        if (databaseTool.isInternalDatabase())
         	databaseTool.shutdownDBServerDefault();
         
         //TODO: the following is done in pagebuilder.reset, too?

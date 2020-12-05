@@ -16,7 +16,7 @@ import de.tsl2.nano.core.ENV;
  * @author Tom
  * @version $Revision$ 
  */
-public class ENVUpdate2v4v3 implements Runnable {
+public class ENVUpdate2v5v0 implements Runnable {
     private String VERS_PREVIOUS = null;
     private ENV env;
     private String currentVersion;
@@ -24,7 +24,7 @@ public class ENVUpdate2v4v3 implements Runnable {
     /**
      * constructor
      */
-    public ENVUpdate2v4v3(Object env, String currentVersion) {
+    public ENVUpdate2v5v0(Object env, String currentVersion) {
         this.env = (ENV) env;
         this.currentVersion = currentVersion;
     }
@@ -35,11 +35,11 @@ public class ENVUpdate2v4v3 implements Runnable {
     @Override
     public void run() {
         // runPreviousVersionUpdate();
-        //TODO: implement :-(
-    	System.out.println("UPDATE 2.4.0 -> 2.4.3: PLEASE UPDATE THE FOLLOWING IN YOUR APPLICATION:\n"
-    			+ "    remove old hibernate and h2 jars\n"
-    			+ "    runserver.cmd, environment.xml: add -ifNotExists\n"
-    			+ "    hash changed: re-create users.xml and <user-name>.xml, presentation-xml seals\n");
+        //TODO: implement ;-(
+    	System.out.println("UPDATE 2.4.3 -> 2.5.0: PLEASE UPDATE THE FOLLOWING IN YOUR APPLICATION:\n"
+    		+ "    change all presentations having actions: all boolean/int values and the shortDescription are now attributes!\n"
+    		+ "    change all activites of workflows: do the same changes as on the actions!\n"
+    		+ "    secureactions, methodactions -> the same\n");
     }
 
     void runPreviousVersionUpdate() {

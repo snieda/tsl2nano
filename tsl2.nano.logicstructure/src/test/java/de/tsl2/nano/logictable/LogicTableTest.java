@@ -6,6 +6,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -17,8 +19,12 @@ import de.tsl2.nano.collection.TableList;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.incubation.specification.ParType;
 import de.tsl2.nano.incubation.specification.Pool;
+import de.tsl2.nano.incubation.specification.actions.Action;
 import de.tsl2.nano.incubation.specification.rules.Rule;
+import de.tsl2.nano.incubation.specification.rules.RuleDecisionTable;
+import de.tsl2.nano.incubation.specification.rules.RuleScript;
 
 public class LogicTableTest implements ENVTestPreparation {
 
@@ -61,6 +67,28 @@ public class LogicTableTest implements ENVTestPreparation {
         assertEquals(new BigDecimal(61), new EquationSolver(null, values).eval(f));
     }
 
+    @Test
+    public void testEquationSolverWithAction() throws NoSuchMethodException, SecurityException {
+    	Pool.registerTypes(Rule.class, RuleScript.class, RuleDecisionTable.class, Action.class);
+    	Action<Integer> action = new Action<Integer>(Integer.class.getMethod("parseInt", new Class[] {String.class}));
+    	ENV.get(Pool.class).add(action);
+        Map<String, Object> values = new Hashtable<String, Object>();
+        values.put("A1", "3");
+    	assertEquals("3", new EquationSolver(null, values).eval("<<" + action.getName() + "(A1)" + ">>"));
+    }
+    
+    @Test
+    public void testEquationSolverWithRule() throws NoSuchMethodException, SecurityException {
+    	Pool.registerTypes(Rule.class, RuleScript.class, RuleDecisionTable.class, Action.class);
+    	LinkedHashMap pars = new LinkedHashMap();
+    	pars.put("x1", new ParType(Integer.class));
+		Rule rule = new Rule("inc", "1+x1", pars);
+    	ENV.get(Pool.class).add(rule);
+        Map<String, Object> values = new Hashtable<String, Object>();
+        values.put("A1", "2");
+    	assertEquals("=3", new EquationSolver(null, values).eval("=" + rule.getName() + "(A1)"));
+    }
+    
     @Test
     public void testLogicTable() {
         TableList<DefaultHeader, String> table = new LogicTable<DefaultHeader, String>("test", 2).fill(String.class, 2);

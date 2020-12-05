@@ -9,6 +9,9 @@ import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.incubation.specification.actions.Action;
+import de.tsl2.nano.incubation.specification.rules.Rule;
+import de.tsl2.nano.incubation.specification.rules.RuleDecisionTable;
+import de.tsl2.nano.incubation.specification.rules.RuleScript;
 import de.tsl2.nano.util.test.TypeBean;
 
 public class SpecifiedActionTest {
@@ -16,6 +19,7 @@ public class SpecifiedActionTest {
 	@Before
 	public void setUp() {
 		NanoH5Test.createENV("specifiedaction");
+    	Pool.registerTypes(Rule.class, RuleScript.class, RuleDecisionTable.class, Action.class);
 	}
 
 	@After

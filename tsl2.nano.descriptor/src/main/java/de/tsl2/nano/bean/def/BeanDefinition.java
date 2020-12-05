@@ -997,6 +997,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                     if (beandef.extension != null) {
                         beandef = (BeanDefinition<T>) beandef.extension.to(beandef);
                     }
+                    LOG.info("beandef loaded from '" + xmlFile.getPath() + "' [name: " + beandef.getName() + ", attributes: " + beandef.getAttributeDefinitions().size() + ", actions: " + beandef.getActions().size() + "]");
                     //perhaps, the file defines another bean-name or bean-type
                     if ((name == null || beandef.isVirtual() || name.equalsIgnoreCase(beandef.getName())
                         || name.equalsIgnoreCase(FileUtil

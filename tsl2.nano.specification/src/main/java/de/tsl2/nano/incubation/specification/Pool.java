@@ -70,15 +70,21 @@ public class Pool {
     	if (registeredTypes.isEmpty())
     		throw new IllegalStateException("no types registered at pool. please register at least one runnable type!");
         if (expressionPattern == null) {
-            StringBuilder buf = new StringBuilder("[");
-            for (Class<? extends IPRunnable> t : registeredTypes) {
-                buf.append(((IPrefixed)BeanClass.createInstance(t)).prefix());
-            }
-            buf.append("].*");
+            StringBuilder buf = getExpressionPattern();
+    		buf.append(".*");
             expressionPattern = buf.toString();
         }
         return expressionPattern;
     }
+
+	public StringBuilder getExpressionPattern() {
+		StringBuilder buf = new StringBuilder("[");
+		for (Class<? extends IPRunnable> t : registeredTypes) {
+		    buf.append(((IPrefixed)BeanClass.createInstance(t)).prefix());
+		}
+		buf.append("]");
+		return buf;
+	}
     
     public void saveAll() {
     	runnables().forEach( (k, v) -> add(k, v));
@@ -146,6 +152,15 @@ public class Pool {
         if (runnable == null && type != null && !name.matches(getFullExpressionPattern())) {
         	String n = ((IPrefixed)BeanClass.createInstance(type)).prefix() + name;
         	runnable = (I) runnables().get(n);
+        } else if (runnable == null && type == null && !name.matches(getFullExpressionPattern())) {
+        	//search on all runnable types
+        	StringBuilder pattern = getExpressionPattern();
+			String prefixes = pattern.substring(1, pattern.length()-1);
+			for (int i=0; i<prefixes.length(); i++) {
+				runnable = (I) runnables().get(prefixes.charAt(i) + name);
+				if (runnable != null)
+					break;
+			}
         }
         if (runnable == null && type == null)
         	throw new IllegalArgumentException("Wrong runnable name: " + name 
