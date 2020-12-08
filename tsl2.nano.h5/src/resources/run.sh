@@ -39,7 +39,7 @@ EXTENSION="-standalone"
 OFFLINE=-Dtsl2nano.offline=true
 #UH=-Denv.user.home=true
 #USERDIR=-Duser.dir=$PRJ
-#LLANG=-Duser.country=FR -Duser.language=fr
+#LLANG=-Duser.country=FR -Duser.language=fr -Duser.language.format=fr
 ENCODING=-Dfile.encoding=UTF-8
 JSU_ENC=-Dsun.jnu.encoding=UTF-8
 #DEBUG="-agentlib:jdwp=transport=dt_socket,address=localhost:8787,server=y,suspend=n"

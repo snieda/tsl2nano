@@ -99,12 +99,11 @@ public class ClassFinder {
 	 * @return parent ClassLoader
 	 */
 	private static ClassLoader addClasses(ClassLoader classLoader, Set<Class<?>> classes) {
-		if (AppLoader.isJdkOracle()) {
-		classes.addAll(
+		try {
+			classes.addAll(
 				(Collection<? extends Class<?>>) new PrivateAccessor(classLoader).member("classes", Vector.class));
-//		return (ClassLoader) new PrivateAccessor(classLoader).call("getParent", ClassLoader.class);
-		} else {
-			LOG.warn("cannot access oracle specific member of classloader. this may result in problems on finding classes.");
+		} catch(Exception ex) {
+			LOG.warn("cannot access specific private member 'classes' of classloader. this may result in problems on finding classes.");
 		}
 		return classLoader.getParent();
 	}

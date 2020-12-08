@@ -22,7 +22,7 @@ set EXTENSION=-standalone
 set OFFLINE=-Dtsl2nano.offline=true
 rem set UH=-Denv.user.home=true
 rem set USERDIR=-Duser.dir=%PRJ%
-rem set LANG=-Duser.country=FR -Duser.language=fr
+rem set LANG=-Duser.country=FR -Duser.language=fr -Duser.language.format=fr
 set ENCODING=-Dfile.encoding=UTF-8
 set JSU_ENC=-Dsun.jnu.encoding=UTF-8
 rem set DEBUG="-agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=n"

@@ -5341,4 +5341,7 @@ deploy:
    * [v] don't run in extra thread!
 
 
-* check create-sql-graphviz.cmd
+* change serialization of actions
+* resolve vulnerabilities of github dependencies
+* test on openjdk to resolve build/test failure in github
+   * ClassFinder: not as singleton but per thread (using Thread.current().getContextClassLoader())
