@@ -21,4 +21,4 @@ jobs:
       with:
         java-version: 1.8
     - name: Build with Maven
-      run: mvn -B package --file pom.xml -Duser.language=de -Duser.region=DE -Duser.country=DE
+      run: mvn -B package --file pom.xml -Duser.language=de -Duser.region=DE -Duser.country=DE -Duser.language.format=de
