@@ -12,14 +12,20 @@ public class PrintUtilTest {
 		try {
 			PrintUtil.main("print source=printer-info printer=PDFCreator".split("\\s"));
 		} catch (Exception e) {
-			assertTrue(e.getMessage().contains("PDFCreator"));
+			checkMessageWIthPDFCreator(e);
 		}
 		try {
 			PrintUtil.main("print source=**/*.pdf printer=PDFCreator papersize=ISO_A4".split("\\s"));
 		} catch (Exception e) {
-			assertTrue(e.getMessage().contains("PDFCreator"));
+			checkMessageWIthPDFCreator(e);
 		}
-		
+	}
+
+	private void checkMessageWIthPDFCreator(Exception e) {
+		boolean messageWithDPFCreator = e.getMessage() != null && e.getMessage().contains("PDFCreator");
+		if (!messageWithDPFCreator)
+			e.printStackTrace();
+		assertTrue(e.toString(), messageWithDPFCreator);
 	}
 
 }
