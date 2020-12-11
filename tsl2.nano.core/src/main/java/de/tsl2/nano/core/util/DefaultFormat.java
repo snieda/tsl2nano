@@ -91,7 +91,8 @@ public class DefaultFormat extends Format {
             CompatibilityLayer cl = ENV.get(CompatibilityLayer.class);
             if (!ObjectUtil.hasToString(obj) && cl.isAvailable("de.tsl2.nano.format.ToStringBuilder")) {
                 try {
-                    result.append(StringUtil.toString(cl.runRegistered("reflectionToString", obj), 80));
+                    Object runRegistered = cl.runRegistered("reflectionToString", obj);
+					result.append(StringUtil.toString(runRegistered != null ? runRegistered : obj, 80));
                 } catch (final Exception e) {
                     LOG.error("Error on calling ToStringBuilder.reflectionToString().\nPlease define a toString() in " + obj.getClass()
                         + ". Or extend the implementation of your DefaultFormat extension!",

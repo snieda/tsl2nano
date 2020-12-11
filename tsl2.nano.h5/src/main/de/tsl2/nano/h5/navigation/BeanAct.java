@@ -91,7 +91,7 @@ public class BeanAct extends Act<BeanDefinition<?>> {
             parameter.put(getName() + ".size", entities.size());
             parameter.put(getName(), e);
             LOG.info("activity returned with context:\n\t" + parameter);
-            return Bean.getBean((Serializable) e);
+            return Bean.getBean(e);
         }
     }
 

@@ -97,7 +97,7 @@ public class PathExpression<T> extends AbstractExpression<T> implements IValueEx
                     + ". please set a value for " + attributePath[i] + " first!");
             }
         }
-        Bean.getBean((Serializable) v).setValue(attributePath[attributePath.length - 1], value);
+        Bean.getBean(v).setValue(attributePath[attributePath.length - 1], value);
     }
 
     @Commit

@@ -202,4 +202,12 @@ public class Pool {
         runnables = null;
     }
 
+    // for bean evaluation (reflection) only!
+	public Map<String, IPRunnable> getRunnables() {
+		return runnables;
+	}
+	public void setRunnables(Map<String, IPRunnable> runnables) {
+		this.runnables = runnables;
+	}
+
 }

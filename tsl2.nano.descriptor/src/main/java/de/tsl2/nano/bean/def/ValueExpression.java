@@ -324,6 +324,8 @@ public class ValueExpression<TYPE> implements
              * this would result in an empty string on new instances.
              */
             return txt.isEmpty() ? "[new: " + fromValue + "]" : txt;
+        } else if (fromValue instanceof Class) {
+        	return ((Class) fromValue).getName();
         } else {
             //lazy workaround...
             return getWorkaroundFormat(fromValue);
@@ -350,13 +352,13 @@ public class ValueExpression<TYPE> implements
         for (int i = 0; i < args.length; i++) {
             if (args[i] != null) {
                 if (BeanContainer.instance().isPersistable(args[i].getClass())) {
-                    args[i] = Bean.getBean((Serializable) args[i]).toString();
+                    args[i] = Bean.getBean(args[i]).toString();
                 } else if (args[i] instanceof Collection) {
                     Collection<?> c = (Collection<?>) args[i];
                     if (c.size() > 0 && BeanContainer.instance().isPersistable(c.iterator().next().getClass())) {
                         StringBuilder buf = new StringBuilder();
                         for (Object obj : c) {
-                            buf.append(Bean.getBean((Serializable) obj).toString() + ";");
+                            buf.append(Bean.getBean(obj).toString() + ";");
                         }
                         args[i] = buf.toString();
                     }

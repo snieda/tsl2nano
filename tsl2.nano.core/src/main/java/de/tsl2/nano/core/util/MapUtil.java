@@ -83,6 +83,13 @@ public class MapUtil {
         return asMap(new Properties(), keysAndValues);
     }
 
+    public static SortedMap asSortedMap(Object... keysAndValues) {
+    	if (keysAndValues[0] instanceof Comparable)
+    		return asMap(new TreeMap<Object, Object>(), keysAndValues);
+    	else
+    		return asMap(new TreeMap<Object, Object>((o1, o2) -> o1.toString().compareTo(o2.toString())), keysAndValues);
+    }
+
     /**
      * collects the given objects to keys and their values (defined by object order) and puts it into a new map.
      * 

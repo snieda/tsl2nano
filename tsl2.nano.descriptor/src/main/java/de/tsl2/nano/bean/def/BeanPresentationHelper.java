@@ -26,7 +26,6 @@ import static de.tsl2.nano.bean.def.IPresentable.TYPE_TIME;
 import static de.tsl2.nano.bean.def.IPresentable.UNDEFINED;
 
 import java.io.File;
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -1336,7 +1335,7 @@ public class BeanPresentationHelper<T> {
                 "icons/equipment.png") {
                 @Override
                 public Object action() throws Exception {
-                    Bean<Serializable> bEnv = Bean.getBean((Serializable) BeanClass.getStatic(ENV.class, "self"));
+                    Bean<?> bEnv = Bean.getBean(BeanClass.getStatic(ENV.class, "self"));
                     addAdministrationActions(session, bEnv);
                     return bEnv;
                 }
@@ -1463,6 +1462,16 @@ public class BeanPresentationHelper<T> {
                     }
                 });
             }
+            sessionActions.add(new SecureAction(bean.getClazz(),
+                    "session",
+                    IAction.MODE_UNDEFINED,
+                    false,
+                    "icons/blue_pin.png") {
+                    @Override
+                    public Object action() throws Exception {
+                        return Bean.getBean(vsession.getValue());
+                    }
+                });
             sessionActions.add(new SecureAction(bean.getClazz(),
                 "logout",
                 IAction.MODE_UNDEFINED,

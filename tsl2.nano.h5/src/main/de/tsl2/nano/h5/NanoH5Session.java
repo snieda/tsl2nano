@@ -41,12 +41,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Executors;
 
 import javax.net.ssl.SSLContext;
 
 import org.apache.commons.logging.Log;
-import org.java_websocket.WebSocket;
 import org.java_websocket.server.DefaultSSLWebSocketServerFactory;
 
 import de.tsl2.nano.action.IAction;
@@ -86,7 +84,6 @@ import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.NanoHTTPD.Method;
 import de.tsl2.nano.h5.NanoHTTPD.Response;
 import de.tsl2.nano.h5.NanoHTTPD.Response.Status;
@@ -94,7 +91,6 @@ import de.tsl2.nano.h5.collector.Controller;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.h5.navigation.Parameter;
-import de.tsl2.nano.h5.navigation.Workflow;
 import de.tsl2.nano.h5.plugin.INanoPlugin;
 import de.tsl2.nano.h5.websocket.NanoWebSocketServer;
 import de.tsl2.nano.h5.websocket.WebSocketExceptionHandler;
@@ -661,7 +657,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
                             && collector.hasFilter() ? 2 : 0);
                     Object selectedItem = listSet.get(selectedIndex);
                     boolean isTypeList = BeanCollector.class.isAssignableFrom(collector.getClazz());
-                    responseObject = isTypeList ? selectedItem : Bean.getBean((Serializable) selectedItem);
+                    responseObject = isTypeList ? selectedItem : Bean.getBean(selectedItem);
                 }
             } else {
                 if (!isCanceled(parms)
@@ -684,7 +680,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
             //on database models with composite-ids, these ids should be synchronized with standard values.
             Bean bean = (Bean) nav.current();
             if (bean.isPersistable()) {
-                BeanContainerUtil.synchronizeEmbeddedCompositeID((Serializable) bean.getInstance());
+                BeanContainerUtil.synchronizeEmbeddedCompositeID(bean.getInstance());
             }
         }
         //collect available actions
@@ -963,7 +959,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
         BeanDefinition<?> bean;
         for (Object object : selection) {
             bean =
-                (BeanDefinition<?>) (object instanceof BeanDefinition ? object : Bean.getBean((Serializable) object));
+                (BeanDefinition<?>) (object instanceof BeanDefinition ? object : Bean.getBean(object));
             //don't add the first element, see behaviour in getNextModel()
             if (firstElement != null) {
                 nav.add(bean);
@@ -1159,6 +1155,10 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
         return context;
     }
 
+    public void setContext(Context context) {
+    	this.context = context;
+    }
+    
     @Override
     public ClassLoader getSessionClassLoader() {
         return sessionClassloader;
@@ -1211,6 +1211,10 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
         return websocketPort;
     }
 
+    public List<String> getActionLog() {
+		return actionLog;
+	}
+    
     @Override
     public boolean check(long timeout, boolean throwException) {
         boolean authenicatedButNotConnected =

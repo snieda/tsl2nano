@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.text.Format;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -338,7 +339,7 @@ public class Bean<T> extends BeanDefinition<T> {
             .isStandardType(attribute.getType()) /*!BeanContainer.instance().isPersistable(attribute.getType())*/) {
             throw new ManagedException("The attribute '" + name + "' is not a persistable bean");
         }
-        Serializable value = (Serializable) attribute.getValue();
+        Object value = attribute.getValue();
         if (value == null) {
             return null;
         }
@@ -766,6 +767,8 @@ public class Bean<T> extends BeanDefinition<T> {
             BeanDefinition<I> beandef =
                 getBeanDefinition((Class<I>) BeanClass.getDefiningClass(instanceOrName.getClass()));
             bean = createBean(instanceOrName, beandef);
+            Arrays.sort(bean.getAttributeNames()); // workaround: sort to key, value
+            bean.setAttributeFilter(bean.getAttributeNames());
             Entry entry = (Entry) instanceOrName;
             if (entry.getValue() != null) {
                 IConstraint c = bean.getAttribute("value").getConstraint();
@@ -826,7 +829,7 @@ public class Bean<T> extends BeanDefinition<T> {
                 v = map.get(k);
                 bean.addAttribute(
                     new BeanValue(bean.instance,
-                        new MapValue(v != null ? v : k, (v != null ? BeanClass.getDefiningClass(v
+                        new MapValue(k, (v != null ? BeanClass.getDefiningClass(v
                             .getClass()) : null), map)));
             }
         }

@@ -340,7 +340,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
          */
         if (composition != null) {
             for (T instance : collection) {
-                Bean.getBean((Serializable) instance).onDeactivation(context);
+                Bean.getBean(instance).onDeactivation(context);
             }
         } else {
             if (ENV.get("collector.ondeactivation.selection.clear", true))
@@ -665,7 +665,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      */
     @Override
     public void deleteItem(T item) {
-        if (!CompositionFactory.markToPersist(item) && Bean.getBean((Serializable) item).getId() != null) {
+        if (!CompositionFactory.markToPersist(item) && Bean.getBean(item).getId() != null) {
             BeanContainer.instance().delete(item);
         }
     }
@@ -801,7 +801,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                     final T finalBean = newBean;
                     final COLLECTIONTYPE values = collection;
                     values.add(newBean);
-                    final Bean b = Bean.getBean((Serializable) newBean);
+                    final Bean b = Bean.getBean(newBean);
                     b.attach(new CommonAction<Void>() {
                         @Override
                         public Void action() throws Exception {
@@ -1084,7 +1084,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         if (names.length > i) {
             String name = names[i];
             IPresentableColumn column = getAttribute(name).getColumnDefinition();
-            if (column != null && column.getIndex() == i) {
+            if (column != null && (column.getName().equals(name) || column.getIndex() == i)) {
                 return column;
             }
         }
@@ -1161,7 +1161,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             } else if (col.isStandardSummary() && NumberUtil.isNumber(getAttribute(col.getName()).getType())) {
                 double result = 0;
                 for (T item : collection) {
-                    Bean b = Bean.getBean((Serializable) item);
+                    Bean b = Bean.getBean(item);
                     Number v = (Number) b.getValue(col.getName());
                     if (v != null) {
                         result += v.doubleValue();
@@ -1507,7 +1507,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             Composition composition) {
         BeanDefinition<I> beandef =
             (BeanDefinition<I>) (beanType.isArray() || beanType.equals(String.class) && !Util.isEmpty(collection) ? Bean
-                .getBean((Serializable) collection.iterator().next())
+                .getBean(collection.iterator().next())
                 : getBeanDefinition(beanType.getSimpleName() + (useExtraCollectorDefinition() ? POSTFIX_COLLECTOR
                     : ""),
                     beanType,

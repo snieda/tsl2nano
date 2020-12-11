@@ -49,6 +49,7 @@ import de.tsl2.nano.core.messaging.IListener;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.ListSet;
+import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
@@ -264,8 +265,8 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                 String name;
                 Object id;
                 for (Object allowed : getConstraint().getAllowedValues()) {
-                    id = Bean.getBean((Serializable) allowed).getId();
-                    name = Bean.getBean((Serializable) allowed).toString();
+                    id = Bean.getBean(allowed).getId();
+                    name = Bean.getBean(allowed).toString();
                     if ((id != null && id.equals(source)) || name.equals(source)) {
                         LOG.debug("recognition of selected value '" + name + "' successful!");
                         v = (T) allowed;
@@ -507,7 +508,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      * @return Returns a given parent or the standard parent evaluated from instance.
      */
     public Bean<?> getParent() {
-        return parent != null || instance == null ? parent : (parent = Bean.getBean((Serializable) instance));
+        return parent != null || instance == null ? parent : (parent = Bean.getBean(instance));
     }
 
     /**
@@ -591,7 +592,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
 
     @Override
     public String toString() {
-        return (isVirtual() ? description : getName()) + "=" + getValue();
+        return getName() + "=" + getValue();
     }
 
     /**
@@ -645,6 +646,12 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
         return collector;
     }
 
+    @Override
+    public boolean isSelectable() {
+    	T v = getValue();
+    	return (v != null && !ObjectUtil.isStandardType(v) && !ByteUtil.isByteStream(v.getClass())) || super.isSelectable();
+    }
+    
 	public static int removeFromCache(Bean<?> bean) {
 		List<BeanValue<?>> beanValues = bean.getBeanValues();
 		int c = 0;

@@ -675,7 +675,7 @@ private static Object deepCopy(Object src, Object dest) throws Exception {
     }
 
     /**
-     * if not already a bean or beancollector, the given object will wrapped into a bean or beancollector. if it is not
+     * if not already a bean or beancollector, the given object will be wrapped into a bean or beancollector. if it is not
      * serializable, a map of values will be packed into a beancollector.
      * 
      * @param obj

@@ -93,7 +93,7 @@ public abstract class RunnableExpression<T extends Serializable> extends Abstrac
             try {
                 T result = getResult().get(refreshArguments(beanInstance));
                 if (connectedAttribute != null) {
-                    Bean.getBean((Serializable) beanInstance).getAttribute(connectedAttribute).setValue(result);
+                    Bean.getBean(beanInstance).getAttribute(connectedAttribute).setValue(result);
                 }
                 return result;
             } catch (final Exception e) {

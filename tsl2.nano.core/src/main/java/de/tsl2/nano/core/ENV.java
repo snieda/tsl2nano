@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -41,6 +42,7 @@ import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.ElementMap;
+import org.simpleframework.xml.core.Commit;
 import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.core.classloader.LibClassLoader;
@@ -111,7 +113,7 @@ public class ENV implements Serializable {
      * real service instances.
      */
     @ElementMap(entry = "service", key = "interface", attribute = true, inline = true, required = false, keyType = Class.class, valueType = Object.class)
-    Map<Class<?>, Object> services;
+    private Map<Class<?>, Object> services;
 
     /** if true, this environment will be persisted on any change. */
     transient boolean autopersist = false;
@@ -281,7 +283,7 @@ public class ENV implements Serializable {
             self = YamlUtil.load(new File(configFile.getPath()), ENV.class);
         } else {
             self = new ENV();
-            self.properties = createPropertyMap();
+            self.properties = createSyncSortedMap();
             configFile = getConfigFile(dir, getFileExtension());
 //          LOG.warn("no environment.properties available");
         }
@@ -347,7 +349,7 @@ public class ENV implements Serializable {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    static SortedMap createPropertyMap() {
+    static SortedMap createSyncSortedMap() {
         return Collections.synchronizedSortedMap(new TreeMap());
     }
 
@@ -537,7 +539,7 @@ public class ENV implements Serializable {
     @SuppressWarnings("rawtypes")
 	public static void setProperties(SortedMap properties) {
         if (self().properties == null) {
-            self().properties = createPropertyMap();
+            self().properties = createSyncSortedMap();
         	self().properties.putAll(properties);
         } else { // perhaps a property map holding only strings
         	SortedMap p = self().properties;
@@ -553,6 +555,15 @@ public class ENV implements Serializable {
         }
     }
 
+    public Map<Class<?>, Object> getServices() {
+		return services;
+	}
+    public void setServices(Map<Class<?>, Object> services) {
+    	//do nothing - only for bean evaluating...
+//    	services.forEach((k, v) -> { if (!k.isAssignableFrom(v.getClass())) throw new IllegalArgumentException(v + " must be of type " + k.getName());} );
+//		this.services = services;
+	}
+    
     /**
      * removes the service, given by it's interface.
      * 
@@ -789,7 +800,7 @@ public class ENV implements Serializable {
      */
     public final static synchronized void persist() {
         //save backup while some key/values will be removed if not serializable
-        SortedMap tempProperties = createPropertyMap();
+        SortedMap tempProperties = createSyncSortedMap();
         tempProperties.putAll(self().properties);
         Map<Class<?>, Object> tempServices = new Hashtable<Class<?>, Object>(services());
         String configPath = getConfigPath();
@@ -806,7 +817,7 @@ public class ENV implements Serializable {
      */
     public static void reload() {
         String envDir = getConfigPath();
-        SortedMap tempProperties = createPropertyMap();
+        SortedMap tempProperties = createSyncSortedMap();
         tempProperties.putAll(self().properties);
         Map<Class<?>, Object> tempServices = new Hashtable<Class<?>, Object>(services());
 
@@ -1104,10 +1115,19 @@ public class ENV implements Serializable {
         return LogFactory.getLog(cls).isDebugEnabled();
     }
 
+    @Commit
+    protected void initDeserialization() {
+    	if (services != null && !(services instanceof SortedMap)) {
+    		SortedMap<Class<?>,Object> serviceMap = createServiceMap();
+    		serviceMap.putAll(services);
+    		services = serviceMap;
+    	}
+    }
+    
     @Persist
     protected void initSerialization() {
         if (properties == null)
-            properties = createPropertyMap();
+            properties = createSyncSortedMap();
         /*
          * remove the environment path itself - should not be reloaded
          */
@@ -1153,8 +1173,8 @@ public class ENV implements Serializable {
      * 
      * @return
      */
-    static Map<Class<?>, Object> createServiceMap() {
-        return Collections.synchronizedMap(new Hashtable<Class<?>, Object>());
+    static SortedMap<Class<?>, Object> createServiceMap() {
+        return Collections.synchronizedSortedMap(new TreeMap<>((o1, o2) -> o1.getName().compareTo(o2.getName())));
     }
 
     /**

@@ -61,8 +61,6 @@ import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.ValueHolder;
-import de.tsl2.nano.bean.annotation.Action;
-import de.tsl2.nano.bean.annotation.Constraint;
 import de.tsl2.nano.bean.def.Attachment;
 import de.tsl2.nano.bean.def.AttributeCover;
 import de.tsl2.nano.bean.def.AttributeDefinition;
@@ -85,7 +83,6 @@ import de.tsl2.nano.bean.def.Presentable;
 import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.bean.def.ValueExpressionFormat;
 import de.tsl2.nano.bean.def.ValueGroup;
-import de.tsl2.nano.bean.def.ValueStream;
 import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ISession;
@@ -126,7 +123,6 @@ import de.tsl2.nano.incubation.specification.rules.RuleDependencyListener;
 import de.tsl2.nano.persistence.DatabaseTool;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.plugin.Plugins;
-import de.tsl2.nano.replication.EntityReplication;
 import de.tsl2.nano.script.ScriptTool;
 
 /**
@@ -866,9 +862,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         } else {
 //                            bv =
 //                                BeanValue.getBeanValue(
-//                                    new ValueHolder(Bean.getBean((Serializable) bean.getValue(name))),
+//                                    new ValueHolder(Bean.getBean(bean.getValue(name))),
 //                                    ValueHolder.ATTR_VALUE);
-                            createBean(session, parent, Bean.getBean((Serializable) bean.getValue(name)), interactive,
+                            createBean(session, parent, Bean.getBean(bean.getValue(name)), interactive,
                                 fullwidth);
                             continue;
                         }
@@ -940,7 +936,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             } else if (beanValue.getPresentation().isNesting() && !Util.isEmpty(beanValue.getValue())) {
                 BeanDefinition bv =
                     beanValue.isMultiValue() ? BeanCollector.getBeanCollector((Collection) beanValue.getValue(), 0)
-                        : Bean.getBean((Serializable) beanValue.getValue());
+                        : Bean.getBean(beanValue.getValue());
                 //workaround: should use fparent, but that doesn't work
                 createContentPanel(session, parent, bv, interactive, false);
                 actions.addAll(bv.getActions());
@@ -1573,7 +1569,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             .getValue()
             .contains(item) : false;
         tableDescriptor.nextRow();
-        Bean<Serializable> itemBean = Bean.getBean((Serializable) item);
+        Bean<?> itemBean = Bean.getBean(item);
         String beanStyle = itemBean.getPresentable().layout(ATTR_STYLE);
         String rowBackground;
         if (beanStyle != null) {
@@ -1631,7 +1627,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 enable(ATTR_CHECKED, isSelected));
         }
 
-        String icon = getIcon(itemBean, (Serializable) item);
+        String icon = getIcon(itemBean, item);
         if (icon != null) {
             String iconOrImage = tableDescriptor.isSimpleList() ? "image" : "icon";
             String width = ENV.get("layout." + iconOrImage + ".width", tableDescriptor.isSimpleList() ? "200" : "-1");
@@ -1693,7 +1689,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                                 + ", " + c.getIndex() + "]"));
 //                    cell = appendElement(cell, TAG_EMBED);
                     createContentPanel(session, cell,
-                        Bean.getBean((Serializable) attr.getValue()), interactive, false);
+                        Bean.getBean(attr.getValue()), interactive, false);
                 } else {//standard --> text
                     value = tableDescriptor.getColumnText(item, c.getIndex());
                     cell =
@@ -1748,10 +1744,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * @param bean
      * @return
      */
-    String getIcon(BeanDefinition bean, Serializable item) {
+    String getIcon(BeanDefinition bean, Object item) {
         String icon = null;
         if (item == null && bean instanceof Bean)
-            item = (Serializable) ((Bean) bean).getInstance();
+            item = ((Bean) bean).getInstance();
         //on data, use a generic way: search inside the environment for a name like the value-expression
         if (item != null) {
             String value = bean.getValueExpression().to(item);
@@ -2348,7 +2344,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 id = content;
                 description = ENV.translate(v.toString() + Messages.POSTFIX_TOOLTIP, true);
             } else {
-                BeanDefinition bv = v instanceof String ? BeanDefinition.getBeanDefinition((String)v) : Bean.getBean((Serializable) v);
+                BeanDefinition bv = v instanceof String ? BeanDefinition.getBeanDefinition((String)v) : Bean.getBean(v);
                 content = bv.toString();
                 id = bv.getId().toString();
                 description = bv.getPresentable().getDescription();

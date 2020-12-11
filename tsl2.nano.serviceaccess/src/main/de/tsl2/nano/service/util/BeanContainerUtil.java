@@ -663,11 +663,11 @@ public class BeanContainerUtil {
      * @param attributeNames attributes to synchronize. if no attributeName is given, all attributeNames of the entity
      *            will be synchronized.
      */
-    public static void synchronizeEmbeddedCompositeID(Serializable entity, String... attributeNames) {
+    public static void synchronizeEmbeddedCompositeID(Object entity, String... attributeNames) {
         /*
          * get the entities id to check, whether synchronization has to be done.
          */
-        Bean<Serializable> bean = Bean.getBean(entity);
+        Bean<?> bean = Bean.getBean(entity);
         Serializable id = (Serializable) bean.getId();
         // a composite key is not a standard type like String or Number
         if (id == null || BeanUtil.isStandardType(id)) {
@@ -700,7 +700,7 @@ public class BeanContainerUtil {
                     if (c != null && c.name().equals(jc.name())) {
                         valueObject = attribute.getValue(entity);
                         if (valueObject != null) {
-                            value = Bean.getBean((Serializable)valueObject).getId();
+                            value = Bean.getBean(valueObject).getId();
                         } else {
                             value = null;
                         }
