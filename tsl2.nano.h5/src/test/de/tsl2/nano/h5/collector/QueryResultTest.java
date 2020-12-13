@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.tsl2.nano.action.IAction;
@@ -20,7 +19,6 @@ import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.ENVTestPreparation;
-import de.tsl2.nano.execution.IPRunnable;
 import de.tsl2.nano.h5.expression.Query;
 import de.tsl2.nano.incubation.specification.Pool;
 
@@ -72,7 +70,7 @@ public class QueryResultTest implements ENVTestPreparation {
 	public void testQueryWithColumnNames() {
 		Pool.registerTypes(Query.class);
 		String title = "mytestquery";
-		QueryResult.createQueryResult(title, "select c.id, c.value from Charge c where c.value > ${testmaxvalue}");
+		QueryResult.createQueryResult(title, "select c.id, c.value\n from Charge c\n where c.value > ${testmaxvalue}");
 		
 		BeanDefinition.clearCache();
 		ENV.get(Pool.class).reset();
@@ -98,13 +96,19 @@ public class QueryResultTest implements ENVTestPreparation {
 		assertTrue(search.isEnabled());
 		
 		assertArrayEquals((Object[])testResult, (Object[])((List)search.activate()).get(0));
+
+		Query query = (Query) ENV.get(Pool.class).get(title);
+		assertEquals("testmaxvalue", query.getParameter().keySet().iterator().next());
+		assertEquals("select c.id, c.value\n from Charge c\n where c.value > :testmaxvalue", query.getQuery());
+		assertEquals("id", query.getColumnNames().get(0));
+		assertEquals("value", query.getColumnNames().get(1));
 	}
 
 	@Test
 	public void testQueryWithColumnAs() {
 		Pool.registerTypes(Query.class);
 		String title = "mytestquery";
-		QueryResult.createQueryResult(title, "select c.id as id1, c.value as value1 from Charge c where c.value > ${testmaxvalue}");
+		QueryResult.createQueryResult(title, "select c.id as id1,\n c.value as value1 \nfrom Charge c \nwhere c.value > ${testmaxvalue}");
 		
 		BeanDefinition.clearCache();
 		ENV.get(Pool.class).reset();
