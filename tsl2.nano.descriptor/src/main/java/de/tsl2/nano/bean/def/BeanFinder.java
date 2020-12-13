@@ -12,7 +12,6 @@ package de.tsl2.nano.bean.def;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -23,6 +22,7 @@ import de.tsl2.nano.bean.BeanFindParameters;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.util.operation.IRange;
@@ -169,8 +169,10 @@ public class BeanFinder<T, F> implements IBeanFinder<T, F>, Serializable {
                     noRangeBean = true;
                 } else {
                     F from = (F) BeanClass.createInstance(type);
+                    setNoConstraint(from);
                     Range.setPrimitiveMinValues(from);
                     F to = BeanUtil.clone(from);
+                    setNoConstraint(to);
                     Range.setPrimitiveMaxValues(to);
                     rangeBean = new Bean<IRange<F>>(new Range<F>(from, to));
                 }
@@ -181,6 +183,18 @@ public class BeanFinder<T, F> implements IBeanFinder<T, F>, Serializable {
             }
         }
         return rangeBean;
+    }
+
+    protected static void setNoConstraint(Object instance) {
+    	Bean<Object> bean = Bean.getBean(instance);
+        List<IAttribute> attributes = bean.getAttributes();
+        for (IAttribute a : attributes) {
+        	BeanValue attr = (BeanValue) a;
+        	Constraint c = Bean.copy(attr.getConstraint(), new Constraint());
+//        	c.setType(Serializable.class);
+        	c.setFormat(null);
+        	attr.setConstraint(c);
+        }
     }
 
     /**

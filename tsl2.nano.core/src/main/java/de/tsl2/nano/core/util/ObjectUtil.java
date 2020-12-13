@@ -336,9 +336,13 @@ public class ObjectUtil extends ByteUtil {
                     else if ((wrapperType.isInterface() || wrapperType.equals(Properties.class)) 
                             && Map.class.isAssignableFrom(wrapperType))
                         return (T) MapUtil.toMapType((Map)value, (Class<Map>)wrapperType);
-                    else if (hasValueOfMethod(wrapperType, value))
+                    else if (value instanceof String && Map.class.isAssignableFrom(wrapperType)
+                    		&& MapUtil.isJSON((String)value)) {
+						Map jsonMap = MapUtil.fromJSON((String)value);
+						return (T) MapUtil.toMapType(jsonMap, (Class<Map>)wrapperType);
+					} else if (hasValueOfMethod(wrapperType, value))
                     	return (T) BeanClass.call(wrapperType, "valueOf", false, value);
-                    else if (isInstanceable(wrapperType))
+                    else if (isInstanceable(wrapperType)/* && BeanClass.hasConstructor(wrapperType, value.getClass())*/)
                         //IMPROVE: what's about FormatUtil.parse() <-- ObjectUtil.wrap() is called in FormatUtil!
                         return BeanClass.createInstance(wrapperType, value);
                     else
@@ -396,7 +400,7 @@ public class ObjectUtil extends ByteUtil {
      */
     public static boolean hasToString(Class cls) {
         try {
-            if (cls.isInterface()) {
+            if (cls.isPrimitive() || cls.isInterface()) {
                 return false;
             }
             final Method method = cls.getMethod("toString", new Class[0]);

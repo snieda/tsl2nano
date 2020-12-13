@@ -1084,7 +1084,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         if (names.length > i) {
             String name = names[i];
             IPresentableColumn column = getAttribute(name).getColumnDefinition();
-            if (column != null && (column.getName().equals(name) || column.getIndex() == i)) {
+            //on maps with entries, we need a workaround through the column name compare
+            if (column != null && ((getClazz().isAssignableFrom(Entry.class) && column.getName().equals(name)) || column.getIndex() == i)) {
                 return column;
             }
         }

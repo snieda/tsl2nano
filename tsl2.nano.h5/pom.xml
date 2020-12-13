@@ -495,10 +495,23 @@
 		<dependency>
 		  <groupId>org.apache.lucene</groupId>
 		  <artifactId>lucene-core</artifactId>
-		  <version>7.1.0</version>
+		  <version>5.5.5</version>
 		<scope>test</scope>
 	</dependency>
-	  <dependency>
+	<dependency>
+		<!-- H2 1.4.199 seems not to be compatible with newer version of lucene (like 7.1.0) -->
+		<groupId>org.apache.lucene</groupId>
+		<artifactId>lucene-analyzers-common</artifactId>
+		<version>5.5.5</version>
+	  <scope>test</scope>
+  </dependency>
+		<dependency>
+		  <groupId>org.apache.lucene</groupId>
+		  <artifactId>lucene-queryparser</artifactId>
+		  <version>5.5.5</version>
+		<scope>test</scope>
+	</dependency>
+	<dependency>
 	    <groupId>com.github.stephenc.jcip</groupId>
 	    <artifactId>jcip-annotations</artifactId>
 	    <version>1.0-1</version>

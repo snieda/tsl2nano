@@ -27,15 +27,15 @@ import de.tsl2.nano.serviceaccess.ServiceFactory;
 @SuppressWarnings("rawtypes")
 @Singleton
 //@Startup
-public class JobScheduleServiceBean extends AbstractJobScheduleServiceBean<Class<ICRunnable>> implements
-        IJobScheduleLocalService<Class<ICRunnable>>, IJobScheduleService<Class<ICRunnable>> {
+public class JobScheduleServiceBean extends AbstractJobScheduleServiceBean<Class<? extends ICRunnable>> implements
+        IJobScheduleLocalService<Class<? extends ICRunnable>>, IJobScheduleService<Class<? extends ICRunnable>> {
 
     /**
      * {@inheritDoc}
      */
     @SuppressWarnings("unchecked")
     @Override
-    protected void run(Class<ICRunnable> runnable, Serializable context) {
+    protected void run(Class<? extends ICRunnable> runnable, Serializable context) {
         ICRunnable service = ServiceFactory.instance().getService(runnable);
         service.run(context);
     }

@@ -14,7 +14,6 @@ import static de.tsl2.nano.bean.def.IBeanCollector.MODE_ALL_SINGLE;
 import static de.tsl2.nano.bean.def.IPresentable.POSTFIX_SELECTOR;
 
 import java.io.File;
-import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.text.Format;
 import java.util.Arrays;
@@ -650,6 +649,10 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
     public boolean isSelectable() {
     	T v = getValue();
     	return (v != null && !ObjectUtil.isStandardType(v) && !ByteUtil.isByteStream(v.getClass())) || super.isSelectable();
+    }
+
+    public void setConstraint(Constraint<T> newConstraint) {
+    	this.constraint = newConstraint;
     }
     
 	public static int removeFromCache(Bean<?> bean) {

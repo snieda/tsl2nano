@@ -20,6 +20,7 @@ import org.simpleframework.xml.Transient;
 import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.bean.Context;
 import de.tsl2.nano.bean.def.ArrayValue;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.BeanCollector;
@@ -28,6 +29,7 @@ import de.tsl2.nano.bean.def.BeanFinder;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.h5.expression.Query;
 import de.tsl2.nano.incubation.specification.Pool;
@@ -114,7 +116,9 @@ public class QueryResult<COLLECTIONTYPE extends Collection<T>, T> extends BeanCo
         beanFinder = new BeanFinder() {
             @Override
             public Collection superGetData(Object fromFilter, Object toFilter, String...orderBy) {
-                Map<String, Object> context = new HashMap<String, Object>();
+                Map<String, Object> context = ConcurrentUtil.getCurrent(Context.class);
+                if (context == null)
+                	context = new HashMap<String, Object>();
                 if (fromFilter != null && toFilter != null) {
                     String[] names = query.getParameter().keySet().toArray(new String[0]);
                     context.putAll(BeanUtil.toValueMap(fromFilter, "from", false, names));

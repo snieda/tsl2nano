@@ -497,7 +497,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
         }
         Thread.currentThread().setContextClassLoader(sessionClassloader);
         Thread.currentThread().setUncaughtExceptionHandler(exceptionHandler);
-        ConcurrentUtil.setCurrent(getUserAuthorization(), beanContainer, beanConfigurator, nav);
+        ConcurrentUtil.setCurrent(getUserAuthorization(), beanContainer, beanConfigurator, nav, context);
     }
 
     /**

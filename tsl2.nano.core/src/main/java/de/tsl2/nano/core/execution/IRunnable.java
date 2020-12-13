@@ -20,6 +20,7 @@ package de.tsl2.nano.core.execution;
  * @author Thomas Schneider
  * @version $Revision$
  */
+@FunctionalInterface
 public interface IRunnable<RESULT, CONTEXT> {
     /**
      * starts the process

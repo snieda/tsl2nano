@@ -836,8 +836,12 @@ public class BeanClass<T> implements Serializable {
      * @return
      */
     public static boolean hasStringConstructor(Class<?> clazz) {
+    	return hasConstructor(clazz, String.class);
+    }
+
+    public static boolean hasConstructor(Class<?> clazz, Class<?> ...parmTypes) {
         try {
-            return clazz.getDeclaredConstructor(new Class[] { String.class }) != null;
+            return clazz.getDeclaredConstructor(parmTypes) != null;
         } catch (Exception e) {
             return false;
         }

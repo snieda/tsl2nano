@@ -3,15 +3,10 @@ package de.tsl2.nano.instrumentation;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.script.Bindings;
 import javax.script.ScriptException;
-
-import javassist.CtMethod;
-import javassist.bytecode.AttributeInfo;
 
 public class Script {
     String name;

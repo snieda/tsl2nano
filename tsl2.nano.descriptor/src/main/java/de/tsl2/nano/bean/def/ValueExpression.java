@@ -198,7 +198,7 @@ public class ValueExpression<TYPE> implements
             return (TYPE) ENV.get(GenericTypeMatcher.class).materialize(toValue);
         }
 
-        TYPE exampleBean = createExampleBean(toValue);
+        TYPE exampleBean = createExampleBean(toValue, isPersistable);
 
         if (isPersistable) {//check for unique!
             Collection<TYPE> beansByExample = BeanContainer.instance().getBeansByExample(exampleBean);

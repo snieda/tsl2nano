@@ -5343,14 +5343,17 @@ deploy:
 
 ## TODOs 11.12.2020
 
+* [v] REF: resolve vulnerabilities of github dependencies
+* [v] FEATURE: Configure Pool as RuleEngine?
+* [v] FEATURE: provide input on variables of any rule - or provide edit of session context
 * REF: change serialization of actions
-* REF: resolve vulnerabilities of github dependencies
 * test on openjdk to resolve build/test failure in github
    * ClassFinder: not as singleton but per thread (using Thread.current().getContextClassLoader())
    * printutiltest:11 nullpointer
-* quick-search on combined value expressions not found
-* search field should not be checked against constraint
-* Query attribute names sometimes with ', '
-* FEATURE: Configure Pool as RuleEngine?
-* FEATURE: provide input on variables of any rule - or provide edit of session context
-
+* [v] quick-search on combined value expressions not found
+   * [v] search field should not be checked against constraint
+* [v] Query attribute names sometimes with ', '
+* [v] on bean mapvalues the navigation does not delete a pop-ed item (e.g.: pool -> rulescript will be reused!)
+   * [v] mapvalue constaint type will be reused on wrong items (like Pool with type: WebsocketExceptionHandler) 
+* [ ] language / internationalization tests, current tests only working on de_DE
+* [v] lucene test (but @ignored in cause of collision with NanoH5Test)

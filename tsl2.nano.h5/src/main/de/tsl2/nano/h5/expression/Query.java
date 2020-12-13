@@ -135,7 +135,7 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>>, I
             operation = operation.replace("${", ":").replace("}", "");
             StringBuilder q = new StringBuilder(operation);
             while ((!Util.isEmpty(p = StringUtil.extract(q, SQL_PAR, "")))) {
-                parameter.put(p, null);
+                parameter.put(p.substring(1), null);
             }
         }
         return parameter;
@@ -162,8 +162,8 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>>, I
             select = select.replaceAll(SQL_FCT, "$1");
             StringBuilder q = new StringBuilder(select);
             while ((!Util.isEmpty(p = StringUtil.extract(q, SQL_COL, "", 0, 0)))) {
-                columnNames.add(p.contains(" as ") ? StringUtil.substring(p, " as ", null).trim() : StringUtil.substring(p, ".",
-                    null).trim());
+                columnNames.add(p.contains(" as ") ? StringUtil.substring(p, " as ", null).trim() : StringUtil.substring(StringUtil.substring(p, ",",
+                    null), ".", null, true).trim());
             }
             if (LOG.isDebugEnabled())
                 LOG.debug(Arrays.toString(columnNames.toArray()));

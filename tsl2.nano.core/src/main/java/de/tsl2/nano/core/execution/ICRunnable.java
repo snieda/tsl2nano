@@ -21,5 +21,6 @@ import java.io.Serializable;
  * @author Thomas Schneider
  * @version $Revision$
  */
+@FunctionalInterface
 public interface ICRunnable<CONTEXT extends Serializable> extends IRunnable<CONTEXT, CONTEXT> {
 }

@@ -186,10 +186,10 @@ public class BeanProxy<T> extends DelegationHandler<T> {
              * key = method-name. otherwise it is possible to store full method call
              * with arguments in the properties.
              */
-            final IAction<?> action = (IAction<?>) properties.get(method.getName());
-            if (action != null) {
-                result = action.activate();
-            } else {
+            result = properties.get(method.getName());
+            if (result instanceof IAction) {
+                result = ((IAction)result).activate();
+            } else if (result == null) {
                 result = properties.get(getMethodArgsId(method, args));
             }
             //auto-boxing - storing the default value in properties

@@ -212,6 +212,21 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     }
                 });
             }
+            //extensions of beancollector may be configured (the beancollector is defined through beandefinition!)
+            //there are a lot of exceptions, so we constraint it to a debug level
+            else if (LogFactory.isEnabled(LogFactory.DEBUG)
+            		&& bean instanceof BeanCollector && !BeanCollector.class.equals(bean.getClass())) {
+                appActions.add(new SecureAction(bean.getClass(),
+                    "configure",
+                    IAction.MODE_UNDEFINED,
+                    false,
+                    "icons/compose.png") {
+                    @Override
+                    public Object action() throws Exception {
+                        return Bean.getBean(bean);
+                    }
+                });
+            }
         }
         return appActions;
     }

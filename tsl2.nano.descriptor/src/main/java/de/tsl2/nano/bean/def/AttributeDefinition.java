@@ -987,6 +987,11 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     public void setValue(Object instance, T value) {
         if (secure != null)
             value = (T) secure.encrypt((String) value);
+        if (value instanceof String && !isMultiValue()) {
+			T fromVE = BeanDefinition.getBeanDefinition(getType()).getValueExpression().from((String)value);
+			if (fromVE != null && getType().isAssignableFrom(fromVE.getClass()))
+				value = fromVE;
+		}
         attribute.setValue(instance, value);
     }
 
@@ -1001,7 +1006,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
      * @param secure The secure to set.
      */
     public void setSecure(ISecure secure) {
-        if (String.class.isAssignableFrom(getType()))
+        if (!String.class.isAssignableFrom(getType()))
             throw new IllegalStateException("encrypted fields must be of type String.class");
         this.secure = secure;
     }

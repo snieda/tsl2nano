@@ -232,7 +232,7 @@ public class MapUtil {
     }
     
     public static Map fromJSON(String json) {
-        Map map = new HashMap<>();
+        Map map = new LinkedHashMap<>();
         String[] split = json.substring(1, json.length() - 1).split("[\"]");
         for (int i = 0; i < split.length-2; i+=4) {
             map.put(split[i+1], split[i+3]);
@@ -240,6 +240,9 @@ public class MapUtil {
         return map;
     }
 
+    public static boolean isJSON(String txt) {
+    	return txt.matches("\\{((\\s*[\"]?\\w+[\"]?\\s*)[:](\\s*[\"]?.*[\"]?\\s*)[,]?)*\\}");
+    }
     /**
      * finds all values for a given key set
      * 

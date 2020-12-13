@@ -770,10 +770,16 @@ public class Bean<T> extends BeanDefinition<T> {
             Arrays.sort(bean.getAttributeNames()); // workaround: sort to key, value
             bean.setAttributeFilter(bean.getAttributeNames());
             Entry entry = (Entry) instanceOrName;
+            if (entry.getKey() != null) {
+            	bean.setName(entry.getKey().toString());
+            }
+            BeanValue beanValue = (BeanValue) bean.getAttribute("value");
+			IConstraint c = beanValue.getConstraint();
+            c.setFormat(null);
             if (entry.getValue() != null) {
-                IConstraint c = bean.getAttribute("value").getConstraint();
-                c.setFormat(null);
-                c.setType(BeanClass.getDefiningClass(entry.getValue().getClass()));
+                //we should only set a specific type through its current value on a new copy, otherwise all Beans on Entry would have the same attribute definitions!
+            	beanValue.setConstraint(copy(c, new Constraint()));
+            	beanValue.getConstraint().setType(entry.getValue().getClass());
             }
         } else {
             Class type = instanceOrName.getClass();

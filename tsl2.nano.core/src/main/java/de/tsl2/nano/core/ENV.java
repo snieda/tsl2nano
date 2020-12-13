@@ -622,18 +622,7 @@ public class ENV implements Serializable {
      * @return formatted object
      */
     public static String format(Object obj) {
-        Object formatter = get(KEY_DEFAULT_FORMAT, DefaultFormat.class.getName());
-        if (!(formatter instanceof Format)) {
-            if (formatter instanceof String) {
-                formatter = BeanClass.createBeanClass((String) formatter).createInstance();
-            } else {
-                throw new IllegalArgumentException(
-                    "environments default formatter must be an instance of java.text.Format but is: "
-                        + formatter.getClass());
-            }
-            self().setProperty(KEY_DEFAULT_FORMAT, formatter);
-        }
-        return ((Format) formatter).format(obj);
+        return ((Format) services().getOrDefault(Format.class, new DefaultFormat())).format(obj);
     }
 
     /**

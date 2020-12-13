@@ -18,7 +18,7 @@ import de.tsl2.nano.persistence.Persistence;
 public class H2LuceneIntegration {
     private Persistence persistence;
 
-    private static final String INIT_LUCENE = 
+    static final String INIT_LUCENE = 
     "CREATE ALIAS IF NOT EXISTS FTL_INIT FOR \"org.h2.fulltext.FullTextLucene.init\";" +
     "CALL FTL_INIT();";
     
@@ -63,6 +63,8 @@ public class H2LuceneIntegration {
         String actTableStmt;
         int i = 0;
         for (String t : tables) {
+        	if (t == null)
+        		continue;
             actTableStmt = StringUtil.insertProperties(stmt, MapUtil.asMap("table", t));
             i += executeStmt(actTableStmt);
         }

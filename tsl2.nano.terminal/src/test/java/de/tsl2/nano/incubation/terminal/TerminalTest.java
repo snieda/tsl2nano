@@ -286,6 +286,7 @@ public class TerminalTest implements ENVTestPreparation {
   public void testTerminalAdmin() throws Exception {
       //admin console
       //TODO: test
-//      SIShell.main(new String[] { SIShell.DEFAULT_NAME, TerminalAdmin.ADMIN });
+      System.setIn(SystemUtil.createBatchStream("5", ":quit"));
+      SIShell.main(new String[] { SIShell.DEFAULT_NAME, TerminalAdmin.ADMIN });
   }
 }
