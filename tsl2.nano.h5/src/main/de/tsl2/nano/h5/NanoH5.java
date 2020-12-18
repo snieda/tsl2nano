@@ -230,6 +230,9 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
                 LOG.error(e1);
             }
             ConcurrentUtil.sleep(3000);
+            LOG.info("=======================================");
+            LOG.info("NANOH5 SHUTDOWN -> VM System.exit(-1) !");
+            LOG.info("=======================================");
             System.exit(-1);
         }
     }
@@ -243,7 +246,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         });
 	}
 
-    private void enableSSL(boolean ssl) throws IOException {
+    protected void enableSSL(boolean ssl) throws IOException {
         if (ssl) {
             String keyStore = ENV.get("app.ssl.keystore.file", "nanoh5.pks");
             if (keyStore.startsWith("nanoh5")) {

@@ -43,7 +43,7 @@ public class XmlGeneratorTest implements ENVTestPreparation {
     @Ignore("howto convert json to xml....")
     @Test
     public void testXmlGenerationFromYAML() throws Exception {
-        JSONObject json = convertToJson(BASE_DIR_GENERATOR + "src/test/de/tsl2/nano/codegen/petstore-v3.0.yaml");
+        JSONObject json = convertToJson(BASE_DIR_GENERATOR + "src/test/java/de/tsl2/nano/codegen/petstore-v3.0.yaml");
         String xml = XML.toString(json);
 
         String file = "tsl2.nano.common/target/petstore-v3.0.xml";

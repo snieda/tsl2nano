@@ -14,6 +14,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.Socket;
 import java.net.URL;
@@ -49,12 +50,14 @@ import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
+import de.tsl2.nano.bean.def.IPresentableColumn;
 import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.bean.def.SStatus;
 import de.tsl2.nano.bean.def.StatusInfo;
 import de.tsl2.nano.codegen.ACodeGenerator;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.Main;
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.classloader.NestedJarClassLoader;
 import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -126,6 +129,8 @@ public class NanoH5Test implements ENVTestPreparation {
     @Test
     public void testMyApp() throws Exception {
         setENVProperties();
+    	// deep scheint mit andreren Tests zu kollidieren....
+        System.setProperty("nanoh5test.run.deep", "false");
         createAndTest(new MyApp(getServiceURL(), null) {
             @Override
             public void start() {
@@ -229,8 +234,9 @@ public class NanoH5Test implements ENVTestPreparation {
                 //trigger all possible rulecovers
                 Bean.getBean(attr.getConstraint()).toValueMap(null);
                 Bean.getBean(attr.getPresentation()).toValueMap(null);
-                if (attr.getColumnDefinition() != null)
+                if (attr.getColumnDefinition() != null) {
                     Bean.getBean(attr.getColumnDefinition()).toValueMap(null, false, false, false, "value");
+                }
             }
             ((Html5Presentation)bean.getPresentationHelper()).build(session, bean, "test", true, session.getNavigationStack());
     		if (!isDeepTest()) {
@@ -242,6 +248,21 @@ public class NanoH5Test implements ENVTestPreparation {
 
         }
 
+        //smoke test on loading virtuals
+        Charge charge = new Charge();
+        for(BeanDefinition<?> beanDef: BeanDefinition.loadVirtualDefinitions()) {
+        	assertTrue(beanDef.toString(), beanDef instanceof BeanCollector || beanDef instanceof CSheet);
+        	if (beanDef instanceof Bean)
+        		continue;
+        	BeanCollector<List<Charge>, Charge> beanCollector = (BeanCollector) beanDef;
+//        	beanDef.onActivation(new HashMap());
+        	if (beanCollector.getSearchAction() != null)
+        		beanCollector.getSearchAction().activate();
+        	for (IPresentableColumn col : beanCollector.getColumnDefinitions()) {
+            	beanCollector.getColumnText(charge, col.getIndex());
+        	}
+        }
+        
         // check encoding (only if german!)
          assertTrue(!Locale.getDefault().equals(Locale.GERMANY) || html.contains("S&amp;chlie&szlig"));
          assertTrue("possible encoding problems found in html-output", !html.contains("ï»¿"));
@@ -389,7 +410,7 @@ public class NanoH5Test implements ENVTestPreparation {
     @Test
     public void testTimesheet() throws Exception {
     	// deep scheint mit andreren Tests zu kollidieren....
-//        System.setProperty("nanoh5test.run.deep", "true");
+        System.setProperty("nanoh5test.run.deep", "false");
         Properties mapper = new Properties();
         createAndTest(new Timesheet(getServiceURL(), null) {
             @Override
@@ -398,6 +419,11 @@ public class NanoH5Test implements ENVTestPreparation {
 	            	createStartPage();
 	                extractJarScripts();
 	                extractDefaultResources();
+	                try {
+						enableSSL(true);
+					} catch (IOException e) {
+						ManagedException.forward(e);
+					}
                 }
                 createBeanCollectors(null);
             }

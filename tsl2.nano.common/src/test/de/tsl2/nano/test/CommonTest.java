@@ -69,6 +69,7 @@ public class CommonTest implements ENVTestPreparation {
     @Test
     public void testScriptUtil() throws Exception {
         final Properties p = new Properties();
+        new File(BASE_DIR_COMMON + "target/lib").getAbsoluteFile().mkdirs();
         //par is not used
         p.put("tsl2nano.test.parameter", "test");
         p.put("client.lib.dir", "lib");
@@ -80,8 +81,8 @@ public class CommonTest implements ENVTestPreparation {
         }
 
         //works only on windows
-        assertTrue(ScriptUtil.execute("cmd", "/C", "echo", "hello").exitValue() == 0);
-        assertTrue(ScriptUtil.execute("cmd", "/C", System.getProperty("user.dir") + "/" + BASE_DIR_COMMON + "runsh.bat").exitValue() == 0);
+        assertTrue(ScriptUtil.executeShell(new File("./").getAbsoluteFile(), "echo", "hello").exitValue() == 0);
+        assertTrue(ScriptUtil.execute(BASE_DIR_COMMON + "src/resources/runsh.sh").exitValue() == 0);
         //works only on windows
 //        ScriptUtil.execute("c:/Program Files (x86)/Adobe/Reader 10.0/Reader/AcroRd32.exe", "c:/eigen/SVN-Eclipse-Einrichtung.pdf");
 //        ScriptUtil.executeRegisteredWindowsPrg("c:/eigen/SVN-Eclipse-Einrichtung.pdf");

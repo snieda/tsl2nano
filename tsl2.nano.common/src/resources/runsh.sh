@@ -11,10 +11,11 @@ echo "  runsh.sh sh.unjar"
 echo "  runsh.sh -prop my.properties sh.xml.xsl"
 echo "=========================================================================="
 
-if [ exist ant.sh ] then
-	set ANTRUNNER=ant.sh
+if [ -f ant.sh ] 
+then set ANTRUNNER=ant.sh
 else
-	if [ "$ANT_HOME" == "" ] then
+	if [ "$ANT_HOME" == "" ] 
+	then
 		set ANTRUNNER=java -jar ant-launcher.jar
 	else
 		set ANTRUNNER=ant.sh
@@ -30,16 +31,16 @@ if [ "$1" == "-properties" ] then goto LOAD_PROPERTIES fi
 if [ "$1" == "-propertyfile" ] then goto LOAD_PROPERTIES fi
 
 echo on
-call $ANTRUNNER -buildfile shell.xml $1 $2 $3 $4 $5 $6
+$ANTRUNNER -buildfile shell.xml $1 $2 $3 $4 $5 $6
 goto END
 
 :LOAD_PROPERTIES
-call $ANTRUNNER -propertyfile $1 -buildfile shell.xml $2 $3 $4 $5 $6
+$ANTRUNNER -propertyfile $1 -buildfile shell.xml $2 $3 $4 $5 $6
 goto END
 
 :HElP
 call $ANTRUNNER -diagnostics
 REM call $ANTRUNNER -help
 ant.sh -projecthelp -buildfile shell.xml
-call $ANTRUNNER -buildfile shell.xml man $2 $3 $4 $5 $6
+$ANTRUNNER -buildfile shell.xml man $2 $3 $4 $5 $6
 :END
