@@ -692,10 +692,10 @@ public class HtmlUtil {
     }
     
     public static String cssID(String id) {
-        return id.replace('.', CSS_ID_SEPARATOR);
+        return id.matches("[.]\\w+.*") ? id.replace('.', CSS_ID_SEPARATOR) : id;
     }
     public static String beanID(String id) {
-        return id != null ? id.replace(CSS_ID_SEPARATOR, '.') : id;
+        return id != null && id.matches("[$]\\w+.*") ? id.replace(CSS_ID_SEPARATOR, '.') : id;
     }
 
     /**

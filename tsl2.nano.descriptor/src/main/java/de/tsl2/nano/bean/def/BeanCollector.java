@@ -1080,6 +1080,13 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
 
     private IPresentableColumn getColumn(int i) {
         //try the fastest - all indexes as default
+        Collection<IPresentableColumn> colDefs = getColumnDefinitions();
+        for (IPresentableColumn c : colDefs) {
+            if (c.getIndex() == i) {
+                return c;
+            }
+        }
+        //if no columnindexes are defined, we go through the names
         String[] names = getAttributeNames();
         if (names.length > i) {
             String name = names[i];
@@ -1087,12 +1094,6 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             //on maps with entries, we need a workaround through the column name compare
             if (column != null && ((getClazz().isAssignableFrom(Entry.class) && column.getName().equals(name)) || column.getIndex() == i)) {
                 return column;
-            }
-        }
-        Collection<IPresentableColumn> colDefs = getColumnDefinitions();
-        for (IPresentableColumn c : colDefs) {
-            if (c.getIndex() == i) {
-                return c;
             }
         }
         return null;

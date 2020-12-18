@@ -47,7 +47,7 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>>, I
     private static final Log LOG = LogFactory.getLog(Query.class);
     
     /** full column expression for one column */
-    private static final String SQL_COL = "(^|\\,)\\s*([^,]+)(\\s+as\\s+([\\w]+))?";
+    private static final String SQL_COL = "(^|\\,)\\s*([^,]+)(\\s+[Aa][Ss]\\s+(\\w+))?";
     /** sql parameter */
     private static final String SQL_PAR = "[:]([\\w._-]+)";
     /** sql function */
@@ -55,7 +55,7 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>>, I
     /** column name */
     private static final String SQL_NAM = ".*(\\w+)";
     /** string literal */
-    private static final String SQL_LIT = "['][^']*[']";
+    private static final String SQL_LIT = "['\"][^'\"]*['\"]";
     /** one or more concatenations */
     private static final String SQL_CON = "[^,]+[|]{2}";
     /** column path (if schema, etc. where given) */
@@ -117,15 +117,20 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>>, I
         return name;
     }
 
-    /**
-     * getQuery
-     * 
-     * @return query
-     */
+    public void setName(String name) {
+		this.name = name;
+	}
+    
     public String getQuery() {
         return operation;
     }
 
+    public void setQuery(String query) {
+    	operation = query;
+    	columnNames = null;
+    	parameter = null;
+	}
+    
     @Override
     public Map<String, ? extends Serializable> getParameter() {
         if (parameter == null) {
@@ -154,7 +159,7 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>>, I
             columnNames = new ArrayList<String>();
             String p;
             //get the full selection header and eliminate literals, functions and concatenations
-            String select = StringUtil.substring(operation, "select", "from");
+            String select = StringUtil.substring(operation, "select ", "from ");
             select = select.replaceAll(SQL_LIT, "");
             select = select.replaceAll(SQL_PAT, "");
             select = select.replaceAll(SQL_CON, "");
@@ -162,8 +167,10 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>>, I
             select = select.replaceAll(SQL_FCT, "$1");
             StringBuilder q = new StringBuilder(select);
             while ((!Util.isEmpty(p = StringUtil.extract(q, SQL_COL, "", 0, 0)))) {
-                columnNames.add(p.contains(" as ") ? StringUtil.substring(p, " as ", null).trim() : StringUtil.substring(StringUtil.substring(p, ",",
-                    null), ".", null, true).trim());
+                String as = StringUtil.extract(p, "\\s+[Aa][Ss]\\s+");
+                columnNames.add(!Util.isEmpty(as) && p.contains(as) 
+                	? StringUtil.substring(p, as, null).trim() 
+                		: StringUtil.substring(StringUtil.substring(p, ",", null), ".", null, true).trim());
             }
             if (LOG.isDebugEnabled())
                 LOG.debug(Arrays.toString(columnNames.toArray()));

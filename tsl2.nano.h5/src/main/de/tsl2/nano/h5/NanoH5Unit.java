@@ -174,7 +174,7 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
         try {
             HtmlButton htmlButton = (HtmlButton) page.getElementById(buttonName);
             if (htmlButton == null) {
-                throw new IllegalArgumentException("button " + buttonName + " not found! page: " + page.asXml());
+                throw new IllegalArgumentException("button " + buttonName + " not found! page:\n\t" + page.asXml());
             }
             page = htmlButton.click();
             page.getWebClient().waitForBackgroundJavaScript(1000);

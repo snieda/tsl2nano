@@ -2,21 +2,16 @@ package de.tsl2.nano.h5;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import org.h2.tools.Server;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
-import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.persistence.DatabaseTool;
 import de.tsl2.nano.persistence.Persistence;
@@ -32,16 +27,17 @@ public class H2LuceneIntegrationTest implements ENVTestPreparation {
         final String BASE_DIR = ENVTestPreparation.setUp("h5", false);
         
         persistence = new Persistence();
-        persistence.setConnectionUrl("jdbc:h2:tcp://localhost:9099/PUBLIC");
+//        persistence.setConnectionUrl("jdbc:h2:tcp://localhost:9099/PUBLIC");
+        persistence.setConnectionUrl("jdbc:h2:./h2lucene-test");
         databaseTool = new DatabaseTool(persistence);
-        databaseTool.runDBServer();
+//        databaseTool.runDBServer();
         createTestDatabase();
 //        BeanContainerUtil.initGenericServices(Thread.currentThread().getContextClassLoader());
     }
     
     @After
     public void tearDown() throws SQLException {
-        databaseTool.shutdownDatabase(); //don't shutdown the server -> that would  shutdown all instances of other tests
+//        databaseTool.shutdownDatabase(); //don't shutdown the server -> that would  shutdown all instances of other tests
 //      ENVTestPreparation.tearDown();
     }
     
@@ -53,7 +49,7 @@ public class H2LuceneIntegrationTest implements ENVTestPreparation {
     }
 
     @Test
-    @Ignore("there are collisions with other tests like NanoH5Test")
+//    @Ignore("there are collisions with other tests like NanoH5Test")
     public void testLuceneSearch() {
         H2LuceneIntegration h2Luc = new H2LuceneIntegration(persistence) {
             Integer executeStmt(String stmt) {

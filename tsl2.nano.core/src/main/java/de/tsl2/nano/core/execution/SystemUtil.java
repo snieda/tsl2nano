@@ -194,6 +194,7 @@ public class SystemUtil {
                 + "  io.tmp: ${java.io.tmpdir}\n"
                 + "  os    : ${os.name}, ${os.version} ${sun.os.patch.level} ${os.arch}\n"
                 + "  system: ${sun.cpu.isalist} ${sun.arch.data.model} x${processors}\n"
+                + "  desk  : ${sun.desktop} ${java.awt.graphicsenv}"
                 + "  net-ip: ${inetadress.myip} (host-name: ${inetadress.hostname})\n";
         Properties p = new Properties();
         p.putAll(System.getProperties());

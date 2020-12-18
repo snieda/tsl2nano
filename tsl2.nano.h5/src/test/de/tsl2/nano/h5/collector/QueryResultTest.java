@@ -27,13 +27,13 @@ public class QueryResultTest implements ENVTestPreparation {
 
 	@Before
 	public void setUpBefore() throws Exception {
-		ENVTestPreparation.setUp("h5", true);
+		ENVTestPreparation.setUp("h5", false);
 	}
 
 	@Test
 	public void testSimpleQuery() {
 		Pool.registerTypes(Query.class);
-		String title = "mytestquery";
+		String title = "mytestquery1";
 		QueryResult.createQueryResult(title, "select * from Charge c where c.value > ${testmaxvalue}");
 		
 		BeanDefinition.clearCache();
@@ -69,7 +69,7 @@ public class QueryResultTest implements ENVTestPreparation {
 	@Test
 	public void testQueryWithColumnNames() {
 		Pool.registerTypes(Query.class);
-		String title = "mytestquery";
+		String title = "mytestquery2";
 		QueryResult.createQueryResult(title, "select c.id, c.value\n from Charge c\n where c.value > ${testmaxvalue}");
 		
 		BeanDefinition.clearCache();
@@ -107,7 +107,7 @@ public class QueryResultTest implements ENVTestPreparation {
 	@Test
 	public void testQueryWithColumnAs() {
 		Pool.registerTypes(Query.class);
-		String title = "mytestquery";
+		String title = "mytestquery3";
 		QueryResult.createQueryResult(title, "select c.id as id1,\n c.value as value1 \nfrom Charge c \nwhere c.value > ${testmaxvalue}");
 		
 		BeanDefinition.clearCache();

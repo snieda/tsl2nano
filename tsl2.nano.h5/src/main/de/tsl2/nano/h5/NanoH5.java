@@ -1317,7 +1317,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
 			ENV.persist(ENV.get(IAuthorization.class)); //TODO: that's only the current user!
 		ENV.persist(Persistence.current());
 		Collection<Class> beantypes = (Collection<Class>) ENV.get("service.loadedBeanTypes");
-		if (beantypes != null) {
+		if (!Util.isEmpty(beantypes) && beantypes.iterator().next() instanceof Class) { //sometimes Collection<String>...
 			for (Class c: beantypes) {
 				BeanDefinition.getBeanDefinition(c).saveDefinition();
 			}

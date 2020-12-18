@@ -294,6 +294,10 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
         return operationContent;
     }
 
+    public void setName(String name) {
+    	this.name = name;
+    }
+    
     public void setOperation(String operation) {
         this.operation = operation;
         operationContent = null;

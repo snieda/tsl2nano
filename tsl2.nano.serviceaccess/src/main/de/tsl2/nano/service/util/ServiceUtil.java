@@ -894,7 +894,7 @@ public class ServiceUtil {
      * @return true, if query contains standardized name parameters like :par1.
      */
     public static final boolean useNamedParameters(String query) {
-        return !query.contains("?") || query.contains(":par1");
+        return !query.contains("?") || query.matches("\\s+[:]\\w+\\s+");
     }
 
     /**

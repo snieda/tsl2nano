@@ -935,9 +935,24 @@ nano.h5 will try to download and add the script libraries to the classpath.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 <query name="personen" nativeQuery="false">
-   <query><![CDATA[select p from Person p]]></query>
+   <operation><![CDATA[select p from Person p]]></operation>
 </query>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+...or with aliases and variables:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<query name="testselect" nativeQuery="true">
+   <operation><![CDATA[select c.party as PartyId, c.fromDate as Date, c.value as Value
+from Charge c
+where c.value > :testselectmax]]></operation>
+   <parameter name="testselectmax">
+      <type/>
+   </parameter>
+</query>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+the parameter 'testselectmax' may be a variable defined by the current session context.
+the session context is editable through the menu: session -> context -> ...
 
 ### Example for an action, starting an ant-script
 
@@ -1315,11 +1330,11 @@ where the _sumvalue_ expression is defined inside the specifications with:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 <query name="sumvalue" nativeQuery="false">
-   <query><![CDATA[select sum(value) as Gesamt from Charge where party.name = '${party.name}' ]]></query>
+   <operation><![CDATA[select sum(value) as Gesamt from Charge where party.name = '${party.name}' ]]></operation>
 </query>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-the variable _party.name_ must be defined by the user before while selecting (see action _memorize_) a party to use.
+the variable _party.name_ must be defined by the user before while selecting (see action _memorize_ or _session_ -> _context_) a party to use.
 
 #### direct queries through _QueryResult_
 

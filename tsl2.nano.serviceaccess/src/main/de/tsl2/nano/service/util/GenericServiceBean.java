@@ -661,13 +661,22 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
         query = ServiceUtil.setHints(query, hints);
 
         if (args != null && args.length > 0) {
+        	boolean mappedParameter = false;
             if (args[0] instanceof Map) { //<- Linkedhashmap to be ordered. TODO: is that the right place?
-                args = ((Map)args[0]).values().toArray();
+            	if (ServiceUtil.useNamedParameters(queryString)) {
+            		mappedParameter = true;
+            		final Query fquery = query;
+            		((Map<String, Object>)args[0]).forEach( (k, v) -> fquery.setParameter(k, v));
+            	} else {
+            		args = ((Map)args[0]).values().toArray();
+            	}
             }
-            if (ServiceUtil.useNamedParameters(queryString)) {
-                query = ServiceUtil.setNamedParameters(query, args);
-            } else {
-                query = ServiceUtil.setParameters(query, args);
+            if (!mappedParameter) {
+	            if (ServiceUtil.useNamedParameters(queryString)) {
+	                query = ServiceUtil.setNamedParameters(query, args);
+	            } else {
+	                query = ServiceUtil.setParameters(query, args);
+	            }
             }
         }
         logTrace(query);

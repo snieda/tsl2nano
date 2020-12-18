@@ -44,7 +44,7 @@ public class AnnotationExtensionTest implements ENVTestPreparation {
     
     @AfterClass
     public static void tearDown() {
-        ENVTestPreparation.tearDown();
+//        ENVTestPreparation.tearDown();
     }
 
     @Test
