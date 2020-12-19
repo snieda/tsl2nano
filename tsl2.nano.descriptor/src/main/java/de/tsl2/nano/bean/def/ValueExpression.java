@@ -101,9 +101,6 @@ public class ValueExpression<TYPE> implements
     /** true, if at least one attribute were found in expression */
     transient boolean hasArguments;
 
-    /** should be true, if {@link #type} is persistable (see {@link BeanContainer#isPersistable(Class)} */
-    transient boolean isPersistable = false;
-
     transient Comparator<TYPE> comparator;
 
     /**
@@ -140,7 +137,6 @@ public class ValueExpression<TYPE> implements
      */
     private void init(String expression, Class<TYPE> type) {
         this.expression = expression;
-        isPersistable = type != null && BeanContainer.isInitialized() && BeanContainer.instance().isPersistable(type);
         isMessageFormat = !expression.startsWith(PREFIX_PRINTF_FORMAT);
         if (isMessageFormat()) {
             //ok, thats not 'hinreichend'
@@ -198,6 +194,7 @@ public class ValueExpression<TYPE> implements
             return (TYPE) ENV.get(GenericTypeMatcher.class).materialize(toValue);
         }
 
+        boolean isPersistable = type != null && BeanContainer.isInitialized() && BeanContainer.instance().isPersistable(type);
         TYPE exampleBean = createExampleBean(toValue, isPersistable);
 
         if (isPersistable) {//check for unique!
