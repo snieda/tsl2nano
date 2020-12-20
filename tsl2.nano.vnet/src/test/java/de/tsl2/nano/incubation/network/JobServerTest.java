@@ -19,7 +19,7 @@ public class JobServerTest {
 
     @BeforeClass
     public static void setUp() {
-    	ENVTestPreparation.setUp("core", false);
+    	ENVTestPreparation.setUp("vnet", false);
     }
 
     @AfterClass

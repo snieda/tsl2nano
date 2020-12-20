@@ -23,7 +23,7 @@ public interface ENVTestPreparation {
 
 	static String setUp() {
 		//baseDir path is absolute!
-		return setUp(true);
+		return setUp(false);
 	}
 	
 	static String setUp(boolean deleteExistingEnvironment) {
@@ -39,7 +39,7 @@ public interface ENVTestPreparation {
 	}
 	static String setUp(String moduleShort, boolean strict, boolean deleteExistingEnvironment) {
 		//ATTENTION: here the BASE_DIR path is relative!
-		return setUp(BASE_DIR, moduleShort, TEST_DIR, strict, deleteExistingEnvironment);
+		return setUp(BASE_DIR, moduleShort, TEST_DIR + System.currentTimeMillis() + "/", strict, deleteExistingEnvironment);
 	}
 	
 	static String setUp(String baseDir, String moduleShort, String envDir, boolean strict, boolean deleteExistingEnvironment) {

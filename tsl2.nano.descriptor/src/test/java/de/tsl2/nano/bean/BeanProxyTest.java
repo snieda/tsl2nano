@@ -12,11 +12,11 @@ import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.util.test.TypeBean;
 
-public class BeanProxyTest {
+public class BeanProxyTest implements ENVTestPreparation {
 
 	@Before
 	public void setUp() {
-		ENVTestPreparation.setUp("descriptor", true);
+		ENVTestPreparation.super.setUp("descriptor");
 	}
 	@Test
 	public void testPersistingBeanProxy() {

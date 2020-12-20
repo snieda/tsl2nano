@@ -27,7 +27,7 @@ public class QueryResultTest implements ENVTestPreparation {
 
 	@Before
 	public void setUpBefore() throws Exception {
-		ENVTestPreparation.setUp("h5", false);
+		setUp("h5");
 	}
 
 	@Test

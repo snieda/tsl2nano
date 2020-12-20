@@ -11,11 +11,11 @@ import org.junit.Test;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 
-public class GeneratorUtilityTest {
+public class GeneratorUtilityTest implements ENVTestPreparation {
 
 	@Before
 	public void setUp() {
-		ENVTestPreparation.setUp("generator", true);
+		ENVTestPreparation.super.setUp("generator");
 	}
     @Test
     public void testObjectCreation() {

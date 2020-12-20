@@ -292,7 +292,7 @@ public class ENV implements Serializable {
         addService(layer);
         addService(ClassLoader.class, Util.getContextClassLoader());
 
-        self.properties.put(KEY_CONFIG_RELPATH, dir + "/");
+        self.properties.put(KEY_CONFIG_RELPATH, dir + (dir.endsWith("/") ? "" : "/"));
         self.properties.put(KEY_CONFIG_PATH, new File(dir).getAbsolutePath().replace("\\", "/") + "/");
         new File(self.getTempPath()).mkdir();
 
@@ -717,7 +717,7 @@ public class ENV implements Serializable {
 
     private static String cleanpath(String name) {
         name = StringUtil.substring(name, null, getFileExtension());
-        return name.contains(getName().toLowerCase()) || FileUtil.isAbsolute(name) ? name : getConfigPath() + name;
+        return name.toLowerCase().contains(getName().toLowerCase()) || FileUtil.isAbsolute(name) ? name : getConfigPath() + name;
     }
 
     /**

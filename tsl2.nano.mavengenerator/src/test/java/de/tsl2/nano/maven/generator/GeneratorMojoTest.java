@@ -15,11 +15,11 @@ import org.junit.Test;
 
 import de.tsl2.nano.core.util.ENVTestPreparation;
 
-public class GeneratorMojoTest extends AbstractMojoTestCase {
+public class GeneratorMojoTest extends AbstractMojoTestCase implements ENVTestPreparation {
 
 	@Before
 	public void setUp() throws Exception {
-		ENVTestPreparation.setUp();
+		ENVTestPreparation.super.setUp("mavengenerator");
 		// required for mojo lookups to work
 		super.setUp();
 	}

@@ -24,7 +24,7 @@ public class H2LuceneIntegrationTest implements ENVTestPreparation {
     
     @Before
     public void setUp() throws SQLException {
-        final String BASE_DIR = ENVTestPreparation.setUp("h5", false);
+        final String BASE_DIR = ENVTestPreparation.super.setUp("h5");
         
         persistence = new Persistence();
 //        persistence.setConnectionUrl("jdbc:h2:tcp://localhost:9099/PUBLIC");

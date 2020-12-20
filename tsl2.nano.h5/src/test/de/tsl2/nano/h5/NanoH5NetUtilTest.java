@@ -32,7 +32,7 @@ public class NanoH5NetUtilTest implements ENVTestPreparation {
 
 	@Before
 	public void setUp() {
-		ENVTestPreparation.setUp();
+		ENVTestPreparation.super.setUp("h5");
 	}
 	
 	@Test

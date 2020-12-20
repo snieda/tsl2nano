@@ -9,11 +9,11 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 
-public class HistorizeTest {
+public class HistorizeTest implements ENVTestPreparation {
 
 	@Before
 	public void setUp() {
-		ENVTestPreparation.setUp("datastructure", true);
+		ENVTestPreparation.super.setUp("datastructure");
 	}
     @Test
     public void testHistorize() throws Exception {

@@ -48,7 +48,7 @@ public class EntityReplicationTest implements ENVTestPreparation {
 	
 	@Before
 	public void setUp() throws Exception {
-		setUp("replication");
+		ENVTestPreparation.super.setUp("replication");
 		H2Util.startH2Datbase();
         mockupEMCreation();
 	}

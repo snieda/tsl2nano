@@ -18,7 +18,7 @@ public class MarkdownLogTest implements ENVTestPreparation{
 
 	@Before
 	public void setUp() {
-		ENVTestPreparation.setUp();
+		ENVTestPreparation.super.setUp("common");
 	}
 	
 	@Test

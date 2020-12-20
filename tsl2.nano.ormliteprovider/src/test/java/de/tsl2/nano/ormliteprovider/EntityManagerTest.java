@@ -18,7 +18,7 @@ public class EntityManagerTest implements ENVTestPreparation {
 
 	@Before
 	public void setUp() {
-		ENVTestPreparation.setUp("ormliteprovider", true);
+		ENVTestPreparation.super.setUp("ormliteprovider");
 		
 		//create a h2 datbase with the table for our test: Address
 	    EntityManagerFactory factory = Persistence.createEntityManagerFactory("test");
