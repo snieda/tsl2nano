@@ -207,7 +207,10 @@ public class PrintUtil {
         //seems that not all printers provide their supported docFlavors
         PrintService ps = getPrintService(printerName, null/*docFlavor*/, das);
         if (stream == null) {
-            logInfo(null, das, ps);
+        	if (ps != null)
+        		logInfo(null, das, ps);
+        	else
+        		LOG.info("no printer-service available!");
             return null;
         }
 
