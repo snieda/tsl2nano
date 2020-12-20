@@ -30,17 +30,12 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.persistence.EntityManager;
-import javax.ws.rs.Path;
 
 import org.anonymous.project.Address;
 import org.anonymous.project.Charge;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-
-import com.sun.jersey.api.container.httpserver.HttpServerFactory;
-import com.sun.net.httpserver.HttpServer;
 
 import de.tsl2.nano.action.IStatus;
 import de.tsl2.nano.bean.BeanContainer;
@@ -52,8 +47,6 @@ import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.IPresentableColumn;
 import de.tsl2.nano.bean.def.IValueDefinition;
-import de.tsl2.nano.bean.def.SStatus;
-import de.tsl2.nano.bean.def.StatusInfo;
 import de.tsl2.nano.codegen.ACodeGenerator;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.Main;
@@ -62,8 +55,6 @@ import de.tsl2.nano.core.classloader.NestedJarClassLoader;
 import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.DeclaredMethodComparator;
-import de.tsl2.nano.core.cls.PrivateAccessor;
-import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.messaging.ChangeEvent;
 import de.tsl2.nano.core.util.ByteUtil;
@@ -410,7 +401,7 @@ public class NanoH5Test implements ENVTestPreparation {
     @Test
     public void testTimesheet() throws Exception {
     	// deep scheint mit andreren Tests zu kollidieren....
-        System.setProperty("nanoh5test.run.deep", "false");
+        System.setProperty("nanoh5test.run.deep", "true");
         Properties mapper = new Properties();
         createAndTest(new Timesheet(getServiceURL(), null) {
             @Override
