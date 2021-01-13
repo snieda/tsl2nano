@@ -41,6 +41,8 @@ public class NanoH5HtmlUnitTest extends NanoH5Unit {
     public void setUp() {
         System.setProperty("app.server.running", "false");
         System.setProperty("app.database.internal.server.run", "true");
+        System.setProperty("app.session.anticsrf", "false");
+        System.setProperty("app.session.htmlheader", "");
         port = 8068;
         super.setUp();
     }

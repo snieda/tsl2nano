@@ -22,11 +22,13 @@ import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 import java.util.Stack;
 import java.util.concurrent.Executors;
 
@@ -61,6 +63,7 @@ import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.messaging.ChangeEvent;
 import de.tsl2.nano.core.messaging.EventController;
+import de.tsl2.nano.core.secure.Crypt;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
@@ -69,6 +72,7 @@ import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.h5.NanoHTTPD.Response;
 import de.tsl2.nano.h5.NanoHTTPD.Response.Status;
 import de.tsl2.nano.h5.collector.QueryResult;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
@@ -151,7 +155,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
     private EventController eventController;
 
     private Request lastRequest;
-
+    private WebSecurity webSec = new WebSecurity();
+    
 //    /** workaround to avoid re-serving a cached request. */
 //    private Properties lastHeader;
 
@@ -474,7 +479,10 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
                 // serve files
                 if (!NumberUtil.isNumber(uri.substring(1)) && HtmlUtil.isURI(uri)
                     && !uri.contains(Html5Presentation.PREFIX_BEANREQUEST)) {
-                    return super.serve(uri, method, header, parms, files);
+                    Response response = super.serve(uri, method, header, parms, files);
+                    webSec.addETag(uri, response, "" + 24 * 3600);
+                    webSec.addSessionHeader(null, response);
+                    return response;
                 }
             }
 
@@ -489,7 +497,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
             }
             lastRequest = req;
             //ETag from Browser: If-None-Match
-            Object sessionID = getSessionID(header, requestor);
+            Object sessionID = webSec.getSessionID(header, requestor);
             session = sessions.get(sessionID);
             //fallback to requestor - if cookie or etag is wrong!
             if (session == null && sessionID != requestor) //yes, id. object!
@@ -555,29 +563,6 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         session.startTime = startTime;
         return session.serve(uri, method, header, parms, files);
     }
-
-    private Object getSessionID(Map<String, String> header, InetAddress requestor) {
-        //header keys are case insenstive and are stored by NanoHttpd in lower case!
-        return header.containsKey("if-none-match") ? header.get("if-none-match") 
-            : header.containsKey("cookie") ? StringUtil.substring(header.get("cookie"), "session-id=", ";")
-                : requestor;
-    }
-
-	public void addSessionID(NanoH5Session session, Response response) {
-        if (session.getKey() != null) {
-            String sessionMode = ENV.get("app.session.id", "Cookie");
-            String maxAge = "Max-Age=" + (ENV.get("session.timeout.millis", 30 * DateUtil.T_MINUTE) / 1000) + ";";
-            if (sessionMode.equals("Cookie")) {
-                String secure = ENV.get("app.ssl.activate", false) ? "secure; " : "";
-                response.addHeader("Set-Cookie", "session-id=" + session.getKey() + "; HttpOnly;" + secure + maxAge);                    
-            } else if (sessionMode.equals("ETag")) {
-                response.addHeader("ETag", "\"" + session.getKey() + "\"");
-                // response.addHeader("Vary", "User-Agent");
-                response.addHeader("Cache-Control",maxAge);
-            } else { // client-ip
-            }
-        }
-	}
 
     private boolean isAdmin(String uri) {
         return uri != null && uri.contains(String.valueOf(hashCode()));

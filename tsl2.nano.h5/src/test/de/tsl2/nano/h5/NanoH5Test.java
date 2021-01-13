@@ -138,6 +138,7 @@ public class NanoH5Test implements ENVTestPreparation {
 //        System.setProperty("tsl2nano.offline", "true");
 //        System.setProperty("websocket.use", "false");
         System.setProperty("app.show.startpage", "false");
+        System.setProperty("app.session.anticsrf", "false");
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -277,7 +278,7 @@ public class NanoH5Test implements ENVTestPreparation {
            "Ended At", BaseTest.XXX,
            "tsl2.nano.h5-\\d+\\.\\d+\\.\\d+(-SNAPSHOT)?[\\-\\.0-9]*", "tsl2.nano.h5-X.X.X",
            ".quicksearch", "?quicksearch", // the '?' does not match between the two sources!
-           "(\\w+[:])?((/|[\\\\])([.]?\\w+)*){2,99}", BaseTest.XXX //absolute file pathes
+           "(\\w+[:])?((/|[\\\\])([.]?\\w+)+)+", BaseTest.XXX //absolute file pathes
            ));
        
         //check xml failed files - these are written, if simple-xml has problems on deserializing from xml
@@ -401,6 +402,7 @@ public class NanoH5Test implements ENVTestPreparation {
     @Test
     public void testTimesheet() throws Exception {
     	// deep scheint mit andreren Tests zu kollidieren....
+        System.setProperty("app.session.anticsrf", "false");
         System.setProperty("nanoh5test.run.deep", "true");
         Properties mapper = new Properties();
         createAndTest(new Timesheet(getServiceURL(), null) {

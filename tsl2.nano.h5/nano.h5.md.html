@@ -4330,6 +4330,8 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.4.2  | 02.08.2020 | plugin enhanced, configurable regexp/replace on html response, session-id as cookie or etag
  2.4.3  | 22.11.2020 | session-id direct on session-start (before authentication), beancollector presents hor on simple lists, vnet -> gravizo, h2-199 (-ifNotExists), h5+entityreplication, yaml-support, bugfixes
  2.4.4  | 06.12.2020 | menu-hover now opaque, bugfixes on database-replication, quicksearch etc.
+ 2.4.5  | 20.12.2020 | bugfixes, dependency security fixes, query result fixes, NEW: session menu (edit context)
+ 2.4.6  | 17.01.2021 | web security extensions
 
  2.5.0  | xx.xx.2021 | see EnvUpdate2v5v0: refactorings: serialization of actions with primitive attributes, move incubation packages
 
@@ -5332,6 +5334,8 @@ deploy:
   on:
     branch: master                 # release from master branch only
     APPVEYOR_REPO_TAG: true        # deploy on tag push only
+
+* check build failure on different jdks: Azul Systems: Zulu Jdk, AdoptOpdenJdk
 
 #### GitLab source + release
 

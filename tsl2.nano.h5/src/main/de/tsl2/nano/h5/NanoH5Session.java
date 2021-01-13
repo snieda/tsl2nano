@@ -159,6 +159,8 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
 
     private String key;
 
+    private WebSecurity webSec = new WebSecurity();
+    
     public static final String PREFIX_STATUS_LINE = "@";
 
     public static final String PREFIX_CONTEXT_RANGE = "range:";
@@ -372,6 +374,9 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
         ManagedException ex = null;
         try {
             cacheReloaded = false;
+            if (method.equals("POST") && !(parms.get(WebSecurity.HIDDEN_NAME) == null && nav.current() == null))
+            	webSec.checkAntiCSRFToken(this, parms.get(WebSecurity.HIDDEN_NAME));
+            
             //refresh session values on the current thread
             assignSessionToCurrentThread(true, MapUtil.filter(header, "User-Agent"));
 
@@ -477,10 +482,13 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
         Message.send(exceptionHandler, createStatusText(startTime));
         if (ex != null)
             Message.send(exceptionHandler, ex.toString());
-        server.addSessionID(this, response);
+        webSec.addSessionHeader(this, response);
         return Plugins.process(INanoPlugin.class).handleResponse(response);
     }
 
+    public String createAntiCSRFToken() {
+    	return webSec.createAntiCSRFToken(this);
+    }
     /**
      * assignSessionToCurrentThread
      */

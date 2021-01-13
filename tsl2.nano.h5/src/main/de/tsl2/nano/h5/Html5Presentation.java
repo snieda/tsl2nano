@@ -426,7 +426,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         isAuthenticated = session.getUserAuthorization() != null;
         Element body = createHeader(session, name, image, interactive);
         Element glasspane = createGlasspane(body);
-        return appendElement(glasspane,
+        Element form = appendElement(glasspane,
             TAG_FORM,
             ATTR_ID,
             "page.form",
@@ -435,6 +435,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             ATTR_METHOD,
             ENV.get("html5.http.method", "post"),
             enable("autocomplete", ENV.get("html5.form.autocomplete", true)), null);
+        addAntiCSRFTokenToForm(session, form);
+        return form;
     }
 
     protected Element createGlasspane(Element body) {
@@ -552,6 +554,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ATTR_METHOD,
                 ENV.get("html5.http.method", "post"), ATTR_STYLE,
                 style("display", "inline"));
+            addAntiCSRFTokenToForm(session, c2);
             if (!useSideNav(99)) {
                 Element menu = createMenu(c2, "Menu");
                 createSubMenu(menu, ENV.translate("tsl2nano.application", true), "icons/equipment.png",
@@ -573,6 +576,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         }
         return body;
     }
+
+	private void addAntiCSRFTokenToForm(ISession session, Element c2) {
+		if (WebSecurity.useAntiCSRFToken() && session instanceof NanoH5Session) {
+			String token = ((NanoH5Session)session).createAntiCSRFToken();
+			appendElement(c2, TAG_INPUT, ATTR_NAME, WebSecurity.HIDDEN_NAME, ATTR_ID, WebSecurity.HIDDEN_NAME, ATTR_VALUE, token, ATTR_HIDDEN);
+		}
+	}
 
     private String getTitleWithLink(String title, ISession session) {
     	if (session.getUserAuthorization() == null) {
