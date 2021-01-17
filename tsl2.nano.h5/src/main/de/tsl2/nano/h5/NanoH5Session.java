@@ -438,8 +438,8 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
                 response = server.createResponse(msg);
             } else {
                 close();
-                return server.createResponse(Html5Presentation.createMessagePage("start.template",
-                    ENV.getName() + "<br/>" + "Restart Session", server.serviceURL));
+                return webSec.addSessionHeader(this, server.createResponse(Html5Presentation.createMessagePage("start.template",
+                    ENV.getName() + "<br/>" + "Restart Session", server.serviceURL)));
             }
         } catch (Throwable e /*respect errors like NoClassDefFound...the application should continue!*/) {
             LOG.error(e);

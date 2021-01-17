@@ -39,7 +39,7 @@ public class WebSecurity {
 		return antiCSRFKey;
 	}
 	public void checkAntiCSRFToken(NanoH5Session session, String token) {
-		if (!useAntiCSRFToken() || antiCSRFKey == null)
+		if (!useAntiCSRFToken()/* || antiCSRFKey == null*/)
 			return;
 		String sessionInfo = Crypt.decrypt(token, getAntiCSRFKey(), ENV.get(PREF_ANTICSRF + ".algorithm", DEF_ALG));
 		String[] splitInfo = sessionInfo.split("[-]");
@@ -63,15 +63,16 @@ public class WebSecurity {
 			throw new IllegalStateException("anti CSRF token failure: possible CSRF attact");
 	}
 
-	public void addSessionHeader(NanoH5Session session, Response response) {
+	public Response addSessionHeader(NanoH5Session session, Response response) {
 		if (session != null)
 			addSessionID(session, response);
 		
-		String header = ENV.get(ENV_PREF + "httpheader", "X-XSS-Protection: 1; mode=block, X-Frame-Options: sameorigin;");
+		String header = ENV.get(ENV_PREF + "httpheader", "X-XSS-Protection: 1; mode=block, X-Frame-Options: sameorigin, X-Content-Type-Options: nosniff;");
 		String[] keyValues = header.split("\\s*[,:]\\s*");
 		for (int i = 0; i < keyValues.length; i+=2) {
 			response.addHeader(keyValues[i].trim(), keyValues[i+1].trim());
 		}
+		return response;
 	}
     public static Object getSessionID(Map<String, String> header, InetAddress requestor) {
         //header keys are case insenstive and are stored by NanoHttpd in lower case!

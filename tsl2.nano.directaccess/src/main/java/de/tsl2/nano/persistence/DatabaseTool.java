@@ -70,7 +70,7 @@ public class DatabaseTool {
                 	Persistence persistence = Persistence.current();
                     EMessage.broadcast(this, "APPLICATION SHUTDOWN INITIALIZED...", "*");
                     shutdownDBServer();
-                    shutdownDatabase(); //doppelt gemoppelt hält besser ;-)
+//                    shutdownDatabase(); //doppelt gemoppelt hält besser ;-)
                     String hsqldbScript = isH2(persistence.getConnectionUrl())
                         ? persistence.getDefaultSchema() + ".mv.db" : persistence.getDatabase() + ".script";
                     String backupFile =

@@ -547,7 +547,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
                         session.response.getData().reset();
                         if (!session.cacheReloaded) {
                             session.cacheReloaded = true;
-                            return new Response(Status.OK, "text/html", session.response.getData(), -1);
+                            return webSec.addSessionHeader(session, new Response(Status.OK, "text/html", session.response.getData(), -1));
                         }
                     } catch (IOException e) {
                         LOG.error(e);
