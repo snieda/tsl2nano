@@ -165,7 +165,7 @@ public class TrustedOrganisation {
         if (email == null || email.trim().length() == 0) {
             return "";
         }
-        return "E=" + email;
+        return "EMAILADDRESS=" + email;
     }
 
     public X500Name toX500Name() {
