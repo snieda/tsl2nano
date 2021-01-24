@@ -1,6 +1,7 @@
 package de.tsl2.nano.core.secure;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -127,7 +128,23 @@ public class CoreSecureTest implements ENVTestPreparation {
     }
     
     @Test
-    public void testBaseTest() throws Exception {
-        //TODO
+    public void testTrustedOrganisation() throws Exception {
+        TrustedOrganisation to = new TrustedOrganisation("DC=*.test.de, CN=Test, L=Berlin, C=DE, O=TestOwner, OU=Owners Trustcenter, STREET=Buxdehuder Str. 9, ST=Ostrhein Suedfalen, E=info@testowner.de");
+        assertEquals("DC=*.test.de", to.getDomainComponent());
+        assertEquals("CN=Test", to.getCommonName());
+        assertEquals("C=DE", to.getCountryName());
+        assertEquals("L=Berlin", to.getLocalityName());
+        assertEquals("O=TestOwner", to.getOrganizationName());
+        assertEquals("OU=Owners Trustcenter", to.getOrganizationalUnitName());
+        assertEquals("STREET=Buxdehuder Str. 9", to.getStreetAddress());
+        assertEquals("ST=Ostrhein Suedfalen", to.getStateOrProvince());
+        assertEquals("EMAILADDRESS=info@testowner.de", to.getEmail());
+        
+        TrustedOrganisation to1 = new TrustedOrganisation("DC=*.test.de, CN=Test, L=Berlin, C=DE, O=TestOwner, OU=Owners Trustcenter, STREET=Buxdehuder Str. 10, ST=Ostrhein Suedfalen, EMAILADDRESS=info@testowner.de");
+        assertTrue(to.hashCode() != to1.hashCode());
+        assertNotEquals(to, to1);
+        assertNotEquals(to.toString(), to1.toString());
+        assertNotEquals(to.toX500Name(), to1.toX500Name());
+        assertNotEquals(to.toX500Principal(), to1.toX500Principal());
     }
 }
