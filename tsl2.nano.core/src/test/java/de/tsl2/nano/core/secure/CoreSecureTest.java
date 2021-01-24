@@ -1,10 +1,18 @@
 package de.tsl2.nano.core.secure;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileOutputStream;
 import java.security.KeyPair;
 import java.security.KeyStore;
+import java.security.cert.CertPath;
+import java.security.cert.CertPathValidatorResult;
+import java.security.cert.Certificate;
+import java.security.cert.PKIXBuilderParameters;
+import java.security.cert.PKIXCertPathValidatorResult;
+import java.security.cert.X509Certificate;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -45,19 +53,21 @@ public class CoreSecureTest implements ENVTestPreparation {
 //        Crypt.main(new String[]{"0123456", Crypt.ALGO_PBEWithHmacSHA1AndDESede, txt});
 //        Crypt.main(new String[]{"0123456", Crypt.ALGO_PBEWithSHAAndAES, txt});
 
-        //validate certificates, check signification
-        // TODO: implement and test!
         KeyPair keyPair = Crypt.generateKeyPair("RSA"/*Crypt.getTransformationPath("RSA", "ECB", "PKCS1Padding")*/);
+        Crypt sender = new Crypt(keyPair.getPublic());
+        Crypt receiver = new Crypt(keyPair.getPrivate());
+        String encrypted = sender.encrypt(txt);
+        assertEquals(txt, receiver.decrypt(encrypted));
+        
+        //validate certificates, check signature
         try {
-            Crypt sender = new Crypt(keyPair.getPublic());
-            Crypt receiver = new Crypt(keyPair.getPrivate());
-            byte[] sign = sender.sign("test".getBytes(), "SHA-256");
+            sender = new Crypt(keyPair.getPrivate());
+            receiver = new Crypt(keyPair.getPublic());
+            String signature = sender.sign("test", "SHA-256");
+            receiver.verify("test", signature, "SHA-256");
             receiver.validate(null);
-            receiver.checkSignification("test".getBytes(), sign, "SHA-256");
         } catch (UnsupportedOperationException ex) {
-            //not implemented yet!
-        } catch (IllegalArgumentException ex) {
-            //TODO: what's wrong with 3f...
+            //validate() not implemented yet!
         }
     }
 
@@ -68,54 +78,54 @@ public class CoreSecureTest implements ENVTestPreparation {
         String passwd = Crypt.generatePassword(8);
         TrustedOrganisation dn = new TrustedOrganisation("me", "de");
         KeyPair keyPair = Crypt.generateKeyPair("RSA");
-        PKI pki = new PKI(new Crypt(keyPair.getPublic()), dn);
+        PKI pki = new PKI(keyPair, dn);
         
         //creating/loading/persisting keystores
         KeyStore newKeyStore = pki.createKeyStore();
-        String file = ENV.getConfigPath() + "mystore";
-        pki.peristKeyStore(newKeyStore, file, passwd);
-        KeyStore keyStore = pki.createKeyStore(file, passwd.toCharArray());
+        String fileKeyStore = ENV.getConfigPath() + "mystore";
+        pki.peristKeyStore(newKeyStore, fileKeyStore, passwd);
+        KeyStore keyStore = pki.createKeyStore(fileKeyStore, passwd.toCharArray());
         assertTrue(newKeyStore.size() == keyStore.size());
+
+        Certificate x509RootSelfSignedCert = pki.generateCertificate(dn.toString(), keyPair, 9999, "SHA256withRSA");
+        System.out.println(x509RootSelfSignedCert);
+        String fileCert = ENV.getConfigPath() + "certificate.cer";
+        pki.write(x509RootSelfSignedCert, new FileOutputStream(fileCert));
         
-        //TODO: test certificates
-//        CertPath certPath = pki.createCertPath(dn, null, null);
-//        pki.write(certPath.getCertificates().get(0), new FileOutputStream(file));
-//        Certificate certificate = pki.createCertificate(FileUtil.getFile(file));
-//        CertPathValidatorResult valResult = pki.verifyCertPath(certPath, new PKIXBuilderParameters(keyStore, null));
-//        assertTrue(((PKIXCertPathValidatorResult)valResult).getPublicKey().equals(certificate.getPublicKey()));
+        String fileKey = ENV.getConfigPath() + "public.key";
+        pki.write(keyPair.getPublic(), new FileOutputStream(fileKey));
+        String filePrivate = ENV.getConfigPath() + "private.key";
+        pki.write(keyPair.getPrivate(), new FileOutputStream(filePrivate));
+        
+        Certificate certificate = pki.createCertificate(FileUtil.getFile(fileCert));
 
         //validating, signing
-        byte[] signature = pki.sign(new ByteArrayInputStream(data.getBytes()), "SHA1withRSA", keyPair.getPrivate());
-        assertTrue(pki.verify(new ByteArrayInputStream(data.getBytes()), signature, keyPair.getPublic(), "SHA1withRSA"));
+        assertTrue(certificate instanceof X509Certificate);
+        assertTrue(pki.isSelfSigned((X509Certificate) certificate));
+        byte[] signature = pki.sign(new ByteArrayInputStream(data.getBytes()));
+        assertTrue(pki.verify(new ByteArrayInputStream(data.getBytes()), signature));
         
+        //...without content...
+        assertTrue(pki.getKeyManagerFactory(keyStore, Crypt.generatePassword(8)) != null);
+        assertEquals(keyPair.getPublic(), pki.createPublicKey(keyPair.getPublic().getEncoded(), keyPair.getPublic().getAlgorithm()));
+        
+        PKI.main(new String[] {"help"});
+        PKI.main(new String[] {"vercert", fileKeyStore, String.valueOf(signature)});
+        
+        //TODO: test create certpath
+//        pki.createCertPath(FileUtil.getFile(fileCert));
+        CertPath certPath = null;
+		try {
+			pki.addCertificate("root-selfsigned", certificate);
+			certPath = pki.createCertPath(dn, null, null); //NOT WORKING YET!!
+	        pki.write(certPath.getCertificates().get(0), new FileOutputStream(fileCert));
+	        CertPathValidatorResult valResult = pki.verifyCertPath(certPath, new PKIXBuilderParameters(keyStore, null));
+	        assertTrue(((PKIXCertPathValidatorResult)valResult).getPublicKey().equals(certificate.getPublicKey()));
+		} catch (Exception e) {
+			e.printStackTrace(); // create cert path without certificates in trust store does not work
+		}
     }
     
-//    @Test
-//    public void testSymEncryption() throws Exception {
-//        SymmetricCipher c = new SymmetricCipher();
-//        System.out.println(c.getTransformationPath());
-//        System.out.println(c.getAlgorithmParameterSpec());
-//        
-//        String data = "mein wichtiger text";
-//        byte[] encrypted = c.encrypt(data.getBytes());
-//        byte[] decrypted = c.decrypt(encrypted);
-//        System.out.println("Symmetric encryption:\n\t" + data + " --> " + new String(encrypted) + " --> " + new String(decrypted));
-//        assertTrue(data.equals(new String(decrypted)));
-//    }
-//    
-//    @Test
-//    public void testAsymEncryption() throws Exception {
-//        AsymmetricCipher c = new AsymmetricCipher();
-//        System.out.println(c.getTransformationPath());
-//        System.out.println(c.getAlgorithmParameterSpec());
-//        
-//        String data = "mein wichtiger text";
-//        byte[] encrypted = c.encrypt(data.getBytes());
-//        byte[] decrypted = c.decrypt(encrypted);
-//        System.out.println("Asymmetric encryption:\n\t" + data + " --> " + new String(encrypted) + " --> " + new String(decrypted));
-//        assertTrue(data.equals(new String(decrypted)));
-//    }
-//    
     @Test
     public void testBaseTest() throws Exception {
         //TODO

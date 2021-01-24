@@ -117,10 +117,10 @@ public class Crypt implements ISecure {
     };
 
     /**
-     * constructor using random DES key generation, {@link #ALGO_DES} algorithm and {@link #ENCODE_UTF8} encoding.
+     * constructor using random AES key generation, {@link #ALGO_AES} algorithm and {@link #ENCODE_UTF8} encoding.
      */
     public Crypt() {
-        this(generateRandomKey("DES"), ALGO_DES, ENCODE_UTF8, true);
+        this(generateRandomKey("AES"), ALGO_AES, ENCODE_UTF8, true);
     }
 
     /**
@@ -165,7 +165,7 @@ public class Crypt implements ISecure {
         this.algorithm = algorithm;
         this.encoding = encoding;
         this.useBASE64 = useBASE64;
-        paramSpec = createParamSpec(algorithm);
+        paramSpec = createParamSpec(algorithm, key);
     }
 
     private static void preInit(String algorithm) {
@@ -241,10 +241,13 @@ public class Crypt implements ISecure {
     }
 
     private static AlgorithmParameterSpec createParamSpec(String algorithm) {
+    	return createParamSpec(algorithm, null);
+    }
+    private static AlgorithmParameterSpec createParamSpec(String algorithm, Key key) {
         return isPBE(algorithm) ? createPBEParamSpec() : (algorithm.contains("/") && !algorithm.contains("ECB"))
             ? new IvParameterSpec(
                 algorithm.startsWith("DES") ? salt8 : salt16)
-            : algorithm.startsWith("RSA") ? new RSAKeyGenParameterSpec(2048, RSAKeyGenParameterSpec.F4)
+            : algorithm.startsWith("RSA") ? key != null ? null : new RSAKeyGenParameterSpec(2048, RSAKeyGenParameterSpec.F4)
                 : null;
 //        return isPBE(algorithm) ? createPBEParamSpec() : algorithm.startsWith("DES") || algorithm.contains("/ECB/")
 //            ? null : createAESParamSpec();
@@ -360,6 +363,17 @@ public class Crypt implements ISecure {
         return key;
     }
 
+    public static String hashHex(String txt) {
+    	return hashHex(txt, "SHA-512");
+    }
+    public static String hashHex(String txt, String algorithm) {
+    	try {
+			return hashHex(StringUtil.toInputStream(new String(salt16, "UTF8") + txt), algorithm);
+		} catch (UnsupportedEncodingException e) {
+			ManagedException.forward(e);
+			return null;
+		}
+    }
     public static String hashHex(InputStream stream, String algorithm) {
         return hex(hash(stream, algorithm));
     }
@@ -467,7 +481,7 @@ public class Crypt implements ISecure {
     static String encrypt(byte[] data,
             Key key,
             String algorithm) {
-        return encrypt(data, key, createParamSpec(algorithm), algorithm, ENCODE_UTF8, true, 0, data.length);
+        return encrypt(data, key, createParamSpec(algorithm, key), algorithm, ENCODE_UTF8, true, 0, data.length);
     }
 
     static String encrypt(byte[] data,
@@ -620,39 +634,35 @@ public class Crypt implements ISecure {
     }
 
     /**
-     * UNDER CONSTRUCTION<p/>
-     * signs data hashing it to the given length and encrypting with the current private key
+     * signs data hashing it with given algorithm and encrypting with the current private key
      * 
      * @param data to be signed
      * @param hashAlgorithm algorithm for hashing
-     * @param hashLength hashcode length
      * @return signed data
      */
-    public byte[] sign(byte[] data, String hashAlgorithm) {
-        byte[] hash = Util.cryptoHash(data, hashAlgorithm);
-        String sign = null;
-        try {
-            //do an encryption with the private key --> decryption
-            sign = decrypt(new String(hash, encoding));
-        } catch (UnsupportedEncodingException e) {
-            ManagedException.forward(e);
-        }
-        return sign.getBytes();
+    public String sign(String data, String hashAlgorithm) {
+        return encrypt(hashHex(data, hashAlgorithm));
     }
 
     /**
-     * checks the given signification against the given data hashing it to the given length.
+     * checks the given signature against the given data hashing it with given algorithm and decrypting it with the public key.
      * 
      * @param data to be checked against the signification
      * @param hashAlgorithm algorithm for hashing
-     * @param hashLength hashcode length
      * @throws Exception on invalid signification
      */
-    public void checkSignification(byte[] data, byte[] sign, String hashAlgorithm) {
-        //TODO: implement
-        throw new UnsupportedOperationException();
+    public void verify(String data, String signature, String hashAlgorithm) {
+        String hash = hashHex(data, hashAlgorithm);
+		String verify = decrypt(signature);
+		if (!verify.equals(hash))
+			throw new IllegalStateException("the given signature does not fit to the datas hash!");
     }
 
+    @Override
+    public String toString() {
+    	return Util.toString(getClass(), this.algorithm, this.encoding, this.useBASE64, this.paramSpec, this.key);
+    }
+    
     /**
      * 
      * @param args
