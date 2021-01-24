@@ -17,32 +17,12 @@ import de.tsl2.nano.core.ENV;
  * @version $Revision$ 
  */
 @SuppressWarnings("static-access")
-public class ENVUpdate1v1v0 implements Runnable {
-    private String VERS_PREVIOUS = null;
-    private ENV env;
-    private String currentVersion;
-    
-    /**
-     * constructor
-     */
-    public ENVUpdate1v1v0(Object env, String currentVersion) {
-        this.env = (ENV) env;
-        this.currentVersion = currentVersion;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
+public class ENVUpdate1v1v0 implements IVersionRunner {
+	public String previousVersion() {return null;}
     @Override
-    public void run() {
-        runPreviousVersionUpdate();
+    public void update(ENV env, String currentVersion) {
         //reset to default
+    	System.out.println(previousVersion() + " -> 1.1.0: removing property 'app.frame.style'");
         env.getProperties().remove("app.frame.style");
-    }
-
-    void runPreviousVersionUpdate() {
-        //nothing to do, no previous update available
-        //TODO: refactore cycling access to updater
-        new Updater().run(env.getConfigFile().getPath(), VERS_PREVIOUS, currentVersion, env);
     }
 }

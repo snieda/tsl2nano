@@ -9,8 +9,10 @@
  */
 package de.tsl2.nano.core.update;
 
+import java.io.File;
 import java.util.Date;
 
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DateUtil;
@@ -53,7 +55,7 @@ public class Updater {
      * update (see {@link #checkAndUpdate(String, String)} - this update should provide a new version update class).
      * <p/>
      * This method will do a backup of the given configFile and checks the current with the new version. if not equal, a
-     * version update class of type {@link Runnable} with following name convention will be search, loaded and started
+     * version update class of type {@link Runnable} with following name convention will be searched, loaded and started
      * (through {@link Runnable#run()}:
      * <p/>
      * ${ENV-PACKAGE-PATH} '.update.' + ENVUpdate${MAJOR}v${MINOR}v${BUILD}
@@ -70,14 +72,12 @@ public class Updater {
      */
     public boolean run(String configFile, String currentVersion, String newVersion, Object environment) {
         if (currentVersion != null && !currentVersion.equals(newVersion)) {
-            LogFactory.log("VERSION CHANGED: " + currentVersion + " -> " + newVersion);
             String vo = getVersionNo(currentVersion);
             String vn = getVersionNo(newVersion);
             try {
                 FileUtil.copy(configFile, configFile + "." + vo);
                 //runs all version updaters recursively between current and new
                 versionUpdate(environment, currentVersion, vn);
-                LogFactory.log("VERSION NOW: " + newVersion);
                 return true;
             } catch (Exception e) {
                 //TODO: exception handling
@@ -95,10 +95,21 @@ public class Updater {
      * @param newVersionNumber
      */
     void versionUpdate(Object environment, String currentVersion, String newVersionNumber) {
-        Class<Runnable> updClass =
-            (Class<Runnable>) BeanClass.load(getVersionUpdaterClass(environment.getClass(), newVersionNumber), null, false);
-        BeanClass.createInstance(updClass, environment, currentVersion).run();
+        Class<IVersionRunner> updClass = findLastVersionUpdaterClass(environment, newVersionNumber);
+        if (updClass != null)
+        	BeanClass.createInstance(updClass).run((ENV)environment, currentVersion);
     }
+
+	private Class<IVersionRunner> findLastVersionUpdaterClass(Object environment, String versionNumber) {
+		Class<IVersionRunner> updClass = null;
+		try {
+			updClass = (Class<IVersionRunner>) BeanClass.load(getVersionUpdaterClass(environment.getClass(), versionNumber), null, false);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			updClass = findLastVersionUpdaterClass(environment, evalPreviousVersion(versionNumber));
+		}
+		return updClass;
+	}
 
     protected String getVersionNo(String txt) {
         return StringUtil.substring(txt, appName + "-", "-");
@@ -108,6 +119,20 @@ public class Updater {
         return cls.getPackage().getName() + ".update." + cls.getSimpleName() + "Update" + version.replace('.', 'v');
     }
 
+    protected static String evalPreviousVersion(String version) {
+    	final String V = ".";
+    	String part, v = version;
+    	Integer n;
+		while ((part = StringUtil.substring(v, V, null, true, true)) != null) {
+    		v = StringUtil.substring(v, null, V, true);
+	    	n = Integer.valueOf(part);
+	    	if (n == 0) {
+	    		continue;
+	    	}
+	    	return v + V + --n;
+    	}
+    	return null;
+    }
     public boolean checkAndUpdate() {
     	return checkAndUpdate(currentVersion, downloadURL);
     }
