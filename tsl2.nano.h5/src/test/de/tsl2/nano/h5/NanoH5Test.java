@@ -139,6 +139,7 @@ public class NanoH5Test implements ENVTestPreparation {
 //        System.setProperty("websocket.use", "false");
         System.setProperty("app.show.startpage", "false");
         System.setProperty("app.session.anticsrf", "false");
+        System.setProperty("app.update.last", new java.sql.Date(0).toString());
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })

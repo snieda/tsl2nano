@@ -153,6 +153,11 @@ import de.tsl2.nano.h5.NanoHTTPD.Response.Status;
  */
 public abstract class NanoHTTPD extends Main {
 
+	@Override
+	protected void initENVService() {
+		//don't start tsl2 ENV
+	}
+	
     /**
      * Pluggable strategy for asynchronously executing requests.
      */
@@ -2657,7 +2662,7 @@ public abstract class NanoHTTPD extends Main {
             "(Command line options: [-p port] [-d root-dir])\n");
 
         // Defaults
-        int port = 80;
+        int port = 8080;
         File wwwroot = new File(".").getAbsoluteFile();
 
         for (int i = 0; i < args.length; ++i) {

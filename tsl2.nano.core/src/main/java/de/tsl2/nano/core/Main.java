@@ -40,8 +40,12 @@ public class Main {
      * constructor
      */
     public Main() {
-        ENV.addService(Main.class, this);
+        initENVService();
     }
+
+	protected void initENVService() {
+		ENV.addService(Main.class, this);
+	}
     
     /**
      * main entry

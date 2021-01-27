@@ -439,12 +439,7 @@ public class ENV implements Serializable {
     	T value = null;
     	if (sysValue != null) { //system properties win...
     		if (defaultValue != null && !(defaultValue instanceof String)) {
-    			//TODO: perhaps we can extend that with ObjectUtil.wrap()?
-    			if (PrimitiveUtil.isPrimitiveOrWrapper(defaultValue.getClass())) {
-    				value = (T) PrimitiveUtil.convert(sysValue, defaultValue.getClass());
-    			} else {
-    				throw new IllegalArgumentException("system property " + key + "=" + sysValue + " cannot be converted to " + defaultValue.getClass());
-    			}
+    			value = (T) ObjectUtil.wrap(sysValue, defaultValue.getClass());
     		} else {
     			value = (T) sysValue;
     		}
