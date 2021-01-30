@@ -1,0 +1,85 @@
+<h6 align="center">D8Portal: Generic Document Portal<br/>
+<font size="-1">&copy; Thomas Schneider 2021
+
+## Introduction
+
+A web application on base of nano.h5  will be provided to do all service actions through an html5 gui.
+The service *DocPortalService* provides its services as REST. The services are described in the next chapter.
+All Client-Documents are encrypted and signed. Access is possible through certificate authentication.
+
+### Overview
+
+An organisation wants to provide documents to its clients. The clients should be able to download decrypt and check the authenticy. The client may upload own documents as response.
+
+The organisation has to create a new git account on a git host like github. Therefore it needs an email address, an own certifate and a webserver providing the webapplication on base of nano.h5. As the webapplication should work on https (tls 1.2) the certificate is already available.
+Some base instruction documents may be uploaded to be readable by the clients.
+
+A new client will be initialized as new git repository. A new certifcate request will be edited by the organisation. On positive validation, the organisation sends a new client certificate to the client. The
+private key of that certificate will be send by mail or email.
+
+## repository portal (private folder)
+
+* git (one user-account, multiple private repositories) -> storing documents encrypted with stored public key
+* use of root certificate and client certificate
+* up-/download of jpg/pdf documents (with {name, type, description, timestamp, seal(MAC), begin-end dates, geo-location} -> QR-code, optional text)
+* folder structure (type -> name+timestampt+period+seal+geolocation, name+description)
+* scan/photo document
+
+generic own-path
+
+* QR (Name+GPS+in-out Time) -> checkin/-out
+* signed document (seal)
+
+### service
+
+* new organisation -> new github account, create self-signed certificate
+* new account -> identity, e-mail, password, certificate -> new repository <identity>, file with user-data
+* extend client certificate
+* upload document
+    * arget repository name, type, description, period 
+    * load certificate
+    * encrypt document
+    * upload
+* trigger email on all repository users
+* browse repository
+    * fetch all changes
+    * fulltext fuzzy search on all entries
+* download document
+    * check seal on public key
+    * decrypt document
+    * show document
+* create QR-Code on documents git url
+
+## TODOs
+
+* [v] repository provider
+* [v] portal provider
+* [ ] sign documents
+* [ ] portal service as REST
+* [ ] CLI
+* [ ] gui for organisation
+    * [ ] login
+    * [ ] list clients
+    * [ ] list files of client
+    * [ ] upload file for client
+* [ ] gui for clients
+    * [ ] login
+    * [ ] list files with filter
+    * [ ] download file
+* integration test with : new git account, new email
+
+## Changelog
+
+ Version | Date       | Description
+ ------- | ---------- | -----------
+ 2.4.7   | 10.03.2021 | First alpha Version
+ 
+<style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
+
+<!--
+[GLOSSARY]
+
+## TODOs
+
+
+-->

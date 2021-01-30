@@ -64,8 +64,8 @@ public class CoreSecureTest implements ENVTestPreparation {
         try {
             sender = new Crypt(keyPair.getPrivate());
             receiver = new Crypt(keyPair.getPublic());
-            String signature = sender.sign("test", "SHA-256");
-            receiver.verify("test", signature, "SHA-256");
+            String signature = sender.sign("test");
+            receiver.verify("test", signature);
             receiver.validate(null);
         } catch (UnsupportedOperationException ex) {
             //validate() not implemented yet!
@@ -77,7 +77,7 @@ public class CoreSecureTest implements ENVTestPreparation {
         System.out.println(Crypt.providers());
         String data = "test data";
         String passwd = Crypt.generatePassword(8);
-        TrustedOrganisation dn = new TrustedOrganisation("me", "de");
+        DistinguishedName dn = new DistinguishedName("me", "de");
         KeyPair keyPair = Crypt.generateKeyPair("RSA");
         PKI pki = new PKI(keyPair, dn);
         
@@ -128,8 +128,8 @@ public class CoreSecureTest implements ENVTestPreparation {
     }
     
     @Test
-    public void testTrustedOrganisation() throws Exception {
-        TrustedOrganisation to = new TrustedOrganisation("DC=*.test.de, CN=Test, L=Berlin, C=DE, O=TestOwner, OU=Owners Trustcenter, STREET=Buxdehuder Str. 9, ST=Ostrhein Suedfalen, E=info@testowner.de");
+    public void testDistinguishedName() throws Exception {
+        DistinguishedName to = new DistinguishedName("DC=*.test.de, CN=Test, L=Berlin, C=DE, O=TestOwner, OU=Owners Trustcenter, STREET=Buxdehuder Str. 9, ST=Ostrhein Suedfalen, E=info@testowner.de");
         assertEquals("DC=*.test.de", to.getDomainComponent());
         assertEquals("CN=Test", to.getCommonName());
         assertEquals("C=DE", to.getCountryName());
@@ -140,7 +140,7 @@ public class CoreSecureTest implements ENVTestPreparation {
         assertEquals("ST=Ostrhein Suedfalen", to.getStateOrProvince());
         assertEquals("EMAILADDRESS=info@testowner.de", to.getEmail());
         
-        TrustedOrganisation to1 = new TrustedOrganisation("DC=*.test.de, CN=Test, L=Berlin, C=DE, O=TestOwner, OU=Owners Trustcenter, STREET=Buxdehuder Str. 10, ST=Ostrhein Suedfalen, EMAILADDRESS=info@testowner.de");
+        DistinguishedName to1 = new DistinguishedName("DC=*.test.de, CN=Test, L=Berlin, C=DE, O=TestOwner, OU=Owners Trustcenter, STREET=Buxdehuder Str. 10, ST=Ostrhein Suedfalen, EMAILADDRESS=info@testowner.de");
         assertTrue(to.hashCode() != to1.hashCode());
         assertNotEquals(to, to1);
         assertNotEquals(to.toString(), to1.toString());

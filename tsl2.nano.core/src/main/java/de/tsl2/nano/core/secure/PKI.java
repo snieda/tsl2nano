@@ -87,7 +87,7 @@ import sun.security.x509.X509CertInfo;
  * -Djavax.net.ssl.keyStore=...java/lib/security/cacerts and -Djavax.net.ssl.keyStorePassword=tobechanged.
  * 
  * use:
- * - create a certificate with path: {@link #createCertPath(TrustedOrganisation, TrustedOrganisation, Date, Date, PublicKey)}
+ * - create a certificate with path: {@link #createCertPath(DistinguishedName, DistinguishedName, Date, Date, PublicKey)}
  * - sign it with your roots private key: {@link #sign(InputStream, String, PrivateKey)}
  * - verify a certificate against its public key: {@link #verify(InputStream, byte[], PublicKey, String)}
  * - persist your keystore: {@link #peristKeyStore(KeyStore, String, String)}
@@ -104,7 +104,7 @@ import sun.security.x509.X509CertInfo;
  * 
  * Developer Annotations:
  * - to use another certificate factory format, set the system property 'tsl2nano.pki.certfactory.format' (default: X.509)
- *      override {@link #createCertPath(TrustedOrganisation, TrustedOrganisation, Date, Date, PublicKey)}
+ *      override {@link #createCertPath(DistinguishedName, DistinguishedName, Date, Date, PublicKey)}
  *      provide a filled {@link CertSelector} and {@link CertPathParameters}
  * - to use another certificate path algorithm, set the system property 'tsl2nano.pki.certpath.algorithm' (default: PKIX)
  * - to use another keystore type, set the system property 'tsl2nano.pki.keystore.type' (default (PKCS12)
@@ -119,7 +119,7 @@ public class PKI {
 	private static final Log LOG = LogFactory.getLog(PKI.class);
 
     KeyPair keyPair;
-    TrustedOrganisation issuer;
+    DistinguishedName issuer;
     KeyStore keyStore;
     
 	private static final String CERT_FACT_FORMAT = System.getProperty("tsl2nano.pki.certfactory.format", "X.509");
@@ -127,12 +127,15 @@ public class PKI {
 	private static final String KEYSTORE_TYPE = System.getProperty("tsl2nano.pki.keystore.type", "PKCS12");
 	private static final String HASHSIGN_ALG = System.getProperty("tsl2nano.pki.hashsign.algorithm", "SHA256withRSA");
 
-    /**
-     * constructor
-     */
-    public PKI(KeyPair keyPair, TrustedOrganisation orga) {
+    public PKI(PublicKey key, DistinguishedName issuer) {
+    	this(new KeyPair(key, null), issuer);
+    }
+    public PKI(PrivateKey key, DistinguishedName issuer) {
+    	this(new KeyPair(null, key), issuer);
+    }
+    public PKI(KeyPair keyPair, DistinguishedName issuer) {
         this.keyPair = keyPair;
-        this.issuer = orga;
+        this.issuer = issuer;
         LOG.info(toString());
     }
 
@@ -231,7 +234,7 @@ public class PKI {
         }
     }
 
-    public CertPath createCertPath(TrustedOrganisation subjectDN,
+    public CertPath createCertPath(DistinguishedName subjectDN,
             Date startDate,
             Date expiringDate) {
         return createCertPath(keyStore, subjectDN, issuer, startDate, expiringDate, keyPair.getPublic());
@@ -248,8 +251,8 @@ public class PKI {
      * @return certificate
      */
     public CertPath createCertPath(KeyStore keyStore, 
-    		TrustedOrganisation subjectDN,
-            TrustedOrganisation issuerDN,
+    		DistinguishedName subjectDN,
+            DistinguishedName issuerDN,
             Date startDate,
             Date expiringDate,
             PublicKey subjectPublicKey) {
@@ -295,7 +298,7 @@ public class PKI {
 
 	}
 
-	protected static X509CertSelector createX509CertSelector(TrustedOrganisation subjectDN, TrustedOrganisation issuerDN,
+	protected static X509CertSelector createX509CertSelector(DistinguishedName subjectDN, DistinguishedName issuerDN,
 			Date expiringDate, PublicKey subjectPublicKey) {
 		X509CertSelector targetConstraints = new X509CertSelector();
 		if (issuerDN != null)

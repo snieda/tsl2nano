@@ -103,6 +103,8 @@ public class Crypt implements ISecure {
     public static final String ALGO_PBEWithMD5AndDES = "PBEWithMD5AndDES";
     public static final String ALGO_PBEWithHmacSHA1AndDESede = "PBEWithHmacSHA1AndDESede";
 
+    public static final String HASH_SHA_256 = "SHA-256";
+
     // Salt
     private static final byte[] salt8 = {
         (byte) 0x71, (byte) 0x37, (byte) 0x30, (byte) 0x23,
@@ -633,6 +635,9 @@ public class Crypt implements ISecure {
         throw new UnsupportedOperationException();
     }
 
+    public String sign(String data) {
+    	return sign(data, HASH_SHA_256);
+    }
     /**
      * signs data hashing it with given algorithm and encrypting with the current private key
      * 
@@ -644,6 +649,9 @@ public class Crypt implements ISecure {
         return encrypt(hashHex(data, hashAlgorithm));
     }
 
+    public void verify(String data, String signature) {
+    	verify(data, signature, HASH_SHA_256);
+    }
     /**
      * checks the given signature against the given data hashing it with given algorithm and decrypting it with the public key.
      * 

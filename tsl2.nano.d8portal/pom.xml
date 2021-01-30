@@ -1,0 +1,26 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>net.sf.tsl2nano</groupId>
+    <artifactId>tsl2.nano.h5-package</artifactId>
+    <version>2.4.6-SNAPSHOT</version>
+  </parent>
+  <artifactId>tsl2.nano.d8portal</artifactId>
+  <name>TSL2 Framework Document Portal</name>
+  <description>up-/download private encrypted documents with metainformations (organisation -> clients)</description>
+	<properties>
+		<module.parent>..</module.parent>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>net.sf.tsl2nano</groupId>
+			<artifactId>tsl2.nano.common</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-client</artifactId>
+			<version>4.6.0.Final</version>
+		</dependency>
+	</dependencies>
+</project>

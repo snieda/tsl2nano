@@ -5,6 +5,7 @@ import java.io.IOException;
 import javax.security.auth.x500.X500Principal;
 
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.util.Util;
 import sun.security.x509.X500Name;
 
 /**
@@ -15,7 +16,7 @@ import sun.security.x509.X500Name;
  * @author Tom
  * @version $Revision$
  */
-public class TrustedOrganisation {
+public class DistinguishedName {
 
     /** CN */
     private String commonName;
@@ -35,19 +36,20 @@ public class TrustedOrganisation {
     private String streetAddress;
     /** E */
     private String email;
+    private boolean outputSimpleValuesOnly;
 
-    public TrustedOrganisation(String commonName,
+    public DistinguishedName(String commonName,
             String countryName) {
         this(commonName, countryName, null);
     }
     
-    public TrustedOrganisation(String commonName,
+    public DistinguishedName(String commonName,
             String countryName,
             String stateOrProvince) {
         this(commonName, countryName, stateOrProvince, null, null, null);
     }
     
-    public TrustedOrganisation(String commonName,
+    public DistinguishedName(String commonName,
             String countryName,
             String stateOrProvince,
             String localityName,
@@ -56,7 +58,7 @@ public class TrustedOrganisation {
         this(commonName, countryName, stateOrProvince, localityName, organizationName, organizationalUnitName, null, null, null);
     }
 
-    public TrustedOrganisation(String commonName,
+    public DistinguishedName(String commonName,
             String countryName,
             String stateOrProvince,
             String localityName,
@@ -76,7 +78,7 @@ public class TrustedOrganisation {
         this.email = email;
     }
 
-    public TrustedOrganisation(String dn) {
+    public DistinguishedName(String dn) {
         String[] dnParts = dn.split(",");
         for (String dnPart : dnParts) {
             dnPart = dnPart.trim();
@@ -105,67 +107,71 @@ public class TrustedOrganisation {
 
     }
 
+    /** poor hack to have the values on getters (without keynames). will be ignored on toString() */
+    public void setOutputSimpleValuesOnly() {
+        outputSimpleValuesOnly = true;
+    }
     public String getCountryName() {
         if (countryName == null || countryName.trim().length() == 0) {
             return "";
         }
-        return "C=" + countryName;
+        return (outputSimpleValuesOnly ? "" : "C=") + countryName;
     }
 
     public String getCommonName() {
         if (commonName == null || commonName.trim().length() == 0) {
             return "";
         }
-        return "CN=" + commonName;
+        return (outputSimpleValuesOnly ? "" : "CN=") + commonName;
     }
 
     public String getStateOrProvince() {
         if (stateOrProvince == null || stateOrProvince.trim().length() == 0) {
             return "";
         }
-        return "ST=" + stateOrProvince;
+        return (outputSimpleValuesOnly ? "" : "ST=") + stateOrProvince;
     }
 
     public String getLocalityName() {
         if (localityName == null || localityName.trim().length() == 0) {
             return "";
         }
-        return "L=" + localityName;
+        return (outputSimpleValuesOnly ? "" : "L=") + localityName;
     }
 
     public String getOrganizationName() {
         if (organizationName == null || organizationName.trim().length() == 0) {
             return "";
         }
-        return "O=" + organizationName;
+        return (outputSimpleValuesOnly ? "" : "O=") + organizationName;
     }
 
     public String getOrganizationalUnitName() {
         if (organizationalUnitName == null || organizationalUnitName.trim().length() == 0) {
             return "";
         }
-        return "OU=" + organizationalUnitName;
+        return (outputSimpleValuesOnly ? "" : "OU=") + organizationalUnitName;
     }
 
     public String getDomainComponent() {
         if (domainComponent == null || domainComponent.trim().length() == 0) {
             return "";
         }
-        return "DC=" + domainComponent;
+        return (outputSimpleValuesOnly ? "" : "DC=") + domainComponent;
     }
 
     public String getStreetAddress() {
         if (streetAddress == null || streetAddress.trim().length() == 0) {
             return "";
         }
-        return "STREET=" + streetAddress;
+        return (outputSimpleValuesOnly ? "" : "STREET=") + streetAddress;
     }
 
     public String getEmail() {
         if (email == null || email.trim().length() == 0) {
             return "";
         }
-        return "EMAILADDRESS=" + email;
+        return (outputSimpleValuesOnly ? "" : "EMAILADDRESS=") + email;
     }
 
     public X500Name toX500Name() {
@@ -183,15 +189,15 @@ public class TrustedOrganisation {
 
     @Override
     public String toString() {
-        return (getCommonName().length() > 0 ? getCommonName() : "") +
-            (getOrganizationalUnitName().length() > 0 ? ", " + getOrganizationalUnitName() : "") +
-            (getOrganizationName().length() > 0 ? ", " + getOrganizationName() : "") +
-            (getLocalityName().length() > 0 ? ", " + getLocalityName() : "") +
-            (getStateOrProvince().length() > 0 ? ", " + getStateOrProvince() : "") +
-            (getDomainComponent().length() > 0 ? ", " + getDomainComponent() : "") +
-            (getStreetAddress().length() > 0 ? ", " + getStreetAddress() : "") +
-            (getEmail().length() > 0 ? ", " + getEmail() : "") +
-            (getCountryName().length() > 0 ? ", " + getCountryName() : "");
+        boolean outputSimpleValuesOnly = this.outputSimpleValuesOnly;
+        this.outputSimpleValuesOnly = false;
+        try {
+            return Util.toString(",", getCommonName(), getOrganizationalUnitName(), getOrganizationName(),
+                    getLocalityName(), getStateOrProvince(), getDomainComponent(), getStreetAddress(), getEmail(),
+                    getCountryName());
+        } finally {
+            this.outputSimpleValuesOnly = outputSimpleValuesOnly;
+        }
     }
 
     @Override
@@ -201,7 +207,7 @@ public class TrustedOrganisation {
         if (o == null || getClass() != o.getClass())
             return false;
 
-        TrustedOrganisation that = (TrustedOrganisation) o;
+        DistinguishedName that = (DistinguishedName) o;
 
         if (commonName != null ? !commonName.equals(that.commonName) : that.commonName != null)
             return false;

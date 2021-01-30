@@ -106,11 +106,11 @@ public class SystemUtil {
             if (waitFor) {
 	            int result = process.waitFor();
 	            LOG.info("\n-------------------------------------------------------------------\n"
-	                + "process '" + StringUtil.toString(command, -1) + "' finished with errorlevel: " + result);
-	            if (result != 0) {
-	                LOG.error("process errors: " + StringUtil.fromInputStream(process.getErrorStream(), "\n"));
-	            }
-	            LOG.info("\n-------------------------------------------------------------------");
+                    + "process '" + StringUtil.toString(command, -1) + "' finished with errorlevel: " + result
+                    + "\n-------------------------------------------------------------------\n");
+	            // if (result != 0) { //the stream is always empty
+	            //     LOG.error("process errors: " + StringUtil.fromInputStream(process.getErrorStream(), "\n"));
+	            // }
             }
         } catch (final Exception e) {
             ManagedException.forward(e);

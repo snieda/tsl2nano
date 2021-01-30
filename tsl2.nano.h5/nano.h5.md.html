@@ -4331,7 +4331,7 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.4.3  | 22.11.2020 | session-id direct on session-start (before authentication), beancollector presents hor on simple lists, vnet -> gravizo, h2-199 (-ifNotExists), h5+entityreplication, yaml-support, bugfixes
  2.4.4  | 06.12.2020 | menu-hover now opaque, bugfixes on database-replication, quicksearch etc.
  2.4.5  | 20.12.2020 | bugfixes, dependency security fixes, query result fixes, NEW: session menu (edit context)
- 2.4.6  | 17.01.2021 | web security extensions
+ 2.4.6  | 07.02.2021 | web security extensions, fixes, new module 'd8poral' in pre-evaluation mode
 
  2.5.0  | xx.xx.2021 | see EnvUpdate2v5v0: refactorings: serialization of actions with primitive attributes, move incubation packages
 
@@ -5258,7 +5258,7 @@ Property -> {Organisation, Party, Item}
 - [ ] test add Action (rule/action/web etc.)
 - [ ] test on add listener
 - [ ] htmlunit test for configuration
-- [ ] Lucene Test aktivieren
+- [v] Lucene Test aktivieren
 - [ ] re-activate refactored test 'NanoH5NetUtilTest' (problems with jersey HtmlServer)
 - [v] hibernate-tools on external  database
    - [v] add new database driver
@@ -5280,7 +5280,7 @@ Property -> {Organisation, Party, Item}
 - [ ] serviceaccess + directaccess
    - [ ] generic database replication
    - [ ] script tool
-   - [ ] persistence provider (NanoEntityManagerFactory)
+   - [x] persistence provider (NanoEntityManagerFactory)
 - [v] MANUEL INTEGRATION TESTS
    - [ ] mvn deploy
    - [ ] local test from scratch with anyway --> login --> change address --> save --> admin --> change to yaml --> restart
@@ -5309,6 +5309,8 @@ Property -> {Organisation, Party, Item}
 - [v] release hochladen
 
 ### Cloud
+
+- [ ] perhaps use 'certbot' as https redirection on port 80
 
 ####  heroku - http 1.1
 
@@ -5360,15 +5362,15 @@ deploy:
    * [v] don't run in extra thread!
 
 
-## TODOs 11.12.2020
+## TODOs since 11.12.2020
 
 * [v] REF: resolve vulnerabilities of github dependencies
 * [v] FEATURE: Configure Pool as RuleEngine?
 * [v] FEATURE: provide input on variables of any rule - or provide edit of session context
-* REF: change serialization of actions
-* test on openjdk to resolve build/test failure in github
-   * ClassFinder: not as singleton but per thread (using Thread.current().getContextClassLoader())
-   * printutiltest:11 nullpointer
+* [?] REF: change serialization of actions
+* [ ] test on openjdk to resolve build/test failure in github
+   * [ ] ClassFinder: not as singleton but per thread (using Thread.current().getContextClassLoader())
+   * [ ] printutiltest:11 nullpointer
 * [v] quick-search on combined value expressions not found
    * [v] search field should not be checked against constraint
 * [v] Query attribute names sometimes with ', '
@@ -5376,3 +5378,9 @@ deploy:
    * [v] mapvalue constaint type will be reused on wrong items (like Pool with type: WebsocketExceptionHandler) 
 * [ ] language / internationalization tests, current tests only working on de_DE
 * [v] lucene test (but @ignored in cause of collision with NanoH5Test)
+
+* [x] create new module for a secure document repository portal
+   * [ ] add REST + GUI, CLI
+   * [ ] review other git encrypting tools like: git-crypt, git-secret, blackbox, git-remote-gcrypt
+         for cloud-storages: boxcryptor (german tool for dropbox), cryptomator (german tool for any cloud storage)
+* [ ] fix test collisions on h5 (tests using h2 database)
