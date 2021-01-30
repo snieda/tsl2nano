@@ -4,6 +4,9 @@ import java.text.Format;
 import java.text.ParseException;
 import java.util.List;
 
+/**
+ * describtes an item of a main argument - used by Argumentator.
+ */
 public class Arg<T extends Comparable<T>> {
     String name;
     String description;

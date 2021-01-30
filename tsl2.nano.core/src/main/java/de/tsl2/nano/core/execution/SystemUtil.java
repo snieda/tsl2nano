@@ -79,6 +79,9 @@ public class SystemUtil {
      * @param command command with arguments
      */
     public static final Process execute(File directory, boolean waitFor, boolean inheritIO, String... command) {
+    	ManagedException.assertion(command != null && command.length > 0 
+                && (command.length > 1 || !command[0].matches(".*\\s.*"))
+                , "the first command element should not contain parameters (separated by spaces", command);
         final ProcessBuilder processBuilder = new ProcessBuilder(command);
         processBuilder.directory(directory);
         Process process = null;

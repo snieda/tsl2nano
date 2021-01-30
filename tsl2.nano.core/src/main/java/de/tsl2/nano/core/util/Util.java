@@ -26,7 +26,6 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.core.secure.Crypt;
 
 /**
  * utils for general purpose on simple objects.
@@ -477,6 +476,16 @@ public class Util {
         return buf.append(")").toString();
     }
 
+    public static String toString(String seprator, Object... values) {
+        StringBuilder buf = new StringBuilder();
+        for (int i = 0; i < values.length; i++) {
+            if (isEmpty(values[i]))
+                continue;
+            buf.append((buf.length()>0 ? seprator : "") + values[i]);
+        }
+        return buf.toString();
+    }
+
 	public static ClassLoader getContextClassLoader() {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         if (cl == null) {
@@ -490,6 +499,10 @@ public class Util {
 
     /**let the trY to the standard exception handling  */
     public static <T> T trY(SupplierEx<T> callback) {
+        return ManagedException.trY(callback);
+    }
+    /**let the trY to the standard exception handling  */
+    public static <T> T trY(SupplierExVoid<T> callback) {
         return ManagedException.trY(callback);
     }
 	public static final void assert_(boolean assertion, String message, Object... args) {
