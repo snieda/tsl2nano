@@ -11,7 +11,9 @@ package de.tsl2.nano.core.execution;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +23,7 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * simple performance and memory analyzer - to be usable by tests and debugging. use
@@ -119,7 +122,7 @@ public class Profiler {
      */
     public long starting(Object classOrInstance, String name) {
         ProfilerObject po = ProfilerObject.fastConstruct();
-        po.clazz = getClazz(classOrInstance);
+        po.clazz = classOrInstance != null ? getClazz(classOrInstance) : Object.class;
         po.name = name;
         po.start = System.currentTimeMillis();
         po.startMem = getUsedMem();
@@ -219,13 +222,18 @@ public class Profiler {
         return Profiler.si().ending(action, name);
     }
 
+    public List<Long> compareTests(String description, final long test_count, final Runnable... actions) {
+    	return compareTests(description, false, test_count, actions);
+    }
     /**
-     * compareTests NOT IMPLEMENTED YET
-     * 
+     * calls all given actions in the given order and returns durations in the order of given action array. 
+     * if checkDurationOrder is true, a check (throwing an assertion) is done on duration increase from first to last action
+     * @param description test description
      * @param test_count count to start every action
      * @param actions different tests to do
+     * @return list of durations (same order than given actions)
      */
-    public void compareTests(String description, final long test_count, final Runnable... actions) {
+    public List<Long> compareTests(String description, boolean checkDurationOrder, final long test_count, final Runnable... actions) {
         log(description);
         List<Long> durations = new ArrayList<Long>(actions.length);
         for (int i = 0; i < actions.length; i++) {
@@ -235,8 +243,18 @@ public class Profiler {
         for (int i = 0; i < actions.length; i++) {
             log("test " + i + ": " + sdf.format(new Date(durations.get(i))));
         }
+        if (checkDurationOrder)
+        	checkComparedTests(durations, actions);
+        return durations;
     }
 
+    public void checkComparedTests(List<Long> durations, Runnable...actions) {
+    	ArrayList<Long> sortedDurations = new ArrayList<>(durations);
+		Collections.sort(sortedDurations);
+		ManagedException.assertion(Arrays.equals(sortedDurations.toArray(), durations.toArray()), 
+				"the expected duration (in ms) order was: " + StringUtil.toString(sortedDurations, -1) +
+				" -> but was: " + StringUtil.toString(durations, -1));
+    }
     /**
      * main test: junit test expects the standard constructor - not available.
      */

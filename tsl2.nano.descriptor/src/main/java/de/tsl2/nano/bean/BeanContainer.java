@@ -153,56 +153,56 @@ public class BeanContainer implements IBeanContainer {
         final IAction idFinder = new CommonAction("empty.service.idFinder") {
             @Override
             public Object action() {
-            	LOG.info("call to '" + this.getId() + "' (parameter: " + StringUtil.toString(getParameter(), 80) + "): on empty service actions -> doing nothing!");
+            	LOG.debug("call to '" + this.getId() + "' (parameter: " + StringUtil.toString(getParameter(), 80) + "): on empty service actions -> doing nothing!");
                 return EMPTY_LIST.size() > 0 ? EMPTY_LIST.iterator().next() : null;
             }
         };
         final IAction<Collection<?>> relationFinder = new CommonAction<Collection<?>>("empty.service.relationFinder") {
             @Override
             public Collection<?> action() {
-            	LOG.info("call to '" + this.getId() + "' (parameter: " + StringUtil.toString(getParameter(), 80) + "): on empty service actions -> doing nothing!");
+            	LOG.debug("call to '" + this.getId() + "' (parameter: " + StringUtil.toString(getParameter(), 80) + "): on empty service actions -> doing nothing!");
                 return EMPTY_LIST;
             }
         };
         final IAction<Collection<?>> exampleFinder = new CommonAction<Collection<?>>("empty.service.exampleFinder") {
             @Override
             public Collection<?> action() {
-            	LOG.info("call to '" + this.getId() + "' (parameter: " + StringUtil.toString(getParameter(), 80) + "): on empty service actions -> doing nothing!");
+            	LOG.debug("call to '" + this.getId() + "' (parameter: " + StringUtil.toString(getParameter(), 80) + "): on empty service actions -> doing nothing!");
                 return EMPTY_LIST;
             }
         };
         final IAction<Collection<?>> betweenFinder = new CommonAction<Collection<?>>("empty.service.betweenFinder") {
             @Override
             public Collection<?> action() {
-            	LOG.info("call to '" + this.getId() + "' (parameter: " + StringUtil.toString(getParameter(), 80) + "): on empty service actions -> doing nothing!");
+            	LOG.debug("call to '" + this.getId() + "' (parameter: " + StringUtil.toString(getParameter(), 80) + "): on empty service actions -> doing nothing!");
                 return EMPTY_LIST;
             }
         };
         final IAction<Collection<?>> queryFinder = new CommonAction<Collection<?>>("empty.service.queryFinder") {
             @Override
             public Collection<?> action() {
-            	LOG.info("call to '" + this.getId() + "' (parameter: " + StringUtil.toString(getParameter(), 80) + "): on empty service actions -> doing nothing!");
+            	LOG.debug("call to '" + this.getId() + "' (parameter: " + StringUtil.toString(getParameter(), 80) + "): on empty service actions -> doing nothing!");
                 return EMPTY_LIST;
             }
         };
         final IAction<Collection<?>> queryMapFinder = new CommonAction<Collection<?>>("empty.service.queryMapFinder") {
             @Override
             public Collection<?> action() {
-            	LOG.info("call to '" + this.getId() + "' (parameter: " + StringUtil.toString(getParameter(), 80) + "): on empty service actions -> doing nothing!");
+            	LOG.debug("call to '" + this.getId() + "' (parameter: " + StringUtil.toString(getParameter(), 80) + "): on empty service actions -> doing nothing!");
                 return EMPTY_LIST;
             }
         };
         final IAction lazyRelationResolver = new CommonAction("empty.service.lazyRelationResolver") {
             @Override
             public Object action() {
-            	LOG.info("call to '" + this.getId() + "' (parameter: " + StringUtil.toString(getParameter(), 80) + "): on empty service actions -> doing nothing!");
+            	LOG.debug("call to '" + this.getId() + "' (parameter: " + StringUtil.toString(getParameter(), 80) + "): on empty service actions -> doing nothing!");
                 return getParameter()[0];
             }
         };
         final IAction saveAction = new CommonAction("empty.service.saveAction") {
             @Override
             public Object action() {
-            	LOG.info("call to '" + this.getId() + "' (parameter: " + StringUtil.toString(getParameter(), 80) + "): on empty service actions -> doing nothing!");
+            	LOG.debug("call to '" + this.getId() + "' (parameter: " + StringUtil.toString(getParameter(), 80) + "): on empty service actions -> doing nothing!");
                 //do nothing, return the instance itself
                 return getParameter()[0];
             }
@@ -210,35 +210,35 @@ public class BeanContainer implements IBeanContainer {
         final IAction deleteAction = new CommonAction("empty.service.deleteAction") {
             @Override
             public Object action() {
-            	LOG.info("call to '" + this.getId() + "' (parameter: " + StringUtil.toString(getParameter(), 80) + "): on empty service actions -> doing nothing!");
+            	LOG.debug("call to '" + this.getId() + "' (parameter: " + StringUtil.toString(getParameter(), 80) + "): on empty service actions -> doing nothing!");
                 return null;
             }
         };
         final IAction<IAttributeDef> attrAction = new CommonAction<IAttributeDef>("empty.service.attrAction") {
             @Override
             public IAttributeDef action() {
-            	LOG.info("call to '" + this.getId() + "' (parameter: " + StringUtil.toString(getParameter(), 80) + "): on empty service actions -> doing nothing!");
+            	LOG.debug("call to '" + this.getId() + "' (parameter: " + StringUtil.toString(getParameter(), 80) + "): on empty service actions -> doing nothing!");
                 return null;
             }
         };
         final IAction permissionAction = new CommonAction("empty.service.permissionAction") {
             @Override
             public Object action() {
-            	LOG.info("call to '" + this.getId() + "' (parameter: " + StringUtil.toString(getParameter(), 80) + "): on empty service actions -> doing nothing!");
+            	LOG.debug("call to '" + this.getId() + "' (parameter: " + StringUtil.toString(getParameter(), 80) + "): on empty service actions -> doing nothing!");
                 return true;
             }
         };
         final IAction persistableAction = new CommonAction("empty.service.persistableAction") {
             @Override
             public Object action() {
-            	LOG.info("call to '" + this.getId() + "' (parameter: " + StringUtil.toString(getParameter(), 80) + "): on empty service actions -> doing nothing!");
+            	LOG.debug("call to '" + this.getId() + "' (parameter: " + StringUtil.toString(getParameter(), 80) + "): on empty service actions -> doing nothing!");
                 return Serializable.class.isAssignableFrom((Class<?>) getParameter()[0]);
             }
         };
         final IAction<Integer> executeAction = new CommonAction<Integer>("empty.service.executeAction") {
             @Override
             public Integer action() {
-            	LOG.info("call to '" + this.getId() + "' (parameter: " + StringUtil.toString(getParameter(), 80) + "): on empty service actions -> doing nothing!");
+            	LOG.debug("call to '" + this.getId() + "' (parameter: " + StringUtil.toString(getParameter(), 80) + "): on empty service actions -> doing nothing!");
                 return null;
             }
         };

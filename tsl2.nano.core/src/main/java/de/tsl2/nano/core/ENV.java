@@ -335,8 +335,7 @@ public class ENV implements Serializable {
     }
 
     public File getConfigFile() {
-        //TODO: ext: xml or yaml
-        return getConfigFile(getConfigPath() + CONFIG_NAME, getFileExtension());
+        return getConfigFile(getConfigPath(), getFileExtension());
     }
 
     private static File getConfigFile(String dir, String ext) {

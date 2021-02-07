@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import de.tsl2.nano.action.IAction;
@@ -32,25 +32,26 @@ import de.tsl2.nano.h5.plugin.INanoPlugin;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.serviceaccess.IAuthorization;
 
+@net.jcip.annotations.NotThreadSafe
 public class NanoHandlerTest implements ENVTestPreparation {
-    private static String MYTEST_DIR;
     private static final String MEINHANDLERTEST = "MEINHANDLERTEST";
 
-    @BeforeClass
-    public static void setUp() {
-        MYTEST_DIR = ENVTestPreparation.setUp() + TARGET_TEST + "nanohandler/" ;
+    @Before
+    public void setUp() {
+        ENVTestPreparation.super.setUp("h5");
     }
 
-    @AfterClass
-    public static void tearDown() {
+    @After
+    public void tearDown() {
         NanoHandlerApp.ID = null;
-//        ENVTestPreparation.tearDown();
+//        ENVTestPreparation.super.tearDown();
     }
 
     @Test
-    public void testNanoHandlerCallbacks() {
-        Thread thread = ConcurrentUtil.startDaemon("test", ()->NanoHandlerApp.main(new String[] {Main.DEFAULT_URL, MEINHANDLERTEST}));
-        ConcurrentUtil.sleep(9000);
+    public void testNanoHandlerCallbacks() throws InterruptedException {
+        String serviceUrl = "http://localhost:8066";
+        Thread thread = ConcurrentUtil.startDaemon("test", ()->NanoHandlerApp.main(new String[] {serviceUrl, MEINHANDLERTEST}));
+        ConcurrentUtil.sleep(20000);
         
         assertEquals(MEINHANDLERTEST, ENV.get(MEINHANDLERTEST));
         
@@ -79,6 +80,8 @@ public class NanoHandlerTest implements ENVTestPreparation {
         nanoH5.serve("1", Method.POST, header, new HashMap<>(), new HashMap<>());
         assertEquals(MEINHANDLERTEST, header.get(MEINHANDLERTEST));
         
+        // NetUtil.get(serviceUrl + nanoH5.hashCode() + "-shutdown");
+        nanoH5.stop();
         thread.interrupt();
     }
 }

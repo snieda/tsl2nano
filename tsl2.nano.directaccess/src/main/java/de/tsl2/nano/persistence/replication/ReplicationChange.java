@@ -13,6 +13,7 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -38,9 +39,12 @@ public class ReplicationChange {
     String table;
 
     /** table row id of changed data */
-    @Column
+    @Column @Id
     Object id;
 
+    protected ReplicationChange() {
+	}
+    
     /**
      * constructor
      * 

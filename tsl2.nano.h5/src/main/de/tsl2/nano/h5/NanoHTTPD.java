@@ -2677,7 +2677,8 @@ public abstract class NanoHTTPD extends Main {
             new NanoHTTPD(port, wwwroot) {}.start();
         } catch (IOException ioe) {
             System.err.println("Couldn't start server:\n" + ioe);
-            System.exit(-1);
+            // System.exit(-1);
+            throw new RuntimeException(ioe);
         }
 
         System.out.println("Now serving files on port " + port + " from \"" + wwwroot + "\"");

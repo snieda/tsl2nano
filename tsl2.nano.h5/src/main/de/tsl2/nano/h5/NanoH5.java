@@ -14,7 +14,6 @@ import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.FieldPosition;
 import java.text.Format;
@@ -22,13 +21,11 @@ import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Random;
 import java.util.Stack;
 import java.util.concurrent.Executors;
 
@@ -52,6 +49,7 @@ import de.tsl2.nano.collection.ExpiringMap;
 import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.IEnvChangeListener;
+import de.tsl2.nano.core.Main;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -63,7 +61,6 @@ import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.messaging.ChangeEvent;
 import de.tsl2.nano.core.messaging.EventController;
-import de.tsl2.nano.core.secure.Crypt;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
@@ -72,7 +69,6 @@ import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.h5.NanoHTTPD.Response;
 import de.tsl2.nano.h5.NanoHTTPD.Response.Status;
 import de.tsl2.nano.h5.collector.QueryResult;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
@@ -187,6 +183,11 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         Plugins.process(INanoPlugin.class).configuration(ENV.getProperties(), ENV.services());
     }
 
+	@Override
+	protected void initENVService() {
+        ENV.addService(Main.class, this);
+	}
+	
 	public static final void registereExpressionsAndPools() {
 		//the classes registere themselves on loading...
         AbstractExpression.registerExpression(PathExpression.class);
@@ -235,10 +236,11 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
                 LOG.error(e1);
             }
             ConcurrentUtil.sleep(3000);
-            LOG.info("=======================================");
-            LOG.info("NANOH5 SHUTDOWN -> VM System.exit(-1) !");
-            LOG.info("=======================================");
-            System.exit(-1);
+            LOG.info("==============================================");
+            LOG.info("NANOH5 SHUTDOWN -> NanoHTTPD stopped on Error!");
+            LOG.info("==============================================");
+            // System.exit(-1);
+            stop();
         }
     }
 
@@ -355,7 +357,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
             if (System.in.read() == -1)
                 throw new IllegalStateException("Empty System-Input returning -1");
         } catch (Exception ex) {
-            LOG.debug("server mode without input console available (message: " + ex.toString() + ")");
+            LOG.info("server mode without input console available (message: " + ex.toString() + ")");
             while (true) {
                 ConcurrentUtil.sleep(3000, false);
             }
@@ -586,7 +588,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
 				@Override
 				public void run() {
 					ConcurrentUtil.sleep(1000);
-					System.exit(0);
+					// System.exit(0);
+                    stop();
 				}
 			});
         }
@@ -1183,7 +1186,28 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
     }
 
     @Override
+    public void stop() {
+        clear();
+        super.stop();
+        LogFactory.stop();
+    }
+
+    @Override
     public void reset() {
+        String configPath = clear();
+        
+        ENV.reload();
+        ENV.setProperty(ENV.KEY_CONFIG_PATH, configPath);
+        ENV.setProperty("service.url", serviceURL.toString());
+        BeanClass.call("de.tsl2.nano.core.classloader.NetworkClassLoader", "resetUnresolvedClasses", ENV.getConfigPath());
+        Thread.currentThread().setContextClassLoader(appstartClassloader);
+
+        HtmlUtil.tableDivStyle = null;
+        createPageBuilder();
+        builder = ENV.get(IPageBuilder.class);
+    }
+
+    private String clear() {
         String configPath = ENV.get(ENV.KEY_CONFIG_PATH, "config");
 
         accept(new ChangeEvent("app.configuration.persist.yaml", null, ENV.get("app.configuration.persist.yaml", false)));
@@ -1208,6 +1232,9 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         BeanContainerUtil.clear();
         Bean.clearCache();
         AttributeCover.resetTypeCache();
+        lastRequest = null;
+        requests = 0;
+        new HashMap<Object, NanoH5Session>(sessions).forEach( (id, session) -> session.close());
         sessions.clear();
 
         IPageBuilder pageBuilder = ENV.get(IPageBuilder.class);
@@ -1215,18 +1242,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
             pageBuilder.reset();
         else
             new Html5Presentation<>().reset();
-        
-        ENV.reload();
-        ENV.setProperty(ENV.KEY_CONFIG_PATH, configPath);
-        ENV.setProperty("service.url", serviceURL.toString());
-        BeanClass.call("de.tsl2.nano.core.classloader.NetworkClassLoader", "resetUnresolvedClasses", ENV.getConfigPath());
-        Thread.currentThread().setContextClassLoader(appstartClassloader);
-
-        HtmlUtil.tableDivStyle = null;
-        createPageBuilder();
-        builder = ENV.get(IPageBuilder.class);
-        lastRequest = null;
-        requests = 0;
+        return configPath;
     }
 
     @Override

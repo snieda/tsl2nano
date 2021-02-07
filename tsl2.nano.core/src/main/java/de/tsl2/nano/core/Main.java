@@ -39,12 +39,13 @@ public class Main {
     /**
      * constructor
      */
-    public Main() {
+    protected Main() {
         initENVService();
     }
 
 	protected void initENVService() {
-		ENV.addService(Main.class, this);
+    	if (ENV.isAvailable())
+    		ENV.addService(Main.class, this);
 	}
     
     /**
@@ -109,12 +110,15 @@ public class Main {
             if (port != null) {
                 url = ENV.get("service.url", DEFAULT_URL);
                 ENV.setProperty("service.url", StringUtil.substring(url, null, ":", true) + ":" + port);
-                
             }
         }
     }
 
     public void start() {
+        throw new UnsupportedOperationException();
+    }
+
+    public void stop () {
         throw new UnsupportedOperationException();
     }
     

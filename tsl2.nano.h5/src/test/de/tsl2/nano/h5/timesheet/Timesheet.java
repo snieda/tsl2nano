@@ -50,6 +50,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.Supplier;
 
 import org.anonymous.project.Account;
 import org.anonymous.project.Address;
@@ -103,9 +104,11 @@ import de.tsl2.nano.bean.def.ValueColumn;
 import de.tsl2.nano.collection.TableList;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.ScriptUtil;
 import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.NanoH5App;
@@ -558,14 +561,15 @@ public class Timesheet extends NanoH5App {
         bean.getAttribute(ATTR_TOTIME).setValue(DateUtil.getTime(20, 0));
         assertEquals(new BigDecimal(11.5), c.getValue());
 
-        Map lc = bean.getAttribute(ATTR_VALUE).getPresentation().getLayoutConstraints();
+        //checking rulecovers with volatile caches (the iterating is an workaround as on debugging it works always)
+        Map lc = iterateRuleCoverWithVolatile(() -> bean.getAttribute(ATTR_VALUE).getPresentation().getLayoutConstraints());
         assertEquals(redColorStyle, lc.get("style"));
 
-        String style = bean.getAttribute(ATTR_FROMDATE).getPresentation().getLayoutConstraints();
+        String style = iterateRuleCoverWithVolatile(() -> bean.getAttribute(ATTR_FROMDATE).getPresentation().getLayoutConstraints());
         assertEquals(redColorStyle, style);
 
         //test it on value-column
-        style = bean.getAttribute(ATTR_FROMDATE).getColumnDefinition().getPresentable().getLayoutConstraints();
+        style = iterateRuleCoverWithVolatile(() -> bean.getAttribute(ATTR_FROMDATE).getColumnDefinition().getPresentable().getLayoutConstraints());
         assertEquals(redColorStyle, style);
 
         //test it on value-column in beancollector -> here it must be null, because its a definition, not a bean value!
@@ -602,4 +606,20 @@ public class Timesheet extends NanoH5App {
         }
         assertEquals(6, count);
     }
+
+    /** on parallel testing the volatile may not work 
+     * @param attrValue */
+	private <T> T iterateRuleCoverWithVolatile(Supplier<T> supplier) {
+		int i = 0;
+		T result = null;
+		do {
+        	result = supplier.get();
+        	if (result != null)
+        		return result;
+        	System.out.println("iteration " + i + " to evaluate rulecover value");
+        	ConcurrentUtil.sleep(100);
+        	i++;
+        } while (i < 10);
+		return result;
+	}
 }
