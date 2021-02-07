@@ -71,7 +71,7 @@ public class Updater {
      * @return true, if version was updated to newVersion, otherwise false
      */
     public boolean run(String configFile, String currentVersion, String newVersion, Object environment) {
-        if (currentVersion != null && !currentVersion.equals(newVersion)) {
+        if (currentVersion != null && newVersion != null && !currentVersion.equals(newVersion)) {
             String vo = getVersionNo(currentVersion);
             String vn = getVersionNo(newVersion);
             try {

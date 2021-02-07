@@ -353,7 +353,7 @@ public class NetUtil {
      * delegates to {@link #download(URL, String, boolean, boolean)}
      */
     public static File download(String strUrl, String destDir) {
-        return download(url(strUrl), destDir, false, true);
+        return download(url(strUrl), destDir, false, false);
     }
 
     /**

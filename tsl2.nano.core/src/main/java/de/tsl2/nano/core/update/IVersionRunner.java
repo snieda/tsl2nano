@@ -36,7 +36,8 @@ public interface IVersionRunner {
 	default void run(ENV env, String currentVersion) {
 		if (isUpdated(env.getConfigFile().getPath(), currentVersion))
 			return;
-		runPreviousVersionUpdate(env, currentVersion);
+		if (previousVersion() != null)
+			runPreviousVersionUpdate(env, currentVersion);
         LogFactory.log("VERSION UPDATE: " + previousVersion() + " -> " + getVersion());
 		update(env, currentVersion);
         LogFactory.log("VERSION NOW   : " + getVersion());
