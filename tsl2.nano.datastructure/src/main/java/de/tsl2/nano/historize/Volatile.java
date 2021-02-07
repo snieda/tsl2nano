@@ -9,6 +9,8 @@
  */
 package de.tsl2.nano.historize;
 
+import java.util.function.Supplier;
+
 import de.tsl2.nano.core.util.Util;
 
 /**
@@ -16,7 +18,7 @@ import de.tsl2.nano.core.util.Util;
  * short time. mostly, the value wont change between two user actions, so this class provides a mechanism to hold the
  * evaluated value for a very short time.
  * <p/>
- * use:
+ * use 1:
  * 
  * <pre>
  * if (myVolatileValue.expired()) {
@@ -26,6 +28,10 @@ import de.tsl2.nano.core.util.Util;
  * return myVolatileValue.get();
  * </pre>
  * 
+ * use 2 (use a callback as supplier, may be an performance problem on high frequency calls):
+ * 
+ * <pre>
+ * get( () -> evalNewValueIfExpired() );
  * @author Tom
  * @version $Revision$
  */
@@ -36,41 +42,55 @@ public class Volatile<T> {
     long period;
     /** value to hold for a short time */
     T value;
+    /** if true, {@link #expired()} and {@link #get()} will reset the value on expiring */
+	private boolean hard;
 
     public Volatile(long period) {
         this(period, null);
     }
     
+    public Volatile(long period, T value) {
+    	this(period, value, false);
+    }
     /**
      * constructor
      * 
      * @param period of milliseconds to hold the value. this should be a value smaller than 1sec (< 1000)
      * @param value (optional) initial value.
      */
-    public Volatile(long period, T value) {
+    public Volatile(long period, T value, boolean hard) {
         super();
         this.period = period;
+        this.hard = hard;
         if (value != null) {
             set(value);
         }
     }
 
+    public void setHardResetOnExpiring(boolean hard) {
+		this.hard = hard;
+	}
+    
     /**
      * expired
-     * @return true, if value is to old.
+     * @return true, if value is to old. if #hard was set, the value will be reseted
      */
     public boolean expired() {
         boolean expired = System.currentTimeMillis() > start + period;
-        if (expired) {
+        if (expired && hard) {
             value = null;
         }
         return expired;
     }
 
     public T get() {
-        return expired() ? null : value;
+        return expired() && hard ? null : value;
     }
 
+    public T get(Supplier<T> newValueOnExpired) {
+    	return expired() ? set(newValueOnExpired.get()) : value;
+    }
+    
     public T invalidate() {
         T last = get();
        value = null;

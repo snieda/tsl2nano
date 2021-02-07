@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Attribute;
@@ -233,7 +234,7 @@ public abstract class AttributeCover<T> extends DelegationHandler<T> implements
             String name = BeanAttribute.getName(method);
             if (hasRule(name)) {
             	Volatile<T> vvalue = getVolatileValue();
-				return vvalue.expired() ? vvalue.set((T)eval(name)) : vvalue.get();
+				return vvalue.get(() -> (T)eval(name));
             }
         }
         return method.invoke(delegate, args);
@@ -241,7 +242,7 @@ public abstract class AttributeCover<T> extends DelegationHandler<T> implements
 
     private Volatile<T> getVolatileValue() {
     	if (value == null)
-    		value = new Volatile<T>(ENV.get("cache.expire.milliseconds.attributecover", 50));
+    		value = new Volatile<T>(ENV.get("cache.expire.milliseconds.attributecover", 100));
 		return value;
 	}
 

@@ -59,6 +59,7 @@ import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ISession;
+import de.tsl2.nano.core.Main;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.classloader.NetworkClassLoader;
@@ -1411,7 +1412,8 @@ public class BeanPresentationHelper<T> {
             	System.out.println("-----------------------------------------------");
             	System.out.println("shutdown action request: doing a System.exit(0)");
             	System.out.println("-----------------------------------------------");
-                System.exit(0);
+                // System.exit(0);
+                ENV.get(Main.class).stop();
                 return null;
             }
         });
