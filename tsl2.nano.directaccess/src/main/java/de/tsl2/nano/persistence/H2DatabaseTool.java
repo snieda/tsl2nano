@@ -23,8 +23,8 @@ public class H2DatabaseTool {
             return ddl;
         }
             
-        String table = "(?i:((CREATE|ALTER)(\\s+TABLE\\s+\"?)))(?i:(" + KEYWORDS + "))([^\\w])";
-        ddl = ddl.replaceAll(table, "$2$3$4" + RPL + "$5");
+        String table = "(?im:(((CREATE|ALTER)(\\s+TABLE\\s+\"?))|([,(]\\s*\"?)))(?im:(" + KEYWORDS + "))(?=\\W)";
+        ddl = ddl.replaceAll(table, "$3$4$5$6" + RPL);
         // without quotations
         String column = "((^|\\(|[,])(^\"\\s*))(?i:(" + KEYWORDS + "))(^\"[\\s]+)";
         ddl = ddl.replaceAll(column, "$2$3$4" + RPL + "$5");

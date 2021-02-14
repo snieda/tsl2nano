@@ -405,6 +405,7 @@ public class NanoH5Test implements ENVTestPreparation {
     	// deep scheint mit andreren Tests zu kollidieren....
         System.setProperty("app.session.anticsrf", "false");
         System.setProperty("nanoh5test.run.deep", "true");
+        System.setProperty("app.update.interval.days", "-1");
         Properties mapper = new Properties();
         createAndTest(new Timesheet(getServiceURL(), null) {
             @Override

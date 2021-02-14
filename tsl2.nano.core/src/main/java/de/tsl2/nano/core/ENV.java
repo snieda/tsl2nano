@@ -326,7 +326,7 @@ public class ENV implements Serializable {
         		ENV.get("app.update.last", new java.sql.Date(System.currentTimeMillis())),
         		ENV.get("app.update.interval.days", 30));
         if (versionURL != null)
-            if (updater.checkAndUpdate(currentVersion, versionURL) || true /* workaround, if alreaddy downloaded...*/) {
+            if (updater.checkAndUpdate(currentVersion, versionURL)) {
 		        if (updater.run(configFile.getPath(), buildInfo, self))
 		            setProperty("app.version", buildInfo);
 //            } else if (currentVersion == null) {

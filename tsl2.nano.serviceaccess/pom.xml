@@ -11,6 +11,8 @@
 	<description>TSL2 JEE Service Access (Generic Services for Entity Access, JEE File-System-Connector, Generic Featuring, Job-Scheduling, BeanContainer, Batch, Comfortable Bean Query Definitions, JAAS, Authentification, Authorization, )</description>
 	<properties>
 		<module.parent>..</module.parent>
+		<jmockit.version>1.39</jmockit.version>
+		<argLine>${tsl2.argline.options} -javaagent:${settings.localRepository}/org/jmockit/jmockit/${jmockit.version}/jmockit-${jmockit.version}.jar</argLine>
 	</properties>
 	<build>
 		<sourceDirectory>src/main</sourceDirectory>
@@ -74,6 +76,12 @@
 		    <groupId>org.hibernate</groupId>
 		    <artifactId>hibernate-entitymanager</artifactId>
 		    <version>5.4.15.Final</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+		    <groupId>org.jmockit</groupId>
+		    <artifactId>jmockit</artifactId>
+		    <version>${jmockit.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

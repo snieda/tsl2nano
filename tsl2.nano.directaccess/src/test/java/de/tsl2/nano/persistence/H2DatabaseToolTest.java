@@ -12,7 +12,7 @@ import de.tsl2.nano.core.util.StringUtil;
 
 public class H2DatabaseToolTest {
     @Test
-    @Ignore("test failing on column 'begin'")
+//    @Ignore("test failing on column 'begin'")
     public void testReplaceKeyWords() {
         //TODO: without space before 'begin' it does not work!
         String sql = " CREATE TABLE orDer( begin Date unique not null, end Date); CREATE TABLE MYTABLE(myorder Number(5), orderme Number(5));";
@@ -37,7 +37,7 @@ public class H2DatabaseToolTest {
         
         String[] keywords = H2DatabaseTool.KEYWORDS.split("\\|");
         for (int i = 0; i < keywords.length; i++) {
-            if (keywords[i].equals("ORDER"))
+            if (keywords[i].equals("ORDER") || keywords[i].equals("CONSTRAINT"))
                 continue;
             assertFalse("wrong replacement: " + keywords[i] + DEFAULT_REPLACE_POSTFIX, result.contains(keywords[i] + DEFAULT_REPLACE_POSTFIX));
         }

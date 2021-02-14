@@ -587,7 +587,6 @@ public class Timesheet extends NanoH5App {
         assertEquals(qpool.get(STAT_TIMESHEET_STATISTICS, Query.class).getColumnNames(), Arrays.asList("Month", "Workdays", "Hours", "Dayhours", "Ill", "Holiday"));
         assertEquals(qpool.get(STAT_PROJECTS, Query.class).getColumnNames(), Arrays.asList("Project", "Hours"));
         assertEquals(qpool.get(STAT_TYPES, Query.class).getColumnNames(), Arrays.asList("Type", "Hours"));
-        super.stop();
         
         //test virtual beans
         Collection<BeanDefinition<?>> virtualDefinitions = BeanDefinition.loadVirtualDefinitions();
@@ -605,6 +604,7 @@ public class Timesheet extends NanoH5App {
                 count++;
         }
         assertEquals(6, count);
+        super.stop();
     }
 
     /** on parallel testing the volatile may not work 

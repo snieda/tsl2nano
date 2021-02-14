@@ -159,7 +159,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
                     log("error: LogFactory couldn't save xml properties");
                 }
             }
-            ConcurrentUtil.startDaemon("logger", self);
+            ConcurrentUtil.startDaemon("tsl2-logger-" + self.outputFile, self);
             Runtime.getRuntime().addShutdownHook(Executors.defaultThreadFactory().newThread(new Runnable() {
                 @Override
                 public void run() {

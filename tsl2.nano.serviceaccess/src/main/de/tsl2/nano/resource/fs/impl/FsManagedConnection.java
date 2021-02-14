@@ -360,7 +360,7 @@ public class FsManagedConnection implements ManagedConnection, FsConnection {
      * be ignored.
      */
     public static final boolean isUseAbsoluteFilePath(String rootDirPath) {
-        return rootDirPath.equals(FsConnectionFactory.MODE_ABSOLUTE_PATH);
+        return rootDirPath != null && rootDirPath.equals(FsConnectionFactory.MODE_ABSOLUTE_PATH);
     }
 
     /**

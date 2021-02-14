@@ -27,7 +27,6 @@ public class NanoHTTPDTest {
 		HttpClient httpClient = new HttpClient("http://localhost:8080");
 		InputStream response = httpClient.send("GET", "text/html", null);
 		System.out.println(StringUtil.fromInputStream(response));
-		
 	}
 
 }

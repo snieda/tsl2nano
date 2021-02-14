@@ -40,7 +40,7 @@ public class NanoH5IT extends NanoH5Unit {
 
     @Override
     protected int dbPort() {
-    	return 9092;
+    	return 9092; //must be the same as in nanoh5 pom.xml on pre-integration-test start 
     }
     
 
@@ -58,7 +58,6 @@ public class NanoH5IT extends NanoH5Unit {
 
     @Test
     public void testNano() throws Exception {
-        Process process = null;
         HtmlPage page = null;
         PipedOutputStream myOut = SystemUtil.setPipedInput();
         try {
@@ -94,12 +93,6 @@ public class NanoH5IT extends NanoH5Unit {
                     }
                     page = back(page);
                 }
-            }
-            if (process != null) {
-                System.out.println("trying to shutdown nanoh5 server through ENTER...");
-                if (myOut != null)
-                    myOut.write("\n\n".getBytes());
-//                process.destroy();
             }
         }
     }

@@ -65,14 +65,7 @@ public class FileServiceBean implements IFileService, IFileLocalService {
      */
     @Override
     public BufferedReader getFileReader(String fileName) {
-        try {
-            final FsConnection con = getConnection();
-            return new BufferedReader(new InputStreamReader(con.getInputStream(fileName)));
-        } catch (final Exception e) {
-            closeConnection();
-            ManagedException.forward(e);
-        }
-        return null;
+        return new BufferedReader(new InputStreamReader(new ByteArrayInputStream(getFileContent(fileName))));
     }
 
     /**
@@ -132,17 +125,7 @@ public class FileServiceBean implements IFileService, IFileLocalService {
      */
     @Override
     public void writeFile(String destFileName, byte[] data, boolean overwrite) throws IOException {
-        try {
-            final FsConnection con = getConnection();
-            final InputStream stream = new ByteArrayInputStream(data);
-            //TODO: stream serializing problem
-            LOG.debug("writing " + data.length + " bytes to file " + destFileName);
-            con.writeFile(destFileName, stream, overwrite);
-        } catch (final Exception e) {
-            ManagedException.forward(e);
-        } finally {
-            closeConnection();
-        }
+    	writeFile(destFileName, new ByteArrayInputStream(data), overwrite);
     }
 
     /**

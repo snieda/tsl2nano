@@ -12,16 +12,29 @@ package de.tsl2.nano.serviceaccess.test;
 import java.io.IOException;
 import java.nio.charset.MalformedInputException;
 
+import javax.security.auth.Subject;
+
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import de.tsl2.nano.core.util.MapUtil;
+import de.tsl2.nano.resource.fs.FsConnectionFactory;
+import de.tsl2.nano.resource.fs.impl.FsConnectionRequestInfo;
+import de.tsl2.nano.resource.fs.impl.FsManagedConnection;
 import de.tsl2.nano.service.util.BaseServiceTest;
 import de.tsl2.nano.service.util.FileServiceBean;
 import de.tsl2.nano.service.util.IFileService;
 //import sun.io.MalformedInputException;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
+import mockit.Expectations;
+import mockit.Injectable;
+import mockit.Mock;
+import mockit.MockUp;
+import mockit.Mocked;
+import mockit.Tested;
+import mockit.integration.junit4.JMockit;
 
 /**
  * Tests for FileService
@@ -31,17 +44,49 @@ import de.tsl2.nano.serviceaccess.ServiceFactory;
  * @author Thomas Schneider
  * @version $Revision$
  */
+@RunWith(JMockit.class)
 public class FileServiceTest extends BaseServiceTest {
-
+	@Tested FileServiceBean fileServiceBean;
+	@Injectable FsConnectionFactory fsConnectionFactory;
+	
+	@Injectable Subject subject;
+	
+	@Tested(fullyInitialized = true) 
+	@Injectable FsConnectionRequestInfo info;
+	
+	@Tested(fullyInitialized = true) 
+	@Injectable FsManagedConnection fsManagedConnection;
+	
     @BeforeClass
     public static void setUp() {
         System.setProperty(ServiceFactory.NO_JNDI, Boolean.toString(true));
-//        createTestData("akten");
     }
+
+	private void createMockUps() {
+		new MockUp<FsManagedConnection>() {
+        	@Mock public void $init(@Mocked Subject subject, @Tested FsConnectionRequestInfo info) {
+        		info.setRootDirPath("./");
+        	}
+        	@Mock
+        	public boolean isUseAbsoluteFilePath(String rootDirPath) {
+        		return false;
+        	}
+        	@Mock
+        	public boolean isUseAbsoluteFilePath() {
+        		return false;
+        	}
+		};
+	}
 
     @Ignore
     @Test
     public void testStandardMode() throws Exception {
+    	info.setRootDirPath("./");
+		new Expectations() {{
+			info.getRootDirPath(); result = "./";
+			fsManagedConnection.isUseAbsoluteFilePath(); result = false;
+		}};
+        createMockUps();
         final String testFile = "fileservice-testfile.txt";
         final String testFileContent = "Dies ist eine Testdatei\nmit drei Zeilen\n";
 
@@ -74,7 +119,7 @@ public class FileServiceTest extends BaseServiceTest {
      */
     private void doFileTest(String testFile, String testFileContent) throws Exception {
         ServiceFactory.createInstance(getClass().getClassLoader());
-        ServiceFactory.instance().setInitialServices(MapUtil.asMap(IFileService.class.getName(), new FileServiceBean()));
+        ServiceFactory.instance().setInitialServices(MapUtil.asMap(IFileService.class.getName(), fileServiceBean));
         final IFileService fileService = getService(IFileService.class);
         //first: create it!
         assert !fileService.exists(testFile);
