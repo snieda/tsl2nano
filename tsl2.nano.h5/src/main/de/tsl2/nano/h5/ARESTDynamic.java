@@ -2,6 +2,7 @@ package de.tsl2.nano.h5;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -13,6 +14,7 @@ import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
+import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
@@ -74,6 +76,8 @@ public abstract class ARESTDynamic<RESPONSE> {
 		try {
 			if (url.equals(BASE_PATH) || method.equals("OPTIONS"))
 				return createResponse(Status.OK, printManual());
+			else if (url.equals(BASE_PATH + "/entities"))
+				return createResponse(Status.OK, printEntities());
 			checkAuthentication(url, method, header);
 			checkMethod(method);
 			String beanName = get(url, BASE_PATH, "entity");
@@ -240,14 +244,32 @@ public abstract class ARESTDynamic<RESPONSE> {
 		return BeanContainer.instance().getBeansByExample(bean.getInstance());
 	}
 
-	public String createDigest(String url, String method, String args) {
+	public static String createDigest(String url, String method, String args) {
 		return StringUtil.toHexString(Util.cryptoHash((method + "+" + url + "+" + args + "+" + LocalDate.now() + "+" + API_KEY).getBytes()));
 	}
 	
+	String printEntities() {
+		StringBuilder buf = new StringBuilder(
+				  "\n-------------------- RESTDynamic available entities ------------------------------");
+		List<Class> beanTypes = ENV.get("service.loadedBeanTypes", new LinkedList<Class>());
+		BeanDefinition<?> beanDef;
+		for (Class b : beanTypes) {
+			beanDef = BeanDefinition.getBeanDefinition(b);
+			buf.append("\n" + beanDef.getName());
+			List<IAttributeDefinition<?>> attributes = beanDef.getBeanAttributes();
+			for (IAttributeDefinition attr : attributes) {
+				buf.append("\n\t" + StringUtil.fixString(attr.getName(), 20) + ": " + attr.getDescription());
+			}
+		}
+		buf.append("\n---------------------------------------------------------------------------------\n");
+		return buf.toString();
+	}
+
 	String printManual() {
 		return 
 				  "\n-------------------- RESTDynamic usage informations ------------------------------\n"
 				+ "\nREQUEST FORMAT: " + USAGE
+				+ "\n\tentities            : metainfo as list of all available entities"
 				+ "\nGET,PUT,DELETE:"
 				+ "\n\tentity              : simple class lower name of entity to be accessed"
 				+ "\n\tattribte-or-action  : entities bean attribute name to be accessed"

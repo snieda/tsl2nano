@@ -17,6 +17,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.lang.Thread.State;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -57,6 +58,7 @@ import de.tsl2.nano.core.cls.ClassFinder;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.ProgressBar;
+import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.execution.ThreadState;
 import de.tsl2.nano.core.http.EHttpClient;
 import de.tsl2.nano.core.log.LogFactory;
@@ -701,5 +703,31 @@ public class CoreUtilTest implements ENVTestPreparation {
 		System.out.println(count);
 		list.add(1);
 		return count++ > 2;
+	}
+	
+	@Test
+	//TODO: check result
+	public void testSoftExit() {
+		final List<String> status = Collections.synchronizedList(new LinkedList<>());
+		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+			@Override
+			public void run() {
+				status.add("shutdown hook called");
+			}
+		}));
+		Log log = LogFactory.getLog(getClass());
+		Worker<Object, Object> worker = ConcurrentUtil.createParallelWorker("testworker");
+		worker.run(new Runnable() {
+			@Override
+			public void run() {
+				status.add("shutdown started");
+				ConcurrentUtil.sleep(5000);
+			}
+		});
+		
+		SystemUtil.softExitOnCurrentThreadGroup(null, true);
+//		ConcurrentUtil.sleep(500); //is alread interrupted!
+//		assertEquals(4, Thread.currentThread().getThreadGroup().activeCount());
+//		ConcurrentUtil.doForCurrentThreadGroup(t -> assertEquals(State.TERMINATED, t.getState()));
 	}
 }

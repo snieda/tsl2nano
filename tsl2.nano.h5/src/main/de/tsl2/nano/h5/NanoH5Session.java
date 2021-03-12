@@ -268,7 +268,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
      */
     BeanDefinition injectContext(BeanDefinition beandef) {
         //inject search filter only on first time - before first search...
-        if (beandef != null && beandef.isMultiValue() && !((BeanCollector) beandef).wasActivated()) {
+        if (beandef != null && beandef.isMultiValue() && beandef instanceof BeanCollector && !((BeanCollector) beandef).wasActivated()) {
             //fill search parameters...
             Iterator<IRange> ranges = this.context.get(IRange.class);
             Class type;
@@ -373,6 +373,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
         String msg = "[undefined]";
         ManagedException ex = null;
         try {
+            logRequest(uri, method, header, parms, files);
             cacheReloaded = false;
             if (method.equals("POST") && !(parms.get(WebSecurity.HIDDEN_NAME) == null && nav.current() == null))
             	webSec.checkAntiCSRFToken(this, parms.get(WebSecurity.HIDDEN_NAME));
@@ -380,23 +381,6 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
             //refresh session values on the current thread
             assignSessionToCurrentThread(true, MapUtil.filter(header, "User-Agent"));
 
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(
-                    String.format("serving request:\n\turi: %s\n\tmethod: %s\n\theader: %s\n\tparms: %s\n\tfiles: %s",
-                        uri,
-                        method,
-                        header,
-                        parms,
-                        files));
-            } else {
-                LOG.info(String.format("serving request " + requests + " : uri: %s, method: %s, %s, parms: %s",
-                    uri,
-                    method,
-                    MapUtil.filter(header, "http-client-ip", "User-Agent"),
-                    parms));
-            }
-            if (RESTDynamic.canRest(uri))
-            	return new RESTDynamic().serve(uri, method, header, parms, files);
             //WORKAROUND for uri-problem
             String referer = header.get("referer");
             if (parms.containsKey(IAction.CANCELED)
@@ -443,6 +427,8 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
             }
         } catch (Throwable e /*respect errors like NoClassDefFound...the application should continue!*/) {
             LOG.error(e);
+            if (nav == null) // -> session closed
+            	return server.createResponse(Status.BAD_REQUEST, MIME_HTML, e.getLocalizedMessage() != null ? e.getLocalizedMessage() : "Request unauthorized");
             ex = new ManagedException(e) {
                 /** serialVersionUID */
                 private static final long serialVersionUID = 1L;
@@ -485,6 +471,25 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
         webSec.addSessionHeader(this, response);
         return Plugins.process(INanoPlugin.class).handleResponse(response);
     }
+
+	private void logRequest(String uri, String method, Map<String, String> header, Map<String, String> parms,
+			Map<String, String> files) {
+		if (LOG.isDebugEnabled()) {
+		    LOG.debug(
+		        String.format("serving request:\n\turi: %s\n\tmethod: %s\n\theader: %s\n\tparms: %s\n\tfiles: %s",
+		            uri,
+		            method,
+		            header,
+		            parms,
+		            files));
+		} else {
+		    LOG.info(String.format("serving request " + requests + " : uri: %s, method: %s, %s, parms: %s",
+		        uri,
+		        method,
+		        MapUtil.filter(header, "http-client-ip", "User-Agent"),
+		        parms));
+		}
+	}
 
     public String createAntiCSRFToken() {
     	return webSec.createAntiCSRFToken(this);
@@ -597,6 +602,14 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
         String msg = "";
         if (exceptionHandler.hasExceptions()) {
             msg = StringUtil.toFormattedString(exceptionHandler.clearExceptions(), 200, false);
+        }
+        if (returnCode instanceof BeanCollector) {
+        	BeanCollector collector = (BeanCollector) returnCode;
+    		Map preAdjustContext = collector.preAdjustContext(getContext());
+        	if (preAdjustContext != null) {
+        		nav.add(collector);
+        		returnCode = preAdjustContext;
+        	}
         }
         BeanDefinition<?> model = injectContext(nav.next(returnCode));
         if (model != null)

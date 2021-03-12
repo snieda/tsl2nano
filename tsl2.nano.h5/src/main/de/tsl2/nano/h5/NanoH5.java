@@ -8,6 +8,7 @@ import static de.tsl2.nano.bean.def.IBeanCollector.MODE_SEARCHABLE;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.lang.Thread.State;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -49,6 +50,7 @@ import de.tsl2.nano.collection.ExpiringMap;
 import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.IEnvChangeListener;
+import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.Main;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
@@ -391,6 +393,16 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         }
     }
 
+	private NanoH5Session getSession(Map<String, String> header, InetAddress requestor) {
+		NanoH5Session session;
+		Object sessionID = webSec.getSessionID(header, requestor);
+		session = sessions.get(sessionID);
+		//fallback to requestor - if cookie or etag is wrong!
+		if (session == null && sessionID != requestor) //yes, id. object!
+		    session = sessions.get(requestor);
+		return session;
+	}
+
     public NanoH5Session getSession(InetAddress address) {
         return sessions.get(address);
     }
@@ -472,11 +484,19 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
             Map<String, String> parms,
             Map<String, String> files) {
 
-            String method = m.name();
-            NanoH5Session session = null;
-            long startTime = 0;
-            try {
+        String method = m.name();
+        NanoH5Session session = null;
+        long startTime = 0;
+        try {
             Plugins.process(INanoPlugin.class).requestHandler(uri, m, header, parms, files);
+            InetAddress requestor = ((Socket) ((Map) header).get("socket")).getInetAddress();
+            if (RESTDynamic.canRest(uri)) {
+            	session = getSession(header, requestor);
+            	if (session != null && checkSessionTimeout(session, requestor)) {
+            		addRestAuthorizationFromSession(session, uri, method, header);
+            	}
+            	return new RESTDynamic().serve(uri, method, header, parms, files);
+            }
             if (method.equals("GET") && !isAdmin(uri) && !RESTDynamic.canRest(uri)) {
                 // serve files
                 if (!NumberUtil.isNumber(uri.substring(1)) && HtmlUtil.isURI(uri)
@@ -491,7 +511,6 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
             startTime = System.currentTimeMillis();
             //TODO: in InternetExporer/Edge we get sometimes IP4 and sometimes IP6. should we set system property java.net.preferIPv6Addresses?
             //           sessions.keySet().iterator().next().getAllByName(requestor.getHostName()).equals(requestor) returns false
-            InetAddress requestor = ((Socket) ((Map) header).get("socket")).getInetAddress();
             Request req = new Request(requestor, uri, m, header, parms, files);
             if (lastRequest != null && lastRequest.equals(req)) {//waiting for the first request to 
                 LOG.warn("duplicated request from " + requestor);
@@ -499,25 +518,20 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
             }
             lastRequest = req;
             //ETag from Browser: If-None-Match
-            Object sessionID = webSec.getSessionID(header, requestor);
-            session = sessions.get(sessionID);
-            //fallback to requestor - if cookie or etag is wrong!
-            if (session == null && sessionID != requestor) //yes, id. object!
-                session = sessions.get(requestor);
+            session = getSession(header, requestor);
             // application commands
-            if (uri.endsWith("help"))
+            if (uri.endsWith("/help"))
                 return help();
             if (isAdmin(uri)) {
                 control(StringUtil.substring(uri, String.valueOf(hashCode())+"-", null), session);
             }
             if (session != null && session.getNavigationStack() == null) {
-                sessions.remove(sessionID);
+                session.close();
                 session = null;
             }
             //if a user reconnects on the same machine, we remove his old session
             if (session != null && session.getUserAuthorization() != null && parms.containsKey("connectionUserName")
                 && !parms.get("connectionUserName").equals(session.getUserAuthorization().getUser().toString())) {
-                sessions.remove(sessionID);
                 session.close();
                 session = null;
             }
@@ -525,24 +539,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
                 //on a new session, no parameter should be set
                 session = createSession(requestor);
             } else {//perhaps session was interrupted/closed but not removed
-                boolean done = session.nav != null && session.nav.done();
-                if (!session.check(ENV.get("session.timeout.millis", 30 * DateUtil.T_MINUTE),
-                    ENV.get("session.timeout.throwexception", false))) {
-                    //TODO: show page with 'session expired'
-                    // session expired!
-                    if (ENV.get("session.workflow.close", false)) {
-                        session.close();
-                        sessions.remove(sessionID);
-                        session = createSession(requestor);
-                    }
-                    if (done) {
-                        // the workflow was done, now create the entity browser
-                        LOG.info("session-workflow of " + session + " was done. creating an entity-browser now...");
-                        session.nav = createGenericNavigationModel(true);
-                        //don't lose the connection - the first item is the login
-    //                    session.nav.next(session.nav.toArray()[1]);
-                    }
-                } else if (session.response != null && method.equals("GET") && parms.size() < 2  && !RESTDynamic.canRest(uri)/* contains 'QUERY_STRING = null' */
+                if (checkSessionTimeout(session, requestor) 
+                	&& session.response != null && method.equals("GET") && parms.size() < 2/* contains 'QUERY_STRING = null' */
                     && (uri.length() < 2 || header.get("referer") == null) || isDoubleClickDelay(session)) {
                     LOG.debug("reloading cached page...");
                     try {
@@ -565,6 +563,33 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         session.startTime = startTime;
         return session.serve(uri, method, header, parms, files);
     }
+
+	private void addRestAuthorizationFromSession(ISession session, String uri, String method, Map<String, String> header) {
+		header.put("authorization", ARESTDynamic.createDigest(uri, method, ""));
+		((Map)header).put("session", session);
+		header.put("user", ((IAuthorization)session.getUserAuthorization()).getUser().toString());
+	}
+
+	private boolean checkSessionTimeout(NanoH5Session session, InetAddress requestor) {
+		if (!session.check(ENV.get("session.timeout.millis", 30 * DateUtil.T_MINUTE),
+				ENV.get("session.timeout.throwexception", false))) {
+			// TODO: show page with 'session expired'
+			if (ENV.get("session.workflow.close", false)) {
+				session.close();
+				session = createSession(requestor);
+			}
+			boolean done = session.nav != null && session.nav.done();
+			if (done) {
+				// the workflow was done, now create the entity browser
+				LOG.info("session-workflow of " + session + " was done. creating an entity-browser now...");
+				session.nav = createGenericNavigationModel(true);
+				// don't lose the connection - the first item is the login
+//                    session.nav.next(session.nav.toArray()[1]);
+			}
+			return false;
+		}
+		return true;
+	}
 
     private boolean isAdmin(String uri) {
         return uri != null && uri.contains(String.valueOf(hashCode()));
@@ -1185,11 +1210,21 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         return ENV.getTempPath() + START_HTML_FILE;
     }
 
+    public static boolean isNestedApplicationStart() {
+    	return Thread.currentThread().getStackTrace().length > 20 || Thread.currentThread().getThreadGroup().getParent() != null;
+    }
+
     @Override
     public void stop() {
+    	LOG.info("===> NANOH5 SERVER SHUTDOWN! <===");
         clear();
         super.stop();
         LogFactory.stop();
+        if (!ENV.get("app.systemexit", true) || isNestedApplicationStart())
+        	//SystemUtil.softExitOnCurrentThreadGroup(null, ENV.get("app.softexit.runhooks", false));
+        	DatabaseTool.shutdownDBServerDefault();
+        else
+        	System.exit(0);
     }
 
     @Override
@@ -1199,7 +1234,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         ENV.reload();
         ENV.setProperty(ENV.KEY_CONFIG_PATH, configPath);
         ENV.setProperty("service.url", serviceURL.toString());
-        BeanClass.call("de.tsl2.nano.core.classloader.NetworkClassLoader", "resetUnresolvedClasses", ENV.getConfigPath());
+        BeanClass.callStatic("de.tsl2.nano.core.classloader.NetworkClassLoader", "resetUnresolvedClasses", ENV.getConfigPath());
         Thread.currentThread().setContextClassLoader(appstartClassloader);
 
         HtmlUtil.tableDivStyle = null;

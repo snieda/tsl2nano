@@ -54,6 +54,16 @@ public class RESTDynamicTest {
 	}
 	
 	@Test
+	public void testMetaInfo() {
+		String url = RESTDynamic.BASE_PATH + "/entities";
+		assertTrue(RESTDynamic.canRest(url));
+		Response response = new RESTDynamic().serve(url, "GET", null, null);
+		String result = ByteUtil.toString(response.getData(), "UTF8");
+		System.out.println(result);
+		assertTrue(result.contains("RESTDynamic available entities"));
+	}
+	
+	@Test
 	public void testDeactivated() {
 		System.setProperty("app.rest.active", "false");
 		String url = RESTDynamic.BASE_PATH;

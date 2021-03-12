@@ -289,6 +289,15 @@ public class ConcurrentUtil {
         threadLocals.clear();
         waiters.clear();
     }
+    public static void doForCurrentThreadGroup(Consumer<Thread> consumer) {
+		ThreadGroup threadGroup = Thread.currentThread().getThreadGroup();
+		Thread[] threads = new Thread[threadGroup.activeCount()];
+		threadGroup.enumerate(threads, true);
+		LOG.info("doing " + consumer +  " on current thread group:\n" + StringUtil.toFormattedString(threads, -1));
+		for (int i = 0; i < threads.length; i++) {
+			consumer.accept(threads[i]);
+		}
+    }
 }
 
 /**
@@ -362,5 +371,4 @@ class Worker<INPUT, OUTPUT> {
     public Map<INPUT, OUTPUT> getResult() {
         return result;
     }
-
 }

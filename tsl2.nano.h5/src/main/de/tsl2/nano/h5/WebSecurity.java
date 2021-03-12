@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.Map;
 
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.secure.Crypt;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -17,6 +18,8 @@ import de.tsl2.nano.h5.NanoHTTPD.Response;
  * @author ts
  */
 public class WebSecurity {
+	private static final String SEP = "---";
+
 	private String antiCSRFKey;
 	
 	private static final String ENV_PREF = "app.session.";
@@ -29,9 +32,16 @@ public class WebSecurity {
     	return ENV.get(PREF_ANTICSRF, true);
     }
     public String createAntiCSRFToken(NanoH5Session session) {
-    	return Crypt.encrypt(session.getKey() + "-" 
-    		+ (session.getWorkingObject() != null ? session.getWorkingObject().getId() : "NOTHING") + "-" 
-    			+ System.currentTimeMillis(), getAntiCSRFKey(), ENV.get(PREF_ANTICSRF + ".algorithm", DEF_ALG));
+    	try {
+			return Crypt.encrypt(session.getKey() + SEP 
+				+ (session.getWorkingObject() != null ? session.getWorkingObject().getId() : "NOTHING") + SEP 
+					+ System.currentTimeMillis(), getAntiCSRFKey(), ENV.get(PREF_ANTICSRF + ".algorithm", DEF_ALG));
+		} catch (Exception e) {
+			if (session != null)
+				session.close();
+			ManagedException.forward(e);
+			return null;
+		}
     }
 	private String getAntiCSRFKey() {
 		if (antiCSRFKey == null)
@@ -42,11 +52,11 @@ public class WebSecurity {
 		if (!useAntiCSRFToken()/* || antiCSRFKey == null*/)
 			return;
 		String sessionInfo = Crypt.decrypt(token, getAntiCSRFKey(), ENV.get(PREF_ANTICSRF + ".algorithm", DEF_ALG));
-		String[] splitInfo = sessionInfo.split("[-]");
+		String[] splitInfo = sessionInfo.split("[-]{3}");
 		boolean attack = false;
 		if (splitInfo[0].equals(session.getKey())) {
 			Date now = new Date();
-			Date tokenAge = new Date(Long.valueOf(splitInfo[2]) + ENV.get(PREF_ANTICSRF + ".maxage.milliseconds", 300*1000));
+			Date tokenAge = new Date(Long.valueOf(splitInfo[2]) + ENV.get(PREF_ANTICSRF + ".maxage.milliseconds", 900*1000));
 			if (tokenAge.before(now))
 				attack = true;
 			else {
@@ -59,8 +69,10 @@ public class WebSecurity {
 		else
 			attack = true;
 		
-		if (attack)
-			throw new IllegalStateException("anti CSRF token failure: possible CSRF attact");
+		if (attack) {
+			session.close();
+			throw new IllegalStateException("request outdated or unauthorized! closing session!");
+		}
 	}
 
 	public Response addSessionHeader(NanoH5Session session, Response response) {
@@ -81,7 +93,7 @@ public class WebSecurity {
                 : requestor;
     }
 
-	public void addSessionID(NanoH5Session session, Response response) {
+	protected void addSessionID(NanoH5Session session, Response response) {
         if (session.getKey() != null) {
             String sessionMode = ENV.get(ENV_PREF + "id", "Cookie");
             String maxAge = "Max-Age=" + (ENV.get("session.timeout.millis", 30 * DateUtil.T_MINUTE) / 1000) + ";";

@@ -8,10 +8,11 @@
 /temp
 /*.log
 /.metadata
-.project
-.classpath
+.*
 /**/.settings/*eclipse.*.core.prefs
 /**/tsl2.nano.*/.vscode
 /**/tsl2.nano.*/.project
 /**/tsl2.nano.*/.classpath
 /**/logfactory.*ml
+/**/*.swp
+/**/tags

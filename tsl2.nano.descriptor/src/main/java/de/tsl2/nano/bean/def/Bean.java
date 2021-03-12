@@ -805,6 +805,10 @@ public class Bean<T> extends BeanDefinition<T> {
         return bean;
     }
 
+    public static boolean canWrap(Object obj) {
+    	return !Util.isContainer(obj) || obj instanceof Map || obj.getClass().isArray();
+    }
+    
     @Override
     //not yet used on creation
     public void autoInit(String name) {
@@ -831,7 +835,10 @@ public class Bean<T> extends BeanDefinition<T> {
         Set keySet = map.keySet();
         Object v;
         if (map.keySet() != null) {//on a proxy instance, keySet() may return null!
+        	bean.attributeFilter = new String[map.size()];
+        	int i = 0;
             for (Object k : keySet) {
+            	bean.attributeFilter[i++] = String.valueOf(k);
                 v = map.get(k);
                 bean.addAttribute(
                     new BeanValue(bean.instance,

@@ -68,7 +68,7 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>>, I
     @Attribute
     boolean nativeQuery;
     @ElementMap(entry = "parameter", attribute = true, inline = true, keyType = String.class, key = "name", value = "type", required = false)
-    Map<String, ? extends Serializable> parameter;
+    Map<String, Serializable> parameter;
     private transient ArrayList<String> columnNames;
 
     /**
@@ -84,7 +84,7 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>>, I
      * @param query
      * @param parameter
      */
-    public Query(String name, String query, boolean nativeQuery, Map<String, ? extends Serializable> parameter) {
+    public Query(String name, String query, boolean nativeQuery, Map<String, Serializable> parameter) {
         super();
         this.name = name;
         this.operation = query;
@@ -103,7 +103,12 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>>, I
         String sqlvar;
         for (String p : pars) {
             sqlvar = p.replace('.', 'X');
-            args.put(sqlvar, context.get(p));
+            if (parameter.get(p) != null) {
+            	args.put(sqlvar, parameter.get(p));
+            	if (!context.containsKey(p))
+            		context.put(p, parameter.get(p));
+            } else if (context.containsKey(p))
+            	args.put(sqlvar, context.get(p));
             op = op.replace(":" + p, ":" + sqlvar);
         }
         
@@ -132,10 +137,12 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>>, I
 	}
     
     @Override
-    public Map<String, ? extends Serializable> getParameter() {
+    public Map<String, Serializable> getParameter() {
         if (parameter == null) {
             parameter = new LinkedHashMap<String, Serializable>();
             String p;
+            //remove all comments
+            operation.replaceAll("--.*", "");
             //we allow both: the named query syntax and the most java used ant-like-variables
             operation = operation.replace("${", ":").replace("}", "");
             StringBuilder q = new StringBuilder(operation);
@@ -182,15 +189,17 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>>, I
     public Map<String, Object> checkedArguments(Map<String, Object> arguments, boolean strict) {
         boolean asSequence = AbstractRunnable.asSequence(arguments);
         Map<String, Object> args = new LinkedHashMap<String, Object>();
+        if (parameter.isEmpty()) //only defined parameters are allowed - otherwise we get an exception by jpa query implementation
+        	return args;
         Set<String> keySet = arguments.keySet();
-        Set<String> defs = !Util.isEmpty(parameter) ? parameter.keySet() : arguments.keySet();
-        Iterator<Object> values = arguments.values().iterator();
+        Set<String> parameterKeys = parameter.keySet();
+        Iterator<Object> valueIt = arguments.values().iterator();
         Object arg = null;
         int i = 0;
-        for (String par : defs) {
+        for (String par : parameterKeys) {
             if (asSequence) {
                 par = "" + (++i);
-                arg = values.next();
+                arg = valueIt.next();
             } else {
                 if (!keySet.contains(par)) {
                     if (strict)

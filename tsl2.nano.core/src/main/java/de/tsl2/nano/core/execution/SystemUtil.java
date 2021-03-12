@@ -17,10 +17,13 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.CollectionUtil;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
@@ -257,5 +260,49 @@ public class SystemUtil {
         System.setIn(testIn);
         return myOut;
     }
-    
+
+    /**
+     * tries to stop all waiting/blocking/running threads in current thread group!
+     * threads that weren't started already will be started (like shutdown hooks).
+     * 
+	 * NOTE: to avoid a real System.exit() to be restartable in any container, this
+	 * tries to simulate a localized exit
+     * @param expression (optional) expression of thead name to be matched (regexp)
+     */
+    public static void softExitOnCurrentThreadGroup(String expression, boolean runShutdownHooks) {
+		Runtime.getRuntime().runFinalization();
+		if (runShutdownHooks)
+			runShutdownHooks();
+		ConcurrentUtil.doForCurrentThreadGroup(t -> {
+			if (t == Thread.currentThread()) //yes, compare references!
+				return;
+			if (expression == null || t.getName().matches(expression)) {
+				try {
+					switch (t.getState()) {
+					case NEW:
+						LOG.info("starting    : " + t.getId() + " " + t.getName());
+						t.run(); // run shutdown hooks
+						break;
+					case RUNNABLE:
+					case WAITING:
+					case BLOCKED:
+					case TIMED_WAITING:
+						LOG.info("interrupting : " + t.getId() + " " + t.getName() + " " + t.getState());
+						t.interrupt(); // stop all blockings
+						break;
+					default:
+						LOG.info("terminated   : " + t.getId() + " " + t.getName() + " " + t.getState());
+						break;
+					}
+				} catch(Exception ex) {
+					LOG.error(ex.toString()); //don't escalate. we try to cleanup...
+				}
+			}
+		});
+		//stop yourself as last
+		Thread.currentThread().interrupt();
+	}
+	public static void runShutdownHooks() {
+		BeanClass.callStatic("java.lang.ApplicationShutdownHooks", "runHooks");
+	}
 }

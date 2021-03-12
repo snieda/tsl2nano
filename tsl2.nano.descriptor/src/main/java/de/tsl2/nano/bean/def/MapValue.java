@@ -19,7 +19,7 @@ import de.tsl2.nano.core.cls.IValueAccess;
 import de.tsl2.nano.core.messaging.EventController;
 
 /**
- * Object[] value.
+ * map value.
  * 
  * @author Tom
  * @version $Revision$

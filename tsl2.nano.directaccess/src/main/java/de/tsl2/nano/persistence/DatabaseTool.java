@@ -300,7 +300,7 @@ public class DatabaseTool {
 	public static void runDBServer(String... args) {
 		String cmd = ENV.get("app.database.internal.server.run.cmd", "org.h2.tools.Server.main(-baseDir, {0}, -tcp, -tcpPort, {1}, -trace, -ifNotExists)");
 		LOG.info("running database internally: " + cmd + " <- [" + Arrays.toString(args) + "]");
-		BeanClass.call(cmd, args);
+		BeanClass.callEx(cmd, args);
 	}
 	
 	public static void shutdownDBServerDefault() {
@@ -318,7 +318,7 @@ public class DatabaseTool {
 		String cmd = ENV.get("app.database.internal.server.shutdown.cmd", "org.h2.tools.Server.shutdownTcpServer({0}, {1}, true, true)");
 		LOG.info("shutdown database server: " + cmd + "[" + args[0] + ", ***]");
         try {
-        	BeanClass.call(cmd, args);
+        	BeanClass.callEx(cmd, args);
         } catch (Exception e) {
             LOG.error(e.toString());
         }
@@ -341,7 +341,7 @@ public class DatabaseTool {
 		String cmd = ENV.get("app.database.internal.server.dump.cmd", "org.h2.tools.RunScript.main(-driver, {0}, -url, {1}, -user, {2}, -password, {3}"); //, -script, dump.sql"); //, -showResults");
 		LOG.info("dump database : " + cmd + "[" + args[0] + ", ***]");
         try {
-        	BeanClass.call(cmd, args);
+        	BeanClass.callEx(cmd, args);
         } catch (Exception e) {
             LOG.error(e.toString());
         }

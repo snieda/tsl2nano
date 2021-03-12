@@ -3,6 +3,7 @@ package de.tsl2.nano.h5;
 import java.util.Map;
 
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.h5.NanoHTTPD.Response;
 import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.IAuthorization;
@@ -17,7 +18,16 @@ public class RESTDynamic extends ARESTDynamic<NanoHTTPD.Response> {
 		if (ENV.get("app.login.administration", true))
 			return;
 		super.checkAuthentication(url, method, header);
+		if (preAuthenticatedSession(header))
+			return;
 		getAuthentication(header);
+	}
+
+	private boolean preAuthenticatedSession(Map header) {
+		NanoH5Session session = (NanoH5Session) header.get("session");
+		if (session != null && WebSecurity.getSessionID(header, session.getInetAddress()).equals(session.getKey()))
+			return true;
+		return false;
 	}
 
 	private IAuthorization getAuthentication(Map<String, String> header) {

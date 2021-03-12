@@ -40,7 +40,7 @@ public class AttachAgent {
       vmPID = vmPID == null ? getPIDofCurrentVM() : vmPID;
       //do it by reflection - it's a direct call to a sun compiler class, that may not be available in other jdks
 //      VirtualMachine vm = VirtualMachine.attach(vmPID);
-      Object vm = BeanClass.call("com.sun.tools.attach.VirtualMachine", "attach", vmPID);
+      Object vm = BeanClass.callStatic("com.sun.tools.attach.VirtualMachine", "attach", vmPID);
       log("attaching agent " + pathToAgentJar + " to VM " + vm + " : " + vm.toString());
 //      vm.loadAgent(pathToAgentJar, "");
       BeanClass.call(vm, "loadAgent", new Class[] {String.class, String.class}, pathToAgentJar, "");

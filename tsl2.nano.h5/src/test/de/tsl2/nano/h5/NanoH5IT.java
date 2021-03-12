@@ -11,6 +11,7 @@ package de.tsl2.nano.h5;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.PipedOutputStream;
 
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -19,9 +20,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.execution.SystemUtil;
-import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.specification.rules.ActionScript;
 
@@ -53,7 +52,8 @@ public class NanoH5IT extends NanoH5Unit {
     
     @After
     public void tearDown() {
-       super.tearDown();
+    	shutdownNanoHttpServer(new File("tsl2.nano.h5/target/temp/instance-id.txt"));
+    	super.tearDown();
     }
 
     @Test

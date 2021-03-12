@@ -9,12 +9,14 @@
  */
 package de.tsl2.nano.h5.collector;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.simpleframework.xml.Transient;
 import org.simpleframework.xml.core.Commit;
@@ -131,6 +133,19 @@ public class QueryResult<COLLECTIONTYPE extends Collection<T>, T> extends BeanCo
         isStaticCollection = false;
     }
 
+    @Override
+    public Map<String, Object> preAdjustContext(Map<String, Object> context) {
+    	if (Util.isEmpty(query.getParameter()))
+    		return null;
+		Set<String> keySet = query.getParameter().keySet();
+		for (String k : keySet) {
+			if (context.containsKey(k)) {
+				query.getParameter().put(k, (Serializable)context.get(k));
+			}
+		}
+		return (Map)query.getParameter();
+	}
+    
     public static QueryResult createQueryResult(String title, String stmt) {
         Query<Object> query = new Query<>(title, stmt, true, null);
         Pool queryPool = ENV.get(Pool.class);

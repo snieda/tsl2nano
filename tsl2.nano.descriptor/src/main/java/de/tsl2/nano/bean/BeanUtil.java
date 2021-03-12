@@ -682,11 +682,13 @@ private static Object deepCopy(Object src, Object dest) throws Exception {
      * @return
      */
     public static BeanDefinition<?> getBean(Object obj) {
-        return (BeanDefinition<?>) (obj instanceof BeanDefinition<?> ? obj
-            : (Util.isContainer(obj)
-                ? BeanCollector.getBeanCollector(CollectionUtil.getContainer(obj), 0)
-                : obj instanceof Serializable ? Bean.getBean((Serializable) obj)
-                    : BeanCollector.getBeanCollector(CollectionUtil.getContainer(BeanUtil.toValueMap(obj)), 0)));
+    	return (BeanDefinition<?>) (obj instanceof BeanDefinition<?> 
+    		? obj
+    			: Bean.canWrap(obj)
+    				? Bean.getBean(obj)
+    					: Util.isContainer(obj)
+    						? BeanCollector.getBeanCollector(CollectionUtil.getContainer(obj), 0)
+    							: BeanCollector.getBeanCollector(CollectionUtil.getContainer(BeanUtil.toValueMap(obj)), 0));
     }
 
     public static <T> Collection<NamedValue> asNamedCollection(Map<?, T> m) {

@@ -620,12 +620,11 @@ public class BeanClass<T> implements Serializable {
      * @param args       arguments to be filled in
      * @return result of method call
      */
-    public static Object call(String expression, Object... args) {
+    public static Object callEx(String expression, Object... args) {
         return call(expression, true, args);
     }
 
     public static Object call(String expression, boolean usePrimitives, Object... args) {
-        Object result = null;
         String cmd = MessageFormat.format(expression, args);
         String cls = StringUtil.substring(cmd, null, "(");
         String mtd = StringUtil.substring(cls, ".", null, true);
@@ -637,7 +636,7 @@ public class BeanClass<T> implements Serializable {
             args = PrimitiveUtil.string2Wrapper(cmdArgs);
         else
             args = StringUtil.trim(cmdArgs);
-        return BeanClass.call(cls, mtd, usePrimitives, args);
+        return BeanClass.callStatic(cls, mtd, usePrimitives, args);
     }
 
     /**
@@ -651,7 +650,7 @@ public class BeanClass<T> implements Serializable {
         return callMethod(instance, methodName, new Class[0], new Object[0]);
     }
 
-    public static Object call(String type, String staticMethodName, Object... args) {
+    public static Object callStatic(String type, String staticMethodName, Object... args) {
         return BeanClass.createBeanClass(type).callMethod(null, staticMethodName, null, false, args);
     }
 
@@ -659,7 +658,7 @@ public class BeanClass<T> implements Serializable {
         return BeanClass.getBeanClass(type).callMethod(null, staticMethodName, null, usePrimitives, args);
     }
 
-    public static Object call(String type, String staticMethodName, boolean usePrimitives, Object... args) {
+    public static Object callStatic(String type, String staticMethodName, boolean usePrimitives, Object... args) {
         return BeanClass.getBeanClass(load(type)).callMethod(null, staticMethodName, null, usePrimitives, args);
     }
 

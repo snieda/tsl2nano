@@ -1,6 +1,7 @@
 package de.tsl2.nano.bean.def;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Defines a bean, holding an instance of a collection. optional actions like open, new, delete may be provided.
@@ -59,7 +60,7 @@ public interface IBeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends
     /**
      * @return Returns the beanFinder.
      */
-    abstract IBeanFinder<T, ?> getBeanFinder();
+    IBeanFinder<T, ?> getBeanFinder();
 
     /**
      * @return Returns the selectionProvider.
@@ -69,7 +70,7 @@ public interface IBeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends
     /**
      * refresh
      */
-    abstract void refresh();
+    void refresh();
 
     /**
      * override this method to create an edit dialog (executeOpenCommand).
@@ -77,7 +78,7 @@ public interface IBeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends
      * @param bean bean to present in new dialog
      * @return command result
      */
-    abstract Object editItem(Object bean);
+    Object editItem(Object bean);
 
     /**
      * will be called, before object deletion. overwrite this method to do an alternate deletion or throw an exception
@@ -86,14 +87,14 @@ public interface IBeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends
      * @param selection objects to delete
      */
     @SuppressWarnings("rawtypes")
-    abstract void checkBeforeDelete(Collection selection);
+    void checkBeforeDelete(Collection selection);
 
     /**
      * deleteItem
      * 
      * @param item item to remove
      */
-    abstract void deleteItem(T item);
+    void deleteItem(T item);
 
     /**
      * ceates a new object
@@ -102,16 +103,26 @@ public interface IBeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends
      * 
      * @return new object
      */
-    abstract T createItem(T selectedItem);
+    T createItem(T selectedItem);
 
     /**
      * @return Returns the collection.
      */
     COLLECTIONTYPE getCurrentData();
     
-  /**
+    /**
      * getSearchStatus
      * @return search status as text to be used as summary/footer for the table
      */
     String getSummary();
+    
+    /**
+     * may be used by the session implementation to provide a dialog to fill all required search expression values.
+     * @param context session context to be filled into the search expression, used by the bean finder
+     * @return map containing all required names of the search expression. may be null, if no required values have
+     *         to be filled
+     */
+    default Map<String, Object> preAdjustContext(Map<String, Object> context) {
+    	return null;
+    }
 }

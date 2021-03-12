@@ -140,96 +140,6 @@ public class ServiceUtil {
         return parameter;
     }
 
-    /**
-     * @deprecated use {@link #addAndConditions(StringBuffer, Object, String, Collection)} instead
-     *             <p>
-     *             creates an ejb-ql query using the valueBean and its attribute-names to add 'and' conditions to the
-     *             where-clause. it is intelligent to find the right syntax for different attribute types. if an
-     *             attribute value holds an '*', the operator {@linkplain #OP_LIKE} will be used instead of the given
-     *             operator.
-     * 
-     * @param valueBean value holding bean
-     * @param operator operator to be used on and conditions (see {@link #OP_EQ} etc.)
-     * @return oql query statement
-     */
-    @Deprecated
-    public static StringBuffer _addAndConditions(StringBuffer qStr, Object valueBean, String operator) {
-        String and_cond = CLAUSE_AND;
-        if (!qStr.toString().contains(CLAUSE_WHERE)) {
-            and_cond = CLAUSE_WHERE;
-        }
-        final Class<?> clazz = valueBean.getClass();
-        final BeanClass bclazz = BeanClass.getBeanClass(clazz);
-        final Collection<BeanAttribute> attributes = bclazz.getSingleValueAttributes();
-        final String prefix = "'";
-        final String postfix = OP_LIKE.equals(operator) ? "%'" : "'";
-        Object value;
-        for (final BeanAttribute beanAttribute : attributes) {
-            final IAttributeDef attributeDef = BeanContainerUtil.getAttributeDefinitions(beanAttribute);
-            if (attributeDef != null) {//only attributes with column-defs will be used!
-                String name = beanAttribute.getName();//getColumnName(beanAttribute);
-                value = beanAttribute.getValue(valueBean);
-                if (value == null) {
-                    continue;
-                }
-                //on manyToOne mappings use the foreignkey column
-                boolean isManyToOne = false;
-                if (!BeanUtil.isStandardType(value.getClass())) {
-                    final Collection<BeanAttribute> foreignIdAttributes =
-                        BeanClass.getBeanClass(value.getClass()).findAttributes(Id.class);
-                    if (foreignIdAttributes.size() > 0) {
-                        final BeanAttribute foreignKey = foreignIdAttributes.iterator().next();
-                        value = foreignKey.getValue(value);
-                        name = name + "." + foreignKey.getName();
-                        isManyToOne = true;
-                    }
-                }
-                if (!isManyToOne && value instanceof String) {
-                    String strValue = String.valueOf(value).toLowerCase();
-                    final boolean isLikeValue = strValue.endsWith("*");
-                    if (isLikeValue) {
-                        strValue = strValue.replace('*', '%');
-                    } else {
-                        if (attributeDef.length() > 0) {
-                            if (operator.equals(OP_GE) || operator.equals(OP_GT)) {
-                                strValue = StringUtil.fixString(strValue, attributeDef.length(), '0', true);
-                            } else if (operator.equals(OP_LE) || operator.equals(OP_LT)) {
-                                strValue = StringUtil.fixString(strValue, attributeDef.length(), 'z', true);
-                            }
-                        }
-                    }
-                    qStr.append(and_cond + "LOWER(t."
-                        + name
-                        + ") "
-                        + (isLikeValue ? OP_LIKE : operator)
-                        + prefix
-                        + strValue
-                        + postfix);
-                } else if (isManyToOne && value instanceof String) {
-                    final String strValue = String.valueOf(value);
-                    final boolean isString = (value instanceof String) || (value instanceof Date);
-                    qStr.append(and_cond + "t."
-                        + name
-                        + OP_EQ
-                        + (isString ? prefix : "")
-                        + strValue
-                        + (isString ? prefix : ""));
-                } else {// if no string, like is not possible
-                    final String op = OP_LIKE.equals(operator) ? OP_EQ : operator;
-                    if (value instanceof Date) {
-                        final java.sql.Date sqlDate = (java.sql.Date) (value instanceof java.sql.Date ? value
-                            : new java.sql.Date(((Date) value).getTime()));
-                        qStr.append(and_cond + "t." + name + op + " '" + sqlDate + "' ");
-                    } else {
-                        qStr.append(and_cond + "t." + name + " " + op + " " + String.valueOf(value));
-                    }
-                }
-                and_cond = " and ";
-            }
-        }
-        return qStr;
-    }
-
     public static StringBuffer addAndConditions(StringBuffer qStr,
             Object valueBean,
             String operator,
@@ -768,123 +678,123 @@ public class ServiceUtil {
         }
     }
 
-    /**
-     * fills all attributes having no value to a define min or max value.
-     * 
-     * @param bean bean to change
-     * @param maxValues if true, maximum values will be filled
-     * @param useDatabaseFormat if true, the date will have a database format, the min numbers will be 0 and strings
-     *            will be surrounded by "'".
-     */
-    public static void fillNullValues(Object bean, boolean maxValues, boolean useDatabaseFormat) {
-        final List<? extends IAttribute> singleValueAttributes =
-            BeanClass.getBeanClass(bean.getClass()).getSingleValueAttributes();
-        for (final IAttribute beanAttribute : singleValueAttributes) {
-            if (beanAttribute.getValue(bean) != null) {
-                continue;
-            }
-            if (BigDecimal.class.isAssignableFrom(beanAttribute.getType())) {
-                if (maxValues) {
-                    beanAttribute.setValue(bean, new BigDecimal(Integer.MAX_VALUE));
-                } else {
-                    beanAttribute.setValue(bean, new BigDecimal(Integer.MIN_VALUE));
-                }
-            } else if (Number.class.isAssignableFrom(beanAttribute.getType())) {
-                String fieldName;
-                if (maxValues) {
-                    fieldName = STR_MAX_VALUE;
-                } else {
-                    fieldName = STR_MIN_VALUE;
-                }
-                Object newValue;
-                try {
-                    /*if (useDatabaseFormat && !maxValues) {
-                        newValue = 0;
-                    } else*/{
-                        newValue = beanAttribute.getType().getField(fieldName).get(null);
-                    }
-                } catch (final Exception e) {
-                    ManagedException.forward(e);
-                    return;
-                }
-                beanAttribute.setValue(bean, newValue);
-            } else {//String or Date
-                if (Date.class.isAssignableFrom(beanAttribute.getType())) {
-                    if (useDatabaseFormat) {
-                        //TODO: static dates use ORACLE specific format. use SQL-92
-                        final Date dbDateValue = new Date((maxValues ? MAXTIME : MINTIME)) {
-                            private static final long serialVersionUID = 1L;
-                            private final String pattern = "yyyy-MM-dd";
-                            private final/*static final */DateFormat sdf = new SimpleDateFormat(pattern);
+//    /**
+//     * fills all attributes having no value to a defined min or max value.
+//     * 
+//     * @param bean bean to change
+//     * @param maxValues if true, maximum values will be filled
+//     * @param useDatabaseFormat if true, the date will have a database format, the min numbers will be 0 and strings
+//     *            will be surrounded by "'".
+//     */
+//    public static void fillNullValues(Object bean, boolean maxValues, boolean useDatabaseFormat) {
+//        final List<? extends IAttribute> singleValueAttributes =
+//            BeanClass.getBeanClass(bean.getClass()).getSingleValueAttributes();
+//        for (final IAttribute beanAttribute : singleValueAttributes) {
+//            if (beanAttribute.getValue(bean) != null) {
+//                continue;
+//            }
+//            if (BigDecimal.class.isAssignableFrom(beanAttribute.getType())) {
+//                if (maxValues) {
+//                    beanAttribute.setValue(bean, new BigDecimal(Integer.MAX_VALUE));
+//                } else {
+//                    beanAttribute.setValue(bean, new BigDecimal(Integer.MIN_VALUE));
+//                }
+//            } else if (Number.class.isAssignableFrom(beanAttribute.getType())) {
+//                String fieldName;
+//                if (maxValues) {
+//                    fieldName = STR_MAX_VALUE;
+//                } else {
+//                    fieldName = STR_MIN_VALUE;
+//                }
+//                Object newValue;
+//                try {
+//                    /*if (useDatabaseFormat && !maxValues) {
+//                        newValue = 0;
+//                    } else*/{
+//                        newValue = beanAttribute.getType().getField(fieldName).get(null);
+//                    }
+//                } catch (final Exception e) {
+//                    ManagedException.forward(e);
+//                    return;
+//                }
+//                beanAttribute.setValue(bean, newValue);
+//            } else {//String or Date
+//                if (Date.class.isAssignableFrom(beanAttribute.getType())) {
+//                    if (useDatabaseFormat) {
+//                        //TODO: static dates use ORACLE specific format. use SQL-92
+//                        final Date dbDateValue = new Date((maxValues ? MAXTIME : MINTIME)) {
+//                            private static final long serialVersionUID = 1L;
+//                            private final String pattern = "yyyy-MM-dd";
+//                            private final/*static final */DateFormat sdf = new SimpleDateFormat(pattern);
+//
+//                            @Override
+//                            public String toString() {
+////                                return "to_date('" + sdf.format(this) + "','" + pattern + "')";
+//                                return "'" + sdf.format(this) + "'";
+//                            }
+//                        };
+//                        beanAttribute.setValue(bean, dbDateValue);
+//                    } else {
+//                        beanAttribute.setValue(bean, maxValues ? new Date(MAXTIME) : new Date(MINTIME));
+//                    }
+//                } else if (String.class.isAssignableFrom(beanAttribute.getType())) {
+//                    final String prefix = "";//useDatabaseFormat ? "'" : "";
+//                    final String postfix = "";//useDatabaseFormat ? "'" : "";
+//                    //TODO: evaluate length through JPA annotation
+//                    beanAttribute.setValue(bean, maxValues ? prefix + ""/*StringUtil.fixString("", 25, 'z', true)*/
+//                        + postfix : prefix + ""/*StringUtil.fixString("", 25, '0', true)*/+ postfix);
+//                }
+//            }
+//        }
+//    }
 
-                            @Override
-                            public String toString() {
-//                                return "to_date('" + sdf.format(this) + "','" + pattern + "')";
-                                return "'" + sdf.format(this) + "'";
-                            }
-                        };
-                        beanAttribute.setValue(bean, dbDateValue);
-                    } else {
-                        beanAttribute.setValue(bean, maxValues ? new Date(MAXTIME) : new Date(MINTIME));
-                    }
-                } else if (String.class.isAssignableFrom(beanAttribute.getType())) {
-                    final String prefix = "";//useDatabaseFormat ? "'" : "";
-                    final String postfix = "";//useDatabaseFormat ? "'" : "";
-                    //TODO: evaluate length through JPA annotation
-                    beanAttribute.setValue(bean, maxValues ? prefix + ""/*StringUtil.fixString("", 25, 'z', true)*/
-                        + postfix : prefix + ""/*StringUtil.fixString("", 25, '0', true)*/+ postfix);
-                }
-            }
-        }
-    }
+//    /**
+//     * WORKAROUND: TopLink is not able to insert a list of values to a query
+//     * 
+//     * @param qstr ejb ql string ending with 'IN' , but without starting bracket.
+//     * @param parameter parameter to insert
+//     * @return query
+//     */
+//    public static Query setCollectionParameter(EntityManager entityManager, String qstr, Collection<?> parameter) {
+//        assert parameter != null && parameter.size() > 0 : "parameters must contain at least one item";
+//        final String colName = "colpar";
+//        final String colPar = ":" + colName;
+//        final StringBuffer qstrBuf = new StringBuffer(qstr + " (");
+//        int i = 0;
+//        for (final Object par : parameter) {
+//            qstrBuf.append((i > 0 ? "," : "") + colPar + ++i);
+//        }
+//        qstr = qstrBuf.toString() + ")";
+//        Query query = entityManager.createQuery(qstr);
+//        i = 0;
+//        for (final Object par : parameter) {
+//            query = query.setParameter(colName + ++i, par);
+//        }
+//        return query;
+//    }
+//
+//    /**
+//     * Workaround helper for statements with 'in(...)'. The jpa-implementor may not be able to replace placeholder with
+//     * a collection of values.
+//     * <p/>
+//     * Use-Case: select .....and beanvar in (?x) <-- Collection with parameter --> select .....and beanvar in ('mypar1',
+//     * 'mypar2', ...)
+//     * 
+//     * @param qstr origin query
+//     * @param matchExpression parameter name or '?' followed by a number (must exist in qstr)
+//     * @param parameter values to be inserted as comma-separated strings
+//     * @return qstr with filled values of parameter
+//     */
+//    public static final String getCollectionParameter(String qstr, String matchExpression, Collection<?> parameter) {
+//        StringBuilder qstrb = new StringBuilder(qstr);
+//        StringUtil.replace(qstrb,
+//            matchExpression,
+//            "'" + StringUtil.concat(new char[] { '\'', ',', '\'' }, parameter.toArray(new String[0])) + "'");
+//        return qstrb.toString();
+//    }
 
     public static final Object getLogInfo(StringBuffer qStr, Collection parameter) {
         return "\n" + qStr + "\n    parameter: " + parameter;
-    }
-
-    /**
-     * WORKAROUND: TopLink is not able to insert a list of values to a query
-     * 
-     * @param qstr ejb ql string ending with 'IN' , but without starting bracket.
-     * @param parameter parameter to insert
-     * @return query
-     */
-    public static Query setCollectionParameter(EntityManager entityManager, String qstr, Collection<?> parameter) {
-        assert parameter != null && parameter.size() > 0 : "parameters must contain at least one item";
-        final String colName = "colpar";
-        final String colPar = ":" + colName;
-        final StringBuffer qstrBuf = new StringBuffer(qstr + " (");
-        int i = 0;
-        for (final Object par : parameter) {
-            qstrBuf.append((i > 0 ? "," : "") + colPar + ++i);
-        }
-        qstr = qstrBuf.toString() + ")";
-        Query query = entityManager.createQuery(qstr);
-        i = 0;
-        for (final Object par : parameter) {
-            query = query.setParameter(colName + ++i, par);
-        }
-        return query;
-    }
-
-    /**
-     * Workaround helper for statements with 'in(...)'. The jpa-implementor may not be able to replace placeholder with
-     * a collection of values.
-     * <p/>
-     * Use-Case: select .....and beanvar in (?x) <-- Collection with parameter --> select .....and beanvar in ('mypar1',
-     * 'mypar2', ...)
-     * 
-     * @param qstr origin query
-     * @param matchExpression parameter name or '?' followed by a number (must exist in qstr)
-     * @param parameter values to be inserted as comma-separated strings
-     * @return qstr with filled values of parameter
-     */
-    public static final String getCollectionParameter(String qstr, String matchExpression, Collection<?> parameter) {
-        StringBuilder qstrb = new StringBuilder(qstr);
-        StringUtil.replace(qstrb,
-            matchExpression,
-            "'" + StringUtil.concat(new char[] { '\'', ',', '\'' }, parameter.toArray(new String[0])) + "'");
-        return qstrb.toString();
     }
 
     /**
@@ -980,158 +890,158 @@ public class ServiceUtil {
         return orderBy.toString();
     }
     
-    /**
-     * recursive method to find all occurrences of attributes annotated with 'annotation' having a value that equals
-     * 'value'.
-     * 
-     * @param bean bean to be searched through all it's attributes
-     * @param packagePrefix to filter classes to be checked
-     * @param annotation annotation type
-     * @param annotationValue can be null to search for null values
-     * @param match (optional)
-     * @param checkedInstances (optional)
-     * @return all matches
-     */
-    public static Collection findAnnotationInEntityTree(Object bean,
-            String packagePrefix,
-            Class<? extends Annotation> annotation,
-            Object annotationValue,
-            Collection match,
-            Collection checkedInstances) {
-        if (bean == null) {
-            return match;
-        }
-        if (checkedInstances == null) {
-            checkedInstances = new HashSet();
-        }
-        if (match == null) {
-            match = new HashSet();
-        }
-        if (bean instanceof Collection) {
-            //loop over oneToMany collection ignoring lazyinit-exceptions
-            try {
-                Collection oneToMany = (Collection) bean;
-                for (Object b : oneToMany) {
-                    findAnnotationInEntityTree(b, packagePrefix, annotation, annotationValue, match, checkedInstances);
-                    return match;
-                }
-            } catch (Exception ex) {
-                LOG.debug(ex);
-                return match;
-            }
-        }
-        if (checkedInstances.contains(bean)) {
-            return match;
-        }
-        if (!bean.getClass().getPackage().getName().startsWith(packagePrefix)) {
-            return match;
-        }
-        LOG.debug("checking instance: " + bean);
-        BeanClass<?> beanClass = BeanClass.getBeanClass(bean.getClass());
-        Collection<BeanAttribute> ids = beanClass.findAttributes(annotation);
-        if (ids != null && ids.size() > 0) {
-            if (ids.iterator().next().getValue(bean) == annotationValue
-                || (annotationValue != null && annotationValue.equals(ids.iterator()
-                    .next()))) {
-                LOG.info("matched value on bean: " + bean);
-                match.add(bean);
-            }
-        }
-        checkedInstances.add(bean);
-        for (IAttribute<?> attr : beanClass.getAttributes()) {
-            findAnnotationInEntityTree(attr.getValue(bean),
-                packagePrefix,
-                annotation,
-                annotationValue,
-                match,
-                checkedInstances);
-        }
-        LOG.info("found matches for annotation " + annotation
-            + " with value "
-            + annotationValue
-            + "\n"
-            + StringUtil.toFormattedString(match, 200, true));
-        return match;
-    }
-
-    /**
-     * see {@link #useNewInstances(Object, List, List)}
-     * 
-     * @param tree entity tree to walk through
-     * @param newInstances new entity instances to be used
-     * @return count of changes
-     */
-    public static int useNewInstances(Object tree, Object... newInstances) {
-        List<Object> newEntities = Arrays.asList(newInstances);
-        ArrayList<Object> onwork = new ArrayList<Object>();
-        //first, check the new instance trees for themselves
-        for (int i = 0; i < newInstances.length; i++) {
-            if (newInstances[i] != null) {
-                useNewInstances(newInstances[i], newEntities, onwork);
-            }
-        }
-        //now, do the main thing
-        return useNewInstances(tree, Arrays.asList(newInstances), onwork);
-    }
-
-    /**
-     * conveniences to copy new instance references into the given object tree. all entities inside the object tree that
-     * are equal to one of the newInstances will be overwritten with the reference of that new instance. this will avoid
-     * the following hibernate exception:
-     * 
-     * <pre>
-     *  java.lang.IllegalStateException: An entity copy was already assigned to a different entity.
-     * </pre>
-     * 
-     * Attention: in most cases it would be better to copy all values of the new instance copy to the old loaded
-     * instance!
-     * 
-     * @param tree root entity holding an entity tree
-     * @param newInstances new entity copies to be used in tree
-     * @return count of changes
-     */
-    public static int useNewInstances(Object tree, List<Object> newEntities, List<Object> onwork) {
-        int count = 0, i;
-        if (onwork.contains(tree)) {
-            return 0;
-        }
-        onwork.add(tree);
-        List<? extends IAttribute> attributes = BeanClass.getBeanClass(tree.getClass()).getAttributes();
-        for (IAttribute attr : attributes) {
-            Object v = attr.getValue(tree);
-            if (v != null) {
-                try {
-                    if ((i = newEntities.indexOf(v)) != -1) {
-                        LOG.debug(attr.getId() + " referencing to new instance");
-                        attr.setValue(tree, newEntities.get(i));
-                        count++;
-                    } else {
-                        if (v instanceof Collection) {
-                            Collection collection = (Collection) v;
-                            if (collection.size() > 0 && isEntity(collection.iterator().next())) {
-                                for (Object object : collection) {
-                                    if ((i = newEntities.indexOf(object)) != -1) {
-                                        LOG.debug(attr.getId() + " referencing to new instance");
-                                        collection.remove(object);
-                                        collection.add(newEntities.get(i));
-                                        count++;
-                                    } else {
-                                        count += useNewInstances(object, newEntities, onwork);
-                                    }
-                                }
-                            }
-                        } else if (isEntity(v)) {
-                            count += useNewInstances(v, newEntities, onwork);
-                        }
-                    }
-                } catch (Exception ex) {
-                    //mostly a problem of lazy loading --> no problem
-                    LOG.trace(ex);
-                }
-            }
-        }
-        return count;
-    }
+//    /**
+//     * recursive method to find all occurrences of attributes annotated with 'annotation' having a value that equals
+//     * 'value'.
+//     * 
+//     * @param bean bean to be searched through all it's attributes
+//     * @param packagePrefix to filter classes to be checked
+//     * @param annotation annotation type
+//     * @param annotationValue can be null to search for null values
+//     * @param match (optional)
+//     * @param checkedInstances (optional)
+//     * @return all matches
+//     */
+//    public static Collection findAnnotationInEntityTree(Object bean,
+//            String packagePrefix,
+//            Class<? extends Annotation> annotation,
+//            Object annotationValue,
+//            Collection match,
+//            Collection checkedInstances) {
+//        if (bean == null) {
+//            return match;
+//        }
+//        if (checkedInstances == null) {
+//            checkedInstances = new HashSet();
+//        }
+//        if (match == null) {
+//            match = new HashSet();
+//        }
+//        if (bean instanceof Collection) {
+//            //loop over oneToMany collection ignoring lazyinit-exceptions
+//            try {
+//                Collection oneToMany = (Collection) bean;
+//                for (Object b : oneToMany) {
+//                    findAnnotationInEntityTree(b, packagePrefix, annotation, annotationValue, match, checkedInstances);
+//                    return match;
+//                }
+//            } catch (Exception ex) {
+//                LOG.debug(ex);
+//                return match;
+//            }
+//        }
+//        if (checkedInstances.contains(bean)) {
+//            return match;
+//        }
+//        if (!bean.getClass().getPackage().getName().startsWith(packagePrefix)) {
+//            return match;
+//        }
+//        LOG.debug("checking instance: " + bean);
+//        BeanClass<?> beanClass = BeanClass.getBeanClass(bean.getClass());
+//        Collection<BeanAttribute> ids = beanClass.findAttributes(annotation);
+//        if (ids != null && ids.size() > 0) {
+//            if (ids.iterator().next().getValue(bean) == annotationValue
+//                || (annotationValue != null && annotationValue.equals(ids.iterator()
+//                    .next()))) {
+//                LOG.info("matched value on bean: " + bean);
+//                match.add(bean);
+//            }
+//        }
+//        checkedInstances.add(bean);
+//        for (IAttribute<?> attr : beanClass.getAttributes()) {
+//            findAnnotationInEntityTree(attr.getValue(bean),
+//                packagePrefix,
+//                annotation,
+//                annotationValue,
+//                match,
+//                checkedInstances);
+//        }
+//        LOG.info("found matches for annotation " + annotation
+//            + " with value "
+//            + annotationValue
+//            + "\n"
+//            + StringUtil.toFormattedString(match, 200, true));
+//        return match;
+//    }
+//
+//    /**
+//     * see {@link #useNewInstances(Object, List, List)}
+//     * 
+//     * @param tree entity tree to walk through
+//     * @param newInstances new entity instances to be used
+//     * @return count of changes
+//     */
+//    public static int useNewInstances(Object tree, Object... newInstances) {
+//        List<Object> newEntities = Arrays.asList(newInstances);
+//        ArrayList<Object> onwork = new ArrayList<Object>();
+//        //first, check the new instance trees for themselves
+//        for (int i = 0; i < newInstances.length; i++) {
+//            if (newInstances[i] != null) {
+//                useNewInstances(newInstances[i], newEntities, onwork);
+//            }
+//        }
+//        //now, do the main thing
+//        return useNewInstances(tree, Arrays.asList(newInstances), onwork);
+//    }
+//
+//    /**
+//     * conveniences to copy new instance references into the given object tree. all entities inside the object tree that
+//     * are equal to one of the newInstances will be overwritten with the reference of that new instance. this will avoid
+//     * the following hibernate exception:
+//     * 
+//     * <pre>
+//     *  java.lang.IllegalStateException: An entity copy was already assigned to a different entity.
+//     * </pre>
+//     * 
+//     * Attention: in most cases it would be better to copy all values of the new instance copy to the old loaded
+//     * instance!
+//     * 
+//     * @param tree root entity holding an entity tree
+//     * @param newInstances new entity copies to be used in tree
+//     * @return count of changes
+//     */
+//    public static int useNewInstances(Object tree, List<Object> newEntities, List<Object> onwork) {
+//        int count = 0, i;
+//        if (onwork.contains(tree)) {
+//            return 0;
+//        }
+//        onwork.add(tree);
+//        List<? extends IAttribute> attributes = BeanClass.getBeanClass(tree.getClass()).getAttributes();
+//        for (IAttribute attr : attributes) {
+//            Object v = attr.getValue(tree);
+//            if (v != null) {
+//                try {
+//                    if ((i = newEntities.indexOf(v)) != -1) {
+//                        LOG.debug(attr.getId() + " referencing to new instance");
+//                        attr.setValue(tree, newEntities.get(i));
+//                        count++;
+//                    } else {
+//                        if (v instanceof Collection) {
+//                            Collection collection = (Collection) v;
+//                            if (collection.size() > 0 && isEntity(collection.iterator().next())) {
+//                                for (Object object : collection) {
+//                                    if ((i = newEntities.indexOf(object)) != -1) {
+//                                        LOG.debug(attr.getId() + " referencing to new instance");
+//                                        collection.remove(object);
+//                                        collection.add(newEntities.get(i));
+//                                        count++;
+//                                    } else {
+//                                        count += useNewInstances(object, newEntities, onwork);
+//                                    }
+//                                }
+//                            }
+//                        } else if (isEntity(v)) {
+//                            count += useNewInstances(v, newEntities, onwork);
+//                        }
+//                    }
+//                } catch (Exception ex) {
+//                    //mostly a problem of lazy loading --> no problem
+//                    LOG.trace(ex);
+//                }
+//            }
+//        }
+//        return count;
+//    }
 
     /**
      * isEntity
