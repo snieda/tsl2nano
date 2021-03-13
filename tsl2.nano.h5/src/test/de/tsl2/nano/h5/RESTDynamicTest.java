@@ -4,9 +4,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import org.anonymous.project.Address;
+import org.anonymous.project.Item;
+import org.anonymous.project.Organisation;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -55,12 +58,24 @@ public class RESTDynamicTest {
 	
 	@Test
 	public void testMetaInfo() {
+		ENV.setProperty("service.loadedBeanTypes", Arrays.asList(Address.class, Organisation.class, Item.class));
 		String url = RESTDynamic.BASE_PATH + "/entities";
 		assertTrue(RESTDynamic.canRest(url));
 		Response response = new RESTDynamic().serve(url, "GET", null, null);
 		String result = ByteUtil.toString(response.getData(), "UTF8");
 		System.out.println(result);
 		assertTrue(result.contains("RESTDynamic available entities"));
+	}
+	
+	@Test
+	public void testMetaInfoJSON() {
+		ENV.setProperty("service.loadedBeanTypes", Arrays.asList(Address.class, Organisation.class, Item.class));
+		String url = RESTDynamic.BASE_PATH + "/entitiesjson";
+		assertTrue(RESTDynamic.canRest(url));
+		Response response = new RESTDynamic().serve(url, "GET", null, null);
+		String result = ByteUtil.toString(response.getData(), "UTF8");
+		System.out.println(result);
+		assertTrue(result.contains("}"));
 	}
 	
 	@Test

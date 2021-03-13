@@ -1220,7 +1220,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         clear();
         super.stop();
         LogFactory.stop();
-        if (!ENV.get("app.systemexit", true) || isNestedApplicationStart())
+        if (!ENV.get("app.stop.allow.system.exit", true) || isNestedApplicationStart())
         	//SystemUtil.softExitOnCurrentThreadGroup(null, ENV.get("app.softexit.runhooks", false));
         	DatabaseTool.shutdownDBServerDefault();
         else

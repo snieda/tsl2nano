@@ -271,8 +271,6 @@ public class SystemUtil {
      */
     public static void softExitOnCurrentThreadGroup(String expression, boolean runShutdownHooks) {
 		Runtime.getRuntime().runFinalization();
-		if (runShutdownHooks)
-			runShutdownHooks();
 		ConcurrentUtil.doForCurrentThreadGroup(t -> {
 			if (t == Thread.currentThread()) //yes, compare references!
 				return;
@@ -299,6 +297,8 @@ public class SystemUtil {
 				}
 			}
 		});
+		if (runShutdownHooks)
+			runShutdownHooks();
 		//stop yourself as last
 		Thread.currentThread().interrupt();
 	}

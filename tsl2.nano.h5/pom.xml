@@ -377,6 +377,7 @@
 	                                <sysproperty key="tsl2nano.offline" value="false" />
 	                                <sysproperty key="app.show.startpage" value="false" />
 									<sysproperty key="app.update.interval.days" value="-1"/>
+									<!-- <sysproperty key="app.stop.allow.system.exit" value="true"/> -->
 	                            </java>
 								<sleep seconds="10" />
 								<echo>RESUMING ${project.build.finalName} integration-test</echo>

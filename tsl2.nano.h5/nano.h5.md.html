@@ -483,17 +483,21 @@ The following service may be set to override the default mechanisms:
 
 There is a REST service, providing access/modification for all loaded entities.
 
+If call only e.g. http://localhost:8067/rest you get the following help screen:
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 -------------------- RESTDynamic usage informations ------------------------------
 
 REQUEST FORMAT: /rest/{entity}/{attribute-or-action}/{query}/{optional-output-attribute}/{PUT:value}
-GET,PUT,DELETE:
+	entities            : metainfo as list of all available entities
+	entitiesjson        : metainfo as json of all available entities
+    GET,PUT,DELETE:
 	entity              : simple class lower name of entity to be accessed
 	attribte-or-action  : entities bean attribute name to be accessed
 	query               : query value for attribute
 	optional-output-attr: if only this attribute should be returned
 	PUT:value           : value to be set on output-attribute
-	example-1           : GET:/rest/address/city/Buxdehude
+	example-1           : GET:/rest/address/city/Buxde*
 	example-2           : GET:/rest/address/city/Buxdehude/street
 	example-3           : PUT:/rest/address/id/1/city/Berlin
 	example-4           : DELETE:/rest/address/id/1
@@ -508,6 +512,17 @@ HEADER:
 	user                : user for method authorization
 	password            : password for method authorization
 ---------------------------------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You may list all available entities with all their attributes as plaintext or json with:
+
+* http://localhost:8067/rest/entities
+* http://localhost:8067/rest/entitiesjson
+
+Example output of http://localhost:8067/rest/address/city/B* (gives you all addresses with city name starting with 'B'
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+{"street": "Berliner Str.1","city": "Buxdehude"},{"street": "Frankfurter Strasse 376","city": "Berlin"}
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ## Starting / Test
@@ -4331,8 +4346,7 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.4.3  | 22.11.2020 | session-id direct on session-start (before authentication), beancollector presents hor on simple lists, vnet -> gravizo, h2-199 (-ifNotExists), h5+entityreplication, yaml-support, bugfixes
  2.4.4  | 06.12.2020 | menu-hover now opaque, bugfixes on database-replication, quicksearch etc.
  2.4.5  | 20.12.2020 | bugfixes, dependency security fixes, query result fixes, NEW: session menu (edit context)
- 2.4.6  | 07.02.2021 | web security extensions, fixes, new module 'd8poral' in pre-evaluation mode
-
+ 2.4.6  | 21.03.2021 | web security extensions, queries with parameters in dilaog, rest-session-authorization, config system.exit, map-bean reactivated, new module 'd8poral' in pre-evaluation mode
  2.5.0  | xx.xx.2021 | see EnvUpdate2v5v0: refactorings: serialization of actions with primitive attributes, move incubation packages
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
@@ -5383,4 +5397,4 @@ deploy:
    * [ ] add REST + GUI, CLI
    * [ ] review other git encrypting tools like: git-crypt, git-secret, blackbox, git-remote-gcrypt
          for cloud-storages: boxcryptor (german tool for dropbox), cryptomator (german tool for any cloud storage)
-* [ ] fix test collisions on h5 (tests using h2 database)
+* [x] fix test collisions on h5 (tests using h2 database)

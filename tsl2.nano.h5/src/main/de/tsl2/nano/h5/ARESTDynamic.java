@@ -2,6 +2,7 @@ package de.tsl2.nano.h5;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
@@ -78,6 +80,8 @@ public abstract class ARESTDynamic<RESPONSE> {
 				return createResponse(Status.OK, printManual());
 			else if (url.equals(BASE_PATH + "/entities"))
 				return createResponse(Status.OK, printEntities());
+			else if (url.equals(BASE_PATH + "/entitiesjson"))
+				return createResponse(Status.OK, printEntitiesJSON());
 			checkAuthentication(url, method, header);
 			checkMethod(method);
 			String beanName = get(url, BASE_PATH, "entity");
@@ -265,18 +269,37 @@ public abstract class ARESTDynamic<RESPONSE> {
 		return buf.toString();
 	}
 
+	String printEntitiesJSON() {
+		HashMap<Object, Object> entityMap = new HashMap<>();
+		HashMap<Object, Object> attributeMap = new HashMap<>();
+
+		List<Class> beanTypes = ENV.get("service.loadedBeanTypes", new LinkedList<Class>());
+		BeanDefinition<?> beanDef;
+		for (Class b : beanTypes) {
+			beanDef = BeanDefinition.getBeanDefinition(b);
+			attributeMap.clear();
+			List<IAttributeDefinition<?>> attributes = beanDef.getBeanAttributes();
+			for (IAttributeDefinition attr : attributes) {
+				attributeMap.put(attr.getName(), attr.getType());
+			}
+			entityMap.put(beanDef.getName(), attributeMap);
+		}
+		return MapUtil.toJSON(entityMap);
+	}
+
 	String printManual() {
 		return 
 				  "\n-------------------- RESTDynamic usage informations ------------------------------\n"
 				+ "\nREQUEST FORMAT: " + USAGE
 				+ "\n\tentities            : metainfo as list of all available entities"
+				+ "\n\tentitiesjson        : metainfo as json of all available entities"
 				+ "\nGET,PUT,DELETE:"
 				+ "\n\tentity              : simple class lower name of entity to be accessed"
 				+ "\n\tattribte-or-action  : entities bean attribute name to be accessed"
 				+ "\n\tquery               : query value for attribute"
 				+ "\n\toptional-output-attr: if only this attribute should be returned"
 				+ "\n\tPUT:value           : value to be set on output-attribute"
-				+ "\n\texample-1           : GET:/rest/address/city/Buxdehude"
+				+ "\n\texample-1           : GET:/rest/address/city/Buxde*"
 				+ "\n\texample-2           : GET:/rest/address/city/Buxdehude/street"
 				+ "\n\texample-3           : PUT:/rest/address/id/1/city/Berlin"
 				+ "\n\texample-4           : DELETE:/rest/address/id/1"
