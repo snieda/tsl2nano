@@ -211,6 +211,7 @@
 				<version>0.8.5</version>
 				<!-- TODO: the configuration is duplicated in the reporting section and h5... -->
 				<configuration>
+					<skip>${skipTests}</skip>
 					<outputDirectory>../target</outputDirectory>
 					<excludes>
 						<exclude>**/*.jar</exclude>

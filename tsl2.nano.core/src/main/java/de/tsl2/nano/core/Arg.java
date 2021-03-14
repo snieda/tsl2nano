@@ -15,7 +15,7 @@ public class Arg<T extends Comparable<T>> {
     T defaultValue;
     List<T> range;
     T value;
-    private String example;
+    String example;
 
     static final String KEY_DUTY = "(!)";
 

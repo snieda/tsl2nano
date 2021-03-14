@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<SIShell name="sishell.xml" width="79" height="22" style="7" fgColor="YELLOW" bgColor="BLUE" bars="true" refreshConfig="false" useNetworkExtension="true" sequential="false">
+<SIShell name="sishell.xml" width="79" height="22" style="TEXT_LINE" fgColor="YELLOW" bgColor="BLUE" bars="true" refreshConfig="false" useNetworkExtension="true" sequential="false">
    <defString name="image.out" value="-out"/>
    <root name="Toolbox" multiple="false" sequential="false">
       <description>Helpful Utilities</description>
@@ -227,6 +227,10 @@
          </action>
       </container>
       <container name="vNet" multiple="false" sequential="false">
+         <fileSelector name="file" multiple="false" sequential="false">
+            <directory>${user.dir}</directory>
+            <include>.*xml</include>
+         </fileSelector>
          <container name="implementation" multiple="false" sequential="false">
             <description>vNet implementation</description>
             <option name="NeuralNet">
@@ -248,13 +252,13 @@
                <value class="java.lang.String">de.tsl2.nano.incubation.vnet.workflow.VActivity</value>
             </option>
          </container>
-         <action name="main">
+         <mainaction name="NetCommunicator">
             <mainClass>de.tsl2.nano.incubation.vnet.NetCommunicator</mainClass>
             <method>main</method>
             <argNames length="1">
                <string>implementation</string>
             </argNames>
-         </action>
+         </mainaction>
       </container>
       <container name="Net" multiple="false" sequential="false">
          <description>wrench.png</description>
@@ -262,7 +266,7 @@
             <input name="ip">
                <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
                <description>internet address to be scanned</description>
-               <value class="java.lang.String">192.168.43.173</value>
+               <value class="java.lang.String">2001:a61:24a5:7801:4d83:b982:dc6b:f2e4%wlp2s0</value>
             </input>
             <input name="lowest-port">
                <constraints type="java.lang.Integer" nullable="true" length="-1" scale="-1" precision="-1"/>

@@ -330,7 +330,7 @@ public class RuntimeClassloader extends URLClassLoader {
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
-        LOG.debug("manifest:\n" + StringUtil.toFormattedString(attributes, 80));
+        LOG.debug("manifest:\n" + StringUtil.toFormattedString(attributes, -1));
         return attributes;
     }
 

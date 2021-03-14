@@ -170,8 +170,9 @@ public class TerminalTest implements ENVTestPreparation {
       impl.add(new Option(vnet, "NeuralNet", null, VNeuron.class.getName(), "NeuralNet implementation class"));
       impl.add(new Option(vnet, "RoutingStar", null, RoutingAStar.class.getName(), "Routing implementation class"));
       impl.add(new Option(vnet, "Workflow", null, VActivity.class.getName(), "Workflow implementation class"));
+      vnet.add(new FileSelector("file", null, ".*xml", "${user.dir}"));
       vnet.add(impl);
-      vnet.add(new Action(NetCommunicator.class, "main", "implementation"));
+      vnet.add(new MainAction(NetCommunicator.class, "implementation"));
       root.add(vnet);
 
 //      Tree getjar = new Tree("getJar", null);

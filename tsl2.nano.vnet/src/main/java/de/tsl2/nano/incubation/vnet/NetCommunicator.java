@@ -11,6 +11,7 @@ import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.ClassFinder;
 import de.tsl2.nano.core.messaging.IListener;
 import de.tsl2.nano.core.util.MapUtil;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * provides a terminal communnication with a {@link Net}
@@ -46,11 +47,13 @@ public class NetCommunicator implements Runnable {
 	public void run() {
 		if (art.check(System.out)) {
 			Net net;
-			if (art.get("file") != null) {
-				net = Net.create(art.get("file"));
+			String fileArg = art.get("file");
+			if (!Util.isEmpty(fileArg)) {
+				net = Net.create(fileArg);
 				implementation = net.elements.keySet().iterator().next().getClass();
 			} else {
-				if (art.get("implementation") == null) {
+				String implArg = art.get("implementation");
+				if (implArg == null) {
 					log(art);
 					log("Creating new Net. Please give a Node implementation - currently found on classpath:");
 					net = setImplementationByUserInput();
@@ -58,7 +61,7 @@ public class NetCommunicator implements Runnable {
 						return;
 				} else {
 					net = new Net();
-					implementation = BeanClass.load(art.get("implementation"));
+					implementation = BeanClass.load(implArg);
 				}
 			}
 			// create a callback for responses

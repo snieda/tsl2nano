@@ -189,7 +189,10 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
      * @param logConfiguration
      */
     public static void setLogFactoryXml(String logConfiguration) {
-        self = null;
+    	if (!isPreparing.get())
+    		stop();
+    	else
+    		log("WARN: shouldn't reset LogFactory in preparing mode!");
         logFactoryXml = logConfiguration;
     }
 
@@ -549,8 +552,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
      */
     protected static void log(Class<?> logClass, int state, Object message, Throwable ex) {
     	if (isPreparing.get()) {
-    		System.out.println("==> Logfactory in preparing mode -> printing to system.out:\n\t" 
-    				+ logClass.getSimpleName() + ": " + message + " " + ex);
+    		System.out.println("[LOGPREPARE] " + logClass.getSimpleName() + ": " + message + (ex != null ? " " + ex : ""));
     		return;
     	}
         final LogFactory factory = instance();
