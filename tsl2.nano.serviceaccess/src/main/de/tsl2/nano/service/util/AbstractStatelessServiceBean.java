@@ -267,7 +267,9 @@ abstract public class AbstractStatelessServiceBean implements IStatelessService 
     @Override
     protected void finalize() throws Throwable {
     	super.finalize();
-    	if (entityManager != null && entityManager.isOpen())
+    	if (entityManager != null && entityManager.isOpen()) {
+    		entityManager.clear(); //if close() does nothing...
     		entityManager.close();
+    	}
     }
 }

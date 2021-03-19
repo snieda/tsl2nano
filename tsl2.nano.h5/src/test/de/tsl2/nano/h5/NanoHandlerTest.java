@@ -39,6 +39,7 @@ public class NanoHandlerTest implements ENVTestPreparation {
     @Before
     public void setUp() {
         ENVTestPreparation.super.setUp("h5");
+        System.setProperty("app.stop.allow.system.exit", "false");
     }
 
     @After

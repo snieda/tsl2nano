@@ -10,6 +10,7 @@
 package de.tsl2.nano.core.classloader;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLStreamHandlerFactory;
 
@@ -175,6 +176,12 @@ public class NetworkClassLoader extends NestedJarClassLoader {
         return new File(path + FILENAME_UNRESOLVEABLES).delete();
     }
 
+    @Override
+    public void close() throws IOException {
+    	super.close();
+    	unresolveables.clear();
+    }
+    
 //    @Override
 //    public Object clone() throws CloneNotSupportedException {
 //    	NetworkClassLoader clone = new NetworkClassLoader(getURLs(), getParent());

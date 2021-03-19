@@ -1281,7 +1281,7 @@ public class BeanPresentationHelper<T> {
         BeanContainer.reset();
         Bean.clearCache();
         NetworkClassLoader.resetUnresolvedClasses(ENV.getConfigPath());
-        ENV.reload();
+//        ENV.reload();
     }
 
     protected boolean isRootBean() {
@@ -1363,9 +1363,7 @@ public class BeanPresentationHelper<T> {
             "icons/reload.png") {
             @Override
             public Object action() throws Exception {
-                //TODO should we reset the whole application - closing all sessions?
                 session.getApplication().reset();
-//                ENV.get(BeanPresentationHelper.class).reset();
                 return page("configuration refreshed");
             }
 

@@ -318,6 +318,7 @@ public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
     @Override
     public void close() throws IOException {
     	super.close();
+    	nestedJars = null;
     	Collection<ZipStream> streams = jarFileStreams.values();
     	for (ZipStream s : streams) {
     		if (s.zipStream != null)

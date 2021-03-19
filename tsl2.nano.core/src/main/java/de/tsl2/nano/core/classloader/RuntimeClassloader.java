@@ -10,6 +10,7 @@
 package de.tsl2.nano.core.classloader;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
@@ -51,6 +52,8 @@ public class RuntimeClassloader extends URLClassLoader {
 
     /** tsl2 default class directory */
     public static final String DEFAULT_BIN_DIR = "generated-bin";
+
+	private Thread startCheckerDaemon;
     
     /**
      * constructor
@@ -293,7 +296,7 @@ public class RuntimeClassloader extends URLClassLoader {
                 return fileList;
             }
         };
-        ConcurrentUtil.startDaemon("classloader-environment-path-checker", pathChecker);
+        startCheckerDaemon = ConcurrentUtil.startDaemon("classloader-environment-path-checker", pathChecker);
     }
 
     /**
@@ -347,6 +350,14 @@ public class RuntimeClassloader extends URLClassLoader {
         return cl;
     }
 
+    @Override
+    public void close() throws IOException {
+    	super.close();
+    	if (startCheckerDaemon != null) {
+    		startCheckerDaemon.interrupt();
+    		startCheckerDaemon = null;
+    	}
+    }
     @Override
     public String toString() {
         StringUtil.toFormattedString(getURLs(), -1, true);

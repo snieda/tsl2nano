@@ -140,6 +140,7 @@ public class NanoH5Test implements ENVTestPreparation {
         System.setProperty("app.show.startpage", "false");
         System.setProperty("app.session.anticsrf", "false");
         System.setProperty("app.update.last", new java.sql.Date(0).toString());
+        System.setProperty("app.stop.allow.system.exit", "false");
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -406,6 +407,7 @@ public class NanoH5Test implements ENVTestPreparation {
         System.setProperty("app.session.anticsrf", "false");
         System.setProperty("nanoh5test.run.deep", "true");
         System.setProperty("app.update.interval.days", "-1");
+        System.setProperty("app.stop.allow.system.exit", "false");
         Properties mapper = new Properties();
         createAndTest(new Timesheet(getServiceURL(), null) {
             @Override

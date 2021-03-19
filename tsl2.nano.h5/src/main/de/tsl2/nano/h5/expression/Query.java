@@ -97,8 +97,8 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>>, I
     public RESULT run(Map<String, Object> context, Object... extArgs) {
         //workaround for hibernate/query not allowing parameter with dots
         Set<String> pars = getParameter().keySet();
-        String op = operation;
-        
+        String op = operation.replaceAll("--.*", "");
+
         Map<String, Object> args = checkedArguments(context, ENV.get("app.mode.strict", false));
         String sqlvar;
         for (String p : pars) {
@@ -141,11 +141,13 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>>, I
         if (parameter == null) {
             parameter = new LinkedHashMap<String, Serializable>();
             String p;
-            //remove all comments
-            operation.replaceAll("--.*", "");
+            //remove temporary all comments
+            String op = operation.replaceAll("--.*", "");
             //we allow both: the named query syntax and the most java used ant-like-variables
+            op = operation.replace("${", ":").replace("}", "");
+            //redundant: persist the cleaned sql-query-parameter
             operation = operation.replace("${", ":").replace("}", "");
-            StringBuilder q = new StringBuilder(operation);
+            StringBuilder q = new StringBuilder(op);
             while ((!Util.isEmpty(p = StringUtil.extract(q, SQL_PAR, "")))) {
                 parameter.put(p.substring(1), null);
             }

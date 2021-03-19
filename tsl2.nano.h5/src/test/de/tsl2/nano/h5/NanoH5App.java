@@ -22,6 +22,7 @@ public class NanoH5App extends NanoH5 {
     }
 
     protected void init() {
+        System.setProperty("app.stop.allow.system.exit", "false");
     }
    @SuppressWarnings("unchecked")
     public static void main(String[] args) {

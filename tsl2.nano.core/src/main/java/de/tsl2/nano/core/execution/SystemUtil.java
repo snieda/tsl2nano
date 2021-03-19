@@ -305,4 +305,15 @@ public class SystemUtil {
 	public static void runShutdownHooks() {
 		BeanClass.callStatic("java.lang.ApplicationShutdownHooks", "runHooks");
 	}
+
+	public static boolean isNestedApplicationStart() {
+    	Thread t = Thread.currentThread();
+		return t.getStackTrace().length > 20 || !isThreadChildOfSystemThread(t);
+    }
+
+	public static boolean isThreadChildOfSystemThread(Thread t) {
+		ThreadGroup parent = t.getThreadGroup().getParent();
+		return parent.getName().equals("system") && (parent.getParent() == null || parent == parent.getParent());
+	}
+
 }

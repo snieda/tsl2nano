@@ -56,7 +56,7 @@ public class WebSecurity {
 		boolean attack = false;
 		if (splitInfo[0].equals(session.getKey())) {
 			Date now = new Date();
-			Date tokenAge = new Date(Long.valueOf(splitInfo[2]) + ENV.get(PREF_ANTICSRF + ".maxage.milliseconds", 900*1000));
+			Date tokenAge = new Date(Long.valueOf(splitInfo[2]) + ENV.get(PREF_ANTICSRF + ".maxage.milliseconds", 3600*1000));
 			if (tokenAge.before(now))
 				attack = true;
 			else {

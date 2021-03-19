@@ -80,6 +80,7 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
     }
     
     public void setUpUnit(String moduleShort) {
+        System.setProperty("app.stop.allow.system.exit", "false");
         nanoAlreadyRunning = Boolean.getBoolean("app.server.running");
         NanoH5UnitPlugin.setEnabled(!nanoAlreadyRunning);
         ENVTestPreparation.super.setUp(moduleShort);

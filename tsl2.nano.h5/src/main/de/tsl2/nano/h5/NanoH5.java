@@ -250,7 +250,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
 		Thread.currentThread().setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread t, Throwable e) {
-                e.printStackTrace();
+                if (e instanceof Message) System.err.println(e.getMessage()); else e.printStackTrace();
             }
         });
 	}
@@ -1210,21 +1210,20 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         return ENV.getTempPath() + START_HTML_FILE;
     }
 
-    public static boolean isNestedApplicationStart() {
-    	return Thread.currentThread().getStackTrace().length > 20 || Thread.currentThread().getThreadGroup().getParent() != null;
-    }
-
     @Override
     public void stop() {
     	LOG.info("===> NANOH5 SERVER SHUTDOWN! <===");
         clear();
         super.stop();
         LogFactory.stop();
-        if (!ENV.get("app.stop.allow.system.exit", true) || isNestedApplicationStart())
-        	//SystemUtil.softExitOnCurrentThreadGroup(null, ENV.get("app.softexit.runhooks", false));
-        	DatabaseTool.shutdownDBServerDefault();
-        else
+        if (ENV.get("app.stop.allow.system.exit", true) && !SystemUtil.isNestedApplicationStart()) {
+        	FileUtil.writeBytes(("System.exit(0) called on: " + this.toString()).getBytes(), "systemexit.txt", false);
+        	LOG.info("===> SYSTEM EXIT!");
+        	ConcurrentUtil.sleep(5000);
         	System.exit(0);
+        } else
+        	//SystemUtil.softExitOnCurrentThreadGroup(null, ENV.get("app.softexit.runhooks", false));
+        	new DatabaseTool(Persistence.current()).shutdownDBServer();
     }
 
     @Override
@@ -1251,7 +1250,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
 
         DatabaseTool databaseTool = new DatabaseTool(Persistence.current());
         if (databaseTool.isInternalDatabase())
-        	databaseTool.shutdownDBServerDefault();
+        	databaseTool.shutdownDBServer();
         
         //TODO: the following is done in pagebuilder.reset, too?
         ENV.removeService(Workflow.class);
@@ -1293,7 +1292,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
 
     @Override
     public String toString() {
-        return Util.toString(NanoH5.class, "serviceURL: " + serviceURL,
+        return Util.toString(NanoH5.class, ENV.getName(), "serviceURL: " + serviceURL,
             "sessions: " + (sessions != null ? sessions.size() : 0), "requests: " + requests);
     }
 

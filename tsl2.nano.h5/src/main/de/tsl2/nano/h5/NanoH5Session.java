@@ -28,6 +28,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
@@ -89,8 +90,10 @@ import de.tsl2.nano.h5.NanoHTTPD.Response;
 import de.tsl2.nano.h5.NanoHTTPD.Response.Status;
 import de.tsl2.nano.h5.collector.Controller;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
+import de.tsl2.nano.h5.navigation.EntityBrowser;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.h5.navigation.Parameter;
+import de.tsl2.nano.h5.navigation.Workflow;
 import de.tsl2.nano.h5.plugin.INanoPlugin;
 import de.tsl2.nano.h5.websocket.NanoWebSocketServer;
 import de.tsl2.nano.h5.websocket.WebSocketExceptionHandler;
@@ -532,7 +535,8 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
      * @return types to be provided to the current thread
      */
     static final Class[] getThreadLocalTypes() {
-        return new Class[] { BeanContainer.class, Authorization.class, BeanConfigurator.class, ExceptionHandler.class };
+        return new Class[] { BeanContainer.class, Authorization.class, BeanConfigurator.class, ExceptionHandler.class, 
+        		Context.class, EntityBrowser.class, Workflow.class };
     }
 
     @Override
@@ -544,13 +548,12 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
         authorization = null;
         beanContainer = null;
         builder = null;
+//        if (sessionClassloader instanceof URLClassLoader) {
+//        	Util.trY(() -> ((URLClassLoader)sessionClassloader).close());
+//        }
         sessionClassloader = null;
         if (exceptionHandler instanceof WebSocketExceptionHandler) {
-            try {
-                ((WebSocketExceptionHandler) exceptionHandler).close();
-            } catch (IOException e) {
-                ManagedException.forward(e);
-            }
+            Util.trY(() -> ((WebSocketExceptionHandler) exceptionHandler).close());
         }
         exceptionHandler = null;
         context = null;

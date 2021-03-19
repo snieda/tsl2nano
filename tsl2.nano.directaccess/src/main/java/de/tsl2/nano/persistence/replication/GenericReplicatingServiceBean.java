@@ -475,4 +475,10 @@ class Tree<T, D> extends HashMap<T, Collection<D>> {
         }
         remove(node);
     }
+    
+    @Override
+    protected void finalize() throws Throwable {
+    	super.finalize();
+    	GenericReplicatingServiceBean.tree.clear();
+    }
 }
