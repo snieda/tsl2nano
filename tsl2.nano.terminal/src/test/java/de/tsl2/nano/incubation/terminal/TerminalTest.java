@@ -120,7 +120,7 @@ public class TerminalTest implements ENVTestPreparation {
 
       Container crypt = new Container("Crypt", null);
       crypt.add(new Input("password", null, "password for encryption - if needed by algorithm"));
-      crypt.add(new Input("algorithm", "PBEWithMD5AndDES", "encryption algorithm"));
+      crypt.add(new Input("algorithm", "PBEWithSHAAndAES", "encryption algorithm"));
       crypt.add(new Input("text", null, "text to be encrypted. if it starts with 'file:' the file will be read",
           false));
       crypt.add(new Input("base64", true, "whether base64 encoding should be used"));

@@ -79,7 +79,7 @@
          <input name="algorithm">
             <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
             <description>encryption algorithm</description>
-            <value class="java.lang.String">PBEWithMD5AndDES</value>
+            <value class="java.lang.String">PBEWithSHAAndAES</value>
          </input>
          <input name="text">
             <constraints type="java.lang.String" nullable="false" length="-1" scale="-1" precision="-1"/>
@@ -266,7 +266,7 @@
             <input name="ip">
                <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
                <description>internet address to be scanned</description>
-               <value class="java.lang.String">2001:a61:24a5:7801:4d83:b982:dc6b:f2e4%wlp2s0</value>
+               <value class="java.lang.String">fd00:0:0:0:d969:a94f:81c6:1dc3%wlp2s0</value>
             </input>
             <input name="lowest-port">
                <constraints type="java.lang.Integer" nullable="true" length="-1" scale="-1" precision="-1"/>

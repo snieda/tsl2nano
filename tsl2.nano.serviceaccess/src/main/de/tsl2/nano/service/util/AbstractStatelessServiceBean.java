@@ -267,9 +267,17 @@ abstract public class AbstractStatelessServiceBean implements IStatelessService 
     @Override
     protected void finalize() throws Throwable {
     	super.finalize();
-    	if (entityManager != null && entityManager.isOpen()) {
-    		entityManager.clear(); //if close() does nothing...
-    		entityManager.close();
+    	if (entityManager != null) {
+    		if (entityManager.isOpen()) {
+    			System.out.print("closing entitymanager " + entityManager);
+	    		entityManager.clear(); //if close() does nothing...
+	    		entityManager.close();
+    		}
+    		//this is the only place to access the factory - but we should only close the factory on a kind of application reset
+    		if (entityManager.getEntityManagerFactory().isOpen() && Boolean.getBoolean("app.service.entitymanagerfactory.close")) {
+    			System.out.print("closing entitymanagerfactory " + entityManager.getEntityManagerFactory());
+    			entityManager.getEntityManagerFactory().close();
+    		}
     	}
     }
 }
