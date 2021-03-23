@@ -18,6 +18,7 @@ import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -187,7 +188,7 @@ public abstract class ARESTDynamic<RESPONSE> {
 		if (body == null)
 			throw new IllegalArgumentException("no 'body' found in http parameters. must be present as payload!");
 		Status status = Status.CREATED;
-		String result = "done";
+		Object result;
 		BeanDefinition def = getType(beanName);
 		Object instance = BeanUtil.fromJSON(def.getClazz(), body);
 		Bean bean = Bean.getBean(instance);
@@ -200,10 +201,16 @@ public abstract class ARESTDynamic<RESPONSE> {
 					.collect(Collectors.toList());
 			result = "unknown post action '" + action + "'. available are: " + StringUtil.toString(available, -1); 
 		} else {
-			bean.getActionByName(action).activate();
+			result = bean.getActionByName(action).activate();
+			if (result != null && !PrimitiveUtil.isPrimitiveOrWrapper(result.getClass())) {
+				Bean<Object> resultBean = Bean.getBean(result);
+				result = action.equals("save") ? resultBean.getId() : MapUtil.toJSON(resultBean.toValueMap(new HashMap<>()));
+			} else if (result == null) {
+				result = bean.getId();
+			}
 		}
-		LOG.info("REST (POST) " + url + " --> " + result);
-		return createResponse(status, String.valueOf(bean.getId()));
+		LOG.info("REST (POST) " + url + " --> " + StringUtil.toString(result, 80));
+		return createResponse(status, String.valueOf(result));
 	}
 
 	void checkBean(Bean bean) {
@@ -264,6 +271,13 @@ public abstract class ARESTDynamic<RESPONSE> {
 			for (IAttributeDefinition attr : attributes) {
 				buf.append("\n\t" + StringUtil.fixString(attr.getName(), 20) + ": " + attr.getDescription());
 			}
+			Collection<IAction> actions = beanDef.getActions();
+			if (actions.size() > 0) {
+			buf.append("\n\tACTIONS");
+				for (IAction action : actions) {
+					buf.append("\n\t" + StringUtil.fixString(action.getShortDescription(), 20) + ": " + action.getLongDescription());
+				}
+			}
 		}
 		buf.append("\n---------------------------------------------------------------------------------\n");
 		return buf.toString();
@@ -272,6 +286,7 @@ public abstract class ARESTDynamic<RESPONSE> {
 	String printEntitiesJSON() {
 		HashMap<Object, Object> entityMap = new HashMap<>();
 		HashMap<Object, Object> attributeMap = new HashMap<>();
+		HashMap<Object, Object> actionMap = new HashMap<>();
 
 		List<Class> beanTypes = ENV.get("service.loadedBeanTypes", new LinkedList<Class>());
 		BeanDefinition<?> beanDef;
@@ -283,6 +298,12 @@ public abstract class ARESTDynamic<RESPONSE> {
 				attributeMap.put(attr.getName(), attr.getType());
 			}
 			entityMap.put(beanDef.getName(), attributeMap);
+			
+			Collection<IAction> actions = beanDef.getActions();
+			for (IAction attr : actions) {
+				actionMap.put(attr.getShortDescription(), attr.getLongDescription());
+			}
+			attributeMap.put("actions", actionMap);
 		}
 		return MapUtil.toJSON(entityMap);
 	}

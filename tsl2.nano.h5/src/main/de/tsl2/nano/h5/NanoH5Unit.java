@@ -47,7 +47,7 @@ import de.tsl2.nano.serviceaccess.Authorization;
 public abstract class NanoH5Unit implements ENVTestPreparation {
 
     protected static final int DEFAULT_H2_PORT = 9092;
-	protected static final String BTN_LOGIN_OK = "tsl2nano.login.ok";
+	protected static final String BTN_LOGIN_OK = PersistenceUI.ACTION_LOGIN_OK;
     protected static final String BTN_RESET = ".reset";
     protected static final String BTN_DELETE = ".delete";
     protected static final String BTN_CANCEL = IAction.CANCELED;

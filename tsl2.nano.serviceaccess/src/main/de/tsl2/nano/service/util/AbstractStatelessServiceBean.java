@@ -274,7 +274,7 @@ abstract public class AbstractStatelessServiceBean implements IStatelessService 
 	    		entityManager.close();
     		}
     		//this is the only place to access the factory - but we should only close the factory on a kind of application reset
-    		if (entityManager.getEntityManagerFactory().isOpen() && Boolean.getBoolean("app.service.entitymanagerfactory.close")) {
+    		if (entityManager.getEntityManagerFactory().isOpen() && Boolean.getBoolean("service.entitymanagerfactory.close")) {
     			System.out.print("closing entitymanagerfactory " + entityManager.getEntityManagerFactory());
     			entityManager.getEntityManagerFactory().close();
     		}

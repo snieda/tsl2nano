@@ -52,7 +52,9 @@ import de.tsl2.nano.plugin.Plugins;
  */
 public class PersistenceUI {
     
-    /**
+    public static final String ACTION_LOGIN_OK = "tsl2nano.login.ok";
+
+	/**
      * constructor
      */
     private PersistenceUI() {
@@ -456,7 +458,7 @@ public class PersistenceUI {
         });
 
 //        ((Map)login.getPresentable().getLayoutConstraints()).put("style", "opacity: 0.9;");
-        IAction<Object> loginAction = new SecureAction<Object>("tsl2nano.login.ok") {
+        IAction<Object> loginAction = new SecureAction<Object>(ACTION_LOGIN_OK) {
             //TODO: ref. to persistence class
             @Override
             public Object action() throws Exception {
@@ -477,7 +479,7 @@ public class PersistenceUI {
 
             @Override
             public String getLongDescription() {
-                return ENV.translate("tsl2nano.login.ok.tooltip", true);
+                return ENV.translate(ACTION_LOGIN_OK + ".tooltip", true);
             }
 
             @Override

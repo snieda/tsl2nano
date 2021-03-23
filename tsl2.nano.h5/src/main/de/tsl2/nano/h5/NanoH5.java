@@ -218,7 +218,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         createExceptionhandler();
         try {
 //            LogFactory.setLogLevel(LogFactory.LOG_ALL);
-                
+        	ENV.setProperty("service.entitymanagerfactory.close", false);                
             LOG.debug(System.getProperties());
 
             createStartPage();
@@ -568,6 +568,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
 		header.put("authorization", ARESTDynamic.createDigest(uri, method, ""));
 		((Map)header).put("session", session);
 		header.put("user", ((IAuthorization)session.getUserAuthorization()).getUser().toString());
+		ConcurrentUtil.setCurrent(BeanContainer.instance(), session.getUserAuthorization());
 	}
 
 	private boolean checkSessionTimeout(NanoH5Session session, InetAddress requestor) {
@@ -793,7 +794,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         runtimeClassloader.addLibraryPath(ENV.getConfigPath());
         //TODO: the environment and current thread shouldn't use the new sessions classloader! 
         Thread.currentThread().setContextClassLoader(runtimeClassloader);
-//        ENV.addService(ClassLoader.class, runtimeClassloader);
+        ENV.addService(ClassLoader.class, runtimeClassloader);
 
         createAuthorization(persistence.getAuth());
 
@@ -1216,7 +1217,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         clear();
         super.stop();
         LogFactory.stop();
-        if (ENV.get("app.stop.allow.system.exit", true) && !SystemUtil.isNestedApplicationStart()) {
+        if (ENV.get("app.stop.allow.system.exit", false) && !SystemUtil.isNestedApplicationStart()) {
         	FileUtil.writeBytes(("System.exit(0) called on: " + this.toString()).getBytes(), "systemexit.txt", false);
         	LOG.info("===> SYSTEM EXIT!");
         	ConcurrentUtil.sleep(5000);
@@ -1253,6 +1254,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         	databaseTool.shutdownDBServer();
         
         //TODO: the following is done in pagebuilder.reset, too?
+        ENV.addService(ClassLoader.class, appstartClassloader);
         ENV.removeService(Workflow.class);
         ENV.removeService(Persistence.class);
         ENV.removeService(BeanConfigurator.class);

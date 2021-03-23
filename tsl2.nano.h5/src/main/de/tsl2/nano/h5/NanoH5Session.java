@@ -548,9 +548,13 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
         authorization = null;
         beanContainer = null;
         builder = null;
-//        if (sessionClassloader instanceof URLClassLoader) {
-//        	Util.trY(() -> ((URLClassLoader)sessionClassloader).close());
-//        }
+        if (sessionClassloader instanceof URLClassLoader) {
+        	if (!sessionClassloader.equals(server.appstartClassloader)) {
+	        	Util.trY(() -> ((URLClassLoader)sessionClassloader).close());
+	        	if (Thread.currentThread().getContextClassLoader().equals(sessionClassloader))
+	        		Thread.currentThread().setContextClassLoader(server.appstartClassloader);
+        	}
+        }
         sessionClassloader = null;
         if (exceptionHandler instanceof WebSocketExceptionHandler) {
             Util.trY(() -> ((WebSocketExceptionHandler) exceptionHandler).close());
@@ -874,7 +878,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
                 }
             } else {
                 result = action.activate();
-                if (action.getId().endsWith(".save") || action.getId().endsWith(".delete"))
+                if (action.getId().endsWith(".save") || action.getId().endsWith(".delete")) {
                     if (ChatMessage.isChatMessage(nav.current()) && nav.current() instanceof Bean) {
                         ChatMessage.createChatRequest(this, (Bean)nav.current());
                     } else {
@@ -884,6 +888,9 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
                                 this.getUserAuthorization().getUser(), action.getShortDescription()),
                             "*");
                     }
+                } else if (action.getId().equals(PersistenceUI.ACTION_LOGIN_OK)) {
+                	sessionClassloader = Thread.currentThread().getContextClassLoader();
+                }
             }
             Plugins.process(INanoPlugin.class).actionAfterHandler(action);
 

@@ -324,6 +324,7 @@ public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
     		if (s.zipStream != null)
     			s.zipStream.close();
 		}
+    	jarFileStreams.clear();
     }
 }
 
