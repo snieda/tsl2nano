@@ -9,6 +9,7 @@ import java.util.Scanner;
 import de.tsl2.nano.core.Argumentator;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.ClassFinder;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.messaging.IListener;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.Util;
@@ -29,6 +30,7 @@ public class NetCommunicator implements Runnable {
 	}
 
 	public static void main(String[] args) throws Exception {
+		LogFactory.setPrintToConsole(false);
 		Argumentator art = new Argumentator("VNet", createManual(), args);
 		new NetCommunicator(art).run();
 	}
@@ -84,7 +86,7 @@ public class NetCommunicator implements Runnable {
 				while (scr.hasNextLine()) {
 					String input = scr.nextLine();
 					if (input.isEmpty()) {
-						System.out.println("Realy want to exit vNet? (ENTER: yes, otherwise: no)");
+						log("Realy want to exit vNet? (ENTER: yes, otherwise: no)");
 						if (!scr.hasNextLine() || scr.nextLine().isEmpty())
 							break;
 					}

@@ -28,6 +28,7 @@ import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.structure.IConnection;
 import de.tsl2.nano.structure.INode;
+import de.tsl2.nano.util.ActivityGraph;
 import de.tsl2.nano.util.GraphLog;
 import de.tsl2.nano.util.MarkdownLog;
 
@@ -439,6 +440,7 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
 
     public void graph() {
     	new GraphLog(name).create(elements.values()).write();
+    	new ActivityGraph(name).create(elements.values()).write();
     }
 
     public String getName() {

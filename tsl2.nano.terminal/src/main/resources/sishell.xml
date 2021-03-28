@@ -227,7 +227,7 @@
          </action>
       </container>
       <container name="vNet" multiple="false" sequential="false">
-         <fileSelector name="file" multiple="false" sequential="false">
+         <fileSelector name="configuration" multiple="false" sequential="false">
             <directory>${user.dir}</directory>
             <include>.*xml</include>
          </fileSelector>
@@ -255,8 +255,9 @@
          <mainaction name="NetCommunicator">
             <mainClass>de.tsl2.nano.incubation.vnet.NetCommunicator</mainClass>
             <method>main</method>
-            <argNames length="1">
-               <string>implementation</string>
+            <argNames length="2">
+               <string>configuration</string>
+               <string>implementation=${implementation}</string>
             </argNames>
          </mainaction>
       </container>
@@ -266,7 +267,7 @@
             <input name="ip">
                <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
                <description>internet address to be scanned</description>
-               <value class="java.lang.String">fd00:0:0:0:d969:a94f:81c6:1dc3%wlp2s0</value>
+               <value class="java.lang.String">2003:c7:ff35:fc44:e5a2:2333:72e2:e39a%wlp2s0</value>
             </input>
             <input name="lowest-port">
                <constraints type="java.lang.Integer" nullable="true" length="-1" scale="-1" precision="-1"/>

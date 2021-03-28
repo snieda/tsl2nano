@@ -3,6 +3,7 @@ package de.tsl2.nano.util;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.function.Function;
 
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.structure.IConnection;
@@ -19,14 +20,20 @@ import de.tsl2.nano.structure.INode;
  * @author Thomas Schneider
  */
 public class GraphLog {
-	private StringBuilder graph;
-	private String name;
+	protected StringBuilder graph;
+	protected String name;
+	protected Function<Object, String> styler;
 	
 	public GraphLog(String name) {
+		this(name, null);
+	}
+	
+	public GraphLog(String name, Function<Object, String> styler) {
 		this.name = name;
+		this.styler = styler;
 		graph = new StringBuilder(gravizStart());
 	}
-	private String gravizStart() {
+	protected String gravizStart() {
 		return "![](http://g.gravizo.com/svg?digraph G {\n";
 	}
 	public GraphLog create(Iterable<? extends INode> nodes) {
@@ -38,10 +45,14 @@ public class GraphLog {
 		return this;
 	}
 	public GraphLog add(Object node, Object dest, Object descriptor) {
-		graph.append(node + " -> " + dest + "[label=\"" + descriptor + "\"];\n");
+		graph.append("\"" + node + "\" -> \"" + dest + "\"[label=\"" + descriptor + "\" " + style(descriptor) + "];\n");
 		return this;
 	}
 	
+	private String style(Object descriptor) {
+		return styler == null ? "" : styler.apply(descriptor);
+	}
+
 	String addMarkDeepStyle() {
 		return "\n\n<!-- Markdeep: --><style class=\"fallback\">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src=\"markdeep.min.js\"></script><script src=\"https://casual-effects.com/markdeep/latest/markdeep.min.js?\"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility=\"visible\")</script>";
 	}
@@ -49,7 +60,7 @@ public class GraphLog {
 	public String toString() {
 		return graph + gravizEnd() + addMarkDeepStyle();
 	}
-	private String gravizEnd() {
+	protected String gravizEnd() {
 		return "})";
 	}
 	public void write() {
