@@ -13,6 +13,7 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.messaging.IListener;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.incubation.vnet.neuron.Layer;
 
 /**
  * provides a terminal communnication with a {@link Net}
@@ -94,13 +95,14 @@ public class NetCommunicator implements Runnable {
 					Node node = null;
 					for (int i = 0; i < words.length; i++) {
 						IListener coreCover = (IListener) BeanClass.createInstance(implementation,
-								new Object[] { words[i] });
+								new Object[] { words[i], Layer.getDefault(net) });
 						if (net.getNode(coreCover) == null) {
 							if (node != null)
 								node = net.addAndConnect(coreCover, (IListener) node.getCore(), 1f);
 							else
 								node = net.add(coreCover);
 						} else {
+							net.getNode(coreCover).connect(node, 1f);
 							net.notify(new Notification(words[i], words[i], null, responseHandler));
 						}
 					}

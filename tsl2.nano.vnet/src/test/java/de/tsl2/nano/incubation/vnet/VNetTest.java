@@ -23,9 +23,9 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.messaging.EventController;
 import de.tsl2.nano.core.messaging.IListener;
-import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.incubation.vnet.neuron.Layer;
 import de.tsl2.nano.incubation.vnet.neuron.VNeuron;
 import de.tsl2.nano.incubation.vnet.routing.Location;
 import de.tsl2.nano.incubation.vnet.routing.RoutingAStar;
@@ -50,10 +50,11 @@ public class VNetTest implements ENVTestPreparation {
 	@Test
 	public void testVNetWithNeuralNet() {
 		Net<VNeuron, Float> net = new Net<VNeuron, Float>();
+		Layer layer = Layer.getDefault(net);
 		// net.setWorkParallel(false);
-		Node<VNeuron, Float> nHunger = net.add(new VNeuron("hunger"));
-		Node<VNeuron, Float> nHabe = net.addAndConnect(new VNeuron("habe"), nHunger.getCore(), -1f);
-		net.addAndConnect(new VNeuron("ich"), nHabe.getCore(), -1f);
+		Node<VNeuron, Float> nHunger = net.add(new VNeuron("hunger", layer));
+		Node<VNeuron, Float> nHabe = net.addAndConnect(new VNeuron("habe", layer), nHunger.getCore(), 1f);
+		net.addAndConnect(new VNeuron("ich", layer), nHabe.getCore(), 1f);
 
 		net.dump();
 		
