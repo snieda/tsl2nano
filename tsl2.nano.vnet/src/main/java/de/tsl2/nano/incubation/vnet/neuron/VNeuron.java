@@ -45,7 +45,7 @@ public class VNeuron extends Neuron<String> implements
     		signal = 1f;
     		output = feedSignal(signal); //the input will not be added to the response
     	} else if (NumberUtil.isNumber(note)) { //from neighbour
-    		signal = NumberUtil.extractNumber(note.toString()).floatValue();
+    		signal = note instanceof Float ? (float)note : NumberUtil.extractNumber(note.toString()).floatValue();
     		output = feedSignal(signal);
     	}
         if (output == Neuron.FIRE) {

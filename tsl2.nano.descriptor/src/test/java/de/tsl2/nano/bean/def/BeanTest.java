@@ -30,11 +30,13 @@ import org.apache.commons.logging.Log;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.action.IActivable;
+import de.tsl2.nano.bean.BeanFileUtil;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.bean.enhance.BeanEnhancer;
@@ -82,7 +84,7 @@ public class BeanTest {
         FileUtil.writeBytes(s.getBytes(), testFile, false);
 
         //read it with fixed-columns
-        Collection<TypeBean> result = BeanUtil.fromFlatFile(testFile,
+        Collection<TypeBean> result = BeanFileUtil.fromFlatFile(testFile,
             " ",
             TypeBean.class,
             "primitiveShort",
@@ -120,7 +122,7 @@ public class BeanTest {
         Reader reader = FileUtil.getTransformingReader(FileUtil.getFile(testFile), ' ', ' ', true);
 
         //read it with fixed-columns
-        result = BeanUtil.fromFlatFile(reader,
+        result = BeanFileUtil.fromFlatFile(reader,
             "\",\"",
             TypeBean.class,
             null,
@@ -156,7 +158,7 @@ public class BeanTest {
         FileUtil.writeBytes(s.getBytes(), testFile, false);
 
         //read it with fixed-columns
-        result = BeanUtil.fromFlatFile(testFile, TypeBean.class, "1-5:primitiveShort", "5-11:primitiveLong");
+        result = BeanFileUtil.fromFlatFile(testFile, TypeBean.class, "1-5:primitiveShort", "5-11:primitiveLong");
         assertTrue(result.size() == 2);
 
         resultIt = result.iterator();
@@ -268,8 +270,8 @@ public class BeanTest {
         //test the export functions - but con't check that automatically!
         BeanCollector<Collection<TypeBean>, TypeBean> collector =
             BeanCollector.getBeanCollector(Arrays.asList(bean, bean2), 0);
-        System.out.println(BeanUtil.presentAsCSV(collector));
-        System.out.println(BeanUtil.presentAsHtmlTable(collector));
+        System.out.println(BeanFileUtil.presentAsCSV(collector));
+        System.out.println(BeanFileUtil.presentAsHtmlTable(collector));
     }
 
     @Test
@@ -758,5 +760,26 @@ public class BeanTest {
         TypeBean o1 = BeanUtil.fromJSON(TypeBean.class, json);
         assertEquals(json, BeanUtil.toJSON(o1));
 //        assertTrue(ObjectUtil.equals(o, o1)); // date will differ on seconds part
+    }
+
+    @Ignore("not yet working: the attribute sorting on write does not fit to that of reading the file again")
+    @Test
+    public void testBeanFileUtil() {
+    	TypeBean typeBean1 = new TypeBean();
+    	typeBean1.string = "meintest";
+    	typeBean1.immutableInteger = 99;
+    	TypeBean typeBean2 = new TypeBean();
+    	typeBean2.string = "meintest2";
+    	typeBean2.immutableInteger = 100;
+    	String filename = "testflatfile";
+		BeanFileUtil.toFile(Arrays.asList(typeBean1, typeBean2), filename, BeanFileUtil.FileType.TABSHEET);
+    	
+    	Collection<TypeBean> typeBeans = BeanFileUtil.fromFile(filename, BeanFileUtil.FileType.TABSHEET, TypeBean.class);
+    	assertEquals(2, typeBeans.size());
+    	Iterator<TypeBean> it = typeBeans.iterator();
+		assertEquals(typeBean1, it.next());
+    	assertEquals(typeBean2, it.next());
+    	
+    	FileUtil.userDirFile(filename).delete();
     }
 }

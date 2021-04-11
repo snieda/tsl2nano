@@ -1,11 +1,15 @@
 package de.tsl2.nano.core;
 
+import static de.tsl2.nano.core.util.ValueSet.e;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.security.Policy;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +22,7 @@ import de.tsl2.nano.core.cls.CallingPath;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.ValueSet;
 
 public class CoreTest implements ENVTestPreparation {
 	static int aufrufe = 0;
@@ -93,4 +98,41 @@ public class CoreTest implements ENVTestPreparation {
 		assertEquals("[1, 2, 3.0]", StringUtil.toString(asList, -1));
 		assertEquals("1:2:3.0:", StringUtil.toFormattedString(asList, -1, false, ":"));
 	}
+	
+	@Test
+	public void testValueSetSimple() {
+		Date date = new Date();
+		Object[] mm = new Object[] {"Madl", "Marion", date};
+		ValueSet<Person, Object> p = new ValueSet<>(Person.class, mm);
+		assertArrayEquals(mm, p.valuesOf(p.names()));
+	}		
+	@Test
+	public void testValueSetExtended() {
+		ValueSet<Person, Object> p = new ValueSet(Person.class, new HashMap<>()) {
+			public String toString() {
+				return def(Person.Name, "Madl"); 
+			}
+		};
+		assertEquals("Madl", p.toString());
+	}		
+	@Test
+	public void testValueSet() {
+		Date date = new Date();
+		ValueSet<Person, Object> p = new ValueSet<>(Person.class);
+//		p.set(e(Person.Name, "muster"), 
+//				e(Person.Vorname, "max"),
+//				e(Person.Geburtsdatum, date));
+		p.set(Person.Name, "muster"); 
+		p.set(Person.Vorname, "max");
+		p.set(Person.Geburtsdatum, date);
+		p.on(Person.Name, (e, n) -> p.set(e, StringUtil.toFirstUpper((String) n)));
+		p.transform(Person.Vorname, n -> StringUtil.toFirstUpper(n.toString()));
+		assertEquals(date, (Date)p.get(Person.Geburtsdatum));
+		
+		Person[] members = p.names();
+		Object[] expected = new Object[] {"Muster", "Max", date};
+		assertArrayEquals(expected, p.stream().map(m -> p.get(m)).toArray());
+		assertArrayEquals(expected, p.valuesOf(p.names()));
+	}
 }
+enum Person {Name, Vorname, Geburtsdatum}; 

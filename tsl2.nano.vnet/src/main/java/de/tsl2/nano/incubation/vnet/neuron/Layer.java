@@ -1,11 +1,9 @@
 package de.tsl2.nano.incubation.vnet.neuron;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.core.util.ValueSet;
 import de.tsl2.nano.incubation.vnet.Net;
 import de.tsl2.nano.structure.IConnection;
@@ -73,7 +71,7 @@ public class Layer extends ValueSet<Layer.Parameter, Float> {
 					def(Parameter.Ft, 1.0f), 
 					def(Parameter.Tv, 1.1f), 
 					def(Parameter.Tt, 1.0f), 
-					def(Parameter.To, 0.1f), 
+					def(Parameter.To, 0.5f), 
 					def(Parameter.Lv, 0.1f), 
 					def(Parameter.Lt, 0.1f), 
 					def(Parameter.Gv, 0.1f), 

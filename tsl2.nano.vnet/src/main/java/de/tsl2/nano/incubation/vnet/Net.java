@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Function;
 
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.IPredicate;
@@ -30,7 +31,6 @@ import de.tsl2.nano.structure.IConnection;
 import de.tsl2.nano.structure.INode;
 import de.tsl2.nano.util.ActivityGraph;
 import de.tsl2.nano.util.GraphLog;
-import de.tsl2.nano.util.MarkdownLog;
 
 /**
  * provides a virtual net with {@link Node}s having {@link Connection}s to several other {@link Node}s. Each
@@ -68,6 +68,10 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
     Map<String, Node<T, D>> elements;
     /** using {@link #notifyIdles(Collection, IListener, long, long)}, all waiting sleep times are added */
     long waitingCycles = 0;
+
+    /** optional function to do styling on textual graph output */
+	Function<Object, String> graphStyler;
+	
     /** normally true, but if you want to work without threading, you can set it to false */
     static boolean workParallel = true;
 
@@ -419,7 +423,7 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
      * @return net and node descriptions
      */
     public String dump() {
-        graph();
+        graph(graphStyler);
         StringBuilder buf = new StringBuilder(30 + 30 * elements.size());
         buf.append(toString() + "\n");
         buf.append("graph (graphviz) stored in: " + new GraphLog(name).getFileName() + "\n");
@@ -438,8 +442,12 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
         return buf.toString();
     }
 
-    public void graph() {
-    	new GraphLog(name).create(elements.values()).write();
+    public void setGraphStyler(Function<Object, String> graphStyler) {
+		this.graphStyler = graphStyler;
+	}
+    
+    public void graph(Function<Object, String> graphStyler) {
+    	GraphLog.createGraphFile(name, elements.values(), graphStyler);
     	new ActivityGraph(name).create(elements.values()).write();
     }
 

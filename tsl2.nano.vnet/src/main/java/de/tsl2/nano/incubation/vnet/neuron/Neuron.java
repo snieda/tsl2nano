@@ -67,6 +67,6 @@ public class Neuron<T> {
     
     @Override
     public String toString() {
-        return kernel + " {M:" + mempot + ", O:" + output + "}";
+        return kernel + " {M:" + mempot + ", T: " + threshold + ", O:" + output + "}";
     }
 }

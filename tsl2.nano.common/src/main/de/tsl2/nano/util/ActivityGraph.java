@@ -24,7 +24,7 @@ public class ActivityGraph extends GraphLog {
 	}
 	@Override
 	public GraphLog add(Object node, Object dest, Object descriptor) {
-		graph.append(node + " --> [" + descriptor + "]  \"" + dest + "\"\n");
+		graph.append("\"" + node + "\" --> [" + descriptor + "]  \"" + dest + "\"\n");
 		return this;
 	}
 	public String getFileName() {

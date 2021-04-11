@@ -99,10 +99,10 @@
 		<module>tsl2.nano.repeatable</module>
 		<module>tsl2.nano.cursus</module>
 		<module>tsl2.nano.logicstructure</module>
-		<module>tsl2.nano.terminal</module>
 		<module>tsl2.nano.vnet</module>
 		<module>tsl2.nano.incubation</module>
 		<module>tsl2.nano.d8portal</module>
+		<module>tsl2.nano.terminal</module>
 		<module>tsl2.nano.h5</module>
 		<module>tsl2.nano.h5.thymeleaf</module>
 		<module>tsl2.nano.h5.thymeleaf-pack</module>

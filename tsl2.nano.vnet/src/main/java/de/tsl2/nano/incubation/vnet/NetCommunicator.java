@@ -102,7 +102,8 @@ public class NetCommunicator implements Runnable {
 							else
 								node = net.add(coreCover);
 						} else {
-							net.getNode(coreCover).connect(node, 1f);
+							if (node != null)
+								net.getNode(coreCover).connect(node, 1f);
 							net.notify(new Notification(words[i], words[i], null, responseHandler));
 						}
 					}

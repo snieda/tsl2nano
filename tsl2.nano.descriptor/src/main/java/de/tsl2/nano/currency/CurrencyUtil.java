@@ -27,6 +27,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.bean.BeanFileUtil;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.IPredicate;
@@ -285,7 +286,7 @@ public class CurrencyUtil {
             df,
             "factor",
             NumberFormat.getInstance(Locale.US));
-        Collection<CurrencyUnit> c = BeanUtil.fromFlatFile(reader,
+        Collection<CurrencyUnit> c = BeanFileUtil.fromFlatFile(reader,
             "\t",
             CurrencyUnit.class,
             formats,

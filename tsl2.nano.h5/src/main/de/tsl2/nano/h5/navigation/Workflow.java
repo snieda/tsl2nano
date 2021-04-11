@@ -188,7 +188,7 @@ public class Workflow extends EntityBrowser implements Cloneable {
     
     @Persist
     private void initSerializing() {
-    	net.graph();
+    	net.graph(null);
     }
     @Commit
     private void initDeserializing() {

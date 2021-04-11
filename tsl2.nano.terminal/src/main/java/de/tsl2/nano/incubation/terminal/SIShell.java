@@ -9,7 +9,7 @@
  */
 package de.tsl2.nano.incubation.terminal;
 
-import static de.tsl2.nano.incubation.terminal.TextTerminal.*;
+import static de.tsl2.nano.core.util.CLI.tag;
 import static de.tsl2.nano.incubation.terminal.TextTerminal.SCREEN_HEIGHT;
 import static de.tsl2.nano.incubation.terminal.TextTerminal.SCREEN_WIDTH;
 import static de.tsl2.nano.incubation.terminal.TextTerminal.getTextFrame;
@@ -35,7 +35,6 @@ import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.ElementMapUnion;
-import org.simpleframework.xml.ElementUnion;
 import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.core.AppLoader;
@@ -51,17 +50,16 @@ import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.serialize.XmlUtil;
 import de.tsl2.nano.core.util.CLI;
+import de.tsl2.nano.core.util.CLI.Color;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
-import static de.tsl2.nano.core.util.CLI.*;
 import de.tsl2.nano.incubation.platform.PlatformManagement;
 import de.tsl2.nano.incubation.terminal.IItem.Type;
-import de.tsl2.nano.incubation.terminal.item.AItem;
+import de.tsl2.nano.incubation.terminal.TextTerminal.Frame;
 import de.tsl2.nano.incubation.terminal.item.Container;
-import de.tsl2.nano.incubation.terminal.item.selector.Selector;
 import de.tsl2.nano.util.SchedulerUtil;
 
 /**
@@ -403,7 +401,7 @@ public class SIShell implements IItemHandler, Serializable {
                 }
             }
         }
-        if (useNetworkExtension) {
+        if (useNetworkExtension && root == this.root /*yes, same reference!*/) {
             String classpath = System.getProperty("user.dir") + "/." + getClass().getSimpleName().toLowerCase();
             new File(classpath).mkdirs();
             NetworkClassLoader.createAndRegister(classpath);
@@ -505,6 +503,9 @@ public class SIShell implements IItemHandler, Serializable {
             String input = printScreen(item, out);
             if (input == null) {
                 input = nextLine(in);
+                if (input == null) {
+                	input = ""; // there was any error in a subsystem losing the input
+                }
                 if (input.equals("stop")) {
                     ConcurrentUtil.stopOrInterrupt("sishell.printscreen");
                 }

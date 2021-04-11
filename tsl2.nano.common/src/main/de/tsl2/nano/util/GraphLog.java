@@ -3,6 +3,7 @@ package de.tsl2.nano.util;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.function.Function;
 
 import de.tsl2.nano.core.ENV;
@@ -28,6 +29,11 @@ public class GraphLog {
 		this(name, null);
 	}
 	
+	/**
+	 * @param name name of graph. will be used inside the file name, too
+	 * @param styler functional expression to add a styling like a color 
+	 * 		to the link (e.g.: d -> "color=" + cc.get((Integer)Math.round((int)d*10)))
+	 */
 	public GraphLog(String name, Function<Object, String> styler) {
 		this.name = name;
 		this.styler = styler;
@@ -72,5 +78,10 @@ public class GraphLog {
 	}
 	public String getFileName() {
 		return ENV.getConfigPath() + name + "-graph.md.html";
+	}
+	
+	/** convenience to create the graphlog and write the gravito file */
+	public static void createGraphFile(String name, Collection<? extends INode> elements, Function<Object, String> graphStyler) {
+		new GraphLog(name, graphStyler).create(elements).write();
 	}
 }

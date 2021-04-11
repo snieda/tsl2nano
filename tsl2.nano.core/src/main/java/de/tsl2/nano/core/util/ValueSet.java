@@ -46,7 +46,7 @@ public class ValueSet<E extends Enum<E>, V> {
 	}
 
 	public V[] valuesOf(E... filter) {
-		return (V[]) stream().filter(e -> Util.in(e, filter)).toArray();
+		return (V[]) stream().filter(e -> Util.in(e, filter)).map(e -> get(e)).toArray();
 	}
 
 	public void on(E name, BiConsumer<E, V> doIt) {
@@ -65,18 +65,18 @@ public class ValueSet<E extends Enum<E>, V> {
 		values.put(name, value);
 	}
 
-	public void set(Entry<E, V>... entries) {
+	public <EE extends Enum<EE>, VV> void set(Entry<EE, VV>... entries) {
 		for (int i = 0; i < entries.length; i++) {
-			set(entries[i].key, entries[i].value);
+			set((E)entries[i].key, (V)entries[i].value);
 		}
 	}
 
-	protected static float def(Enum<?> p, float value) {
+	protected static <V> V def(Enum<?> p, V value) {
 		return Util.get(p.name(), value);
 	}
 
-	public static Entry<Enum<?>, Object> e(Enum<?> e, Object v) {
-		return new Entry<Enum<?>, Object>(e, v);
+	public static <E extends Enum<E>, V> Entry<E, V> e(E e, V v) {
+		return new Entry<E, V>(e, v);
 	}
 }
 
