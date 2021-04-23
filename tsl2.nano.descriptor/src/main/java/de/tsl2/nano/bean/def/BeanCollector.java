@@ -1513,7 +1513,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 : getBeanDefinition(beanType.getSimpleName() + (useExtraCollectorDefinition() ? POSTFIX_COLLECTOR
                     : ""),
                     beanType,
-                    false));
+                    ENV.get("bean.def.init.full", true)));
         return (BeanCollector<C, I>) createCollector(collection, workingMode, composition, beandef);
     }
 

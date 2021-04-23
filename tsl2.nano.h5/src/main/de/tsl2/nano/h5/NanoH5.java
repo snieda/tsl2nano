@@ -541,7 +541,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
             } else {//perhaps session was interrupted/closed but not removed
                 if (checkSessionTimeout(session, requestor) 
                 	&& session.response != null && method.equals("GET") && parms.size() < 2/* contains 'QUERY_STRING = null' */
-                    && (uri.length() < 2 || header.get("referer") == null) || isDoubleClickDelay(session)) {
+                    && (uri.length() < 2 || header.get("referer") == null) || (isDoubleClickDelay(session) && session.response != null)) {
                     LOG.debug("reloading cached page...");
                     try {
                         session.response.getData().reset();

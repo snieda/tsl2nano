@@ -489,7 +489,7 @@ public class Bean<T> extends BeanDefinition<T> {
      * @return new bean
      */
     public static <T> Bean<T> newBean(Class<T> type, Object... constructorArgs) {
-        return new Bean<T>(BeanClass.createInstance(type, constructorArgs));
+        return Bean.getBean(BeanClass.createInstance(type, constructorArgs));
     }
 
     @Override

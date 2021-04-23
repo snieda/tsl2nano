@@ -14,7 +14,14 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+
+import de.tsl2.nano.core.cls.PrivateAccessor;
+import de.tsl2.nano.core.util.ByteUtil;
+import de.tsl2.nano.core.util.MapUtil;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * Simple Test-Bean, holding (public) attributes of most types.
@@ -102,6 +109,18 @@ public class TypeBean implements Serializable, Comparable<TypeBean> {
 
     public TypeBean relation;
     
+    public TypeBean() {
+	}
+    protected TypeBean(String name) {
+    	string = name;
+    }
+    protected TypeBean(Double randomValue) {
+    	string = "created by value";
+    	immutableDouble = randomValue;
+    }
+    public TypeBean(boolean fillRandom) {
+    	ValueRandomizer.fillRandom(this);
+    }
     /**
      * @return Returns the string.
      */
@@ -529,5 +548,14 @@ public class TypeBean implements Serializable, Comparable<TypeBean> {
     @Override
     public int compareTo(TypeBean o) {
         return new Double(primitiveDouble).compareTo(o.primitiveDouble) ;
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+    	return ByteUtil.equals(ByteUtil.serialize(this), ByteUtil.serialize(obj));
+    }
+    @Override
+    public String toString() {
+    	return Util.toJson(this);
     }
 }

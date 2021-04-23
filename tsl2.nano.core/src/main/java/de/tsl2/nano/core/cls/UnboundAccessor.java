@@ -12,12 +12,14 @@ package de.tsl2.nano.core.cls;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 import org.apache.commons.logging.Log;
 
@@ -157,6 +159,8 @@ public class UnboundAccessor<T> {
         Field[] fields = cls.getDeclaredFields();
         List nameList = names.length > 0 ? Arrays.asList(names) : null;
         for (Field field : fields) {
+        	if (Modifier.isFinal(field.getModifiers()) || Modifier.isStatic(field.getModifiers()))
+        		continue;
             if (nameList == null || nameList.contains(field.getName()))
                 member(field.getName(), field.getType());
         }
@@ -412,6 +416,10 @@ public class UnboundAccessor<T> {
         this.memberCache = memberCache;
     }
 
+    public void forEachMember(BiConsumer<String, Object> actor) {
+    	members().forEach( (n, v) -> actor.accept(n, v));
+    }
+    
     @Override
     public String toString() {
         return Util.toString(getClass(), instance);

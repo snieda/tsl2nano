@@ -63,8 +63,8 @@ public class NetCommunicator implements Runnable {
 					if (implementation == null)
 						return;
 				} else {
-					net = new Net();
 					implementation = BeanClass.load(implArg);
+					net = new Net(implementation.getSimpleName());
 				}
 			}
 			// create a callback for responses

@@ -1,7 +1,6 @@
 package de.tsl2.nano.bean;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.Reader;
@@ -21,6 +20,7 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.log.LogFactory;
@@ -29,16 +29,21 @@ import de.tsl2.nano.core.util.FormatUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
+/**
+ * Provides read/write files to/from flat files like csv, tabsheet, markdown-table and html-table
+ * 
+ * @author Thomas Schneider
+ */
 public class BeanFileUtil {
     private static final Log LOG = LogFactory.getLog(BeanFileUtil.class);
 
-    public enum FileType {CSV, TABSHEET, HTML};
+    public enum FileType {CSV, TABSHEET, HTML, MARKDOWN_TABLE};
     
     /**
      * convenience for {@link #fromFlatFile(Reader, Class, String...)}.
      */
     public static <T> Collection<T> fromFile(String fileName, FileType fileType, Class<T> rootType, String... attributeNames) {
-    	assert fileType != null && Util.in(fileType, FileType.CSV, FileType.TABSHEET) : "FileType must be one of CSV or TABSHEET";
+    	assert fileType != null && !Util.in(fileType, FileType.HTML) : "FileType HTML is not supported!";
     	
         return Util.trY(() -> fromFlatFile(reader(fileName),
                 FileType.CSV.equals(fileType) ? "," : "\t",
@@ -226,9 +231,21 @@ public class BeanFileUtil {
          * do the reading, collecting all errors to throw only one exception at the end
          */
         try {
+        	int markdownTableHeader = 0;
+        	boolean isMarkdownTable = false;
             String t;
             while ((ttype = st.nextToken()) != StreamTokenizer.TT_EOF) {
                 if (ttype != StreamTokenizer.TT_EOL && st.sval.trim().length() > 0) {
+                	// ignore markdown table styling
+                	if (markdownTableHeader < 3 && (st.sval.startsWith("|") || st.sval.startsWith("--"))) {
+                		markdownTableHeader++;
+                		if (markdownTableHeader == 3)
+                			isMarkdownTable = true;
+                		continue;
+                	} else if (isMarkdownTable) {
+                		st.sval = st.sval.substring(1).replaceAll("\\s*[|]\\s*", separation);
+                	}
+                	
                     bean.newInstance();
                     int lastSep = 0;
                     for (final String attr : cols) {
@@ -262,8 +279,8 @@ public class BeanFileUtil {
                                 + (lastSep - t.length()));
                             continue;
                         }
-                        t = StringUtil.trim(t, "\"");
-                        final String info = "reading line " + st.lineno() + ":'" + t + "' into " + rootInfo + attr;
+                        t = StringUtil.trim(t, " \"");
+                        final String info = "reading line " + st.lineno() + ":'" + t + "' -> " + rootInfo + attr;
                         try {
                             Object newValue = null;
                             if (!Util.isEmpty(t)) {
@@ -276,7 +293,7 @@ public class BeanFileUtil {
                                 newValue = parser.parseObject(t);
                                 bean.setValue(beanAttribute.getName(), newValue);
                             }
-                            LOG.info(info + "(" + newValue + ")");
+                            LOG.debug(info + "(" + newValue + ")");
                             filled = true;
                         } catch (final Exception e) {
                             LOG.info("problem on " + info);
@@ -308,6 +325,9 @@ public class BeanFileUtil {
 			break;
 		case TABSHEET:
 			data = presentAsTabSheet(collector);
+			break;
+		case MARKDOWN_TABLE:
+			data = presentAsMarkdownTable(collector);
 			break;
 		case HTML:
 			data = presentAsHtmlTable(collector);
@@ -342,6 +362,10 @@ public class BeanFileUtil {
         return present(collector, "<table>\n", "</table>", "<tr>", "</tr>\n", "<td>", "\"</td>", "", ": <div/>\"");
     }
 
+    public static String presentAsMarkdownTable(BeanCollector collector) {
+        return present(collector, StringUtil.fixString(79, '-'), "\n" + StringUtil.fixString(79, '-'), "\n|", "", " ", " |", null, null);
+    }
+
     /**
      * creates a string representing all items with all attributes of the given beancollector (holding a collection of
      * items).
@@ -372,6 +396,14 @@ public class BeanFileUtil {
         List<IAttributeDefinition> attributes = collector.getBeanAttributes();
         StringBuilder buf = new StringBuilder(c.size() * attributes.size() * 30 + 100);
         buf.append(header);
+        if (!Util.isEmpty(header) && ENV.get("bean.flatfile.createheader", true)) {
+        	buf.append(rowBegin);
+	        for (IAttributeDefinition a : attributes) {
+	            buf.append(colBegin + (nameBegin != null && nameEnd != null ? nameBegin + a.getName() + nameEnd : "")
+	                + a.getName() + colEnd);
+	        }
+        	buf.append(rowEnd + header);
+        }
         for (Object o : c) {
             buf.append(rowBegin);
             for (IAttributeDefinition a : attributes) {

@@ -17,6 +17,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -24,6 +25,7 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
+import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.log.LogFactory;
 
@@ -485,7 +487,13 @@ public class Util {
         }
         return buf.toString();
     }
-
+    
+    public static String toJson(Object obj) {
+    	Map<String, Object> m = new HashMap<>();
+    	new PrivateAccessor<>(obj).forEachMember( (n, v) -> m.put(n, v));
+    	return MapUtil.toJSON(m);
+    }
+    
 	public static ClassLoader getContextClassLoader() {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         if (cl == null) {

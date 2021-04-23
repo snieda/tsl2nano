@@ -36,6 +36,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.PrimitiveUtil;
 
 /**
  * utilities for maps.
@@ -142,7 +143,23 @@ public class MapUtil {
         }
         return result;
     }
-
+    public static Object asArray(Class type, Object...values) {
+    	Object arr = Array.newInstance(type, values.length);
+    	for (int i = 0; i < values.length; i++) {
+			Array.set(arr, i, values[i]);
+		}
+    	return arr;
+    	
+    }
+    public static Object asArray(Class type, String stringWithValues) {
+    	stringWithValues = StringUtil.trim(stringWithValues, "[]");
+    	String[] split = stringWithValues.split("[,;\t\n]");
+    	Object[] values = new Object[split.length];
+    	for (int i = 0; i < split.length; i++) {
+			Array.set(values, i, ObjectUtil.wrap(split[i].trim(), type));
+		}
+    	return asArray(type, values);
+    }
     /**
      * the contrary to {@link #asMap(Object...)}. keys should be strings, values will be converted (through
      * {@link #toString()} to strings.
@@ -224,6 +241,12 @@ public class MapUtil {
             Object v = map.get(k);
             if (v == null)
                 continue;
+            else if (v.getClass().isArray()) {
+            	if (v.getClass().getComponentType().isPrimitive())
+            		v = PrimitiveUtil.toArrayString(v);
+            	else
+            		v = Arrays.toString((Object[])v);
+            }
             buf.append("\"" + k + "\": \"" + v + "\",");
         }
         if (buf.length() > 1)

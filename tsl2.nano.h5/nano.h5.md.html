@@ -4347,6 +4347,7 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.4.4  | 06.12.2020 | menu-hover now opaque, bugfixes on database-replication, quicksearch etc.
  2.4.5  | 20.12.2020 | bugfixes, dependency security fixes, query result fixes, NEW: session menu (edit context)
  2.4.6  | 21.03.2021 | web security extensions, queries with parameters in dilaog, rest-session-authorization, config system.exit, map-bean reactivated, new module 'd8poral' in pre-evaluation mode
+ 2.4.7  | 25.04.2021 | vnet(neuron)+terminal extensions, beanvalues respecting arrays/primitive-arrays and all different number type formattings, generic typebean test added
  2.5.0  | xx.xx.2021 | see EnvUpdate2v5v0: refactorings: serialization of actions with primitive attributes, move incubation packages
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
@@ -5399,3 +5400,10 @@ deploy:
          for cloud-storages: boxcryptor (german tool for dropbox), cryptomator (german tool for any cloud storage)
 * [x] fix test collisions on h5 (tests using h2 database)
 * [ ] memory leak in hibernate SessionFactoryImpl: reloading the persistenceunit does not clean old session factory
+* [ ] read/write data from wiki files (like markdown-table, graphviz dot, gravizo: plantuml, etc)
+* [ ] "reverse/cycle testing" or "reverse annotation driven tests" 
+   * [ ] create @ReverseFunction annotation
+   * [ ] add reverse annotation on all acceptable functions
+   * [ ] create generic test for all reverse annotated functions
+   * [ ] use generic testbean with test sets
+

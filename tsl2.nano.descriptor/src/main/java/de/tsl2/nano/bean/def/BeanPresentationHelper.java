@@ -67,6 +67,7 @@ import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.cls.IValueAccess;
+import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.messaging.ChangeEvent;
@@ -481,7 +482,7 @@ public class BeanPresentationHelper<T> {
                     return RegExpFormat.createNumberRegExp(v);
                 } else {
                     int l = attribute.length() != UNDEFINED ? attribute.length()
-                        : ENV.get("value.format.default.bigdecimal.length", 19);
+                        : ENV.get("value.format.default.bigdecimal.length", 19+4);
                     int p = attribute.precision() != UNDEFINED ? attribute.precision()
                         : ENV.get("value.format.default.bigdecimal.precision", 4);
 
@@ -500,7 +501,7 @@ public class BeanPresentationHelper<T> {
                 return RegExpFormat.createNumberRegExp(l, p, type);
             } else if (NumberUtil.isInteger(type)) {
                 int l = attribute.length() != UNDEFINED ? attribute.length()
-                    : ENV.get("value.format.default.int.length", 10);
+                    : ENV.get("value.format.default." + type.getSimpleName().toLowerCase() + ".length", PrimitiveUtil.getDecMaxLen(type));
                 return RegExpFormat.createNumberRegExp(l, 0, type);
             }
         } else if (BeanClass.isAssignableFrom(Date.class, type)) {

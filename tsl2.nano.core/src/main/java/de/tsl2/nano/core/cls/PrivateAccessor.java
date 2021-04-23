@@ -11,10 +11,13 @@ package de.tsl2.nano.core.cls;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.CollectionUtil;
@@ -196,6 +199,16 @@ public class PrivateAccessor<T> extends UnboundAccessor<T> {
         }
         return result;
     }
+
+    public Field[] findMembers(Predicate<Field> fieldSelector) {
+        Field[] fields = instance().getClass().getFields();
+        fields = CollectionUtil.concat(fields, instance().getClass().getDeclaredFields());
+        return Arrays.stream(fields).filter(fieldSelector).toArray(Field[]::new);
+    }
+
+	public static final boolean notStaticAndNotFinal(Field f) {
+		return !Modifier.isFinal(f.getModifiers()) && !Modifier.isStatic(f.getModifiers());
+	}
 
     /**
      * assign all given properties to the fields of the given instance.

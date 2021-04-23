@@ -478,7 +478,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
         final StringBuilder p = new StringBuilder("([-])|([-]{0,1}");
         /*
          * involve grouping separators (3-digits-blocks).
-         * if text input don't contain fractions, fractions will be added automated,
+         * if text input doesn't contain fractions, fractions will be added automated,
          * so, the decimal part should not exceed length of dec.
          */
         dec -= fract;
@@ -488,11 +488,8 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
         final int r = dec % 3;
         if (r > 0)
             p.append("\\d{0," + r + "}" + "[" + GROUPING_SEPARATOR + "]?");
-        final String a = "\\d{0,3}" + "[" + GROUPING_SEPARATOR + "]?";
         final int c = (dec - r) / 3;
-        for (int i = 0; i < c; i++) {
-            p.append(a);
-        }
+        p.append("(\\d{0,3}" + "[" + GROUPING_SEPARATOR + "]?){0," + c + "}");
         p.append((fract > 0 ? "([" + DECIMAL_SEPARATOR + "]" + "[0-9]{0," + fract + "}){0,1})" : ")"));
         if (fixed) {
             systemInitMap.put(p.toString(), fixed('0', dec) + (fract > 0 ? DECIMAL_SEPARATOR + fixed('0', fract) : ""));

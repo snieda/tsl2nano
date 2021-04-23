@@ -381,8 +381,8 @@ public class FileUtil {
     }
 
     /**
-     * Serialize a Java object to XML. All attributes that have getter and setter methods will be serialized to
-     * elements.
+     * Serialize a Java object to XML. All attributes that have getter and setter methods and are not default values 
+     * will be serialized to elements.
      * 
      * @param serializable Java object that implements Serializable.
      * @param outputStream Output stream to write XML to.

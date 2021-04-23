@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.structure;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -24,8 +25,9 @@ import de.tsl2.nano.core.util.StringUtil;
  * @author Tom
  * @version $Revision$
  */
-public class ANode<T, D> implements INode<T, D> {
-    /** the nodes real object */
+public class ANode<T, D> implements INode<T, D>, Serializable {
+	private static final long serialVersionUID = 1L;
+	/** the nodes real object */
     protected T core;
     /** connections to other nodes in a net */
     protected List<IConnection<T, D>> connections;

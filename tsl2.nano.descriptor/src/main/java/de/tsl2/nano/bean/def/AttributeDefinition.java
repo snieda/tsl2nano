@@ -515,6 +515,11 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
                 getConstraint().setFormat(new CollectionExpressionTypeFormat<T>(getGenericType(0)));
             } else if (Map.class.isAssignableFrom(type)) {
                 getConstraint().setFormat(new MapExpressionFormat<T>(getGenericType(1)));
+            } else if (type.isArray()) {
+            	if (type.getComponentType().isPrimitive())
+                    getConstraint().setFormat(new PrimitiveArrayExpressionFormat<T>(getGenericType(1)));
+            	else
+            		getConstraint().setFormat(new ArrayExpressionFormat<T>(getGenericType(1)));
             } else if (type.isEnum()) {
                 getConstraint().setFormat(FormatUtil.getDefaultFormat(type, true));
             } else if (BeanUtil.isStandardType(type) && !ByteUtil.isByteStream(type)) {
@@ -558,7 +563,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     @Override
     public boolean isMultiValue() {
         Class<?> type = getType();
-        return Collection.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type);
+        return Collection.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type) || type.isArray();
     }
 
     /**
@@ -987,10 +992,16 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     public void setValue(Object instance, T value) {
         if (secure != null)
             value = (T) secure.encrypt((String) value);
-        if (value instanceof String && !isMultiValue()) {
-			T fromVE = BeanDefinition.getBeanDefinition(getType()).getValueExpression().from((String)value);
-			if (fromVE != null && getType().isAssignableFrom(fromVE.getClass()))
-				value = fromVE;
+        if (value instanceof String) {
+        	if (!isMultiValue()) {
+				T fromVE = BeanDefinition.getBeanDefinition(getType()).getValueExpression().from((String)value);
+				if (fromVE != null && getType().isAssignableFrom(fromVE.getClass()))
+					value = fromVE;
+	    	} else {
+	    		final String str = (String) value;
+	    		if (!Util.isEmpty(StringUtil.trim(str, "[]{}()\t\n ")))
+	    			value = (T) Util.trY(() -> getFormat().parseObject(str));
+	    	}
 		}
         attribute.setValue(instance, value);
     }

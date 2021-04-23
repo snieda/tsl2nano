@@ -224,6 +224,11 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         this.activationActionNames = activationActionNames;
     }
 
+    @Override
+    public String[] getAttributeNames() {
+    	return (allDefinitionsCached && attributeFilter != null ? attributeFilter : super.getAttributeNames());
+    }
+    
     /**
      * constrains the available attributes. the order of the filter will be used for generic attribute evaluations.
      * 
@@ -324,19 +329,20 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             		attributeFilter = annAttributes.names();
             	} else {
 	                List<IAttribute> attributes = super.getAttributes(readAndWriteAccess);
-	                attributeFilter =
-	                    new String[attributes.size() + (attributeDefinitions != null ? attributeDefinitions.size() : 0)];
-	                int i = 0;
+	                ArrayList<String> attributeFilterList =
+	                    new ArrayList<>(attributes.size() + (attributeDefinitions != null ? attributeDefinitions.size() : 0));
 	                for (IAttribute attr : attributes) {
-	                    attributeFilter[i++] = attr.getName();
+	                    attributeFilterList.add(attr.getName());
 	                }
 	                //the already defined virtual attributes should not be lost!
 	                if (attributeDefinitions != null) {
 	                    Set<String> defs = attributeDefinitions.keySet();
 	                    for (String name : defs) {
-	                        attributeFilter[i++] = name;
+	                    	if (!attributeFilterList.contains(name))
+	                    		attributeFilterList.add(name);
 	                    }
 	                }
+	                attributeFilter = attributeFilterList.toArray(new String[0]);
             	}
             }
             for (int i = 0; i < attributeFilter.length; i++) {
@@ -952,14 +958,14 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      * delegates to {@link #getBeanDefinition(String, Class, boolean)} with null and true.
      */
     public static BeanDefinition<?> getBeanDefinition(String name) {
-        return getBeanDefinition(name, null, true);
+        return getBeanDefinition(name, null, ENV.get("bean.def.init.full", true));
     }
 
     /**
      * delegates to {@link #getBeanDefinition(String, Class, boolean)} with {@link BeanClass#getName(Class)} and true.
      */
     public static <T> BeanDefinition<T> getBeanDefinition(Class<T> type) {
-        return getBeanDefinition(BeanClass.getName(type), type, true);
+        return getBeanDefinition(BeanClass.getName(type), type, ENV.get("bean.def.init.full", true));
     }
     public static <T> BeanDefinition<T> getBeanDefinition(Class<T> type, boolean fullInitStore) {
         return getBeanDefinition(BeanClass.getName(type), type, fullInitStore);
@@ -995,6 +1001,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                     beandef = ENV.load(xmlFile.getPath(), BeanDefinition.class);
                     //workaround for simple-xml not creating the desired root-extension-instance
                     if (beandef.extension != null) {
+                        virtualBeanCache.add(beandef); // -> to avoid recursive loading (->stackoverflow) in beanfinder.setnoconstraints()
                         beandef = (BeanDefinition<T>) beandef.extension.to(beandef);
                     }
                     LOG.info("beandef loaded from '" + xmlFile.getPath() + "' [name: " + beandef.getName() + ", attributes: " + beandef.getAttributeDefinitions().size() + ", actions: " + beandef.getActions().size() + "]");

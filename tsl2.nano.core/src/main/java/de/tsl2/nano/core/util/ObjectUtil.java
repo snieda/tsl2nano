@@ -329,19 +329,27 @@ public class ObjectUtil extends ByteUtil {
                 else {
                     if (PrimitiveUtil.isPrimitiveOrWrapper(wrapperType))
                         return PrimitiveUtil.convert(value, wrapperType);
-                    else if (ByteUtil.isByteStream(wrapperType))
+                    else if (ByteUtil.isByteStream(wrapperType) && (value instanceof byte[])) {
                         return ByteUtil.toByteStream((byte[])value, wrapperType);
-                    else if (Collection.class.isAssignableFrom(wrapperType))
+                    } else if (Collection.class.isAssignableFrom(wrapperType))
                         return (T )new ListSet(value);
-                    else if ((wrapperType.isInterface() || wrapperType.equals(Properties.class)) 
+                    else if (value instanceof Map && (wrapperType.isInterface() || wrapperType.equals(Properties.class)) 
                             && Map.class.isAssignableFrom(wrapperType))
                         return (T) MapUtil.toMapType((Map)value, (Class<Map>)wrapperType);
                     else if (value instanceof String && Map.class.isAssignableFrom(wrapperType)
                     		&& MapUtil.isJSON((String)value)) {
 						Map jsonMap = MapUtil.fromJSON((String)value);
 						return (T) MapUtil.toMapType(jsonMap, (Class<Map>)wrapperType);
+                    } else if (wrapperType.isArray() && value instanceof String) {
+                    	return (T) MapUtil.asArray(wrapperType.getComponentType(), (String)value);
+                    } else if (wrapperType.isArray() && PrimitiveUtil.isAssignableFrom(wrapperType.getComponentType(),value.getClass())) {
+                    	return (T) MapUtil.asArray(wrapperType.getComponentType(), value);
+                    } else if (wrapperType.isArray() && isInstanceable(wrapperType.getComponentType())) {
+                    	return (T) MapUtil.asArray(wrapperType.getComponentType(), BeanClass.createInstance(wrapperType.getComponentType(), value));
 					} else if (hasValueOfMethod(wrapperType, value))
-                    	return (T) BeanClass.call(wrapperType, "valueOf", false, value);
+                    	return (T) BeanClass.call(wrapperType, "valueOf", true, value);
+					else if (wrapperType.isEnum() && value instanceof Number)
+						return (T) wrapperType.getEnumConstants()[((Number)value).intValue()];
                     else if (isInstanceable(wrapperType)/* && BeanClass.hasConstructor(wrapperType, value.getClass())*/)
                         //IMPROVE: what's about FormatUtil.parse() <-- ObjectUtil.wrap() is called in FormatUtil!
                         return BeanClass.createInstance(wrapperType, value);
@@ -357,7 +365,7 @@ public class ObjectUtil extends ByteUtil {
 
     private static boolean hasValueOfMethod(Class<?> wrapperType, Object value) {
 		try {
-			return wrapperType.getDeclaredMethod("valueOf", new Class[] {value.getClass()}) != null;
+			return wrapperType.getDeclaredMethod("valueOf", new Class[] {PrimitiveUtil.getPrimitive(value.getClass())}) != null;
 		} catch (NoSuchMethodException | SecurityException e) {
 			//ok, no problem
 			return false;

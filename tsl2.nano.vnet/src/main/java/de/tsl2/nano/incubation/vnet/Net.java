@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Function;
 
+import de.tsl2.nano.bean.BeanFileUtil;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.IPredicate;
 import de.tsl2.nano.core.ITransformer;
@@ -100,6 +101,7 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
 	
 	public void save() {
 		FileUtil.saveXml(this, ENV.getConfigPath() + FileUtil.getUniqueFileName(getName()) + ".xml");
+		BeanFileUtil.toFile(elements.values(), ENV.getConfigPath() + FileUtil.getUniqueFileName(getName()) + ".net", BeanFileUtil.FileType.TABSHEET);
 	}
     /**
      * addAll

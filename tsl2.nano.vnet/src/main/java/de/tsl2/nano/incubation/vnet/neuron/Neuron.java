@@ -11,13 +11,16 @@ package de.tsl2.nano.incubation.vnet.neuron;
 
 import static de.tsl2.nano.incubation.vnet.neuron.Layer.Parameter.*;
 
+import java.io.Serializable;
+
 /**
  * 
  * @author ts
  * @version $Revision$
  */
-public class Neuron<T> {
-    Layer l;
+public class Neuron<T> implements Serializable {
+	private static final long serialVersionUID = 1L;
+	Layer l;
     T kernel = null;
     float feeding = 0;
     float linking = 0;

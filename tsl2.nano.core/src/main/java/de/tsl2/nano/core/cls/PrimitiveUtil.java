@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.core.cls;
 
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Arrays;
@@ -97,8 +98,50 @@ public class PrimitiveUtil {
         int i = Arrays.binarySearch(wrappers, immutableWrapper, comparator);
         return i >= 0 ? primitives[i] : immutableWrapper;
     }
+    
+    public static boolean isPrimitiveArray(Object obj) {
+    	return obj != null && isPrimitiveArray(obj.getClass());
+    }
+    public static boolean isPrimitiveArray(Class primitiveArrayType) {
+        return primitiveArrayType.isArray() && primitiveArrayType.getComponentType().isPrimitive();
+    }
+    
+    public static Class getPrimitiveArrayComponentType(Class primitiveArrayType) {
+    	assert isPrimitiveArray(primitiveArrayType);
+    	return (Class) BeanClass.getStatic(getWrapper(primitiveArrayType.getComponentType()), "TYPE");
+    }
+    
+	public static void fillArray(Object arrayInstance, Object value) {
+		assert isPrimitiveArray(arrayInstance);
+    	int length = Array.getLength(arrayInstance);
+    	for (int i=0; i<length; i++) {
+    		Array.set(arrayInstance, i, value);
+    	}
+	}
+	
+	public static String toArrayString(Object primitiveArray) {
+		assert isPrimitiveArray(primitiveArray);
+		if (primitiveArray instanceof boolean[])
+			return Arrays.toString((boolean[])primitiveArray);
+		else if (primitiveArray instanceof byte[])
+			return Arrays.toString((byte[])primitiveArray);
+		else if (primitiveArray instanceof char[])
+			return Arrays.toString((char[])primitiveArray);
+		else if (primitiveArray instanceof double[])
+			return Arrays.toString((double[])primitiveArray);
+		else if (primitiveArray instanceof float[])
+			return Arrays.toString((float[])primitiveArray);
+		else if (primitiveArray instanceof int[])
+			return Arrays.toString((int[])primitiveArray);
+		else if (primitiveArray instanceof long[])
+			return Arrays.toString((long[])primitiveArray);
+		else if (primitiveArray instanceof short[])
+			return Arrays.toString((short[])primitiveArray);
+		else
+			throw new IllegalArgumentException();
+	}
 
-    /**
+	/**
      * getWrapper
      * 
      * @param primitive primitive type
@@ -176,7 +219,7 @@ public class PrimitiveUtil {
      * @return minimum value for given type
      */
     public static <T> T getMaximumValue(Class<T> standardType) {
-        assert standardType.isPrimitive() : "standardType must be a primitive, but is:" + standardType;
+        assert isPrimitiveOrWrapper(standardType) : "standardType must be a primitive, but is:" + standardType;
         Class<T> t = getWrapper(standardType);
         return (T) (Boolean.class.isAssignableFrom(t) ? Boolean.TRUE : BeanClass.getBeanClass(t).createInstance(
             BeanClass.getStatic(t, "MAX_VALUE")));
@@ -271,18 +314,22 @@ public class PrimitiveUtil {
         	return (T) value;
         
         //first: convert the non-number values to numbers
-        if (isAssignableFrom(Boolean.class, value.getClass())
-        		|| "false".equals(value) || "true".equals(value))
-            value = Boolean.valueOf(value.toString()) ? 1 : 0;
-        else if (isAssignableFrom(Character.class, value.getClass()))
-            value = value.hashCode();
-        else if (isAssignableFrom(String.class, value.getClass()) && !Util.isEmpty(value, true))
-        	if (char.class == conversionType)
-        		value = value.hashCode();
-        	else
-        		value = Double.valueOf((String) value);
-        else if (!(value instanceof Number))
-            throw new IllegalArgumentException(value + " can't be converted to " + conversionType);
+        if (!(value instanceof Number)) {
+	        if (isAssignableFrom(Boolean.class, value.getClass())
+	        		|| "false".equals(value) || "true".equals(value))
+	            value = Boolean.valueOf(value.toString()) ? 1 : 0;
+	        else if (isAssignableFrom(Character.class, value.getClass()))
+	            value = value.hashCode();
+	        else if (isAssignableFrom(String.class, value.getClass()))
+	        	if (isAssignableFrom(Character.class, conversionType))
+	        		value = value.hashCode();
+	        	else if (!Util.isEmpty(value, true))
+	        		value = Double.valueOf((String) value);
+	        	else
+	        		throw new IllegalArgumentException(value + " can't be converted to " + conversionType);
+	        else
+	        	throw new IllegalArgumentException(value + " can't be converted to " + conversionType);
+        }
                     
         //now we have a number
         double d = ((Number)value).doubleValue();
@@ -346,6 +393,11 @@ public class PrimitiveUtil {
 		else if (a.matches("[+-]?\\d+"))
 			return Integer.valueOf(a);
 		return a;
+	}
+
+	public static int getDecMaxLen(Class<?> type) {
+		Number max = (Number) getMaximumValue(type);
+		return (int) Math.log10(max.doubleValue()) + 1;
 	}
 }
 

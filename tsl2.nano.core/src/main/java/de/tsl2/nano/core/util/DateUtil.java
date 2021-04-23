@@ -909,7 +909,12 @@ public final class DateUtil {
         Calendar cal = Calendar.getInstance();
         return cal.getTimeZone().getOffset(timeInMillis);
     }
-
+    public static void setUTCTimeZone() {
+    	TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+    }
+    public static void setNoTimeOffset() {
+    	getCalendar().getTimeZone().setRawOffset(0);
+    }
     public static Date clearTime(Date src) {
         return setTime(src, 0, 0, 0, 0);
     }
