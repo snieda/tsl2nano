@@ -6,6 +6,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 
 import de.tsl2.nano.core.cls.BeanClass;
@@ -49,6 +51,7 @@ public class ValueRandomizer {
 				? BigDecimal.class.isAssignableFrom(typeOf) ? (long) Double.MAX_VALUE
 						: ((Number) BeanClass.getStatic(PrimitiveUtil.getWrapper(typeOf), "MAX_VALUE")).longValue()
 				: typeOf.isEnum() ? typeOf.getEnumConstants().length : Byte.MAX_VALUE;
+		size = size * (Math.random() < 0.5 ? -1 : 1);
 		Object n = Math.random() * size;
 		if (BeanClass.hasConstructor(typeOf, long.class))
 			n = ((Number) n).longValue(); // -> Date
@@ -68,9 +71,13 @@ public class ValueRandomizer {
 	public static Object[] provideRandomizedObjectArray(int countPerType, Class type) {
 		return provideRandomizedObjects(countPerType, type).get(type);
 	}
-	public static Object[] provideRandomizedObjectArray(Class... type) {
-		Map<Class, Object[]> map = provideRandomizedObjects(1, type);
-		return CollectionUtil.addAll(new ArrayList<>(), map.values().toArray()).toArray();
+	public static Object[] provideRandomizedObjectArray(Class... types) {
+		Map<Class, Object[]> map = provideRandomizedObjects(1, types);
+		LinkedList<Object> objlist = new LinkedList<>();
+		for (Object[] objs : map.values()) {
+			objlist.addAll(Arrays.asList(objs));
+		}
+		return objlist.toArray();
 	}
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static Map<Class, Object[]> provideRandomizedObjects(int countPerType, Class... types) {
