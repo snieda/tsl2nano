@@ -4,6 +4,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Map;
 
 /**
  * Annotate your method to define it as a reverse function of another known
@@ -30,10 +31,16 @@ public @interface ReverseFunction {
 	Class[] parameters() default {};
 
 	/**
-	 * use the result of given method as parameter (with given index) for own
-	 * reverse function (default: none)
+	 * reuse calling parameter of first function (see methodName) on call of the
+	 * reverse function (the method, having this annotation)
+	 * <p/>
+	 * the content of the int array are the parameter indexes of the first function
+	 * - to be filled in the order of the reverse function parameters.
+	 * <p/>
+	 * -1: fill the returned result instead of a parameter.<br/>
+	 * -2: fill any random value on that reverse parameter index
 	 */
-	int returnAsParameterIndex() default -1;
+	int[] bindParameterIndexesOnReverse() default {};
 
 	/**
 	 * whitch parameter or result (returned result = -1) should be used to compare

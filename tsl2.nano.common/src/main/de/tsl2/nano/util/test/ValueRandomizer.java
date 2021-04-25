@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -39,20 +40,23 @@ public class ValueRandomizer {
 	}
 
 	public static Object fillRandom(Object obj) {
+		return fillRandom(obj, false);
+	}
+	
+	public static Object fillRandom(Object obj, boolean zeroNumber) {
 		PrivateAccessor<?> acc = new PrivateAccessor<>(obj);
 		Field[] fields = acc.findMembers(PrivateAccessor::notStaticAndNotFinal);
-		Arrays.stream(fields).forEach(f -> acc.set(f.getName(), createRandomValue(f.getType())));
+		Arrays.stream(fields).forEach(f -> acc.set(f.getName(), createRandomValue(f.getType(), zeroNumber)));
 		return obj;
 	}
 
-	@SuppressWarnings({ "unchecked" })
 	protected static <V> V createRandomValue(Class<V> typeOf) {
-		long size = NumberUtil.isNumber(typeOf)
-				? BigDecimal.class.isAssignableFrom(typeOf) ? (long) Double.MAX_VALUE
-						: ((Number) BeanClass.getStatic(PrimitiveUtil.getWrapper(typeOf), "MAX_VALUE")).longValue()
-				: typeOf.isEnum() ? typeOf.getEnumConstants().length : Byte.MAX_VALUE;
-		size = size * (Math.random() < 0.5 ? -1 : 1);
-		Object n = Math.random() * size;
+		return createRandomValue(typeOf, false);
+	}
+	
+	@SuppressWarnings({ "unchecked" })
+	protected static <V> V createRandomValue(Class<V> typeOf, boolean zeroNumber) {
+		Object n = zeroNumber ? 0d : createRandomNumber(typeOf);
 		if (BeanClass.hasConstructor(typeOf, long.class))
 			n = ((Number) n).longValue(); // -> Date
 		else if (typeOf.equals(Class.class))
@@ -68,30 +72,48 @@ public class ValueRandomizer {
 		return ObjectUtil.wrap(n, typeOf);
 	}
 
-	public static Object[] provideRandomizedObjectArray(int countPerType, Class type) {
-		return provideRandomizedObjects(countPerType, type).get(type);
+	protected static <V> Object createRandomNumber(Class<V> typeOf) {
+		long size = NumberUtil.isNumber(typeOf) && !Number.class.equals(typeOf)
+				? BigDecimal.class.isAssignableFrom(typeOf) ? (long) Double.MAX_VALUE
+						: ((Number) BeanClass.getStatic(PrimitiveUtil.getWrapper(typeOf), "MAX_VALUE")).longValue()
+				: typeOf.isEnum() ? typeOf.getEnumConstants().length : Byte.MAX_VALUE;
+		if (NumberUtil.isNumber(typeOf))
+			size = size * (Math.random() < 0.5 ? -1 : 1);
+		Object n = Math.random() * size;
+		return n;
 	}
-	public static Object[] provideRandomizedObjectArray(Class... types) {
-		Map<Class, Object[]> map = provideRandomizedObjects(1, types);
-		LinkedList<Object> objlist = new LinkedList<>();
-		for (Object[] objs : map.values()) {
-			objlist.addAll(Arrays.asList(objs));
-		}
-		return objlist.toArray();
-	}
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static Map<Class, Object[]> provideRandomizedObjects(int countPerType, Class... types) {
-		Map<Class, Object[]> all = new HashMap<>();
-		for (int i = 0; i < types.length; i++) {
-			Object[] randomObjects = new Object[countPerType];
-			for (int j = 0; j < countPerType; j++) {
-				if (ObjectUtil.isStandardType(types[i]) || types[i].isEnum())
-					randomObjects[j] = createRandomValue(types[i]);
+	public static Object[] provideRandomizedObjects(int countPerType, Class... types) {
+		Object[] randomObjects = new Object[countPerType * types.length];
+		for (int i = 0; i < countPerType; i++) {
+			for (int j = 0; j < types.length; j++) {
+				if (ObjectUtil.isStandardType(types[j]) || types[j].isEnum())
+					randomObjects[i+j] = createRandomValue(types[j], respectZero(countPerType, i));
 				else
-					randomObjects[j] = fillRandom(BeanClass.createInstance(types[i]));
+					randomObjects[i+j] = fillRandom(BeanClass.createInstance(types[j]), respectZero(countPerType, i));
 			}
-			all.put(types[i], randomObjects);
 		}
-		return all;
+		return randomObjects;
+	}
+	
+//	@SuppressWarnings({ "unchecked", "rawtypes" })
+//	public static Map<Class, Object[]> provideRandomizedObjectMap(int countPerType, Class... types) {
+//		Map<Class, Object[]> all = new LinkedHashMap<>();
+//		for (int i = 0; i < types.length; i++) {
+//			Object[] randomObjects = new Object[countPerType];
+//			for (int j = 0; j < countPerType; j++) {
+//				if (ObjectUtil.isStandardType(types[i]) || types[i].isEnum())
+//					randomObjects[j] = createRandomValue(types[i], respectZero(countPerType, j));
+//				else
+//					randomObjects[j] = fillRandom(BeanClass.createInstance(types[i]), respectZero(countPerType, j));
+//			}
+//			all.put(types[i], randomObjects);
+//		}
+//		return all;
+//	}
+
+	protected static boolean respectZero(int countPerType, int currentIndex) {
+		return countPerType > 2 && currentIndex == 0;
 	}
 }
