@@ -58,6 +58,7 @@ import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.secure.Crypt;
 import de.tsl2.nano.core.util.FileUtil.FileDetail;
+import de.tsl2.nano.util.test.inverse.InverseFunction;
 
 /**
  * file helper class.
@@ -153,6 +154,9 @@ public class FileUtil {
      * @param file
      * @return
      */
+    @InverseFunction(methodName = "writeToZip", parameters = {String.class, String.class, byte[].class}, 
+    		bindParameterIndexesOnInverse = {0, 1},
+    		compareParameterIndex = 2)
     public static byte[] readFromZip(String zipfile, String file) {
         return readFromZip(getZipInputStream(zipfile), file);
     }
@@ -252,16 +256,16 @@ public class FileUtil {
     }
 
     //perhaps we can use it in future
-    private static byte[] readBytes(InputStream stream, String entryName, int len) throws IOException {
-        LOG.debug("loading stream-entry " + entryName + " with " + len + " bytes");
-        byte[] b = new byte[len];
-        int read = 0, offset = 0;
-        do {
-            read = stream.read(b, offset, len - offset);
-            offset += read;
-        } while (read > 0);
-        return b;
-    }
+//    private static byte[] readBytes(InputStream stream, String entryName, int len) throws IOException {
+//        LOG.debug("loading stream-entry " + entryName + " with " + len + " bytes");
+//        byte[] b = new byte[len];
+//        int read = 0, offset = 0;
+//        do {
+//            read = stream.read(b, offset, len - offset);
+//            offset += read;
+//        } while (read > 0);
+//        return b;
+//    }
 
     public static byte[] readBytes(InputStream stream) throws IOException {
         return readBytes(stream, new ByteArrayOutputStream()).toByteArray();
@@ -435,6 +439,8 @@ public class FileUtil {
         return result;
     }//deserialize()
 
+    @InverseFunction(methodName = "saveXml", parameters = {Serializable.class, String.class},
+    		bindParameterIndexesOnInverse = {1})
     public static final Serializable loadXml(String fileName) {
         LOG.info("FileUtil.loadXml from --> " + fileName);
         try {
@@ -444,6 +450,11 @@ public class FileUtil {
         }
     }
 
+    /**
+     * loads properties not from resources but from file in current user dir.
+     */
+    @InverseFunction(methodName = "saveProperties", parameters = {String.class, Properties.class},
+    		compareParameterIndex = 1, bindParameterIndexesOnInverse = {0})
     public static Properties loadPropertiesFromFile(String resourceFile) {
         File f = userDirFile(resourceFile);
         if (!f.canRead()) {
@@ -581,6 +592,8 @@ public class FileUtil {
     /**
      * Read File into a byte-array
      */
+    @InverseFunction(methodName = "writeBytes", parameters = {byte[].class, String.class, boolean.class},
+    		bindParameterIndexesOnInverse = {1})
     public static synchronized byte[] getFileBytes(String strFile, ClassLoader classLoader) {
         LOG.info("Try to open File/Resource " + strFile);
         InputStream stream = null;
@@ -640,6 +653,8 @@ public class FileUtil {
 	/**
      * deserialize
      */
+    @InverseFunction(methodName = "save", parameters = {String.class, Serializable.class},
+    		compareParameterIndex = 1, bindParameterIndexesOnInverse = {0})
     public static Object load(String filename) {
         LOG.info("deserializing object from: " + filename);
         Object l_return = null;
@@ -662,7 +677,7 @@ public class FileUtil {
      * @param filename save name
      * @param object save object
      */
-    public static void save(String filename, Object object) {
+    public static void save(String filename, Serializable object) {
         LOG.info("serializing object to file: " + filename);
         ObjectOutputStream o = null;
         try {

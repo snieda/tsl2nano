@@ -33,6 +33,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.util.test.inverse.InverseFunction;
 
 /**
  * some utils for byte-arrays
@@ -64,6 +65,7 @@ public class ByteUtil extends Util {
      * @return new instance of type
      */
     @SuppressWarnings("unchecked")
+    @InverseFunction(methodName = "getBytes", parameters = {Object.class}, compareParameterIndex = 0)
     public static <T> T toByteStream(byte[] bytes, Class<T> type) {
         if (byte[].class.isAssignableFrom(type)) {
             return (T) bytes;

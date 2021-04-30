@@ -31,6 +31,7 @@ import java.util.regex.Pattern;
 import de.tsl2.nano.core.ITransformer;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
+import de.tsl2.nano.util.test.inverse.InverseFunction;
 
 /**
  * String helper class
@@ -850,6 +851,7 @@ public class StringUtil {
      * @param bytes bytes to convert
      * @return decimal string
      */
+//    @InverseFunction(methodName = "toHexString", parameters = {byte[].class})
     public static String fromHexString(String hex) {
         return fromBaseString(hex, 16);
     }
@@ -908,6 +910,7 @@ public class StringUtil {
         return new ByteArrayInputStream(text.getBytes());
     }
 
+    @InverseFunction(methodName = "toInputStream", parameters = {String.class}, compareParameterIndex = 0)
 	public static String fromInputStream(InputStream stream) {
 		return fromInputStream(stream, "");
 	}

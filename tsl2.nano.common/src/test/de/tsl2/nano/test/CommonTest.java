@@ -28,6 +28,9 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 import de.tsl2.nano.action.IConstraint;
 import de.tsl2.nano.core.Argumentator;
@@ -43,6 +46,7 @@ import de.tsl2.nano.execution.ScriptUtil;
 import de.tsl2.nano.util.AdapterProxy;
 import de.tsl2.nano.util.PrintUtil;
 import de.tsl2.nano.util.Translator;
+import de.tsl2.nano.util.test.inverse.AutoFunctionTest;
 
 /**
  * 
@@ -50,6 +54,8 @@ import de.tsl2.nano.util.Translator;
  * @version $Revision$
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
+@RunWith(Suite.class)
+@SuiteClasses({ AutoFunctionTest.class })
 public class CommonTest implements ENVTestPreparation {
     private static final Log LOG = LogFactory.getLog(CommonTest.class);
     private static String BASE_DIR_COMMON;

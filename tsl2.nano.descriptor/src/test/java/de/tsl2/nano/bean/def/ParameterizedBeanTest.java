@@ -50,7 +50,7 @@ public class ParameterizedBeanTest {
 	public static Collection<Object[]> parameters() {
 		LinkedList<Object[]> list = new LinkedList<>();
 		for (FileType fileType : FileType.values()) {
-			list.add(new Object[] { fileType, ValueRandomizer.provideRandomizedObjectArray(2, TypeBean.class)});
+			list.add(new Object[] { fileType, ValueRandomizer.provideRandomizedObjects(2, TypeBean.class)});
 		}
 		return list;
 	}

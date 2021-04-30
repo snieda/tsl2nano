@@ -69,6 +69,7 @@
 				<directory>../tsl2.nano.core/target/classes</directory>
 				<includes>
 					<include>**/core/**</include>
+					<include>**/util/test/**</include>
 					<include>org/**/*.class</include>
 				</includes>
 			</resource>

@@ -1,21 +1,16 @@
 package de.tsl2.nano.util.test;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.Map;
+import java.util.Properties;
 
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.util.ByteUtil;
-import de.tsl2.nano.core.util.CollectionUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
@@ -61,8 +56,14 @@ public class ValueRandomizer {
 			n = ((Number) n).longValue(); // -> Date
 		else if (typeOf.equals(Class.class))
 			n = TypeBean.class; // TODO: create randomly
+		else if (typeOf.equals(ClassLoader.class))
+			n = Thread.currentThread().getContextClassLoader(); // TODO: create randomly
+		else if (Properties.class.isAssignableFrom(typeOf))
+			n = MapUtil.asProperties(n.toString(), n.toString());
 		else if (Map.class.isAssignableFrom(typeOf))
 			n = MapUtil.asMap(n, n);
+		else if (ByteUtil.isByteStream(typeOf))
+			n = ByteUtil.toByteStream(new byte[] {((Number) n).byteValue()}, typeOf);
 		else if (typeOf.isArray()) {
 			n = PrimitiveUtil.convert(n, typeOf.getComponentType());
 			n = typeOf.getComponentType().isPrimitive() ? MapUtil.asArray(typeOf.getComponentType(), n)
@@ -85,13 +86,17 @@ public class ValueRandomizer {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static Object[] provideRandomizedObjects(int countPerType, Class... types) {
+		boolean zero = countPerType == 0;
+		countPerType = countPerType < 1 ? 1 : countPerType; 
 		Object[] randomObjects = new Object[countPerType * types.length];
 		for (int i = 0; i < countPerType; i++) {
 			for (int j = 0; j < types.length; j++) {
-				if (ObjectUtil.isStandardType(types[j]) || types[j].isEnum())
-					randomObjects[i+j] = createRandomValue(types[j], respectZero(countPerType, i));
-				else
-					randomObjects[i+j] = fillRandom(BeanClass.createInstance(types[j]), respectZero(countPerType, i));
+				if (ObjectUtil.isStandardType(types[j]) || types[j].isEnum() || ByteUtil.isByteStream(types[j]) || Serializable.class.isAssignableFrom(types[j]))
+					randomObjects[i+j] = createRandomValue(types[j], zero || respectZero(countPerType, i));
+				else {
+					Class type = types[j].equals(Object.class) ? TypeBean.class : types[j];
+					randomObjects[i+j] = fillRandom(BeanClass.createInstance(type), zero || respectZero(countPerType, i));
+				}
 			}
 		}
 		return randomObjects;

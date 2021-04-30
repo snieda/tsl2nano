@@ -1,7 +1,5 @@
 package de.tsl2.nano.incubation.platform;
 
-import static org.junit.Assert.*;
-
 import java.util.ArrayList;
 
 import org.junit.Test;

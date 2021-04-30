@@ -14,13 +14,9 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
-import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.util.ByteUtil;
-import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.Util;
 
 /**
@@ -113,6 +109,9 @@ public class TypeBean implements Serializable, Comparable<TypeBean> {
 	}
     protected TypeBean(String name) {
     	string = name;
+    }
+    protected TypeBean(long id) {
+    	immutableLong = id;
     }
     protected TypeBean(Double randomValue) {
     	string = "created by value";
@@ -549,7 +548,10 @@ public class TypeBean implements Serializable, Comparable<TypeBean> {
     public int compareTo(TypeBean o) {
         return new Double(primitiveDouble).compareTo(o.primitiveDouble) ;
     }
-    
+    @Override
+    public int hashCode() {
+    	return (int) (immutableLong != null ? immutableLong : super.hashCode());
+    }
     @Override
     public boolean equals(Object obj) {
     	return ByteUtil.equals(ByteUtil.serialize(this), ByteUtil.serialize(obj));

@@ -10,17 +10,27 @@
 package de.tsl2.nano.core.util;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.math.BigDecimal;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 
@@ -48,6 +58,18 @@ public class ObjectUtil extends ByteUtil {
         STD_TYPE_PKGS.add("java.math");
         STD_TYPE_PKGS.add("java.sql");
     };
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private static final Map<Class, Class> STD_IMPLEMENTATIONS = MapUtil.asMap(
+    		Number.class, Double.class,
+			Collection.class, LinkedList.class,
+			Iterable.class, LinkedList.class,
+			List.class, LinkedList.class,
+			Set.class, LinkedHashSet.class,
+			SortedSet.class, TreeSet.class,
+			Map.class, HashMap.class,
+			SortedMap.class, TreeMap.class,
+			CharSequence.class, String.class);
 
     /**
      * delegates to {@link BeanClass#copy(Object, Object)}.
@@ -324,14 +346,18 @@ public class ObjectUtil extends ByteUtil {
         // check, if constructor for value is available in wrapper type
         try {
             if (value != null && !PrimitiveUtil.isAssignableFrom(wrapperType, value.getClass())) {
+            	if (wrapperType.isInterface() || Modifier.isAbstract(wrapperType.getModifiers()))
+            		wrapperType = getDefaultImplementation(wrapperType);
                 if (Class.class.isAssignableFrom(wrapperType))
                     return (T) BeanClass.load(StringUtil.substring(value.toString(), "class ", "@"));
                 else {
                     if (PrimitiveUtil.isPrimitiveOrWrapper(wrapperType))
                         return PrimitiveUtil.convert(value, wrapperType);
-                    else if (ByteUtil.isByteStream(wrapperType) && (value instanceof byte[])) {
+                    else if (ByteUtil.isByteStream(wrapperType) && (value instanceof byte[]))
                         return ByteUtil.toByteStream((byte[])value, wrapperType);
-                    } else if (Collection.class.isAssignableFrom(wrapperType))
+                    else if (ByteUtil.isByteStream(value.getClass()) && byte[].class.isAssignableFrom(wrapperType))
+                        return (T) ByteUtil.getBytes(value);
+                    else if (Collection.class.isAssignableFrom(wrapperType))
                         return (T )new ListSet(value);
                     else if (value instanceof Map && (wrapperType.isInterface() || wrapperType.equals(Properties.class)) 
                             && Map.class.isAssignableFrom(wrapperType))
@@ -363,7 +389,12 @@ public class ObjectUtil extends ByteUtil {
         return (T) value;
     }
 
-    private static boolean hasValueOfMethod(Class<?> wrapperType, Object value) {
+    @SuppressWarnings("unchecked")
+	private static <T> Class<T> getDefaultImplementation(Class<T> wrapperType) {
+		return STD_IMPLEMENTATIONS.containsKey(wrapperType) ? STD_IMPLEMENTATIONS.get(wrapperType) : wrapperType;
+	}
+
+	private static boolean hasValueOfMethod(Class<?> wrapperType, Object value) {
 		try {
 			return wrapperType.getDeclaredMethod("valueOf", new Class[] {PrimitiveUtil.getPrimitive(value.getClass())}) != null;
 		} catch (NoSuchMethodException | SecurityException e) {

@@ -410,7 +410,7 @@ public abstract class AbstractJobScheduleServiceBean<RUNNABLE> implements
     protected void addToHistory(Job<RUNNABLE> job) {
         jobHistory.add(new JobHistoryEntry(job));
         //backup to file-system (should be done through file-connector)
-        FileUtil.save(FILE_HISTORY, jobHistory);
+        FileUtil.save(FILE_HISTORY, (Serializable)jobHistory);
     }
 
     /**

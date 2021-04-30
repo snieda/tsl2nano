@@ -22,6 +22,7 @@ import java.util.Locale;
 
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
+import de.tsl2.nano.util.test.inverse.InverseFunction;
 
 /**
  * Some utils for numbers and comparables
@@ -371,18 +372,25 @@ public class NumberUtil extends BitUtil {
      * @param obj any object
      * @return number, representing this object
      */
+//    @InverseFunction(methodName = "fromNumber", parameters = {long.class, Class.class}, compareParameterIndex = 0)
     public static long toNumber(Object obj) {
         if (obj instanceof Date)
             return ((Date)obj).getTime();
         else if (obj instanceof Number)
             return ((Number)obj).longValue();
-        else
+        else if (obj instanceof Enum)
+        	return ((Enum)obj).ordinal();
+        else if (ObjectUtil.isStandardType(obj))
             return new BigInteger(1, obj.toString().getBytes()).longValue();
+        else
+        	return obj.hashCode();
     }
 
     public static <T> T fromNumber(long identifier, Class<T> type) {
         if (String.class.isAssignableFrom(type))
             return (T) StringUtil.fromDecString(String.valueOf(identifier));
+        else if (Enum.class.isAssignableFrom(type))
+        	return type.getEnumConstants()[(int) identifier];
         else
             return BeanClass.createInstance(type, identifier);
     }
