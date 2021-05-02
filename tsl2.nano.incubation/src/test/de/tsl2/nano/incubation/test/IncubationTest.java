@@ -21,6 +21,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import de.tsl2.nano.autotest.TypeBean;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.Finished;
 import de.tsl2.nano.core.execution.IRunnable;
@@ -32,7 +33,6 @@ import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.incubation.graph.SVGChart;
 import de.tsl2.nano.util.XmlGenUtil;
-import de.tsl2.nano.util.test.TypeBean;
 
 /**
  * basic tests for algorithms to be refactored to the project tsl2nano.common in future.

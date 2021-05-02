@@ -417,14 +417,20 @@ public class ObjectUtil extends ByteUtil {
         return cast != null ? wrap(value, BeanClass.createBeanClass(cast).getClazz()) : value;
     }
 
-
-    private static String OBJ_TOSTRING;
-    static {
-        try {
-            OBJ_TOSTRING = Object.class.getMethod("toString", new Class[0]).toString();
-        } catch (final Exception e) {
-            ManagedException.forward(e);
-        }
+    enum ObjectMethods {
+    	TOSTRING("toString"),
+    	HASHCODE("hashCode"),
+    	EQUALS("equals", Object.class);
+//    	CLONE("clone"),
+//    	FINALIZE("finalize");
+    	
+    	Method method;
+    	ObjectMethods(String methodName, Class...args) {
+    		method = Util.trY(() -> Object.class.getMethod(methodName, args));
+    	}
+    	Method method() {
+    		return method;
+    	}
     }
 
     public static boolean hasToString(Object obj) {
@@ -438,13 +444,22 @@ public class ObjectUtil extends ByteUtil {
      * @return true, if class of object overrides toString()
      */
     public static boolean hasToString(Class cls) {
+    	return isOverridden(cls, ObjectMethods.TOSTRING);
+    }
+    public static boolean hasEquals(Class cls) {
+    	return isOverridden(cls, ObjectMethods.EQUALS);
+    }
+    public static boolean hasHashcode(Class cls) {
+    	return isOverridden(cls, ObjectMethods.HASHCODE);
+    }
+    public static boolean isOverridden(Class cls, ObjectMethods objMethod) {
         try {
             if (cls.isPrimitive() || cls.isInterface()) {
                 return false;
             }
-            final Method method = cls.getMethod("toString", new Class[0]);
-            //pure objects, representating there instance id
-            return !method.toString().equals(OBJ_TOSTRING);
+            final Method method = cls.getMethod(objMethod.method().getName(), objMethod.method().getParameterTypes());
+            //pure objects, representating their instance id
+            return !method.toString().equals(objMethod.method().toString());
         } catch (final Exception e) {
             ManagedException.forward(e);
             return false;

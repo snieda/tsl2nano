@@ -28,10 +28,12 @@ import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.tsl2.nano.autotest.creator.Expect;
+import de.tsl2.nano.autotest.creator.Expectations;
+import de.tsl2.nano.autotest.creator.InverseFunction;
 import de.tsl2.nano.core.ITransformer;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
-import de.tsl2.nano.util.test.inverse.InverseFunction;
 
 /**
  * String helper class
@@ -50,6 +52,7 @@ public class StringUtil {
     /**
      * @see #substring(String, String, String, int)
      */
+    @Expectations({@Expect(when = {"something.. <content>..some other", "<", ">"}, then = "content")})
     public static String substring(String data, String from, String to) {
         return substring(data, from, to, 0);
     }
@@ -61,6 +64,8 @@ public class StringUtil {
      * @param constrain if true and from and to are not null, returns null if from or to was not found.
      * @return outer enclosing match.
      */
+    // TODO: the expectations should have a then() = "<content>" (enclosing!) but doesn't!
+    @Expectations({@Expect(when = {"something.. <content>..some other", "<", ">", "false"}, then = "content")})
     public static String subEnclosing(String data, String from, String to, boolean constrain) {
         if (from == null && to == null) {
             return constrain ? null : data;
@@ -170,6 +175,7 @@ public class StringUtil {
     /**
      * @see #substring(StringBuilder, String, String, int)
      */
+    @Expectations({@Expect(when = {"something.. <content>..some other", "<", ">"}, then = "content")})
     public static String substring(StringBuilder data, String from, String to) {
         return substring(data, from, to, 0);
     }
@@ -220,6 +226,8 @@ public class StringUtil {
      * delegates to {@link #trim(StringBuilder, char)} walking through given characters in string (note: character-order
      * is important!)
      */
+    // TODO: not a real trim(): each character will be 'trimmed' only once!
+    @Expectations({@Expect(when = {" .<content>. ", " .<>"}, then = "content")})
     public static String trim(String src, String charactersToTrim) {
         char[] carr = charactersToTrim.toCharArray();
         StringBuilder sb = new StringBuilder(src);
@@ -248,6 +256,7 @@ public class StringUtil {
         }
     }
 
+//    @Expectations({@Expect(when = {"something.. <content>..some other", "<content>", "[new]"}, then = "something.. [new]..some other")})
     public static void replace(StringBuilder str, String expression, String replacement) {
         replace(str, expression, replacement, 0);
     }
@@ -297,6 +306,8 @@ public class StringUtil {
      * @param replacement replacement
      * @return count of findings
      */
+    // TODO: wrong replacement, see @Expect -> otherther
+//    @Expectations({@Expect(when = {"something.. <content>..some other", "<content>", "[new]"}, resultIndex = 0, then = "something.. [new]..some other")})
     public static int replaceAll(StringBuilder src, String regex, String replacement) {
     	int count = 0;
         Matcher matcher = Pattern.compile(regex).matcher(src);
@@ -328,6 +339,7 @@ public class StringUtil {
      * @param maxLength max length of string
      * @return string
      */
+    @Expectations({@Expect(when = {"something.. <content>..some other", "9"}, then = "someth...")})
     public static String toString(Object o, int maxLength) {
 //        assert maxLength > 4 : "maxLength shouldn't be smaller than 5!";
         if (maxLength < 4) {
@@ -358,6 +370,7 @@ public class StringUtil {
      * @param maxLineCount max line count
      * @return string
      */
+    @Expectations({@Expect(when = {"something.. <content>..some other", "1"}, then = " [0]: something.. <content>..some other\n")})
     public static String toFormattedString(Object o, int maxLineCount) {
         return toFormattedString(o, maxLineCount, true);
     }
@@ -405,6 +418,7 @@ public class StringUtil {
     /**
      * delegates to {@link #fixString(String, int, char, boolean)}.
      */
+    @Expectations({@Expect(when = {"10", "c"}, then = "cccccccccc")})
     public static String fixString(int fixLength, char fillChar) {
         return fixString("", fixLength, fillChar, true);
     }
@@ -532,6 +546,7 @@ public class StringUtil {
     /**
      * delegates to {@link #extract(CharSequence, String, String, int, int...)}
      */
+    @Expectations({@Expect(when = {"something.. <content>..some other", "[<].*[>]", "[\\1]"}, then = "<content>")})
     public static String extract(CharSequence source, String regexp, String replacement) {
         return extract(source, regexp, replacement, 0, 0);
     }
@@ -701,6 +716,7 @@ public class StringUtil {
      * @param ccName text to split
      * @return split ccName
      */
+    @Expectations({@Expect(when = {"spaceCamelCase"}, then = "space Camel Case")})
     public static final String spaceCamelCase(String ccName) {
         return ccName.replaceAll("([a-z0-9])([A-Z])", "$1 $2");
     }
@@ -746,6 +762,7 @@ public class StringUtil {
     /**
      * delegates to {@link #format(String, int, String, String)}
      */
+    @Expectations({@Expect(when = {"something.. <content>..some other", "9"}, then = "something\n.. <conte\nnt>..some\n other")})
     public static final String format(String text, int maxLineWidth) {
         return format(text, maxLineWidth, "\n");
     }

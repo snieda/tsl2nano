@@ -7,8 +7,8 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
+import de.tsl2.nano.autotest.TypeBean;
 import de.tsl2.nano.core.ManagedException;
-import de.tsl2.nano.util.test.TypeBean;
 
 public class ReplicationTest {
 

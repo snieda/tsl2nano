@@ -6,11 +6,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import de.tsl2.nano.action.IConstraint;
+import de.tsl2.nano.autotest.TypeBean;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.util.ENVTestPreparation;
-import de.tsl2.nano.util.test.TypeBean;
 
 public class BeanProxyTest implements ENVTestPreparation {
 

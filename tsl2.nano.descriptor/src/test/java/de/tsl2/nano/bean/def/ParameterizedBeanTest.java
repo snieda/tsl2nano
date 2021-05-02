@@ -16,12 +16,12 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import de.tsl2.nano.autotest.TypeBean;
+import de.tsl2.nano.autotest.ValueRandomizer;
 import de.tsl2.nano.bean.BeanFileUtil;
 import de.tsl2.nano.bean.BeanFileUtil.FileType;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
-import de.tsl2.nano.util.test.TypeBean;
-import de.tsl2.nano.util.test.ValueRandomizer;
 
 @RunWith(Parameterized.class)
 public class ParameterizedBeanTest {

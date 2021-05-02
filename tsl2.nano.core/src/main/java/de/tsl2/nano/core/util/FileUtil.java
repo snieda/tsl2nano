@@ -53,12 +53,12 @@ import java.util.zip.ZipOutputStream;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.autotest.creator.InverseFunction;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.secure.Crypt;
 import de.tsl2.nano.core.util.FileUtil.FileDetail;
-import de.tsl2.nano.util.test.inverse.InverseFunction;
 
 /**
  * file helper class.

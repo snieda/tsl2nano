@@ -1,0 +1,21 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>net.sf.tsl2nano</groupId>
+    <artifactId>tsl2.nano.h5-package</artifactId>
+    <version>2.4.7-SNAPSHOT</version>
+  </parent>
+  <artifactId>tsl2.nano.autotest</artifactId>
+  <name>TSL2 Framework Automatic Test Creation</name>
+  <description>creates unit test from annotated methods</description>
+	<properties>
+		<module.parent>..</module.parent>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>net.sf.tsl2nano</groupId>
+			<artifactId>tsl2.nano.core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
+</project>

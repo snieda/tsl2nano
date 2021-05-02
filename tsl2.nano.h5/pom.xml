@@ -69,7 +69,6 @@
 				<directory>../tsl2.nano.core/target/classes</directory>
 				<includes>
 					<include>**/core/**</include>
-					<include>**/util/test/**</include>
 					<include>org/**/*.class</include>
 				</includes>
 			</resource>
@@ -446,6 +445,12 @@
 			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>tsl2.nano.replication</artifactId>
 			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.tsl2nano</groupId>
+			<artifactId>tsl2.nano.autotest</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.h2database</groupId>

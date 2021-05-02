@@ -9,8 +9,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import de.tsl2.nano.autotest.TypeBean;
 import de.tsl2.nano.core.util.ENVTestPreparation;
-import de.tsl2.nano.util.test.TypeBean;
 
 public class AttributeCoverTest implements ENVTestPreparation {
 	static final String MYRULECOVERVALUE = "MYRULECOVERVALUE";

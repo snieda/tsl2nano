@@ -23,7 +23,6 @@
 					<include>*.*ml</include>
 					<include>*.txt</include>
 					<include>**/core/**</include>
-					<include>**/util/test/**</include>
 					<include>org/**/*.class</include>
 				</includes>
 			</resource>

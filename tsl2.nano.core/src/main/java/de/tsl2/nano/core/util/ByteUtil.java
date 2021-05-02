@@ -29,11 +29,11 @@ import javax.sql.rowset.serial.SerialBlob;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.autotest.creator.InverseFunction;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.util.test.inverse.InverseFunction;
 
 /**
  * some utils for byte-arrays

@@ -10,6 +10,7 @@ import java.util.Date;
 
 import org.junit.Test;
 
+import de.tsl2.nano.autotest.TypeBean;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.currency.CurrencyUnit;
@@ -17,7 +18,6 @@ import de.tsl2.nano.currency.CurrencyUtil;
 import de.tsl2.nano.util.operation.CRange;
 import de.tsl2.nano.util.operation.IConvertableUnit;
 import de.tsl2.nano.util.operation.OperableUnit;
-import de.tsl2.nano.util.test.TypeBean;
 
 public class FormatTest {
 

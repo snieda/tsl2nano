@@ -1,0 +1,3 @@
+# maven archetype to create a simple application on jpa beans and a database
+
+...TODO...

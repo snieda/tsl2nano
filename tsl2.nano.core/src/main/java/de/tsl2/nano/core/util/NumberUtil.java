@@ -22,7 +22,6 @@ import java.util.Locale;
 
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
-import de.tsl2.nano.util.test.inverse.InverseFunction;
 
 /**
  * Some utils for numbers and comparables

@@ -33,6 +33,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 import de.tsl2.nano.action.IConstraint;
+import de.tsl2.nano.autotest.creator.AutoFunctionTest;
 import de.tsl2.nano.core.Argumentator;
 import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -46,7 +47,6 @@ import de.tsl2.nano.execution.ScriptUtil;
 import de.tsl2.nano.util.AdapterProxy;
 import de.tsl2.nano.util.PrintUtil;
 import de.tsl2.nano.util.Translator;
-import de.tsl2.nano.util.test.inverse.AutoFunctionTest;
 
 /**
  * 

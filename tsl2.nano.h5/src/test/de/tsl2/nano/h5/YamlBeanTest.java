@@ -7,11 +7,11 @@ import java.util.Date;
 
 import org.junit.Test;
 
+import de.tsl2.nano.autotest.TypeBean;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.core.serialize.YamlUtil;
 import de.tsl2.nano.core.util.DefaultFormat;
-import de.tsl2.nano.util.test.TypeBean;
 
 public class YamlBeanTest {
 

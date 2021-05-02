@@ -3,13 +3,10 @@ package de.tsl2.nano.bean.def;
 import static de.tsl2.nano.bean.def.IPresentable.UNDEFINED;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.Reader;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -22,7 +19,6 @@ import java.util.Collection;
 import java.util.Currency;
 import java.util.Date;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -30,15 +26,13 @@ import org.apache.commons.logging.Log;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.action.IActivable;
-import de.tsl2.nano.bean.BeanFileUtil;
+import de.tsl2.nano.autotest.TypeBean;
 import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.bean.enhance.BeanEnhancer;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanAttribute;
@@ -56,8 +50,6 @@ import de.tsl2.nano.currency.CurrencyUnit;
 import de.tsl2.nano.currency.CurrencyUtil;
 import de.tsl2.nano.format.GenericTypeMatcher;
 import de.tsl2.nano.format.RegExpFormat;
-import de.tsl2.nano.util.test.TypeBean;
-import de.tsl2.nano.util.test.WeekdayEnum;
 
 public class BeanTest {
     private static final Log LOG = LogFactory.getLog(BeanTest.class);

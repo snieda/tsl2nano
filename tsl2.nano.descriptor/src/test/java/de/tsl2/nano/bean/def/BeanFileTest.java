@@ -14,6 +14,8 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import de.tsl2.nano.autotest.TypeBean;
+import de.tsl2.nano.autotest.WeekdayEnum;
 import de.tsl2.nano.bean.BeanFileUtil;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.ValueHolder;
@@ -22,8 +24,6 @@ import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
-import de.tsl2.nano.util.test.TypeBean;
-import de.tsl2.nano.util.test.WeekdayEnum;
 
 public class BeanFileTest {
     @Test

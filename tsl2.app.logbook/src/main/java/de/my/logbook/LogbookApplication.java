@@ -60,7 +60,7 @@ public class LogbookApplication implements INanoPlugin, IDOMDecorator {
 	public void definePersistence(Persistence persistence) {
 		persistence.setAutoddl("update");
 		persistence.setDatabase("logbook");
-		persistence.setJarFile(System.getProperty("user.dir") + "/tsl2.app.logbook" + "-2.4.2-SNAPSHOT.jar");
+		persistence.setJarFile(System.getProperty("user.dir") + "/tsl2.app.logbook" + "-2.4.7-SNAPSHOT.jar");
 	}
 
 	public void actionBeforeHandler(IAction<?> action) {

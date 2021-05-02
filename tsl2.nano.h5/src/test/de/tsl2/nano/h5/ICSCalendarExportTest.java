@@ -8,11 +8,12 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import de.tsl2.nano.autotest.TypeBean;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.h5.ICSCalendarExport.REPEAT;
-import de.tsl2.nano.util.test.TypeBean;
+
 import static de.tsl2.nano.h5.ICSCalendarExport.FIELD.*;
 public class ICSCalendarExportTest implements ENVTestPreparation {
 
