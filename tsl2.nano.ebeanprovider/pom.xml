@@ -46,6 +46,12 @@
 		    <version>1.7.30</version>
 		    <scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>net.sf.tsl2nano</groupId>
+			<artifactId>tsl2.nano.autotest</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 <build>
 	<plugins>

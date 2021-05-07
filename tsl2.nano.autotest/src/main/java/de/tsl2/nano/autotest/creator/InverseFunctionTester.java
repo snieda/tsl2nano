@@ -83,6 +83,11 @@ public class InverseFunctionTester extends AFunctionTester<InverseFunction> {
 	}
 
 	@Override
+	public Object getExpectFail() {
+		return null;
+	}
+	
+	@Override
 	public int hashCode() {
 		return Objects.hash(def.methodName(), source.toGenericString(), cloneIndex);
 	}

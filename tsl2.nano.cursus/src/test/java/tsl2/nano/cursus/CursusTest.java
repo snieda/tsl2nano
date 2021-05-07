@@ -16,7 +16,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import de.tsl2.nano.core.util.CollectionUtil;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.DateUtil;
@@ -56,7 +55,7 @@ public class CursusTest implements Serializable /* only for inner-classes...*/{
     public void testContract() throws Exception {
     	IConsilium[] consilii = process(createConsilii());
     	
-    	assertEquals(new Date((String)((Exsecutio)consilii[0].getExsecutios().iterator().next()).mutatio.getNew()), origin.end);
+    	assertEquals(DateUtil.getDate((String)((Exsecutio)consilii[0].getExsecutios().iterator().next()).mutatio.getNew()), origin.end);
     	assertEquals(Long.valueOf((String)((Exsecutio)consilii[1].getExsecutios().iterator().next()).mutatio.getNew()).longValue(), ((List<Account>)origin.accounts).get(1).saldo);
     	assertEquals(IConsilium.Status.INACTIVE, consilii[2].getStatus());
     	assertEquals(5d, origin.value);
@@ -103,7 +102,7 @@ public class CursusTest implements Serializable /* only for inner-classes...*/{
 		Consilium consilii[] = {
     		new Consilium("end", new Timer(DateUtil.getYesterday(), null), Consilium.Priority.HIGHEST, 
     				new Exsecutio(Action.CHANGE_END.name(), 
-    				new Mutatio("01/01/2019", new TRes(Contract.class.getName(), "1", "contract.end")), null)),
+    				new Mutatio(DateUtil.toLocaleFormat("2019-01-01"), new TRes(Contract.class.getName(), "1", "contract.end")), null)),
     		new Consilium("saldo", new Timer(DateUtil.getToday(), null), Consilium.Priority.NORMAL, 
     				new Exsecutio(Action.CHANGE_SALDO.name(),
     				new Mutatio("2000", new TRes(Contract.class.getName(), "1", "contract.accounts[?type=CAPACITY].saldo")), null)),

@@ -75,7 +75,8 @@ public class CursusEntityTest implements Serializable /* only for the inner-clas
 				return contract;
 			}
 		};
-		EMutatio eMutatio = new EMutatio("01/01/2019", eRes);
+		String newDate = DateUtil.toLocaleFormat("2019-01-01");
+		EMutatio eMutatio = new EMutatio(newDate, eRes);
 		EExsecutio eExsecutio = new EExsecutio("Änderung-ENDE-Datum", eMutatio, null);
 		EConsilium eConsilium = new EConsilium(new EConsiliumID("test-change"), "test", new ETimer(DateUtil.getYesterday(), DateUtil.getTomorrow()), Priority.NORMAL, eExsecutio);
 		hCons.setValue(eConsilium);

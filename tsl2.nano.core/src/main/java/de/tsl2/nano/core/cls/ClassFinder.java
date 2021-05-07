@@ -86,7 +86,6 @@ public class ClassFinder {
 			e.printStackTrace();
 		}
 		
-		collectPackageClasses(baseClassLoader, classes);
 		LOG.info("---------------------------------------------------------------------");
 		LOG.info("ClassFinder created for " + classes.size() + " classes");
 		LOG.info("---------------------------------------------------------------------");
@@ -98,10 +97,11 @@ public class ClassFinder {
 	 * @param classLoader
 	 * @return parent ClassLoader
 	 */
-	private static ClassLoader addClasses(ClassLoader classLoader, Set<Class<?>> classes) {
+	private ClassLoader addClasses(ClassLoader classLoader, Set<Class<?>> classes) {
 		try {
 			classes.addAll(
 				(Collection<? extends Class<?>>) new PrivateAccessor(classLoader).member("classes", Vector.class));
+			collectPackageClasses(classLoader, classes);
 		} catch(Exception ex) {
 			LOG.warn("cannot access specific private member 'classes' of classloader. this may result in problems on finding classes.");
 		}

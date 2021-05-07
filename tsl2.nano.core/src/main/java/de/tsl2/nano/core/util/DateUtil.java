@@ -111,8 +111,7 @@ public final class DateUtil {
      * @return the difference in milliseconds
      */
     public static long diffMillis(Date date1, Date date2) {
-        Calendar cal = getCalendar();
-        cal.setTime(date1);
+        Calendar cal = getCalendar(date1);
         long long1 = cal.getTimeInMillis();// + cal.getTimeZone().getOffset(cal.getTimeInMillis());
         cal.setTime(date2);
         long long2 = cal.getTimeInMillis();// + cal.getTimeZone().getOffset(cal.getTimeInMillis());
@@ -140,8 +139,7 @@ public final class DateUtil {
      * @return the new date
      */
     public static Date addMinutes(Date date, int minutes) {
-        Calendar cal = getCalendar();
-        cal.setTime(date);
+        Calendar cal = getCalendar(date);
         cal.add(MINUTE, minutes);
         return cal.getTime();
 
@@ -155,8 +153,7 @@ public final class DateUtil {
      * @return the new date
      */
     public static Date addHours(Date date, int hours) {
-        Calendar cal = getCalendar();
-        cal.setTime(date);
+        Calendar cal = getCalendar(date);
         cal.add(Calendar.HOUR_OF_DAY, hours);
         return cal.getTime();
 
@@ -170,8 +167,7 @@ public final class DateUtil {
      * @return the new date
      */
     public static Date addDays(Date date, int days) {
-        Calendar cal = getCalendar();
-        cal.setTime(date);
+        Calendar cal = getCalendar(date);
         cal.add(Calendar.DAY_OF_MONTH, days);
         return cal.getTime();
     }
@@ -184,8 +180,7 @@ public final class DateUtil {
      * @return the new date
      */
     public static Date addMonths(Date date, int months) {
-        Calendar cal = getCalendar();
-        cal.setTime(date);
+        Calendar cal = getCalendar(date);
         cal.add(Calendar.MONTH, months);
         return cal.getTime();
     }
@@ -198,8 +193,7 @@ public final class DateUtil {
      * @return the new date
      */
     public static Date addYears(Date date, int years) {
-        Calendar cal = getCalendar();
-        cal.setTime(date);
+        Calendar cal = getCalendar(date);
         cal.add(Calendar.YEAR, years);
         return cal.getTime();
     }
@@ -212,9 +206,8 @@ public final class DateUtil {
      * @return the concatenated date
      */
     public static Date concatDateAndTime(Date date, Date time) {
-        Calendar cal = getCalendar();
+        Calendar cal = getCalendar(date);
 
-        cal.setTime(date);
         int year = cal.get(Calendar.YEAR);
         int month = cal.get(Calendar.MONTH);
         int day = cal.get(Calendar.DAY_OF_MONTH);
@@ -529,8 +522,7 @@ public final class DateUtil {
      * @return value of date field
      */
     public static int getFieldOfDate(Date date, int field) {
-        Calendar cal = getCalendar();
-        cal.setTime(date);
+        Calendar cal = getCalendar(date);
         return cal.get(field);
     }
 
@@ -573,8 +565,7 @@ public final class DateUtil {
      * @return the new date
      */
     public static Date add(Date date, int field, int amount) {
-        Calendar cal = getCalendar();
-        cal.setTime(date);
+        Calendar cal = getCalendar(date);
         cal.add(field, amount);
         return cal.getTime();
     }
@@ -602,8 +593,7 @@ public final class DateUtil {
      * @return the new date
      */
     public static Date setMaximum(Date date, int field) {
-        Calendar cal = getCalendar();
-        cal.setTime(date);
+        Calendar cal = getCalendar(date);
         cal.set(field, cal.getActualMaximum(field));
         return cal.getTime();
     }
@@ -783,7 +773,7 @@ public final class DateUtil {
      * @return true, if given day is one of given weekdays
      */
     private static boolean isDayOfWeek(Date d, int... weekDays) {
-        return isDayOfWeek(getCalendar(), weekDays);
+        return isDayOfWeek(getCalendar(d), weekDays);
     }
 
     /**
@@ -805,15 +795,12 @@ public final class DateUtil {
      * @return next workday, that is not weekend or holiday
      */
     public static Date getNextWorkday(Date d, Collection<Date> holidays) {
-        Calendar cal = getCalendar();
-        cal.setTime(d);
+        Calendar cal = getCalendar(d);
 
         while (true) {
-            if (!isWorkDay(cal.getTime(), holidays)) {
-                cal.add(Calendar.DAY_OF_MONTH, 1);
-            } else {
+            cal.add(Calendar.DAY_OF_MONTH, 1);
+            if (isWorkDay(cal.getTime(), holidays))
                 return cal.getTime();
-            }
         }
 
     }
@@ -875,6 +862,11 @@ public final class DateUtil {
         return new Period(periodFrom, periodTo).contains(new Period(dateToCheck, dateToCheck));
     }
 
+    private static Calendar getCalendar(Date d) {
+    	Calendar cal = getCalendar();
+    	cal.setTime(d);
+    	return cal;
+    }
     /**
      * internal calendar instance to be used by all methods, resetting the calendars date/time and creating a new date
      * instance.
@@ -958,12 +950,10 @@ public final class DateUtil {
      */
     public static boolean equalsDate(Date first, Date second) {
         //IMPROVE: not performance optimized!
-        Calendar fcal = getCalendar();
-        fcal.setTime(first);
+        Calendar fcal = getCalendar(first);
         setTime(fcal, 0, 0, 0, 0);
 
-        Calendar scal = getCalendar();
-        scal.setTime(second);
+        Calendar scal = getCalendar(second);
         setTime(scal, 0, 0, 0, 0);
         return fcal.equals(scal);
     }
@@ -975,8 +965,7 @@ public final class DateUtil {
      * @return count of days in year of given date
      */
     public static int getDaysOfYear(Date date) {
-        Calendar fcal = getCalendar();
-        fcal.setTime(date);
+        Calendar fcal = getCalendar(date);
         return fcal.get(Calendar.DAY_OF_YEAR);
     }
 
@@ -1137,5 +1126,8 @@ public final class DateUtil {
           ManagedException.forward(e);
           return null;
         }
+    }
+    public static String toLocaleFormat(String iso8601UTC) {
+    	return FormatUtil.format(iso8601UTC.length() == 10 ? getDateSQL(iso8601UTC) : fromISO8601UTC(iso8601UTC));
     }
 }

@@ -415,6 +415,9 @@ public class FormatUtil {
         return numberFormat;
     }
 
+    public static String format(Object obj) {
+    	return getDefaultFormat(obj, false).format(obj);
+    }
     public static <T> T parse(Class<T> type, String source) {
         try {
             return (T) getDefaultFormat(type, true).parseObject(source);

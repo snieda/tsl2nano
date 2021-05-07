@@ -111,5 +111,11 @@
 			<version>1.5</version>
 			<type>pom</type>
 		</dependency>  -->
+		<dependency>
+			<groupId>net.sf.tsl2nano</groupId>
+			<artifactId>tsl2.nano.autotest</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 </project>

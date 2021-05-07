@@ -27,7 +27,7 @@ import de.tsl2.nano.core.util.Util;
  * @author Thomas Schneider
  * @version $Revision$
  */
-public class TypeBean implements Serializable, Comparable<TypeBean> {
+public class TypeBean implements Serializable, Comparable<TypeBean>, Cloneable {
     public static final String ATTR_STRING = "string";
     public static final String ATTR_BIGDECIMAL = "bigdecimal";
     public static final String ATTR_DATE = "date";

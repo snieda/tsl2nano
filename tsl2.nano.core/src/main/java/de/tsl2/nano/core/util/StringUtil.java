@@ -370,7 +370,7 @@ public class StringUtil {
      * @param maxLineCount max line count
      * @return string
      */
-    @Expectations({@Expect(when = {"something.. <content>..some other", "1"}, then = " [0]: something.. <content>..some other\n")})
+    @Expectations({@Expect(when = {"something.. <content>..some other", "1"}, then = " [0]: something.. <content>..some other")})
     public static String toFormattedString(Object o, int maxLineCount) {
         return toFormattedString(o, maxLineCount, true);
     }
@@ -402,7 +402,7 @@ public class StringUtil {
             final StringBuilder strBuilder = new StringBuilder(array.length * 50);
             final int c = array.length > maxLineCount ? maxLineCount : array.length;
             for (int i = 0; i < c; i++) {
-                strBuilder.append((showLines ? " [" + i + "]: " : "") + array[i] + sep);
+                strBuilder.append((showLines ? " [" + i + "]: " : "") + array[i] + (i<c-1 ? sep : ""));
             }
             if (maxLineCount < array.length) {
                 strBuilder.append(MessageFormat.format(Messages.getString("tsl2nano.more.elements"),

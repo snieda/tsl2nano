@@ -351,6 +351,8 @@ public class ObjectUtil extends ByteUtil {
                 if (Class.class.isAssignableFrom(wrapperType))
                     return (T) BeanClass.load(StringUtil.substring(value.toString(), "class ", "@"));
                 else {
+                	if (value instanceof CharSequence && CharSequence.class.isAssignableFrom(wrapperType))
+                		return String.class.isAssignableFrom(wrapperType) ? (T) value.toString() : BeanClass.createInstance(wrapperType, value);
                     if (PrimitiveUtil.isPrimitiveOrWrapper(wrapperType))
                         return PrimitiveUtil.convert(value, wrapperType);
                     else if (ByteUtil.isByteStream(wrapperType) && (value instanceof byte[]))
@@ -376,10 +378,17 @@ public class ObjectUtil extends ByteUtil {
                     	return (T) BeanClass.call(wrapperType, "valueOf", true, value);
 					else if (wrapperType.isEnum() && value instanceof Number)
 						return (T) wrapperType.getEnumConstants()[((Number)value).intValue()];
+					else if (value instanceof String && isSimpleType(wrapperType))
+						return FormatUtil.parse(wrapperType, (String)value);
+					else if (String.class.isAssignableFrom(wrapperType) && isSimpleType(value.getClass()))
+						return (T) FormatUtil.getDefaultFormat(value, true);
                     else if (isInstanceable(wrapperType)/* && BeanClass.hasConstructor(wrapperType, value.getClass())*/)
-                        //IMPROVE: what's about FormatUtil.parse() <-- ObjectUtil.wrap() is called in FormatUtil!
-                        return BeanClass.createInstance(wrapperType, value);
-                    else
+						try {
+							return BeanClass.createInstance(wrapperType, value);
+						} catch (Exception e) {
+							return BeanClass.createInstance(wrapperType, value.toString());
+						}
+					else
                         LOG.warn("unknown wrapping of " + value.getClass() + value.hashCode() + " to " + wrapperType);
                 }
             }

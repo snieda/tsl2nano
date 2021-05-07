@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -11,9 +13,12 @@ import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.util.ByteUtil;
+import de.tsl2.nano.core.util.DateUtil;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
 /**
@@ -24,13 +29,21 @@ import de.tsl2.nano.core.util.Util;
  * their getters and setters you are able to write generic framework unit tests.
  * <p/>
  * NOTE: Additionally you should test your logic on testsets (e.g. maps of
- * fields with boudary values) describing the boundary conditions. To be more
+ * fields with boundary values) describing the boundary conditions. To be more
  * generic, you may use lots of runs on random values instead. This may be done
  * with {@link #provideRandomizedObjects(int, Class...)}
+ * <p/>
+ * Before creating any random number + value, the ValueRandomizer tries to read a file with
+ * name <classname.simplename.lowercase + .set> e.g.: String -> string.set
+ * If this file exists a random value of that will be used. The values can be separated by whitespaces or ';'.
+ * If this file exists and has only one line with content like 'min<->max' then a minimum and maximum value
+ * will be set for that type.
  * 
  * @author Thomas Schneider
  */
 public class ValueRandomizer {
+	private static final ValueSets valueSets = new ValueSets();
+
 	private ValueRandomizer() {
 	}
 
@@ -51,7 +64,9 @@ public class ValueRandomizer {
 	
 	@SuppressWarnings({ "unchecked" })
 	protected static <V> V createRandomValue(Class<V> typeOf, boolean zeroNumber) {
-		Object n = zeroNumber ? 0d : createRandomNumber(typeOf);
+		if (valueSets.hasValueSet(typeOf))
+			return valueSets.fromValueSet(typeOf);
+		Object n = zeroNumber && typeOf.isPrimitive() || NumberUtil.isNumber(typeOf) ? 0d : createRandomNumber(typeOf);
 		if (BeanClass.hasConstructor(typeOf, long.class))
 			n = ((Number) n).longValue(); // -> Date
 		else if (typeOf.equals(Class.class))
@@ -75,9 +90,14 @@ public class ValueRandomizer {
 
 	protected static <V> Object createRandomNumber(Class<V> typeOf) {
 		long size = NumberUtil.isNumber(typeOf) && !Number.class.equals(typeOf)
-				? BigDecimal.class.isAssignableFrom(typeOf) ? (long) Double.MAX_VALUE
-						: ((Number) BeanClass.getStatic(PrimitiveUtil.getWrapper(typeOf), "MAX_VALUE")).longValue()
-				: typeOf.isEnum() ? typeOf.getEnumConstants().length : Byte.MAX_VALUE;
+				? BigDecimal.class.isAssignableFrom(typeOf) 
+					? (long) Double.MAX_VALUE
+					: ((Number) BeanClass.getStatic(PrimitiveUtil.getWrapper(typeOf), "MAX_VALUE")).longValue()
+				: typeOf.isEnum() 
+					? typeOf.getEnumConstants().length 
+					: Date.class.isAssignableFrom(typeOf) 
+						? DateUtil.MAX_DATE.getTime()
+						: Byte.MAX_VALUE;
 		if (NumberUtil.isNumber(typeOf))
 			size = size * (Math.random() < 0.5 ? -1 : 1);
 		Object n = Math.random() * size;
@@ -120,5 +140,36 @@ public class ValueRandomizer {
 
 	protected static boolean respectZero(int countPerType, int currentIndex) {
 		return countPerType > 2 && currentIndex == 0;
+	}
+	
+	public static final void reset() {
+		valueSets.clear();
+	}
+}
+class ValueSets extends HashMap<Class, String[]> {
+	<V> V fromValueSet(Class<V> typeOf) {
+		if (!containsKey(typeOf) && (FileUtil.userDirFile(valueSetFilename(typeOf)).exists() || FileUtil.hasResource(valueSetFilename(typeOf)))) {
+			String content = new String(FileUtil.getFileBytes(valueSetFilename(typeOf), null));
+			String[] names = content.split("[\\s;\\|\n]");
+			put(typeOf, names);
+		}
+		String[] values = get(typeOf);
+		if (values.length == 1) 
+			return fromValueMinMax(values[0], typeOf);
+		return ObjectUtil.wrap(values[(int)(Math.random() * values.length)], typeOf);
+	}
+
+	<V> V fromValueMinMax(String minmax, Class<V> typeOf) {
+		String min = StringUtil.substring(minmax, null, "<->");
+		String max = StringUtil.substring(minmax, "<->", null);
+		return ObjectUtil.wrap(Math.random() * Double.valueOf(max) - Math.random() * Double.valueOf(min), typeOf);
+	}
+
+	boolean hasValueSet(Class typeOf) {
+		return containsKey(typeOf) || FileUtil.userDirFile(valueSetFilename(typeOf)).exists() || FileUtil.hasResource(valueSetFilename(typeOf));
+	}
+
+	private static String valueSetFilename(Class typeOf) {
+		return typeOf.getSimpleName().toLowerCase() + ".set";
 	}
 }

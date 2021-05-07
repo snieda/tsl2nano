@@ -7,6 +7,8 @@
 	    <version>2.4.7-SNAPSHOT</version>
 	  </parent>
 	<artifactId>tsl2.nano.ormliteprovider</artifactId>
+	<name>TSL2 ORMlite provider</name>
+	<description>TSL2 ORMlite (providing an EntityManager for ormlite)</description>
 	<properties>
 		<module.parent>..</module.parent>
 	</properties>
@@ -39,7 +41,11 @@
 		    <version>5.4.15.Final</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>net.sf.tsl2nano</groupId>
+			<artifactId>tsl2.nano.autotest</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
-	<name>TSL2 ORMlite provider</name>
-	<description>TSL2 ORMlite (providing an EntityManager for ormlite)</description>
 </project>

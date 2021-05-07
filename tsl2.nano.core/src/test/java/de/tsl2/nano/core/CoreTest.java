@@ -1,6 +1,5 @@
 package de.tsl2.nano.core;
 
-import static de.tsl2.nano.core.util.ValueSet.e;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -92,11 +91,11 @@ public class CoreTest implements ENVTestPreparation {
 		Object[] arr = new Object[] {"1", 2, 3.};
 		List<Object> asList = Arrays.asList(arr); //Arrays.ArrayList
 		assertEquals("[1, 2, 3.0]", StringUtil.toString(asList, -1));
-		assertEquals("1:2:3.0:", StringUtil.toFormattedString(asList, -1, false, ":"));
+		assertEquals("1:2:3.0", StringUtil.toFormattedString(asList, -1, false, ":"));
 
 		asList = new ArrayList<Object>(asList); //java.util.ArrayList
 		assertEquals("[1, 2, 3.0]", StringUtil.toString(asList, -1));
-		assertEquals("1:2:3.0:", StringUtil.toFormattedString(asList, -1, false, ":"));
+		assertEquals("1:2:3.0", StringUtil.toFormattedString(asList, -1, false, ":"));
 	}
 	
 	@Test

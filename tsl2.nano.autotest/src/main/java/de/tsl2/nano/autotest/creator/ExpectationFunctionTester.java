@@ -4,7 +4,9 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Objects;
 
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.ObjectUtil;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
 @FunctionType(Expectations.class)
@@ -12,6 +14,14 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 
 	private static final String NOT_DEFINED = "NOT DEFINED";
 	private Expect expect;
+
+	public ExpectationFunctionTester(Method source, Expectations externalExpecations) {
+		this(0, source, externalExpecations);
+	}
+	public ExpectationFunctionTester(int iteration, Method source, Expectations externalExpecations) {
+		super(iteration, source);
+		def = externalExpecations;
+	}
 
 	public ExpectationFunctionTester(Method source) {
 		super(source);
@@ -23,10 +33,13 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 	protected Object[] getParameter() {
 		if (parameter == null) {
 			Expect[] expectations = def.value();
-			if (cloneIndex >= expectations.length) {
+			//if generated ExpectationsImpl is used, there is only one @Expect!
+			boolean annotated = !def.getClass().getSimpleName().endsWith("Impl");
+			if (annotated && cloneIndex >= expectations.length) {
+				status = new Status(StatusTyp.PARAMETER_UNDEFINED, "countIndex > expections.length", null);
 				return null;
 			}
-			expect = expectations[cloneIndex];
+			expect = expectations[annotated ? cloneIndex : 0];
 			if (Util.isEmpty(expect.when())) {
 				parameter = createStartParameter(source.getParameterTypes());
 				int i = expect.parIndex();
@@ -37,13 +50,25 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 					parameter[i] = ObjectUtil.wrap(expect.when()[i], source.getParameterTypes()[i]);
 				}
 			}
+			status = INITIALIZED;
 		}
 		return parameter;
 	}
 
+	protected String parametersAsString() {
+		try {
+			return Arrays.toString(getParameter());
+		} catch (Exception e) {
+			status = new Status(StatusTyp.PARAMETER_ERROR, e.toString(), e);
+			return Arrays.toString(parameter);
+		}
+	}
+	
 	@Override
 	public Object getCompareOrigin() {
-		return expect != null && getCompareResult() != null ? ObjectUtil.wrap(expect.then(), getCompareResult().getClass()) : NOT_DEFINED;
+		return expect != null && getCompareResult() != null && expect.then() != null && !expect.then().equals("null") 
+				? ObjectUtil.wrap(expect.then(), getCompareResult().getClass()) 
+				: NOT_DEFINED;
 	}
 
 	private int getResultIndex() {
@@ -60,20 +85,38 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 	}
 
 	@Override
+	public Object getExpectFail() {
+		return expect != null && expect.then() != null && expect.then().startsWith("fail(") ? createFailException(expect.then()) : null;
+	}
+	
+	private Object createFailException(String then) {
+		String cls = StringUtil.substring(then, "fail(", "(");
+		String msg = StringUtil.substring(then, cls, null);
+		msg = msg.substring(0, msg.length() - 1);
+		return BeanClass.createInstance(cls, msg);
+	}
+	
+	@Override
 	public void run() {
 		if (getParameter() == null) {
 			log ("no expectation found for test number " + cloneIndex + "\n");
+			status = new Status(StatusTyp.PARAMETER_UNDEFINED, NOT_DEFINED, null);
 			result = NOT_DEFINED;
 			return;
 		}
 		result = run(source, parameter);
+		status = result != null ? OK : NULL_RESULT;
 	}
 	@Override
 	public int hashCode() {
 		return Objects.hash(source.toGenericString(), cloneIndex);
 	}
 	@Override
+	public boolean equals(Object obj) {
+		return obj != null && hashCode() == obj.hashCode();
+	}
+	@Override
 	public String toString() {
-		return cloneIndex + ": " + source.getDeclaringClass().getSimpleName() + "." + source.getName() + " " + Arrays.toString(getParameter()) + " -> expected: " + expect;
+		return cloneIndex + ": " + source.getDeclaringClass().getSimpleName() + "." + source.getName() + " " + parametersAsString() + status + " -> expected: " + expect;
 	}
 }

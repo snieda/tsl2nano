@@ -9,6 +9,8 @@
  */
 package de.tsl2.nano.core.util;
 
+import java.io.InputStream;
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
 import java.security.MessageDigest;
@@ -17,6 +19,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -75,6 +78,14 @@ public class Util {
         return cls.getPackage() != null && cls.getPackage().getName().startsWith("java");
     }
 
+    public static boolean isSimpleType(Class<?> cls) {
+    	return PrimitiveUtil.isPrimitiveOrWrapper(cls) || NumberUtil.isNumber(cls) || Date.class.isAssignableFrom(cls);
+    }
+
+    public static boolean isDataType(Class<?> cls) {
+    	return Serializable.class.isAssignableFrom(cls) && Cloneable.class.isAssignableFrom(cls) && Comparable.class.isAssignableFrom(cls);
+    }
+    
     /**
      * 
      * @param cls class to evaluate
@@ -489,9 +500,22 @@ public class Util {
     }
     
     public static String toJson(Object obj) {
-    	Map<String, Object> m = new HashMap<>();
-    	new PrivateAccessor<>(obj).forEachMember( (n, v) -> m.put(n, v));
-    	return MapUtil.toJSON(m);
+    	if (ObjectUtil.isSingleValueType(obj.getClass())) {
+	    	Map<String, Object> m = new HashMap<>();
+	    	new PrivateAccessor<>(obj).forEachMember( (n, v) -> m.put(n, FormatUtil.format(v)));
+	    	return MapUtil.toJSON(m);
+    	} else if (ByteUtil.isByteStream(obj.getClass())) {
+    		return "{" + ByteUtil.toString((InputStream)obj, null) + "}";
+    	} else if (!(obj instanceof Map)) {
+    		if (obj instanceof Collection)
+    			obj = ((Collection)obj).toArray();
+    		Object[] arr = (Object[]) obj;
+    		for (int i = 0; i < arr.length; i++) {
+				arr[i] = FormatUtil.format(arr[i]);
+			}
+    		return "{" + StringUtil.concatWrap("\"{0}\"".toCharArray(), arr).replace("\"\"", "\",\"") + "}";
+    	} else
+    		return MapUtil.toJSON((Map) obj);
     }
     
 	public static ClassLoader getContextClassLoader() {

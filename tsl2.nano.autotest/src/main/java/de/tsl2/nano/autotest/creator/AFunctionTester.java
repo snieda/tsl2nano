@@ -1,17 +1,20 @@
 package de.tsl2.nano.autotest.creator;
 
+import static de.tsl2.nano.autotest.creator.AFunctionTester.best;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import de.tsl2.nano.autotest.ValueRandomizer;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.ClassFinder;
 import de.tsl2.nano.core.util.ObjectUtil;
@@ -25,21 +28,23 @@ import de.tsl2.nano.core.util.Util;
  * @author ts
  */
 @SuppressWarnings("rawtypes")
-public abstract class AFunctionTester<A extends Annotation>  implements Runnable, Cloneable {
-	
-	protected Method source;
+public abstract class AFunctionTester<A extends Annotation> extends AFunctionCaller  implements Runnable, Cloneable {
 	protected transient A def;
-	protected Object result;
-	protected Object[] parameter;
-	protected int cloneIndex = 0;
-	protected transient Object instance;
+	protected transient Status status = NEW;
+	public static final String PREF_PROPS = "tsl2.functiontest.";
+	private static final float DELTA_FLOAT = Util.get(PREF_PROPS + "delta.float", 0.0000000001f);
+	private static final float DELTA_DOUBLE = Util.get(PREF_PROPS + "delta.double", 0.0000000001f);
 
-	AFunctionTester(Method source) {
-		this.source = source;
+	static final Status NEW = new Status(StatusTyp.NEW, null, null);
+	static final Status INITIALIZED = new Status(StatusTyp.INITIALIZED, null, null);
+	static final Status OK = new Status(StatusTyp.OK, null, null);
+
+	public AFunctionTester(Method source) {
+		super(source);
 	}
 
-	protected static final void log(Object txt) {
-		System.out.print(txt);
+	public AFunctionTester(int iteration, Method source) {
+		super(iteration, source);
 	}
 
 	public static Collection<? extends AFunctionTester> createRunners(Class<? extends AFunctionTester> testerType, int duplication, String fuzzyFilter) {
@@ -50,6 +55,10 @@ public abstract class AFunctionTester<A extends Annotation>  implements Runnable
 		revFcts.values().forEach(m -> runners.add(createRunner(testerType, m)));
 		duplicate(duplication, runners);
 		return runners;
+	}
+
+	protected static AFunctionTester<?> createRunner(Class<? extends AFunctionTester> testerType, Method m) {
+		return BeanClass.createInstance(testerType, m);
 	}
 
 	private static void duplicate(int duplication, Set<AFunctionTester> runners) {
@@ -64,50 +73,21 @@ public abstract class AFunctionTester<A extends Annotation>  implements Runnable
 		}
 	}
 
-	protected static AFunctionTester createRunner(Class<? extends AFunctionTester> testerType, Method m) {
-		return BeanClass.createInstance(testerType, m);
-	}
-
 	public static Object best(Object obj) {
-		return obj == null || (ObjectUtil.isStandardType(obj) && ObjectUtil.isSingleValueType(obj.getClass())) && ObjectUtil.hasEquals(obj.getClass()) 
+		return obj == null || (ObjectUtil.isStandardType(obj) || ObjectUtil.isSingleValueType(obj.getClass())) && ObjectUtil.hasEquals(obj.getClass()) 
 				? obj 
-				: obj instanceof Serializable && !(obj instanceof StringBuilder) && !(obj instanceof StringBuffer)
+				: obj instanceof Serializable && !obj.getClass().isAnonymousClass() && !(obj instanceof StringBuilder) && !(obj instanceof StringBuffer)
 					? bytes(obj) 
 					: string(obj);
-	}
-
-	protected abstract Object[] getParameter();
-	
-	protected Object[] createStartParameter(Class[] arguments) {
-		return ValueRandomizer.provideRandomizedObjects(cloneIndex == 0 ? 0 : 1, arguments);
 	}
 
 	/** to be overwritten */
 	protected void doBetween() {
 	}
 
-	protected Object run(Method method, Object... args) {
-		log("invoking " + method.getName() + " with " + Arrays.toString(args) + "\n");
-		final Object instance = getInstance(method);
-		return Util.trY(() -> method.invoke(instance, args));
-	}
-
-	private Object getInstance(Method method) {
-		if (Modifier.isStatic(method.getModifiers()))
-			return null;
-		if (instance != null && method.getDeclaringClass().isAssignableFrom(instance.getClass()))
-			return instance;
-		else
-			instance = BeanClass.createInstance(method.getDeclaringClass());
-		return instance;
-	}
-
-	protected Object getResult() {
-		return result;
-	}
-
 	public abstract Object getCompareOrigin();
 	public abstract Object getCompareResult();
+	public abstract Object getExpectFail();
 
 	protected int undefToZeroIndex(int index) {
 		return index < 0 ? 0 : index;
@@ -121,15 +101,57 @@ public abstract class AFunctionTester<A extends Annotation>  implements Runnable
 		return Util.toJson(obj);
 	}
 
-	public AFunctionTester() {
-		super();
+	public static Collection<? extends AFunctionTester> prepareTestParameters(FunctionTester types) {
+		Collection<AFunctionTester> runners = new LinkedHashSet<>();
+		for (int i = 0; i < types.value().length; i++) {
+			runners.addAll(AFunctionTester.createRunners(
+						types.value()[i],
+						Util.get(PREF_PROPS + "duplication", 3),
+						Util.get(PREF_PROPS + "filter", "")));
+		}
+		return runners;
 	}
 
-	@Override
-	protected Object clone() throws CloneNotSupportedException {
-		AFunctionTester clone = (AFunctionTester) super.clone();
-		clone.cloneIndex++;
-		return clone;
+	public void testMe() {
+		long start = System.currentTimeMillis();
+		run();
+		checkFail();
+		assertTrue(getCompareOrigin() != null || getCompareResult() != null);
+
+		Object o1 = best(getCompareOrigin());
+		Object o2 = best(getCompareResult());
+		if (o1 != null && o1.getClass().isArray())
+			assertAnyArrayEquals(o1, o2);
+		else {
+			assertEquals(toString(), o1, o2);
+		}
+		status = new Status(StatusTyp.TESTED, (System.currentTimeMillis() - start) / 1000 + " sec", null);
+		log(this + "\n");
 	}
 
+	private void checkFail() {
+		if (getExpectFail() != null) {
+			if (status.err == null)
+				fail("test should fail with " + getExpectFail() + " but has result: " + getResult());
+			else if (!getExpectFail().toString().equals(status.err.toString()))
+				fail("test should fail with " + getExpectFail() + " but failed with: " + status.err);
+		}
+	}
+
+	protected void assertAnyArrayEquals(Object o1, Object o2) {
+		if (o1.getClass().getComponentType() == byte.class)
+			assertArrayEquals(toString(), (byte[])o1, (byte[])o2);
+		else if (o1.getClass().getComponentType() == char.class)
+			assertArrayEquals(toString(), (char[])o1, (char[])o2);
+		else if (o1.getClass().getComponentType() == short.class)
+			assertArrayEquals(toString(), (short[])o1, (short[])o2);
+		else if (o1.getClass().getComponentType() == int.class)
+			assertArrayEquals(toString(), (int[])o1, (int[])o2);
+		else if (o1.getClass().getComponentType() == float.class)
+			assertArrayEquals(toString(), (float[])o1, (float[])o2, DELTA_FLOAT);
+		else if (o1.getClass().getComponentType() == double.class)
+			assertArrayEquals(toString(), (double[])o1, (double[])o2, DELTA_DOUBLE);
+		else
+			assertArrayEquals(toString(), (Object[])o1, (Object[])o2);
+	}
 }
