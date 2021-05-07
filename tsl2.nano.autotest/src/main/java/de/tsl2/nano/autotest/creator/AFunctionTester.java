@@ -15,6 +15,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.ClassFinder;
 import de.tsl2.nano.core.util.ObjectUtil;
@@ -113,20 +114,25 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 	}
 
 	public void testMe() {
-		long start = System.currentTimeMillis();
-		run();
-		checkFail();
-		assertTrue(getCompareOrigin() != null || getCompareResult() != null);
+		try {
+			long start = System.currentTimeMillis();
+			run();
+			checkFail();
+			assertTrue(getCompareOrigin() != null || getCompareResult() != null);
 
-		Object o1 = best(getCompareOrigin());
-		Object o2 = best(getCompareResult());
-		if (o1 != null && o1.getClass().isArray())
-			assertAnyArrayEquals(o1, o2);
-		else {
-			assertEquals(toString(), o1, o2);
+			Object o1 = best(getCompareOrigin());
+			Object o2 = best(getCompareResult());
+			if (o1 != null && o1.getClass().isArray())
+				assertAnyArrayEquals(o1, o2);
+			else {
+				assertEquals(toString(), o1, o2);
+			}
+			status = new Status(StatusTyp.TESTED, (System.currentTimeMillis() - start) / 1000 + " sec", null);
+			log(this + "\n");
+		} catch (Throwable e) {
+			status = new Status(StatusTyp.TEST_FAILED, e.toString(), e);
+			ManagedException.forward(e);
 		}
-		status = new Status(StatusTyp.TESTED, (System.currentTimeMillis() - start) / 1000 + " sec", null);
-		log(this + "\n");
 	}
 
 	private void checkFail() {

@@ -150,7 +150,7 @@ class ValueSets extends HashMap<Class, String[]> {
 	<V> V fromValueSet(Class<V> typeOf) {
 		if (!containsKey(typeOf) && (FileUtil.userDirFile(valueSetFilename(typeOf)).exists() || FileUtil.hasResource(valueSetFilename(typeOf)))) {
 			String content = new String(FileUtil.getFileBytes(valueSetFilename(typeOf), null));
-			String[] names = content.split("[\\s;\\|\n]");
+			String[] names = content.split("[\n]");
 			put(typeOf, names);
 		}
 		String[] values = get(typeOf);

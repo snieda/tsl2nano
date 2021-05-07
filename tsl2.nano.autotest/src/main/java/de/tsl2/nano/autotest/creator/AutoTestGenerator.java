@@ -47,6 +47,7 @@ public class AutoTestGenerator {
 	static int fails = 0;
 	static int nullresults = 0;
 	static int load_method_error = 0;
+	static int load_unsuccessful = 0;
 	static int filter_typeconversions = 0;
 	static int filter_errors = 0;
 	static int filter_unsuccessful = 0;
@@ -78,16 +79,19 @@ public class AutoTestGenerator {
 		printStartParameters();
 		int duplication = def("duplication", 10);
 		Collection<AFunctionTester> testers = new LinkedList<>();
+		boolean fileexists = true;
 		for (int i=0; i<duplication; i++) {
-			if (!AutoTestGenerator.getFile(i).exists() || def("clean", false))
+			if (!AutoTestGenerator.getFile(i).exists() || def("clean", false)) {
+				fileexists = false;
 				AutoTestGenerator.generateExpectations(i, 
 						def("filter", Util.FRAMEWORK_PACKAGE), 
 						def("modifier", -1) );
-			if (count > 0)
+			}
+			if (fileexists || count > 0)
 				testers.addAll(AutoTestGenerator.readExpectations(i));
 		}
 		if (def("filter.unsuccessful", true))
-			FunctionCheck.filterFailingTest(testers);
+			load_unsuccessful = FunctionCheck.filterFailingTest(testers);
 		printStatistics(duplication +1, testers);
 		return testers;
 	}
@@ -168,7 +172,7 @@ public class AutoTestGenerator {
 			if (exp == null) {
 				exp = ExpectationCreator.createExpectationFromLine(l);
 			} else {
-				if (l.matches("\\w+.*")) {
+				if (l.matches("\\w+.*\\(.*\\)")) {
 					method = ExpectationCreator.extractMethod(l);
 					if (method != null)
 						expTesters.add(new ExpectationFunctionTester(iteration, method, exp));
@@ -198,7 +202,7 @@ public class AutoTestGenerator {
 				+ "\n\tfiltered nulls        : " + filter_nullresults
 				+ "\n\tfiltered unsuccessful : " + filter_unsuccessful
 				+ "\n\tload errors           : " + load_method_error
-				+ "\n\tloaded unsuccessful   : " + (testers.size() - count)
+				+ "\n\tloaded unsuccessful   : " + load_unsuccessful
 				+ "\n\ttotally loaded        : " + testers.size();
 		AFunctionTester.log(p + s +p);
 	}
@@ -238,8 +242,8 @@ class ExpectationCreator {
 		String pars = StringUtil.substring(m, "(", ")");
 		try {
 			return BeanClass.load(clsName).getMethod(methodName, createParameterTypes(pars.split("[,]")));
-		} catch (NoSuchMethodException | SecurityException e) {
-			AFunctionTester.log(e.toString());
+		} catch (Exception e) {
+			AFunctionTester.log(e.toString() + "\n");
 			return null;
 		}
 	}
@@ -248,7 +252,11 @@ class ExpectationCreator {
 	static Class[] createParameterTypes(String[] pars) {
 		Class[] types = new Class[pars.length];
 		for (int i = 0; i < types.length; i++) {
-			types[i] = pars[i].contains(".") ? BeanClass.load(pars[i]) : PrimitiveUtil.getPrimitiveClass(pars[i]);
+			types[i] = pars[i].contains("[]") 
+					? BeanClass.loadArrayClass(pars[i]) 
+					: pars[i].contains(".")
+						? BeanClass.load(pars[i]) 
+						: PrimitiveUtil.getPrimitiveClass(pars[i]);
 		}
 		return types;
 	}
@@ -257,7 +265,7 @@ class ExpectationCreator {
 class FunctionCheck {
 	static boolean checkTestSuccessful(AFunctionCaller t, String expect) {
 		try {
-			new ExpectationFunctionTester(t.source, ExpectationCreator.createExpectation(null, expect)).testMe();
+			new ExpectationFunctionTester(t.source, ExpectationCreator.createExpectationFromLine(expect)).testMe();
 			return true;
 		} catch (Throwable e) {
 			return false;
@@ -282,11 +290,11 @@ class FunctionCheck {
 	}
 
 	static boolean isSimpleType(Class<?> t) {
-		return true;// ObjectUtil.isStandardType(t) && ObjectUtil.isSingleValueType(t);
+		return ObjectUtil.isStandardType(t) && ObjectUtil.isSingleValueType(t);
 	}
 	
 	@SuppressWarnings("rawtypes")
-	static void filterFailingTest(Collection<AFunctionTester> testers) {
+	static int filterFailingTest(Collection<AFunctionTester> testers) {
 		LinkedList<AFunctionTester> failing = new LinkedList<>();
 		for (AFunctionTester t : testers) {
 			try {
@@ -296,6 +304,7 @@ class FunctionCheck {
 			}
 		}
 		testers.removeAll(failing);
+		return failing.size();
 	}
 }
 

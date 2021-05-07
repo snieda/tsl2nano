@@ -13,6 +13,7 @@ import de.tsl2.nano.autotest.creator.CurrentStatePreservationTest;
 public class AllAutoTests {
 	@BeforeClass
 	public static void setUp() {
-		System.setProperty("user.dir", System.getProperty("user.dir") + "/target/autotest/");
+		if (!System.getProperty("user.dir").endsWith("target/autotest/"))
+			System.setProperty("user.dir", System.getProperty("user.dir") + "/target/autotest/");
 	}
 }

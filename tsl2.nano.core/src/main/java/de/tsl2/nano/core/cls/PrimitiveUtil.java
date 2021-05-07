@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FormatUtil;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
 /**
@@ -117,6 +118,10 @@ public class PrimitiveUtil {
     	for (int i=0; i<length; i++) {
     		Array.set(arrayInstance, i, value);
     	}
+	}
+	
+	public static Class getPrimitiveArrayClass(String str) {
+		return BeanClass.load("[" + str.substring(0, 1).toUpperCase());
 	}
 	
 	public static String toArrayString(Object primitiveArray) {
@@ -358,7 +363,7 @@ public class PrimitiveUtil {
             Character c = (char)d;
             return (T) c;
         }
-        throw new IllegalArgumentException("conversionType is not primitive or wrapper type");
+        throw new IllegalArgumentException("conversionType is not primitive or wrapper");
     }
 
     /**

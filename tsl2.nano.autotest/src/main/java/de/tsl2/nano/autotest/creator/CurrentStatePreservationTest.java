@@ -3,6 +3,7 @@ package de.tsl2.nano.autotest.creator;
 import java.util.Collection;
 
 import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -34,6 +35,11 @@ public class CurrentStatePreservationTest {
 		return AutoTestGenerator.createExpectationTesters();
 	}
 
+	@BeforeClass
+	public static void setUp() {
+		if (!System.getProperty("user.dir").endsWith("target/autotest/"))
+			System.setProperty("user.dir", System.getProperty("user.dir") + "/target/autotest/");
+	}
 	@AfterClass
 	public static void tearDown() {
 		ValueRandomizer.reset();

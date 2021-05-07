@@ -40,15 +40,25 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 				return null;
 			}
 			expect = expectations[annotated ? cloneIndex : 0];
-			if (Util.isEmpty(expect.when())) {
-				parameter = createStartParameter(source.getParameterTypes());
-				int i = expect.parIndex();
-				parameter[i] = ObjectUtil.wrap(expect.whenPar(), source.getParameterTypes()[i]);
-			} else {
-				parameter = new Object[source.getParameterTypes().length];
-				for (int i = 0; i < expect.when().length; i++) {
-					parameter[i] = ObjectUtil.wrap(expect.when()[i], source.getParameterTypes()[i]);
+			try {
+				if (Util.isEmpty(expect.when())) {
+					int i = expect.parIndex();
+					if (i < 0) {
+						status = new Status(StatusTyp.PARAMETER_UNDEFINED, "expect.when() == null && expect.parIndex < 0 not allowed!", null);
+						return null;
+					}
+					parameter = createStartParameter(source.getParameterTypes());
+					parameter[i] = ObjectUtil.wrap(expect.whenPar(), source.getParameterTypes()[i]);
+				} else {
+					parameter = new Object[source.getParameterTypes().length];
+					for (int i = 0; i < expect.when().length; i++) {
+						parameter[i] = ObjectUtil.wrap(expect.when()[i], source.getParameterTypes()[i]);
+					}
 				}
+			} catch (Exception e) {
+				status = new Status(StatusTyp.PARAMETER_ERROR, e.getMessage(), e);
+				parameter = null;
+				return null;
 			}
 			status = INITIALIZED;
 		}

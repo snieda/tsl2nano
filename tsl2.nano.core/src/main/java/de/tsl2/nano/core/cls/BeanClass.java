@@ -984,6 +984,13 @@ public class BeanClass<T> implements Serializable {
         return BeanClass.getBeanClass(clazz);
     }
 
+    public static String arrayClassName(String className) {
+    	String first = className.substring(0,1);
+		return "[" + (first.toLowerCase().equals(first) ? first.toUpperCase(): "L" + className + ";"); 
+    }
+    public static Class loadArrayClass(String className) {
+    	return Util.trY( () -> Class.forName(arrayClassName(className)));
+    }
     /**
      * load
      * 
