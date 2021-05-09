@@ -5,6 +5,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
+import de.tsl2.nano.autotest.BaseTest;
 import de.tsl2.nano.autotest.creator.AutoFunctionTest;
 import de.tsl2.nano.autotest.creator.CurrentStatePreservationTest;
 
@@ -13,6 +14,6 @@ import de.tsl2.nano.autotest.creator.CurrentStatePreservationTest;
 public class AllAutoTests {
 	@BeforeClass
 	public static void setUp() {
-		System.setProperty("user.dir", System.getProperty("user.dir") + "/target/autotest/");
+		BaseTest.useTargetDir();
 	}
 }

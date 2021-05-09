@@ -175,4 +175,9 @@ public class BaseTest extends TextComparison {
   public enum Condition {
     EQUALS, NULL, NOTNULL, GT, GE, LT, LE;
   }
+  
+	public static void useTargetDir() {
+		if (!System.getProperty("user.dir").endsWith("target/autotest/"))
+			System.setProperty("user.dir", System.getProperty("user.dir") + "/target/autotest/");
+	}
 }

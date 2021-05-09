@@ -190,7 +190,8 @@ public class AutoTestGenerator {
 
 	private static void printStatistics(int iterations, Collection<AFunctionTester> testers) {
 		String p = "\n" + StringUtil.fixString(79, '=') + "\n";
-		String s = AutoTestGenerator.class.getSimpleName() + " created " + count + " expections in file pattern: '" + fileName + "...'"
+		String s = AutoTestGenerator.class.getSimpleName() + " created " + count + " expectations in file pattern: '" + fileName + "...'"
+				+ "\n\ttestneverfail         : " + def("testneverfail", false)
 				+ "\n\tmethods loaded        : " + methods_loaded
 				+ "\n\tduplications          : " + def("duplication", 10)
 				+ "\n\tcreated with fail     : " + fails

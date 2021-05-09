@@ -2,23 +2,35 @@
 
 Thomas Schneider 04/2021
 
+## Overview
+
+This is a java unit test generation framework to do automated tests for you. If you don't want to know, how it works and only want to check, if it works for you, go to the last chapter *All together*
+
+![unittest-result.png](doc/unittest-result.png)
+
 ## Introduction
 
 Unit testing with a good code coverage is essential for modern software. test-driven development seems to be a productive way to implement new software. but unit tests are expensive. 
 Developers are lazy - they always want to automate the things they have to do ;-)
 
-Isn't there any way to automate some test creation? Why do we not declare expectations as annotations on our functions or methods to provide something like a specification for the implementation of the function? If we have a function - what's about the inverse function? Couldn't we declare an existing inverse function to be used by a test creation implementation?
+Isn't there any way to automate some test creation? Why do we not declare expectations as annotations on our functions or methods to provide something like a specification for the implementation of the function? If we have a function - what's about the *inverse function*? Couldn't we declare an existing inverse function to be used by a test creation implementation?
 
-But if we declare Expections or Inverse functions, we need a mechanism to fill method parameters randomly (or with expectation values). For complex objects , we need a test object implementation holding all java types as attributes. Further more we need a conversion framework to provide parameters in the right type.
+But if we declare *Expections* or *Inverse functions*, we need a mechanism to fill method parameters randomly (or with expectation values). For complex objects , we need a test object implementation holding all java types as attributes. Further more we need a conversion framework to provide parameters in the right type.
 
 The framework tsl2nano provides the base for the implementation. A parameterized Unit Test uses features like declared Expectations and Inverse Functions to do the tests. It is extendable to add more features with new annotions and tester-implemenations.
 
+But, at the end I'm to lazy to create the Expectation Annoations by myself. Is there any way to let that create anyone for me?
+Yes, the *AutoTestGenerator* can do that for you. It collects all available classes (may be filtered by you), finds out all
+callable methods and tries to run them with randomized values. The result will be stored as Expectation Annoations in a file. The file will be read again, the expectations will be handled like they were created by you as method annotations. A pre-test checks, that the test won't fail. Now, a parametrized unit test *CurrentStatePreservationTest* runs all that tests.
+
+It is by you to copy/paste the generated annotations to the methods in your source code then the annotations would be found be the *AutoFunctionTest*. But only if you like ;-)
+
 Additionally, there are the following Implementations:
 
-* ValueRandomizer: is able to create random values of any java type
-* TypeBean       : example implementation of a java bean holding all java types as bean attributes
-* BaseTest       : base class for own unit tests providing expectations and textcomparisons (ignoring defined blocks of temporary text)
-* TextComparison : provides text comparisons with ignoring of defined regular expression blocks
+* _ValueRandomizer_ : is able to create random values of any java type
+* _TypeBean_        : example implementation of a java bean holding all java types as bean attributes
+* _BaseTest_        : base class for own unit tests providing expectations and textcomparisons (ignoring defined blocks of temporary text)
+* _TextComparison_  : provides text comparisons with ignoring of defined regular expression blocks
 
 ## Code Review
 
@@ -29,9 +41,38 @@ At the moment, we have two features with their tester implementations:
 * InverseFunction -> InverseFunctionTester
 * Expectations    -> ExpectationsTester
 
-## Usage
+The *AutoTestGenerator* is able to generate unit tests for all methods in your classpath. Tests the state as is.
+
+Two parametrized Unit Tests provide the real unit tests:
+
+* *AutoFunctionTest*: will test all annotations of type _Expectation_ and _InverseFunction_
+* CurrentStatePreservationTest*: uses *AutoTestGenerator* to create Expectation Tests for all found methods
+
+## Usage of Test Annotations
 
 The annotations are packed into the tsl2nano core jar. So, you need a maven dependency for *tsl2.nano.core*. The *AutoFunctionTest* is included in the package *tsl2.nano.autotest*. Please add a maven dependency on scope *test*.
+
+tsl.nano.core:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	<dependency>
+		<groupId>net.sf.tsl2nano</groupId>
+		<artifactId>tsl2.nano.core</artifactId>
+		<version>2.4.7</version>
+		<scope>test</scope>
+	</dependency>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+the test framework:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	<dependency>
+		<groupId>net.sf.tsl2nano</groupId>
+		<artifactId>tsl2.nano.autotest</artifactId>
+		<version>2.4.7</version>
+		<scope>test</scope>
+	</dependency>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The Test Creator *AutoFunctionTest* should be activated by adding it to a Test Suite
 
@@ -107,7 +148,18 @@ writing/reading to something like a stream:
 
 ### ValueRandomizer
 
-example with an parametrized test, creating a set of randomized values:
+The value randomizer can create randomized values for all java types. It respects zero numbers and provides loading of value sets.
+
+A value set will be loaded from file with file name equal to the java class name.
+
+Example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+randomize value type: java.lang.String -> will be loaded from optional file 'string.set'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Example with an parametrized test, creating a set of randomized values:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -167,3 +219,83 @@ example of using text comparison with ignore expressions:
           ));
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+## Usage of AutoTestGenerator and CurrentStatePreservationTest
+
+The *CurrentStatePreservationTest* tries to do all for you. Calling the *AutoTestGenerator* will find all available classes and methods in your classpath, trying to call all methods, storing the results and restoring them as unit tests through the ExpectationTester again.
+
+If you call the test a second time, all generated tests are restored. So, no new generation will be done -> this works as preservation of current state.
+
+There are some parameters (system properties) you can specify. Here, you see the properties (they all have the prefix 'tsl2.functiontest.', e.g.: 'tsl2.functiontest.clean') with their default values:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+AutoTestGenerator(PREFIX: tsl2.functiontest.) started with:
+	filename (pattern)     : target/autotest/generated/generated-autotests-
+	testneverfail          : false
+	clean                  : false
+	duplication            : 10
+	filter                 : de.tsl2.nano
+	modifier               : -1
+	filter.unsuccessful    : true
+	filter.complextypes    : true
+	filter.failing         : false
+	filter.nullresults     : false
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* filename: path to generate the auto tests into. on duplication > 0, you will have more than one generated file (e.g.: generated-autotests-0 and generated-autotests-1)
+* testneverfail: (default: false) only to check the resulting test coverage - if true, no test of *AllAutoTests* will ever fail. Please dont publish that to your application!
+* clean: (default: false) whether to delete all previously generated test files prior to start the new tests.
+* duplication: (default: 10) a duplication of 10 will generate 11 random calls on each method. A duplication > 2 will result in the use of zero numbers in the first test set.
+* filter: (default: this framework package path) fuzzy class+method filter. note: it's fuzzy finding, means, all 'similar' findings will be included!
+* modifier: (default: -1) java method mofifier bitfield like *public* *static* etc. Please have a look at the java class *java.lang.reflect.Modifier* to see all possibilities
+* filter.unsuccessful: (default: true): if true, a pre-check is done, calling the test for a failing result. If the test will fail, it will be filtered from the real test.
+* filter.complextypes: (default: true) all method parameter types and the result type will be checked, if they are standard data types (provided by jdk) and single value types.(nothing like arrays, collections and maps)
+* filter.failing: (default:false) whether it is allowed to have a method call , throwing an exception as expected result.
+* filter.nullresults: (default: false) whether it is allowed to have a method call, returning *null* as result.
+
+At the end, you will get a short statistical overview:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+AutoTestGenerator created 0 expectations in file pattern: 'target/autotest/generated/generated-autotests-...'
+	methods loaded        : 0
+	duplications          : 10
+	created with fail     : 0
+	created with null     : 0
+	created totally       : 0
+	filtered type error   : 0
+	filtered complex types: 0
+	filtered errors       : 0
+	filtered nulls        : 0
+	filtered unsuccessful : 0
+	load errors           : 0
+	loaded unsuccessful   : 0
+	totally loaded        : 656
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* methods loaded: if the test was not started before, generating the auto tests - or the property clean=true was set, then the *AutoTestGenerator* will load classes and methods (filtered throuth given property filter)
+* duplications: the count of method calling clones to test the methods with different randomized value parameters
+* created with fail: if the property *filter.failing* is true (default:false) this is the number of tests throwing an exception
+* created with null: if the property *filter.nullresults* is true (default:false) this is the number of tests with a result value of null
+* filtered.unsuccessful: if the property *filter.unsuccessful* is true (default:true) a test is done before the real unit test. if this test fails, it will be filtered and not provided to the real unit test.
+* load errors: after *AutoTestGenerator* has generated auto tests, they will be loaded to be provided as unit tests. on load there may occur any errors like unavailable method, wrong method parameters (perhaps anything changed in the source code) or problems on creating the parameter values from string.
+* loaded unsuccessful: if property filter.unsuccessful is true (default:true), this will do a test run after loading from generated file and before providing it to the real unit test. NOTE: This will hide the failing tests of your current state!
+* totally loaded: totally loaded real unit tests. this belongs to the number of methods and duplications for the generating process, and on the filtered tests with errors on loading and initializing - or that would fail.
+
+## All together
+
+To enable all standard test features of this framework, do the following:
+
+* The annotations are packed into the tsl2nano core jar. Add a maven dependency for *tsl2.nano.core*. 
+* Add a maven dependency on scope *test*.
+* Optionally, to the steps of chapter *Usage of Test Annotations* to add manual annoations (@Expectation and @InverseFunction) to your methods.
+* create a java unit test class *AllAutoTests* in your test source directory and fill it with following code:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+@RunWith(Suite.class)
+@SuiteClasses({AutoFunctionTest.class, CurrentStatePreservationTest.class})
+public class AllAutoTests {
+	@BeforeClass
+	public static void setUp() {
+		BaseTest.useTargetDir();
+	}
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

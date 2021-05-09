@@ -36,7 +36,7 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 			//if generated ExpectationsImpl is used, there is only one @Expect!
 			boolean annotated = !def.getClass().getSimpleName().endsWith("Impl");
 			if (annotated && cloneIndex >= expectations.length) {
-				status = new Status(StatusTyp.PARAMETER_UNDEFINED, "countIndex > expections.length", null);
+				status = new Status(StatusTyp.PARAMETER_UNDEFINED, "countIndex > expectations.length", null);
 				return null;
 			}
 			expect = expectations[annotated ? cloneIndex : 0];

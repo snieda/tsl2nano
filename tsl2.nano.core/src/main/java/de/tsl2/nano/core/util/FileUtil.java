@@ -509,6 +509,7 @@ public class FileUtil {
      * @param p properties to save
      */
     public static void saveProperties(String resourceFile, Properties p) {
+    	userDirFile(resourceFile).getParentFile().mkdirs();
         try (FileOutputStream out = new FileOutputStream(userDirFile(resourceFile))) {
 			p.store(out,
                 "generated at " + DateFormat.getDateTimeInstance()

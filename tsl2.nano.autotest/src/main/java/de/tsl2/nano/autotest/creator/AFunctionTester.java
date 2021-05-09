@@ -131,7 +131,10 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 			log(this + "\n");
 		} catch (Throwable e) {
 			status = new Status(StatusTyp.TEST_FAILED, e.toString(), e);
-			ManagedException.forward(e);
+			if (!Util.get(PREF_PROPS + "testneverfail", false))
+				ManagedException.forward(e);
+			else
+				log("ERROR (testneverfail=true): " + status);
 		}
 	}
 

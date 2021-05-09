@@ -1,6 +1,5 @@
 package de.tsl2.nano.autotest.creator;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -58,7 +57,7 @@ public class AFunctionCaller implements Runnable {
 		final Object instance = getInstance(method);
 		try {
 			return result = method.invoke(instance, args);
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+		} catch (Exception e) {
 			status = new Status(StatusTyp.EXECUTION_ERROR, e.toString(), e);
 			return ManagedException.forward(e);
 		}

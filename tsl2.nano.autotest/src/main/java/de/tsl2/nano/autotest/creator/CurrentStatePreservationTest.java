@@ -9,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import de.tsl2.nano.autotest.BaseTest;
 import de.tsl2.nano.autotest.ValueRandomizer;
 
 /**
@@ -38,7 +39,7 @@ public class CurrentStatePreservationTest {
 	@BeforeClass
 	public static void setUp() {
 		if (!System.getProperty("user.dir").endsWith("target/autotest/"))
-			System.setProperty("user.dir", System.getProperty("user.dir") + "/target/autotest/");
+			BaseTest.useTargetDir();
 	}
 	@AfterClass
 	public static void tearDown() {
