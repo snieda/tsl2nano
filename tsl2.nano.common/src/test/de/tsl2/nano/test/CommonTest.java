@@ -39,12 +39,12 @@ import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.AdapterProxy;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.execution.AntRunner;
 import de.tsl2.nano.execution.ScriptUtil;
-import de.tsl2.nano.util.AdapterProxy;
 import de.tsl2.nano.util.PrintUtil;
 import de.tsl2.nano.util.Translator;
 

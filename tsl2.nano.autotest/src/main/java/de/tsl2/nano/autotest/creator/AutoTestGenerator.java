@@ -67,7 +67,7 @@ public class AutoTestGenerator {
 				+ "\n\tfilter                 : " + def("filter", "")
 				+ "\n\tmodifier               : " + def("modifier", -1)
 				+ "\n\tfilter.unsuccessful    : " + def("filter.unsuccessful", true)
-				+ "\n\tfilter.complextypes    : " + def("filter.complextypes", true)
+				+ "\n\tfilter.complextypes    : " + def("filter.complextypes", false)
 				+ "\n\tfilter.failing         : " + def("filter.failing", false)
 				+ "\n\tfilter.nullresults     : " + def("filter.nullresults", false);
 		AFunctionTester.log(p + s +p);

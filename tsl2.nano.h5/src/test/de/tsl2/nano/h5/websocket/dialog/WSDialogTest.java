@@ -17,12 +17,12 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.exception.Message;
+import de.tsl2.nano.core.util.AdapterProxy;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.websocket.NanoWebSocketServer;
 import de.tsl2.nano.h5.websocket.WebSocketExceptionHandler;
-import de.tsl2.nano.util.AdapterProxy;
 
 public class WSDialogTest implements Serializable {
     private static final long serialVersionUID = 1L; // in cause of serializable inner classes

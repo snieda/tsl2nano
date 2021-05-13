@@ -260,7 +260,7 @@ AutoTestGenerator(PREFIX: tsl2.functiontest.) started with:
 	filter                 : de.tsl2.nano
 	modifier               : -1
 	filter.unsuccessful    : true
-	filter.complextypes    : true
+	filter.complextypes    : false
 	filter.failing         : false
 	filter.nullresults     : false
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -272,7 +272,7 @@ AutoTestGenerator(PREFIX: tsl2.functiontest.) started with:
 * *filter*: (default: this framework package path) fuzzy class+method filter. NOTE: it's fuzzy finding, means, all 'similar' findings will be included!
 * *modifier*: (default: -1) java method mofifier bitfield like *public* (=1) *static* (=8) etc. Please have a look at the java class *java.lang.reflect.Modifier* to see all possibilities 
 * *filter.unsuccessful*: (default: true): if true, a pre-check is done, calling the test for a failing result. If the test will fail, it will be filtered from the real test.
-* *filter.complextypes*: (default: true) all method parameter types and the result type will be checked, if they are standard data types (provided by jdk) and single value types.(nothing like arrays, collections and maps)
+* *filter.complextypes*: (default: false) all method parameter types and the result type will be checked, if they are standard data types (provided by jdk) and single value types.(nothing like arrays, collections and maps)
 * *filter.failing*: (default:false) whether it is allowed to have a method call , throwing an exception as expected result.
 * *filter.nullresults*: (default: false) whether it is allowed to have a method call, returning *null* as result.
 

@@ -12,6 +12,7 @@ import java.util.Properties;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.cls.PrivateAccessor;
+import de.tsl2.nano.core.util.AdapterProxy;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
@@ -58,6 +59,13 @@ public class ValueRandomizer {
 		return obj;
 	}
 
+	public static Object createRandomProxy(Class<?> interfaze, boolean zeroNumber) {
+		Map<String, Class> types = AdapterProxy.getValueTypes(interfaze);
+		Map<String, Object> values = new HashMap<>();
+		types.forEach( (n, t) -> values.put(n, createRandomValue(t, zeroNumber)));
+		return AdapterProxy.create(interfaze, values);
+	}
+	
 	protected static <V> V createRandomValue(Class<V> typeOf) {
 		return createRandomValue(typeOf, false);
 	}
@@ -79,11 +87,10 @@ public class ValueRandomizer {
 			n = MapUtil.asMap(n, n);
 		else if (ByteUtil.isByteStream(typeOf))
 			n = ByteUtil.toByteStream(new byte[] {((Number) n).byteValue()}, typeOf);
+		else if (typeOf.isInterface())
+			n = createRandomProxy(typeOf, zeroNumber);
 		else if (typeOf.isArray()) {
-//			if (PrimitiveUtil.isPrimitiveOrWrapper(typeOf.getComponentType()))
-//				n = PrimitiveUtil.convert(n, typeOf.getComponentType());
-//			else
-				n = ObjectUtil.wrap(n, typeOf.getComponentType());
+			n = ObjectUtil.wrap(n, typeOf.getComponentType());
 			n = typeOf.getComponentType().isPrimitive() ? MapUtil.asArray(typeOf.getComponentType(), n)
 					: MapUtil.asArray(MapUtil.asMap(n, n), typeOf.getComponentType());
 		} else if (typeOf.equals(Object.class) || !ObjectUtil.isStandardType(typeOf) && !Util.isFrameworkClass(typeOf))
@@ -116,6 +123,8 @@ public class ValueRandomizer {
 			for (int j = 0; j < types.length; j++) {
 				if (ObjectUtil.isStandardType(types[j]) || types[j].isEnum() || ByteUtil.isByteStream(types[j]) || Serializable.class.isAssignableFrom(types[j]))
 					randomObjects[i+j] = createRandomValue(types[j], zero || respectZero(countPerType, i));
+				else if (types[j].isInterface())
+					randomObjects[i+j] = createRandomProxy(types[j], zero);
 				else {
 					Class type = types[j].equals(Object.class) ? TypeBean.class : types[j];
 					randomObjects[i+j] = fillRandom(BeanClass.createInstance(type), zero || respectZero(countPerType, i));

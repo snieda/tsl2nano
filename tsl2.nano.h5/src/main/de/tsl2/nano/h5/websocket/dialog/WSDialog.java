@@ -13,11 +13,11 @@ import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.exception.Message;
+import de.tsl2.nano.core.util.AdapterProxy;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.HtmlUtil;
-import de.tsl2.nano.util.AdapterProxy;
 
 /** creates a simple html5 dialog to be sent through websockets */
 public class WSDialog {

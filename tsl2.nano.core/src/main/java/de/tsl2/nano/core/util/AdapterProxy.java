@@ -7,18 +7,22 @@
  * 
  * Copyright: (c) Thomas Schneider 2013, all rights reserved
  */
-package de.tsl2.nano.util;
+package de.tsl2.nano.core.util;
 
 import static de.tsl2.nano.core.cls.PrimitiveUtil.getDefaultValue;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import de.tsl2.nano.core.cls.BeanAttribute;
-import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.core.cls.PrivateAccessor;
 
 /**
  * generic adapter to be usable as base class for interface implementations. get/put any values in a map.
@@ -80,5 +84,15 @@ public class AdapterProxy implements InvocationHandler {
 
     public Map<String, Object> values() {
         return values;
+    }
+    
+    public static Map<String, Class> getValueTypes(Class interfaze) {
+    	Method[] methods = CollectionUtil.concat(interfaze.getMethods(), interfaze.getDeclaredMethods());
+    	Map<String,Class> map = new HashMap<>();
+    	for (int i = 0; i < methods.length; i++) {
+			if (!void.class.isAssignableFrom(methods[i].getReturnType()))
+				map.put(methods[i].getName(), methods[i].getReturnType());
+		}
+    	return map;
     }
 }
