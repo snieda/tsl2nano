@@ -329,7 +329,7 @@ public class PrimitiveUtil {
 	        	if (isAssignableFrom(Character.class, conversionType))
 	        		value = value.hashCode();
 	        	else if (!Util.isEmpty(value, true))
-	        		value = Double.valueOf((String) value);
+	        		value = FormatUtil.parse(Double.class, (String)value);//Double.valueOf((String) value);
 	        	else
 	        		throw new IllegalArgumentException(value + " can't be converted to " + conversionType);
 	        else

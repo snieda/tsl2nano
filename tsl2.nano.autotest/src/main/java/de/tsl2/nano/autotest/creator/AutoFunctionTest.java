@@ -1,12 +1,16 @@
 package de.tsl2.nano.autotest.creator;
 
 import java.util.Collection;
-import java.util.LinkedList;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+
+import de.tsl2.nano.autotest.BaseTest;
+import de.tsl2.nano.autotest.ValueRandomizer;
 
 /**
  * Generic Test creating test cases for each method annotated with
@@ -29,9 +33,14 @@ public class AutoFunctionTest {
 
 	@Parameters(name = "{0}")
 	public static Collection<? extends AFunctionTester> parameters() {
-		return new LinkedList<>();// AFunctionTester.prepareTestParameters(AutoFunctionTest.class.getAnnotation(FunctionTester.class));
+		BaseTest.useTargetDir();
+		return AFunctionTester.prepareTestParameters(AutoFunctionTest.class.getAnnotation(FunctionTester.class));
 	}
 
+	@AfterClass
+	public static void tearDown() {
+		ValueRandomizer.reset();
+	}
 	@Test
 	public void test() {
 		tester.testMe();

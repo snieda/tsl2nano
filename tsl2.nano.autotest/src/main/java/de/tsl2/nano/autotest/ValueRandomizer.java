@@ -80,7 +80,10 @@ public class ValueRandomizer {
 		else if (ByteUtil.isByteStream(typeOf))
 			n = ByteUtil.toByteStream(new byte[] {((Number) n).byteValue()}, typeOf);
 		else if (typeOf.isArray()) {
-			n = PrimitiveUtil.convert(n, typeOf.getComponentType());
+//			if (PrimitiveUtil.isPrimitiveOrWrapper(typeOf.getComponentType()))
+//				n = PrimitiveUtil.convert(n, typeOf.getComponentType());
+//			else
+				n = ObjectUtil.wrap(n, typeOf.getComponentType());
 			n = typeOf.getComponentType().isPrimitive() ? MapUtil.asArray(typeOf.getComponentType(), n)
 					: MapUtil.asArray(MapUtil.asMap(n, n), typeOf.getComponentType());
 		} else if (typeOf.equals(Object.class) || !ObjectUtil.isStandardType(typeOf) && !Util.isFrameworkClass(typeOf))

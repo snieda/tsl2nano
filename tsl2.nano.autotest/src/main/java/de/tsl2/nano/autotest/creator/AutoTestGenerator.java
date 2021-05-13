@@ -1,16 +1,16 @@
 package de.tsl2.nano.autotest.creator;
 
+import static de.tsl2.nano.autotest.creator.AFunctionCaller.def;
 import static de.tsl2.nano.autotest.creator.AFunctionTester.PREF_PROPS;
 
 import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
-import java.util.Map;
+import java.util.List;
 import java.util.Scanner;
 
 import de.tsl2.nano.core.cls.BeanClass;
@@ -55,10 +55,8 @@ public class AutoTestGenerator {
 	static int filter_complextypes = 0;
 	
 	public static void main(String[] args) {
-		generateExpectations(0, def("filter", Util.FRAMEWORK_PACKAGE), Modifier.STATIC | Modifier.PUBLIC );
-	}
-	static <T> T def(String name, T value) {
-		return Util.get(PREF_PROPS + name, value);
+		List<Method> methods = ClassFinder.self().find(def("filter", "") , Method.class, def("modifier", -1), null);
+		generateExpectations(0, methods );
 	}
 	private static void printStartParameters() {
 		String p = "\n" + StringUtil.fixString(79, '=') + "\n";
@@ -66,7 +64,7 @@ public class AutoTestGenerator {
 				+ "\n\tfilename pattern       : " + fileName
 				+ "\n\tclean                  : " + def("clean", false)
 				+ "\n\tduplication            : " + def("duplication", 10)
-				+ "\n\tfilter                 : " + def("filter", Util.FRAMEWORK_PACKAGE)
+				+ "\n\tfilter                 : " + def("filter", "")
 				+ "\n\tmodifier               : " + def("modifier", -1)
 				+ "\n\tfilter.unsuccessful    : " + def("filter.unsuccessful", true)
 				+ "\n\tfilter.complextypes    : " + def("filter.complextypes", true)
@@ -78,14 +76,13 @@ public class AutoTestGenerator {
 	public static Collection<? extends AFunctionTester> createExpectationTesters() {
 		printStartParameters();
 		int duplication = def("duplication", 10);
+		List<Method> methods = ClassFinder.self().find(def("filter", "") , Method.class, def("modifier", -1), null);
 		Collection<AFunctionTester> testers = new LinkedList<>();
 		boolean fileexists = true;
 		for (int i=0; i<duplication; i++) {
 			if (!AutoTestGenerator.getFile(i).exists() || def("clean", false)) {
 				fileexists = false;
-				AutoTestGenerator.generateExpectations(i, 
-						def("filter", Util.FRAMEWORK_PACKAGE), 
-						def("modifier", -1) );
+				AutoTestGenerator.generateExpectations(i, methods);
 			}
 			if (fileexists || count > 0)
 				testers.addAll(AutoTestGenerator.readExpectations(i));
@@ -96,17 +93,16 @@ public class AutoTestGenerator {
 		return testers;
 	}
 
-	static void generateExpectations(int iteration, String fuzzyfilter, int modifiers) {
+	static void generateExpectations(int iteration, List<Method> methods) {
 		LogFactory.setPrintToConsole(false);
 		count = 0;
-		Map<Double, Method> methods = ClassFinder.self().fuzzyFind(fuzzyfilter, Method.class, modifiers, null);
 		methods_loaded = methods.size();
 		String p = "\n" + StringUtil.fixString(79, '~') + "\n";
 		AFunctionCaller.log(p + "calling " + methods.size() + " methods to create expectations -> " + getFile(iteration) + p);
 
-		methods.values().forEach(m -> writeExpectation(new AFunctionCaller(iteration, m)));
+		methods.forEach(m -> writeExpectation(new AFunctionCaller(iteration, m)));
 		
-		ConcurrentUtil.sleep(1000);
+		ConcurrentUtil.sleep(500);
 		if (count > 0)
 			AFunctionCaller.log(new String(FileUtil.getFileBytes(getFile(iteration).getPath(), null)));
 		AFunctionCaller.log(p + count + " expectations written into '" + getFile(iteration) + p);
@@ -119,14 +115,15 @@ public class AutoTestGenerator {
 	private static void writeExpectation(AFunctionCaller f) {
 		String then = null;
 		try {
-			if ((def("filter.complextypes", true) && !FunctionCheck.hasSimpleTypes(f)) 
-					|| f.source.getParameterCount() == 0) {
+			if ((def("filter.complextypes", false) && !FunctionCheck.hasSimpleTypes(f)) 
+					|| f.source.getParameterCount() == 0 || void.class.isAssignableFrom(f.source.getReturnType())) {
 				filter_complextypes++;
 				return;
 			}
 			f.run();
-		} catch (Throwable e) {
-			if (!f.status.is(StatusTyp.INITIALIZED) || def("filter.failing", false)) {
+		} catch (Exception e) {
+			if (f.status.in(StatusTyp.NEW, StatusTyp.INSTANCE_ERROR, StatusTyp.PARAMETER_ERROR, StatusTyp.PARAMETER_UNDEFINED) 
+					|| def("filter.failing", false)) {
 				filter_errors++;
 				return;
 			}
@@ -216,7 +213,7 @@ class ExpectationCreator {
 	static String createExpectationString(AFunctionCaller f, String then) {
 		String expect = "\n@" + Expectations.class.getSimpleName() + "({@" + Expect.class.getSimpleName() 
 				+ "( when = " + Util.toJson(f.getParameter()) 
-				+ " then = \"" + (then != null || f.getResult() == null ? then : (ObjectUtil.isSingleValueType(f.getResult().getClass()) ? FormatUtil.format(f.getResult()) : Util.toJson(f.getResult())) + "\"})\n")
+				+ " then = \"" + (then != null || f.getResult() == null ? then : (ObjectUtil.isSingleValueType(f.getResult().getClass()) ? FormatUtil.format(f.getResult()) : Util.toJson(f.getResult()))) + "\"})\n"
 				+ f.source + "\n\n";
 		expect = expect.replace("]}", "}");
 		return expect;
@@ -274,9 +271,9 @@ class FunctionCheck {
 	}
 
 	static boolean checkTypeConversion(Object result) {
-		String strResult = FormatUtil.format(result);
-		Object recreatedResult = null;
 		try {
+			String strResult = FormatUtil.format(result);
+			Object recreatedResult = null;
 			recreatedResult = ObjectUtil.wrap(strResult, result.getClass());
 			return AFunctionTester.best(result).equals(AFunctionTester.best(recreatedResult));
 		} catch (Exception e) {
@@ -285,7 +282,7 @@ class FunctionCheck {
 	}
 
 	static boolean hasSimpleTypes(AFunctionCaller f) {
-		if (!isSimpleType(f.source.getReturnType()) || void.class.isAssignableFrom(f.source.getReturnType()))
+		if (!isSimpleType(f.source.getReturnType()))
 			return false;
 		return Arrays.stream(f.source.getParameterTypes()).allMatch(t -> isSimpleType(t));
 	}

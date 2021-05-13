@@ -1,6 +1,5 @@
 package de.tsl2.nano.autotest.creator;
 
-import static de.tsl2.nano.autotest.creator.AFunctionTester.best;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -19,6 +18,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.ClassFinder;
 import de.tsl2.nano.core.util.ObjectUtil;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
 /**
@@ -31,14 +31,9 @@ import de.tsl2.nano.core.util.Util;
 @SuppressWarnings("rawtypes")
 public abstract class AFunctionTester<A extends Annotation> extends AFunctionCaller  implements Runnable, Cloneable {
 	protected transient A def;
-	protected transient Status status = NEW;
 	public static final String PREF_PROPS = "tsl2.functiontest.";
 	private static final float DELTA_FLOAT = Util.get(PREF_PROPS + "delta.float", 0.0000000001f);
 	private static final float DELTA_DOUBLE = Util.get(PREF_PROPS + "delta.double", 0.0000000001f);
-
-	static final Status NEW = new Status(StatusTyp.NEW, null, null);
-	static final Status INITIALIZED = new Status(StatusTyp.INITIALIZED, null, null);
-	static final Status OK = new Status(StatusTyp.OK, null, null);
 
 	public AFunctionTester(Method source) {
 		super(source);
@@ -105,10 +100,7 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 	public static Collection<? extends AFunctionTester> prepareTestParameters(FunctionTester types) {
 		Collection<AFunctionTester> runners = new LinkedHashSet<>();
 		for (int i = 0; i < types.value().length; i++) {
-			runners.addAll(AFunctionTester.createRunners(
-						types.value()[i],
-						Util.get(PREF_PROPS + "duplication", 3),
-						Util.get(PREF_PROPS + "filter", "")));
+			runners.addAll(AFunctionTester.createRunners(types.value()[i], def("duplication", 3), def("filter", "")));
 		}
 		return runners;
 	}
@@ -118,7 +110,8 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 			long start = System.currentTimeMillis();
 			run();
 			checkFail();
-			assertTrue(getCompareOrigin() != null || getCompareResult() != null);
+			if (def("filter.nullresults", false))
+				assertTrue(getCompareOrigin() != null || getCompareResult() != null);
 
 			Object o1 = best(getCompareOrigin());
 			Object o2 = best(getCompareResult());
@@ -130,7 +123,17 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 			status = new Status(StatusTyp.TESTED, (System.currentTimeMillis() - start) / 1000 + " sec", null);
 			log(this + "\n");
 		} catch (Throwable e) {
-			status = new Status(StatusTyp.TEST_FAILED, e.toString(), e);
+			boolean shouldFailError = false;
+			try {
+				if (shouldFail(e))
+					return;
+			} catch (Throwable e1) {
+				status = new Status(StatusTyp.TEST_FAILED, e1.toString(), e1);
+				shouldFailError = true;
+			}
+			if (!shouldFailError)
+				status = new Status(StatusTyp.TEST_FAILED, e.toString(), e);
+			log(" -> " + status + "\n");
 			if (!Util.get(PREF_PROPS + "testneverfail", false))
 				ManagedException.forward(e);
 			else
@@ -138,13 +141,18 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 		}
 	}
 
-	private void checkFail() {
+	private boolean checkFail() {
+		return shouldFail(status.err);
+	}
+	private boolean shouldFail(Throwable error) {
 		if (getExpectFail() != null) {
-			if (status.err == null)
+			if (error == null)
 				fail("test should fail with " + getExpectFail() + " but has result: " + getResult());
-			else if (!getExpectFail().toString().equals(status.err.toString()))
-				fail("test should fail with " + getExpectFail() + " but failed with: " + status.err);
+			else if (!getExpectFail().toString().contains(error.toString().substring(0, Math.min(200, error.toString().length()))))
+				fail("test should fail with " + getExpectFail() + " but failed with: " + error);
+			return true;
 		}
+		return false;
 	}
 
 	protected void assertAnyArrayEquals(Object o1, Object o2) {

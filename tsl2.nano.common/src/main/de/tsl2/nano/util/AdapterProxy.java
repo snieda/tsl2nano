@@ -21,7 +21,7 @@ import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.util.Util;
 
 /**
- * generic adapter to be usable as base class for interface implementations.
+ * generic adapter to be usable as base class for interface implementations. get/put any values in a map.
  * 
  * @author Thomas Schneider
  * @version $Revision$

@@ -43,17 +43,25 @@ public class InverseFunctionTester extends AFunctionTester<InverseFunction> {
 	
 	protected Object[] getInverseParameter() {
 		if (parameterInverse == null) {
-			parameterInverse = createStartParameter(source.getParameterTypes());
-			int[] bind = def.bindParameterIndexesOnInverse();
-			for (int i = 0; i < bind.length; i++) {
-				if (bind[i] == -1 && i >= parameterInverse.length) //bind = default {-1}, but no parameterInverse existing
-					break;
-				parameterInverse[i] = bind[i] == -2
-					? parameterInverse[i] 
-						: bind[i] == -1 
-							? ObjectUtil.wrap(getResult(), source.getParameterTypes()[i]) 
-								: ObjectUtil.wrap(parameter[bind[i]], source.getParameterTypes()[i]);
+			try {
+				parameterInverse = createStartParameter(source.getParameterTypes());
+				int[] bind = def.bindParameterIndexesOnInverse();
+				for (int i = 0; i < bind.length; i++) {
+					if (bind[i] == -1 && i >= parameterInverse.length) //bind = default {-1}, but no parameterInverse existing
+						break;
+					parameterInverse[i] = bind[i] == -2
+						? parameterInverse[i] 
+							: bind[i] == -1 
+								? ObjectUtil.wrap(getResult(), source.getParameterTypes()[i]) 
+									: ObjectUtil.wrap(parameter[bind[i]], source.getParameterTypes()[i]);
+				}
+			} catch (Exception e) {
+				status = new Status(StatusTyp.PARAMETER_ERROR, e.getMessage(), e);
+				parameter = null;
+				return null;
 			}
+			status = INITIALIZED;
+			
 		}
 		return parameterInverse;
 	}
@@ -93,6 +101,6 @@ public class InverseFunctionTester extends AFunctionTester<InverseFunction> {
 	}
 	@Override
 	public String toString() {
-		return cloneIndex + ": " + source.getDeclaringClass().getSimpleName() + "." + def.methodName() + "->" + source.getName() + " " + Arrays.toString(getParameter());
+		return cloneIndex + ": " + source.getDeclaringClass().getSimpleName() + "." + def.methodName() + "->" + source.getName() + " " + parametersAsString();
 	}
 }

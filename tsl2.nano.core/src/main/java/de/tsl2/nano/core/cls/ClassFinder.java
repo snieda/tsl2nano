@@ -23,6 +23,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
@@ -31,7 +33,6 @@ import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.log.LogFactory;
@@ -87,7 +88,7 @@ public class ClassFinder {
 		}
 		
 		LOG.info("---------------------------------------------------------------------");
-		LOG.info("ClassFinder created for " + classes.size() + " classes");
+		LOG.info("ClassFinder created for " + classes.size() + " classes (packages: " + packageNames.size() + ")");
 		LOG.info("---------------------------------------------------------------------");
 	}
 
@@ -213,6 +214,19 @@ public class ClassFinder {
 		return fuzzyFind(filter, Class.class, -1, null);
 	}
 
+	// TODO: this is workaround with poor performance. extend the fuzzyfind() method to respect fuzzy or regex filter
+	public <T> List<T> find(String regex, Class<T> resultType, int modifier,
+			Class<? extends Annotation> annotation) {
+		Map<Double, T> map = fuzzyFind(null, resultType, modifier, annotation);
+		System.out.print("filtering " + map.size() + " elements with '" + regex + "'...");
+		List<T> result = new LinkedList<>();
+		for (T t : map.values()) {
+			if (t.toString().matches(regex))
+				result.add(t);
+		}
+		System.out.println(result.size() + " OK");
+		return result;
+	}
 	/**
 	 * finds all classes/methods/fields of the given classloader fuzzy matching the
 	 * given filter, having the given modifiers (or modifiers is -1) and having the
@@ -234,14 +248,8 @@ public class ClassFinder {
 	 */
 	public <T, M extends Map<Double, T>> M fuzzyFind(String filter, Class<T> resultType, int modifier,
 			Class<? extends Annotation> annotation) {
-		Map<Double, T> result = new TreeMap<Double, T>() {
-			@Override
-			public T put(Double key, T value) {
-				while (containsKey(key))
-					key += 0000000001;
-				return super.put(key, value);
-			}
-		};
+		System.out.println("fuzzyfind [" + filter + ", " + (resultType != null ? resultType.getSimpleName() : "null") + ", " + modifier + "]");
+		Map<Double, T> result = createFuzzyMap(resultType);
 		if (filter != null)
 			collectPackageClasses(Thread.currentThread().getContextClassLoader(), filter, classes);
 		else
@@ -284,16 +292,21 @@ public class ClassFinder {
 		return (M) result;
 	}
 
-	public Map<Double, Method> fuzzyFindMethods(Class cls, String filter, int modifier,
-			Class<? extends Annotation> annotation) {
-		HashMap<Double, Method> map = new HashMap<Double, Method>() {
+	private <T> Map<Double, T> createFuzzyMap(Class<T> valueType) {
+		Map<Double, T> result = new TreeMap<Double, T>() {
 			@Override
-			public Method put(Double key, Method value) {
+			public T put(Double key, T value) {
 				while (containsKey(key))
 					key += 0000000001;
 				return super.put(key, value);
 			}
 		};
+		return result;
+	}
+
+	public Map<Double, Method> fuzzyFindMethods(Class cls, String filter, int modifier,
+			Class<? extends Annotation> annotation) {
+		Map<Double, Method> map = createFuzzyMap(Method.class);
 		Method[] methods = Modifier.isPublic(modifier) ? cls.getMethods() : cls.getDeclaredMethods();
 		double match;
 		for (int i = 0; i < methods.length; i++) {
@@ -309,14 +322,7 @@ public class ClassFinder {
 
 	public Map<Double, Field> fuzzyFindFields(Class cls, String filter, int modifier,
 			Class<? extends Annotation> annotation) {
-		HashMap<Double, Field> map = new HashMap<Double, Field>() {
-			@Override
-			public Field put(Double key, Field value) {
-				while (containsKey(key))
-					key += 0000000001;
-				return super.put(key, value);
-			}
-		};
+		Map<Double, Field> map = createFuzzyMap(Field.class);
 		Field[] fields = Modifier.isPublic(modifier) ? cls.getFields() : cls.getDeclaredFields();
 		double match;
 		for (int i = 0; i < fields.length; i++) {

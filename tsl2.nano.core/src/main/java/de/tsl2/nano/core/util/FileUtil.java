@@ -34,6 +34,7 @@ import java.io.Serializable;
 import java.io.Writer;
 import java.net.URI;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.text.DateFormat;
@@ -607,13 +608,19 @@ public class FileUtil {
                 LOG.debug(strFile + " not found on classpath " +  classLoader + "! trying now on file system path: " + System.getProperty("user.dir"));
                 stream = getFile(strFile);
             }
-            final int length = stream.available();
-            final byte data[] = new byte[length];
+            int length = stream.available();
+            byte data[] = new byte[length];
             stream.read(data);
             LOG.info(ByteUtil.amount(length));
             //stream.available() does not guarantee to return the total amount of bytes!
             if (stream.available() > 0) {
-            	throw new IllegalAccessException("not all bytes were read from stream! The InputStream" + stream + " should not be read with this method!");
+            	ByteArrayOutputStream buf = new ByteArrayOutputStream(data.length);
+            	buf.write(data);
+            	while(stream.available() > 0) {
+            		buf.write(stream.read());
+            	}
+        		data = buf.toByteArray();
+//            	throw new IllegalAccessException("not all bytes were read from stream! The InputStream" + stream + " should not be read with this method!");
             }
             return data;
         } catch (final Exception e) {
@@ -682,8 +689,10 @@ public class FileUtil {
         LOG.info("serializing object to file: " + filename);
         ObjectOutputStream o = null;
         try {
-            final FileOutputStream file = new FileOutputStream(userDirFile(filename));
-            o = new ObjectOutputStream(file);
+            File file = userDirFile(filename);
+            file.getParentFile().mkdirs();
+			final FileOutputStream out = new FileOutputStream(file);
+            o = new ObjectOutputStream(out);
             o.writeObject(object);
         } catch (final IOException ex) {
             throw new RuntimeException(ex);

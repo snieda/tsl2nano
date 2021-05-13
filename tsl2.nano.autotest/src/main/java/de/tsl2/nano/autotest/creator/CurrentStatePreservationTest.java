@@ -33,14 +33,10 @@ public class CurrentStatePreservationTest {
 
 	@Parameters(name = "{0}")
 	public static Collection<? extends AFunctionTester> parameters() {
+		BaseTest.useTargetDir();
 		return AutoTestGenerator.createExpectationTesters();
 	}
 
-	@BeforeClass
-	public static void setUp() {
-		if (!System.getProperty("user.dir").endsWith("target/autotest/"))
-			BaseTest.useTargetDir();
-	}
 	@AfterClass
 	public static void tearDown() {
 		ValueRandomizer.reset();

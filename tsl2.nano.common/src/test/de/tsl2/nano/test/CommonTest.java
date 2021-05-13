@@ -54,8 +54,6 @@ import de.tsl2.nano.util.Translator;
  * @version $Revision$
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-@RunWith(Suite.class)
-@SuiteClasses({ AutoFunctionTest.class })
 public class CommonTest implements ENVTestPreparation {
     private static final Log LOG = LogFactory.getLog(CommonTest.class);
     private static String BASE_DIR_COMMON;

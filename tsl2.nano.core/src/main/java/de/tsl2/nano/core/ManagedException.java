@@ -40,10 +40,10 @@ public class ManagedException extends RuntimeException {
     protected ManagedException(Throwable cause) {
         this(cause, true);
     }
-    
-    /**
-     * @param cause cause
-     */
+
+    public ManagedException(String msg) {
+    	this(msg, new Object[0]);
+	}
     protected ManagedException(Throwable cause, boolean logNow) {
         super(MESSAGE_FORWARDED, cause);
         if (logNow) {

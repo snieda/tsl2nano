@@ -148,16 +148,7 @@ writing/reading to something like a stream:
 
 ### ValueRandomizer
 
-The value randomizer can create randomized values for all java types. It respects zero numbers and provides loading of value sets.
-
-A value set will be loaded from file with file name equal to the java class name.
-
-Example:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-randomize value type: java.lang.String -> will be loaded from optional file 'string.set'
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+The value randomizer can create randomized values for all java types. 
 
 Example with an parametrized test, creating a set of randomized values:
 
@@ -192,6 +183,39 @@ Example with an parametrized test, creating a set of randomized values:
 	}
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#### ValueSets
+
+The ValueRandomizer respects zero numbers (on test duplication > 2) and provides loading of value sets.
+
+A value set will be loaded from file with file name equal to the java class name. The values have to be separated by java carriage return ('\n').
+
+On Comparables like numbers, the value set may only be an area with a min and max value, separated by '<->'.
+
+Area of numbers:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-5.0<->5.0
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+randomize value type: java.lang.String -> will be loaded from optional file 'string.set'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+sample content for string.set:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name1
+Name2
+Name3
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For type String (->string.set) there is a default valueset with german city names.
+
 
 ### TypeBean
 
@@ -241,16 +265,60 @@ AutoTestGenerator(PREFIX: tsl2.functiontest.) started with:
 	filter.nullresults     : false
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* filename: path to generate the auto tests into. on duplication > 0, you will have more than one generated file (e.g.: generated-autotests-0 and generated-autotests-1)
-* testneverfail: (default: false) only to check the resulting test coverage - if true, no test of *AllAutoTests* will ever fail. Please dont publish that to your application!
-* clean: (default: false) whether to delete all previously generated test files prior to start the new tests.
-* duplication: (default: 10) a duplication of 10 will generate 11 random calls on each method. A duplication > 2 will result in the use of zero numbers in the first test set.
-* filter: (default: this framework package path) fuzzy class+method filter. note: it's fuzzy finding, means, all 'similar' findings will be included!
-* modifier: (default: -1) java method mofifier bitfield like *public* *static* etc. Please have a look at the java class *java.lang.reflect.Modifier* to see all possibilities
-* filter.unsuccessful: (default: true): if true, a pre-check is done, calling the test for a failing result. If the test will fail, it will be filtered from the real test.
-* filter.complextypes: (default: true) all method parameter types and the result type will be checked, if they are standard data types (provided by jdk) and single value types.(nothing like arrays, collections and maps)
-* filter.failing: (default:false) whether it is allowed to have a method call , throwing an exception as expected result.
-* filter.nullresults: (default: false) whether it is allowed to have a method call, returning *null* as result.
+* *filename*: path to generate the auto tests into. on duplication > 0, you will have more than one generated file (e.g.: generated-autotests-0 and generated-autotests-1)
+* *testneverfail*: (default: false) only to check the resulting test coverage - if true, no test of *AllAutoTests* will ever fail. Please dont publish that to your application!
+* *clean*: (default: false) whether to delete all previously generated test files prior to start the new tests.
+* *duplication*: (default: 10) a duplication of 10 will generate 11 random calls on each method. A duplication > 2 will result in the use of zero numbers in the first test set.
+* *filter*: (default: this framework package path) fuzzy class+method filter. NOTE: it's fuzzy finding, means, all 'similar' findings will be included!
+* *modifier*: (default: -1) java method mofifier bitfield like *public* (=1) *static* (=8) etc. Please have a look at the java class *java.lang.reflect.Modifier* to see all possibilities 
+* *filter.unsuccessful*: (default: true): if true, a pre-check is done, calling the test for a failing result. If the test will fail, it will be filtered from the real test.
+* *filter.complextypes*: (default: true) all method parameter types and the result type will be checked, if they are standard data types (provided by jdk) and single value types.(nothing like arrays, collections and maps)
+* *filter.failing*: (default:false) whether it is allowed to have a method call , throwing an exception as expected result.
+* *filter.nullresults*: (default: false) whether it is allowed to have a method call, returning *null* as result.
+
+The *AutoTestGenerator* finds methods to test, calls them and does a full test - comparing the result to the first call. If successful done, it writes the file *...target/autotest/generated/generated-autotests-XXX.txt with XXX as number of iteration (given by duplication).
+
+Example of generated-autotests-XXX.txt:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+@Expectations({@Expect( when = {"88.00600103264951","Schwalmtal-Storndorf","Zuzenhausen","0"} then = "88.00600103264951"})
+public static java.lang.String de.tsl2.nano.core.util.StringUtil.substring(java.lang.StringBuilder,java.lang.String,java.lang.String,int)
+
+
+@Expectations({@Expect( when = {"Petzow","Extertal-Almena","Ripperterhof"} then = "Petzow"})
+public static java.lang.String de.tsl2.nano.core.util.StringUtil.substring(java.lang.String,java.lang.String,java.lang.String)
+
+
+@Expectations({@Expect( when = {"Korb","Buchfart","Uplengen - Ockenhausen","true","true"} then = "null"})
+public static java.lang.String de.tsl2.nano.core.util.StringUtil.substring(java.lang.String,java.lang.String,java.lang.String,boolean,boolean)
+
+
+@Expectations({@Expect( when = {"Oberhofen","Göggenhofen","Großkarlbach","true"} then = "Oberhofen"})
+public static java.lang.String de.tsl2.nano.core.util.StringUtil.substring(java.lang.String,java.lang.String,java.lang.String,boolean)
+
+
+@Expectations({@Expect( when = {"82.40402009066662","Telgte","Waldsassen"} then = "0"})
+public static int de.tsl2.nano.core.util.StringUtil.replaceAll(java.lang.StringBuilder,java.lang.String,java.lang.String)
+
+
+@Expectations({@Expect( when = {"Großheirath","0"} then = "fail(de.tsl2.nano.core.ManagedException(java.lang.ArithmeticException: / by zero))"})
+public static final java.lang.String[] de.tsl2.nano.core.util.StringUtil.split(java.lang.String,int)
+
+
+@Expectations({@Expect( when = {"Göttingen","Wettenberg"} then = "Göttin"})
+public static java.lang.String de.tsl2.nano.core.util.StringUtil.trim(java.lang.String,java.lang.String)
+
+
+@Expectations({@Expect( when = {"Hadersbach","0","Königswinter"} then = "fail(de.tsl2.nano.core.ManagedException(java.lang.ArithmeticException: / by zero))"})
+public static final java.lang.String de.tsl2.nano.core.util.StringUtil.format(java.lang.String,int,java.lang.String)
+
+@Expectations({@Expect( when = {"[32]","[7]"} then = "false"})
+public static boolean de.tsl2.nano.core.util.ByteUtil.equals(byte[],byte[])
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+There you can see the different types of randomized values and method invokings ending in an exception, that will be used as expected result on the next test run.
+This generated files should be stored in your test resources folder to be loaded on next test run. Then you have current state preservation test. Or you copy the lines with @Expectectation annotations and
+put them into your source code at the position of the given method.
 
 At the end, you will get a short statistical overview:
 
@@ -271,14 +339,36 @@ AutoTestGenerator created 0 expectations in file pattern: 'target/autotest/gener
 	totally loaded        : 656
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* methods loaded: if the test was not started before, generating the auto tests - or the property clean=true was set, then the *AutoTestGenerator* will load classes and methods (filtered throuth given property filter)
-* duplications: the count of method calling clones to test the methods with different randomized value parameters
-* created with fail: if the property *filter.failing* is true (default:false) this is the number of tests throwing an exception
-* created with null: if the property *filter.nullresults* is true (default:false) this is the number of tests with a result value of null
-* filtered.unsuccessful: if the property *filter.unsuccessful* is true (default:true) a test is done before the real unit test. if this test fails, it will be filtered and not provided to the real unit test.
-* load errors: after *AutoTestGenerator* has generated auto tests, they will be loaded to be provided as unit tests. on load there may occur any errors like unavailable method, wrong method parameters (perhaps anything changed in the source code) or problems on creating the parameter values from string.
-* loaded unsuccessful: if property filter.unsuccessful is true (default:true), this will do a test run after loading from generated file and before providing it to the real unit test. NOTE: This will hide the failing tests of your current state!
-* totally loaded: totally loaded real unit tests. this belongs to the number of methods and duplications for the generating process, and on the filtered tests with errors on loading and initializing - or that would fail.
+* *methods loaded*: if the test was not started before, generating the auto tests - or the property clean=true was set, then the *AutoTestGenerator* will load classes and methods (filtered throuth given property filter)
+* *duplications*: the count of method calling clones to test the methods with different randomized value parameters
+* *created with fail*: if the property *filter.failing* is true (default:false) this is the number of tests throwing an exception
+* *created with null*: if the property *filter.nullresults* is true (default:false) this is the number of tests with a result value of null
+* *filtered with type error*: if the parameters or the return value is not convertable from/to String, the method will be filtered
+* *filtered complex types*: if a method as no return value (->void) or no parameters, or the parameters are to complex, the method will be filtered
+* *filtered.unsuccessful*: if the property *filter.unsuccessful* is true (default:true) a test is done before the real unit test. if this test fails, it will be filtered and not provided to the real unit test.
+* *load errors*: after *AutoTestGenerator* has generated auto tests, they will be loaded to be provided as unit tests. on load there may occur any errors like unavailable method, wrong method parameters (perhaps anything changed in the source code) or problems on creating the parameter values from string.
+* *loaded unsuccessful*: if property filter.unsuccessful is true (default:true), this will do a test run after loading from generated file and before providing it to the real unit test. NOTE: This will hide the failing tests of your current state!
+* *totally loaded*: totally loaded real unit tests. this belongs to the number of methods and duplications for the generating process, and on the filtered tests with errors on loading and initializing - or that would fail.
+
+## The Workaround initializing a Suite having parameterized Unit Tests
+
+With the tools of JUnit 4 it is not possible to define a method that is called before creating all parameterized tests of a suite. A @BeforeClass or a static block in the Suite class is started after calling all parameterized() methods. So, we have created a specific Test class that only has to start a method for initializations before calling all unit parameterizings.
+
+Workaround Initialization Test Class:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+@RunWith(Parameterized.class)
+public class InitAllAutoTests {
+
+	@Parameters
+	public static Collection<?> parameters() {
+		BeanClass.callStatic("de.tsl2.nano.util.autotest.creator.AllAutoTests", "init");
+		return Arrays.asList();
+	}
+
+	@Test public void nothing() {}
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ## All together
 
@@ -290,12 +380,21 @@ To enable all standard test features of this framework, do the following:
 * create a java unit test class *AllAutoTests* in your test source directory and fill it with following code:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package de.tsl2.nano.util.autotest.creator;
+...
 @RunWith(Suite.class)
-@SuiteClasses({AutoFunctionTest.class, CurrentStatePreservationTest.class})
+@SuiteClasses({InitAllAutoTests.class, AutoFunctionTest.class, CurrentStatePreservationTest.class})
 public class AllAutoTests {
-	@BeforeClass
-	public static void setUp() {
-		BaseTest.useTargetDir();
+	public static void init() {
+		System.setProperty("tsl2.functiontest.filter", AnyClassToTest.class.getPackage().getName());
 	}
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* The class must be exactly : *de.tsl2.nano.util.autotest.creator.AllAutoTests*
+* The first Suite class has to be *InitAllAutoTests.class* to start the init() method before all
+* The method must be exactly: *public static void init()*
+* Please replace 'AnyClassToTest' with your base class name
+* If you evaluate the package name in this manner, you are sure, the class 'AnyClassToTest' is loaded by the classloader and the classfinder will find the package.
+
+This static class name and init method name are used as workaround to the problem that a junit suite on parameterized unit tests has no standard possibility to initialize the test suite before parametrizing all tests. So, we use the trick of the empty *InitAllAutoTests* calling *de.tsl2.nano.util.autotest.creator.AllAutoTests.init()* by reflection.

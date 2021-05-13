@@ -1,5 +1,7 @@
 package de.tsl2.nano.autotest.creator;
 
+import static de.tsl2.nano.autotest.creator.AFunctionTester.PREF_PROPS;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -7,6 +9,7 @@ import java.util.Arrays;
 import de.tsl2.nano.autotest.ValueRandomizer;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
 public class AFunctionCaller implements Runnable {
@@ -31,16 +34,32 @@ public class AFunctionCaller implements Runnable {
 		this.cloneIndex = iteration;
 		this.source = source;
 	}
+	static final <T> T def(String name, T value) {
+		return Util.get(PREF_PROPS + name, value);
+	}
 	protected static final void log(Object txt) {
 		System.out.print(txt);
 	}
 
 	protected Object[] getParameter() {
 		if (parameter == null)
-			parameter = createStartParameter(source.getParameterTypes());
+			try {
+				parameter = createStartParameter(source.getParameterTypes());
+			} catch (Exception e) {
+				status = new Status(StatusTyp.PARAMETER_ERROR, e.toString(), e);
+				ManagedException.forward(e);
+			}
 		return parameter;
 	}
 	
+	protected String parametersAsString() {
+		try {
+			return Arrays.toString(getParameter());
+		} catch (Exception e) {
+			status = new Status(StatusTyp.PARAMETER_ERROR, e.toString(), e);
+			return Arrays.toString(parameter);
+		}
+	}
 
 	protected Object[] createStartParameter(Class[] arguments) {
 		return ValueRandomizer.provideRandomizedObjects(cloneIndex == 0 ? 0 : 1, arguments);
@@ -53,13 +72,17 @@ public class AFunctionCaller implements Runnable {
 	}
 	
 	protected Object run(Method method, Object... args) {
-		log("invoking " + method.getDeclaringClass().getSimpleName() + "." + method.getName() + " with " + Arrays.toString(args) + "\n");
+		log(StringUtil.fixString(this.getClass().getSimpleName(), 25) + " invoking " + method.getDeclaringClass().getSimpleName() + "." + method.getName() + " with " + Arrays.toString(args));
 		final Object instance = getInstance(method);
 		try {
-			return result = method.invoke(instance, args);
-		} catch (Exception e) {
+			result = method.invoke(instance, args);
+			status = OK;
+			return result;
+		} catch (Throwable e) {
 			status = new Status(StatusTyp.EXECUTION_ERROR, e.toString(), e);
 			return ManagedException.forward(e);
+		} finally {
+			log(" -> " + status + "\n");
 		}
 	}
 
@@ -71,8 +94,9 @@ public class AFunctionCaller implements Runnable {
 				return instance;
 			else
 				instance = BeanClass.createInstance(method.getDeclaringClass());
-		} catch(Exception ex) {
+		} catch(Throwable ex) {
 			status = new Status(StatusTyp.INSTANCE_ERROR, ex.toString(), ex);
+			log(" -> " + status + "\n");
 			ManagedException.forward(ex);
 		}
 		return instance;
@@ -103,12 +127,12 @@ class Status {
 		this.msg = msg;
 		this.err = err;
 	}
-	public boolean is(StatusTyp typ) {
-		return this.typ.equals(typ);
+	public boolean in(StatusTyp... types) {
+		return Util.in(typ, types);
 	}
 	
 	@Override
 	public String toString() {
-		return Util.toJson(this);
+		return typ + (err != null ? "(" + err.toString() + ")": msg != null ? "(" + msg + ")" : "");
 	}
 }

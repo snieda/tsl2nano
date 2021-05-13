@@ -65,20 +65,14 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 		return parameter;
 	}
 
-	protected String parametersAsString() {
-		try {
-			return Arrays.toString(getParameter());
-		} catch (Exception e) {
-			status = new Status(StatusTyp.PARAMETER_ERROR, e.toString(), e);
-			return Arrays.toString(parameter);
-		}
-	}
-	
 	@Override
 	public Object getCompareOrigin() {
-		return expect != null && getCompareResult() != null && expect.then() != null && !expect.then().equals("null") 
+		if (expect == null)
+			return NOT_DEFINED;
+		Object then = expect == null || expect.then() == null || expect.then().equals("null") ? null : expect.then();
+		return then != null && getCompareResult() != null
 				? ObjectUtil.wrap(expect.then(), getCompareResult().getClass()) 
-				: NOT_DEFINED;
+				: null;
 	}
 
 	private int getResultIndex() {
@@ -101,7 +95,7 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 	
 	private Object createFailException(String then) {
 		String cls = StringUtil.substring(then, "fail(", "(");
-		String msg = StringUtil.substring(then, cls, null);
+		String msg = StringUtil.substring(then, cls + "(", null);
 		msg = msg.substring(0, msg.length() - 1);
 		return BeanClass.createInstance(cls, msg);
 	}

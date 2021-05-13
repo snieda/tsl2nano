@@ -40,12 +40,13 @@ import de.tsl2.nano.core.log.LogFactory;
  */
 public class Util {
     private static final Log LOG = LogFactory.getLog(Util.class);
-    public static final String FRAMEWORK_PACKAGE;
-    static {
-        String pck = Util.class.getPackage().getName();
+    public static final String FRAMEWORK_PACKAGE = getBasePackage(Util.class);
+
+    public static String getBasePackage(Class<?> cls) {
+		String pck = cls.getPackage().getName();
         String[] p = pck.split("\\.");
-        FRAMEWORK_PACKAGE = StringUtil.concat(new char[] { '.' }, p[0], p[1], p[2]);
-    }
+        return StringUtil.concat(new char[] { '.' }, p[0], p[1], p[2]);
+	}
 
     private static final byte[] salt16 = {
             (byte) 0x71, (byte) 0x37, (byte) 0x30, (byte) 0x23,
@@ -79,7 +80,7 @@ public class Util {
     }
 
     public static boolean isSimpleType(Class<?> cls) {
-    	return PrimitiveUtil.isPrimitiveOrWrapper(cls) || NumberUtil.isNumber(cls) || Date.class.isAssignableFrom(cls);
+    	return PrimitiveUtil.isPrimitiveOrWrapper(cls) || NumberUtil.isNumber(cls) || Date.class.isAssignableFrom(cls) || String.class.isAssignableFrom(cls);
     }
 
     public static boolean isDataType(Class<?> cls) {

@@ -177,7 +177,7 @@ public class BaseTest extends TextComparison {
   }
   
 	public static void useTargetDir() {
-		if (!System.getProperty("user.dir").endsWith("target/autotest/"))
-			System.setProperty("user.dir", System.getProperty("user.dir") + "/target/autotest/");
+		if (!System.getProperty("user.dir").contains("target/autotest"))
+			System.setProperty("user.dir", System.getProperty("user.dir") + "/target/autotest");
 	}
 }
