@@ -12,6 +12,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.ClassFinder;
@@ -41,7 +42,7 @@ import de.tsl2.nano.core.util.Util;
  * @author ts
  */
 public class AutoTestGenerator {
-	static String fileName = "target/autotest/generated/generated-autotests-";
+	static String fileName = def("filename", "target/autotest/generated/generated-autotests-");
 	static int methods_loaded = 0;
 	static int count = 0;
 	static int fails = 0;
@@ -77,6 +78,7 @@ public class AutoTestGenerator {
 		printStartParameters();
 		int duplication = def("duplication", 10);
 		List<Method> methods = ClassFinder.self().find(def("filter", "") , Method.class, def("modifier", -1), null);
+		filterTestClasses(methods);
 		Collection<AFunctionTester> testers = new LinkedList<>();
 		boolean fileexists = true;
 		for (int i=0; i<duplication; i++) {
@@ -93,6 +95,9 @@ public class AutoTestGenerator {
 		return testers;
 	}
 
+	private static void filterTestClasses(List<Method> methods) {
+		methods.removeIf(m -> m.getDeclaringClass().getName().matches(def("filter.test", ".*(Test|IT)")));
+	}
 	static void generateExpectations(int iteration, List<Method> methods) {
 		LogFactory.setPrintToConsole(false);
 		count = 0;
@@ -177,7 +182,7 @@ public class AutoTestGenerator {
 						load_method_error++;
 				} else {
 					load_method_error++;
-					AFunctionCaller.log("ERROR: method-format for " + exp + "\n");
+					AFunctionCaller.log("ERROR: method-format for " + exp + " -> " + l + "\n");
 				}
 				exp = null;
 			}
@@ -265,7 +270,7 @@ class FunctionCheck {
 		try {
 			new ExpectationFunctionTester(t.source, ExpectationCreator.createExpectationFromLine(expect)).testMe();
 			return true;
-		} catch (Throwable e) {
+		} catch (Exception | AssertionError e) {
 			return false;
 		}
 	}
@@ -297,7 +302,7 @@ class FunctionCheck {
 		for (AFunctionTester t : testers) {
 			try {
 				t.testMe();
-			} catch (Throwable e) {
+			} catch (Exception | AssertionError e) {
 				failing.add(t);
 			}
 		}
@@ -306,6 +311,7 @@ class FunctionCheck {
 	}
 }
 
+// TODO: replace this implementation by using the AdapterProxy
 class ExpectationsImpl implements Expectations {
 
 	private Expect[] value;

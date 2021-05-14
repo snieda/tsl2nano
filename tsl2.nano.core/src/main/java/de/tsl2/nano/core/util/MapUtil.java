@@ -153,7 +153,7 @@ public class MapUtil {
     }
     public static Object asArray(Class type, String stringWithValues) {
     	stringWithValues = StringUtil.trim(stringWithValues, "[]");
-    	String[] split = stringWithValues.split("[,;\t\n]");
+    	String[] split = stringWithValues.isEmpty() ? new String[0] : stringWithValues.split("[,;\t\n]");
     	Object[] values = new Object[split.length];
     	for (int i = 0; i < split.length; i++) {
 			Array.set(values, i, ObjectUtil.wrap(split[i].trim(), type));

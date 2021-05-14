@@ -11,14 +11,13 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.ClassFinder;
 import de.tsl2.nano.core.util.ObjectUtil;
-import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
 /**
@@ -46,9 +45,9 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 	public static Collection<? extends AFunctionTester> createRunners(Class<? extends AFunctionTester> testerType, int duplication, String fuzzyFilter) {
 		log("collecting tests for " + testerType.getSimpleName() + ":\n");
 		Class<? extends Annotation> type = testerType.getAnnotation(FunctionType.class).value();
-		Map<Double, Method> revFcts = ClassFinder.self().fuzzyFind(fuzzyFilter, Method.class, -1, type);
+		List<Method> revFcts = ClassFinder.self().find(fuzzyFilter, Method.class, -1, type);
 		Set<AFunctionTester> runners = new LinkedHashSet<>(revFcts.size());
-		revFcts.values().forEach(m -> runners.add(createRunner(testerType, m)));
+		revFcts.forEach(m -> runners.add(createRunner(testerType, m)));
 		duplicate(duplication, runners);
 		return runners;
 	}
@@ -122,12 +121,12 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 			}
 			status = new Status(StatusTyp.TESTED, (System.currentTimeMillis() - start) / 1000 + " sec", null);
 			log(this + "\n");
-		} catch (Throwable e) {
+		} catch (Exception | AssertionError e) {
 			boolean shouldFailError = false;
 			try {
 				if (shouldFail(e))
 					return;
-			} catch (Throwable e1) {
+			} catch (Exception | AssertionError e1) {
 				status = new Status(StatusTyp.TEST_FAILED, e1.toString(), e1);
 				shouldFailError = true;
 			}

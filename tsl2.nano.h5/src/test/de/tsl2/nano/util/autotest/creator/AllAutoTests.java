@@ -11,8 +11,8 @@ import de.tsl2.nano.autotest.creator.CurrentStatePreservationTest;
 import de.tsl2.nano.autotest.creator.InitAllAutoTests;
 import de.tsl2.nano.h5.NanoH5;
 
-@RunWith(Suite.class)
-@SuiteClasses({InitAllAutoTests.class, AutoFunctionTest.class, CurrentStatePreservationTest.class})
+//@RunWith(Suite.class)
+//@SuiteClasses({InitAllAutoTests.class, AutoFunctionTest.class, CurrentStatePreservationTest.class})
 public class AllAutoTests {
 	public static void init() {
 		System.setProperty("tsl2.functiontest.filter", matchPackage(NanoH5.class));

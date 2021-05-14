@@ -396,5 +396,5 @@ public class AllAutoTests {
 * The method must be exactly: *public static void init()*
 * Please replace 'AnyClassToTest' with your base class name
 * If you evaluate the package name in this manner, you are sure, the class 'AnyClassToTest' is loaded by the classloader and the classfinder will find the package.
-
+* If you have more than one package to be tested, use the convenience method *InitAllAutoTests.matchPackage(MyClass1, MyClass2, ...)*
 This static class name and init method name are used as workaround to the problem that a junit suite on parameterized unit tests has no standard possibility to initialize the test suite before parametrizing all tests. So, we use the trick of the empty *InitAllAutoTests* calling *de.tsl2.nano.util.autotest.creator.AllAutoTests.init()* by reflection.

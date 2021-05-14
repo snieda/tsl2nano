@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,6 +17,7 @@ import de.tsl2.nano.core.util.AdapterProxy;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
@@ -60,9 +62,12 @@ public class ValueRandomizer {
 	}
 
 	public static Object createRandomProxy(Class<?> interfaze, boolean zeroNumber) {
+		return createRandomProxy(interfaze, zeroNumber, 0);
+	}
+	public static Object createRandomProxy(Class<?> interfaze, boolean zeroNumber, final int depth) {
 		Map<String, Class> types = AdapterProxy.getValueTypes(interfaze);
 		Map<String, Object> values = new HashMap<>();
-		types.forEach( (n, t) -> values.put(n, createRandomValue(t, zeroNumber)));
+		types.forEach( (n, t) -> values.put(n, createRandomValue(t, zeroNumber, depth+1)));
 		return AdapterProxy.create(interfaze, values);
 	}
 	
@@ -70,8 +75,11 @@ public class ValueRandomizer {
 		return createRandomValue(typeOf, false);
 	}
 	
-	@SuppressWarnings({ "unchecked" })
 	protected static <V> V createRandomValue(Class<V> typeOf, boolean zeroNumber) {
+		return createRandomValue(typeOf, zeroNumber, 0);
+	}
+	@SuppressWarnings({ "unchecked" })
+	protected static <V> V createRandomValue(Class<V> typeOf, boolean zeroNumber, int depth) {
 		if (valueSets.hasValueSet(typeOf))
 			return valueSets.fromValueSet(typeOf);
 		Object n = zeroNumber && typeOf.isPrimitive() || NumberUtil.isNumber(typeOf) ? 0d : createRandomNumber(typeOf);
@@ -81,14 +89,16 @@ public class ValueRandomizer {
 			n = TypeBean.class; // TODO: create randomly
 		else if (typeOf.equals(ClassLoader.class))
 			n = Thread.currentThread().getContextClassLoader(); // TODO: create randomly
+		else if (Collection.class.isAssignableFrom(typeOf))
+			n = new ListSet<>(n);
 		else if (Properties.class.isAssignableFrom(typeOf))
 			n = MapUtil.asProperties(n.toString(), n.toString());
 		else if (Map.class.isAssignableFrom(typeOf))
 			n = MapUtil.asMap(n, n);
 		else if (ByteUtil.isByteStream(typeOf))
 			n = ByteUtil.toByteStream(new byte[] {((Number) n).byteValue()}, typeOf);
-		else if (typeOf.isInterface())
-			n = createRandomProxy(typeOf, zeroNumber);
+		else if (typeOf.isInterface() && !ObjectUtil.isStandardInterface(typeOf) && depth < 10)
+			n = createRandomProxy(typeOf, zeroNumber, ++depth);
 		else if (typeOf.isArray()) {
 			n = ObjectUtil.wrap(n, typeOf.getComponentType());
 			n = typeOf.getComponentType().isPrimitive() ? MapUtil.asArray(typeOf.getComponentType(), n)

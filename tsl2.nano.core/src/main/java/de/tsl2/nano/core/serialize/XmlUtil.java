@@ -261,20 +261,20 @@ public class XmlUtil {
         		fileInputStream = FileUtil.close(fileInputStream, false);
             //mark the loaded xml file as corrupt
             if (renameOnError && (ENV.isAvailable() && !ENV.get("app.mode.strict", false))) {
-                File file = new File(xmlFile);
+                File file = FileUtil.userDirFile(xmlFile);
                 if (file.canWrite()) {
                     LOG.info("renaming corrupted file '" + xmlFile + "' to: " + xmlFile + ".failed");
-                    if (!file.renameTo(new File(file.getPath() + ".failed")))
+                    if (!file.renameTo(FileUtil.userDirFile(file.getPath() + ".failed")))
                         LOG.warn("couldn't rename corrupted file '" + xmlFile + "' to '" + xmlFile
                             + ".failed' !");
                 }
             }
             //write the error to an equal-named file
             String stackTraceFile = xmlFile + ".stacktrace";
-            if (!new File(stackTraceFile).exists()) {
+            if (!FileUtil.userDirFile(stackTraceFile).exists()) {
                 PrintStream printStream = null;
                 try {
-                    printStream = new PrintStream(stackTraceFile);
+                    printStream = new PrintStream(new File(stackTraceFile).getAbsolutePath());
                     e.printStackTrace(printStream);
                 } catch (FileNotFoundException e1) {
                     LOG.error("cant' write stacktrace to " + stackTraceFile);

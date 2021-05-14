@@ -11,18 +11,13 @@ package de.tsl2.nano.core.util;
 
 import static de.tsl2.nano.core.cls.PrimitiveUtil.getDefaultValue;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import de.tsl2.nano.core.cls.BeanAttribute;
-import de.tsl2.nano.core.cls.PrivateAccessor;
 
 /**
  * generic adapter to be usable as base class for interface implementations. get/put any values in a map.
@@ -54,7 +49,8 @@ public class AdapterProxy implements InvocationHandler {
                 return v;
             if (!BeanAttribute.isGetterMethod(method))
                 values.put(BeanAttribute.getNameFromSetter(method), args.length == 1 ? args[0] : args);
-        }
+        } else if (method.getName().equals("toString"))
+        	return toProxyString(proxy);
         if (BeanAttribute.isGetterMethod(method)) {
             Object v = values.get(BeanAttribute.getName(method));
             if ((v instanceof Object[]) && !Object[].class.isAssignableFrom(method.getReturnType()) )
@@ -62,8 +58,19 @@ public class AdapterProxy implements InvocationHandler {
             if (v != null && method.getReturnType().isAssignableFrom(v.getClass()))
                 return v;
         }
-        return method.getReturnType().isPrimitive() ? getDefaultValue(method.getReturnType()): null;
+        return method.getDefaultValue() != null ? method.getDefaultValue() : method.getReturnType().isPrimitive() ? getDefaultValue(method.getReturnType()): null;
     }
+
+	private String toProxyString(Object proxy) {
+		//avoid stackoverflow on having member pointing to itself
+		Map<String, Object> valuesWithoutItself;
+		if (values.containsValue(proxy)) {
+			valuesWithoutItself = new HashMap<>(values);
+			valuesWithoutItself.forEach( (k, v) -> {if (v == proxy) valuesWithoutItself.replace(k, proxy.getClass().getSimpleName());});
+		} else
+			valuesWithoutItself = values;
+		return "{\"" + proxy.getClass().getInterfaces()[0].getSimpleName() + "(" + proxy.getClass().getSimpleName() + ")\":" + getClass().getSimpleName() + ")" + ": " + MapUtil.toJSON(valuesWithoutItself) + "}";
+	}
     
     private Object findReturnValue(Method method, Object[] values, Object[] args) {
         if (Util.isEmpty(args)) {

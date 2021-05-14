@@ -180,8 +180,10 @@ public class BeanAttribute<T> implements IAttribute<T> {
     }
 
     public static final boolean isGetterMethod(Method method) {
-        return method.getName().startsWith(PREFIX_READ_ACCESS)
-            || method.getName().startsWith(PREFIX_BOOLEAN_READ_ACCESS);
+        return (method.getName().startsWith(PREFIX_READ_ACCESS)
+            || method.getName().startsWith(PREFIX_BOOLEAN_READ_ACCESS))
+        		/*TODO: add and test: && !void.class.isAssignableFrom(method.getReturnType())
+        		&& method.getParameterCount() == 0*/;
     }
 
     /**
