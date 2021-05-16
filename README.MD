@@ -54,6 +54,22 @@
 * [Wiki-Documentation](tsl2.nano.h5/nano.h5.md.html)
 * [Video Tutorial on Youtube](https://www.youtube-nocookie.com/embed/WuC37CLdxSA?rel=0)
 
+### Documentation of Submodules
+
+* [Core (core library)](tsl2.nano.core/readme.md)
+* [Common (common library)](tsl2.nano.common/readme.md)
+* [Aspects (simple aspect library)](tsl2.nano.aspects/README.MD)
+* [Autotest (Unit Test Generation Framework)](tsl2.nano.autotest/readme.md)
+* [Cursus (Change Managment System)](tsl2.nano.cursus/readme.md.html)
+* [Generator (Source generation framework)](tsl2.nano.generator/README.MD)
+* [Maven Generator (Maven Plugin as Source generation framework)](tsl2.nano.maven-generator/README.MD)
+* [Archetype (Maven archetype for full generated spring/springboot/thymeleaf application)](tsl2.nano.archetype/README.MD)
+* [Terminal (Console Application Framework)](tsl2.nano.terminal/sishell.markdown)
+* [Service Access (JEE Access Framework)](tsl2.nano.directaccess/nano-serviceaccess.textile)
+* [Direct Access (JPA Direct Access Framework)](tsl2.nano.directaccess/nano-directaccess.textile)
+* [Nano H5 Thymeleaf Extension](tsl2.nano.h5-thymeleaf/tsl2-thymeleaf-tutorial.md)
+* [Logbook (Example NanoH5 application)](tsl2.nano.h5/README.MD)
+
 ## Code
 
 * [sourceforge](https://sourceforge.net/p/tsl2nano/code/ci/master/tree/)

@@ -1,11 +1,11 @@
 *tsl2.nano.common*
-<font size="-1">Autor: Thomas Schneider 2009-2013</font>
+<font size="-1">Autor: Thomas Schneider 2009-2021</font>
 
 {toc}
 
 # Introduction
 
-It is a framework as base of all tsl2.nano öackages. The goal is the lightweight, having no direct dependencies to other libraries and to be usable on different java vms like the oracle standard vm and androids dalvik vm. Providing a lot of elegant solutions it doesn't bind the user to it - using other libraries and frameworks beside isn't any problem.
+It is a framework as base of all tsl2.nano packages. The goal is the lightweight, having no direct dependencies to other libraries and to be usable on different java vms like the oracle standard vm and androids dalvik vm. Providing a lot of elegant solutions it doesn't bind the user to it - using other libraries and frameworks beside isn't any problem.
 
 There are utility classes to work on javaassist, velocity, ant-scripts and some xml libraries, but they are separated through a compatibility layer. So they are only accessible, if you provide the third pary libraries inside the environments workspace directory. 
 

@@ -34,6 +34,18 @@ Additionally, there are the following Implementations:
 * _BaseTest_        : base class for own unit tests providing expectations and textcomparisons (ignoring defined blocks of temporary text)
 * _TextComparison_  : provides text comparisons with ignoring of defined regular expression blocks
 
+### Constraints: What does it not
+
+Methods on instances with complex constructors or with complex parameters may not work. They will be filtered.
+
+If you have methods that return a value depending on a current system state, the results wont be stable and testable here.
+
+Examples:
+
+* your method returns the count of cached objects -> that will vary on each call
+* your method returns something dependent on current system time, memory usage or file system state
+
+
 ## Code Review
 
 The Test Creator (the class *AutoFunctionTest*) defines the features to be tested. Some properties like a *test name filter*, *test duplication* etc. can be set by system properties.
