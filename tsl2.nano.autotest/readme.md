@@ -4,6 +4,8 @@ Thomas Schneider 04/2021
 
 ## Overview
 
+maven artifactid: tsl2.nano.autotest
+
 This is a java unit test generation framework to do automated tests for you. If you don't want to know, how it works and only want to check, if it works for you, go to the last chapter *All together*
 
 ![unittest-result.png](doc/unittest-result.png)
