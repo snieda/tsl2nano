@@ -42,10 +42,10 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 		super(iteration, source);
 	}
 
-	public static Collection<? extends AFunctionTester> createRunners(Class<? extends AFunctionTester> testerType, int duplication, String fuzzyFilter) {
+	public static Collection<? extends AFunctionTester> createRunners(Class<? extends AFunctionTester> testerType, int duplication, String filter) {
 		log("collecting tests for " + testerType.getSimpleName() + ":\n");
 		Class<? extends Annotation> type = testerType.getAnnotation(FunctionType.class).value();
-		List<Method> revFcts = ClassFinder.self().find(fuzzyFilter, Method.class, -1, type);
+		List<Method> revFcts = ClassFinder.self().find(filter, Method.class, -1, type);
 		Set<AFunctionTester> runners = new LinkedHashSet<>(revFcts.size());
 		revFcts.forEach(m -> runners.add(createRunner(testerType, m)));
 		duplicate(duplication, runners);

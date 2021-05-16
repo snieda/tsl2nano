@@ -1,7 +1,9 @@
 package de.tsl2.nano.autotest;
 
 import java.io.Serializable;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
@@ -10,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.cls.PrivateAccessor;
@@ -51,13 +54,13 @@ public class ValueRandomizer {
 	}
 
 	public static Object fillRandom(Object obj) {
-		return fillRandom(obj, false);
+		return fillRandom(obj, false, 0);
 	}
 	
-	public static Object fillRandom(Object obj, boolean zeroNumber) {
+	public static Object fillRandom(Object obj, boolean zeroNumber, final int depth) {
 		PrivateAccessor<?> acc = new PrivateAccessor<>(obj);
 		Field[] fields = acc.findMembers(PrivateAccessor::notStaticAndNotFinal);
-		Arrays.stream(fields).forEach(f -> acc.set(f.getName(), createRandomValue(f.getType(), zeroNumber)));
+		Arrays.stream(fields).forEach(f -> acc.set(f.getName(), createRandomValue(f.getType(), zeroNumber, depth+1)));
 		return obj;
 	}
 
@@ -97,7 +100,7 @@ public class ValueRandomizer {
 			n = MapUtil.asMap(n, n);
 		else if (ByteUtil.isByteStream(typeOf))
 			n = ByteUtil.toByteStream(new byte[] {((Number) n).byteValue()}, typeOf);
-		else if (typeOf.isInterface() && !ObjectUtil.isStandardInterface(typeOf) && depth < 10)
+		else if (typeOf.isInterface() && !ObjectUtil.isStandardInterface(typeOf) && checkMaxDepth(depth))
 			n = createRandomProxy(typeOf, zeroNumber, ++depth);
 		else if (typeOf.isArray()) {
 			n = ObjectUtil.wrap(n, typeOf.getComponentType());
@@ -105,7 +108,45 @@ public class ValueRandomizer {
 					: MapUtil.asArray(MapUtil.asMap(n, n), typeOf.getComponentType());
 		} else if (typeOf.equals(Object.class) || !ObjectUtil.isStandardType(typeOf) && !Util.isFrameworkClass(typeOf))
 			n = typeOf.getSimpleName() + "(" + ByteUtil.hashCode(n) + ")";
-		return ObjectUtil.wrap(n, typeOf);
+		try {
+			return ObjectUtil.wrap(n, typeOf);
+		} catch (Exception e) {
+			if (checkMaxDepth(depth) && ObjectUtil.isInstanceable(typeOf)) {
+				return constructWithRandomParameters(typeOf, ++depth);
+			} else {
+				ManagedException.forward(e);
+				return null;
+			}
+		}
+	}
+
+	protected static boolean checkMaxDepth(int depth) {
+		return depth < 50;
+	}
+
+	public static <V> V constructWithRandomParameters(Class<V> typeOf)  {
+		return constructWithRandomParameters(typeOf, 0);
+	}
+	@SuppressWarnings({ "unchecked" })
+	static <V> V constructWithRandomParameters(Class<V> typeOf, int depth)  {
+		try {
+			Constructor<?> constructor = getBestConstructor(typeOf);
+			if (constructor == null)
+				throw new RuntimeException(typeOf + " is not constructable!");
+			return (V) constructor.newInstance(provideRandomizedObjects(depth, 1, constructor.getParameterTypes()));
+		} catch (Exception e) {
+			ManagedException.forward(e);
+			return null;
+		}
+	}
+
+	private static <T> Constructor<T> getBestConstructor(Class<T> typeOf) {
+		Constructor<T>[] cs = (Constructor<T>[]) typeOf.getConstructors();
+		for (int i = 0; i < cs.length; i++) {
+			if (cs[i].getParameterTypes().length == 1)
+				return cs[i];
+		}
+		return cs.length > 0 ? cs[0] : null;
 	}
 
 	protected static <V> Object createRandomNumber(Class<V> typeOf) {
@@ -124,20 +165,23 @@ public class ValueRandomizer {
 		return n;
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static Object[] provideRandomizedObjects(int countPerType, Class... types) {
+		return provideRandomizedObjects(0, countPerType, types);
+	}
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static Object[] provideRandomizedObjects(int depth, int countPerType, Class... types) {
 		boolean zero = countPerType == 0;
 		countPerType = countPerType < 1 ? 1 : countPerType; 
 		Object[] randomObjects = new Object[countPerType * types.length];
 		for (int i = 0; i < countPerType; i++) {
 			for (int j = 0; j < types.length; j++) {
 				if (ObjectUtil.isStandardType(types[j]) || types[j].isEnum() || ByteUtil.isByteStream(types[j]) || Serializable.class.isAssignableFrom(types[j]))
-					randomObjects[i+j] = createRandomValue(types[j], zero || respectZero(countPerType, i));
+					randomObjects[i+j] = createRandomValue(types[j], zero || respectZero(countPerType, i), depth);
 				else if (types[j].isInterface())
-					randomObjects[i+j] = createRandomProxy(types[j], zero);
+					randomObjects[i+j] = createRandomProxy(types[j], zero, depth);
 				else {
 					Class type = types[j].equals(Object.class) ? TypeBean.class : types[j];
-					randomObjects[i+j] = fillRandom(BeanClass.createInstance(type), zero || respectZero(countPerType, i));
+					randomObjects[i+j] = fillRandom(BeanClass.createInstance(type), zero || respectZero(countPerType, i), depth);
 				}
 			}
 		}

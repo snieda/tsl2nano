@@ -7,7 +7,7 @@
   </parent>
   <artifactId>tsl2.nano.autotest</artifactId>
   <name>TSL2 Framework Automatic Test Creation</name>
-  <description>creates unit test from annotated methods</description>
+  <description>Generates unit tests from code or annotated methods</description>
 	<properties>
 		<module.parent>..</module.parent>
 	</properties>

@@ -121,6 +121,6 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 	}
 	@Override
 	public String toString() {
-		return cloneIndex + ": " + source.getDeclaringClass().getSimpleName() + "." + source.getName() + " " + parametersAsString() + status + " -> expected: " + expect;
+		return super.toString() + " -> expected: " + expect;
 	}
 }

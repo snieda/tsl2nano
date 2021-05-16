@@ -23,7 +23,9 @@ But, at the end I'm to lazy to create the Expectation Annoations by myself. Is t
 Yes, the *AutoTestGenerator* can do that for you. It collects all available classes (may be filtered by you), finds out all
 callable methods and tries to run them with randomized values. The result will be stored as Expectation Annoations in a file. The file will be read again, the expectations will be handled like they were created by you as method annotations. A pre-test checks, that the test won't fail. Now, a parametrized unit test *CurrentStatePreservationTest* runs all that tests.
 
-It is by you to copy/paste the generated annotations to the methods in your source code then the annotations would be found be the *AutoFunctionTest*. But only if you like ;-)
+It is up to you to copy/paste the generated annotations to the methods in your source code then the annotations would be found be the *AutoFunctionTest*. But only if you like ;-)
+
+Using this autotest library on my tsl2 framwork with 30 maven modules and about 260.000 instructions I pushed my code coverage from 62% to 72% - and I found with that some bugs to be fixed :-)
 
 Additionally, there are the following Implementations:
 
@@ -254,6 +256,7 @@ There are some parameters (system properties) you can specify. Here, you see the
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 AutoTestGenerator(PREFIX: tsl2.functiontest.) started with:
 	filename (pattern)     : target/autotest/generated/generated-autotests-
+	filter.test            : .*(Test|IT)
 	testneverfail          : false
 	clean                  : false
 	duplication            : 10
@@ -266,6 +269,7 @@ AutoTestGenerator(PREFIX: tsl2.functiontest.) started with:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * *filename*: path to generate the auto tests into. on duplication > 0, you will have more than one generated file (e.g.: generated-autotests-0 and generated-autotests-1)
+* *filter.test*: filter for test classes (default: ".*(Test|IT)")
 * *testneverfail*: (default: false) only to check the resulting test coverage - if true, no test of *AllAutoTests* will ever fail. Please dont publish that to your application!
 * *clean*: (default: false) whether to delete all previously generated test files prior to start the new tests.
 * *duplication*: (default: 10) a duplication of 10 will generate 11 random calls on each method. A duplication > 2 will result in the use of zero numbers in the first test set.
@@ -369,6 +373,16 @@ public class InitAllAutoTests {
 	@Test public void nothing() {}
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## Tipp: check the AutoGeneration while debugging with Standard Java Exception Breakpoints
+
+The simplest way to use this framework is to use the *as is* unit tests by *CurrentStatePreservationTest*. But you can try to check for simple errors/exceptions on running the test in your IDE (like eclipse) in debug mode and activating standard java exception breakpoints.
+
+Stopping on these exception breakpoints, you can check, if it is an error inside your method. Using this test framework, I found some unexpected calls to my methods, so I fixed them.
+
+Two files are written, to let you see, what was done:
+* *autotest/generated/autotest-generated-filtered.txt*   : lists all filtered function calls
+* *autotest/generated/autotest-generated-statistics.txt* : lists statistics about filtered and created expectation tests
 
 ## All together
 

@@ -90,10 +90,13 @@ public class AFunctionCaller implements Runnable {
 		if (Modifier.isStatic(method.getModifiers()))
 			return null;
 		try {
-			if (instance != null && method.getDeclaringClass().isAssignableFrom(instance.getClass()))
+			Class<?> cls = method.getDeclaringClass();
+			if (instance != null && cls.isAssignableFrom(instance.getClass()))
 				return instance;
+			else if (BeanClass.hasDefaultConstructor(cls))
+				instance = BeanClass.createInstance(cls);
 			else
-				instance = BeanClass.createInstance(method.getDeclaringClass());
+				instance = ValueRandomizer.constructWithRandomParameters(cls);
 		} catch(Throwable ex) {
 			status = new Status(StatusTyp.INSTANCE_ERROR, ex.toString(), ex);
 			log(" -> " + status + "\n");
@@ -113,6 +116,10 @@ public class AFunctionCaller implements Runnable {
 		return clone;
 	}
 
+	@Override
+	public String toString() {
+		return cloneIndex + ": " + source.getDeclaringClass().getSimpleName() + "." + source.getName() + " " + parametersAsString() + status;
+	}
 }
 
 enum StatusTyp {NEW, PARAMETER_UNDEFINED, PARAMETER_ERROR, INITIALIZED, INSTANCE_ERROR

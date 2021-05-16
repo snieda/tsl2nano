@@ -8,17 +8,18 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.ClassFinder;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ConcurrentUtil;
+import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.FormatUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
@@ -42,7 +43,7 @@ import de.tsl2.nano.core.util.Util;
  * @author ts
  */
 public class AutoTestGenerator {
-	static String fileName = def("filename", "target/autotest/generated/generated-autotests-");
+	static String fileName = def("filename", "generated/generated-autotests-");
 	static int methods_loaded = 0;
 	static int count = 0;
 	static int fails = 0;
@@ -62,20 +63,26 @@ public class AutoTestGenerator {
 	private static void printStartParameters() {
 		String p = "\n" + StringUtil.fixString(79, '=') + "\n";
 		String s = AutoTestGenerator.class.getSimpleName() + "(PREFIX: " + PREF_PROPS + ") started with:"
+				+ "\n\tuser.dir               : " + System.getProperty("user.dir")
+				+ "\n\tuser.name              : " + System.getProperty("user.name")
+				+ "\n\tstart time             : " + DateUtil.getFormattedDateTime(new Date())
 				+ "\n\tfilename pattern       : " + fileName
 				+ "\n\tclean                  : " + def("clean", false)
 				+ "\n\tduplication            : " + def("duplication", 10)
 				+ "\n\tfilter                 : " + def("filter", "")
 				+ "\n\tmodifier               : " + def("modifier", -1)
+				+ "\n\tfilter.test            : " + def("filter.test", ".*(Test|IT)")
 				+ "\n\tfilter.unsuccessful    : " + def("filter.unsuccessful", true)
 				+ "\n\tfilter.complextypes    : " + def("filter.complextypes", false)
 				+ "\n\tfilter.failing         : " + def("filter.failing", false)
 				+ "\n\tfilter.nullresults     : " + def("filter.nullresults", false);
 		AFunctionTester.log(p + s +p);
+		FileUtil.writeBytes((p + s + p).getBytes(), fileName + "statistics.txt", false);
 	}
 	@SuppressWarnings("rawtypes")
 	public static Collection<? extends AFunctionTester> createExpectationTesters() {
 		printStartParameters();
+		FileUtil.userDirFile(fileName + "filtered.txt").delete();
 		int duplication = def("duplication", 10);
 		List<Method> methods = ClassFinder.self().find(def("filter", "") , Method.class, def("modifier", -1), null);
 		filterTestClasses(methods);
@@ -122,6 +129,7 @@ public class AutoTestGenerator {
 		try {
 			if ((def("filter.complextypes", false) && !FunctionCheck.hasSimpleTypes(f)) 
 					|| f.source.getParameterCount() == 0 || void.class.isAssignableFrom(f.source.getReturnType())) {
+				writeFilteredFunctionCall(f);
 				filter_complextypes++;
 				return;
 			}
@@ -129,6 +137,7 @@ public class AutoTestGenerator {
 		} catch (Exception e) {
 			if (f.status.in(StatusTyp.NEW, StatusTyp.INSTANCE_ERROR, StatusTyp.PARAMETER_ERROR, StatusTyp.PARAMETER_UNDEFINED) 
 					|| def("filter.failing", false)) {
+				writeFilteredFunctionCall(f);
 				filter_errors++;
 				return;
 			}
@@ -139,6 +148,7 @@ public class AutoTestGenerator {
 			if (f.getResult() == null) {
 				if (def("filter.nullresults", false)) {
 					filter_nullresults++;
+					writeFilteredFunctionCall(f);
 					return;
 				} else {
 					then = "null";
@@ -146,11 +156,13 @@ public class AutoTestGenerator {
 			}
 		}
 		if (f.getResult() != null && !FunctionCheck.checkTypeConversion(f.getResult())) {
+			writeFilteredFunctionCall(f);
 			filter_typeconversions++;
 			return;
 		}
 		String expect = ExpectationCreator.createExpectationString(f, then);
 		if (def("filter.unsuccessful", true) && !FunctionCheck.checkTestSuccessful(f, expect)) {
+			writeFilteredFunctionCall(f);
 			filter_unsuccessful++;
 			return;
 		}
@@ -158,6 +170,9 @@ public class AutoTestGenerator {
 		FileUtil.writeBytes(expect.getBytes(), getFile(f.cloneIndex).getPath(), true);
 	}
 
+	private static void writeFilteredFunctionCall(AFunctionCaller f) {
+		FileUtil.writeBytes((f.toString() + "\n").getBytes(), fileName + "filtered.txt", true);
+	}
 	public static Collection<ExpectationFunctionTester> readExpectations(int iteration) {
 		return readExpectations(iteration, getFile(iteration));
 	}
@@ -193,6 +208,7 @@ public class AutoTestGenerator {
 	private static void printStatistics(int iterations, Collection<AFunctionTester> testers) {
 		String p = "\n" + StringUtil.fixString(79, '=') + "\n";
 		String s = AutoTestGenerator.class.getSimpleName() + " created " + count + " expectations in file pattern: '" + fileName + "...'"
+				+ "\n\tend time              : " + DateUtil.getFormattedDateTime(new Date())
 				+ "\n\ttestneverfail         : " + def("testneverfail", false)
 				+ "\n\tmethods loaded        : " + methods_loaded
 				+ "\n\tduplications          : " + def("duplication", 10)
@@ -208,6 +224,7 @@ public class AutoTestGenerator {
 				+ "\n\tloaded unsuccessful   : " + load_unsuccessful
 				+ "\n\ttotally loaded        : " + testers.size();
 		AFunctionTester.log(p + s +p);
+		FileUtil.writeBytes((p + s + p).getBytes(), fileName + "statistics.txt", true);
 	}
 }
 
@@ -268,7 +285,9 @@ class ExpectationCreator {
 class FunctionCheck {
 	static boolean checkTestSuccessful(AFunctionCaller t, String expect) {
 		try {
-			new ExpectationFunctionTester(t.source, ExpectationCreator.createExpectationFromLine(expect)).testMe();
+			ExpectationFunctionTester tester = new ExpectationFunctionTester(t.source, ExpectationCreator.createExpectationFromLine(expect));
+			tester.testMe();
+			tester.testMe(); //do it twice, sometimes a value changes the first time. would be better to do the initial run() twice!
 			return true;
 		} catch (Exception | AssertionError e) {
 			return false;
