@@ -10,6 +10,8 @@
 package de.tsl2.nano.core.cls;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -18,9 +20,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -30,6 +33,8 @@ import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
 
 import org.apache.commons.logging.Log;
 
@@ -42,7 +47,13 @@ import de.tsl2.nano.core.util.StringUtil;
  * WORKS ONLY IN ORACLES JAVA IMPLEMENTATION
  * <p/>
  * is able to find all types of java elements like classes, annotations,
- * methods, fields - per reflection.
+ * methods, fields - per reflection. be careful using the fuzzy finders that return lots more 'similar' findings.
+ * <p/>
+ * 
+ * NOTE: only classes, that were already loaded by the classloaders are found!. to
+ * pre-load known packages, call
+ * {@link #getClassesInPackage(String, ClassLoader)} before calling a finder
+ * method.
  * 
  * @author Tom
  * @version $Revision$
@@ -137,29 +148,23 @@ public class ClassFinder {
 			System.out.print("loading classes on " + pack + ": ");
 		int i = 0;
 		try {
-//			Enumeration<URL> entries = cl.getResources(pack.replace('.', '/'));
-//			// recurse into sub-packages
-//			while (entries.hasMoreElements()) {
-//				collectPackageClasses(cl, entries.nextElement().getPath(), classes);
-//			}
-
-			URL upackage = cl.getResource(pack.replace('.', '/'));
-			if (upackage == null) {
-				return classes;
-			}
-			BufferedReader dis = new BufferedReader(new InputStreamReader(((InputStream) upackage.getContent())));
-			String line = null;
-			while ((line = dis.readLine()) != null) {
-				if (line.endsWith(".class")) {
-					try {
-						i++;
-						System.out.print(".");
-						classes.add(cl.loadClass(pack + "." + line.substring(0, line.lastIndexOf('.'))));
-					} catch (ClassNotFoundException e) {
-						ManagedException.forward(e);
+			Enumeration<URL> upackages = cl.getResources(pack.replace('.', '/'));
+			while (upackages.hasMoreElements()) {
+				URL upackage = upackages.nextElement();
+				BufferedReader dis = new BufferedReader(new InputStreamReader(((InputStream) upackage.getContent())));
+				String line = null;
+				while ((line = dis.readLine()) != null) {
+					if (line.endsWith(".class")) {
+						try {
+							i++;
+							System.out.print(".");
+							classes.add(cl.loadClass(pack + "." + line.substring(0, line.lastIndexOf('.'))));
+						} catch (ClassNotFoundException e) {
+							ManagedException.forward(e);
+						}
+					} else {
+						classes.addAll(collectPackageClasses(cl, pack + "." + line, classes));
 					}
-				} else {
-					classes.addAll(collectPackageClasses(cl, pack + "." + line, classes));
 				}
 			}
 		} catch (IOException e1) {
@@ -336,6 +341,58 @@ public class ClassFinder {
 		return map;
 	}
 
+	public static final List<Class<?>> getClassesInPackage(String packageName, ClassLoader cl) {
+		if (cl == null)
+			cl = Thread.currentThread().getContextClassLoader();
+		System.out.print("loading classes from " + packageName);
+	    String path = packageName.replaceAll("\\.", File.separator);
+	    List<Class<?>> classes = new ArrayList<>();
+	    String[] classPathEntries = System.getProperty("java.class.path").split(
+	            System.getProperty("path.separator")
+	    );
+
+	    String name;
+	    for (String classpathEntry : classPathEntries) {
+	        if (classpathEntry.endsWith(".jar")) {
+	            File jar = new File(classpathEntry);
+	            try (JarInputStream is = new JarInputStream(new FileInputStream(jar))) {
+	                JarEntry entry;
+	                while((entry = is.getNextJarEntry()) != null) {
+	                    name = entry.getName();
+	                    if (name.endsWith(".class")) {
+	                        if (name.contains(path) && name.endsWith(".class")) {
+	                            String classPath = name.substring(0, entry.getName().length() - 6);
+	                            classPath = classPath.replaceAll("[\\|/]", ".");
+	                            classes.add(cl.loadClass(classPath));
+	                            System.out.print(".");
+	                        }
+	                    }
+	                }
+	            } catch (Exception | NoClassDefFoundError  ex) {
+	                // ok, next classpathEntry...
+	            }
+	        } else {
+	            try {
+	                File base = new File(classpathEntry + File.separatorChar + path);
+	                if (!base.exists())
+	                	continue;
+	                for (File file : base.listFiles()) {
+	                    name = file.getName();
+	                    if (name.endsWith(".class")) {
+	                        name = name.substring(0, name.length() - 6);
+	                        classes.add(Class.forName(packageName + "." + name));
+                            System.out.print(".");
+	                    }
+	                }
+	            } catch (Exception | NoClassDefFoundError  ex) {
+	                // ok, next classpathEntry...
+	            }
+	        }
+	    }
+	    System.out.println("OK");
+	    return classes;
+	}
+	
 	public void reset() {
 		init(Thread.currentThread().getContextClassLoader());
 	}

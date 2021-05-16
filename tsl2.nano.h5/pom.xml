@@ -379,7 +379,7 @@
 									<sysproperty key="app.update.interval.days" value="-1"/>
 									<sysproperty key="app.stop.allow.system.exit" value="false"/>
 	                            </java>
-								<sleep seconds="10" />
+								<sleep seconds="20" />
 								<echo>RESUMING ${project.build.finalName} integration-test</echo>
 	                        </target>
 	                    </configuration>

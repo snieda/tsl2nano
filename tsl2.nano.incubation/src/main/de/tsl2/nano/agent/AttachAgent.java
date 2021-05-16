@@ -98,7 +98,7 @@ public class AttachAgent {
     System.setProperty("LogMeAs.system.out", "true");
     if (args == null)
       args = new String[0];
-    if (args.length <= 1 && (args[0].contains("?") || args[0].toLowerCase().contains("help"))) {
+    if (args.length == 0 || (args.length == 1 && (args[0].contains("?") || args[0].toLowerCase().contains("help")))) {
       System.out.println(AttachAgent.class.getName() + "{VM-PID or 0} [agent-lib-jar [agent-class [argent-method]]]");
       return;
     }

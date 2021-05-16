@@ -9,6 +9,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.ClassFinder;
 
 /**
  * This parameterized test class is a workaround on test suites having parameterized tests that have to be initialized from outside.<p/>
@@ -40,6 +41,7 @@ public class InitAllAutoTests {
 	public static String matchPackage(Class...classes) {
 		StringBuilder buf = new StringBuilder(".*(");
 		for (int i = 0; i < classes.length; i++) {
+			ClassFinder.getClassesInPackage(classes[i].getPackage().getName(), null);
 			buf.append(classes[i].getPackage().getName() + (i < classes.length - 1 ? "|" : ""));
 		}
 		return buf.append(").*").toString();
