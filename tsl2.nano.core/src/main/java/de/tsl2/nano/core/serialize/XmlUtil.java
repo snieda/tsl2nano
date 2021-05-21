@@ -313,7 +313,7 @@ public class XmlUtil {
                 new Format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")).write(
                     obj, new File(xmlFile).getAbsoluteFile());
             //workaround for empty files
-            if (FileUtil.getFile(xmlFile).available() == 0) {
+            if (FileUtil.userDirFile(xmlFile).exists() && FileUtil.getFile(xmlFile).available() == 0) {
                 new File(xmlFile).getAbsoluteFile().delete();
             }
         } catch (Exception e) {

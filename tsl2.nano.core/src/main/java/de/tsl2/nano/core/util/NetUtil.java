@@ -376,7 +376,7 @@ public class NetUtil {
     public static File download(URL url, String destDir, boolean flat, boolean overwrite) {
         try {
             String fileName = flat ? new File(FileUtil.getValidFileName(url.getFile())).getName() : getFileName(url);
-            destDir = destDir == null ? System.getProperty("user.dir") : destDir;
+            destDir = destDir == null ? System.getProperty("user.dir") : FileUtil.userDirFile(destDir).getPath();
             fileName = (destDir.endsWith("/") ? destDir : destDir + "/") + fileName;
             File file = new File(fileName);
             if (overwrite || !file.exists()) {

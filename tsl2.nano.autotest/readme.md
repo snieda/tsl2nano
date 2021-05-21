@@ -271,6 +271,7 @@ There are some parameters (system properties) you can specify. Here, you see the
 AutoTestGenerator(PREFIX: tsl2.functiontest.) started with:
 	filename (pattern)     : target/autotest/generated/generated-autotests-
 	filter.test            : .*(Test|IT)
+	filter.exclude         : XXXXXXXXXX
 	testneverfail          : false
 	clean                  : false
 	duplication            : 10
@@ -284,6 +285,7 @@ AutoTestGenerator(PREFIX: tsl2.functiontest.) started with:
 
 * *filename*: path to generate the auto tests into. on duplication > 0, you will have more than one generated file (e.g.: generated-autotests-0 and generated-autotests-1)
 * *filter.test*: filter for test classes (default: ".*(Test|IT)")
+* *filter.exclude*: additional excluding regex filter for methods, that should not be tested by this tests
 * *testneverfail*: (default: false) only to check the resulting test coverage - if true, no test of *AllAutoTests* will ever fail. Please dont publish that to your application!
 * *clean*: (default: false) whether to delete all previously generated test files prior to start the new tests.
 * *duplication*: (default: 10) a duplication of 10 will generate 11 random calls on each method. A duplication > 2 will result in the use of zero numbers in the first test set.

@@ -118,7 +118,7 @@ public class AFunctionCaller implements Runnable {
 
 	@Override
 	public String toString() {
-		return cloneIndex + ": " + source.getDeclaringClass().getSimpleName() + "." + source.getName() + " " + parametersAsString() + status;
+		return cloneIndex + ": " + source.getDeclaringClass().getSimpleName() + "." + source.getName() + " " + parametersAsString() + " -> " + status;
 	}
 }
 

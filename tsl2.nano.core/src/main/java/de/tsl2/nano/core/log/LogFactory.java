@@ -302,8 +302,9 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
      */
     private void initPrintStream(String outputFile) {
         try {
-            new File(outputFile).getAbsoluteFile().createNewFile();
-            PrintStream outFile = new PrintStream(outputFile);
+            File absoluteFile = new File(outputFile).getAbsoluteFile();
+			absoluteFile.createNewFile();
+            PrintStream outFile = new PrintStream(absoluteFile);
             out = outFile;
             err = outFile;
         } catch (Exception e) {

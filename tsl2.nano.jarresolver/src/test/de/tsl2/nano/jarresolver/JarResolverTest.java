@@ -3,6 +3,9 @@ package de.tsl2.nano.jarresolver;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.junit.AfterClass;
@@ -116,9 +119,16 @@ public class JarResolverTest   implements ENVTestPreparation {
     @Test
     public void testFindJar() throws Exception {
         if (NetUtil.isOnline()) {
-            String jarName = new JarResolver(BASE_DIR_JARRESOLVER).findJarOnline("org.java_websocket.WrappedByteChannel");
-            LOG.info("jar-file: " + jarName);
-            assertTrue(StringUtil.extract(jarName, "\\w+").matches("sparql|org|pusher|firebase"));
+            try {
+				String jarName = new JarResolver(BASE_DIR_JARRESOLVER).findJarOnline("org.java_websocket.WrappedByteChannel");
+				LOG.info("jar-file: " + jarName);
+				assertTrue(StringUtil.extract(jarName, "\\w+").matches("sparql|org|pusher|firebase"));
+			} catch (Exception e) {
+				if (e.toString().matches(".*HTTP response.*50[023].*"))
+					System.out.println(e.toString()); //OK, Problem on server side...
+				else
+					fail(e.toString());
+			}
         } else {
             System.out.println("ignoring test 'testFindJar() - we are offline!");
         }

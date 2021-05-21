@@ -72,6 +72,7 @@ public class AutoTestGenerator {
 				+ "\n\tfilter                 : " + def("filter", "")
 				+ "\n\tmodifier               : " + def("modifier", -1)
 				+ "\n\tfilter.test            : " + def("filter.test", ".*(Test|IT)")
+				+ "\n\tfilter.exclude         : " + def("filter.exclude", "XXXXXXXX")
 				+ "\n\tfilter.unsuccessful    : " + def("filter.unsuccessful", true)
 				+ "\n\tfilter.complextypes    : " + def("filter.complextypes", false)
 				+ "\n\tfilter.failing         : " + def("filter.failing", false)
@@ -85,6 +86,7 @@ public class AutoTestGenerator {
 		FileUtil.userDirFile(fileName + "filtered.txt").delete();
 		int duplication = def("duplication", 10);
 		List<Method> methods = ClassFinder.self().find(def("filter", "") , Method.class, def("modifier", -1), null);
+		filterExcludes(methods);
 		filterTestClasses(methods);
 		Collection<AFunctionTester> testers = new LinkedList<>();
 		boolean fileexists = true;
@@ -102,6 +104,9 @@ public class AutoTestGenerator {
 		return testers;
 	}
 
+	private static void filterExcludes(List<Method> methods) {
+		methods.removeIf(m -> m.toGenericString().matches(def("filter.exclude", "XXXXXXXX")));
+	}
 	private static void filterTestClasses(List<Method> methods) {
 		methods.removeIf(m -> m.getDeclaringClass().getName().matches(def("filter.test", ".*(Test|IT)")));
 	}
@@ -162,7 +167,7 @@ public class AutoTestGenerator {
 		}
 		String expect = ExpectationCreator.createExpectationString(f, then);
 		if (def("filter.unsuccessful", true) && !FunctionCheck.checkTestSuccessful(f, expect)) {
-			writeFilteredFunctionCall(f);
+			writeFilteredFunctionCall(expect);
 			filter_unsuccessful++;
 			return;
 		}
@@ -171,7 +176,10 @@ public class AutoTestGenerator {
 	}
 
 	private static void writeFilteredFunctionCall(AFunctionCaller f) {
-		FileUtil.writeBytes((f.toString() + "\n").getBytes(), fileName + "filtered.txt", true);
+		writeFilteredFunctionCall(f.toString());
+	}
+	private static void writeFilteredFunctionCall(String call) {
+		FileUtil.writeBytes((call + "\n").getBytes(), fileName + "filtered.txt", true);
 	}
 	public static Collection<ExpectationFunctionTester> readExpectations(int iteration) {
 		return readExpectations(iteration, getFile(iteration));
