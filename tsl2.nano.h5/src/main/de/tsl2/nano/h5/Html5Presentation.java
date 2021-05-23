@@ -1352,7 +1352,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             else
                 imagePath = a.getImagePath();
         } else {
-            imagePath = new File(ENV.getConfigPath() + (path = "icons/" + StringUtil.substring(a.getId(), ".", null, true)
+            imagePath = new File(ENV.getConfigPathRel() + (path = "icons/" + StringUtil.substring(a.getId(), ".", null, true)
             + ".png")).exists() ? path 
                 : ICON_DEFAULT;
         }

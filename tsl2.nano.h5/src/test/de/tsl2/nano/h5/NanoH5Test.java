@@ -35,6 +35,7 @@ import org.anonymous.project.Address;
 import org.anonymous.project.Charge;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.tsl2.nano.action.IStatus;
@@ -98,10 +99,15 @@ public class NanoH5Test implements ENVTestPreparation {
         return "http://localhost:" + NetUtil.getFreePort();
     }
 
+    @BeforeClass
+    public static void setUpClass() {
+    	FileUtil.deleteRecursive(new File("jdbc:h2:tcp:"));  // -> yes, not on target/test
+    }
     @After
     public void tearDown() {
 //    	ENV.getProperties().keySet().forEach(k->System.getProperties().remove(k));
     	ENV.reset();
+    	new File("jdbc:h2:tcp:").deleteOnExit(); // -> yes, not on target/test
     }
 
     @Test

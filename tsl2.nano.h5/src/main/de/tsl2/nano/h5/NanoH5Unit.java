@@ -80,6 +80,7 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
     }
     
     public void setUpUnit(String moduleShort) {
+//    	tearDownAfter(250000);
         System.setProperty("app.stop.allow.system.exit", "false");
         nanoAlreadyRunning = Boolean.getBoolean("app.server.running");
         NanoH5UnitPlugin.setEnabled(!nanoAlreadyRunning);
@@ -112,6 +113,11 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
 		}
 	}
     
+	/** WORKAROUND FOR SUREFIRE/FAILSAFE failing on not stopping fork */
+	private void tearDownAfter(long millis) {
+		ConcurrentUtil.doAfterWait(millis, "tearDown after " + millis + " ms", () -> {this.tearDown(); return null;});
+	}
+
     public void tearDown() {
     	if (webClient != null)
     		webClient.close();

@@ -304,17 +304,17 @@ public class DatabaseTool {
 	}
 	
 	public static void shutdownDBServerDefault() {
-		shutdownDBServer(Persistence.current().getConnectionUrl(), "");
+		new DatabaseTool(Persistence.current()).shutdownDBServer();
 	}
 	
 	public void shutdownDBServer() {
 		if (isEmbeddedDatabase())
 			shutdownDatabase();
 		else
-			shutdownDBServer(persistence.getConnectionUrl(), persistence.getConnectionPassword());
+			stopDBServer(persistence.getConnectionUrl(), persistence.getConnectionPassword());
 	}
 	
-	public static void shutdownDBServer(String... args) {
+	static void stopDBServer(String... args) {
 		String cmd = ENV.get("app.database.internal.server.shutdown.cmd", "org.h2.tools.Server.shutdownTcpServer({0}, {1}, true, true)");
 		LOG.info("shutdown database server: " + cmd + "[" + args[0] + ", ***]");
         try {

@@ -198,7 +198,7 @@ public class Attachment implements IValueAccess<byte[]>, IAttribute<byte[]> {
      * @return
      */
     public static String getFilename(Object instance, String attribute, String name) {
-        return ENV.getTempPath()
+        return ENV.getTempPathRel()
             + FileUtil.getValidFileName(BeanValue.getBeanValue(instance, attribute).getValueId() + "."
                 + Util.asString(name));
     }

@@ -171,7 +171,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
     public NanoH5(String serviceURL, IPageBuilder<?, String> builder) throws IOException {
 //        super(null, getPort(serviceURL), new File(ENV.getConfigPath()), !LOG.isDebugEnabled());
         super(getPort(serviceURL), new File(ENV.getConfigPath()));
-        FileUtil.writeBytes(String.valueOf(hashCode()).getBytes(), new File(ENV.getTempPath() + "instance-id.txt").getAbsolutePath(), false);
+        FileUtil.writeBytes(String.valueOf(hashCode()).getBytes(), ENV.getTempPath() + "instance-id.txt", false);
         this.serviceURL = getServiceURL(serviceURL);
         this.builder = builder != null ? builder : createPageBuilder();
         ENV.registerBundle(NanoH5.class.getPackage().getName() + ".messages", true);
@@ -297,6 +297,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
 //                            e1);
 //                    }
 //                }
+            ENV.extractResource("permissions.xsd");
             /*
              * DEPRECATED: we integrate the 'anyway' database as sample
              * on first start, extract the sample files
@@ -1217,7 +1218,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         clear();
         super.stop();
         LogFactory.stop();
-        if (ENV.get("app.stop.allow.system.exit", false) && !SystemUtil.isNestedApplicationStart()) {
+        if (ENV.get("app.stop.allow.system.exit", !ENV.isTestMode() && !SystemUtil.isNestedApplicationStart())) {
         	FileUtil.writeBytes(("System.exit(0) called on: " + this.toString()).getBytes(), "systemexit.txt", false);
         	LOG.info("===> SYSTEM EXIT!");
         	ConcurrentUtil.sleep(5000);

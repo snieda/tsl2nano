@@ -187,7 +187,7 @@ public class Bean<T> extends BeanDefinition<T> {
     @Override
     public Object getId() {
         IAttribute idAttribute = getIdAttribute();
-        return idAttribute != null ? idAttribute.getValue(instance) : super.getId();
+        return idAttribute != null && instance != null ? idAttribute.getValue(instance) : super.getId();
     }
     public void setId(Object value) {
         IAttribute idAttribute = getIdAttribute();

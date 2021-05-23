@@ -133,7 +133,7 @@ public class ENV implements Serializable {
     public static final String CONFIG_NAME = "environment";
     public static final String KEY_BUILDINFO = "tsl2.nano.build.informations";
 
-    private static final String KEY_TESTMODE = "tsl2.nano.test";
+    public static final String KEY_TESTMODE = "tsl2.nano.test";
 
     static final String DEF_PATHSEPRATOR = "/";
     static final String UNKNOWN_BUILD_INFORMATIONS = "<unknown build informations>";
@@ -235,11 +235,10 @@ public class ENV implements Serializable {
     }
 
     public static ENV create(String dir) {
-        File absPath = new File(dir).getAbsoluteFile();
-		absPath.mkdirs();
+        new File(dir).getAbsoluteFile().mkdirs();
         String name = StringUtil.substring(dir, PREFIX_ENVNAME, "/");
-        LogFactory.setLogFile(FileUtil.concat(absPath.getPath(), name) + ".log");
-        LogFactory.setLogFactoryXml(absPath.getPath() + "/" + "logfactory.xml");
+        LogFactory.setLogFile(name + ".log");
+        LogFactory.setLogFactoryXml("logfactory.xml");
         String buildInfo = getBuildInformations();
         
         LogFactory.log("\n===========================================================\n"
@@ -295,7 +294,6 @@ public class ENV implements Serializable {
 
         self.properties.put(KEY_CONFIG_RELPATH, dir + (dir.endsWith("/") ? "" : "/"));
         self.properties.put(KEY_CONFIG_PATH, new File(dir).getAbsolutePath().replace("\\", "/") + "/");
-        new File(self.getTempPath()).mkdir();
 
         registerBundle(PREFIX + "messages", true);
         if (FileUtil.hasResource("messages.properties")) {
@@ -654,7 +652,9 @@ public class ENV implements Serializable {
      * @return
      */
     public static String getTempPath() {
-        return getConfigPath() + PATH_TEMP;
+        String tpath = getConfigPath() + PATH_TEMP;
+        new File(tpath).mkdir();
+		return tpath;
     }
 
     /**
@@ -663,6 +663,7 @@ public class ENV implements Serializable {
      * @return
      */
     public static String getTempPathRel() {
+        self.getTempPath(); // -> mkdir()
         return getConfigPathRel() + PATH_TEMP;
     }
 
@@ -800,7 +801,7 @@ public class ENV implements Serializable {
      * reloads the current environment. a reset will be done to reload the environment from saved file.
      */
     public static void reload() {
-        String envDir = getConfigPath();
+        String envDir = getConfigPathRel();
         SortedMap tempProperties = createSyncSortedMap();
         tempProperties.putAll(self().properties);
         Map<Class<?>, Object> tempServices = new Hashtable<Class<?>, Object>(services());

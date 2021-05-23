@@ -298,6 +298,10 @@ public class ConcurrentUtil {
 			consumer.accept(threads[i]);
 		}
     }
+
+	public static void doAfterWait(long millis, String newThreadName, Supplier<?> todo) {
+		new Thread(() -> {sleep(millis); todo.get();}, newThreadName).start();
+	}
 }
 
 /**

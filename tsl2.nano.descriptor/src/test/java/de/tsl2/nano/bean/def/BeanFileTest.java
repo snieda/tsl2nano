@@ -243,6 +243,6 @@ public class BeanFileTest {
 		assertEquals(typeBean1, it.next());
     	assertEquals(typeBean2, it.next());
     	
-    	FileUtil.userDirFile(filename).delete();
+    	FileUtil.delete(filename);
     }
 }

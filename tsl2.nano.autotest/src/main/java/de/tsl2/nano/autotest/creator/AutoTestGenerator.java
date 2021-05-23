@@ -83,7 +83,7 @@ public class AutoTestGenerator {
 	@SuppressWarnings("rawtypes")
 	public static Collection<? extends AFunctionTester> createExpectationTesters() {
 		printStartParameters();
-		FileUtil.userDirFile(fileName + "filtered.txt").delete();
+		FileUtil.delete(fileName + "filtered.txt");
 		int duplication = def("duplication", 10);
 		List<Method> methods = ClassFinder.self().find(def("filter", "") , Method.class, def("modifier", -1), null);
 		filterExcludes(methods);
@@ -139,7 +139,7 @@ public class AutoTestGenerator {
 				return;
 			}
 			f.run();
-		} catch (Exception e) {
+		} catch (Exception | AssertionError e) {
 			if (f.status.in(StatusTyp.NEW, StatusTyp.INSTANCE_ERROR, StatusTyp.PARAMETER_ERROR, StatusTyp.PARAMETER_UNDEFINED) 
 					|| def("filter.failing", false)) {
 				writeFilteredFunctionCall(f);

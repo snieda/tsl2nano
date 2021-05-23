@@ -37,7 +37,7 @@ public class ParameterizedBeanTest {
 
 	@After
 	public void tearDown() throws Exception {
-    	FileUtil.userDirFile(filename).delete();
+    	FileUtil.delete(filename);
 	}
 
 	public ParameterizedBeanTest(FileType filetype, Object[] typeBeans) {
@@ -88,6 +88,6 @@ public class ParameterizedBeanTest {
 //    	assertEquals(typeBean1.toString().replace(',', '\n'), it.next().toString().replace(',', '\n'));
 //    	assertEquals(typeBean2.toString().replace(',', '\n'), it.next().toString().replace(',', '\n'));
     	
-    	FileUtil.userDirFile(filename + "_").delete();
+    	FileUtil.delete(filename + "_");
 	}
 }

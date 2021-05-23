@@ -1424,6 +1424,10 @@ public class FileUtil {
         return writer;
     }
 
+    public static boolean delete(String file) {
+    	return userDirFile(file).delete();
+    }
+    
     /**
      * deletes all sub-directories of the given directory
      * 
