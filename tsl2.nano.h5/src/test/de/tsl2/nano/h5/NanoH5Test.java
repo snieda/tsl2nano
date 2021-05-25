@@ -9,6 +9,10 @@
  */
 package de.tsl2.nano.h5;
 
+import static de.tsl2.nano.autotest.TextComparison.REGEX_DATE_DE;
+import static de.tsl2.nano.autotest.TextComparison.REGEX_DATE_US;
+import static de.tsl2.nano.autotest.TextComparison.REGEX_TIME_DE;
+import static de.tsl2.nano.autotest.TextComparison.XXX;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -274,19 +278,21 @@ public class NanoH5Test implements ENVTestPreparation {
         //static check against last expteced state
        exptectedHtml = new String(FileUtil.getFileBytes(expFileName, null));
       BaseTest.assertEquals(exptectedHtml, html, true, MapUtil.asMap("\\:[0-9]{5,5}", ":XXXXX",
-          "20\\d\\d(-\\d{2})*", BaseTest.XXX,
+          "20\\d\\d(-\\d{2})*", XXX,
           "[0-9]{1,6} Sec [0-9]{1,6} KB", "XXX Sec XXX KB", 
           "statusinfo-[0-9]{13,13}\\.txt", "statusinfo-XXXXXXXXXXXXX.txt",
-          BaseTest.REGEX_DATE_US, BaseTest.XXX,
-          BaseTest.REGEX_DATE_DE, BaseTest.XXX,
-          BaseTest.REGEX_TIME_DE, BaseTest.XXX,
-          "startedAt", BaseTest.XXX,
-          "endedAt", BaseTest.XXX,
-          "Started At", BaseTest.XXX,
-          "Ended At", BaseTest.XXX,
+          REGEX_DATE_US, XXX,
+          REGEX_DATE_DE, XXX,
+          REGEX_TIME_DE, XXX,
+          "\\d[:]\\d\\d", XXX,
+          "startedAt", XXX,
+          "endedAt", XXX,
+          "Started At", XXX,
+          "Ended At", XXX,
           "tsl2.nano.h5-\\d+\\.\\d+\\.\\d+(-SNAPSHOT)?[\\-\\.0-9]*", "tsl2.nano.h5-X.X.X",
+          "(target/test/)?.nanoh5.timesheet/", XXX,
           ".quicksearch", "?quicksearch", // the '?' does not match between the two sources!
-          "(\\w+[:])?((/|[\\\\])([.]?\\w+)+)+", BaseTest.XXX //absolute file pathes
+          "(\\w+[:])?((/|[\\\\])([.]?\\w+)+)+", XXX //absolute file pathes
           ));
        
         //check xml failed files - these are written, if simple-xml has problems on deserializing from xml
