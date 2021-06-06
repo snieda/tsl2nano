@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 
@@ -510,9 +511,10 @@ public class Util {
     	} else if (!(obj instanceof Map)) {
     		if (obj instanceof Collection)
     			obj = ((Collection)obj).toArray();
-    		Object[] arr = (Object[]) obj;
+    		Object[] orr = ((Object[])obj);
+    		Object[] arr = /*orr instanceof Object[] || orr instanceof String[] ? orr : */new String[orr.length];
     		for (int i = 0; i < arr.length; i++) {
-				arr[i] = FormatUtil.format(arr[i]);
+				arr[i] = FormatUtil.format(orr[i]);
 			}
     		return "{" + StringUtil.concatWrap("\"{0}\"".toCharArray(), arr).replace("\"\"", "\",\"") + "}";
     	} else
@@ -541,5 +543,8 @@ public class Util {
 	public static final void assert_(boolean assertion, String message, Object... args) {
 		if (!assertion && !Boolean.getBoolean("tsl2.nano.disable.assertion"))
 			throw new IllegalArgumentException(String.format(message, args));
+	}
+	public static <T> Stream<T> stream(Collection<T> c, boolean parallel) {
+		return parallel ? c.parallelStream() : c.stream();
 	}
 }

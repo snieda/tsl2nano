@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Objects;
 
+import de.tsl2.nano.autotest.Construction;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -50,10 +51,7 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 					parameter = createStartParameter(source.getParameterTypes());
 					parameter[i] = ObjectUtil.wrap(expect.whenPar(), source.getParameterTypes()[i]);
 				} else {
-					parameter = new Object[source.getParameterTypes().length];
-					for (int i = 0; i < expect.when().length; i++) {
-						parameter[i] = ObjectUtil.wrap(expect.when()[i], source.getParameterTypes()[i]);
-					}
+					parameter = createParameterFromStringArr(source.getParameterTypes(), expect.when());
 				}
 			} catch (Exception e) {
 				status = new Status(StatusTyp.PARAMETER_ERROR, e.getMessage(), e);
@@ -64,7 +62,25 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 		}
 		return parameter;
 	}
+	private Object[] createParameterFromStringArr(Class[] types, String[] strValues) {
+		Object[] pars = new Object[types.length];
+		for (int i = 0; i < strValues.length; i++) {
+			pars[i] = ObjectUtil.wrap(strValues[i], types[i]);
+		}
+		return pars;
+	}
 
+	@Override
+	protected Object getInstance(Method method) {
+		if (construction == null && !Util.isEmpty(expect.construct())) {
+			construction = new Construction(null);
+			construction.parameter = createParameterFromStringArr(expect.constructTypes(), expect.construct());
+			construction.instance = BeanClass.createInstance(source.getDeclaringClass(), parameter);
+			return construction.instance;
+		}
+		return super.getInstance(method);
+	}
+	
 	@Override
 	public Object getCompareOrigin() {
 		if (expect == null)

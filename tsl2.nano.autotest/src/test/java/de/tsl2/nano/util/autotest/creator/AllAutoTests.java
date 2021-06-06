@@ -15,7 +15,8 @@ import de.tsl2.nano.core.Main;
 @SuiteClasses({InitAllAutoTests.class, AutoFunctionTest.class, CurrentStatePreservationTest.class})
 public class AllAutoTests {
 	public static void init() {
-		System.setProperty("tsl2.functiontest.filter.exclude", ".*(ENVTestPreparation|getFileOutput).*");
+//		System.setProperty("tsl2nano.offline", "true");
+		System.setProperty("tsl2.functiontest.filter.exclude", ".*(ENVTestPreparation|getFileOutput|SystemUtil.executeRegisteredLinuxBrowser).*");
 		System.setProperty("tsl2.functiontest.filter", matchPackage(Main.class));
 	}
 }

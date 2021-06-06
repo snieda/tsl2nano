@@ -18,7 +18,6 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
-import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.ByteUtil;

@@ -112,7 +112,7 @@ public class ValueRandomizer {
 			return ObjectUtil.wrap(n, typeOf);
 		} catch (Exception e) {
 			if (checkMaxDepth(depth) && ObjectUtil.isInstanceable(typeOf)) {
-				return constructWithRandomParameters(typeOf, ++depth);
+				return constructWithRandomParameters(typeOf, ++depth).instance;
 			} else {
 				ManagedException.forward(e);
 				return null;
@@ -124,16 +124,17 @@ public class ValueRandomizer {
 		return depth < 50;
 	}
 
-	public static <V> V constructWithRandomParameters(Class<V> typeOf)  {
+	public static <V> Construction<V> constructWithRandomParameters(Class<V> typeOf)  {
 		return constructWithRandomParameters(typeOf, 0);
 	}
 	@SuppressWarnings({ "unchecked" })
-	static <V> V constructWithRandomParameters(Class<V> typeOf, int depth)  {
+	static <V> Construction<V> constructWithRandomParameters(Class<V> typeOf, int depth)  {
 		try {
 			Constructor<?> constructor = getBestConstructor(typeOf);
 			if (constructor == null)
 				throw new RuntimeException(typeOf + " is not constructable!");
-			return (V) constructor.newInstance(provideRandomizedObjects(depth, 1, constructor.getParameterTypes()));
+			Object[] parameters = provideRandomizedObjects(depth, 1, constructor.getParameterTypes());
+			return new Construction(constructor.newInstance(parameters), constructor, parameters);
 		} catch (Exception e) {
 			ManagedException.forward(e);
 			return null;

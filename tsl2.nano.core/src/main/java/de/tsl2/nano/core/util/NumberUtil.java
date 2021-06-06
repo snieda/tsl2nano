@@ -16,6 +16,7 @@ import java.text.Format;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Locale;
@@ -401,4 +402,12 @@ public class NumberUtil extends BitUtil {
     public static boolean hasMaxDeviation(Number first, Number second, Number deviation) {
         return second.doubleValue() - first.doubleValue() < deviation.doubleValue();
     }
+	public static ArrayList<Integer> numbers(int end) {
+		return numbers(0, end, 1);
+	}
+	public static ArrayList<Integer> numbers(int start, int end, int step) {
+		ArrayList<Integer> dupList = new ArrayList<>((end - start) / step);
+		for (int i = start; i < end; i+=step) dupList.add(i);
+		return dupList;
+	}
 }

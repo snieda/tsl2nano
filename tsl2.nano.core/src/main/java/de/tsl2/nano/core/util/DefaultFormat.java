@@ -88,7 +88,7 @@ public class DefaultFormat extends Format {
             result.append(StringUtil.toString(obj, 80));
         } else {
             //pure objects, representing there instance id --> use reflection
-            CompatibilityLayer cl = ENV.get(CompatibilityLayer.class);
+            CompatibilityLayer cl = ENV.isAvailable() ? ENV.get(CompatibilityLayer.class) : new CompatibilityLayer();
             if (!ObjectUtil.hasToString(obj) && cl.isAvailable("de.tsl2.nano.format.ToStringBuilder")) {
                 try {
                     Object runRegistered = cl.runRegistered("reflectionToString", obj);

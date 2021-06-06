@@ -13,6 +13,7 @@ import tsl2.nano.cursus.Consilium;
 @SuiteClasses({InitAllAutoTests.class, AutoFunctionTest.class, CurrentStatePreservationTest.class})
 public class AllAutoTests {
 	public static void init() {
+		System.setProperty("tsl2.functiontest.parallel", "false");
 		System.setProperty("tsl2.functiontest.filter", ".*" + Consilium.class.getPackage().getName() + ".*");
 	}
 }

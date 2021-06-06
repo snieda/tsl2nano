@@ -1,5 +1,6 @@
 package de.tsl2.nano.autotest.creator;
 
+import java.security.Permission;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -32,6 +33,7 @@ public class InitAllAutoTests {
 
 	@Parameters
 	public static Collection<?> parameters() {
+//		forbidSystemExit();
 		BeanClass.callStatic("de.tsl2.nano.util.autotest.creator.AllAutoTests", "init");
 		return Arrays.asList();
 	}
@@ -45,5 +47,28 @@ public class InitAllAutoTests {
 			buf.append(classes[i].getPackage().getName() + (i < classes.length - 1 ? "|" : ""));
 		}
 		return buf.append(").*").toString();
+	}
+
+	public static void forbidSystemExit() {
+		try {
+			System.setSecurityManager(new SecurityManager() {
+				@Override
+				public void checkPermission(Permission perm) {
+					//ALL PERMISSIONS! (on test)
+				}
+				@Override
+				public void checkPermission(Permission perm, Object context) {
+					//ALL PERMISSIONS! (on test)
+				}
+				@Override
+				public void checkExit(int status) {
+					StackTraceElement caller = Thread.currentThread().getStackTrace()[4];
+					if (!caller.toString().contains("surefire"))
+						throw new IllegalStateException("systemexit forbidden:" + status + "(" + caller + ")");
+				}
+			});
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }
