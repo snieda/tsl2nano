@@ -4,7 +4,7 @@ Thomas Schneider 04/2021
 
 ## Overview
 
-maven artifactid: tsl2.nano.autotest
+maven artifact: *net.sf.tsl2nano:tsl2.nano.autotest:2.4.7*
 
 This is a java unit test generation framework to do automated tests for you. If you don't want to know, how it works and only want to check, if it works for you, go to the last chapter *All together*
 
@@ -66,9 +66,11 @@ Two parametrized Unit Tests provide the real unit tests:
 
 ## Usage of Test Annotations
 
+First, you need a junit dependency on **junit:junit:4.12** or newer.
+
 The annotations are packed into the tsl2nano core jar. So, you need a maven dependency for *tsl2.nano.core*. The *AutoFunctionTest* is included in the package *tsl2.nano.autotest*. Please add a maven dependency on scope *test*.
 
-tsl.nano.core:
+*tsl.nano.core*:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	<dependency>
@@ -79,7 +81,7 @@ tsl.nano.core:
 	</dependency>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-the test framework:
+the test framework *tsl2.nano.autotest*:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	<dependency>
@@ -270,6 +272,7 @@ There are some parameters (system properties) you can specify. Here, you see the
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 AutoTestGenerator(PREFIX: tsl2.functiontest.) started with:
 	filename (pattern)     : target/autotest/generated/generated-autotests-
+	fast.classscan         : true
 	filter.test            : .*(Test|IT)
 	filter.exclude         : XXXXXXXXXX
 	testneverfail          : false
@@ -284,6 +287,7 @@ AutoTestGenerator(PREFIX: tsl2.functiontest.) started with:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * *filename*: path to generate the auto tests into. on duplication > 0, you will have more than one generated file (e.g.: generated-autotests-0 and generated-autotests-1)
+* *fast.classscan*: if true, no class re-scan is done. may find less matches than with re-scan, but is much faster (should be used on classloader with more than 1000 classes)
 * *filter.test*: filter for test classes (default: ".*(Test|IT)")
 * *filter.exclude*: additional excluding regex filter for methods, that should not be tested by this tests
 * *testneverfail*: (default: false) only to check the resulting test coverage - if true, no test of *AllAutoTests* will ever fail. Please dont publish that to your application!
@@ -390,7 +394,7 @@ public class InitAllAutoTests {
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-## Tipp: check the AutoGeneration while debugging with Standard Java Exception Breakpoints
+## Tip: check the AutoGeneration while debugging with Standard Java Exception Breakpoints
 
 The simplest way to use this framework is to use the *as is* unit tests by *CurrentStatePreservationTest*. But you can try to check for simple errors/exceptions on running the test in your IDE (like eclipse) in debug mode and activating standard java exception breakpoints.
 
@@ -400,14 +404,23 @@ Two files are written, to let you see, what was done:
 * *autotest/generated/autotest-generated-filtered.txt*   : lists all filtered function calls
 * *autotest/generated/autotest-generated-statistics.txt* : lists statistics about filtered and created expectation tests
 
-## All together
+## Problems and Solutions
+
+In different environment, there may be problems. We try to solve some of them:
+
+* **java.lang.ClassNotFoundException: org.junit.runner.manipulation.Filter**
+	* -> Did you store you file really in the src/test/java path (perhaps you put it into main?)
+	* -> Eclipse Problem. Add the junit library manually to your test classpath
+* **java.lang.ArrayStoreException: sun.reflect.annotation.TypeNotPresentExceptionProxy**
+	* -> Did you store you file really in the src/test/java path (perhaps you put it into main?)
+
+## All Together
 
 To enable all standard test features of this framework, do the following:
 
-* The annotations are packed into the tsl2nano core jar. Add a maven dependency for *tsl2.nano.core*. 
-* Add a maven dependency on scope *test*.
-* Optionally, to the steps of chapter *Usage of Test Annotations* to add manual annoations (@Expectation and @InverseFunction) to your methods.
-* create a java unit test class *AllAutoTests* in your test source directory and fill it with following code:
+* Add a maven dependency for *net.sf.tsl2nano:tsl2.nano.autotest:2.4.7* on scope *test*.
+* Optionally, do the steps of chapter *Usage of Test Annotations* to add manual annoations (@Expectation and @InverseFunction) to your methods.
+* create a java unit test class **de.tsl2.nano.util.autotest.creator.AllAutoTests** in your test source directory and fill it with following code:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package de.tsl2.nano.util.autotest.creator;
@@ -416,15 +429,20 @@ package de.tsl2.nano.util.autotest.creator;
 @SuiteClasses({InitAllAutoTests.class, AutoFunctionTest.class, CurrentStatePreservationTest.class})
 public class AllAutoTests {
 	public static void init() {
-		System.setProperty("tsl2.functiontest.filter", AnyClassToTest.class.getPackage().getName());
+		System.setProperty("tsl2.functiontest.filter", ".*" + AnyClassToTest.class.getPackage().getName() + ".*");
 	}
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* The class must be exactly : *de.tsl2.nano.util.autotest.creator.AllAutoTests*
+* The class must be exactly : *de.tsl2.nano.util.autotest.creator.AllAutoTests* inside your *src/test/java* folder
 * The first Suite class has to be *InitAllAutoTests.class* to start the init() method before all
 * The method must be exactly: *public static void init()*
 * Please replace 'AnyClassToTest' with your base class name
 * If you evaluate the package name in this manner, you are sure, the class 'AnyClassToTest' is loaded by the classloader and the classfinder will find the package.
 * If you have more than one package to be tested, use the convenience method *InitAllAutoTests.matchPackage(MyClass1, MyClass2, ...)*
+
+**NOTE**:
 This static class name and init method name are used as workaround to the problem that a junit suite on parameterized unit tests has no standard possibility to initialize the test suite before parametrizing all tests. So, we use the trick of the empty *InitAllAutoTests* calling *de.tsl2.nano.util.autotest.creator.AllAutoTests.init()* by reflection.
+
+** NOTE II **:
+If the test doesn't work, have a look in chapter *Problems and Solutions*

@@ -8,6 +8,7 @@
  */
 package de.tsl2.nano.core;
 
+import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Arrays;
@@ -16,6 +17,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.SupplierEx;
 import de.tsl2.nano.core.util.SupplierExVoid;
@@ -232,8 +234,21 @@ public class ManagedException extends RuntimeException {
     }
 
     public static String toString(Throwable ex) {
-    	return StringUtil.printToString(c->ex.printStackTrace(c));
+    	return StringUtil.printToString(c -> ex.printStackTrace(c));
     }
+
+    public static String toStringCause(Throwable ex) {
+    	return ex.toString() + " -> Cause: " + getRootCause(ex).toString() + " Here: " + findInStacktrace(getRootCause(ex), ".*" + Util.FRAMEWORK_PACKAGE + ".*"); 
+    }
+    
+	private static String findInStacktrace(Throwable ex, String regex) {
+		StackTraceElement[] stackTrace = ex.getStackTrace();
+		for (int i = 0; i < stackTrace.length; i++) {
+			if (stackTrace[i].toString().matches(regex))
+				return stackTrace[i].toString();
+		}
+		return "...no stacktrace line found for " + regex;
+	}
 
 	public static void handleError(String msg, Object...args) {
 		for (int i=0; i < args.length; i++) {
@@ -244,5 +259,12 @@ public class ManagedException extends RuntimeException {
     		throw new IllegalStateException(msg);
     	else
     		LOG.error(msg);
+	}
+	public static void writeError(Exception e, final String fileName) {
+		Util.trY(() -> {
+			PrintWriter s = new PrintWriter(FileUtil.userDirFile(fileName));
+			e.printStackTrace(s);
+			s.close();
+		});
 	}
 }

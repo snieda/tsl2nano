@@ -28,4 +28,8 @@ public @interface Expect {
 	String then();
 	/** if the method does not return a result, but changes the content of a given parameter, this is the index of that parameter used by then() */
 	int resultIndex() default -1;
+	/** if method is not static, this are the parameter types for the constructor */
+	Class[] constructTypes() default {};
+	/** if method is not static, this are the parameters for the constructor */
+	String[] construct() default {};
 }

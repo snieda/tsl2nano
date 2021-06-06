@@ -94,6 +94,7 @@ public class ClassFinder {
 			addClasses(ClassLoader.getSystemClassLoader(), classes);
 			while ((classLoader = addClasses(classLoader, classes)) != null)
 				;
+			System.out.println();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -145,7 +146,7 @@ public class ClassFinder {
 
 	private Collection<Class<?>> collectPackageClasses(ClassLoader cl, String pack, Set<Class<?>> classes) {
 		if (LOG.isDebugEnabled())
-			System.out.print("loading classes on " + pack + ": ");
+			System.out.print("\n" + pack + ": ");
 		int i = 0;
 		try {
 			Enumeration<URL> upackages = cl.getResources(pack.replace('.', '/'));
@@ -219,7 +220,13 @@ public class ClassFinder {
 		return fuzzyFind(filter, Class.class, -1, null);
 	}
 
-	// TODO: this is workaround with poor performance. extend the fuzzyfind() method to respect fuzzy or regex filter
+	/**
+	 * TODO: this is workaround with poor performance. extend the fuzzyfind() method to respect fuzzy or regex filter
+	 * <p/>
+	 * delegates to #fuzzyFind(String, Class, int, Class) and filters result with given regex
+	 * @return list of classes, methods or fields fulfilling given regex and optionally modifier 
+	 * and optionally having given annotation
+	 */
 	public <T> List<T> find(String regex, Class<T> resultType, int modifier,
 			Class<? extends Annotation> annotation) {
 		Map<Double, T> map = fuzzyFind(null, resultType, modifier, annotation);
@@ -232,6 +239,30 @@ public class ClassFinder {
 		System.out.println(result.size() + " OK");
 		return result;
 	}
+	
+	/** fast alternative for {@link #find(String, Class, int, Class)} to load methods only, without re-scanning loaded classes */
+	public List<Method> findMethods(String regex, int modifier,
+			Class<? extends Annotation> annotation) {
+		System.out.print("filtering " + classes.size() + " elements with '" + regex + "'...");
+		List<Method> result = new LinkedList<>();
+		classes.forEach(c -> result.addAll(matchingMethods(c, regex, modifier, annotation)));
+		System.out.println(result.size() + " OK");
+		return result;
+	}
+	private List<Method> matchingMethods(Class<?> cls, String regex, int modifier,
+			Class<? extends Annotation> annotation) {
+		Method[] methods = Modifier.isPublic(modifier) ? cls.getMethods() : cls.getDeclaredMethods();
+		List<Method> result = new LinkedList<>();
+		for (int i = 0; i < methods.length; i++) {
+			if ((modifier < 0 || methods[i].getModifiers() == modifier)
+					&& (annotation == null || methods[i].getAnnotation(annotation) != null)) {
+				if (methods[i].toString().matches(regex))
+					result.add(methods[i]);
+			}
+		}
+		return result;
+	}
+
 	/**
 	 * finds all classes/methods/fields of the given classloader fuzzy matching the
 	 * given filter, having the given modifiers (or modifiers is -1) and having the

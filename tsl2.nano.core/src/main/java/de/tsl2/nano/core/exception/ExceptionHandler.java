@@ -15,6 +15,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import de.tsl2.nano.core.ManagedException;
+
 /**
  * simple exception handler to be used by several threads.
  * 
@@ -71,5 +73,17 @@ public class ExceptionHandler implements UncaughtExceptionHandler {
 
     public boolean hasExceptions() {
         return exceptions.size() > 0;
+    }
+    
+    @Override
+    public String toString() {
+    	if (hasExceptions()) {
+    		StringBuilder buf = new StringBuilder();
+    		for (Throwable e : exceptions) {
+				buf.append(ManagedException.toStringCause(e) + "\n");
+			}
+    		return buf.toString();
+    	}
+    	return "No Exceptions. Everthing OK!";
     }
 }

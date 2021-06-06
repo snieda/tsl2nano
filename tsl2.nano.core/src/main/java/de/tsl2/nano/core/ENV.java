@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -37,7 +36,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
@@ -50,7 +48,6 @@ import de.tsl2.nano.core.classloader.NetworkClassLoader;
 //import de.tsl2.nano.collection.PersistableSingelton;
 //import de.tsl2.nano.collection.PersistentCache;
 import de.tsl2.nano.core.cls.BeanClass;
-import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.exception.ExceptionHandler;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
@@ -62,6 +59,7 @@ import de.tsl2.nano.core.serialize.XmlUtil;
 import de.tsl2.nano.core.serialize.YamlUtil;
 import de.tsl2.nano.core.update.Updater;
 import de.tsl2.nano.core.util.CLI;
+import de.tsl2.nano.core.util.CLI.Color;
 import de.tsl2.nano.core.util.DefaultFormat;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
@@ -70,7 +68,6 @@ import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.core.util.CLI.*;
 
 /**
  * Generic Application-Environment. Providing:
@@ -89,6 +86,8 @@ import de.tsl2.nano.core.util.CLI.*;
  * different service/singelton classes. The accessors are static while the internal instances are called through a
  * singelton.
  * <p/>
+ * NOTE: thread unsafe!
+ * <p/>
  * TODO: create a const generator EnvironmentConst to be embedded to all specialized application classes to be used to
  * get properties and services
  * 
@@ -104,6 +103,8 @@ public class ENV implements Serializable {
 
     public static final String PATH_TEMP = "temp/";
     private static ENV self;
+    private static ThreadLocal<ENV> selfThread = new ThreadLocal<ENV>();
+    
     @SuppressWarnings("rawtypes")
     @ElementMap(entry = "property", key = "name", attribute = true, inline = true, required = false, keyType = String.class, valueType = Object.class)
     private SortedMap properties;
@@ -139,7 +140,6 @@ public class ENV implements Serializable {
     static final String UNKNOWN_BUILD_INFORMATIONS = "<unknown build informations>";
 
     private ENV() {
-        self = this;
     }
 
     /**
@@ -198,24 +198,24 @@ public class ENV implements Serializable {
      * @return implementation of service
      */
     public static synchronized <T> T get(Class<T> service) {
-        Object s = services().get(service);
-        if (s == null) {
+        T serviceImpl = (T) services().get(service);
+        if (serviceImpl == null) {
             debug(self, "no service found for " + service);
             debug(self, "available services:\n" + StringUtil.toFormattedString(services(), 500, true));
             String path = getConfigPath(service) + getFileExtension();
             if (new File(path).canRead()) {
                 self().info("loading service from " + path);
-                self().addService(service, self().get(XmlUtil.class).loadXml(path, service));
+                serviceImpl = self().addService(service, self().get(XmlUtil.class).loadXml(path, service));
             } else if (!service.isInterface()
                 && BeanClass.hasDefaultConstructor(service, !Util.isFrameworkClass(service))) {
                 self().info("trying to create service " + service + " through default construction");
-                T newService = self().addService(BeanClass.createInstance(service));
-                if (newService instanceof Serializable) {
-                    get(XmlUtil.class).saveXml(path, newService);
+                serviceImpl = self().addService(BeanClass.createInstance(service));
+                if (serviceImpl instanceof Serializable) {
+                    get(XmlUtil.class).saveXml(path, serviceImpl);
                 }
             }
         }
-        return (T) services().get(service);
+        return serviceImpl;
     }
 
     /**
@@ -228,6 +228,8 @@ public class ENV implements Serializable {
     }
 
     protected final static ENV self() {
+//        if (selfThread.get() != null)
+//        		return selfThread.get();
         if (self == null) {
             create(System.getProperty(KEY_CONFIG_PATH, System.getProperty("user.dir").replace('\\', '/')));
         }
@@ -287,7 +289,7 @@ public class ENV implements Serializable {
             configFile = getConfigFile(dir, getFileExtension());
 //          LOG.warn("no environment.properties available");
         }
-
+//        selfThread.set(self);
         self.services = createServiceMap();
         addService(layer);
         addService(ClassLoader.class, Util.getContextClassLoader());
@@ -615,7 +617,7 @@ public class ENV implements Serializable {
      * @return formatted object
      */
     public static String format(Object obj) {
-        return ((Format) services().getOrDefault(Format.class, new DefaultFormat())).format(obj);
+        return self != null && self.services != null ? ((Format) services().getOrDefault(Format.class, new DefaultFormat())).format(obj) : new DefaultFormat().format(obj);
     }
 
     /**

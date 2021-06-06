@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 
+import de.tsl2.nano.autotest.Construction;
 import de.tsl2.nano.autotest.ValueRandomizer;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -17,7 +18,7 @@ public class AFunctionCaller implements Runnable {
 	protected Object result;
 	protected Object[] parameter;
 	protected int cloneIndex = 0;
-	protected transient Object instance;
+	protected Construction construction;
 	protected Method source;
 	protected transient Status status = NEW;
 
@@ -91,18 +92,19 @@ public class AFunctionCaller implements Runnable {
 			return null;
 		try {
 			Class<?> cls = method.getDeclaringClass();
-			if (instance != null && cls.isAssignableFrom(instance.getClass()))
-				return instance;
+			if (construction != null && construction.instance != null && cls.isAssignableFrom(construction.instance.getClass()))
+				return construction.instance;
 			else if (BeanClass.hasDefaultConstructor(cls))
-				instance = BeanClass.createInstance(cls);
-			else
-				instance = ValueRandomizer.constructWithRandomParameters(cls);
+				construction = new Construction(BeanClass.createInstance(cls));
+			else {
+				construction = ValueRandomizer.constructWithRandomParameters(cls);
+			}
 		} catch(Throwable ex) {
 			status = new Status(StatusTyp.INSTANCE_ERROR, ex.toString(), ex);
 			log(" -> " + status + "\n");
 			ManagedException.forward(ex);
 		}
-		return instance;
+		return construction.instance;
 	}
 
 	protected Object getResult() {
@@ -119,6 +121,10 @@ public class AFunctionCaller implements Runnable {
 	@Override
 	public String toString() {
 		return cloneIndex + ": " + source.getDeclaringClass().getSimpleName() + "." + source.getName() + " " + parametersAsString() + " -> " + status;
+	}
+
+	public Construction getConstruction() {
+		return construction;
 	}
 }
 

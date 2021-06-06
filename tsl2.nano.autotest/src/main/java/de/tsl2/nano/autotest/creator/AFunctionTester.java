@@ -17,6 +17,7 @@ import java.util.Set;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.ClassFinder;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.Util;
 
@@ -43,13 +44,20 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 	}
 
 	public static Collection<? extends AFunctionTester> createRunners(Class<? extends AFunctionTester> testerType, int duplication, String filter) {
-		log("collecting tests for " + testerType.getSimpleName() + ":\n");
-		Class<? extends Annotation> type = testerType.getAnnotation(FunctionType.class).value();
-		List<Method> revFcts = ClassFinder.self().find(filter, Method.class, -1, type);
-		Set<AFunctionTester> runners = new LinkedHashSet<>(revFcts.size());
-		revFcts.forEach(m -> runners.add(createRunner(testerType, m)));
-		duplicate(duplication, runners);
-		return runners;
+		try {
+			log("collecting tests for " + testerType.getSimpleName() + ":\n");
+			Class<? extends Annotation> type = testerType.getAnnotation(FunctionType.class).value();
+			List<Method> revFcts = ClassFinder.self().find(filter, Method.class, -1, type);
+			Set<AFunctionTester> runners = new LinkedHashSet<>(revFcts.size());
+			revFcts.forEach(m -> runners.add(createRunner(testerType, m)));
+			duplicate(duplication, runners);
+			return runners;
+		} catch (Exception e) {
+			ConcurrentUtil.sleep(3000);
+			e.printStackTrace();
+			ManagedException.forward(e);
+			return null;
+		}
 	}
 
 	protected static AFunctionTester<?> createRunner(Class<? extends AFunctionTester> testerType, Method m) {
