@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.sf.tsl2nano</groupId>
 	<artifactId>tsl2.nano.h5-package</artifactId>
-	<version>2.4.7</version>
+	<version>2.4.8-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>TSL2 Html5 Application Framework</name>
 	<description>NanoH5 (or FullRelation) is an UI independent gui implementation framework providing a model driven design (MDA). It is bound to the app framework 'tsl2.nano.commons' and the jpa-service framework 'tsl2.nano.serviceaccess'. It is possible to build a complete html5 application through a given class- or database-model.
@@ -182,7 +182,7 @@
 							<!-- <parallel>true</parallel> -->
 							<!-- <skipTests>true</skipTests>  -->
 							<!-- <workingDirectory>FORK_DIRECTORY_${surefire.forkNumber}</workingDirectory> -->
-						</configuration>
+							</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -193,8 +193,8 @@
 				<configuration>
 					<!-- <skipITs>true</skipITs> -->
 					<forkCount>${forkCount}</forkCount>
-					<forkedProcessExitTimeoutInSeconds>900</forkedProcessExitTimeoutInSeconds>
-					<forkedProcessTimeoutInSeconds>900</forkedProcessTimeoutInSeconds>
+					<forkedProcessExitTimeoutInSeconds>600</forkedProcessExitTimeoutInSeconds>
+					<forkedProcessTimeoutInSeconds>600</forkedProcessTimeoutInSeconds>
 				</configuration>
 				<executions>
 					<execution>
