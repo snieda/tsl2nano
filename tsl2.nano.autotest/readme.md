@@ -296,6 +296,7 @@ AutoTestGenerator(PREFIX: tsl2.functiontest.) started with:
 * *filter*: (default: this framework package path) fuzzy class+method filter. NOTE: it's fuzzy finding, means, all 'similar' findings will be included!
 * *modifier*: (default: -1) java method mofifier bitfield like *public* (=1) *static* (=8) etc. Please have a look at the java class *java.lang.reflect.Modifier* to see all possibilities 
 * *filter.unsuccessful*: (default: true): if true, a pre-check is done, calling the test for a failing result. If the test will fail, it will be filtered from the real test.
+* *filter.voidreturn*: (default: false) whether to filter methods having a return type of *void*. without an output like the returned result, an expectation can only tested against having a specific exception or not.
 * *filter.complextypes*: (default: false) all method parameter types and the result type will be checked, if they are standard data types (provided by jdk) and single value types.(nothing like arrays, collections and maps)
 * *filter.failing*: (default:false) whether it is allowed to have a method call , throwing an exception as expected result.
 * *filter.nullresults*: (default: false) whether it is allowed to have a method call, returning *null* as result.
@@ -413,6 +414,12 @@ In different environment, there may be problems. We try to solve some of them:
 	* -> Eclipse Problem. Add the junit library manually to your test classpath
 * **java.lang.ArrayStoreException: sun.reflect.annotation.TypeNotPresentExceptionProxy**
 	* -> Did you store you file really in the src/test/java path (perhaps you put it into main?)
+* **No Classes were found**
+	* -> Please set the filter in the manner *".*" + AnyClassToTest.class.getPackage().getName() + ".*"* - so your *AnyClassToTest* is loaded with all imports directly on start
+* **I cannot see exception stacktraces**
+	* -> start your jvm with parameter -XX:-OmitStackTraceInFastThrow
+* **AllAutoTests hangs until an timeout**
+	* use JVisualVM to open the hanging process in FeatureTab **Sampler**. Hit **CPU Samples** and open the callstack tree completely. Perhaps you can see an endless loop in your code under test.
 
 ## All Together
 

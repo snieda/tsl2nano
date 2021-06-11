@@ -381,6 +381,10 @@ public class ObjectUtil extends ByteUtil {
 						return FormatUtil.parse(wrapperType, (String)value);
 					else if (String.class.isAssignableFrom(wrapperType) && isSimpleType(value.getClass()))
 						return (T) FormatUtil.getDefaultFormat(value, true);
+					else if (wrapperType.isInterface() && value instanceof Map)
+						return (T) AdapterProxy.create(wrapperType, (Map)value);
+					else if (wrapperType.isInterface() && value instanceof String)
+						return (T) AdapterProxy.create(wrapperType, MapUtil.fromJSON((String)value));
                     else if (isInstanceable(wrapperType)/* && BeanClass.hasConstructor(wrapperType, value.getClass())*/)
 						try {
 							return BeanClass.createInstance(wrapperType, value);

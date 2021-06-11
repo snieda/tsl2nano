@@ -2,21 +2,18 @@ package de.tsl2.nano.autotest.creator;
 
 import static de.tsl2.nano.autotest.creator.AFunctionCaller.def;
 import static de.tsl2.nano.autotest.creator.AFunctionTester.PREF_PROPS;
-import static java.nio.file.StandardOpenOption.*;
+import static java.nio.file.StandardOpenOption.APPEND;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.WRITE;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
-import java.nio.file.OpenOption;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -25,16 +22,15 @@ import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Stream;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.ClassFinder;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.exception.ExceptionHandler;
+import de.tsl2.nano.core.execution.ProgressBar;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.DateUtil;
@@ -74,8 +70,11 @@ public class AutoTestGenerator {
 	static int filter_unsuccessful = 0;
 	static int filter_nullresults = 0;
 	static int filter_complextypes = 0;
+	private static Statistics statistics = new Statistics();
+	
 	private static BufferedWriter filteredFunctionWriter;
 	private static ExceptionHandler uncaughtExceptionHandler = new ExceptionHandler();
+	private static ProgressBar progress;
 	
 	public static void main(String[] args) {
 		List<Method> methods = ClassFinder.self().find(def("filter", "") , Method.class, def("modifier", -1), null);
@@ -97,6 +96,8 @@ public class AutoTestGenerator {
 				+ "\n\tfilter.test            : " + def("filter.test", ".*(Test|IT)")
 				+ "\n\tfilter.exclude         : " + def("filter.exclude", "XXXXXXXX")
 				+ "\n\tfilter.unsuccessful    : " + def("filter.unsuccessful", true)
+				+ "\n\tfilter.voidparameter   : " + def("filter.voidparameter", false)
+				+ "\n\tfilter.voidreturn      : " + def("filter.voidreturn", false)
 				+ "\n\tfilter.complextypes    : " + def("filter.complextypes", false)
 				+ "\n\tfilter.failing         : " + def("filter.failing", false)
 				+ "\n\tfilter.nullresults     : " + def("filter.nullresults", false);
@@ -105,11 +106,12 @@ public class AutoTestGenerator {
 	}
 	@SuppressWarnings("rawtypes")
 	public static Collection<? extends AFunctionTester> createExpectationTesters() {
+		int duplication = def("duplication", 10);
+		Collection<AFunctionTester> testers = Collections.synchronizedList(new LinkedList<>());
 		try {
 			printStartParameters();
 			FileUtil.delete(fileName + "initialization-error.txt");
 			prepareFilteredWriter();
-			int duplication = def("duplication", 10);
 			List<Method> methods;
 			if (def("fast.classscan", true))
 				methods = ClassFinder.self().findMethods(def("filter", ""), def("modifier", -1), null);
@@ -117,8 +119,7 @@ public class AutoTestGenerator {
 				methods = ClassFinder.self().find(def("filter", ""), Method.class, def("modifier", -1), null);
 			filterExcludes(methods);
 			filterTestClasses(methods);
-			
-			Collection<AFunctionTester> testers = Collections.synchronizedList(new LinkedList<>());
+			progress = new ProgressBar(methods.size() * duplication);
 			ArrayList<Integer> dupList = NumberUtil.numbers(duplication);
 			AtomicBoolean fileexists = new AtomicBoolean(true);
 			Util.stream(dupList, def("parallel", false)).forEach( i -> 
@@ -133,7 +134,6 @@ public class AutoTestGenerator {
 			});
 			if (def("filter.unsuccessful", true))
 				load_unsuccessful = FunctionCheck.filterFailingTest(testers);
-			printStatistics(duplication +1, testers);
 			return testers;
 		} catch (Exception e) {
 			ManagedException.writeError(e, fileName + "initialization-error.txt");
@@ -143,9 +143,12 @@ public class AutoTestGenerator {
 			ManagedException.forward(e);
 			return null;
 		} finally {
+			printStatistics(duplication +1, testers, statistics.getInfo(22));
 			Util.trY(() -> filteredFunctionWriter.close());
-//			if (uncaughtExceptionHandler.hasExceptions())
+			if (uncaughtExceptionHandler.hasExceptions()) {
+				FileUtil.writeBytes(uncaughtExceptionHandler.toString().getBytes(), fileName + "uncaught-exceptions.txt", false);
 //				throw new IllegalStateException(uncaughtExceptionHandler.toString());
+			}
 		}
 	}
 	private static void prepareFilteredWriter() throws IOException {
@@ -168,14 +171,14 @@ public class AutoTestGenerator {
 			count = 0;
 			methods_loaded = methods.size();
 			String p = "\n" + StringUtil.fixString(79, '~') + "\n";
-			AFunctionCaller.log(p + "calling " + methods.size() + " methods to create expectations -> " + getFile(iteration) + p);
+			log(p + "calling " + methods.size() + " methods to create expectations -> " + getFile(iteration) + p);
 	
 			Util.stream(methods, def("parallel", false)).forEach(m -> writeExpectation(new AFunctionCaller(iteration, m), writer));
 			
 			ConcurrentUtil.sleep(200);
 			if (count > 0)
-				AFunctionCaller.log(new String(FileUtil.getFileBytes(getFile(iteration).getPath(), null)));
-			AFunctionCaller.log(p + count + " expectations written into '" + getFile(iteration) + p);
+				log(new String(FileUtil.getFileBytes(getFile(iteration).getPath(), null)));
+			log(p + count + " expectations written into '" + getFile(iteration) + p);
 		} finally {
 			FileUtil.close(writer, true);
 		}
@@ -187,24 +190,31 @@ public class AutoTestGenerator {
 
 	private static void writeExpectation(AFunctionCaller f, BufferedWriter writer) {
 		Thread.currentThread().setUncaughtExceptionHandler(uncaughtExceptionHandler );
+		statistics.add(f);
+		log("writeExpectation", true);
 		String then = null;
 		try {
-			if ((f.source.getParameterCount() == 0 && Modifier.isStatic(f.source.getModifiers())) || void.class.isAssignableFrom(f.source.getReturnType())
-					|| (def("filter.complextypes", false) && !FunctionCheck.hasSimpleTypes(f))) {
+			if (def("filter.voidparameter", false) && f.source.getParameterCount() == 0 && Modifier.isStatic(f.source.getModifiers()))
+				f.status = Status.FUNC_WITHOUT_INPUT;
+			else if (def("filter.voidreturn", false) && void.class.isAssignableFrom(f.source.getReturnType()))
+				f.status = Status.FUNC_WITHOUT_OUTPUT;
+			else if (def("filter.complextypes", false) && !FunctionCheck.hasSimpleTypes(f))
+				f.status = Status.FUNC_COMPLEX_INPUT;
+		
+			if (f.status.isRefused()) {
 				writeFilteredFunctionCall(f);
 				filter_complextypes++;
 				return;
 			}
 			f.run();
 		} catch (Exception | AssertionError e) {
-			if (f.status.in(StatusTyp.NEW, StatusTyp.INSTANCE_ERROR, StatusTyp.PARAMETER_ERROR, StatusTyp.PARAMETER_UNDEFINED) 
-					|| def("filter.failing", false)) {
+			if (f.status.in(StatusTyp.NEW) || f.status.isError() || def("filter.failing", false)) {
 				writeFilteredFunctionCall(f);
 				filter_errors++;
 				return;
 			}
 			fails++;
-			then = "fail(" + e.getClass().getName() + "(" + e.getMessage() + "))";
+			then = "fail(" + e.getClass().getName() + "(" + e.getMessage().replace('\n', ' ') + "))";
 		}
 		if (then == null) {
 			if (f.getResult() == null) {
@@ -223,7 +233,14 @@ public class AutoTestGenerator {
 			return;
 		}
 		String expect = ExpectationCreator.createExpectationString(f, then);
-		if (def("filter.unsuccessful", true) && !FunctionCheck.checkTestSuccessful(f, expect)) {
+		if (expect == null) {
+			writeFilteredFunctionCall(f);
+			filter_typeconversions++;
+			return;
+		}
+		Status testStatus;
+		if (def("filter.unsuccessful", true) && (testStatus = FunctionCheck.checkTestSuccessful(f, expect)) != null) {
+			f.status = testStatus;
 			writeFilteredFunctionCall(expect);
 			filter_unsuccessful++;
 			return;
@@ -234,7 +251,7 @@ public class AutoTestGenerator {
 	}
 
 	private static void writeFilteredFunctionCall(AFunctionCaller f) {
-		writeFilteredFunctionCall(f.toString());
+		writeFilteredFunctionCall(f.toString() + "\n");
 	}
 	private static void writeFilteredFunctionCall(String call) {
 		Util.trY(() -> filteredFunctionWriter.append(call));
@@ -264,7 +281,7 @@ public class AutoTestGenerator {
 						load_method_error++;
 				} else {
 					load_method_error++;
-					AFunctionCaller.log("ERROR: method-format for " + exp + " -> " + l + "\n");
+					log("ERROR: method-format for " + exp + " -> " + l + "\n");
 				}
 				exp = null;
 			}
@@ -272,7 +289,16 @@ public class AutoTestGenerator {
 		return expTesters;
 	}
 
-	private static void printStatistics(int iterations, Collection<AFunctionTester> testers) {
+	private static void log(Object obj) {
+		log(obj, false);
+	}
+	private static void log(Object obj, boolean increase) {
+		if (increase)
+			System.out.println(obj);
+		else
+			progress.increase(obj.toString());
+	}
+	private static void printStatistics(int iterations, Collection<AFunctionTester> testers, String groupByState) {
 		String p = "\n" + StringUtil.fixString(79, '=') + "\n";
 		String s = AutoTestGenerator.class.getSimpleName() + " created " + count + " expectations in file pattern: '" + fileName + "...'"
 				+ "\n\tend time              : " + DateUtil.getFormattedDateTime(new Date())
@@ -289,9 +315,26 @@ public class AutoTestGenerator {
 				+ "\n\tfiltered unsuccessful : " + filter_unsuccessful
 				+ "\n\tload errors           : " + load_method_error
 				+ "\n\tloaded unsuccessful   : " + load_unsuccessful
-				+ "\n\ttotally loaded        : " + testers.size();
+				+ "\n\ttotally loaded        : " + testers.size()
+				+ groupByState;
 		AFunctionTester.log(p + s +p);
 		FileUtil.writeBytes((p + s + p).getBytes(), fileName + "statistics.txt", true);
+	}
+}
+
+class Statistics {
+	Collection<AFunctionCaller> caller = Collections.synchronizedCollection(new LinkedList<>());
+	public void add(AFunctionCaller fc) { caller.add(fc);}
+	public String getInfo(int keyWidth) {
+		int[] count = new int[StatusTyp.values().length];
+		caller.forEach(f -> ++count[f.status.typ.ordinal()]);
+		
+		final StringBuilder buf = new StringBuilder("\nFUNCTIONS GROUPED BY STATE:");
+		for (int i = 0; i < count.length; i++) {
+			buf.append("\n\t" + StringUtil.fixString(StatusTyp.values()[i], keyWidth) + ": " + count[i]);
+		}
+		buf.append("\n\t" + StringUtil.fixString("<<< TOTALLY >>>", keyWidth) + ": " + caller.size());
+		return buf.toString();
 	}
 }
 
@@ -302,30 +345,37 @@ class ExpectationCreator {
 	private static final String PREF_CONSTRUCT_TYPES = "constructTypes = \"";
 	
 	static String createExpectationString(AFunctionCaller f, String then) {
-		String expect = "\n@" + Expectations.class.getSimpleName() + "({@" + Expect.class.getSimpleName() 
-				+ "( when = " + Util.toJson(f.getParameter()) 
-				+ " then = \"" + (then != null || f.getResult() == null ? then : (ObjectUtil.isSingleValueType(f.getResult().getClass()) ? FormatUtil.format(f.getResult()) : Util.toJson(f.getResult())))
-				+ (f.construction != null && f.construction.parameter != null ? 
-						" constructTypes = " + Util.toJson(f.getConstruction().constructor.getParameterTypes())
-						+ " construct = " + Util.toJson(f.getConstruction().parameter) : "") 
-				+ "\"})\n"
-				+ f.source + "\n\n";
-		expect = expect.replace("]}", "}");
-		return expect;
+		try {
+			if ((then == null || then.equals("null")) && void.class.isAssignableFrom(f.source.getReturnType())) {
+				if (f.getParameter().length > 0 && f.getParameter()[0] != null)
+					then = asString(f.getParameter()[0]); // see ExpectationTester.getResultIndex()
+			}
+			then = (then != null || f.getResult() == null ? then : asString(f.getResult()));
+			String expect = "\n@" + Expectations.class.getSimpleName() + "({@" + Expect.class.getSimpleName() 
+					+ "( when = " + Util.toJson(f.getParameter()) 
+					+ " then = \"" + then
+					+ (f.construction != null && f.construction.parameter != null ? 
+							" constructTypes = " + Util.toJson(f.getConstruction().constructor.getParameterTypes())
+							+ " construct = " + Util.toJson(f.getConstruction().parameter) : "") 
+					+ "\"})\n"
+					+ f.source + "\n\n";
+			expect = expect.replace("]}", "}");
+			return expect;
+		} catch (Exception e) {
+			f.status = new Status(StatusTyp.STORE_ERROR, null, e);
+			return null;
+		}
 	}
 
-	private static Class[] getTypes(Object[] construct) {
-		Class[] cs = new Class[construct.length];
-		for (int i = 0; i < construct.length; i++) {
-			cs[i] = construct[i].getClass();
-		}
-		return cs;
+	private static String asString(Object obj) {
+		return ObjectUtil.isSingleValueType(obj.getClass()) ? FormatUtil.format(obj) : Util.toJson(obj);
 	}
 
 	static Expectations createExpectationFromLine(String l) {
 		String when[], then, construct[];
 		when = extractArray(l, PREF_WHEN);
 		then = StringUtil.substring(l, PREF_THEN, "\"", 0, true);
+		then = then != null && then.startsWith("{") ? StringUtil.substring(l, PREF_THEN, "}\"", 0, true) : then;
 		Class[] constructTypes = loadClasses(extractArray(l, PREF_CONSTRUCT_TYPES));
 		construct = extractArray(l, PREF_CONSTRUCT);
 		return ExpectationCreator.createExpectation(when, then, constructTypes, construct);
@@ -361,7 +411,7 @@ class ExpectationCreator {
 		String clsName = StringUtil.substring(name, null, "." + methodName);
 		String pars = StringUtil.substring(m, "(", ")");
 		try {
-			return BeanClass.load(clsName).getMethod(methodName, createParameterTypes(pars.split("[,]")));
+			return BeanClass.load(clsName).getDeclaredMethod(methodName, Util.isEmpty(pars) ? new Class[0] : createParameterTypes(pars.split("[,]")));
 		} catch (Exception e) {
 			AFunctionTester.log(e.toString() + "\n");
 			return null;
@@ -383,14 +433,15 @@ class ExpectationCreator {
 }
 
 class FunctionCheck {
-	static boolean checkTestSuccessful(AFunctionCaller t, String expect) {
+	static Status checkTestSuccessful(AFunctionCaller t, String expect) {
+		ExpectationFunctionTester tester = null;
 		try {
-			ExpectationFunctionTester tester = new ExpectationFunctionTester(t.source, ExpectationCreator.createExpectationFromLine(expect));
+			tester = new ExpectationFunctionTester(t.source, ExpectationCreator.createExpectationFromLine(expect));
 			tester.testMe();
 			tester.testMe(); //do it twice, sometimes a value changes the first time. would be better to do the initial run() twice!
-			return true;
+			return null;
 		} catch (Exception | AssertionError e) {
-			return false;
+			return tester != null ? tester.status : new Status(StatusTyp.TEST_FAILED, null, e);
 		}
 	}
 

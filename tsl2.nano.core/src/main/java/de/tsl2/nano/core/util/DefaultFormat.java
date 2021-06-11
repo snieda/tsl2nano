@@ -67,6 +67,8 @@ public class DefaultFormat extends Format {
             } else {
                 result.append(MessageFormat.format("{0}", new Object[] { obj }));
             }
+        } else if (Proxy.isProxyClass(obj.getClass()) && Proxy.getInvocationHandler(obj) instanceof AdapterProxy) {
+        	result.append(obj);
         } else if (Proxy.isProxyClass(obj.getClass())) {
             result.append(obj.getClass().getSimpleName());
         } else if (obj instanceof Collection) {

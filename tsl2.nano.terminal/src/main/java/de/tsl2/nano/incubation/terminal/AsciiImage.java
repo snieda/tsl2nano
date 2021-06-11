@@ -80,7 +80,7 @@ public class AsciiImage {
      * delegates to {@link #convertToAscii(String)} creating an own printwriter
      */
     public PrintWriter convertToAscii(String imgName) throws Exception {
-        return convertToAscii(imgName, new PrintWriter(new FileWriter(FileUtil.getUniqueFileName(imgName) + ".txt",
+        return convertToAscii(imgName, new PrintWriter(new FileWriter(FileUtil.userDirFile(FileUtil.getUniqueFileName(imgName) + ".txt"),
             true)), -1, 25);
     }
 

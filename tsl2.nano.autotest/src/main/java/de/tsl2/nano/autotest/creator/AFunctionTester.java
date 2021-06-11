@@ -155,7 +155,7 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 		if (getExpectFail() != null) {
 			if (error == null)
 				fail("test should fail with " + getExpectFail() + " but has result: " + getResult());
-			else if (!getExpectFail().toString().contains(error.toString().substring(0, Math.min(200, error.toString().length()))))
+			else if (!getExpectFail().toString().contains(error.toString().replace('\n', ' ').substring(0, Math.min(200, error.toString().length()))))
 				fail("test should fail with " + getExpectFail() + " but failed with: " + error);
 			return true;
 		}

@@ -42,7 +42,7 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 			}
 			expect = expectations[annotated ? cloneIndex : 0];
 			try {
-				if (Util.isEmpty(expect.when())) {
+				if (!Util.isEmpty(expect.whenPar())) {
 					int i = expect.parIndex();
 					if (i < 0) {
 						status = new Status(StatusTyp.PARAMETER_UNDEFINED, "expect.when() == null && expect.parIndex < 0 not allowed!", null);
@@ -58,13 +58,13 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 				parameter = null;
 				return null;
 			}
-			status = INITIALIZED;
+			status = Status.INITIALIZED;
 		}
 		return parameter;
 	}
 	private Object[] createParameterFromStringArr(Class[] types, String[] strValues) {
 		Object[] pars = new Object[types.length];
-		for (int i = 0; i < strValues.length; i++) {
+		for (int i = 0; i < types.length; i++) {
 			pars[i] = ObjectUtil.wrap(strValues[i], types[i]);
 		}
 		return pars;
@@ -85,9 +85,9 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 	public Object getCompareOrigin() {
 		if (expect == null)
 			return NOT_DEFINED;
-		Object then = expect == null || expect.then() == null || expect.then().equals("null") ? null : expect.then();
-		return then != null && getCompareResult() != null
-				? ObjectUtil.wrap(expect.then(), getCompareResult().getClass()) 
+		Object then = expect.then() == null || expect.then().equals("null") ? null : expect.then();
+		return then != null
+				? ObjectUtil.wrap(then, (Class)(getResultIndex() < 0 ? source.getReturnType() : source.getParameterTypes()[getResultIndex()])) 
 				: null;
 	}
 
@@ -125,7 +125,7 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 			return;
 		}
 		result = run(source, parameter);
-		status = result != null ? OK : NULL_RESULT;
+		status = result != null ? Status.OK : Status.NULL_RESULT;
 	}
 	@Override
 	public int hashCode() {

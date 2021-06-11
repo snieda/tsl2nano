@@ -161,7 +161,7 @@ public class StringUtil {
                 from = "";//-->length = 0
                 i = start;
             }
-            int j = data.indexOf(to, i + from.length() + 1);
+            int j = data.indexOf(to, i + (from.length() > 0 ? from.length() : 1));
             if (j < 0) {
                 if (constrain) {
                     return null;
