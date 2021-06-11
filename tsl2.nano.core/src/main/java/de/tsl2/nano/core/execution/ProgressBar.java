@@ -80,11 +80,13 @@ public class ProgressBar {
 	 * </pre>
 	 */
 	public void print(String comment, Object... args) {
+		print(++count, comment, args);
+	}
+	public void print(int count, String comment, Object... args) {
 		String profMsg, a, b, c;
 		int i, mx, lpref = 0, p, l, x;
 		char bar, cr;
 
-		count += 1;
 		if (((count - 1) % step) != 0)
 			return;
 		if (profile) {

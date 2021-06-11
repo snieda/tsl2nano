@@ -20,12 +20,7 @@ public class AFunctionCaller implements Runnable {
 	protected int cloneIndex = 0;
 	protected Construction construction;
 	protected Method source;
-	protected transient Status status = NEW;
-
-	static final Status NEW = new Status(StatusTyp.NEW, null, null);
-	static final Status INITIALIZED = new Status(StatusTyp.INITIALIZED, null, null);
-	static final Status OK = new Status(StatusTyp.OK, null, null);
-	static final Status NULL_RESULT = new Status(StatusTyp.NULL_RESULT, null, null);
+	protected transient Status status = Status.NEW;
 
 	AFunctionCaller(Method source) {
 		this(0, source);
@@ -58,7 +53,11 @@ public class AFunctionCaller implements Runnable {
 			return Arrays.toString(getParameter());
 		} catch (Exception e) {
 			status = new Status(StatusTyp.PARAMETER_ERROR, e.toString(), e);
-			return Arrays.toString(parameter);
+			try {
+				return Arrays.toString(parameter);
+			} catch (Exception e1) {
+				return "UNRESOLVABLE";
+			}
 		}
 	}
 
@@ -69,7 +68,7 @@ public class AFunctionCaller implements Runnable {
 	@Override
 	public void run() {
 		run(source, getParameter());
-		status = result != null ? OK : NULL_RESULT;
+		status = result != null ? Status.OK : Status.NULL_RESULT;
 	}
 	
 	protected Object run(Method method, Object... args) {
@@ -77,7 +76,7 @@ public class AFunctionCaller implements Runnable {
 		final Object instance = getInstance(method);
 		try {
 			result = method.invoke(instance, args);
-			status = OK;
+			status = Status.OK;
 			return result;
 		} catch (Throwable e) {
 			status = new Status(StatusTyp.EXECUTION_ERROR, e.toString(), e);
@@ -128,13 +127,29 @@ public class AFunctionCaller implements Runnable {
 	}
 }
 
-enum StatusTyp {NEW, PARAMETER_UNDEFINED, PARAMETER_ERROR, INITIALIZED, INSTANCE_ERROR
-	, NULL_RESULT, EXECUTION_ERROR, OK, TEST_FAILED, TESTED}
+enum StatusTyp {
+	NEW(0), FUNC_WITHOUT_INTPUT(1), FUNC_WITHOUT_OUTPUT(1), FUNC_COMPLEX_INPUT(1)
+	, PARAMETER_UNDEFINED(-1), PARAMETER_ERROR(-1), INITIALIZED(2), INSTANCE_ERROR(-1)
+	, NULL_RESULT(1), EXECUTION_ERROR(-1), OK(2), STORE_ERROR(-1), TEST_FAILED(-3), TESTED(4);
+	int level; //to categorize a state
+	StatusTyp(int level) {this.level = level;};
+}
 class Status {
 	StatusTyp typ;
 	String msg;
 	Throwable err;
 	
+	static final Status NEW = new Status(StatusTyp.NEW);
+	static final Status INITIALIZED = new Status(StatusTyp.INITIALIZED);
+	static final Status OK = new Status(StatusTyp.OK);
+	static final Status NULL_RESULT = new Status(StatusTyp.NULL_RESULT);
+	static final Status FUNC_WITHOUT_INPUT = new Status(StatusTyp.FUNC_WITHOUT_INTPUT);
+	static final Status FUNC_COMPLEX_INPUT = new Status(StatusTyp.FUNC_COMPLEX_INPUT);
+	static final Status FUNC_WITHOUT_OUTPUT = new Status(StatusTyp.FUNC_WITHOUT_OUTPUT);
+
+	public Status(StatusTyp typ) {
+		this(typ, null, null);
+	}
 	Status(StatusTyp typ, String msg, Throwable err) {
 		this.typ = typ;
 		this.msg = msg;
@@ -142,6 +157,14 @@ class Status {
 	}
 	public boolean in(StatusTyp... types) {
 		return Util.in(typ, types);
+	}
+
+	public boolean isError() {
+		return typ.level < 0;
+	}
+	
+	public boolean isRefused() {
+		return typ.level == 1;
 	}
 	
 	@Override

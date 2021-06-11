@@ -238,7 +238,7 @@ public class ManagedException extends RuntimeException {
     }
 
     public static String toStringCause(Throwable ex) {
-    	return ex.toString() + " -> Cause: " + getRootCause(ex).toString() + " Here: " + findInStacktrace(getRootCause(ex), ".*" + Util.FRAMEWORK_PACKAGE + ".*"); 
+    	return ex.toString() + " -> Cause: " + getRootCause(ex).toString() + " Code: " + findInStacktrace(getRootCause(ex), ".*" + Util.FRAMEWORK_PACKAGE + ".*"); 
     }
     
 	private static String findInStacktrace(Throwable ex, String regex) {
@@ -247,7 +247,7 @@ public class ManagedException extends RuntimeException {
 			if (stackTrace[i].toString().matches(regex))
 				return stackTrace[i].toString();
 		}
-		return "...no stacktrace line found for " + regex;
+		return stackTrace.length == 0 ? "...empty stacktrace" : "...no stacktrace line found for " + regex;
 	}
 
 	public static void handleError(String msg, Object...args) {

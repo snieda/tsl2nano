@@ -26,7 +26,8 @@ public class ThreadState {
     String info;
     CPUState cpu;
     int lines;
-
+    boolean stop = false;
+    
     public ThreadState() {
         this(22);
     }
@@ -73,11 +74,14 @@ public class ThreadState {
         ConcurrentUtil.startDaemon("cpu-times", new Runnable() {
             @Override
             public void run() {
-                while (true) {
+                while (!stop) {
                     now().print(header, display);
                     ConcurrentUtil.sleep(sleep);
                 }
             }
         });
+    }
+    public void stop() {
+    	stop = true;
     }
 }

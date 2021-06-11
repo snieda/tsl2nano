@@ -142,6 +142,8 @@ public class ValueRandomizer {
 	}
 
 	private static <T> Constructor<T> getBestConstructor(Class<T> typeOf) {
+		if (BeanClass.hasDefaultConstructor(typeOf))
+			return Util.trY( () -> typeOf.getConstructor(new Class[0]));
 		Constructor<T>[] cs = (Constructor<T>[]) typeOf.getConstructors();
 		for (int i = 0; i < cs.length; i++) {
 			if (cs[i].getParameterTypes().length == 1)
@@ -182,7 +184,7 @@ public class ValueRandomizer {
 					randomObjects[i+j] = createRandomProxy(types[j], zero, depth);
 				else {
 					Class type = types[j].equals(Object.class) ? TypeBean.class : types[j];
-					randomObjects[i+j] = fillRandom(BeanClass.createInstance(type), zero || respectZero(countPerType, i), depth);
+					randomObjects[i+j] = fillRandom(constructWithRandomParameters(type, depth).instance, zero || respectZero(countPerType, i), depth);
 				}
 			}
 		}

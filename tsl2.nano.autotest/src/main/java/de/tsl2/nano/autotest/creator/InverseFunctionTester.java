@@ -60,7 +60,7 @@ public class InverseFunctionTester extends AFunctionTester<InverseFunction> {
 				parameter = null;
 				return null;
 			}
-			status = INITIALIZED;
+			status = Status.INITIALIZED;
 			
 		}
 		return parameterInverse;

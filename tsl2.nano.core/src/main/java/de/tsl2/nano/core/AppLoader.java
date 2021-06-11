@@ -205,7 +205,7 @@ public class AppLoader {
             /*
              * create the classloader to be used by the new application
              */
-            new File(environment).mkdirs();
+            FileUtil.userDirFile(environment).mkdirs();
             NetworkClassLoader networkClassLoader = provideClassloader(environment);
 
             BeanClass<?> bc = BeanClass.createBeanClass(mainclass);

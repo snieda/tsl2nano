@@ -357,6 +357,7 @@ public class ByteUtil extends Util {
      * @param action action to be done for each byte array.
      */
     public static void forEach(InputStream stream, int bufferlength, final IRunnable<Object, byte[]> action) {
+    	assert stream != null && bufferlength > 0 && action != null;
         byte[] buffer = new byte[bufferlength];
         try {
             while (stream.available() > 0) {

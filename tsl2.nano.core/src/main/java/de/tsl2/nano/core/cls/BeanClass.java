@@ -985,8 +985,8 @@ public class BeanClass<T> implements Serializable {
     }
 
     public static String arrayClassName(String className) {
-    	String first = className.substring(0,1);
-		return "[" + (first.toLowerCase().equals(first) ? first.toUpperCase(): "L" + className + ";"); 
+    	String first = StringUtil.substring(className, ".", "[]", true).substring(0,1);
+		return "[" + (first.toLowerCase().equals(first) ? first.toUpperCase(): "L" + StringUtil.substring(className, null, "[]") + ";"); 
     }
     public static Class loadArrayClass(String className) {
     	return Util.trY( () -> Class.forName(arrayClassName(className)));
