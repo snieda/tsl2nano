@@ -110,7 +110,10 @@ public class Mail {
                 "  Mail mail.web.org MyName@MyProvider.org \"My Realname\" HisName@y.z xyz hello greetings\n");
         if (null == args || 6 > args.length) {
             System.out.println("Error: parameters missing!");
-            System.exit(1);
+            if (Boolean.getBoolean("tsl2.nano.test"))
+            	throw new IllegalStateException("Error: parameters missing!");
+            else
+            	System.exit(1);
         }
         try {
             Mail mail = new Mail(System.out, ENCODING_DE);
@@ -118,9 +121,11 @@ public class Mail {
                 (6 < args.length) ? args[6] : null);
         } catch (Exception ex) {
             System.out.println("Error:\n" + ex);
-            System.exit(2);
+            if (Boolean.getBoolean("tsl2.nano.test"))
+            	throw new IllegalStateException(ex);
+            else
+            	System.exit(2);
         }
-        System.exit(0);
     }
 
 }

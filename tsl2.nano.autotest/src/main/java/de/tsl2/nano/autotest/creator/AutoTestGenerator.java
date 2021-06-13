@@ -86,6 +86,7 @@ public class AutoTestGenerator {
 				+ "\n\tuser.dir               : " + System.getProperty("user.dir")
 				+ "\n\tuser.name              : " + System.getProperty("user.name")
 				+ "\n\tstart time             : " + DateUtil.getFormattedDateTime(new Date())
+				+ "\n\ttimeout (ms)           : " + def("timeout", 100)
 				+ "\n\tfilename pattern       : " + fileName
 				+ "\n\tfast.classscan         : " + def("fast.classscan", true)
 				+ "\n\tclean                  : " + def("clean", false)
@@ -189,6 +190,9 @@ public class AutoTestGenerator {
 	}
 
 	private static void writeExpectation(AFunctionCaller f, BufferedWriter writer) {
+		int timeout;
+		if (def("parallel", false) && (timeout = def("tsl2.functiontester.timeout", 100)) != -1)
+			createTimeoutThread(Thread.currentThread(), timeout);
 		Thread.currentThread().setUncaughtExceptionHandler(uncaughtExceptionHandler );
 		statistics.add(f);
 		log("writeExpectation", true);
@@ -208,7 +212,7 @@ public class AutoTestGenerator {
 			}
 			f.run();
 		} catch (Exception | AssertionError e) {
-			if (f.status.in(StatusTyp.NEW) || f.status.isError() || def("filter.failing", false)) {
+			if (f.status.in(StatusTyp.NEW) || f.status.isFatal() || def("filter.failing", false)) {
 				writeFilteredFunctionCall(f);
 				filter_errors++;
 				return;
@@ -250,6 +254,12 @@ public class AutoTestGenerator {
 //		FileUtil.writeBytes(expect.getBytes(), getFile(f.cloneIndex).getPath(), true);
 	}
 
+	private static void createTimeoutThread(Thread current, int timeout) {
+		new Thread(() -> {
+			Util.trY(() -> Thread.currentThread().sleep(timeout * 1000));
+			current.interrupt();
+			}).start();
+	}
 	private static void writeFilteredFunctionCall(AFunctionCaller f) {
 		writeFilteredFunctionCall(f.toString() + "\n");
 	}
@@ -303,6 +313,7 @@ public class AutoTestGenerator {
 		String s = AutoTestGenerator.class.getSimpleName() + " created " + count + " expectations in file pattern: '" + fileName + "...'"
 				+ "\n\tend time              : " + DateUtil.getFormattedDateTime(new Date())
 				+ "\n\ttestneverfail         : " + def("testneverfail", false)
+				+ "\n\tclassfinder cls/mthds : " + ClassFinder.self().getLoadedClassCount() + " / " + ClassFinder.self().getLoadedMethodCount()
 				+ "\n\tmethods loaded        : " + methods_loaded
 				+ "\n\tduplications          : " + def("duplication", 10)
 				+ "\n\tcreated with fail     : " + fails

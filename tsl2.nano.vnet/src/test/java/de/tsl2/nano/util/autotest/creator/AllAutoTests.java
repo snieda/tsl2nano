@@ -16,6 +16,7 @@ import de.tsl2.nano.incubation.vnet.Net;
 @SuiteClasses({InitAllAutoTests.class, AutoFunctionTest.class, CurrentStatePreservationTest.class})
 public class AllAutoTests {
 	public static void init() {
+		System.setProperty("tsl2.functiontest.filter.voidreturn", "true");
 		System.setProperty("tsl2.functiontest.filter", matchPackage(JobServer.class, Net.class));
 	}
 }

@@ -129,7 +129,7 @@ public class AFunctionCaller implements Runnable {
 
 enum StatusTyp {
 	NEW(0), FUNC_WITHOUT_INTPUT(1), FUNC_WITHOUT_OUTPUT(1), FUNC_COMPLEX_INPUT(1)
-	, PARAMETER_UNDEFINED(-1), PARAMETER_ERROR(-1), INITIALIZED(2), INSTANCE_ERROR(-1)
+	, PARAMETER_UNDEFINED(-9), PARAMETER_ERROR(-9), INITIALIZED(2), INSTANCE_ERROR(-9)
 	, NULL_RESULT(1), EXECUTION_ERROR(-1), OK(2), STORE_ERROR(-1), TEST_FAILED(-3), TESTED(4);
 	int level; //to categorize a state
 	StatusTyp(int level) {this.level = level;};
@@ -161,6 +161,10 @@ class Status {
 
 	public boolean isError() {
 		return typ.level < 0;
+	}
+	
+	public boolean isFatal() {
+		return typ.level == -9;
 	}
 	
 	public boolean isRefused() {

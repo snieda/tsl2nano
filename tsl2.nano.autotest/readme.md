@@ -271,6 +271,7 @@ There are some parameters (system properties) you can specify. Here, you see the
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 AutoTestGenerator(PREFIX: tsl2.functiontest.) started with:
+	timeout (sec)          : 100
 	filename (pattern)     : target/autotest/generated/generated-autotests-
 	fast.classscan         : true
 	filter.test            : .*(Test|IT)
@@ -286,6 +287,7 @@ AutoTestGenerator(PREFIX: tsl2.functiontest.) started with:
 	filter.nullresults     : false
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+* *timeout* : (default: 100) time in seconds for each single test (extra thread will interupt unit test). if parallel is false or timeout is -1, no timeout will be checked.
 * *filename*: path to generate the auto tests into. on duplication > 0, you will have more than one generated file (e.g.: generated-autotests-0 and generated-autotests-1)
 * *fast.classscan*: if true, no class re-scan is done. may find less matches than with re-scan, but is much faster (should be used on classloader with more than 1000 classes)
 * *filter.test*: filter for test classes (default: ".*(Test|IT)")
@@ -296,6 +298,7 @@ AutoTestGenerator(PREFIX: tsl2.functiontest.) started with:
 * *filter*: (default: this framework package path) fuzzy class+method filter. NOTE: it's fuzzy finding, means, all 'similar' findings will be included!
 * *modifier*: (default: -1) java method mofifier bitfield like *public* (=1) *static* (=8) etc. Please have a look at the java class *java.lang.reflect.Modifier* to see all possibilities 
 * *filter.unsuccessful*: (default: true): if true, a pre-check is done, calling the test for a failing result. If the test will fail, it will be filtered from the real test.
+* *filter.voidparameter*: (default: false) functions without parameters in a static class can only be tested against an exception (see fail). if set to true, methods without parameters in a static class will be filtered. Doing that, you may have to filter (filter.exclude) some of your classes and/or methods.
 * *filter.voidreturn*: (default: false) whether to filter methods having a return type of *void*. without an output like the returned result, an expectation can only tested against having a specific exception or not.
 * *filter.complextypes*: (default: false) all method parameter types and the result type will be checked, if they are standard data types (provided by jdk) and single value types.(nothing like arrays, collections and maps)
 * *filter.failing*: (default:false) whether it is allowed to have a method call , throwing an exception as expected result.
@@ -405,6 +408,35 @@ Two files are written, to let you see, what was done:
 * *autotest/generated/autotest-generated-filtered.txt*   : lists all filtered function calls
 * *autotest/generated/autotest-generated-statistics.txt* : lists statistics about filtered and created expectation tests
 
+## Examples
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package de.tsl2.nano.util.autotest.creator;
+
+import static de.tsl2.nano.autotest.creator.InitAllAutoTests.matchPackage;
+
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+
+import de.tsl2.nano.autotest.creator.AutoFunctionTest;
+import de.tsl2.nano.autotest.creator.CurrentStatePreservationTest;
+import de.tsl2.nano.autotest.creator.InitAllAutoTests;
+import de.tsl2.nano.core.Main;
+
+@RunWith(Suite.class)
+@SuiteClasses({InitAllAutoTests.class, AutoFunctionTest.class, CurrentStatePreservationTest.class})
+public class AllAutoTests {
+	public static void init() {
+		System.setProperty("tsl2.functiontest.filter.voidparameter", "true");
+		System.setProperty("tsl2.functiontest.filter.voidreturn", "true");
+	
+		System.setProperty("tsl2.functiontest.filter.exclude", ".*(SystemUtil.executeRegisteredLinuxBrowser|SystemUtil.softExitOnCurrentThreadGroup|ThreadState.top|LogFactory).*");
+		System.setProperty("tsl2.functiontest.filter", matchPackage(Main.class, FuzzyFinder.class));
+	}
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 ## Problems and Solutions
 
 In different environment, there may be problems. We try to solve some of them:
@@ -419,7 +451,11 @@ In different environment, there may be problems. We try to solve some of them:
 * **I cannot see exception stacktraces**
 	* -> start your jvm with parameter -XX:-OmitStackTraceInFastThrow
 * **AllAutoTests hangs until an timeout**
-	* use JVisualVM to open the hanging process in FeatureTab **Sampler**. Hit **CPU Samples** and open the callstack tree completely. Perhaps you can see an endless loop in your code under test.
+	* use JVisualVM to open the hanging process in FeatureTab **Sampler**. Hit **CPU Samples** and open the callstack tree of  *main* thread completely. Perhaps you can see an endless or blocking loop (like Scanner.hasNextLine(), Semaphore.tryAquire(), etc.) in your code under test.
+* **AllAutoTests stops with an timeout - started with maven surefire**
+	* -> increase the surefire properties *surefire.exitTimeout* or *surefire.timeout*
+* **AllAutoTests ends always with test failures or errors**
+	* -> try to evaluate the classes and methods causing these errors. set system properties in your AllAutoTests class like:  *parallel=false*, *modifier=7* (->public), *filter.exclude=..my-class-and-or-methodnames* *filter.complextypes=true*, *filter.voidparameter=true*, *filter.voidreturn=true*
 
 ## All Together
 

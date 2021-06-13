@@ -35,7 +35,7 @@ public class FileLock {
      * @throws IOException if lock couldn't be done
      */
     public boolean lock(String dir, String file) throws IOException {
-        final File lockFile = new File(dir, file);
+        final File lockFile = new File(dir, file).getAbsoluteFile();
         if (!lockFile.exists()) {
             lockFile.createNewFile();
         }

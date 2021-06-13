@@ -33,6 +33,7 @@ public class InitAllAutoTests {
 
 	@Parameters
 	public static Collection<?> parameters() {
+		System.setProperty("tsl2.nano.test", "true");
 //		forbidSystemExit();
 		BeanClass.callStatic("de.tsl2.nano.util.autotest.creator.AllAutoTests", "init");
 		return Arrays.asList();
