@@ -67,6 +67,8 @@ public class ClassFinder {
 	private Set<String> packageNames; // only for performance aspects 
 	private Set<Class<?>> classes;
 
+	private int methodCount;
+
 	public static ClassFinder self() {
 		if (self == null)
 			self = new ClassFinder();
@@ -244,6 +246,7 @@ public class ClassFinder {
 	public List<Method> findMethods(String regex, int modifier,
 			Class<? extends Annotation> annotation) {
 		System.out.print("filtering " + classes.size() + " elements with '" + regex + "'...");
+		methodCount = 0;
 		List<Method> result = new LinkedList<>();
 		classes.forEach(c -> result.addAll(matchingMethods(c, regex, modifier, annotation)));
 		System.out.println(result.size() + " OK");
@@ -252,6 +255,7 @@ public class ClassFinder {
 	private List<Method> matchingMethods(Class<?> cls, String regex, int modifier,
 			Class<? extends Annotation> annotation) {
 		Method[] methods = Modifier.isPublic(modifier) ? cls.getMethods() : cls.getDeclaredMethods();
+		methodCount += methods.length;
 		List<Method> result = new LinkedList<>();
 		for (int i = 0; i < methods.length; i++) {
 			if ((modifier < 0 || methods[i].getModifiers() == modifier)
@@ -422,6 +426,13 @@ public class ClassFinder {
 	    }
 	    System.out.println("OK");
 	    return classes;
+	}
+
+	public int getLoadedClassCount() {
+		return classes.size();
+	}
+	public int getLoadedMethodCount() {
+		return methodCount;
 	}
 	
 	public void reset() {

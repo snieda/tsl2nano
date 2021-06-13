@@ -202,7 +202,7 @@ public class Argumentator {
                 out.println("ERROR: argument '" + k + "' was not set!");
                 out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
                 printManual(out);
-                if (errorCodeOnExit > 0)
+                if (errorCodeOnExit > 0 && !ENV.isTestMode())
                     System.exit(errorCodeOnExit);
                 return false;
             }

@@ -29,5 +29,6 @@ public class AllAutoTests {
 				, Plugin.class
 				, FieldReader.class
 				, FuzzyFinder.class ));
+		System.setProperty("tsl2.functiontest.filter.exclude", ".*[.]Mail.*");
 	}
 }

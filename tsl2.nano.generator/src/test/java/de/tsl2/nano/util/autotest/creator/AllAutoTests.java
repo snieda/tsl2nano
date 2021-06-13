@@ -15,6 +15,8 @@ import de.tsl2.nano.codegen.ACodeGenerator;
 @SuiteClasses({InitAllAutoTests.class, AutoFunctionTest.class, CurrentStatePreservationTest.class})
 public class AllAutoTests {
 	public static void init() {
+		System.setProperty("tsl2.functiontest.filter.voidparameter", "true");
+		System.setProperty("tsl2.functiontest.filter.voidreturn", "true");
 		System.setProperty("tsl2.functiontest.filter", matchPackage(ACodeGenerator.class));
 	}
 }
