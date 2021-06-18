@@ -409,7 +409,7 @@ public class CollectionUtil {
      */
     public static void write(String file, String delimiter, Collection collection) {
         try {
-            Writer w = new FileWriter(file);
+            Writer w = new FileWriter(FileUtil.userDirFile(file));
             for (Object i : collection) {
                 w.append(i + delimiter);
             }

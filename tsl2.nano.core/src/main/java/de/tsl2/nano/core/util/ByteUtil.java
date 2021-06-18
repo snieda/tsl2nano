@@ -11,6 +11,7 @@ package de.tsl2.nano.core.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -325,6 +326,19 @@ public class ByteUtil extends Util {
             .valueOf(FileUtil.getFileData(stream, encoding != null ? encoding : get("file.encoding", "UTF-8")));
     }
 
+ 
+    public static final String toString(PrintStream out) {
+    	OutputStream stream = null;
+    	return (stream = (OutputStream) BeanClass.getBeanClass(out).getField(out, "out")) != null ? toString(stream) : out.toString();
+    }
+    /**
+     * @param out
+     * @return on {@link FileOutputStream} tries to get the file name otherwise calls toString().
+     */
+    public static final String toString(OutputStream out) {
+    	String file = null;
+    	return out instanceof FileOutputStream  && (file = (String) BeanClass.getBeanClass(out).getField(out, "path")) != null ? file : out.toString();
+    }
     /**
      * @return piped stream
      */

@@ -587,6 +587,15 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
+     * @param <F> type of field
+     * @param instance object instance having field
+     * @param typeOfField field type
+     * @return first found field of given type or null
+     */
+    public <F> F getField(T instance, Class<F> typeOfField) {
+    	return (F) Arrays.stream(clazz.getDeclaredFields()).filter(f -> typeOfField.isAssignableFrom(f.getType())).findFirst().get();
+    }
+    /**
      * setField
      * 
      * @param instance  object instance having the field

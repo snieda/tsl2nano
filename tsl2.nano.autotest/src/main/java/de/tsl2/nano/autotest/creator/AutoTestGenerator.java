@@ -86,7 +86,7 @@ public class AutoTestGenerator {
 				+ "\n\tuser.dir               : " + System.getProperty("user.dir")
 				+ "\n\tuser.name              : " + System.getProperty("user.name")
 				+ "\n\tstart time             : " + DateUtil.getFormattedDateTime(new Date())
-				+ "\n\ttimeout (ms)           : " + def("timeout", 100)
+				+ "\n\ttimeout (sec)          : " + def("timeout", 100)
 				+ "\n\tfilename pattern       : " + fileName
 				+ "\n\tfast.classscan         : " + def("fast.classscan", true)
 				+ "\n\tclean                  : " + def("clean", false)
@@ -145,7 +145,8 @@ public class AutoTestGenerator {
 			return null;
 		} finally {
 			printStatistics(duplication +1, testers, statistics.getInfo(22));
-			Util.trY(() -> filteredFunctionWriter.close());
+			if (filteredFunctionWriter != null)
+				Util.trY(() -> filteredFunctionWriter.close());
 			if (uncaughtExceptionHandler.hasExceptions()) {
 				FileUtil.writeBytes(uncaughtExceptionHandler.toString().getBytes(), fileName + "uncaught-exceptions.txt", false);
 //				throw new IllegalStateException(uncaughtExceptionHandler.toString());
@@ -314,8 +315,9 @@ public class AutoTestGenerator {
 				+ "\n\tend time              : " + DateUtil.getFormattedDateTime(new Date())
 				+ "\n\ttestneverfail         : " + def("testneverfail", false)
 				+ "\n\tclassfinder cls/mthds : " + ClassFinder.self().getLoadedClassCount() + " / " + ClassFinder.self().getLoadedMethodCount()
-				+ "\n\tmethods loaded        : " + methods_loaded
-				+ "\n\tduplications          : " + def("duplication", 10)
+				+ "\n\tmethods loaded        : " + methods_loaded + "\t(rate: " + methods_loaded / (float)ClassFinder.self().getLoadedMethodCount() + ")"
+				+ "\n\tduplications          : " + def("duplication", 10) + "\t(methods loaded * duplications: " + methods_loaded * def("duplication", 10) + ")"
+				+ "\nGENERATION PROCESS:"
 				+ "\n\tcreated with fail     : " + fails
 				+ "\n\tcreated with null     : " + nullresults
 				+ "\n\tcreated totally       : " + count
@@ -323,11 +325,14 @@ public class AutoTestGenerator {
 				+ "\n\tfiltered complex types: " + filter_complextypes
 				+ "\n\tfiltered errors       : " + filter_errors
 				+ "\n\tfiltered nulls        : " + filter_nullresults
+				+ groupByState
+				+ "\nLOADING PROCESS:"
 				+ "\n\tfiltered unsuccessful : " + filter_unsuccessful
 				+ "\n\tload errors           : " + load_method_error
 				+ "\n\tloaded unsuccessful   : " + load_unsuccessful
-				+ "\n\ttotally loaded        : " + testers.size()
-				+ groupByState;
+				+ "\n\ttotally loaded        : " + testers.size() + " (load-rate: " + (testers.size() / (float)def("duplication", 10)) / (float)methods_loaded + ", total-rate: " 
+												 + (testers.size() / def("duplication", 10)) / (float)ClassFinder.self().getLoadedMethodCount()  + ")"
+				;
 		AFunctionTester.log(p + s +p);
 		FileUtil.writeBytes((p + s + p).getBytes(), fileName + "statistics.txt", true);
 	}
@@ -340,11 +345,11 @@ class Statistics {
 		int[] count = new int[StatusTyp.values().length];
 		caller.forEach(f -> ++count[f.status.typ.ordinal()]);
 		
-		final StringBuilder buf = new StringBuilder("\nFUNCTIONS GROUPED BY STATE:");
+		final StringBuilder buf = new StringBuilder("\n\tGENERATED FUNCTION TESTERS GROUPED BY STATE:");
 		for (int i = 0; i < count.length; i++) {
-			buf.append("\n\t" + StringUtil.fixString(StatusTyp.values()[i], keyWidth) + ": " + count[i]);
+			buf.append("\n\t\t" + StringUtil.fixString(StatusTyp.values()[i], keyWidth) + ": " + count[i]);
 		}
-		buf.append("\n\t" + StringUtil.fixString("<<< TOTALLY >>>", keyWidth) + ": " + caller.size());
+		buf.append("\n\t\t" + StringUtil.fixString("<<< TOTALLY >>>", keyWidth) + ": " + caller.size());
 		return buf.toString();
 	}
 }
@@ -449,7 +454,8 @@ class FunctionCheck {
 		try {
 			tester = new ExpectationFunctionTester(t.source, ExpectationCreator.createExpectationFromLine(expect));
 			tester.testMe();
-			tester.testMe(); //do it twice, sometimes a value changes the first time. would be better to do the initial run() twice!
+//			tester.testMe(); //do it twice, sometimes a value changes the first time. would be better to do the initial run() twice!
+			t.status = tester.status;
 			return null;
 		} catch (Exception | AssertionError e) {
 			return tester != null ? tester.status : new Status(StatusTyp.TEST_FAILED, null, e);

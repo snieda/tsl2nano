@@ -9,6 +9,8 @@
  */
 package de.tsl2.nano.core.util;
 
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Time;
@@ -208,6 +210,34 @@ public class FormatUtil {
                             }
                         }
                         return e;
+                    }
+
+                };
+            } else if (PrintStream.class.isAssignableFrom(type)) {
+                f = new Format() {
+                    @Override
+                    public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
+                        return toAppendTo.append(obj != null ? ByteUtil.toString((PrintStream) obj) : "");
+                    }
+
+                    @Override
+                    public Object parseObject(String source, ParsePosition pos) {
+                        pos.setIndex(!Util.isEmpty(source) ? source.length() : 1);
+                        return !Util.isEmpty(source) ? ObjectUtil.wrap(source, type) : null;
+                    }
+
+                };
+            } else if (FileOutputStream.class.isAssignableFrom(type)) {
+                f = new Format() {
+                    @Override
+                    public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
+                        return toAppendTo.append(obj != null ? ByteUtil.toString((FileOutputStream) obj) : "");
+                    }
+
+                    @Override
+                    public Object parseObject(String source, ParsePosition pos) {
+                        pos.setIndex(!Util.isEmpty(source) ? source.length() : 1);
+                        return !Util.isEmpty(source) ? ObjectUtil.wrap(source, type) : null;
                     }
 
                 };

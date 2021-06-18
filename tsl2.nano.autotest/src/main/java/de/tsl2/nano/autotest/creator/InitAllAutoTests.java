@@ -9,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import de.tsl2.nano.autotest.BaseTest;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.ClassFinder;
 
@@ -34,6 +35,7 @@ public class InitAllAutoTests {
 	@Parameters
 	public static Collection<?> parameters() {
 		System.setProperty("tsl2.nano.test", "true");
+		BaseTest.useTargetDir();
 //		forbidSystemExit();
 		BeanClass.callStatic("de.tsl2.nano.util.autotest.creator.AllAutoTests", "init");
 		return Arrays.asList();

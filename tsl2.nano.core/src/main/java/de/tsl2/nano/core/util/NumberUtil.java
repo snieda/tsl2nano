@@ -410,4 +410,8 @@ public class NumberUtil extends BitUtil {
 		for (int i = start; i < end; i+=step) dupList.add(i);
 		return dupList;
 	}
+	public static double scaled(double n, int scale) {
+		double p = Math.pow(10, scale);
+		return (int)(n * p) / (double)scale;
+	}
 }
