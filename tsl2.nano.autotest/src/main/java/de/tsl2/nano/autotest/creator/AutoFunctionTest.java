@@ -33,7 +33,6 @@ public class AutoFunctionTest {
 
 	@Parameters(name = "{0}")
 	public static Collection<? extends AFunctionTester> parameters() {
-		BaseTest.useTargetDir();
 		return AFunctionTester.prepareTestParameters(AutoFunctionTest.class.getAnnotation(FunctionTester.class));
 	}
 

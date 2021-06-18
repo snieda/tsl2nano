@@ -125,7 +125,7 @@ public class XmlGenUtil extends XmlUtil {
 
             final File dir = new File(destFile.substring(0, destFile.lastIndexOf("/")));
             dir.mkdirs();
-            final BufferedWriter writer = new BufferedWriter(new FileWriter(destFile));
+            final BufferedWriter writer = new BufferedWriter(new FileWriter(FileUtil.userDirFile(destFile)));
 
             layer.runOptional(template, "merge",
                 layer.load("org.apache.velocity.VelocityContext", "java.io.BufferedWriter"), context, writer);

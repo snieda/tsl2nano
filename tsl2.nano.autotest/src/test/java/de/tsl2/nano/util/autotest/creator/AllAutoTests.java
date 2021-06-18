@@ -16,7 +16,7 @@ import de.tsl2.nano.core.Main;
 public class AllAutoTests {
 	public static void init() {
 //		System.setProperty("tsl2nano.offline", "true");
-		System.setProperty("tsl2.functiontest.filter.exclude", ".*(ENVTestPreparation|getFileOutput|SystemUtil.executeRegisteredLinuxBrowser|SystemUtil.softExitOnCurrentThreadGroup|ThreadState.top|LogFactory).*");
+		System.setProperty("tsl2.functiontest.filter.exclude", ".*(ENVTestPreparation|getFileOutput|SystemUtil.executeRegisteredLinuxBrowser|SystemUtil.softExitOnCurrentThreadGroup|ThreadState.top|LogFactory|ConcurrentUtil.getCaller).*");
 		System.setProperty("tsl2.functiontest.filter", matchPackage(Main.class));
 	}
 }
