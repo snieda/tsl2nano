@@ -149,6 +149,11 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
                 self.loglevels.put("de.tsl2.nano.core", LOG_ALL);
                 self.msgFormat = new MsgFormat(self.outputformat);
                 self.defaultPckLogLevel = BitUtil.highestOneBit(self.statesToLog);
+                if (Boolean.getBoolean("tsl2.nano.logfactory.off")) {
+                	System.out.println("LOGFACTORY IS OFF! <- system-property 'tsl2.nano.logfactory.off' is true");
+                	self.queueCapacity = 1;
+                	return self;
+                }
                 if (self.outputFile != null) {
                     self.initPrintStream(self.outputFile);
                 }
@@ -552,7 +557,9 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
      * @param ex (optional) exception to log
      */
     protected static void log(Class<?> logClass, int state, Object message, Throwable ex) {
-    	if (isPreparing.get()) {
+        if (Boolean.getBoolean("tsl2.nano.logfactory.off")) {
+        	return;
+        } else if (isPreparing.get()) {
     		System.out.println("[LOGPREPARE] " + logClass.getSimpleName() + ": " + message + (ex != null ? " " + ex : ""));
     		return;
     	}

@@ -18,6 +18,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.ClassFinder;
 import de.tsl2.nano.core.util.ConcurrentUtil;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.Util;
 
@@ -141,9 +142,11 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 			if (!shouldFailError)
 				status = new Status(StatusTyp.TEST_FAILED, e.toString(), e);
 			log(" -> " + status + "\n");
-			if (!Util.get(PREF_PROPS + "testneverfail", false))
+			if (!Util.get(PREF_PROPS + "testneverfail", false)) {
+				if (AutoTestGenerator.progress.isFinished())
+					FileUtil.writeBytes(ManagedException.toString(e).getBytes(), AutoTestGenerator.fileName + FileUtil.getUniqueFileName(e.toString()), false);
 				ManagedException.forward(e);
-			else
+			} else
 				log("ERROR (testneverfail=true): " + status);
 		}
 	}

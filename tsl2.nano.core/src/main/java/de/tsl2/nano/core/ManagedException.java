@@ -8,6 +8,7 @@
  */
 package de.tsl2.nano.core;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.UndeclaredThrowableException;
@@ -262,8 +263,11 @@ public class ManagedException extends RuntimeException {
 	}
 	public static void writeError(Exception e, final String fileName) {
 		Util.trY(() -> {
-			PrintWriter s = new PrintWriter(FileUtil.userDirFile(fileName));
+			File file = FileUtil.userDirFile(fileName);
+			file.getParentFile().mkdirs();
+			PrintWriter s = new PrintWriter(file);
 			e.printStackTrace(s);
+			s.flush();
 			s.close();
 		});
 	}

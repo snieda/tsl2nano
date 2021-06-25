@@ -271,6 +271,7 @@ There are some parameters (system properties) you can specify. Here, you see the
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 AutoTestGenerator(PREFIX: tsl2.functiontest.) started with:
+	forbidSystemExit       : false
 	timeout (sec)          : 100
 	filename (pattern)     : target/autotest/generated/generated-autotests-
 	fast.classscan         : true
@@ -287,6 +288,7 @@ AutoTestGenerator(PREFIX: tsl2.functiontest.) started with:
 	filter.nullresults     : false
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+* *forbidSystemExit*: if true, a *securitymanager* will be created to disable calls to *System.exit()*. May have collisions with other SecuriyManagers and other permissions - so be careful with this.
 * *timeout* : (default: 100) time in seconds for each single test (extra thread will interupt unit test). if parallel is false or timeout is -1, no timeout will be checked.
 * *filename*: path to generate the auto tests into. on duplication > 0, you will have more than one generated file (e.g.: generated-autotests-0 and generated-autotests-1)
 * *fast.classscan*: if true, no class re-scan is done. may find less matches than with re-scan, but is much faster (should be used on classloader with more than 1000 classes)

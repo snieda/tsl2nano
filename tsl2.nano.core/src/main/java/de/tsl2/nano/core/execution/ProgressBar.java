@@ -120,6 +120,13 @@ public class ProgressBar {
 		print_(a + b + c + comment, end = cr);
 	}
 
+	public boolean isFinished() {
+		return count >= maxCount;
+	}
+	public void setFinished() {
+		count = maxCount;
+	}
+	
 	/**
 	 * @param txt source text
 	 * @param indexFromRight will be subtracted from txt.length()
