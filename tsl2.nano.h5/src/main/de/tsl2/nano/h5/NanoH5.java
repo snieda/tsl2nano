@@ -1215,7 +1215,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
     @Override
     public void stop() {
     	LOG.info("===> NANOH5 SERVER SHUTDOWN! <===");
-        clear();
+    	if (!ENV.isTestMode())
+    		clear();
         super.stop();
         LogFactory.stop();
         if (ENV.get("app.stop.allow.system.exit", !ENV.isTestMode() && !SystemUtil.isNestedApplicationStart())) {
