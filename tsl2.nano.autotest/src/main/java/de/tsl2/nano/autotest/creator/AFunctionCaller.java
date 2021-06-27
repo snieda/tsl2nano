@@ -1,7 +1,5 @@
 package de.tsl2.nano.autotest.creator;
 
-import static de.tsl2.nano.autotest.creator.AFunctionTester.PREF_PROPS;
-
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -22,6 +20,8 @@ public class AFunctionCaller implements Runnable {
 	protected Method source;
 	protected transient Status status = Status.NEW;
 
+	public static final String PREF_PROPS = "tsl2.functiontest.";
+
 	AFunctionCaller(Method source) {
 		this(0, source);
 	}
@@ -30,7 +30,7 @@ public class AFunctionCaller implements Runnable {
 		this.cloneIndex = iteration;
 		this.source = source;
 	}
-	static final <T> T def(String name, T value) {
+	public static final <T> T def(String name, T value) {
 		return Util.get(PREF_PROPS + name, value);
 	}
 	protected static final void log(Object txt) {

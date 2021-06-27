@@ -45,6 +45,14 @@ public class InitAllAutoTests {
 	}
 
 	@Test public void nothing() {}
+
+	public static void set(boolean on, String...properties) {
+		Arrays.stream(properties).forEach( p -> System.setProperty(AFunctionTester.PREF_PROPS + p, String.valueOf(on)));
+	}
+
+	public static void set(String property, Object value) {
+		System.setProperty(AFunctionTester.PREF_PROPS + property, value.toString());
+	}
 	
 	public static String matchPackage(Class...classes) {
 		StringBuilder buf = new StringBuilder(".*(");
