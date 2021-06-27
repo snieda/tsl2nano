@@ -1,9 +1,17 @@
 package de.tsl2.nano.autotest;
 
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import java.io.File;
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
@@ -12,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import de.tsl2.nano.autotest.creator.AFunctionCaller;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
@@ -85,12 +94,20 @@ public class ValueRandomizer {
 	protected static <V> V createRandomValue(Class<V> typeOf, boolean zeroNumber, int depth) {
 		if (valueSets.hasValueSet(typeOf))
 			return valueSets.fromValueSet(typeOf);
-		Object n = zeroNumber && typeOf.isPrimitive() || NumberUtil.isNumber(typeOf) ? 0d : createRandomNumber(typeOf);
+		Object n = zeroNumber && (typeOf.isPrimitive() || NumberUtil.isNumber(typeOf)) 
+				&& (!PrimitiveUtil.isAssignableFrom(char.class, typeOf) || AFunctionCaller.def("allow.single.char.zero", false))
+				&& (!PrimitiveUtil.isAssignableFrom(byte.class, typeOf)  || AFunctionCaller.def("allow.single.byte.zero", false))
+				? 0d : createRandomNumber(typeOf);
 		if (BeanClass.hasConstructor(typeOf, long.class))
 			n = ((Number) n).longValue(); // -> Date
-		else if (typeOf.equals(Class.class))
-			n = TypeBean.class; // TODO: create randomly
-		else if (typeOf.equals(ClassLoader.class))
+		else if (typeOf.equals(Class.class)) {
+			if (typeOf.isAnnotation())
+				n = ATestAnnotation.class;
+			else if (typeOf.isInterface())
+				n = ITestInterface.class;
+			else
+				n = TypeBean.class; // TODO: create randomly
+		} else if (typeOf.equals(ClassLoader.class))
 			n = Thread.currentThread().getContextClassLoader(); // TODO: create randomly
 		else if (Collection.class.isAssignableFrom(typeOf))
 			n = new ListSet<>(n);
@@ -130,10 +147,17 @@ public class ValueRandomizer {
 	@SuppressWarnings({ "unchecked" })
 	static <V> Construction<V> constructWithRandomParameters(Class<V> typeOf, int depth)  {
 		try {
-			Constructor<?> constructor = getBestConstructor(typeOf);
-			if (constructor == null)
-				throw new RuntimeException(typeOf + " is not constructable!");
-			Object[] parameters = provideRandomizedObjects(depth, 1, constructor.getParameterTypes());
+			Constructor<?> constructor;
+			Object[] parameters;
+			if (PrintWriter.class.isAssignableFrom(typeOf)) { // poor workaround to avoid PrintWriter writing to project directory (instead of target)
+				constructor = (Constructor<?>) Util.trY( () -> PrintWriter.class.getConstructor(File.class));
+				parameters = new Object[] {FileUtil.userDirFile(createRandomValue(String.class))};
+			} else {
+				constructor = getBestConstructor(typeOf);
+				if (constructor == null)
+					throw new RuntimeException(typeOf + " is not constructable!");
+				parameters = provideRandomizedObjects(depth, 1, constructor.getParameterTypes());
+			}
 			return new Construction(constructor.newInstance(parameters), constructor, parameters);
 		} catch (Exception e) {
 			ManagedException.forward(e);
@@ -241,4 +265,14 @@ class ValueSets extends HashMap<Class, String[]> {
 	private static String valueSetFilename(Class typeOf) {
 		return typeOf.getSimpleName().toLowerCase() + ".set";
 	}
+}
+
+@Retention(RUNTIME)
+@Target({TYPE, METHOD, PARAMETER})
+@interface ATestAnnotation {
+	int nix();
+}
+
+interface ITestInterface {
+	void nix();
 }

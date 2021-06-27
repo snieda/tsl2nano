@@ -32,7 +32,6 @@ import de.tsl2.nano.core.util.Util;
 @SuppressWarnings("rawtypes")
 public abstract class AFunctionTester<A extends Annotation> extends AFunctionCaller  implements Runnable, Cloneable {
 	protected transient A def;
-	public static final String PREF_PROPS = "tsl2.functiontest.";
 	private static final float DELTA_FLOAT = Util.get(PREF_PROPS + "delta.float", 0.0000000001f);
 	private static final float DELTA_DOUBLE = Util.get(PREF_PROPS + "delta.double", 0.0000000001f);
 

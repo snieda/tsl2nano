@@ -234,11 +234,15 @@ Name3
 
 For type String (->string.set) there is a default valueset with german city names.
 
+#### Exceptional instancing on PrintWriters
+
+The String Constructor of class *PrintWriter* will create a file in the *user.dir* folder with given name as file name. On testing , this may result in files with random names inside your working directory. To avoid that, the *ValueRandomizer* will explicitly create the randomized PrintWriters into the test directory - using the File-Constructor.
+
 
 ### TypeBean
 
 in the ValueRandomizer example you have already seen the creation of randomized TypeBeans. In the following
-simple example we directly create one instance of TypeBean.class with randomized values:
+simple example we directly create one instance of TypeBean.class with randomized values
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// giving a parameter of true, the TypeBean will fill itself with randomized values
@@ -271,18 +275,23 @@ There are some parameters (system properties) you can specify. Here, you see the
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 AutoTestGenerator(PREFIX: tsl2.functiontest.) started with:
+	user.dir               : /home/xxxx/workspace/tsl2nano-code/tsl2.nano.autotest/target/autotest
+	user.name              : xxxx
+	start time             : 25.06.2021 17:22:36
 	forbidSystemExit       : false
+	parallel               : true
 	timeout (sec)          : 100
-	filename (pattern)     : target/autotest/generated/generated-autotests-
+	filename pattern       : generated/generated-autotests-
 	fast.classscan         : true
-	filter.test            : .*(Test|IT)
-	filter.exclude         : XXXXXXXXXX
-	testneverfail          : false
 	clean                  : false
 	duplication            : 10
-	filter                 : de.tsl2.nano
+	filter                 : .*(de.tsl2.nano.core).*
 	modifier               : -1
+	filter.test            : .*(Test|IT)
+	filter.exclude         : XXXXXXXX
 	filter.unsuccessful    : true
+	filter.voidparameter   : false
+	filter.voidreturn      : false
 	filter.complextypes    : false
 	filter.failing         : false
 	filter.nullresults     : false
@@ -353,20 +362,41 @@ put them into your source code at the position of the given method.
 At the end, you will get a short statistical overview:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-AutoTestGenerator created 0 expectations in file pattern: 'target/autotest/generated/generated-autotests-...'
-	methods loaded        : 0
-	duplications          : 10
-	created with fail     : 0
+AutoTestGenerator created 458 expectations in file pattern: 'generated/generated-autotests-...'
+	end time              : 25.06.2021 17:23:17
+	testneverfail         : false
+	classfinder cls/mthds : 646 / 11152
+	methods loaded        : 512	(rate: 0.045911048)
+	duplications          : 10	(methods loaded * duplications: 5120)
+GENERATION PROCESS:
+	created with fail     : 1500
 	created with null     : 0
-	created totally       : 0
-	filtered type error   : 0
+	created totally       : 458
+	filtered type error   : 289
 	filtered complex types: 0
-	filtered errors       : 0
+	filtered errors       : 2189
 	filtered nulls        : 0
-	filtered unsuccessful : 0
-	load errors           : 0
-	loaded unsuccessful   : 0
-	totally loaded        : 656
+	GENERATED FUNCTION TESTERS GROUPED BY STATE:
+		NEW                   : 0
+		FUNC_WITHOUT_INTPUT   : 0
+		FUNC_WITHOUT_OUTPUT   : 0
+		FUNC_COMPLEX_INPUT    : 0
+		PARAMETER_UNDEFINED   : 0
+		PARAMETER_ERROR       : 470
+		INITIALIZED           : 0
+		INSTANCE_ERROR        : 1720
+		NULL_RESULT           : 0
+		EXECUTION_ERROR       : 1189
+		OK                    : 289
+		STORE_ERROR           : 0
+		TEST_FAILED           : 680
+		TESTED                : 772
+		<<< TOTALLY >>>       : 5120
+LOADING PROCESS:
+	filtered unsuccessful : 680
+	load errors           : 53
+	loaded unsuccessful   : 23
+	totally loaded        : 1500 (load-rate: 0.29296875, total-rate: 0.013450502)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * *methods loaded*: if the test was not started before, generating the auto tests - or the property clean=true was set, then the *AutoTestGenerator* will load classes and methods (filtered throuth given property filter)
@@ -437,6 +467,20 @@ public class AllAutoTests {
 		System.setProperty("tsl2.functiontest.filter", matchPackage(Main.class, FuzzyFinder.class));
 	}
 }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## Some Hints
+
+* use **InitAllAutoTests.matchPackages(..your class names..)** in your AllAutoTests class to be sure , your classes are loaded by classloader
+* use **InitAllAutoTests.set(on|off, propertyNames)** as convenience to activate some properties (e.g.: set(true, "parallel"), avoiding to write System.setProperty("tsl2.functiontest.parallel", "true") ) 
+
+### Example to test exactly one function (e.g. for debugging)
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		String matchPackage = matchPackage(MyClassOnTest.class);
+		matchPackage = ".*AnyDeclaringClass.anymethodToTest.*"; 
+		System.setProperty("tsl2.functiontest.filter", matchPackage);
+		System.setProperty("tsl2.functiontest.duplication", "1");
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ## Problems and Solutions

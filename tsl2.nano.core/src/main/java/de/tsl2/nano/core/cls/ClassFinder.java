@@ -23,9 +23,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +43,7 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
@@ -247,14 +250,15 @@ public class ClassFinder {
 			Class<? extends Annotation> annotation) {
 		System.out.print("filtering " + classes.size() + " elements with '" + regex + "'...");
 		methodCount = 0;
-		List<Method> result = new LinkedList<>();
+		List<Method> result = new ListSet<>();
 		classes.forEach(c -> result.addAll(matchingMethods(c, regex, modifier, annotation)));
+		Collections.sort(result, (c, d) -> c.toGenericString().compareTo(d.toGenericString()));
 		System.out.println(result.size() + " OK");
 		return result;
 	}
 	private List<Method> matchingMethods(Class<?> cls, String regex, int modifier,
 			Class<? extends Annotation> annotation) {
-		Method[] methods = Modifier.isPublic(modifier) ? cls.getMethods() : cls.getDeclaredMethods();
+		Method[] methods = modifier != -1 && Modifier.isPublic(modifier) ? cls.getMethods() : cls.getDeclaredMethods();
 		methodCount += methods.length;
 		List<Method> result = new LinkedList<>();
 		for (int i = 0; i < methods.length; i++) {
