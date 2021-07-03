@@ -502,6 +502,8 @@ In different environment, there may be problems. We try to solve some of them:
 	* -> increase the surefire properties *surefire.exitTimeout* or *surefire.timeout*
 * **AllAutoTests ends always with test failures or errors**
 	* -> try to evaluate the classes and methods causing these errors. set system properties in your AllAutoTests class like:  *parallel=false*, *modifier=7* (->public), *filter.exclude=..my-class-and-or-methodnames* *filter.complextypes=true*, *filter.voidparameter=true*, *filter.voidreturn=true*
+* **Files are written outside of target or test directories**
+* -> set a breakpoint to *java.io.FileOutputStream.open()* with breakpoint-property '!path.getAbsoluteFile().contains("target/")'. Mostly, a parameter of type *PrintWriter* will invoke a call to *PrintWriter(String)* that create randomized files through the ValueRandomizer
 
 ## All Together
 

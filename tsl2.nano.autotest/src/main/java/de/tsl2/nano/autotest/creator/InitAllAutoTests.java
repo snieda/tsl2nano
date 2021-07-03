@@ -34,7 +34,7 @@ public class InitAllAutoTests {
 
 	@Parameters
 	public static Collection<?> parameters() {
-//		System.setProperty("tsl2.nano.logfactory.off", "true");
+		System.setProperty("tsl2.nano.logfactory.off", "true");
 		System.setProperty("tsl2.nano.test", "true");
 //		System.setProperty("tsl2.functiontest.testneverfail", "true");
 		BaseTest.useTargetDir();

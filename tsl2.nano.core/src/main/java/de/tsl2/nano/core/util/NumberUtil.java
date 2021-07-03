@@ -395,6 +395,9 @@ public class NumberUtil extends BitUtil {
             return BeanClass.createInstance(type, identifier);
     }
 
+    public static double random(double min, double max) {
+    	return Math.random() * (max - min) + min;
+    }
     public static boolean roundAbout(Number first, Number second) {
         Number dev = Double.valueOf(System.getProperty("tslnano.number.deviation.max", "0.00000000000000001"));
         return hasMaxDeviation(first, second, dev);

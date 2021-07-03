@@ -18,5 +18,6 @@ import de.tsl2.nano.serviceaccess.ServiceFactory;
 public class AllAutoTests {
 	public static void init() {
 		System.setProperty("tsl2.functiontest.filter", matchPackage(FsConnection.class, ServiceUtil.class, ServiceFactory.class));
+		System.setProperty("tsl2.functiontest.filter.exclude", ".*(FsManagedConnection.setLogWriter|FsManagedConnectionFactory.setLogWriter).*");
 	}
 }

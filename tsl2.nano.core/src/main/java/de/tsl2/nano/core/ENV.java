@@ -9,6 +9,8 @@
  */
 package de.tsl2.nano.core;
 
+import static de.tsl2.nano.core.execution.CompatibilityLayer.TSL2_JARRESOLVER;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -98,7 +100,7 @@ import de.tsl2.nano.core.util.Util;
 @Default(value = DefaultType.FIELD, required = false)
 public class ENV implements Serializable {
 
-    /** serialVersionUID */
+	/** serialVersionUID */
     private static final long serialVersionUID = 5988200267214868670L;
 
     public static final String PATH_TEMP = "temp/";
@@ -1029,8 +1031,9 @@ public class ENV implements Serializable {
     }
 
     public static final String getPackagePrefix(String mvnNamePart) {
-        return (String) get(CompatibilityLayer.class).run("de.tsl2.nano.jarresolver.JarResolver", "getPackage",
-            new Class[] { String.class }, mvnNamePart);
+    	return get(CompatibilityLayer.class).isAvailable(TSL2_JARRESOLVER)
+        	? (String) get(CompatibilityLayer.class).run(TSL2_JARRESOLVER, "getPackage", new Class[] { String.class }, mvnNamePart)
+        	: null;
     }
 
     public static final Object loadClassDependencies(String... dependencyNames) {
@@ -1069,9 +1072,8 @@ public class ENV implements Serializable {
             return null;
         }
         //load the dependencies through maven, if available
-        String clsJarResolver = "de.tsl2.nano.jarresolver.JarResolver";
         if (get("classloader.usenetwork.loader", true) && NetUtil.isOnline()
-            && get(CompatibilityLayer.class).isAvailable(clsJarResolver)) {
+            && get(CompatibilityLayer.class).isAvailable(TSL2_JARRESOLVER)) {
             Message.send("resolving dependencies: "
                     + StringUtil.toString(dependencyNames, 300));
             
@@ -1082,7 +1084,7 @@ public class ENV implements Serializable {
                 return "user denied - no dependencies loaded";
             }
 
-            Object result = get(CompatibilityLayer.class).run(clsJarResolver, "install", new Class[] { String[].class },
+            Object result = get(CompatibilityLayer.class).run(TSL2_JARRESOLVER, "install", new Class[] { String[].class },
                 new Object[] { dependencyNames });
             if (result == null || result.toString().startsWith("FAILED"))
                 throw new IllegalStateException("couldn't resolve dependencies:\n"

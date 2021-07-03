@@ -2,6 +2,7 @@ package de.tsl2.nano.autotest.creator;
 
 import java.util.Collection;
 
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,9 +37,15 @@ public class CurrentStatePreservationTest {
 	}
 
 	@AfterClass
-	public static void tearDown() {
+	public static void tearDownClass() {
 		ValueRandomizer.reset();
 	}
+	
+	@After
+	public void tearDown() {
+		tester = null;
+	}
+	
 	@Test
 	public void test() {
 		tester.testMe();

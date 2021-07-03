@@ -92,12 +92,27 @@ public class ValueRandomizer {
 	}
 	@SuppressWarnings({ "unchecked" })
 	protected static <V> V createRandomValue(Class<V> typeOf, boolean zeroNumber, int depth) {
-		if (valueSets.hasValueSet(typeOf))
+		if (!Util.isEmpty(AFunctionCaller.def("use.valueset", ValueSets.DEFAULT)) && valueSets.hasValueSet(typeOf))
 			return valueSets.fromValueSet(typeOf);
 		Object n = zeroNumber && (typeOf.isPrimitive() || NumberUtil.isNumber(typeOf)) 
 				&& (!PrimitiveUtil.isAssignableFrom(char.class, typeOf) || AFunctionCaller.def("allow.single.char.zero", false))
 				&& (!PrimitiveUtil.isAssignableFrom(byte.class, typeOf)  || AFunctionCaller.def("allow.single.byte.zero", false))
 				? 0d : createRandomNumber(typeOf);
+		if (NumberUtil.isNumber(n))
+			n = convert(n, typeOf, zeroNumber, depth);
+		try {
+			return ObjectUtil.wrap(n, typeOf);
+		} catch (Exception e) {
+			if (checkMaxDepth(depth) && ObjectUtil.isInstanceable(typeOf)) {
+				return constructWithRandomParameters(typeOf, ++depth).instance;
+			} else {
+				ManagedException.forward(e);
+				return null;
+			}
+		}
+	}
+
+	private static Object convert(Object n, Class typeOf, boolean zeroNumber, int depth) {
 		if (BeanClass.hasConstructor(typeOf, long.class))
 			n = ((Number) n).longValue(); // -> Date
 		else if (typeOf.equals(Class.class)) {
@@ -125,20 +140,11 @@ public class ValueRandomizer {
 					: MapUtil.asArray(MapUtil.asMap(n, n), typeOf.getComponentType());
 		} else if (typeOf.equals(Object.class) || !ObjectUtil.isStandardType(typeOf) && !Util.isFrameworkClass(typeOf))
 			n = typeOf.getSimpleName() + "(" + ByteUtil.hashCode(n) + ")";
-		try {
-			return ObjectUtil.wrap(n, typeOf);
-		} catch (Exception e) {
-			if (checkMaxDepth(depth) && ObjectUtil.isInstanceable(typeOf)) {
-				return constructWithRandomParameters(typeOf, ++depth).instance;
-			} else {
-				ManagedException.forward(e);
-				return null;
-			}
-		}
+		return n;
 	}
 
 	protected static boolean checkMaxDepth(int depth) {
-		return depth < 50;
+		return depth < AFunctionCaller.def("create.randdom.max.depth", 10);
 	}
 
 	public static <V> Construction<V> constructWithRandomParameters(Class<V> typeOf)  {
@@ -156,6 +162,8 @@ public class ValueRandomizer {
 				constructor = getBestConstructor(typeOf);
 				if (constructor == null)
 					throw new RuntimeException(typeOf + " is not constructable!");
+				if (constructor.getParameterCount() > 0 && !checkMaxDepth(depth))
+					throw new IllegalStateException("max depth reached on recursion. there is a cycle in parameter instantiation: " + typeOf);
 				parameters = provideRandomizedObjects(depth, 1, constructor.getParameterTypes());
 			}
 			return new Construction(constructor.newInstance(parameters), constructor, parameters);
@@ -177,7 +185,17 @@ public class ValueRandomizer {
 	}
 
 	protected static <V> Object createRandomNumber(Class<V> typeOf) {
-		long size = NumberUtil.isNumber(typeOf) && !Number.class.equals(typeOf)
+		return createRandomNumber(typeOf, intervalOf(typeOf));
+	}
+	protected static <V> Object createRandomNumber(Class<V> typeOf, long interval) {
+		if (NumberUtil.isNumber(typeOf)) // negative only on number types
+			interval = interval * (Math.random() < 0.5 ? -1 : 1);
+		Object n = Math.random() * interval;
+		return n;
+	}
+
+	private static <V> long intervalOf(Class<V> typeOf) {
+		return NumberUtil.isNumber(typeOf) && !Number.class.equals(typeOf)
 				? BigDecimal.class.isAssignableFrom(typeOf) 
 					? (long) Double.MAX_VALUE
 					: ((Number) BeanClass.getStatic(PrimitiveUtil.getWrapper(typeOf), "MAX_VALUE")).longValue()
@@ -186,10 +204,6 @@ public class ValueRandomizer {
 					: Date.class.isAssignableFrom(typeOf) 
 						? DateUtil.MAX_DATE.getTime()
 						: Byte.MAX_VALUE;
-		if (NumberUtil.isNumber(typeOf))
-			size = size * (Math.random() < 0.5 ? -1 : 1);
-		Object n = Math.random() * size;
-		return n;
 	}
 
 	public static Object[] provideRandomizedObjects(int countPerType, Class... types) {
@@ -208,7 +222,7 @@ public class ValueRandomizer {
 					randomObjects[i+j] = createRandomProxy(types[j], zero, depth);
 				else {
 					Class type = types[j].equals(Object.class) ? TypeBean.class : types[j];
-					randomObjects[i+j] = fillRandom(constructWithRandomParameters(type, depth).instance, zero || respectZero(countPerType, i), depth);
+					randomObjects[i+j] = fillRandom(constructWithRandomParameters(type, ++depth).instance, zero || respectZero(countPerType, i), depth);
 				}
 			}
 		}
@@ -240,9 +254,12 @@ public class ValueRandomizer {
 	}
 }
 class ValueSets extends HashMap<Class, String[]> {
+	static final String DEFAULT = "default";
+
 	<V> V fromValueSet(Class<V> typeOf) {
 		if (!containsKey(typeOf) && (FileUtil.userDirFile(valueSetFilename(typeOf)).exists() || FileUtil.hasResource(valueSetFilename(typeOf)))) {
 			String content = new String(FileUtil.getFileBytes(valueSetFilename(typeOf), null));
+			content = content.replaceFirst("[#].*\n", "");
 			String[] names = content.split("[\n]");
 			put(typeOf, names);
 		}
@@ -253,9 +270,11 @@ class ValueSets extends HashMap<Class, String[]> {
 	}
 
 	<V> V fromValueMinMax(String minmax, Class<V> typeOf) {
-		String min = StringUtil.substring(minmax, null, "<->");
+		String typ = StringUtil.substring(minmax, null, ":", 0, true);
+		String min = StringUtil.substring(minmax, ":", "<->");
 		String max = StringUtil.substring(minmax, "<->", null);
-		return ObjectUtil.wrap(Math.random() * Double.valueOf(max) - Math.random() * Double.valueOf(min), typeOf);
+		double d = NumberUtil.random(Double.valueOf(min), Double.valueOf(max));
+		return ObjectUtil.wrap(typ != null ? PrimitiveUtil.convert(d, PrimitiveUtil.getPrimitiveClass(typ)): d, typeOf);
 	}
 
 	boolean hasValueSet(Class typeOf) {
@@ -263,7 +282,8 @@ class ValueSets extends HashMap<Class, String[]> {
 	}
 
 	private static String valueSetFilename(Class typeOf) {
-		return typeOf.getSimpleName().toLowerCase() + ".set";
+		String name = AFunctionCaller.def("use.valueset", DEFAULT);
+		return (name.equals(DEFAULT) ? "" : name + "-") + typeOf.getSimpleName().toLowerCase() + ".set";
 	}
 }
 

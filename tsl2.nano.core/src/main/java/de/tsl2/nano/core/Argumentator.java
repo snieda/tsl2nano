@@ -65,7 +65,7 @@ import de.tsl2.nano.core.util.CLI.Color;
  *         }
  *         ...
  * </pre>
- * 
+ * NOTE: for a simple solution, see de.tsl2.nano.core.util.MainUtil.
  * @author ts
  * @version $Revision$
  */

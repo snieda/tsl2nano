@@ -261,7 +261,7 @@ public class ManagedException extends RuntimeException {
     	else
     		LOG.error(msg);
 	}
-	public static void writeError(Exception e, final String fileName) {
+	public static void writeError(Throwable e, final String fileName) {
 		Util.trY(() -> {
 			File file = FileUtil.userDirFile(fileName);
 			file.getParentFile().mkdirs();

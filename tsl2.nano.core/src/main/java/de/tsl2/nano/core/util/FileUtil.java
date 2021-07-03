@@ -9,10 +9,15 @@
  */
 package de.tsl2.nano.core.util;
 
+import static java.nio.file.StandardOpenOption.APPEND;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.WRITE;
+
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,6 +42,7 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1335,6 +1341,10 @@ public class FileUtil {
         }
         return prefix + file.getName() + postfix;
     }
+
+	public static BufferedWriter getBAWriter(String file) {
+		return Util.trY( () -> Files.newBufferedWriter(Paths.get(userDirFile(file).getPath()), CREATE, WRITE, APPEND));
+	}
 
     /**
      * convenience to close any inputstream

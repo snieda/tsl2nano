@@ -1,7 +1,7 @@
 package de.tsl2.nano.autotest.creator;
 
+import static de.tsl2.nano.autotest.creator.AFunctionCaller.PREF_PROPS;
 import static de.tsl2.nano.autotest.creator.AFunctionCaller.def;
-import static de.tsl2.nano.autotest.creator.AFunctionTester.PREF_PROPS;
 import static java.nio.file.StandardOpenOption.APPEND;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.WRITE;
@@ -32,6 +32,7 @@ import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.exception.ExceptionHandler;
 import de.tsl2.nano.core.execution.ProgressBar;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
@@ -58,6 +59,7 @@ import de.tsl2.nano.core.util.Util;
  * @author ts
  */
 public class AutoTestGenerator {
+	private static final String REGEX_UNMATCH = "XXXXXXXX";
 	static String fileName = def("filename", "generated/generated-autotests-");
 	static int methods_loaded = 0;
 	static int count = 0;
@@ -75,10 +77,17 @@ public class AutoTestGenerator {
 	private static BufferedWriter filteredFunctionWriter;
 	private static ExceptionHandler uncaughtExceptionHandler = new ExceptionHandler();
 	static ProgressBar progress;
+	private static AFunctionCaller maxDurationFct, maxMemUsageFct;
+	private static long start;
 	
 	public static void main(String[] args) {
-		List<Method> methods = ClassFinder.self().find(def("filter", "") , Method.class, def("modifier", -1), null);
-		generateExpectations(0, methods );
+		if (args.length == 0) {
+			System.out.println("Please provide a comma-separated list of full classnames to be loaded!");
+			return;
+		}
+		String[] clsNames = args[0].split("\\s*,\\s*");
+		Arrays.stream(clsNames).forEach(c -> ClassFinder.getClassesInPackage(BeanClass.load(c).getPackage().getName(), null));
+		createExpectationTesters();
 	}
 	private static void printStartParameters() {
 		String p = "\n" + StringUtil.fixString(79, '=') + "\n";
@@ -96,11 +105,12 @@ public class AutoTestGenerator {
 				+ "\n\tfilter                 : " + def("filter", "")
 				+ "\n\tmodifier               : " + def("modifier", -1)
 				+ "\n\tfilter.test            : " + def("filter.test", ".*(Test|IT)")
-				+ "\n\tfilter.exclude         : " + def("filter.exclude", "XXXXXXXX")
+				+ "\n\tfilter.exclude         : " + def("filter.exclude", REGEX_UNMATCH)
 				+ "\n\tfilter.unsuccessful    : " + def("filter.unsuccessful", true)
 				+ "\n\tfilter.voidparameter   : " + def("filter.voidparameter", false)
 				+ "\n\tfilter.voidreturn      : " + def("filter.voidreturn", false)
 				+ "\n\tfilter.complextypes    : " + def("filter.complextypes", false)
+				+ "\n\tfilter.error.type      : " + def("filter.error.type", REGEX_UNMATCH)
 				+ "\n\tfilter.failing         : " + def("filter.failing", false)
 				+ "\n\tfilter.nullresults     : " + def("filter.nullresults", false)
 				+ "\n\tfilter.failing         : " + def("filter.failing", false)
@@ -111,6 +121,7 @@ public class AutoTestGenerator {
 	}
 	@SuppressWarnings("rawtypes")
 	public static Collection<? extends AFunctionTester> createExpectationTesters() {
+		start = System.currentTimeMillis();
 		int duplication = def("duplication", 10);
 		Collection<AFunctionTester> testers = Collections.synchronizedList(new LinkedList<>());
 		try {
@@ -125,6 +136,7 @@ public class AutoTestGenerator {
 			FileUtil.writeBytes(("\nmatching methods in classpath: " + methods.size()).getBytes(), fileName + "statistics.txt", true);
 			filterExcludes(methods);
 			filterTestClasses(methods);
+			filterSingeltons(methods);
 			FileUtil.writeBytes(("\nfiltered methods             : " + methods.size()).getBytes(), fileName + "statistics.txt", true);
 			progress = new ProgressBar(methods.size() * duplication);
 			ArrayList<Integer> dupList = NumberUtil.numbers(duplication);
@@ -138,11 +150,12 @@ public class AutoTestGenerator {
 				}
 				if (fileexists.get() || count > 0)
 					testers.addAll(AutoTestGenerator.readExpectations(i));
+				
 			});
 			if (def("filter.unsuccessful", true))
 				load_unsuccessful = FunctionCheck.filterFailingTest(testers);
 			return testers;
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			ManagedException.writeError(e, fileName + "initialization-error.txt");
 			ConcurrentUtil.sleep(3000);
 			System.out.println("JUNIT TEST PARAMETERS FAILING:");
@@ -163,15 +176,21 @@ public class AutoTestGenerator {
 	private static void prepareFilteredWriter() throws IOException {
 		if (!AutoTestGenerator.getFile(0).exists() || def("clean", false))
 			FileUtil.delete(fileName + "filtered.txt");
-		File userDirFile = FileUtil.userDirFile(fileName + "filtered.txt");
-		filteredFunctionWriter = Files.newBufferedWriter(Paths.get(userDirFile.getPath()), CREATE, WRITE, APPEND);
+		filteredFunctionWriter = FileUtil.getBAWriter(fileName + "filtered.txt");
 	}
 
 	private static void filterExcludes(List<Method> methods) {
-		methods.removeIf(m -> m.toGenericString().matches(def("filter.exclude", "XXXXXXXX")));
+		methods.removeIf(m -> m.toGenericString().matches(def("filter.exclude", REGEX_UNMATCH)));
 	}
 	private static void filterTestClasses(List<Method> methods) {
 		methods.removeIf(m -> m.getDeclaringClass().getName().matches(def("filter.test", ".*(Test|IT)")));
+	}
+	private static void filterSingeltons(List<Method> methods) {
+		if (def("filter.singeltons", true))
+			methods.removeIf(m -> BeanClass.getBeanClass(m.getDeclaringClass()).isSingleton());
+	}
+	private static boolean filterErrorType(Throwable e) {
+		return ManagedException.getRootCause(e).toString().matches(def("filter.error.types", REGEX_UNMATCH));
 	}
 	static void generateExpectations(int iteration, List<Method> methods) {
 		LogFactory.setPrintToConsole(false);
@@ -184,7 +203,7 @@ public class AutoTestGenerator {
 	
 			Util.stream(methods, def("parallel", false)).forEach(m -> writeExpectation(new AFunctionCaller(iteration, m), writer));
 		} finally {
-			Util.trY( () -> writer.flush());
+			Util.trY( () ->filteredFunctionWriter.flush());
 			FileUtil.close(writer, true);
 			ConcurrentUtil.sleep(200);
 			if (count > 0)
@@ -202,64 +221,70 @@ public class AutoTestGenerator {
 		if (def("parallel", false) && (timeout = def("tsl2.functiontester.timeout", 100)) != -1)
 			createTimeoutThread(Thread.currentThread(), timeout);
 		Thread.currentThread().setUncaughtExceptionHandler(uncaughtExceptionHandler );
-		statistics.add(f);
-		log("writeExpectation", true);
-		String then = null;
 		try {
-			if (def("filter.voidparameter", false) && f.source.getParameterCount() == 0 && Modifier.isStatic(f.source.getModifiers()))
-				f.status = Status.FUNC_WITHOUT_INPUT;
-			else if (def("filter.voidreturn", false) && void.class.isAssignableFrom(f.source.getReturnType()))
-				f.status = Status.FUNC_WITHOUT_OUTPUT;
-			else if (def("filter.complextypes", false) && !FunctionCheck.hasSimpleTypes(f))
-				f.status = Status.FUNC_COMPLEX_INPUT;
-		
-			if (f.status.isRefused()) {
-				writeFilteredFunctionCall(f);
-				filter_complextypes++;
-				return;
-			}
-			f.run();
-		} catch (Exception | AssertionError e) {
-			if (f.status.in(StatusTyp.NEW) || f.status.isFatal() || def("filter.failing", false)) {
-				writeFilteredFunctionCall(f);
-				filter_errors++;
-				return;
-			}
-			fails++;
-			then = "fail(" + e.getClass().getName() + "(" + e.getMessage().replace('\n', ' ') + "))";
-		}
-		if (then == null) {
-			if (f.getResult() == null) {
-				if (def("filter.nullresults", false)) {
-					filter_nullresults++;
+			log("writeExpectation", true);
+			String then = null;
+			try {
+				if (f.source.isSynthetic() || f.source.isBridge() || f.source.getName().startsWith("$")) // -> e.g. $jacocoInit() -> javaagent code enhancing
+					f.status = Status.FUNC_SYNTHETIC;
+				if (def("filter.voidparameter", false) && f.source.getParameterCount() == 0 && Modifier.isStatic(f.source.getModifiers()))
+					f.status = Status.FUNC_WITHOUT_INPUT;
+				else if (def("filter.voidreturn", false) && void.class.isAssignableFrom(f.source.getReturnType()))
+					f.status = Status.FUNC_WITHOUT_OUTPUT;
+				else if (def("filter.complextypes", false) && !FunctionCheck.hasSimpleTypes(f))
+					f.status = Status.FUNC_COMPLEX_INPUT;
+			
+				if (f.status.isRefused()) {
 					writeFilteredFunctionCall(f);
+					filter_complextypes++;
 					return;
-				} else {
-					then = "null";
+				}
+				f.run();
+			} catch (Exception | AssertionError e) {
+				if (f.status.in(StatusTyp.NEW) || f.status.isFatal() || def("filter.failing", false) || filterErrorType(e)) {
+					writeFilteredFunctionCall(f);
+					filter_errors++;
+					return;
+				}
+				fails++;
+				then = "fail(" + e.getClass().getName() + "(" + e.getMessage().replace('\n', ' ') + "))";
+			}
+			if (then == null) {
+				if (f.getResult() == null) {
+					if (def("filter.nullresults", false)) {
+						filter_nullresults++;
+						writeFilteredFunctionCall(f);
+						return;
+					} else {
+						then = "null";
+					}
 				}
 			}
+			if (f.getResult() != null && !FunctionCheck.checkTypeConversion(f.getResult())) {
+				writeFilteredFunctionCall(f);
+				filter_typeconversions++;
+				return;
+			}
+			String expect = ExpectationCreator.createExpectationString(f, then);
+			if (expect == null) {
+				writeFilteredFunctionCall(f);
+				filter_typeconversions++;
+				return;
+			}
+			Status testStatus;
+			if (def("filter.unsuccessful", true) && (testStatus = FunctionCheck.checkTestSuccessful(f, expect)) != null) {
+				f.status = testStatus;
+				writeFilteredFunctionCall(expect);
+				filter_unsuccessful++;
+				return;
+			}
+			count++;
+			maxDurationFct = maxDurationFct == null || maxDurationFct.duration < f.duration ? f : maxDurationFct; 
+			maxMemUsageFct = maxMemUsageFct == null || maxMemUsageFct.memusage < f.memusage ? f : maxMemUsageFct; 
+			Util.trY(() -> writer.append(expect));
+		} finally {
+			statistics.add(f);
 		}
-		if (f.getResult() != null && !FunctionCheck.checkTypeConversion(f.getResult())) {
-			writeFilteredFunctionCall(f);
-			filter_typeconversions++;
-			return;
-		}
-		String expect = ExpectationCreator.createExpectationString(f, then);
-		if (expect == null) {
-			writeFilteredFunctionCall(f);
-			filter_typeconversions++;
-			return;
-		}
-		Status testStatus;
-		if (def("filter.unsuccessful", true) && (testStatus = FunctionCheck.checkTestSuccessful(f, expect)) != null) {
-			f.status = testStatus;
-			writeFilteredFunctionCall(expect);
-			filter_unsuccessful++;
-			return;
-		}
-		count++;
-		Util.trY(() -> writer.append(expect));
-//		FileUtil.writeBytes(expect.getBytes(), getFile(f.cloneIndex).getPath(), true);
 	}
 
 	private static void createTimeoutThread(Thread current, int timeout) {
@@ -324,7 +349,7 @@ public class AutoTestGenerator {
 		String p = "\n" + StringUtil.fixString(79, '=') + "\n";
 		Integer dup = def("duplication", 10);
 		String s = AutoTestGenerator.class.getSimpleName() + " created " + count + " expectations in file pattern: '" + fileName + "...'"
-				+ "\n\tend time              : " + DateUtil.getFormattedDateTime(new Date())
+				+ "\n\tend time              : " + DateUtil.getFormattedDateTime(new Date()) + "\tduration: " + DateUtil.getFormattedTime(System.currentTimeMillis() - start)
 				+ "\n\ttestneverfail         : " + def("testneverfail", false)
 				+ "\n\tclassfinder cls/mthds : " + ClassFinder.self().getLoadedClassCount() + " / " + ClassFinder.self().getLoadedMethodCount()
 				+ "\n\tmethods loaded        : " + methods_loaded + "\t(rate: " + methods_loaded / (float)ClassFinder.self().getLoadedMethodCount() + ")"
@@ -337,6 +362,8 @@ public class AutoTestGenerator {
 				+ "\n\tfiltered complex types: " + filter_complextypes
 				+ "\n\tfiltered errors       : " + filter_errors
 				+ "\n\tfiltered nulls        : " + filter_nullresults
+				+ "\n\tmax duration          : " + (maxDurationFct != null ? maxDurationFct.duration + " msec\t\t<- "  + maxDurationFct.cloneIndex + ":" + maxDurationFct.getFunctionDescription() : "")
+				+ "\n\tmax mem usage         : " + (maxMemUsageFct != null ? ByteUtil.amount(maxMemUsageFct.memusage) + "\t\t\t<- " + maxMemUsageFct.cloneIndex + ":" + maxMemUsageFct.getFunctionDescription() : "")
 				+ groupByState
 				+ "\nLOADING PROCESS:"
 				+ "\n\tfiltered unsuccessful : " + filter_unsuccessful
@@ -351,17 +378,17 @@ public class AutoTestGenerator {
 }
 
 class Statistics {
-	Collection<AFunctionCaller> caller = Collections.synchronizedCollection(new LinkedList<>());
-	public void add(AFunctionCaller fc) { caller.add(fc);}
+	Collection<Status> statuss = Collections.synchronizedCollection(new LinkedList<>());
+	public void add(AFunctionCaller fc) { statuss.add(fc.status);}
 	public String getInfo(int keyWidth) {
 		int[] count = new int[StatusTyp.values().length];
-		caller.forEach(f -> ++count[f.status.typ.ordinal()]);
+		statuss.forEach(s -> ++count[s.typ.ordinal()]);
 		
 		final StringBuilder buf = new StringBuilder("\n\tGENERATED FUNCTION TESTERS GROUPED BY STATE:");
 		for (int i = 0; i < count.length; i++) {
 			buf.append("\n\t\t" + StringUtil.fixString(StatusTyp.values()[i], keyWidth) + ": " + count[i]);
 		}
-		buf.append("\n\t\t" + StringUtil.fixString("<<< TOTALLY >>>", keyWidth) + ": " + caller.size());
+		buf.append("\n\t\t" + StringUtil.fixString("<<< TOTALLY >>>", keyWidth) + ": " + statuss.size());
 		return buf.toString();
 	}
 }
@@ -424,7 +451,7 @@ class ExpectationCreator {
 		all = StringUtil.substring(l, prefix, "} ", 0, true);
 		if (!Util.isEmpty(all)) {
 			String obj;
-			do {
+			do { // ugly, but the json from MapUtil creates some additional \" that we use to distinguish inner maps and arrays
 				obj = StringUtil.substring(all, ",\"{\"", "}", true, true);
 				if (obj != null) {
 					String obj1 = obj.replaceAll("\"", "");
@@ -476,9 +503,10 @@ class FunctionCheck {
 	static Status checkTestSuccessful(AFunctionCaller t, String expect) {
 		ExpectationFunctionTester tester = null;
 		try {
-			tester = new ExpectationFunctionTester(t.source, ExpectationCreator.createExpectationFromLine(expect));
+			tester = new ExpectationFunctionTester(t.cloneIndex, t.source, ExpectationCreator.createExpectationFromLine(expect));
 			tester.testMe();
-//			tester.testMe(); //do it twice, sometimes a value changes the first time. would be better to do the initial run() twice!
+			if (def("precheck.twice", false))
+				tester.testMe(); //do it twice, sometimes a value changes the first time. would be better to do the initial run() twice!
 			t.status = tester.status;
 			return null;
 		} catch (Exception | AssertionError e) {
@@ -510,15 +538,24 @@ class FunctionCheck {
 	@SuppressWarnings("rawtypes")
 	static int filterFailingTest(Collection<AFunctionTester> testers) {
 		LinkedList<AFunctionTester> failing = new LinkedList<>();
-		for (AFunctionTester t : testers) {
-			try {
-				t.testMe();
-			} catch (Exception | AssertionError e) {
-				failing.add(t);
+		int size = testers.size();
+		try ( BufferedWriter removedFunctionWriter = FileUtil.getBAWriter(AutoTestGenerator.fileName + "removed-functions.txt")) {
+			for (AFunctionTester t : testers) {
+				try {
+					t.testMe();
+				} catch (Throwable e) {
+					failing.add(t);
+					Util.trY( () -> removedFunctionWriter.write(t.getID() + "\n"));
+				}
 			}
+			testers.removeAll(failing);
+			if (testers.size() != size-failing.size())
+				throw new IllegalStateException("failing testers were not removed from list - check your equals()!");
+		} catch (IOException e1) {
+			ManagedException.forward(e1);
 		}
-		testers.removeAll(failing);
 		return failing.size();
+
 	}
 }
 

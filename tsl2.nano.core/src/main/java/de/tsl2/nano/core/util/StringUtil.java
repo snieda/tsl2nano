@@ -1037,4 +1037,11 @@ public class StringUtil {
 		return args;
 	}
 
+	public static String matchingOneOf(Object...matchers) {
+		StringBuilder buf = new StringBuilder(".*(");
+		for (int i = 0; i < matchers.length; i++) {
+			buf.append(matchers[i] + (i < matchers.length - 1 ? "|" : ""));
+		}
+		return buf.append(").*").toString();
+	}
 }
