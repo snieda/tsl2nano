@@ -19,7 +19,6 @@ import de.tsl2.nano.core.secure.DistinguishedName;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MyProperties;
 import de.tsl2.nano.core.util.Period;
-import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.util.Mail;
 
@@ -77,7 +76,7 @@ public class RepositoryPortal implements IRepositoryPortal {
     static final String KT_IMPORT = property("keytool.importcert", "keytool -importcert -v -noprompt -keystore %s.pkcs12 -alias %s -storepass %s -file %s.pem");
 
     public void createRootCA() { // basic self signed
-        rootStore = createCertificate(getRoot(), rootPasswd = Crypt.generatePassword(24),
+        rootStore = createCertificate(getRoot(), rootPasswd = Crypt.generatePassword((byte)24),
                 new DistinguishedName(getRoot(), Locale.getDefault().getCountry()), CERT_X509_EXT_BC_CA_1, null, null);
     }
 
@@ -99,7 +98,7 @@ public class RepositoryPortal implements IRepositoryPortal {
 
         // create and export the new ca certificate in a keystore (not possible through
         // KeyStore class!)
-        passwd = Crypt.generatePassword(24);
+        passwd = Crypt.generatePassword((byte)24);
         orgaStore = createCertificate(name, passwd, orga, CERT_X509_EXT_BC_CA_0, getRoot(), rootPasswd);
 
         clientStore = Util.trY(() -> KeyStore.getInstance("PKCS12"));
