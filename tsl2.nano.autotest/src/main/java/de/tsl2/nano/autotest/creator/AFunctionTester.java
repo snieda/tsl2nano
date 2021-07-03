@@ -66,13 +66,16 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 
 	private static void duplicate(int duplication, Set<AFunctionTester> runners) {
 		log("duplicating " + runners.size() + " runners " + duplication + " times\n");
+		ArrayList<AFunctionTester> current = new ArrayList<>(runners);
 		ArrayList<AFunctionTester> clones = new ArrayList<>();
 		for (int i = 0; i < duplication; i++) {
 			clones.clear();
-			for (AFunctionTester tester : runners) {
+			for (AFunctionTester tester : current) {
 				clones.add((AFunctionTester) Util.trY(() -> tester.clone()));
 			}
 			runners.addAll(clones);
+			current.clear();
+			current.addAll(clones);
 		}
 	}
 
@@ -142,7 +145,7 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 				status = new Status(StatusTyp.TEST_FAILED, e.toString(), e);
 			log(" -> " + status + "\n");
 			if (!Util.get(PREF_PROPS + "testneverfail", false)) {
-				if (AutoTestGenerator.progress.isFinished())
+				if (AutoTestGenerator.progress != null && AutoTestGenerator.progress.isFinished())
 					FileUtil.writeBytes(("\n\nTEST: " + toString() + "\n" + ManagedException.toString(e)).getBytes(), AutoTestGenerator.fileName + "failed-tests.txt", true);
 				ManagedException.forward(e);
 			} else
