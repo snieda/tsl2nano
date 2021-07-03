@@ -52,6 +52,8 @@ public class CompatibilityLayer {
     public static final boolean MIN_JDK15 = IS_JDK && System.getProperty("java.version").matches("1[.][5-9].*");
     public static final boolean MIN_JDK16 = IS_JDK && System.getProperty("java.version").matches("1[.][6-9].*");
 
+    public static final String TSL2_JARRESOLVER = "de.tsl2.nano.jarresolver.JarResolver";
+
     /**
      * constructor
      */

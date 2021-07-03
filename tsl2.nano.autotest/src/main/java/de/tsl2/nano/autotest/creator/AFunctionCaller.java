@@ -8,10 +8,12 @@ import de.tsl2.nano.autotest.Construction;
 import de.tsl2.nano.autotest.ValueRandomizer;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.execution.Profiler;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
-public class AFunctionCaller implements Runnable {
+public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
 
 	protected Object result;
 	protected Object[] parameter;
@@ -19,7 +21,8 @@ public class AFunctionCaller implements Runnable {
 	protected Construction construction;
 	protected Method source;
 	protected transient Status status = Status.NEW;
-
+	long duration = -1;
+	long memusage = -1;
 	public static final String PREF_PROPS = "tsl2.functiontest.";
 
 	AFunctionCaller(Method source) {
@@ -72,14 +75,22 @@ public class AFunctionCaller implements Runnable {
 	}
 	
 	protected Object run(Method method, Object... args) {
-		log(StringUtil.fixString(this.getClass().getSimpleName(), 25) + " invoking " + method.getDeclaringClass().getSimpleName() + "." + method.getName() + " with " + Arrays.toString(args));
+		log(StringUtil.fixString(this.getClass().getSimpleName(), 25) + " invoking " + method.getDeclaringClass().getSimpleName() + "." + method.getName() + " with " + StringUtil.toString(Arrays.toString(args), 80));
 		final Object instance = getInstance(method);
 		try {
+			long start = System.currentTimeMillis();
+			long mem = Profiler.getUsedMem();
+			
 			result = method.invoke(instance, args);
+			
+			duration = System.currentTimeMillis() - start;
+			memusage = Profiler.getUsedMem() - mem;
 			status = Status.OK;
 			return result;
 		} catch (Throwable e) {
 			status = new Status(StatusTyp.EXECUTION_ERROR, e.toString(), e);
+			if (e instanceof Error)
+				FileUtil.writeBytes((this.toString() + "\nSTACKTRACE:\n" + ManagedException.toStringCause(e)).getBytes(), AutoTestGenerator.fileName + "hard-errors.txt", true);
 			return ManagedException.forward(e);
 		} finally {
 			log(" -> " + status + "\n");
@@ -118,8 +129,30 @@ public class AFunctionCaller implements Runnable {
 	}
 
 	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof AFunctionCaller && getID().equals(((AFunctionCaller)obj).getID());
+	}
+	
+	@Override
+	public int hashCode() {
+		return getID().hashCode();
+	}
+	
+	@Override
+	public int compareTo(AFunctionCaller o) {
+		return toString().compareTo(o.toString());
+	}
+	@Override
 	public String toString() {
-		return cloneIndex + ": " + source.getDeclaringClass().getSimpleName() + "." + source.getName() + " " + parametersAsString() + " -> " + status;
+		return getID() + " -> " + status;
+	}
+
+	public String getID() {
+		return cloneIndex + ": " + getFunctionDescription() + " " + parametersAsString();
+	}
+
+	public String getFunctionDescription() {
+		return source.getDeclaringClass().getSimpleName() + "." + source.getName();
 	}
 
 	public Construction getConstruction() {
@@ -128,7 +161,7 @@ public class AFunctionCaller implements Runnable {
 }
 
 enum StatusTyp {
-	NEW(0), FUNC_WITHOUT_INTPUT(1), FUNC_WITHOUT_OUTPUT(1), FUNC_COMPLEX_INPUT(1)
+	NEW(0), FUNC_SYNTHETIC(1), FUNC_WITHOUT_INTPUT(1), FUNC_WITHOUT_OUTPUT(1), FUNC_COMPLEX_INPUT(1)
 	, PARAMETER_UNDEFINED(-9), PARAMETER_ERROR(-9), INITIALIZED(2), INSTANCE_ERROR(-9)
 	, NULL_RESULT(1), EXECUTION_ERROR(-1), OK(2), STORE_ERROR(-1), TEST_FAILED(-3), TESTED(4);
 	int level; //to categorize a state
@@ -143,6 +176,7 @@ class Status {
 	static final Status INITIALIZED = new Status(StatusTyp.INITIALIZED);
 	static final Status OK = new Status(StatusTyp.OK);
 	static final Status NULL_RESULT = new Status(StatusTyp.NULL_RESULT);
+	static final Status FUNC_SYNTHETIC = new Status(StatusTyp.FUNC_SYNTHETIC);
 	static final Status FUNC_WITHOUT_INPUT = new Status(StatusTyp.FUNC_WITHOUT_INTPUT);
 	static final Status FUNC_COMPLEX_INPUT = new Status(StatusTyp.FUNC_COMPLEX_INPUT);
 	static final Status FUNC_WITHOUT_OUTPUT = new Status(StatusTyp.FUNC_WITHOUT_OUTPUT);
@@ -170,7 +204,7 @@ class Status {
 	public boolean isRefused() {
 		return typ.level == 1;
 	}
-	
+
 	@Override
 	public String toString() {
 		return typ + (err != null ? "(" + err.toString() + ")": msg != null ? "(" + msg + ")" : "");

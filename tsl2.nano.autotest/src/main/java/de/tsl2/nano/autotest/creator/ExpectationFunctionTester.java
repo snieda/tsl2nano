@@ -13,7 +13,7 @@ import de.tsl2.nano.core.util.Util;
 @FunctionType(Expectations.class)
 public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 
-	private static final String NOT_DEFINED = "NOT DEFINED";
+	private static final String UNDEFINED = "UNDEFINED";
 	private Expect expect;
 
 	public ExpectationFunctionTester(Method source, Expectations externalExpecations) {
@@ -32,7 +32,7 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 
 	@Override
 	protected Object[] getParameter() {
-		if (parameter == null) {
+		if (parameter == null && !status.in(StatusTyp.PARAMETER_UNDEFINED, StatusTyp.PARAMETER_ERROR)) {
 			Expect[] expectations = def.value();
 			//if generated ExpectationsImpl is used, there is only one @Expect!
 			boolean annotated = !def.getClass().getSimpleName().endsWith("Impl");
@@ -40,8 +40,8 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 				status = new Status(StatusTyp.PARAMETER_UNDEFINED, "countIndex > expectations.length", null);
 				return null;
 			}
-			expect = expectations[annotated ? cloneIndex : 0];
 			try {
+				expect = expectations[annotated ? cloneIndex : 0];
 				if (!Util.isEmpty(expect.whenPar())) {
 					int i = expect.parIndex();
 					if (i < 0) {
@@ -84,7 +84,7 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 	@Override
 	public Object getCompareOrigin() {
 		if (expect == null)
-			return NOT_DEFINED;
+			return UNDEFINED;
 		Object then = expect.then() == null || expect.then().equals("null") ? null : expect.then();
 		return then != null
 				? ObjectUtil.wrap(then, (Class)(getResultIndex() < 0 ? source.getReturnType() : source.getParameterTypes()[getResultIndex()])) 
@@ -120,8 +120,8 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 	public void run() {
 		if (getParameter() == null) {
 			log ("no expectation found for test number " + cloneIndex + "\n");
-			status = new Status(StatusTyp.PARAMETER_UNDEFINED, NOT_DEFINED, null);
-			result = NOT_DEFINED;
+			status = new Status(StatusTyp.PARAMETER_UNDEFINED, UNDEFINED, null);
+			result = UNDEFINED;
 			return;
 		}
 		result = run(source, parameter);
@@ -137,6 +137,6 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 	}
 	@Override
 	public String toString() {
-		return super.toString() + " -> expected: " + expect;
+		return super.toString() + " -> EXPECTED: " + expect;
 	}
 }

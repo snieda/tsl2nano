@@ -238,7 +238,7 @@ public class Crypt implements ISecure {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         if (cl instanceof NetworkClassLoader) {
             //if available we try to download bouncycastle through maven
-            new CompatibilityLayer().runOptionalMain("de.tsl2.nano.jarresolver.JarResolver", "org.bouncycastle");
+            new CompatibilityLayer().runOptionalMain(CompatibilityLayer.TSL2_JARRESOLVER, "org.bouncycastle");
         }
     }
 
@@ -337,7 +337,7 @@ public class Crypt implements ISecure {
      * @param length password length
      * @return
      */
-    public static String generatePassword(int length) {
+    public static String generatePassword(byte length) {
         byte[] passwordBuffer = new byte[length];
         generatePassword("SHA1PRNG", passwordBuffer );
         return StringUtil.toHexString(passwordBuffer);

@@ -19,5 +19,6 @@ public class AllAutoTests {
 		System.setProperty("tsl2.functiontest.filter.exclude", ".*SIShell.main.*");
 		System.setProperty("tsl2.functiontest.filter.voidreturn", "true");
 		System.setProperty("tsl2.functiontest.filter", matchPackage(PlatformManagement.class, SIShell.class));
+		System.setProperty("tsl2.functiontest.filter.exclude", ".*(PrintWriter).*");
 	}
 }

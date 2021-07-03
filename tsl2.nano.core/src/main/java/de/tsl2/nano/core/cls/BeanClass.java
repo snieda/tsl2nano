@@ -585,16 +585,20 @@ public class BeanClass<T> implements Serializable {
             return null;
         }
     }
-
-    /**
-     * @param <F> type of field
-     * @param instance object instance having field
-     * @param typeOfField field type
-     * @return first found field of given type or null
-     */
+    
+   /**
+    * @param <F> type of field
+    * @param typeOfField field type
+    * @return first found field of given type or null
+    */
     public <F> F getField(T instance, Class<F> typeOfField) {
-    	return (F) Arrays.stream(clazz.getDeclaredFields()).filter(f -> typeOfField.isAssignableFrom(f.getType())).findFirst().get();
+    	return (F) Util.trY(() -> getField(typeOfField).get(instance));
     }
+   
+    public Field getField(Class<?> typeOfField) {
+    	return Arrays.stream(clazz.getDeclaredFields()).filter(f -> typeOfField.isAssignableFrom(f.getType())).findFirst().orElse(null);
+    }
+    
     /**
      * setField
      * 
@@ -1296,7 +1300,16 @@ public class BeanClass<T> implements Serializable {
         return name.matches("([a-zA-Z0-9_]+[.])+[A-Z]\\w*[a-zA-Z0-9]$");
     }
 
-    /**
+    public boolean isSingleton() {
+    	Field f;
+    	return ObjectUtil.isInstanceable(clazz) && !hasPublicConstructor() && (f = getField(clazz)) != null && Modifier.isStatic(f.getModifiers()); 
+    }
+    
+    public boolean hasPublicConstructor() {
+		return Arrays.stream(clazz.getConstructors()).anyMatch( c -> c.isAccessible());
+	}
+
+	/**
      * getPackageName
      * 
      * @param name full class name

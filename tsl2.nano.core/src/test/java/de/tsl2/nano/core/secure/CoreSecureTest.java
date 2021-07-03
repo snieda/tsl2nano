@@ -76,7 +76,7 @@ public class CoreSecureTest implements ENVTestPreparation {
     public void testPKI() throws Exception {
         System.out.println(Crypt.providers());
         String data = "test data";
-        String passwd = Crypt.generatePassword(8);
+        String passwd = Crypt.generatePassword((byte)8);
         DistinguishedName dn = new DistinguishedName("me", "de");
         KeyPair keyPair = Crypt.generateKeyPair("RSA");
         PKI pki = new PKI(keyPair, dn);
@@ -107,7 +107,7 @@ public class CoreSecureTest implements ENVTestPreparation {
         assertTrue(pki.verify(new ByteArrayInputStream(data.getBytes()), signature));
         
         //...without content...
-        assertTrue(pki.getKeyManagerFactory(keyStore, Crypt.generatePassword(8)) != null);
+        assertTrue(pki.getKeyManagerFactory(keyStore, Crypt.generatePassword((byte)8)) != null);
         assertEquals(keyPair.getPublic(), pki.createPublicKey(keyPair.getPublic().getEncoded(), keyPair.getPublic().getAlgorithm()));
         
         PKI.main(new String[] {"help"});

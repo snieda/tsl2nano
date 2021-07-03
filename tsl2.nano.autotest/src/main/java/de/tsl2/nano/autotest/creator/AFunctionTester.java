@@ -143,7 +143,7 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 			log(" -> " + status + "\n");
 			if (!Util.get(PREF_PROPS + "testneverfail", false)) {
 				if (AutoTestGenerator.progress.isFinished())
-					FileUtil.writeBytes(ManagedException.toString(e).getBytes(), AutoTestGenerator.fileName + FileUtil.getUniqueFileName(e.toString()), false);
+					FileUtil.writeBytes(("\n\nTEST: " + toString() + "\n" + ManagedException.toString(e)).getBytes(), AutoTestGenerator.fileName + "failed-tests.txt", true);
 				ManagedException.forward(e);
 			} else
 				log("ERROR (testneverfail=true): " + status);
