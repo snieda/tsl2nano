@@ -33,7 +33,7 @@ public class CurrentStatePreservationTest {
 
 	@Parameters(name = "{0}")
 	public static Collection<? extends AFunctionTester> parameters() {
-		return AutoTestGenerator.createExpectationTesters();
+		return new AutoTestGenerator().createExpectationTesters();
 	}
 
 	@AfterClass

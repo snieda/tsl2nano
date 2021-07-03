@@ -45,7 +45,7 @@ public class WebSecurity {
     }
 	private String getAntiCSRFKey() {
 		if (antiCSRFKey == null)
-			antiCSRFKey = Crypt.generatePassword(16);
+			antiCSRFKey = Crypt.generatePassword((byte)16);
 		return antiCSRFKey;
 	}
 	public void checkAntiCSRFToken(NanoH5Session session, String token) {
