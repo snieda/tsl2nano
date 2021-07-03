@@ -53,11 +53,11 @@ public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
 	
 	protected String parametersAsString() {
 		try {
-			return Arrays.toString(getParameter());
+			return Util.toJson(getParameter());//Arrays.toString(getParameter());
 		} catch (Exception e) {
 			status = new Status(StatusTyp.PARAMETER_ERROR, e.toString(), e);
 			try {
-				return Arrays.toString(parameter);
+				return Util.toJson(getParameter());//Arrays.toString(parameter);
 			} catch (Exception e1) {
 				return "UNRESOLVABLE";
 			}
