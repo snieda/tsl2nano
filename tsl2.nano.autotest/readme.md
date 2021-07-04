@@ -275,28 +275,35 @@ There are some parameters (system properties) you can specify. Here, you see the
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 AutoTestGenerator(PREFIX: tsl2.functiontest.) started with:
-	user.dir               : /home/xxxx/workspace/tsl2nano-code/tsl2.nano.autotest/target/autotest
-	user.name              : xxxx
-	start time             : 25.06.2021 17:22:36
-	forbidSystemExit       : false
-	parallel               : true
-	timeout (sec)          : 100
-	filename pattern       : generated/generated-autotests-
-	fast.classscan         : true
-	clean                  : false
-	duplication            : 10
-	filter                 : .*(de.tsl2.nano.core).*
-	modifier               : -1
-	filter.test            : .*(Test|IT)
-	filter.exclude         : XXXXXXXX
-	filter.unsuccessful    : true
-	filter.voidparameter   : false
-	filter.voidreturn      : false
-	filter.complextypes    : false
-	filter.failing         : false
-	filter.nullresults     : false
+AutoTest (PREFIX: 'tsl2.functiontest.') started with:
+	user.dir                                          : /home/XXXX/workspace/code/tsl2.nano.autotest/target/autotest
+	user.name                                         : XXXX
+	donttest                                          : false
+	forbidsystemexit                                  : false
+	duplication                                       : 9
+	parallel                                          : false
+	timeout                                           : 100
+	testneverfail                                     : false
+	filename                                          : autetest/generated/generated-expectations-
+	fast.classscan                                    : false
+	clean                                             : false
+	filter                                            : .*(de.tsl2.nano.core).*
+	modifier                                          : -1
+	filter.test                                       : .*(IT|Test)
+	filter.exclude                                    : .*(DateUtil.getWorkdayCount|ByteUtil.getPipe).*
+	filter.unsuccessful                               : false
+	filter.void.parameter                             : false
+	filter.void.return                                : false
+	filter.complextypes                               : false
+	filter.singeltons                                 : false
+	filter.error.type                                 : XXXXXXXX
+	filter.failing                                    : false
+	filter.nullresults                                : false
+	allow.single.char.zero                            : false
+	allow.single.byte.zero                            : false
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+* *donttest*: if true, *AutoTestGenerator* will leave without doing any generation or testing!
 * *forbidSystemExit*: if true, a *securitymanager* will be created to disable calls to *System.exit()*. May have collisions with other SecuriyManagers and other permissions - so be careful with this.
 * *timeout* : (default: 100) time in seconds for each single test (extra thread will interupt unit test). if parallel is false or timeout is -1, no timeout will be checked.
 * *filename*: path to generate the auto tests into. on duplication > 0, you will have more than one generated file (e.g.: generated-autotests-0 and generated-autotests-1)
@@ -362,41 +369,44 @@ put them into your source code at the position of the given method.
 At the end, you will get a short statistical overview:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-AutoTestGenerator created 458 expectations in file pattern: 'generated/generated-autotests-...'
-	end time              : 25.06.2021 17:23:17
+AutoTestGenerator created 542 expectations in file pattern: 'generated/generated-autotests-...'
+	end time              : 04.07.2021 18:26:21	duration: 01:00:37
 	testneverfail         : false
-	classfinder cls/mthds : 646 / 11152
-	methods loaded        : 512	(rate: 0.045911048)
-	duplications          : 10	(methods loaded * duplications: 5120)
+	classfinder cls/mthds : 600 / 5021
+	methods loaded        : 1689	(rate: 0.3363872)
+	duplications          : 10	(methods loaded * duplications: 16890)
 GENERATION PROCESS:
-	created with fail     : 1500
+	created with fail     : 4821
 	created with null     : 0
-	created totally       : 458
-	filtered type error   : 289
-	filtered complex types: 0
-	filtered errors       : 2189
+	created totally       : 542
+	filtered type error   : 2128
+	filtered complex types: 1990
+	filtered errors       : 3576
 	filtered nulls        : 0
+	max duration          : 90 msec		<- 0:XmlUtil.saveXml
+	max mem usage         : 24MB			<- 5:AppLoader.start
 	GENERATED FUNCTION TESTERS GROUPED BY STATE:
 		NEW                   : 0
+		FUNC_SYNTHETIC        : 1920
 		FUNC_WITHOUT_INTPUT   : 0
 		FUNC_WITHOUT_OUTPUT   : 0
 		FUNC_COMPLEX_INPUT    : 0
 		PARAMETER_UNDEFINED   : 0
-		PARAMETER_ERROR       : 470
+		PARAMETER_ERROR       : 2026
 		INITIALIZED           : 0
-		INSTANCE_ERROR        : 1720
+		INSTANCE_ERROR        : 2080
 		NULL_RESULT           : 0
-		EXECUTION_ERROR       : 1189
-		OK                    : 289
+		EXECUTION_ERROR       : 2672
+		OK                    : 1668
 		STORE_ERROR           : 0
-		TEST_FAILED           : 680
-		TESTED                : 772
-		<<< TOTALLY >>>       : 5120
+		TEST_FAILED           : 3436
+		TESTED                : 3088
+		<<< TOTALLY >>>       : 16890
 LOADING PROCESS:
-	filtered unsuccessful : 680
-	load errors           : 53
-	loaded unsuccessful   : 23
-	totally loaded        : 1500 (load-rate: 0.29296875, total-rate: 0.013450502)
+	filtered unsuccessful : 3436
+	load errors           : 169
+	loaded unsuccessful   : 408
+	totally loaded        : 5183 (load-rate: 0.30686796, total-rate: 0.1031667)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * *methods loaded*: if the test was not started before, generating the auto tests - or the property clean=true was set, then the *AutoTestGenerator* will load classes and methods (filtered throuth given property filter)
@@ -498,6 +508,8 @@ In different environment, there may be problems. We try to solve some of them:
 	* -> start your jvm with parameter -XX:-OmitStackTraceInFastThrow
 * **AllAutoTests hangs until an timeout**
 	* use JVisualVM to open the hanging process in FeatureTab **Sampler**. Hit **CPU Samples** and open the callstack tree of  *main* thread completely. Perhaps you can see an endless or blocking loop (like Scanner.hasNextLine(), Semaphore.tryAquire(), etc.) in your code under test.
+	* Perhaps it is waiting on an InputStream (Pipe etc)
+	* If your function does a loop or allocation dependent on given int or long parameter, add an *assert* to stop on big numbers
 * **AllAutoTests stops with an timeout - started with maven surefire**
 	* -> increase the surefire properties *surefire.exitTimeout* or *surefire.timeout*
 * **AllAutoTests ends always with test failures or errors**

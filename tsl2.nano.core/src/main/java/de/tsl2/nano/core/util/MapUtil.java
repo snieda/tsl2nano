@@ -255,6 +255,8 @@ public class MapUtil {
     }
     
     public static Map fromJSON(String json) {
+    	if (!json.contains("\""))
+    		return fromJSONnoQuotations(json);
         Map map = new LinkedHashMap<>();
         String[] split = json.substring(1, json.length() - 1).split("[\"]");
         for (int i = 0; i < split.length-2; i+=4) {
@@ -263,8 +265,19 @@ public class MapUtil {
         return map;
     }
 
-    public static boolean isJSON(String txt) {
-    	return txt.matches("\\{((\\s*[\"]?\\w+[\"]?\\s*)[:](\\s*[\"]?.*[\"]?\\s*)[,]?)*\\}");
+    private static Map fromJSONnoQuotations(String json) {
+        Map map = new LinkedHashMap<>();
+        String[] split = json.substring(1, json.length() - 1).split("[,]");
+        String[] keyValue;
+        for (int i = 0; i < split.length; i++) {
+        	keyValue = split[i].split("\\s*:\\s*");
+            map.put(keyValue[0], keyValue[1]);
+        }
+        return map;
+	}
+
+	public static boolean isJSON(String txt) {
+    	return txt.matches("[\"]?\\{((\\s*[\"]?\\w+[\"]?\\s*)[:](\\s*[\"]?.*[\"]?\\s*)[,]?)*\\}[\\\"]?");
     }
     /**
      * finds all values for a given key set

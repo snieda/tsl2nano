@@ -245,8 +245,8 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
      */
     public void notifyFirstIdle(Notification notification,
             IListener<Notification> responseObserver,
-            long timeout,
-            long waitTime) {
+            int timeout,
+            int waitTime) {
         Collection<Node<T, D>> nodes = elements.values();
         long start = System.currentTimeMillis();
         int count = 0;
@@ -278,8 +278,8 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
      */
     public void notifyIdles(Collection<Notification> notifications,
             IListener<Notification> responseObserver,
-            long timeout,
-            long waitTime) {
+            int timeout,
+            int waitTime) {
         for (Notification notification : notifications) {
             notifyFirstIdle(notification, responseObserver, timeout, waitTime);
         }

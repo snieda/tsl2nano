@@ -393,6 +393,9 @@ public final class DateUtil {
         return getFormattedDate(new Date(), "yyyy-MMM-dd_HHmmss_sss");
     }
 
+    public static String getShortTimestamp(long millis) {
+    	return getFormattedDate(new Date(millis), "yyyyMMdd-HHmmss");
+    }
     /**
      * Formats a date to the default time-format
      * 

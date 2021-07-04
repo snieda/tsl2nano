@@ -254,6 +254,7 @@ public class SIShell implements IItemHandler, Serializable {
             Color bgColor,
             Map<String, Object> defintions) {
         super();
+    	assert width < 8000 && height < 8000;
         this.root = root;
         this.in = in;
         this.out = out;

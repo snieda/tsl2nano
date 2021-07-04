@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import de.tsl2.nano.autotest.creator.AFunctionCaller;
+import de.tsl2.nano.autotest.creator.AutoTest;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
@@ -92,11 +93,11 @@ public class ValueRandomizer {
 	}
 	@SuppressWarnings({ "unchecked" })
 	protected static <V> V createRandomValue(Class<V> typeOf, boolean zeroNumber, int depth) {
-		if (!Util.isEmpty(AFunctionCaller.def("use.valueset", ValueSets.DEFAULT)) && valueSets.hasValueSet(typeOf))
+		if (!Util.isEmpty(AFunctionCaller.def(AutoTest.USE_VALUESET, ValueSets.DEFAULT)) && valueSets.hasValueSet(typeOf))
 			return valueSets.fromValueSet(typeOf);
 		Object n = zeroNumber && (typeOf.isPrimitive() || NumberUtil.isNumber(typeOf)) 
-				&& (!PrimitiveUtil.isAssignableFrom(char.class, typeOf) || AFunctionCaller.def("allow.single.char.zero", false))
-				&& (!PrimitiveUtil.isAssignableFrom(byte.class, typeOf)  || AFunctionCaller.def("allow.single.byte.zero", false))
+				&& (!PrimitiveUtil.isAssignableFrom(char.class, typeOf) || AFunctionCaller.def(AutoTest.ALLOW_SINGLE_CHAR_ZERO, false))
+				&& (!PrimitiveUtil.isAssignableFrom(byte.class, typeOf)  || AFunctionCaller.def(AutoTest.ALLOW_SINGLE_BYTE_ZERO, false))
 				? 0d : createRandomNumber(typeOf);
 		if (NumberUtil.isNumber(n))
 			n = convert(n, typeOf, zeroNumber, depth);
@@ -127,9 +128,9 @@ public class ValueRandomizer {
 		else if (Collection.class.isAssignableFrom(typeOf))
 			n = new ListSet<>(n);
 		else if (Properties.class.isAssignableFrom(typeOf))
-			n = MapUtil.asProperties(n.toString(), n.toString());
+			n = MapUtil.asProperties(StringUtil.toBase64(n).replace('=', 'X'), n.toString());
 		else if (Map.class.isAssignableFrom(typeOf))
-			n = MapUtil.asMap(n, n);
+			n = MapUtil.asMap(StringUtil.toBase64(n).replace('=', 'X'), n);
 		else if (ByteUtil.isByteStream(typeOf))
 			n = ByteUtil.toByteStream(new byte[] {((Number) n).byteValue()}, typeOf);
 		else if (typeOf.isInterface() && !ObjectUtil.isStandardInterface(typeOf) && checkMaxDepth(depth))
@@ -144,7 +145,7 @@ public class ValueRandomizer {
 	}
 
 	protected static boolean checkMaxDepth(int depth) {
-		return depth < AFunctionCaller.def("create.randdom.max.depth", 10);
+		return depth < AFunctionCaller.def(AutoTest.CREATE_RANDDOM_MAX_DEPTH, 10);
 	}
 
 	public static <V> Construction<V> constructWithRandomParameters(Class<V> typeOf)  {
@@ -282,7 +283,7 @@ class ValueSets extends HashMap<Class, String[]> {
 	}
 
 	private static String valueSetFilename(Class typeOf) {
-		String name = AFunctionCaller.def("use.valueset", DEFAULT);
+		String name = AFunctionCaller.def(AutoTest.USE_VALUESET, DEFAULT);
 		return (name.equals(DEFAULT) ? "" : name + "-") + typeOf.getSimpleName().toLowerCase() + ".set";
 	}
 }

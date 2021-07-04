@@ -33,6 +33,9 @@ public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
 		this.cloneIndex = iteration;
 		this.source = source;
 	}
+	public static final <T> T def(AutoTest pref, T value) {
+		return IPreferences.get(pref, value);
+	}
 	public static final <T> T def(String name, T value) {
 		return Util.get(PREF_PROPS + name, value);
 	}
@@ -53,7 +56,7 @@ public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
 	
 	protected String parametersAsString() {
 		try {
-			return Util.toJson(getParameter());//Arrays.toString(getParameter());
+			return getParameter() != null ? Util.toJson(getParameter()) : "UNDEFINED";//Arrays.toString(getParameter());
 		} catch (Exception e) {
 			status = new Status(StatusTyp.PARAMETER_ERROR, e.toString(), e);
 			try {

@@ -1,6 +1,6 @@
 package de.tsl2.nano.util.autotest.creator;
 
-import static de.tsl2.nano.autotest.creator.InitAllAutoTests.matchPackage;
+import static de.tsl2.nano.autotest.creator.InitAllAutoTests.*;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -16,7 +16,7 @@ import de.tsl2.nano.structure.StructureTest;
 @SuiteClasses({InitAllAutoTests.class, AutoFunctionTest.class, CurrentStatePreservationTest.class})
 public class AllAutoTests {
 	public static void init() {
-		System.setProperty("tsl2.functiontest.filter", 
-				matchPackage(CollectionUtil.class, HistorizedInput.class, StructureTest.class));
+		set("filter", matchPackage(CollectionUtil.class, HistorizedInput.class, StructureTest.class));
+		set("filter.exclude", ".*Map.put.*"); // ExpiringMap.put may vary in result dependent on time
 	}
 }

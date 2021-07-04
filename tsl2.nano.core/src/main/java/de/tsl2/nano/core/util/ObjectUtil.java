@@ -348,7 +348,7 @@ public class ObjectUtil extends ByteUtil {
             	if (wrapperType.isInterface() || Modifier.isAbstract(wrapperType.getModifiers()))
             		wrapperType = getDefaultImplementation(wrapperType);
                 if (Class.class.isAssignableFrom(wrapperType))
-                    return (T) BeanClass.load(StringUtil.substring(value.toString(), "class ", "@"));
+                    return (T) BeanClass.load(StringUtil.substring(StringUtil.substring(value.toString(), "class ", "@"), "{", "}"));
                 else {
                 	if (value instanceof CharSequence && CharSequence.class.isAssignableFrom(wrapperType))
                 		return String.class.isAssignableFrom(wrapperType) ? (T) value.toString() : BeanClass.createInstance(wrapperType, value);
@@ -366,7 +366,7 @@ public class ObjectUtil extends ByteUtil {
                     else if (value instanceof String && Map.class.isAssignableFrom(wrapperType)
                     		&& MapUtil.isJSON((String)value)) {
 						Map jsonMap = MapUtil.fromJSON((String)value);
-						return (T) MapUtil.toMapType(jsonMap, (Class<Map>)wrapperType);
+						return (T) (wrapperType.isInterface() ? MapUtil.toMapType(jsonMap, (Class<Map>)wrapperType) : jsonMap);
                     } else if (wrapperType.isArray() && value instanceof String) {
                     	return (T) MapUtil.asArray(wrapperType.getComponentType(), (String)value);
                     } else if (wrapperType.isArray() && PrimitiveUtil.isAssignableFrom(wrapperType.getComponentType(),value.getClass())) {
@@ -383,7 +383,7 @@ public class ObjectUtil extends ByteUtil {
 						return (T) FormatUtil.getDefaultFormat(value, true);
 					else if (wrapperType.isInterface() && value instanceof Map)
 						return (T) AdapterProxy.create(wrapperType, (Map)value);
-					else if (wrapperType.isInterface() && value instanceof String)
+					else if (wrapperType.isInterface() && value instanceof String && MapUtil.isJSON((String) value))
 						return (T) AdapterProxy.create(wrapperType, MapUtil.fromJSON((String)value));
                     else if (isInstanceable(wrapperType)/* && BeanClass.hasConstructor(wrapperType, value.getClass())*/)
 						try {

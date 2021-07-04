@@ -91,7 +91,7 @@ public class InverseFunctionTester extends AFunctionTester<InverseFunction> {
 	}
 
 	@Override
-	public Object getExpectFail() {
+	public Throwable getExpectFail() {
 		return null;
 	}
 	
