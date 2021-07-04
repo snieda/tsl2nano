@@ -38,6 +38,9 @@ public interface IPreferences {
 	static String sysname(Enum e) {
 		return e.name().toLowerCase().replace('_' , '.');
 	}
+	static Object set(Enum pref, Object value) {
+		return PREFS.put(sysname(pref), value);
+	}
 	static void init(Class<? extends IPreferences> impl, String prefix) {
 		PREFS.putAll(load(impl));
 		STATS.put("prefix", prefix);
@@ -49,6 +52,9 @@ public interface IPreferences {
 	
 	static void save(Class impl) {
 		YamlUtil.dump(PREFS, getFileName(impl));
+	}
+	public static void reset() {
+		PREFS.clear();
 	}
 	static String getFileName(Class<? extends IPreferences> impl) {
 		return impl.getSimpleName().toLowerCase() + ".yml";
