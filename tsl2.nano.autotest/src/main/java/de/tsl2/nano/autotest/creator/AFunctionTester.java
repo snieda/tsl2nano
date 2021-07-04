@@ -18,6 +18,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.ClassFinder;
 import de.tsl2.nano.core.util.ConcurrentUtil;
+import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.Util;
@@ -93,8 +94,13 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 
 	public abstract Object getCompareOrigin();
 	public abstract Object getCompareResult();
-	public abstract Object getExpectFail();
+	public abstract Throwable getExpectFail();
 
+	public static String getErrorMsg(Throwable e) {
+		Throwable rootCause = ManagedException.getRootCause(e);
+		return rootCause.toString().replace('\n', ' ');
+	}
+	
 	protected int undefToZeroIndex(int index) {
 		return index < 0 ? 0 : index;
 	}
@@ -110,7 +116,7 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 	public static Collection<? extends AFunctionTester> prepareTestParameters(FunctionTester types) {
 		Collection<AFunctionTester> runners = new LinkedHashSet<>();
 		for (int i = 0; i < types.value().length; i++) {
-			runners.addAll(AFunctionTester.createRunners(types.value()[i], def("duplication", 3), def("filter", "")));
+			runners.addAll(AFunctionTester.createRunners(types.value()[i], def(AutoTest.DUPLICATION, 3), def(AutoTest.FILTER, "")));
 		}
 		return runners;
 	}
@@ -120,7 +126,7 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 			long start = System.currentTimeMillis();
 			run();
 			checkFail();
-			if (def("filter.nullresults", false))
+			if (def(AutoTest.FILTER_NULLRESULTS, false))
 				assertTrue(getCompareOrigin() != null || getCompareResult() != null);
 
 			Object o1 = best(getCompareOrigin());
@@ -146,7 +152,7 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 			log(" -> " + status + "\n");
 			if (!Util.get(PREF_PROPS + "testneverfail", false)) {
 				if (AutoTestGenerator.progress != null && AutoTestGenerator.progress.isFinished())
-					FileUtil.writeBytes(("\n\nTEST: " + toString() + "\n" + ManagedException.toString(e)).getBytes(), AutoTestGenerator.fileName + "failed-tests.txt", true);
+					FileUtil.writeBytes(("\n\nTEST: " + toString() + "\n" + ManagedException.toString(e)).getBytes(), def("timedfilename", "") + "failed-tests.txt", true);
 				ManagedException.forward(e);
 			} else
 				log("ERROR (testneverfail=true): " + status);
@@ -160,7 +166,7 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 		if (getExpectFail() != null) {
 			if (error == null)
 				fail("test should fail with " + getExpectFail() + " but has result: " + getResult());
-			else if (!getExpectFail().toString().contains(error.toString().replace('\n', ' ').substring(0, Math.min(200, error.toString().length()))))
+			else if (!getErrorMsg(getExpectFail()).contains(getErrorMsg(error).substring(0, Math.min(150, getErrorMsg(error).length()))))
 				fail("test should fail with " + getExpectFail() + " but failed with: " + error);
 			return true;
 		}

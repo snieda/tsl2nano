@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.security.MessageDigest;
 import java.text.Format;
 import java.text.ParseException;
@@ -502,7 +503,11 @@ public class Util {
     }
     
     public static String toJson(Object obj) {
-    	if (ObjectUtil.isSingleValueType(obj.getClass())) {
+    	if (Class.class.isAssignableFrom(obj.getClass())) {
+    		return "{" + obj.getClass().getName() + "}";
+    	} else if (Proxy.isProxyClass(obj.getClass()) && Proxy.getInvocationHandler(obj) instanceof AdapterProxy) {
+    		return MapUtil.toJSON(((AdapterProxy)Proxy.getInvocationHandler(obj)).values());
+    	} else if (ObjectUtil.isSingleValueType(obj.getClass())) {
 	    	Map<String, Object> m = new HashMap<>();
 	    	new PrivateAccessor<>(obj).forEachMember( (n, v) -> m.put(n, FormatUtil.format(v)));
 	    	return MapUtil.toJSON(m);
@@ -514,7 +519,7 @@ public class Util {
     		Object[] orr = ((Object[])obj);
     		Object[] arr = /*orr instanceof Object[] || orr instanceof String[] ? orr : */new String[orr.length];
     		for (int i = 0; i < arr.length; i++) {
-				arr[i] = FormatUtil.format(orr[i]);
+				arr[i] = isSimpleType(orr[i].getClass()) ? FormatUtil.format(orr[i]) : toJson(orr[i]);
 			}
     		return "{" + StringUtil.concatWrap("\"{0}\"".toCharArray(), arr).replace("\"\"", "\",\"") + "}";
     	} else

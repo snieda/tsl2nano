@@ -105,13 +105,13 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 	}
 
 	@Override
-	public Object getExpectFail() {
+	public Throwable getExpectFail() {
 		return expect != null && expect.then() != null && expect.then().startsWith("fail(") ? createFailException(expect.then()) : null;
 	}
 	
-	private Object createFailException(String then) {
-		String cls = StringUtil.substring(then, "fail(", "(");
-		String msg = StringUtil.substring(then, cls + "(", null);
+	private Throwable createFailException(String then) {
+		String cls = StringUtil.substring(then, "fail(", ":");
+		String msg = StringUtil.substring(then, cls + ": ", null);
 		msg = msg.substring(0, msg.length() - 1);
 		return BeanClass.createInstance(cls, msg);
 	}
@@ -120,7 +120,8 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 	public void run() {
 		if (getParameter() == null) {
 			log ("no expectation found for test number " + cloneIndex + "\n");
-			status = new Status(StatusTyp.PARAMETER_UNDEFINED, UNDEFINED, null);
+			if (!status.isFatal())
+				status = new Status(StatusTyp.PARAMETER_UNDEFINED, UNDEFINED, null);
 			result = UNDEFINED;
 			return;
 		}

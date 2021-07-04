@@ -124,6 +124,7 @@ public class SVGChart {
             boolean yLogarithmic,
             List<Object> x,
             Serie... yn) {
+    	assert width < 8000 && height < 8000;
 
         // Create Chart
         ChartBuilder builder;

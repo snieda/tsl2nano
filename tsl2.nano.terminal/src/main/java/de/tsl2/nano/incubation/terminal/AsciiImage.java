@@ -103,6 +103,7 @@ public class AsciiImage {
     }
 
     public PrintWriter convertToAscii(BufferedImage img, PrintWriter printer, int width, int height) throws Exception {
+    	assert width < 8000 && height < 8000;
         double px;
         Color pxColor;
         StringBuilder buf = new StringBuilder(img.getWidth());

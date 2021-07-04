@@ -84,6 +84,7 @@ public class TextTerminal {
     public static final int HORALIGN_RIGHT = 3;
 
     public static String getTextFrame(String text, Frame frameType, int width, boolean centered) {
+    	assert width < 8000;
         text = getFormattedItem(text, width - 2, 0, null, "\n");
         switch (frameType) {
         case BAR:
@@ -156,6 +157,7 @@ public class TextTerminal {
     }
 
     public static String getLine(String text, char filler, int width, boolean centered) {
+    	assert width < 8000;
         text = text == null ? "" : text;
         int count = width - text.length();
         if (count < 1) {
@@ -187,6 +189,7 @@ public class TextTerminal {
      * @return
      */
     public static String getFormattedItem(String item, int width, int alignment, String styles, String resets) {
+    	assert width < 8000;
         //if item text is to long
         item = StringUtil.format(item, width, resets);
         

@@ -17,6 +17,7 @@ import java.math.BigInteger;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -882,6 +883,17 @@ public class StringUtil {
         return true;
     }
     
+    public static String toBase64(Object txt) {
+    	return toBase64(txt.toString().getBytes());
+    }
+    public static String toBase64(byte[] raw) {
+        return Base64.getEncoder().encodeToString(raw);
+    }
+    public static String fromBase64(String encoded) {
+        return new String(Base64.getDecoder().decode(encoded));
+    }
+
+    
     public static String fromBaseString(String hex, int base) {
         StringBuilder buf = new StringBuilder(hex.length());
         for (int i = 0; i < hex.length(); i += 2) {
@@ -1043,5 +1055,13 @@ public class StringUtil {
 			buf.append(matchers[i] + (i < matchers.length - 1 ? "|" : ""));
 		}
 		return buf.append(").*").toString();
+	}
+	
+	public static int maxLength(Object...objs) {
+		int maxLength = 0, l;
+		for (int i = 0; i < objs.length; i++) {
+			maxLength = (l = objs.toString().length()) > maxLength ? l : maxLength;
+		}
+		return maxLength;
 	}
 }

@@ -25,7 +25,7 @@ public class AllAutoTests {
 				"SystemUtil.executeRegisteredLinuxBrowser","SystemUtil.softExitOnCurrentThreadGroup",
 				"ThreadState.top","LogFactory","ConcurrentUtil.getCaller","ConcurrentUtil.sleep",
 				"Profiler","NumberUtil.numbers","StringUtil.fixString","CollectionUtil.copyOfRange",
-				"Profiler.workLoop","NumberUtil.fixLengthNumber","DateUtil.getWorkdayCount"));
+				"Profiler.workLoop","NumberUtil.fixLengthNumber","DateUtil.getWorkdayCount", "ByteUtil.getPipe"));
 //		set("filter.error.types", ".*OutOfMemory.*");
 		String matchPackage = matchPackage(Main.class);
 //		matchPackage = ".*ManagedException.assertion.*"; 
