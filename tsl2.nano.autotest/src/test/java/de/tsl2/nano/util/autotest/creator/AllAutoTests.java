@@ -1,6 +1,11 @@
 package de.tsl2.nano.util.autotest.creator;
 
-import static de.tsl2.nano.autotest.creator.InitAllAutoTests.*;
+import static de.tsl2.nano.autotest.creator.AutoTest.DUPLICATION;
+import static de.tsl2.nano.autotest.creator.AutoTest.FILTER;
+import static de.tsl2.nano.autotest.creator.AutoTest.FILTER_EXCLUDE;
+import static de.tsl2.nano.autotest.creator.AutoTest.MODIFIER;
+import static de.tsl2.nano.autotest.creator.InitAllAutoTests.matchPackage;
+import static de.tsl2.nano.autotest.creator.InitAllAutoTests.set;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -19,9 +24,9 @@ public class AllAutoTests {
 		System.setProperty("tsl2nano.offline", "true");
 		set(false, "parallel");
 //		set(true, "testneverfail");
-//		set("duplication", 5);
-		set("modifier", -1); // public: 1
-		set("filter.exclude", StringUtil.matchingOneOf("ENVTestPreparation","ENV.delete","getFileOutput",
+		set(DUPLICATION, 5);
+		set(MODIFIER, -1); // public: 1
+		set(FILTER_EXCLUDE, StringUtil.matchingOneOf("ENVTestPreparation","ENV.delete","getFileOutput",
 				"SystemUtil.executeRegisteredLinuxBrowser","SystemUtil.softExitOnCurrentThreadGroup",
 				"ThreadState.top","LogFactory","ConcurrentUtil.getCaller","ConcurrentUtil.sleep",
 				"Profiler","NumberUtil.numbers","StringUtil.fixString","CollectionUtil.copyOfRange",
@@ -29,6 +34,6 @@ public class AllAutoTests {
 //		set("filter.error.types", ".*OutOfMemory.*");
 		String matchPackage = matchPackage(Main.class);
 //		matchPackage = ".*ManagedException.assertion.*"; 
-		set("filter", matchPackage);
+		set(FILTER, matchPackage);
 	}
 }

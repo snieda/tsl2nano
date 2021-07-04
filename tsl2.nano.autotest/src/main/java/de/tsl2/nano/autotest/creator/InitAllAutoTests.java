@@ -34,6 +34,7 @@ public class InitAllAutoTests {
 
 	@Parameters
 	public static Collection<?> parameters() {
+		IPreferences.reset();
 		System.setProperty("tsl2.nano.logfactory.off", "true");
 		System.setProperty("tsl2.nano.test", "true");
 //		System.setProperty("tsl2.functiontest.testneverfail", "true");
@@ -50,6 +51,9 @@ public class InitAllAutoTests {
 		Arrays.stream(properties).forEach( p -> System.setProperty(AFunctionTester.PREF_PROPS + p, String.valueOf(on)));
 	}
 
+	public static void set(Enum p, Object value) {
+		IPreferences.set(p, value);
+	}
 	public static void set(String property, Object value) {
 		System.setProperty(AFunctionTester.PREF_PROPS + property, value.toString());
 	}
