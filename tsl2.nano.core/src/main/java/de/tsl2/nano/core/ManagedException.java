@@ -217,7 +217,7 @@ public class ManagedException extends RuntimeException {
             return callback.get();
         } catch(Exception ex) {
             LOG.error(ex);
-            return escalate ? (T) forward(ex) : null;
+            return escalate ? (T) forward(ex, false) : null;
         }
     }
 
@@ -230,7 +230,7 @@ public class ManagedException extends RuntimeException {
             return callback.get();
         } catch(Exception ex) {
             LOG.error(ex);
-            return escalate ? (T) forward(ex) : null;
+            return escalate ? (T) forward(ex, false) : null;
         }
     }
 

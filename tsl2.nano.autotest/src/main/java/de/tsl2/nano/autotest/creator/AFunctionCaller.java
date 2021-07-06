@@ -1,5 +1,8 @@
 package de.tsl2.nano.autotest.creator;
 
+import static de.tsl2.nano.autotest.creator.AFunctionCaller.def;
+import static de.tsl2.nano.autotest.creator.AutoTest.TIMEOUT;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -9,6 +12,7 @@ import de.tsl2.nano.autotest.ValueRandomizer;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.execution.Profiler;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
@@ -77,6 +81,23 @@ public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
 		status = result != null ? Status.OK : Status.NULL_RESULT;
 	}
 	
+	public void runWithTimeout() {
+		int timeout = def(TIMEOUT, 20);
+		if (timeout == -1)
+			run(); 
+		else 
+			runWithTimeout(timeout * 1000);
+	}
+	public void runWithTimeout(int timout) {
+		try {
+			Thread runner = ConcurrentUtil.startDaemon(getID(), this, false,  (t, e) -> ManagedException.forward(e));
+			runner.join(timout);
+			if (runner.isAlive())
+				runner.interrupt();
+		} catch (Exception e) {
+			ManagedException.forward(e);
+		}
+	}
 	protected Object run(Method method, Object... args) {
 		log(StringUtil.fixString(this.getClass().getSimpleName(), 25) + " invoking " + method.getDeclaringClass().getSimpleName() + "." + method.getName() + " with " + StringUtil.toString(Arrays.toString(args), 80));
 		final Object instance = getInstance(method);
@@ -96,6 +117,7 @@ public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
 				FileUtil.writeBytes((this.toString() + "\nSTACKTRACE:\n" + ManagedException.toStringCause(e)).getBytes(), AutoTestGenerator.fileName + "hard-errors.txt", true);
 			return ManagedException.forward(e);
 		} finally {
+//			Thread.currentThread().notifyAll(); // you should't call notifyAll() on a Thread! see Thread.join() description
 			log(" -> " + status + "\n");
 		}
 	}

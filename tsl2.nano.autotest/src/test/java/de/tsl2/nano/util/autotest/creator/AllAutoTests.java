@@ -24,13 +24,13 @@ public class AllAutoTests {
 		System.setProperty("tsl2nano.offline", "true");
 		set(false, "parallel");
 //		set(true, "testneverfail");
-		set(DUPLICATION, 5);
+		set(DUPLICATION, 10);
 		set(MODIFIER, -1); // public: 1
 		set(FILTER_EXCLUDE, StringUtil.matchingOneOf("ENVTestPreparation","ENV.delete","getFileOutput",
 				"SystemUtil.executeRegisteredLinuxBrowser","SystemUtil.softExitOnCurrentThreadGroup",
 				"ThreadState.top","LogFactory","ConcurrentUtil.getCaller","ConcurrentUtil.sleep",
 				"Profiler","NumberUtil.numbers","StringUtil.fixString","CollectionUtil.copyOfRange",
-				"Profiler.workLoop","NumberUtil.fixLengthNumber","DateUtil.getWorkdayCount", "ByteUtil.getPipe"));
+				"Profiler.workLoop","NumberUtil.fixLengthNumber","DateUtil.getWorkdayCount"/*, "ByteUtil.getPipe"*/));
 //		set("filter.error.types", ".*OutOfMemory.*");
 		String matchPackage = matchPackage(Main.class);
 //		matchPackage = ".*ManagedException.assertion.*"; 
