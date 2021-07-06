@@ -147,8 +147,10 @@ public class AutoTestGenerator {
 			if (statistics.statuss.isEmpty()) // -> no generation but only reading
 				testers.forEach( t -> statistics.add(t));
 			printStatistics(duplication +1, testers, statistics.getInfo(22));
-			if (filteredFunctionWriter != null)
+			if (filteredFunctionWriter != null) {
 				Util.trY(() -> filteredFunctionWriter.close());
+				filteredFunctionWriter = null; // to avoid access with additional flush on parallel use
+			}
 			if (uncaughtExceptionHandler.hasExceptions()) {
 				FileUtil.writeBytes(uncaughtExceptionHandler.toString().getBytes(), getTimedFileName() + "uncaught-exceptions.txt", false);
 //				throw new IllegalStateException(uncaughtExceptionHandler.toString());
@@ -187,7 +189,8 @@ public class AutoTestGenerator {
 	
 			Util.stream(methods, def(PARALLEL, false)).forEach(m -> writeExpectation(new AFunctionCaller(iteration, m), writer));
 		} finally {
-			Util.trY( () ->filteredFunctionWriter.flush());
+			if (filteredFunctionWriter != null)
+				Util.trY( () ->filteredFunctionWriter.flush(), false);
 			FileUtil.close(writer, true);
 			ConcurrentUtil.sleep(200);
 			if (count > 0)
@@ -201,9 +204,6 @@ public class AutoTestGenerator {
 	}
 
 	private void writeExpectation(AFunctionCaller f, BufferedWriter writer) {
-		int timeout;
-		if (def(PARALLEL, false) && (timeout = def(TIMEOUT, 100)) != -1)
-			createTimeoutThread(Thread.currentThread(), timeout);
 		Thread.currentThread().setUncaughtExceptionHandler(uncaughtExceptionHandler );
 		try {
 			log("writeExpectation", progress);
@@ -223,7 +223,7 @@ public class AutoTestGenerator {
 					filter_complextypes++;
 					return;
 				}
-				f.run();
+				f.runWithTimeout();
 			} catch (Exception | AssertionError e) {
 				if (f.status.in(StatusTyp.NEW) || f.status.isFatal() || def(FILTER_FAILING, false) || filterErrorType(e)) {
 					writeFilteredFunctionCall(f);
@@ -258,7 +258,7 @@ public class AutoTestGenerator {
 			Status testStatus;
 			if (def(FILTER_UNSUCCESSFUL, true) && (testStatus = FunctionCheck.checkTestSuccessful(f, expect)) != null) {
 				f.status = testStatus;
-				writeFilteredFunctionCall(expect);
+				writeFilteredFunctionCall("STATUS: " + f.status + expect);
 				filter_unsuccessful++;
 				return;
 			}
@@ -271,12 +271,6 @@ public class AutoTestGenerator {
 		}
 	}
 
-	private void createTimeoutThread(Thread current, int timeout) {
-		new Thread(() -> {
-			Util.trY(() -> Thread.currentThread().sleep(timeout * 1000));
-			current.interrupt();
-			}).start();
-	}
 	private void writeFilteredFunctionCall(AFunctionCaller f) {
 		writeFilteredFunctionCall(f.toString() + "\n");
 	}

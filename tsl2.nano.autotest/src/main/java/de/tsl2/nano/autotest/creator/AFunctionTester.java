@@ -124,7 +124,7 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 	public void testMe() {
 		try {
 			long start = System.currentTimeMillis();
-			run();
+			runWithTimeout();
 			checkFail();
 			if (def(AutoTest.FILTER_NULLRESULTS, false))
 				assertTrue(getCompareOrigin() != null || getCompareResult() != null);

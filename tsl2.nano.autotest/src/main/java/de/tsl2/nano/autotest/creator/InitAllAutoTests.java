@@ -39,6 +39,7 @@ public class InitAllAutoTests {
 		System.setProperty("tsl2.nano.test", "true");
 //		System.setProperty("tsl2.functiontest.testneverfail", "true");
 		BaseTest.useTargetDir();
+		set(AutoTest.PARALLEL, true);
 		if (Boolean.getBoolean("tsl2.functiontest.forbidSystemExit"))
 			forbidSystemExit();
 		BeanClass.callStatic("de.tsl2.nano.util.autotest.creator.AllAutoTests", "init");
@@ -59,9 +60,13 @@ public class InitAllAutoTests {
 	}
 	
 	public static String matchPackage(Class...classes) {
+		return matchPackage(true, classes);
+	}
+	public static String matchPackage(boolean loadAllClassesInPackage, Class...classes) {
 		StringBuilder buf = new StringBuilder(".*(");
 		for (int i = 0; i < classes.length; i++) {
-			ClassFinder.getClassesInPackage(classes[i].getPackage().getName(), null);
+			if (loadAllClassesInPackage)
+				ClassFinder.getClassesInPackage(classes[i].getPackage().getName(), null);
 			buf.append(classes[i].getPackage().getName() + (i < classes.length - 1 ? "|" : ""));
 		}
 		return buf.append(").*").toString();

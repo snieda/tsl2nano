@@ -252,6 +252,7 @@ public class ClassFinder {
 		methodCount = 0;
 		List<Method> result = new ListSet<>();
 		classes.forEach(c -> result.addAll(matchingMethods(c, regex, modifier, annotation)));
+		System.out.print("sorting " + result.size() + " by name...");
 		Collections.sort(result, (c, d) -> c.toGenericString().compareTo(d.toGenericString()));
 		System.out.println(result.size() + " OK");
 		return result;
@@ -384,7 +385,7 @@ public class ClassFinder {
 		if (cl == null)
 			cl = Thread.currentThread().getContextClassLoader();
 		System.out.print("loading classes from " + packageName);
-	    String path = packageName.replaceAll("\\.", File.separator);
+	    String path = packageName.replaceAll("\\.", "/" /*File.separator: does not work on windows because backslash has to be escaped*/);
 	    List<Class<?>> classes = new ArrayList<>();
 	    String[] classPathEntries = System.getProperty("java.class.path").split(
 	            System.getProperty("path.separator")
