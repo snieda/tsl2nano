@@ -9,6 +9,7 @@ import java.util.Arrays;
 
 import de.tsl2.nano.autotest.Construction;
 import de.tsl2.nano.autotest.ValueRandomizer;
+import de.tsl2.nano.core.IPreferences;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.execution.Profiler;
@@ -39,6 +40,9 @@ public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
 	}
 	public static final <T> T def(AutoTest pref, T value) {
 		return IPreferences.get(pref, value);
+	}
+	public static final <T> T def(AutoTest pref, Class<T> type) {
+		return IPreferences.get(pref, type);
 	}
 	public static final <T> T def(String name, T value) {
 		return Util.get(PREF_PROPS + name, value);
@@ -82,21 +86,11 @@ public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
 	}
 	
 	public void runWithTimeout() {
-		int timeout = def(TIMEOUT, 20);
+		int timeout = def(TIMEOUT, int.class);
 		if (timeout == -1)
 			run(); 
 		else 
-			runWithTimeout(timeout * 1000);
-	}
-	public void runWithTimeout(int timout) {
-		try {
-			Thread runner = ConcurrentUtil.startDaemon(getID(), this, false,  (t, e) -> ManagedException.forward(e));
-			runner.join(timout);
-			if (runner.isAlive())
-				runner.interrupt();
-		} catch (Exception e) {
-			ManagedException.forward(e);
-		}
+			ConcurrentUtil.runWithTimeout(getID(), this, timeout * 1000);
 	}
 	protected Object run(Method method, Object... args) {
 		log(StringUtil.fixString(this.getClass().getSimpleName(), 25) + " invoking " + method.getDeclaringClass().getSimpleName() + "." + method.getName() + " with " + StringUtil.toString(Arrays.toString(args), 80));

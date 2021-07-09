@@ -19,15 +19,17 @@ Isn't there any way to automate some test creation? Why do we not declare expect
 
 But if we declare *Expections* or *Inverse functions*, we need a mechanism to fill method parameters randomly (or with expectation values). For complex objects , we need a test object implementation holding all java types as attributes. Further more we need a conversion framework to provide parameters in the right type.
 
-The framework tsl2nano provides the base for the implementation. A parameterized Unit Test uses features like declared Expectations and Inverse Functions to do the tests. It is extendable to add more features with new annotions and tester-implemenations.
+The framework tsl2nano provides the base for the implementation. A parameterized Unit Test uses features like declared Expectations and Inverse Functions to do the tests. It is extendable to add more features with new annotations and tester-implementations.
 
 But, at the end I'm to lazy to create the Expectation Annoations by myself. Is there any way to let that create anyone for me?
 Yes, the *AutoTestGenerator* can do that for you. It collects all available classes (may be filtered by you), finds out all
-callable methods and tries to run them with randomized values. The result will be stored as Expectation Annoations in a file. The file will be read again, the expectations will be handled like they were created by you as method annotations. A pre-test checks, that the test won't fail. Now, a parametrized unit test *CurrentStatePreservationTest* runs all that tests.
+callable methods and tries to run them with randomized values. The result will be stored as Expectation Annoations in a file. The file will be read again, the expectations will be handled like they were created by you as method annotations. A pre-test checks, that the test wont fail. Now, a parametrized unit test *CurrentStatePreservationTest* runs all that tests.
 
 It is up to you to copy/paste the generated annotations to the methods in your source code then the annotations would be found be the *AutoFunctionTest*. But only if you like ;-)
 
 Using this autotest library on my tsl2 framwork with 30 maven modules and about 260.000 instructions I pushed my code coverage from 62% to 72% - and I found with that some bugs to be fixed :-)
+
+So, it is a solution to provide generated and reusable junit tests to enhance your tested code coverage - and to analyze the current state of a new or old software.
 
 Additionally, there are the following Implementations:
 
@@ -47,6 +49,11 @@ Examples:
 * your method returns the count of cached objects -> that will vary on each call
 * your method returns something dependent on current system time, memory usage or file system state
 
+### Todos and Ideas
+
+* extra check *boundary conditions* to test on minimum and maximum values
+* enhance @Expect with with annotation for boundaries
+* interpret java bean validation annotations for value boundaries
 
 ## Code Review
 
@@ -296,6 +303,7 @@ AutoTest (PREFIX: 'tsl2.functiontest.') started with:
 	filter.void.return                                : false
 	filter.complextypes                               : false
 	filter.singeltons                                 : false
+	filter.noninstanceables                           : true
 	filter.error.type                                 : XXXXXXXX
 	filter.failing                                    : false
 	filter.nullresults                                : false
@@ -305,7 +313,7 @@ AutoTest (PREFIX: 'tsl2.functiontest.') started with:
 
 * *donttest*: if true, *AutoTestGenerator* will leave without doing any generation or testing!
 * *forbidSystemExit*: if true, a *securitymanager* will be created to disable calls to *System.exit()*. May have collisions with other SecuriyManagers and other permissions - so be careful with this.
-* *timeout* : (default: 20) time in seconds for each single test (extra thread will interupt unit test). if timeout = -1, no extra thread will be created to check for timeout.
+* *timeout* : (default: 20) time in seconds for each single test (extra thread will interupt unit test). if timeout = -1, no extra thread will be created to check for timeout. a timeout of 0 will wait forever - without interrupting.
 * *filename*: path to generate the auto tests into. on duplication > 0, you will have more than one generated file (e.g.: generated-autotests-0 and generated-autotests-1)
 * *fast.classscan*: if true, no class re-scan is done. may find less matches than with re-scan, but is much faster (should be used on classloader with more than 1000 classes)
 * *filter.test*: filter for test classes (default: ".*(Test|IT)")
@@ -319,8 +327,14 @@ AutoTest (PREFIX: 'tsl2.functiontest.') started with:
 * *filter.voidparameter*: (default: false) functions without parameters in a static class can only be tested against an exception (see fail). if set to true, methods without parameters in a static class will be filtered. Doing that, you may have to filter (filter.exclude) some of your classes and/or methods.
 * *filter.voidreturn*: (default: false) whether to filter methods having a return type of *void*. without an output like the returned result, an expectation can only tested against having a specific exception or not.
 * *filter.complextypes*: (default: false) all method parameter types and the result type will be checked, if they are standard data types (provided by jdk) and single value types.(nothing like arrays, collections and maps)
+* *filter.singeltons*: (default: true) filters all classes that have only a non public constructor and a non public field of its own type. singeltons may produce problems on junit testing if used on different tests.
+* *	filter.noninstanceables*: (default: true) classes of type interface/abstract/not-public/anonymous may not be instanceable and produce error states for each owned method. there are solutions (e.g. on interfaces and anonymous) to create instances - but sometimes they may fail.
+* *filter.error.type*: optionally filter errors occurring on calling the function (e.g. .*OutOfMemory.*). No expectation with a failing will be created.
 * *filter.failing*: (default:false) whether it is allowed to have a method call , throwing an exception as expected result.
 * *filter.nullresults*: (default: false) whether it is allowed to have a method call, returning *null* as result.
+* *allow.single.byte.zero*: (default:false) tells the ValueRandomizer not to create a byte value of 0. 0-bytes may be converted to c chars (\x0) that is an end-delimiter on strings.
+* allow.single.char.zero*: (default=false) tells the ValueRandomizer not to create a char value of 0. 0-char (\x0) is an end-delimiter on strings.
+
 
 The *AutoTestGenerator* finds methods to test, calls them and does a full test - comparing the result to the first call. If successful done, it writes the file *...target/autotest/generated/generated-autotests-XXX.txt with XXX as number of iteration (given by duplication).
 
@@ -472,9 +486,52 @@ public class AllAutoTests {
 	public static void init() {
 		System.setProperty("tsl2.functiontest.filter.voidparameter", "true");
 		System.setProperty("tsl2.functiontest.filter.voidreturn", "true");
-	
 		System.setProperty("tsl2.functiontest.filter.exclude", ".*(SystemUtil.executeRegisteredLinuxBrowser|SystemUtil.softExitOnCurrentThreadGroup|ThreadState.top|LogFactory).*");
 		System.setProperty("tsl2.functiontest.filter", matchPackage(Main.class, FuzzyFinder.class));
+	}
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+...or with IPreferences and their enums and some convenience methods of InitAllAutoTests:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package de.tsl2.nano.util.autotest.creator;
+
+import static de.tsl2.nano.autotest.creator.AutoTest.ALLOW_SINGLE_BYTE_ZERO;
+import static de.tsl2.nano.autotest.creator.AutoTest.DUPLICATION;
+import static de.tsl2.nano.autotest.creator.AutoTest.FILTER;
+import static de.tsl2.nano.autotest.creator.AutoTest.FILTER_EXCLUDE;
+import static de.tsl2.nano.autotest.creator.AutoTest.MODIFIER;
+import static de.tsl2.nano.autotest.creator.InitAllAutoTests.matchPackage;
+import static de.tsl2.nano.autotest.creator.InitAllAutoTests.set;
+
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+
+import de.tsl2.nano.autotest.creator.AutoFunctionTest;
+import de.tsl2.nano.autotest.creator.AutoTest;
+import de.tsl2.nano.autotest.creator.CurrentStatePreservationTest;
+import de.tsl2.nano.autotest.creator.InitAllAutoTests;
+import de.tsl2.nano.core.Main;
+import de.tsl2.nano.core.util.StringUtil;
+
+@RunWith(Suite.class)
+@SuiteClasses({InitAllAutoTests.class, AutoFunctionTest.class, CurrentStatePreservationTest.class})
+public class AllAutoTests {
+	private static final AutoTest ALLOW_SINGLE_BYTE_ZERO2 = ALLOW_SINGLE_BYTE_ZERO;
+
+	public static void init() {
+		set(false, AutoTest.FAST_CLASSSCAN);
+		set(true, ALLOW_SINGLE_BYTE_ZERO2, ALLOW_SINGLE_BYTE_ZERO2);
+		set(DUPLICATION, 10);
+		set(MODIFIER, -1); // public: 1
+		set(FILTER_EXCLUDE, StringUtil.matchingOneOf("ENVTestPreparation","ENV.delete","getFileOutput",
+				"SystemUtil.executeRegisteredLinuxBrowser"));
+		set(AutoTest.FILTER_ERROR_TYPES, ".*OutOfMemory.*");
+		String matchPackage = matchPackage(true, Main.class);
+		matchPackage = ".*ManagedException.assertion.*"; 
+		set(FILTER, matchPackage);
 	}
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -495,7 +552,7 @@ public class AllAutoTests {
 
 ## Problems and Solutions
 
-In different environment, there may be problems. We try to solve some of them:
+In different environments, there may be problems. We try to solve some of them:
 
 * **java.lang.ClassNotFoundException: org.junit.runner.manipulation.Filter**
 	* -> Did you store you file really in the src/test/java path (perhaps you put it into main?)
@@ -548,4 +605,4 @@ public class AllAutoTests {
 This static class name and init method name are used as workaround to the problem that a junit suite on parameterized unit tests has no standard possibility to initialize the test suite before parametrizing all tests. So, we use the trick of the empty *InitAllAutoTests* calling *de.tsl2.nano.util.autotest.creator.AllAutoTests.init()* by reflection.
 
 ** NOTE II **:
-If the test doesn't work, have a look in chapter *Problems and Solutions*
+If the test doesn't work, have a look at chapter *Problems and Solutions*
