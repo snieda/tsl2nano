@@ -730,4 +730,36 @@ public class CoreUtilTest implements ENVTestPreparation {
 //		assertEquals(4, Thread.currentThread().getThreadGroup().activeCount());
 //		ConcurrentUtil.doForCurrentThreadGroup(t -> assertEquals(State.TERMINATED, t.getState()));
 	}
+	
+	@Test
+	public void testRunWithTimeoutAndInterrupt() {
+		final List result = new LinkedList<>();
+		try {
+			ConcurrentUtil.runWithTimeout("test", () -> {ConcurrentUtil.sleep(1000); result.add("SUCCESSFULL");}, 100);
+			fail("runner should be interrupted");
+		} catch (Exception e) {
+			if (!(e.getCause() instanceof InterruptedException))
+				fail("runner should be stopped with " + IndexOutOfBoundsException.class + " but stopped with: " + e.getCause());
+			assertTrue(result.isEmpty());
+		}
+	}
+	@Test
+	public void testRunWithTimeoutWithError() {
+		final List result = new LinkedList<>();
+		try {
+			ConcurrentUtil.runWithTimeout("test", () -> result.get(0), 100);
+			fail("runner should stop with ArrayIndexOutOfBoundsException");
+		} catch (Exception e) {
+			if (!(e instanceof IndexOutOfBoundsException))
+				fail("runner should be stopped with " + IndexOutOfBoundsException.class + " but stopped with: " + e);
+			assertTrue(result.isEmpty());
+		}
+	}
+	@Test
+	public void testRunWithTimeout() {
+		final List result = new LinkedList<>();
+		ConcurrentUtil.runWithTimeout("test", () -> {ConcurrentUtil.sleep(100); result.add("SUCCESSFULL");}, 300);
+		assertTrue(!result.isEmpty());
+		assertEquals("SUCCESSFULL", result.get(0));
+	}
 }
