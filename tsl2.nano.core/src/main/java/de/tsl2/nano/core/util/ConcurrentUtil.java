@@ -10,11 +10,13 @@
 package de.tsl2.nano.core.util;
 
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -254,11 +256,16 @@ public class ConcurrentUtil {
 	 */
 	public static void runWithTimeout(String name, Runnable runnable, int timeout) {
 		try {
-			Thread runner = ConcurrentUtil.startDaemon(name, runnable, false,  (t, e) -> ManagedException.forward(e));
+			AtomicReference<Throwable> ref = new AtomicReference<Throwable>();
+			Thread runner = ConcurrentUtil.startDaemon(name, runnable, false,  (t, e) -> ref.set(e));
 			runner.join(timeout);
-			if (runner.isAlive())
+			if (runner.isAlive()) {
 				runner.interrupt();
-		} catch (Exception e) {
+				throw new InterruptedException(Arrays.toString(runner.getStackTrace()));
+			}
+			if (ref.get() != null)
+				throw ref.get();
+		} catch (Throwable e) {
 			ManagedException.forward(e);
 		}
 	}
