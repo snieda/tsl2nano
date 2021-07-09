@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import de.tsl2.nano.core.IPreferences;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.ClassFinder;
@@ -90,7 +91,7 @@ public class AutoTestGenerator {
 		new AutoTestGenerator().createExpectationTesters();
 	}
 	private void printStartParameters() {
-		FileUtil.writeBytes((IPreferences.printInfo(AutoTest.class, AutoTest.PREFIX, 0)).getBytes(), getTimedFileName() + "statistics.txt", false);
+		FileUtil.writeBytes((IPreferences.printInfo(AutoTest.class)).getBytes(), getTimedFileName() + "statistics.txt", false);
 	}
 	public String getTimedFileName() {
 		return fileName + DateUtil.getShortTimestamp(start) + "-";
@@ -118,6 +119,7 @@ public class AutoTestGenerator {
 			filterExcludes(methods);
 			filterTestClasses(methods);
 			filterSingeltons(methods);
+			filterNonInstanceable(methods);
 			FileUtil.writeBytes(("\nfiltered methods             : " + methods.size()).getBytes(), getTimedFileName() + "statistics.txt", true);
 			progress = new ProgressBar(methods.size() * duplication);
 			ArrayList<Integer> dupList = NumberUtil.numbers(duplication);
@@ -174,6 +176,10 @@ public class AutoTestGenerator {
 	private static void filterSingeltons(List<Method> methods) {
 		if (def(FILTER_SINGELTONS, true))
 			methods.removeIf(m -> BeanClass.getBeanClass(m.getDeclaringClass()).isSingleton());
+	}
+	private static void filterNonInstanceable(List<Method> methods) {
+		if (def(FILTER_NONINSTANCEABLES, true))
+			methods.removeIf(m -> !Util.isInstanceable((m.getDeclaringClass())));
 	}
 	private static boolean filterErrorType(Throwable e) {
 		return ManagedException.getRootCause(e).toString().matches(def(FILTER_ERROR_TYPES, REGEX_UNMATCH));

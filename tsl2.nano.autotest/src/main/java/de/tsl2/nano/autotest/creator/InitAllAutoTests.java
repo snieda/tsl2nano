@@ -10,6 +10,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import de.tsl2.nano.autotest.BaseTest;
+import de.tsl2.nano.core.IPreferences;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.ClassFinder;
 
@@ -47,6 +48,10 @@ public class InitAllAutoTests {
 	}
 
 	@Test public void nothing() {}
+
+	public static void set(boolean on, Enum...properties) {
+		Arrays.stream(properties).forEach( e -> set(e, on));
+	}
 
 	public static void set(boolean on, String...properties) {
 		Arrays.stream(properties).forEach( p -> System.setProperty(AFunctionTester.PREF_PROPS + p, String.valueOf(on)));

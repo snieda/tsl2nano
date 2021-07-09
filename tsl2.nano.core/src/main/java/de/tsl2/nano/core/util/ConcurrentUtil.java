@@ -246,6 +246,22 @@ public class ConcurrentUtil {
     public static SuppliedLock createReadWriteLock() {
         return new SuppliedLock();
     }
+	/**
+	 * starts the given runnable in an extra daemon thread, setting internally an exception-handler 
+	 * to forward any exception to the current thread and trying to join the new thread to the current,
+	 * waiting max timeout millis. If not ended inside the given time, the new thread will be interrupted.
+	 * @param timeout timeout in millis
+	 */
+	public static void runWithTimeout(String name, Runnable runnable, int timeout) {
+		try {
+			Thread runner = ConcurrentUtil.startDaemon(name, runnable, false,  (t, e) -> ManagedException.forward(e));
+			runner.join(timeout);
+			if (runner.isAlive())
+				runner.interrupt();
+		} catch (Exception e) {
+			ManagedException.forward(e);
+		}
+	}
     public static void runWorker(Runnable...runnables) {
     	createParallelWorker(runnables[0].toString()).run(runnables);
     }
