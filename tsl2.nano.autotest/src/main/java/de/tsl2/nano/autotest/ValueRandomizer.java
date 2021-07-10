@@ -13,10 +13,13 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -93,7 +96,7 @@ public class ValueRandomizer {
 	}
 	@SuppressWarnings({ "unchecked" })
 	protected static <V> V createRandomValue(Class<V> typeOf, boolean zeroNumber, int depth) {
-		if (!Util.isEmpty(AFunctionCaller.def(AutoTest.USE_VALUESET, ValueSets.DEFAULT)) && valueSets.hasValueSet(typeOf))
+		if (!Util.isEmpty(AFunctionCaller.def(AutoTest.VALUESET_GROUP, ValueSets.DEFAULT)) && valueSets.hasValueSet(typeOf))
 			return valueSets.fromValueSet(typeOf);
 		Object n = zeroNumber && (typeOf.isPrimitive() || NumberUtil.isNumber(typeOf)) 
 				&& (!PrimitiveUtil.isAssignableFrom(char.class, typeOf) || AFunctionCaller.def(AutoTest.ALLOW_SINGLE_CHAR_ZERO, false))
@@ -252,9 +255,13 @@ public class ValueRandomizer {
 	
 	public static final void reset() {
 		valueSets.clear();
+		valueSets.consumed.clear();
 	}
 }
-class ValueSets extends HashMap<Class, String[]> {
+@SuppressWarnings({"serial", "rawtypes", "unchecked"})
+class ValueSets extends HashMap<Class, List<String>> {
+	static List consumed = Collections.synchronizedList(new ArrayList<>());
+	
 	static final String DEFAULT = "default";
 
 	<V> V fromValueSet(Class<V> typeOf) {
@@ -262,12 +269,25 @@ class ValueSets extends HashMap<Class, String[]> {
 			String content = new String(FileUtil.getFileBytes(valueSetFilename(typeOf), null));
 			content = content.replaceFirst("[#].*\n", "");
 			String[] names = content.split("[\n]");
-			put(typeOf, names);
+			put(typeOf, Arrays.asList(names));
 		}
-		String[] values = get(typeOf);
-		if (values.length == 1) 
-			return fromValueMinMax(values[0], typeOf);
-		return ObjectUtil.wrap(values[(int)(Math.random() * values.length)], typeOf);
+		List<String> values = get(typeOf);
+		Object result = values.size() == 1 ? fromValueMinMax(values.get(0), typeOf) : values.get((int)(Math.random() * values.size()));
+		result = checkCollision(result, typeOf); //recursive!
+		return values.size() == 1 ? (V) result : ObjectUtil.wrap(result, typeOf);
+	}
+
+	private Object checkCollision(Object result, Class typeOf) {
+		if (!AFunctionCaller.def(AutoTest.VALUESET_AVOID_COLLISION, boolean.class))
+			return result;
+		if (!PrimitiveUtil.isPrimitiveOrWrapper(typeOf) && consumed.contains(result)) {
+			List<String> valueset = this.get(typeOf);
+			if (valueset.size() > 1 && consumed.size() > valueset.size() && consumed.containsAll(valueset))
+				return result;
+			result = fromValueSet(typeOf); // recursion!
+		}
+		consumed.add(result);
+		return result;
 	}
 
 	<V> V fromValueMinMax(String minmax, Class<V> typeOf) {
@@ -283,7 +303,7 @@ class ValueSets extends HashMap<Class, String[]> {
 	}
 
 	private static String valueSetFilename(Class typeOf) {
-		String name = AFunctionCaller.def(AutoTest.USE_VALUESET, DEFAULT);
+		String name = AFunctionCaller.def(AutoTest.VALUESET_GROUP, DEFAULT);
 		return (name.equals(DEFAULT) ? "" : name + "-") + typeOf.getSimpleName().toLowerCase() + ".set";
 	}
 }

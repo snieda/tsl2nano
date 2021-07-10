@@ -111,7 +111,7 @@ public interface IPreferences {
 	}
 	/** dumps the current preferences to file (see #getFileName()) */
 	static void save(Class impl) {
-		YamlUtil.dump(PREFS, getFileName(impl));
+//		YamlUtil.dump(PREFS, getFileName(impl)); //TODO: load does not work yet!
 	}
 	/** removes all preference values. this is a reset to the default values of your enum implementation */
 	public static void reset() {

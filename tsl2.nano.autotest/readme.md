@@ -281,34 +281,37 @@ If you call the test a second time, all generated tests are restored. So, no new
 There are some parameters (system properties) you can specify. Here, you see the properties (they all have the prefix 'tsl2.functiontest.', e.g.: 'tsl2.functiontest.clean') with their default values:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-AutoTestGenerator(PREFIX: tsl2.functiontest.) started with:
 AutoTest (PREFIX: 'tsl2.functiontest.') started with:
-	user.dir                                          : /home/XXXX/workspace/code/tsl2.nano.autotest/target/autotest
-	user.name                                         : XXXX
-	donttest                                          : false
-	forbidsystemexit                                  : false
-	duplication                                       : 9
-	parallel                                          : false
-	timeout                                           : 20
-	testneverfail                                     : false
-	filename                                          : autetest/generated/generated-expectations-
-	fast.classscan                                    : false
-	clean                                             : false
-	filter                                            : .*(de.tsl2.nano.core).*
-	modifier                                          : -1
-	filter.test                                       : .*(IT|Test)
-	filter.exclude                                    : .*(DateUtil.getWorkdayCount|ByteUtil.getPipe).*
-	filter.unsuccessful                               : false
-	filter.void.parameter                             : false
-	filter.void.return                                : false
-	filter.complextypes                               : false
-	filter.singeltons                                 : false
-	filter.noninstanceables                           : true
-	filter.error.type                                 : XXXXXXXX
-	filter.failing                                    : false
-	filter.nullresults                                : false
-	allow.single.char.zero                            : false
-	allow.single.byte.zero                            : false
+	user.dir                                         : /home/xxx/workspace/tsl2.nano.autotest/target/autotest
+	user.name                                        : xxx
+	donttest                                         : false
+	forbidsystemexit                                 : false
+	duplication                                      : 10
+	parallel                                         : true
+	timeout                                          : 20
+	precheck.twice                                   : true
+	testneverfail                                    : false
+	filename                                         : autotest/generated/generated-expectations-
+	fast.classscan                                   : true
+	clean                                            : false
+	filter                                           : .*(de.tsl2.nano.core).*
+	modifier                                         : -1
+	filter.test                                      : .*(IT|Test)
+	filter.exclude                                   : .*(DateUtil.getWorkdayCount|ByteUtil.getPipe|IPreferences).*
+	filter.unsuccessful                              : true
+	filter.void.parameter                            : false
+	filter.void.return                               : false
+	filter.complextypes                              : false
+	filter.singeltons                                : true
+	filter.noninstanceables                          : true
+	filter.error.types                               : XXXXXXXX
+	filter.failing                                   : false
+	filter.nullresults                               : false
+	allow.single.char.zero                           : false
+	allow.single.byte.zero                           : false
+	create.randdom.max.depth                         : 10
+	valueset.group                                   : default
+	valueset.avoid.collision                         : true
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * *donttest*: if true, *AutoTestGenerator* will leave without doing any generation or testing!
@@ -334,7 +337,8 @@ AutoTest (PREFIX: 'tsl2.functiontest.') started with:
 * *filter.nullresults*: (default: false) whether it is allowed to have a method call, returning *null* as result.
 * *allow.single.byte.zero*: (default:false) tells the ValueRandomizer not to create a byte value of 0. 0-bytes may be converted to c chars (\x0) that is an end-delimiter on strings.
 * allow.single.char.zero*: (default=false) tells the ValueRandomizer not to create a char value of 0. 0-char (\x0) is an end-delimiter on strings.
-
+* *valueset.group*: (default: 'default'). if empty ('') no valuesets will be used. if 'default', valuerandomizer will look for a resource or file with simle name of type to create a random value for (e.g.: string.set). if not empty and not 'default', the resourde name will have to start with this name (e.g.: 'mygroupname-string.set')
+* *valueset.avoid.collision*: (default: true) tries to avoid collisions over all valuesets (except primitives and interval-valuesets). will result in a more stabil test run in cause of avoiding collisions on for example file names. the performance will slow down on collisions in cause of recursion and testing for available values.
 
 The *AutoTestGenerator* finds methods to test, calls them and does a full test - comparing the result to the first call. If successful done, it writes the file *...target/autotest/generated/generated-autotests-XXX.txt with XXX as number of iteration (given by duplication).
 
