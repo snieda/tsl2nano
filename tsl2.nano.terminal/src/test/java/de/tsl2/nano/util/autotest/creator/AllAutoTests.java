@@ -16,9 +16,8 @@ import de.tsl2.nano.incubation.terminal.SIShell;
 @SuiteClasses({InitAllAutoTests.class, AutoFunctionTest.class, CurrentStatePreservationTest.class})
 public class AllAutoTests {
 	public static void init() {
-		System.setProperty("tsl2.functiontest.filter.exclude", ".*SIShell.main.*");
-		System.setProperty("tsl2.functiontest.filter.voidreturn", "true");
+		System.setProperty("tsl2.functiontest.filter.void.return", "true");
 		System.setProperty("tsl2.functiontest.filter", matchPackage(PlatformManagement.class, SIShell.class));
-		System.setProperty("tsl2.functiontest.filter.exclude", ".*(PrintWriter).*");
+		System.setProperty("tsl2.functiontest.filter.exclude", ".*(SIShell.main|PrintWriter).*");
 	}
 }

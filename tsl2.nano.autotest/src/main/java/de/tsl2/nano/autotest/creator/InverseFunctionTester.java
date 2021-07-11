@@ -82,11 +82,11 @@ public class InverseFunctionTester extends AFunctionTester<InverseFunction> {
 	}
 
 	public Object getCompareOrigin() {
-		return def.compareParameterIndex() < 0  && !getFunction(def).getReturnType().equals(void.class) ? result : parameter[undefToZeroIndex(def.compareParameterIndex())];
+		return convertOnMultilineString(def.compareParameterIndex() < 0  && !getFunction(def).getReturnType().equals(void.class) ? result : parameter[undefToZeroIndex(def.compareParameterIndex())]);
 	}
 
 	public Object getCompareResult() {
-		Object compRevObject = def.compareInverseParameterIndex() < 0 && !source.getReturnType().equals(void.class) ? inverseResult : parameterInverse[undefToZeroIndex(def.compareInverseParameterIndex())];
+		Object compRevObject = convertOnMultilineString(def.compareInverseParameterIndex() < 0 && !source.getReturnType().equals(void.class) ? inverseResult : parameterInverse[undefToZeroIndex(def.compareInverseParameterIndex())]);
 		return getCompareOrigin() != null ? ObjectUtil.wrap(compRevObject, getCompareOrigin().getClass()) : compRevObject;
 	}
 

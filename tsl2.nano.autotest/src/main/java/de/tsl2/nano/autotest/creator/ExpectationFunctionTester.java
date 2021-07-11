@@ -86,9 +86,10 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 		if (expect == null)
 			return UNDEFINED;
 		Object then = expect.then() == null || expect.then().equals("null") ? null : expect.then();
-		return then != null
-				? ObjectUtil.wrap(then, (Class)(getResultIndex() < 0 ? source.getReturnType() : source.getParameterTypes()[getResultIndex()])) 
-				: null;
+		return convertOnMultilineString(
+				then != null
+					? ObjectUtil.wrap(then, (Class)(getResultIndex() < 0 ? source.getReturnType() : source.getParameterTypes()[getResultIndex()])) 
+					: null);
 	}
 
 	private int getResultIndex() {
@@ -101,7 +102,7 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 
 	@Override
 	public Object getCompareResult() {
-		return expect == null || getResultIndex() < 0 ? result : getParameter()[getResultIndex()];
+		return convertOnMultilineString(expect == null || getResultIndex() < 0 ? result : getParameter()[getResultIndex()]);
 	}
 
 	@Override

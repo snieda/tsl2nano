@@ -37,6 +37,7 @@ public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
 	AFunctionCaller(int iteration, Method source) {
 		this.cloneIndex = iteration;
 		this.source = source;
+		this.source.setAccessible(true);
 	}
 	public static final <T> T def(AutoTest pref, T value) {
 		return IPreferences.get(pref, value);
@@ -48,7 +49,8 @@ public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
 		return Util.get(PREF_PROPS + name, value);
 	}
 	protected static final void log(Object txt) {
-		System.out.print(txt);
+		String s = txt.toString();
+		System.out.print(s.length() > 640 ? s.substring(0, 640) : s);
 	}
 
 	protected Object[] getParameter() {

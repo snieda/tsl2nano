@@ -24,13 +24,13 @@ public class AllAutoTests {
 	public static void init() {
 		System.setProperty("tsl2nano.offline", "true");
 		set(DUPLICATION, 10);
-		set(TIMEOUT, -1);
+//		set(TIMEOUT, -1);
 		set(MODIFIER, -1); // public: 1
 		set(FILTER_EXCLUDE, StringUtil.matchingOneOf("ENVTestPreparation","ENV.delete","getFileOutput",
 				"SystemUtil.executeRegisteredLinuxBrowser","SystemUtil.softExitOnCurrentThreadGroup",
 				"ThreadState.top","LogFactory","ConcurrentUtil.getCaller","ConcurrentUtil.sleep",
 				"Profiler","NumberUtil.numbers","StringUtil.fixString","CollectionUtil.copyOfRange",
-				"Profiler.workLoop","NumberUtil.fixLengthNumber","DateUtil.getWorkdayCount", "ByteUtil.getPipe", "IPreferences"));
+				"Profiler.workLoop","NumberUtil.fixLengthNumber","DateUtil.getWorkdayCount", "ByteUtil.getPipe", "IPreferences", "CPUState"));
 		set(FILTER, matchPackage(Main.class));
 	}
 }

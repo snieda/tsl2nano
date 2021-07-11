@@ -592,7 +592,7 @@ public class BeanClass<T> implements Serializable {
     * @return first found field of given type or null
     */
     public <F> F getField(T instance, Class<F> typeOfField) {
-    	return (F) Util.trY(() -> getField(typeOfField).get(instance));
+    	return (F) Util.trY(() -> {Field f = getField(typeOfField); f.setAccessible(true); return f.get(instance);});
     }
    
     public Field getField(Class<?> typeOfField) {
