@@ -147,7 +147,7 @@ public class ValueRandomizer {
 		return n;
 	}
 
-	protected static boolean checkMaxDepth(int depth) {
+	static boolean checkMaxDepth(int depth) {
 		return depth < AFunctionCaller.def(AutoTest.CREATE_RANDDOM_MAX_DEPTH, 10);
 	}
 
@@ -265,6 +265,9 @@ class ValueSets extends HashMap<Class, List<String>> {
 	static final String DEFAULT = "default";
 
 	<V> V fromValueSet(Class<V> typeOf) {
+		return fromValueSet(typeOf, 0);
+	}
+	<V> V fromValueSet(Class<V> typeOf, int depth) {
 		if (!containsKey(typeOf) && (FileUtil.userDirFile(valueSetFilename(typeOf)).exists() || FileUtil.hasResource(valueSetFilename(typeOf)))) {
 			String content = new String(FileUtil.getFileBytes(valueSetFilename(typeOf), null));
 			content = content.replaceFirst("[#].*\n", "");
@@ -273,18 +276,21 @@ class ValueSets extends HashMap<Class, List<String>> {
 		}
 		List<String> values = get(typeOf);
 		Object result = values.size() == 1 ? fromValueMinMax(values.get(0), typeOf) : values.get((int)(Math.random() * values.size()));
-		result = checkCollision(result, typeOf); //recursive!
+		result = checkCollision(result, typeOf, depth); //recursive!
 		return values.size() == 1 ? (V) result : ObjectUtil.wrap(result, typeOf);
 	}
 
-	private Object checkCollision(Object result, Class typeOf) {
+	private Object checkCollision(Object result, Class typeOf, int depth) {
 		if (!AFunctionCaller.def(AutoTest.VALUESET_AVOID_COLLISION, boolean.class))
+			return result;
+		if (!ValueRandomizer.checkMaxDepth(depth))
 			return result;
 		if (!PrimitiveUtil.isPrimitiveOrWrapper(typeOf) && consumed.contains(result)) {
 			List<String> valueset = this.get(typeOf);
-			if (valueset.size() > 1 && consumed.size() > valueset.size() && consumed.containsAll(valueset))
+			if (valueset.size() == 1 || consumed.size() < valueset.size() || consumed.containsAll(valueset))
 				return result;
-			result = fromValueSet(typeOf); // recursion!
+			System.out.println("collision on " + typeOf);
+			result = fromValueSet(typeOf, depth + 1); // recursion!
 		}
 		consumed.add(result);
 		return result;

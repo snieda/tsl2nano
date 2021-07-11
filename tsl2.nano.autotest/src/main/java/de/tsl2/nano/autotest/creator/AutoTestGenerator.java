@@ -83,7 +83,7 @@ public class AutoTestGenerator {
 	
 	public static void main(String[] args) {
 		if (args.length == 0) {
-			System.out.println("Please provide a comma-separated list of full classnames to be loaded!");
+			log("Please provide a comma-separated list of full classnames to be loaded!");
 			return;
 		}
 		String[] clsNames = args[0].split("\\s*,\\s*");
@@ -141,7 +141,7 @@ public class AutoTestGenerator {
 		} catch (Throwable e) {
 			ManagedException.writeError(e, fileName + "initialization-error.txt");
 			ConcurrentUtil.sleep(3000);
-			System.out.println("JUNIT TEST PARAMETERS FAILING:");
+			log("JUNIT TEST PARAMETERS FAILING:");
 			e.printStackTrace();
 			ManagedException.forward(e);
 			return null;
@@ -325,7 +325,7 @@ public class AutoTestGenerator {
 	}
 	private static void log(Object obj, ProgressBar progress) {
 		if (progress == null)
-			System.out.println(obj);
+			AFunctionCaller.log(obj + "\n");
 		else
 			progress.increase(obj.toString());
 	}
@@ -407,7 +407,7 @@ class ExpectationCreator {
 	}
 
 	private static String asString(Object obj) {
-		return ObjectUtil.isSingleValueType(obj.getClass()) ? FormatUtil.format(obj) : Util.toJson(obj);
+		return AFunctionTester.convertMultilineString(ObjectUtil.isSingleValueType(obj.getClass()) ? FormatUtil.format(obj) : Util.toJson(obj));
 	}
 
 	static Expectations createExpectationFromLine(String l) {

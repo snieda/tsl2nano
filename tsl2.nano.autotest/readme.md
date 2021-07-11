@@ -51,6 +51,7 @@ Examples:
 
 ### Todos and Ideas
 
+* enhance reading/writing of multiline @Expectation blocks (current: replace '\r' and '\n' with ' 'o
 * extra check *boundary conditions* to test on minimum and maximum values
 * enhance @Expect with with annotation for boundaries
 * interpret java bean validation annotations for value boundaries
@@ -339,6 +340,8 @@ AutoTest (PREFIX: 'tsl2.functiontest.') started with:
 * allow.single.char.zero*: (default=false) tells the ValueRandomizer not to create a char value of 0. 0-char (\x0) is an end-delimiter on strings.
 * *valueset.group*: (default: 'default'). if empty ('') no valuesets will be used. if 'default', valuerandomizer will look for a resource or file with simle name of type to create a random value for (e.g.: string.set). if not empty and not 'default', the resourde name will have to start with this name (e.g.: 'mygroupname-string.set')
 * *valueset.avoid.collision*: (default: true) tries to avoid collisions over all valuesets (except primitives and interval-valuesets). will result in a more stabil test run in cause of avoiding collisions on for example file names. the performance will slow down on collisions in cause of recursion and testing for available values.
+
+*NOTE*: Some properties are set in *InitAllAutoTests*, working on all AutoTests.
 
 The *AutoTestGenerator* finds methods to test, calls them and does a full test - comparing the result to the first call. If successful done, it writes the file *...target/autotest/generated/generated-autotests-XXX.txt with XXX as number of iteration (given by duplication).
 

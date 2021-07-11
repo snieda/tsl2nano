@@ -98,9 +98,18 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 
 	public static String getErrorMsg(Throwable e) {
 		Throwable rootCause = ManagedException.getRootCause(e);
-		return rootCause.toString().replace('\n', ' ');
+		return convertMultilineString(rootCause.toString());
 	}
 	
+	static Object convertOnMultilineString(Object obj) {
+		return obj instanceof String ? convertMultilineString(obj.toString()) : obj;
+	}
+
+	static String convertMultilineString(String txt) {
+		//TODO: at the moment, we read only one line per expectation!
+		return txt.replace('\r', ' ').replace('\n', ' ');
+	}
+
 	protected int undefToZeroIndex(int index) {
 		return index < 0 ? 0 : index;
 	}

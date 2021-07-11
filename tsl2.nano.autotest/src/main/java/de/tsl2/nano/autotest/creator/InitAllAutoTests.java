@@ -40,7 +40,6 @@ public class InitAllAutoTests {
 		System.setProperty("tsl2.nano.test", "true");
 //		System.setProperty("tsl2.functiontest.testneverfail", "true");
 		BaseTest.useTargetDir();
-		set(AutoTest.PARALLEL, true);
 		if (Boolean.getBoolean("tsl2.functiontest.forbidSystemExit"))
 			forbidSystemExit();
 		BeanClass.callStatic("de.tsl2.nano.util.autotest.creator.AllAutoTests", "init");

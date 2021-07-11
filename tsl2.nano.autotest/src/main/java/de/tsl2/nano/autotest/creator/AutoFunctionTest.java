@@ -11,6 +11,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import de.tsl2.nano.autotest.BaseTest;
 import de.tsl2.nano.autotest.ValueRandomizer;
+import de.tsl2.nano.core.IPreferences;
 
 /**
  * Generic Test creating test cases for each method annotated with
@@ -39,6 +40,7 @@ public class AutoFunctionTest {
 	@AfterClass
 	public static void tearDown() {
 		ValueRandomizer.reset();
+		IPreferences.reset();
 	}
 	@Test
 	public void test() {
