@@ -245,6 +245,8 @@ public class BeanContainerUtil {
     }
 
     protected Object hasPermission(String name, String action) {
+    	if (!ServiceFactory.isInitialized())
+    		ServiceFactory.create(Thread.currentThread().getContextClassLoader());
         return ServiceFactory.instance().hasRole(name);
     }
 

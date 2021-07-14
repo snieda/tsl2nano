@@ -39,6 +39,7 @@ public class CurrentStatePreservationTest {
 	@AfterClass
 	public static void tearDownClass() {
 		ValueRandomizer.reset();
+		AutoTestGenerator.progress = null;
 	}
 	
 	@After

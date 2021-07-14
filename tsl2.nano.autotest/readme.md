@@ -55,6 +55,7 @@ Examples:
 * extra check *boundary conditions* to test on minimum and maximum values
 * enhance @Expect with with annotation for boundaries
 * interpret java bean validation annotations for value boundaries
+* avoid MalformedInputException
 
 ## Code Review
 
@@ -555,6 +556,16 @@ public class AllAutoTests {
 		matchPackage = ".*AnyDeclaringClass.anymethodToTest.*"; 
 		System.setProperty("tsl2.functiontest.filter", matchPackage);
 		System.setProperty("tsl2.functiontest.duplication", "1");
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+### Start with maven
+
+You may try several properties through starting maven.
+
+Example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+mvn test -Dtsl2.functiontest.parallel=true -Dtsl2.functiontest.create.random.max.depth=20
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ## Problems and Solutions

@@ -1,10 +1,27 @@
 package de.tsl2.nano.autotest.creator;
 
 import static de.tsl2.nano.autotest.creator.AFunctionCaller.def;
-import static de.tsl2.nano.autotest.creator.AutoTest.*;
-import static java.nio.file.StandardOpenOption.APPEND;
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.WRITE;
+import static de.tsl2.nano.autotest.creator.AutoTest.CLEAN;
+import static de.tsl2.nano.autotest.creator.AutoTest.DONTTEST;
+import static de.tsl2.nano.autotest.creator.AutoTest.DUPLICATION;
+import static de.tsl2.nano.autotest.creator.AutoTest.FAST_CLASSSCAN;
+import static de.tsl2.nano.autotest.creator.AutoTest.FILENAME;
+import static de.tsl2.nano.autotest.creator.AutoTest.FILTER;
+import static de.tsl2.nano.autotest.creator.AutoTest.FILTER_COMPLEXTYPES;
+import static de.tsl2.nano.autotest.creator.AutoTest.FILTER_ERROR_TYPES;
+import static de.tsl2.nano.autotest.creator.AutoTest.FILTER_EXCLUDE;
+import static de.tsl2.nano.autotest.creator.AutoTest.FILTER_FAILING;
+import static de.tsl2.nano.autotest.creator.AutoTest.FILTER_NONINSTANCEABLES;
+import static de.tsl2.nano.autotest.creator.AutoTest.FILTER_NULLRESULTS;
+import static de.tsl2.nano.autotest.creator.AutoTest.FILTER_SINGELTONS;
+import static de.tsl2.nano.autotest.creator.AutoTest.FILTER_TEST;
+import static de.tsl2.nano.autotest.creator.AutoTest.FILTER_UNSUCCESSFUL;
+import static de.tsl2.nano.autotest.creator.AutoTest.FILTER_VOID_PARAMETER;
+import static de.tsl2.nano.autotest.creator.AutoTest.FILTER_VOID_RETURN;
+import static de.tsl2.nano.autotest.creator.AutoTest.MODIFIER;
+import static de.tsl2.nano.autotest.creator.AutoTest.PARALLEL;
+import static de.tsl2.nano.autotest.creator.AutoTest.PRECHECK_TWICE;
+import static de.tsl2.nano.autotest.creator.AutoTest.TESTNEVERFAIL;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -12,8 +29,6 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,6 +39,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import de.tsl2.nano.core.IPreferences;
 import de.tsl2.nano.core.ManagedException;
@@ -75,7 +91,7 @@ public class AutoTestGenerator {
 	int filter_complextypes = 0;
 	private Statistics statistics = new Statistics();
 	
-	private BufferedWriter filteredFunctionWriter;
+	private AtomicReference<BufferedWriter> filteredFunctionWriter = new AtomicReference<BufferedWriter>();
 	private ExceptionHandler uncaughtExceptionHandler = new ExceptionHandler();
 	static ProgressBar progress;
 	private AFunctionCaller maxDurationFct, maxMemUsageFct;
@@ -149,9 +165,9 @@ public class AutoTestGenerator {
 			if (statistics.statuss.isEmpty()) // -> no generation but only reading
 				testers.forEach( t -> statistics.add(t));
 			printStatistics(duplication +1, testers, statistics.getInfo(22));
-			if (filteredFunctionWriter != null) {
-				Util.trY(() -> filteredFunctionWriter.close());
-				filteredFunctionWriter = null; // to avoid access with additional flush on parallel use
+			if (filteredFunctionWriter.get() != null) {
+				Util.trY(() -> filteredFunctionWriter.get().close());
+				filteredFunctionWriter.set(null); // to avoid access with additional flush on parallel use
 			}
 			if (uncaughtExceptionHandler.hasExceptions()) {
 				FileUtil.writeBytes(uncaughtExceptionHandler.toString().getBytes(), getTimedFileName() + "uncaught-exceptions.txt", false);
@@ -164,7 +180,7 @@ public class AutoTestGenerator {
 	private void prepareFilteredWriter() throws IOException {
 		if (!getFile(0).exists() || def(CLEAN, false))
 			FileUtil.delete(fileName + "filtered.txt");
-		filteredFunctionWriter = FileUtil.getBAWriter(fileName + "filtered.txt");
+		filteredFunctionWriter.set(FileUtil.getBAWriter(fileName + "filtered.txt"));
 	}
 
 	private static void filterExcludes(List<Method> methods) {
@@ -186,18 +202,18 @@ public class AutoTestGenerator {
 	}
 	void generateExpectations(int iteration, List<Method> methods) {
 		LogFactory.setPrintToConsole(false);
-		BufferedWriter writer = Util.trY(() -> Files.newBufferedWriter(Paths.get(getFile(iteration).getPath()), CREATE, WRITE, APPEND));
 		String p = "\n" + StringUtil.fixString(79, '~') + "\n";
-		try {
+		try (BufferedWriter writer = FileUtil.getBAWriter(getFile(iteration).getPath())) {
 			count = 0;
 			methods_loaded = methods.size();
 			log(p + "calling " + methods.size() + " methods to create expectations -> " + getFile(iteration) + p);
-	
-			Util.stream(methods, def(PARALLEL, false)).forEach(m -> writeExpectation(new AFunctionCaller(iteration, m), writer));
+			AtomicReference<BufferedWriter> refWriter = new AtomicReference<>(writer);
+			Util.stream(methods, def(PARALLEL, false)).forEach(m -> writeExpectation(new AFunctionCaller(iteration, m), refWriter));
+		} catch (IOException e1) {
+			ManagedException.forward(e1);
 		} finally {
 			if (filteredFunctionWriter != null)
-				Util.trY( () ->filteredFunctionWriter.flush(), false);
-			FileUtil.close(writer, true);
+				Util.trY( () ->filteredFunctionWriter.get().flush(), false);
 			ConcurrentUtil.sleep(200);
 			if (count > 0)
 				log(new String(FileUtil.getFileBytes(getFile(iteration).getPath(), null)));
@@ -209,7 +225,7 @@ public class AutoTestGenerator {
 		return FileUtil.userDirFile(fileName + iteration + ".txt");
 	}
 
-	private void writeExpectation(AFunctionCaller f, BufferedWriter writer) {
+	private void writeExpectation(AFunctionCaller f, AtomicReference<BufferedWriter> writer) {
 		Thread.currentThread().setUncaughtExceptionHandler(uncaughtExceptionHandler );
 		try {
 			log("writeExpectation", progress);
@@ -271,7 +287,7 @@ public class AutoTestGenerator {
 			count++;
 			maxDurationFct = maxDurationFct == null || maxDurationFct.duration < f.duration ? f : maxDurationFct; 
 			maxMemUsageFct = maxMemUsageFct == null || maxMemUsageFct.memusage < f.memusage ? f : maxMemUsageFct; 
-			Util.trY(() -> writer.append(expect));
+			Util.trY(() -> writer.get().append(expect));
 		} finally {
 			statistics.add(f);
 		}
@@ -281,8 +297,7 @@ public class AutoTestGenerator {
 		writeFilteredFunctionCall(f.toString() + "\n");
 	}
 	private void writeFilteredFunctionCall(String call) {
-		Util.trY(() -> filteredFunctionWriter.append(call));
-//		FileUtil.writeBytes((call + "\n").getBytes(), fileName + "filtered.txt", true);
+		Util.trY(() -> filteredFunctionWriter.get().append(call), false);
 	}
 	public Collection<ExpectationFunctionTester> readExpectations(int iteration) {
 		return readExpectations(iteration, getFile(iteration));
@@ -316,7 +331,7 @@ public class AutoTestGenerator {
 				exp = null;
 			}
 		}
-		log("\nEXPECTATION READING FINSIHED!\n");
+		log("\nEXPECTATION READING ON ITERATION " + iteration + " FINSIHED!\n");
 		return expTesters;
 	}
 
@@ -521,17 +536,18 @@ class FunctionCheck {
 	
 	@SuppressWarnings("rawtypes")
 	static int filterFailingTest(Collection<AFunctionTester> testers, String filePrefix) {
-		LinkedList<AFunctionTester> failing = new LinkedList<>();
+		Collection<AFunctionTester> failing = Collections.synchronizedCollection(new LinkedList<>());
 		int size = testers.size();
 		try ( BufferedWriter removedFunctionWriter = FileUtil.getBAWriter(filePrefix + "removed-functions.txt")) {
-			for (AFunctionTester t : testers) {
+			AtomicReference<BufferedWriter> refWriter = new AtomicReference<>(removedFunctionWriter);
+			Util.stream(testers, def(PARALLEL, false)).forEach( t -> {
 				try {
 					t.testMe();
 				} catch (Throwable e) {
 					failing.add(t);
-					Util.trY( () -> removedFunctionWriter.write(t.getID() + "\n"));
+					Util.trY( () -> refWriter.get().append(t.getID() + "\n"), false);
 				}
-			}
+			});
 			testers.removeAll(failing);
 			if (testers.size() != size-failing.size())
 				throw new IllegalStateException("failing testers were not removed from list - check your equals()!");
