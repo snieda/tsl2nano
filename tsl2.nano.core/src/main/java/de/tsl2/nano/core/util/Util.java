@@ -101,6 +101,21 @@ public class Util {
 	public static boolean isAbstract(Class<?> cls) {
 		return Modifier.isAbstract(cls.getModifiers());
 	}
+	/**
+	 * @param cls any class to get the single base type for
+	 * @return on arrays the array component type, on byte streams byte.class, on wrappers the primitive
+	 */
+	public static Class<?> getSingleBaseType(Class<?> cls) {
+		if (PrimitiveUtil.isPrimitiveArray(cls))
+			return PrimitiveUtil.getPrimitiveArrayComponentType(cls);
+		else if (cls.isArray())
+			return cls.getComponentType();
+		else if (ByteUtil.isByteStream(cls))
+			return byte.class;
+		else 
+			return PrimitiveUtil.getPrimitive(cls);
+	}
+	
     /**
      * isAllNull
      * 

@@ -277,7 +277,7 @@ public class MapUtil {
 	}
 
 	public static boolean isJSON(String txt) {
-    	return txt.matches("[\"]?\\{((\\s*[\"]?\\w+[\"]?\\s*)[:](\\s*[\"]?.*[\"]?\\s*)[,]?)*\\}[\\\"]?");
+    	return txt.matches("[\"]?\\{((\\s*[\"]?\\w+[\"]?\\s*)[:](\\s*[\"]?[^\"]*[\"]?\\s*)[,]?)*\\}[\\\"]?");
     }
     /**
      * finds all values for a given key set

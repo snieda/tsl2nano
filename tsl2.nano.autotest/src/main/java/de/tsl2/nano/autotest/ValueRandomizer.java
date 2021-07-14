@@ -96,12 +96,15 @@ public class ValueRandomizer {
 	}
 	@SuppressWarnings({ "unchecked" })
 	protected static <V> V createRandomValue(Class<V> typeOf, boolean zeroNumber, int depth) {
-		if (!Util.isEmpty(AFunctionCaller.def(AutoTest.VALUESET_GROUP, ValueSets.DEFAULT)) && valueSets.hasValueSet(typeOf))
-			return valueSets.fromValueSet(typeOf);
-		Object n = zeroNumber && (typeOf.isPrimitive() || NumberUtil.isNumber(typeOf)) 
-				&& (!PrimitiveUtil.isAssignableFrom(char.class, typeOf) || AFunctionCaller.def(AutoTest.ALLOW_SINGLE_CHAR_ZERO, false))
-				&& (!PrimitiveUtil.isAssignableFrom(byte.class, typeOf)  || AFunctionCaller.def(AutoTest.ALLOW_SINGLE_BYTE_ZERO, false))
-				? 0d : createRandomNumber(typeOf);
+		Object n;
+		if (!Util.isEmpty(AFunctionCaller.def(AutoTest.VALUESET_GROUP, ValueSets.DEFAULT)) && valueSets.hasValueSet(typeOf)) {
+			n = valueSets.fromValueSet(typeOf);
+		} else {
+			n = zeroNumber && (typeOf.isPrimitive() || NumberUtil.isNumber(typeOf)) 
+					&& (!PrimitiveUtil.isAssignableFrom(char.class, typeOf) || AFunctionCaller.def(AutoTest.ALLOW_SINGLE_CHAR_ZERO, false))
+					&& (!PrimitiveUtil.isAssignableFrom(byte.class, typeOf)  || AFunctionCaller.def(AutoTest.ALLOW_SINGLE_BYTE_ZERO, false))
+					? 0d : createRandomNumber(typeOf);
+		}
 		if (NumberUtil.isNumber(n))
 			n = convert(n, typeOf, zeroNumber, depth);
 		try {
@@ -265,7 +268,7 @@ class ValueSets extends HashMap<Class, List<String>> {
 	static final String DEFAULT = "default";
 
 	<V> V fromValueSet(Class<V> typeOf) {
-		return fromValueSet(typeOf, 0);
+		return (V) fromValueSet(Util.getSingleBaseType(typeOf), 0);
 	}
 	<V> V fromValueSet(Class<V> typeOf, int depth) {
 		if (!containsKey(typeOf) && (FileUtil.userDirFile(valueSetFilename(typeOf)).exists() || FileUtil.hasResource(valueSetFilename(typeOf)))) {
@@ -305,7 +308,8 @@ class ValueSets extends HashMap<Class, List<String>> {
 	}
 
 	boolean hasValueSet(Class typeOf) {
-		return containsKey(typeOf) || FileUtil.userDirFile(valueSetFilename(typeOf)).exists() || FileUtil.hasResource(valueSetFilename(typeOf));
+		Class t = Util.getSingleBaseType(typeOf);
+		return containsKey(t) || FileUtil.userDirFile(valueSetFilename(t)).exists() || FileUtil.hasResource(valueSetFilename(t));
 	}
 
 	private static String valueSetFilename(Class typeOf) {
