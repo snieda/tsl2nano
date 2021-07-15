@@ -110,7 +110,7 @@ public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
 		} catch (Throwable e) {
 			status = new Status(StatusTyp.EXECUTION_ERROR, e.toString(), e);
 			if (e instanceof Error)
-				FileUtil.writeBytes((this.toString() + "\nSTACKTRACE:\n" + ManagedException.toStringCause(e)).getBytes(), AutoTestGenerator.fileName + "hard-errors.txt", true);
+				Util.trY( () -> FileUtil.writeBytes((this.toString() + "\nSTACKTRACE:\n" + ManagedException.toStringCause(e)).getBytes(), AutoTestGenerator.fileName + "hard-errors.txt", true), false);
 			return ManagedException.forward(e);
 		} finally {
 //			Thread.currentThread().notifyAll(); // you should't call notifyAll() on a Thread! see Thread.join() description
