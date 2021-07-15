@@ -155,7 +155,7 @@ public class AutoTestGenerator {
 				load_unsuccessful = FunctionCheck.filterFailingTest(testers, fileName);
 			return testers;
 		} catch (Throwable e) {
-			ManagedException.writeError(e, fileName + "initialization-error.txt");
+			Util.trY( () -> ManagedException.writeError(e, fileName + "initialization-error.txt"), false);
 			ConcurrentUtil.sleep(3000);
 			log("JUNIT TEST PARAMETERS FAILING:");
 			e.printStackTrace();
@@ -166,11 +166,11 @@ public class AutoTestGenerator {
 				testers.forEach( t -> statistics.add(t));
 			printStatistics(duplication +1, testers, statistics.getInfo(22));
 			if (filteredFunctionWriter.get() != null) {
-				Util.trY(() -> filteredFunctionWriter.get().close());
+				Util.trY(() -> filteredFunctionWriter.get().close(), false);
 				filteredFunctionWriter.set(null); // to avoid access with additional flush on parallel use
 			}
 			if (uncaughtExceptionHandler.hasExceptions()) {
-				FileUtil.writeBytes(uncaughtExceptionHandler.toString().getBytes(), getTimedFileName() + "uncaught-exceptions.txt", false);
+				Util.trY( () -> FileUtil.writeBytes(uncaughtExceptionHandler.toString().getBytes(), getTimedFileName() + "uncaught-exceptions.txt", false), false);
 //				throw new IllegalStateException(uncaughtExceptionHandler.toString());
 			}
 			if (progress != null)
