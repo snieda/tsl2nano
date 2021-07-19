@@ -527,7 +527,7 @@ public class Util {
 	    	new PrivateAccessor<>(obj).forEachMember( (n, v) -> m.put(n, FormatUtil.format(v)));
 	    	return MapUtil.toJSON(m);
     	} else if (ByteUtil.isByteStream(obj.getClass())) {
-    		return "{" + ByteUtil.toString((InputStream)obj, null) + "}";
+    		return "{" + ByteUtil.toString(obj) + "}";
     	} else if (!(obj instanceof Map)) {
     		if (obj instanceof Collection)
     			obj = ((Collection)obj).toArray();

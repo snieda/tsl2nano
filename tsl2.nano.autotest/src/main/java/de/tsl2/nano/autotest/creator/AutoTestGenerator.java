@@ -107,7 +107,7 @@ public class AutoTestGenerator {
 		new AutoTestGenerator().createExpectationTesters();
 	}
 	private void printStartParameters() {
-		FileUtil.writeBytes((IPreferences.printInfo(AutoTest.class)).getBytes(), getTimedFileName() + "statistics.txt", false);
+		Util.trY( () -> FileUtil.writeBytes((IPreferences.printInfo(AutoTest.class)).getBytes(), getTimedFileName() + "statistics.txt", false), false);
 	}
 	public String getTimedFileName() {
 		return fileName + DateUtil.getShortTimestamp(start) + "-";

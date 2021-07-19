@@ -19,9 +19,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import de.tsl2.nano.autotest.creator.AFunctionCaller;
 import de.tsl2.nano.autotest.creator.AutoTest;
@@ -258,51 +261,65 @@ public class ValueRandomizer {
 	
 	public static final void reset() {
 		valueSets.clear();
-		valueSets.consumed.clear();
 	}
 }
 @SuppressWarnings({"serial", "rawtypes", "unchecked"})
 class ValueSets extends HashMap<Class, List<String>> {
-	static List consumed = Collections.synchronizedList(new ArrayList<>());
 	
+	private static final String MINMAX = "<->";
 	static final String DEFAULT = "default";
+	static AtomicInteger counter = new AtomicInteger(0);
 
 	<V> V fromValueSet(Class<V> typeOf) {
 		return (V) fromValueSet(Util.getSingleBaseType(typeOf), 0);
 	}
 	<V> V fromValueSet(Class<V> typeOf, int depth) {
 		if (!containsKey(typeOf) && (FileUtil.userDirFile(valueSetFilename(typeOf)).exists() || FileUtil.hasResource(valueSetFilename(typeOf)))) {
-			String content = new String(FileUtil.getFileBytes(valueSetFilename(typeOf), null));
-			content = content.replaceFirst("[#].*\n", "");
-			String[] names = content.split("[\n]");
-			put(typeOf, Arrays.asList(names));
+			loadValueSet(typeOf);
 		}
 		List<String> values = get(typeOf);
-		Object result = values.size() == 1 ? fromValueMinMax(values.get(0), typeOf) : values.get((int)(Math.random() * values.size()));
-		result = checkCollision(result, typeOf, depth); //recursive!
-		return values.size() == 1 ? (V) result : ObjectUtil.wrap(result, typeOf);
+		if (isMinMax(values)) {
+			return fromValueMinMax(values.get(0), typeOf);
+		} else {
+			Object result = values.get((int)(Math.random() * values.size()));
+			result = avoidCollision(result, typeOf, depth);
+			return ObjectUtil.wrap(result, typeOf);
+		}
+	}
+	private boolean isMinMax(List<String> values) {
+		return values.size() == 1 && values.get(0).contains(MINMAX);
+	}
+	private <V> void loadValueSet(Class<V> typeOf) {
+		loadValueSet(typeOf, null);
+	}
+	private <V> void loadValueSet(Class<V> typeOf, String prefix) {
+		String file = valueSetFilename(typeOf);
+		System.out.print("loading valueset '" + file + "' ...");
+		String content = new String(FileUtil.getFileBytes(file, null));
+		content = content.replaceFirst("[#].*\n", "");
+		String[] names = content.split("[\n]");
+		if (!Util.isEmpty(prefix))
+			Arrays.stream(names).map(n -> prefix + n);
+		put(typeOf, Collections.synchronizedList(new ArrayList(Arrays.asList(names))));
+		System.out.print(names.length + " OK!\n");
 	}
 
-	private Object checkCollision(Object result, Class typeOf, int depth) {
-		if (!AFunctionCaller.def(AutoTest.VALUESET_AVOID_COLLISION, boolean.class))
+	private Object avoidCollision(Object result, Class typeOf, int depth) {
+		if (!AFunctionCaller.def(AutoTest.VALUESET_AVOID_COLLISION, boolean.class) || PrimitiveUtil.isPrimitiveOrWrapper(typeOf))
 			return result;
-		if (!ValueRandomizer.checkMaxDepth(depth))
-			return result;
-		if (!PrimitiveUtil.isPrimitiveOrWrapper(typeOf) && consumed.contains(result)) {
-			List<String> valueset = this.get(typeOf);
-			if (valueset.size() == 1 || consumed.size() < valueset.size() || consumed.containsAll(valueset))
-				return result;
-			System.out.println("collision on " + typeOf);
-			result = fromValueSet(typeOf, depth + 1); // recursion!
+		List<String> valueSet = get(typeOf);
+		valueSet.remove(result);
+		if (valueSet != null && valueSet.isEmpty()) {
+			remove(typeOf);
+			loadValueSet(typeOf, "" + counter.addAndGet(1));
 		}
-		consumed.add(result);
 		return result;
 	}
 
 	<V> V fromValueMinMax(String minmax, Class<V> typeOf) {
 		String typ = StringUtil.substring(minmax, null, ":", 0, true);
-		String min = StringUtil.substring(minmax, ":", "<->");
-		String max = StringUtil.substring(minmax, "<->", null);
+		String min = StringUtil.substring(minmax, ":", MINMAX);
+		String max = StringUtil.substring(minmax, MINMAX, null);
 		double d = NumberUtil.random(Double.valueOf(min), Double.valueOf(max));
 		return ObjectUtil.wrap(typ != null ? PrimitiveUtil.convert(d, PrimitiveUtil.getPrimitiveClass(typ)): d, typeOf);
 	}
