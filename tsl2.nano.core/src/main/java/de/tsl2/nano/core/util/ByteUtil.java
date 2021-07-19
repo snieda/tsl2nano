@@ -23,6 +23,7 @@ import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.sql.Blob;
 import java.util.Arrays;
 
@@ -33,6 +34,7 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.autotest.creator.InverseFunction;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.log.LogFactory;
 
@@ -314,7 +316,31 @@ public class ByteUtil extends Util {
         }
     }
 
-    /**
+    public static final String toString(Object obj) {
+    	return toString(obj, Charset.defaultCharset().name());
+    }
+    public static final String toString(Object obj, String encoding) {
+    	assert isByteStream(obj.getClass());
+    	return PrimitiveUtil.isPrimitiveArray(obj)
+    		? Util.trY( () -> Arrays.toString((byte[])obj))
+    		: obj instanceof ByteBuffer
+    			? Util.trY( () -> Arrays.toString(toByteArray((ByteBuffer)obj)))
+    			: obj instanceof OutputStream
+    				? toString((OutputStream)obj, encoding)
+    				: toString((InputStream)obj, encoding);
+    }
+    
+    public static byte[] toByteArray(ByteBuffer bb) {
+		if (bb.hasArray())
+			return bb.array();
+		else {
+    	byte[] ba = new byte[bb.remaining()];
+			bb.get(ba);
+			return ba;
+		}
+	}
+
+	/**
      * toString
      * 
      * @param stream source
