@@ -309,7 +309,7 @@ class ValueSets extends HashMap<Class, List<String>> {
 			return result;
 		List<String> valueSet = get(typeOf);
 		valueSet.remove(result);
-		if (valueSet != null && valueSet.isEmpty()) {
+		if (Util.isEmpty(valueSet)) {
 			remove(typeOf);
 			loadValueSet(typeOf, "" + counter.addAndGet(1));
 		}

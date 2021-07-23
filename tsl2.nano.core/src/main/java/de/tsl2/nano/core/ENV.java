@@ -92,6 +92,7 @@ import de.tsl2.nano.core.util.Util;
  * <p/>
  * TODO: create a const generator EnvironmentConst to be embedded to all specialized application classes to be used to
  * get properties and services
+ * TODO: use IPreferences mechanism to replace all string-named-properties with enumerated properties.
  * 
  * @author Thomas Schneider
  * @version $Revision$

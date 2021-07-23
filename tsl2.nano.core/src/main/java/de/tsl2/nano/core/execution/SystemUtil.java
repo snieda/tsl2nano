@@ -85,7 +85,7 @@ public class SystemUtil {
                 && (command.length > 1 || !command[0].matches(".*\\s.*"))
                 , "the first command element should not contain parameters (separated by spaces", command);
         final ProcessBuilder processBuilder = new ProcessBuilder(command);
-        processBuilder.directory(directory.getAbsoluteFile());
+        processBuilder.directory(directory != null ? directory.getAbsoluteFile() : null);
         Process process = null;
         try {
             LOG.info("starting process with command: " + StringUtil.toString(command, 500)

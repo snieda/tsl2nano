@@ -1718,7 +1718,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 } else {//standard --> text
                     value = tableDescriptor.getColumnText(item, c.getIndex());
                     cell =
-                        appendTag(row, TABLE(TAG_CELL, content(value), ATTR_TITLE,
+                        appendTag(row, TABLE(TAG_CELL, content(translated(value, attr)), ATTR_TITLE,
                             itemBean.toString() + ": " + ENV.translate(c.getName(), true),
                             ATTR_HEADERS, c.getIndex() + ":" + c.getName(), ATTR_ID,
                             tableDescriptor.getId() + "[" + tabIndex
@@ -1747,6 +1747,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         }
         return row;
     }
+
+	private String translated(String value, IValueDefinition<?> attr) {
+		return !Util.isEmpty(value) && attr != null ? Messages.getStringOpt(attr.getId() + "." + value) : value;
+	}
 
     private void addManyToOnePicture(Element cell, IValueDefinition<?> attr) {
         if (BeanContainer.instance().isPersistable(attr.getType())) {
@@ -2044,6 +2048,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 true);
             appendAttributes(a, "tabindex", shortcut);
             addManyToOnePicture(cell, beanValue);
+        } else {
+        	String translated = translated(beanValue.getValueText(), beanValue);
+        	if (!translated.equals(beanValue.getValueText()))
+        		appendElement(cell, TAG_CELL, content(translated));
         }
         if (p.getEnabler().isActive()) {
             //on focus gained, preselect text
