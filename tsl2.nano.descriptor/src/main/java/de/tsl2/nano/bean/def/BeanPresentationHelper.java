@@ -1686,6 +1686,14 @@ public class BeanPresentationHelper<T> {
                     }
                 });
 
+            pageActions
+            .add(new SecureAction(bean.getClazz(), "json", IAction.MODE_UNDEFINED, false, "icons/view.png") {
+                @Override
+                public Object action() throws Exception {
+                    return Util.toJson(bean instanceof IBeanCollector ? ((IBeanCollector)bean).getCurrentData() : ((Bean)bean).instance);
+                }
+            });
+
             pageActions.add(new SecureAction(bean.getClazz(),
                 "document",
                 IAction.MODE_UNDEFINED,

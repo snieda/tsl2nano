@@ -211,7 +211,7 @@ public abstract class NanoHTTPD extends Main {
                 if (!(e instanceof SocketException && "NanoHttpd Shutdown".equals(e.getMessage()))
                     && !(e instanceof SocketTimeoutException)) {
                     NanoHTTPD.LOG.log(Level.SEVERE,
-                        "Communication with the client broken, or an bug in the handler code", e);
+                        "Communication with the client broken, or a bug in the handler code", e);
                 }
             } finally {
                 safeClose(outputStream);
