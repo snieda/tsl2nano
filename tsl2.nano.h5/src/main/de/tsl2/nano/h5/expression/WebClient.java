@@ -140,7 +140,7 @@ public class WebClient<T> extends AbstractRunnable<T> {
             String postStr = null;
             if (data != null) {
                 if ("PUT".equals(method) || "POST".equals(method)) {
-                    postStr = MapUtil.toJSON(BeanUtil.toValueMap(data, false, false, false, getName()));
+                    postStr = MapUtil.toJSon(BeanUtil.toValueMap(data, false, false, false, getName()));
                 } else if (Util.isEmpty(extArgs)) {
                     Map<String, Object> valueMap =
                         BeanUtil.toValueMap(data, false, false, false, getName());

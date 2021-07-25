@@ -562,7 +562,10 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
         } else if (isPreparing.get()) {
     		System.out.println("[LOGPREPARE] " + logClass.getSimpleName() + ": " + message + (ex != null ? " " + ex : ""));
     		return;
+    	} else if (message != null && message.toString() != null && message.toString().length() > 16000) {
+    		message = StringUtil.toStringCut(message, 120) + "...";
     	}
+    		
         final LogFactory factory = instance();
         if (LogFactory.isEnabled(state) && factory.hasLogLevel(logClass, state)) {
             if (message != null) {

@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Stream;
@@ -31,6 +33,7 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.cls.PrivateAccessor;
+import de.tsl2.nano.core.cls.UnboundAccessor;
 import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.log.LogFactory;
 
@@ -99,7 +102,7 @@ public class Util {
     }
 
 	public static boolean isAbstract(Class<?> cls) {
-		return Modifier.isAbstract(cls.getModifiers());
+		return Modifier.isAbstract(cls.getModifiers()) && !cls.isArray();
 	}
 	/**
 	 * @param cls any class to get the single base type for
@@ -162,7 +165,7 @@ public class Util {
      */
     @SuppressWarnings("rawtypes")
     public static final boolean isEmpty(Object obj) {
-        return isEmpty(obj, false) || (obj.getClass().isArray() && Array.getLength(obj) == 0)
+        return isEmpty(obj, false) || obj == UnboundAccessor.NULL || (obj.getClass().isArray() && Array.getLength(obj) == 0)
             || ((obj instanceof Collection) && ((Collection) obj).isEmpty())
             || ((obj instanceof Map) && ((Map) obj).isEmpty());
     }
@@ -518,30 +521,10 @@ public class Util {
     }
     
     public static String toJson(Object obj) {
-    	if (Class.class.isAssignableFrom(obj.getClass())) {
-    		return "{" + obj.getClass().getName() + "}";
-    	} else if (Proxy.isProxyClass(obj.getClass()) && Proxy.getInvocationHandler(obj) instanceof AdapterProxy) {
-    		return MapUtil.toJSON(((AdapterProxy)Proxy.getInvocationHandler(obj)).values());
-    	} else if (ObjectUtil.isSingleValueType(obj.getClass())) {
-	    	Map<String, Object> m = new HashMap<>();
-	    	new PrivateAccessor<>(obj).forEachMember( (n, v) -> m.put(n, FormatUtil.format(v)));
-	    	return MapUtil.toJSON(m);
-    	} else if (ByteUtil.isByteStream(obj.getClass())) {
-    		return "{" + ByteUtil.toString(obj) + "}";
-    	} else if (!(obj instanceof Map)) {
-    		if (obj instanceof Collection)
-    			obj = ((Collection)obj).toArray();
-    		Object[] orr = ((Object[])obj);
-    		Object[] arr = /*orr instanceof Object[] || orr instanceof String[] ? orr : */new String[orr.length];
-    		for (int i = 0; i < arr.length; i++) {
-				arr[i] = isSimpleType(orr[i].getClass()) ? FormatUtil.format(orr[i]) : toJson(orr[i]);
-			}
-    		return "{" + StringUtil.concatWrap("\"{0}\"".toCharArray(), arr).replace("\"\"", "\",\"") + "}";
-    	} else
-    		return MapUtil.toJSON((Map) obj);
+    	return JSon.toJSon(obj);
     }
-    
-	public static ClassLoader getContextClassLoader() {
+
+    public static ClassLoader getContextClassLoader() {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         if (cl == null) {
             cl = Util.class.getClassLoader();

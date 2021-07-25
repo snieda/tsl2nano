@@ -323,6 +323,10 @@ public class StringUtil {
         return count;
     }
     
+    public static String toStringCut(Object obj, int len) {
+    	String s = String.valueOf(obj);
+    	return s.length() > len ? s.substring(0, Math.min(s.length(), len)) : s;
+    }
     /**
      * calls toString() of obj object if not null, otherwise an empty string will be returned
      * 

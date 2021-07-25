@@ -1749,7 +1749,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
 	private String translated(String value, IValueDefinition<?> attr) {
-		return !Util.isEmpty(value) && attr != null ? Messages.getStringOpt(attr.getId() + "." + value) : value;
+		String k = attr.getId() + "." + value;
+		return !Util.isEmpty(value) && attr != null && Messages.hasKey(k) ? Messages.getStringOpt(k) : value;
 	}
 
     private void addManyToOnePicture(Element cell, IValueDefinition<?> attr) {

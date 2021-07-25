@@ -223,6 +223,13 @@ public class MapUtil {
         return src;
     }
 
+    public static String toJSon(Map map) {
+    	return JSon.toJSon(map);
+    }
+    public static Map fromJSon(String json) {
+    	return JSon.fromJSon(json);
+    }
+
     /**
      * toString represention of a map
      * 
@@ -233,52 +240,6 @@ public class MapUtil {
         return StringUtil.toFormattedString(map, Integer.MAX_VALUE);
     }
 
-    public static String toJSON(Map map) {
-        //the quotations enable content with json keys like ',' and ':'
-        Set keys = map.keySet();
-        StringBuilder buf = new StringBuilder().append("{");
-        for (Object k : keys) {
-            Object v = map.get(k);
-            if (v == null)
-                continue;
-            else if (v.getClass().isArray()) {
-            	if (v.getClass().getComponentType().isPrimitive())
-            		v = PrimitiveUtil.toArrayString(v);
-            	else
-            		v = Arrays.toString((Object[])v);
-            }
-            buf.append("\"" + k + "\": \"" + v + "\",");
-        }
-        if (buf.length() > 1)
-            buf.deleteCharAt(buf.length()-1);
-        return buf.append("}").toString();
-    }
-    
-    public static Map fromJSON(String json) {
-    	if (!json.contains("\""))
-    		return fromJSONnoQuotations(json);
-        Map map = new LinkedHashMap<>();
-        String[] split = json.substring(1, json.length() - 1).split("[\"]");
-        for (int i = 0; i < split.length-2; i+=4) {
-            map.put(split[i+1], split[i+3]);
-        }
-        return map;
-    }
-
-    private static Map fromJSONnoQuotations(String json) {
-        Map map = new LinkedHashMap<>();
-        String[] split = json.substring(1, json.length() - 1).split("[,]");
-        String[] keyValue;
-        for (int i = 0; i < split.length; i++) {
-        	keyValue = split[i].split("\\s*:\\s*");
-            map.put(keyValue[0], keyValue[1]);
-        }
-        return map;
-	}
-
-	public static boolean isJSON(String txt) {
-    	return txt.matches("[\"]?\\{((\\s*[\"]?\\w+[\"]?\\s*)[:](\\s*[\"]?[^\"]*[\"]?\\s*)[,]?)*\\}[\\\"]?");
-    }
     /**
      * finds all values for a given key set
      * 

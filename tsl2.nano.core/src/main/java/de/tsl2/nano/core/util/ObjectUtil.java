@@ -364,8 +364,8 @@ public class ObjectUtil extends ByteUtil {
                             && Map.class.isAssignableFrom(wrapperType))
                         return (T) MapUtil.toMapType((Map)value, (Class<Map>)wrapperType);
                     else if (value instanceof String && Map.class.isAssignableFrom(wrapperType)
-                    		&& MapUtil.isJSON((String)value)) {
-						Map jsonMap = MapUtil.fromJSON((String)value);
+                    		&& JSon.isJSon((String)value)) {
+						Map jsonMap = MapUtil.fromJSon((String)value);
 						return (T) (wrapperType.isInterface() ? MapUtil.toMapType(jsonMap, (Class<Map>)wrapperType) : jsonMap);
                     } else if (wrapperType.isArray() && value instanceof String) {
                     	return (T) MapUtil.asArray(wrapperType.getComponentType(), (String)value);
@@ -383,8 +383,8 @@ public class ObjectUtil extends ByteUtil {
 						return (T) FormatUtil.getDefaultFormat(value, true);
 					else if (wrapperType.isInterface() && value instanceof Map)
 						return (T) AdapterProxy.create(wrapperType, (Map)value);
-					else if (wrapperType.isInterface() && value instanceof String && MapUtil.isJSON((String) value))
-						return (T) AdapterProxy.create(wrapperType, MapUtil.fromJSON((String)value));
+					else if (wrapperType.isInterface() && value instanceof String && JSon.isJSon((String) value))
+						return (T) AdapterProxy.create(wrapperType, MapUtil.fromJSon((String)value));
                     else if (isInstanceable(wrapperType)/* && BeanClass.hasConstructor(wrapperType, value.getClass())*/)
 						try {
 							return BeanClass.createInstance(wrapperType, value);

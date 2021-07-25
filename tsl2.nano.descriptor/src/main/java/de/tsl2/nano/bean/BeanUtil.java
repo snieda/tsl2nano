@@ -242,14 +242,14 @@ private static Object deepCopy(Object src, Object dest) throws Exception {
     public static String toJSON(Object... instances) {
     	StringBuilder buf = new StringBuilder();
     	for (int i = 0; i < instances.length; i++) {
-            buf.append(MapUtil.toJSON(toValueMap(instances[i])) + ",");
+            buf.append(MapUtil.toJSon(toValueMap(instances[i])) + ",");
 		}
     	return instances.length > 0 ? buf.deleteCharAt(buf.length() - 1).toString(): buf.toString();
     }
 
     /** only flat object, no recursion yet! */
     public static <T> T fromJSON(Class<T> type, String json) {
-        return (T) fromValueMap(type, MapUtil.fromJSON(json));
+        return (T) fromValueMap(type, MapUtil.fromJSon(json));
     }
     /**
      * delegates to {@link #toFormattedMap(Object, String, boolean)}.

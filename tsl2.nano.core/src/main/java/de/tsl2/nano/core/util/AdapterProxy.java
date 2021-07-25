@@ -69,7 +69,7 @@ public class AdapterProxy implements InvocationHandler {
 			valuesWithoutItself.forEach( (k, v) -> {if (v == proxy) valuesWithoutItself.replace(k, proxy.getClass().getSimpleName());});
 		} else
 			valuesWithoutItself = values;
-		return "{\"" + proxy.getClass().getInterfaces()[0].getSimpleName() + "(" + proxy.getClass().getSimpleName() + ")\":" + getClass().getSimpleName() + ")" + ": " + MapUtil.toJSON(valuesWithoutItself) + "}";
+		return "{\"" + proxy.getClass().getInterfaces()[0].getSimpleName() + "(" + proxy.getClass().getSimpleName() + ")\":" + getClass().getSimpleName() + ")" + ": " + MapUtil.toJSon(valuesWithoutItself) + "}";
 	}
     
     private Object findReturnValue(Method method, Object[] values, Object[] args) {

@@ -100,7 +100,7 @@ public class WebSocketExceptionHandler extends ExceptionHandler implements Close
         Object value = response;
         if (response instanceof String && ((String)response).matches("[.*{].*[:].*[,].*[}].*")) {
             String json = StringUtil.substring((String)response, "{", "}");
-            Map parms =  MapUtil.fromJSON(json);
+            Map parms =  MapUtil.fromJSon(json);
             if ((obj == null || PrimitiveUtil.isPrimitiveOrWrapper(obj.getClass())) && parms.size() == 1)
                 value = parms.values().iterator().next();
             else {

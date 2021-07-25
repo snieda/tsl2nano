@@ -402,7 +402,7 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
             + ", Syncron: "
             + synchron
             + ", Result: "
-            + result
+            + StringUtil.toStringCut(result, 80)
             + ", Receivers-Ids: "
             + StringUtil.toString(receiverIDs, 30)
             + ", Enabler: "

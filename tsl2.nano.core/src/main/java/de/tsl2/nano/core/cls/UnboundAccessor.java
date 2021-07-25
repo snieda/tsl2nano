@@ -61,7 +61,9 @@ public class UnboundAccessor<T> {
     Map<String, Method> methodCache;
     /** enables {@link #memberCache} cache. */
     boolean useMemberCache;
-    static Object NULL = new Object() {
+    /** if true, no local/anonymous/enhancing classes will be used, but the known public class instead */
+	private boolean useDefiningClass;
+    public static Object NULL = new Object() {
         public String toString() {
             return "<empty>";
         };
@@ -93,6 +95,12 @@ public class UnboundAccessor<T> {
         }
     }
 
+    /** see {@link #useDefiningClass} */
+    public <A extends UnboundAccessor<T>> A setUseDefiningClass(boolean useDefiningClass) {
+		this.useDefiningClass = useDefiningClass;
+		return (A) this;
+	}
+    
     /**
      * this method returns the instance itself. extending classes may override this to return an object that will be
      * more accessible than the instance itself (perhaps an instance of a super class).
@@ -110,8 +118,12 @@ public class UnboundAccessor<T> {
      * @return all members of accessing class - inclusive super-classes, having at least one the given annotation-types
      */
     public <A extends Annotation> List<String> memberNames(Class<A>... havingAnnotations) {
-        return memberNames(new ArrayList<String>(), instance().getClass(), havingAnnotations);
+        return memberNames(new ArrayList<String>(), clazz(), havingAnnotations);
     }
+
+	protected Class<T> clazz() {
+		return useDefiningClass ? BeanClass.getDefiningClass(instance) : (Class<T>) instance.getClass();
+	}
 
     protected <A extends Annotation> List<String> memberNames(List<String> memberNames,
             Class<? extends Object> cls,
@@ -143,7 +155,7 @@ public class UnboundAccessor<T> {
             useMemberCache = true;
             setMemberCache(new LinkedHashMap<String, Object>());
         }
-        return members(this.instance().getClass(), names);
+        return members(clazz(), names);
     }
 
     /**
@@ -223,7 +235,7 @@ public class UnboundAccessor<T> {
      */
     public void set(String memberName, Object newValue) {
         if (LOG.isTraceEnabled())
-            LOG.trace("changing field " + instance().getClass().getName() + "." + memberName + ": " + newValue);
+            LOG.trace("changing field " + clazz().getName() + "." + memberName + ": " + newValue);
         set(instance(), newValue, path(memberName));
         if (useMemberCache) {
             memberCache.put(memberName, newValue != null ? newValue : NULL);
@@ -253,7 +265,7 @@ public class UnboundAccessor<T> {
      * @return delegates to {@link #typeOf(Class, String...)} using {@link #instance()} and {@link #path(String)}
      */
     public Class typeOf(String name) {
-        return typeOf(instance().getClass(), path(name));
+        return typeOf(clazz(), path(name));
     }
 
     /**
@@ -310,7 +322,7 @@ public class UnboundAccessor<T> {
      * @throws Exception if field not accessible
      */
     protected Field getField(String name) throws Exception {
-        return getField(instance().getClass(), name);
+        return getField(clazz(), name);
     }
 
     protected Field getField(Class type, String name) throws NoSuchFieldException {
@@ -399,7 +411,7 @@ public class UnboundAccessor<T> {
      * @throws Exception if method not accessible
      */
     protected Method getMethod(String name, Class[] par) throws Exception {
-        return instance().getClass().getMethod(name, par);
+        return clazz().getMethod(name, par);
     }
 
     private String getMethodID(String name, Class[] par) {
