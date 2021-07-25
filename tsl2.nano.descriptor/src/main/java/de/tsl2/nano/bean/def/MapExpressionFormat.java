@@ -51,7 +51,7 @@ public class MapExpressionFormat<T> extends ValueExpressionFormat<T> {
     @Override
     public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
         pos.setEndIndex(pos.getBeginIndex() + 1);
-        return toAppendTo.append(MapUtil.toJSON((Map)obj));
+        return toAppendTo.append(MapUtil.toJSon((Map)obj));
     }
 
     /**
@@ -61,7 +61,7 @@ public class MapExpressionFormat<T> extends ValueExpressionFormat<T> {
     @Override
     public Object parseObject(String source, ParsePosition pos) {
         pos.setIndex(pos.getIndex() + 1);
-        return MapUtil.fromJSON(source);
+        return MapUtil.fromJSon(source);
     }
 
 }

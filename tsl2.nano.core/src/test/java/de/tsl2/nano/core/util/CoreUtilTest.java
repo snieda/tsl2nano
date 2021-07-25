@@ -55,6 +55,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.classloader.NetworkClassLoader;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.ClassFinder;
+import de.tsl2.nano.core.cls.IValueAccess;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.ProgressBar;
@@ -62,6 +63,7 @@ import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.execution.ThreadState;
 import de.tsl2.nano.core.http.EHttpClient;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.messaging.EventController;
 import de.tsl2.nano.core.serialize.SimpleXmlAnnotator;
 import de.tsl2.nano.core.serialize.YamlUtil;
 
@@ -140,13 +142,13 @@ public class CoreUtilTest implements ENVTestPreparation {
 	}
 
 	@Test
-	public void testMapUtil() {
+	public void testJSon() {
 		Map m = MapUtil.asMap("k1", "v1,v2", "k2", "v2;v3");
 
-		String json = MapUtil.toJSON(m);
-		assertTrue(MapUtil.isJSON(json));
-		Map m2 = MapUtil.fromJSON(json);
-		assertEquals(json, MapUtil.toJSON(m2));
+		String json = JSon.toJSon(m);
+		assertTrue(JSon.isJSon(json));
+		Map m2 = JSon.fromJSon(json);
+		assertEquals(json, JSon.toJSon(m2));
 		assertEquals(MapUtil.asArray(m), MapUtil.asArray(m2));
 	}
 
@@ -762,4 +764,16 @@ public class CoreUtilTest implements ENVTestPreparation {
 		assertTrue(!result.isEmpty());
 		assertEquals("SUCCESSFULL", result.get(0));
 	}
+	@Test
+	public void testJSONRecursive() {
+		System.setProperty("tsl2.json.recursive", "true");
+		ValueHolder v1 = new ValueHolder(null);
+		ValueHolder v2 = new ValueHolder(v1);
+		v1.setValue(v2);
+		String result = Util.toJson(v2);
+		System.out.println(result);
+		assertEquals("{\"value\": \"{\"value\": \"@0\"}{\"value\": \"{\"value\": \"@0\"}\"}", result);
+	}
+
+		
 }

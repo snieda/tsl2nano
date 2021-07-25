@@ -71,7 +71,7 @@ public class PrivateAccessor<T> extends UnboundAccessor<T> {
 
     @Override
     protected Field getField(String name) throws Exception {
-        return getField(instance().getClass(), name);
+        return getField(clazz(), name);
     }
 
     @Override
@@ -88,7 +88,7 @@ public class PrivateAccessor<T> extends UnboundAccessor<T> {
 
     @Override
     protected Method getMethod(String name, Class[] par) throws Exception {
-        return getMethod(instance().getClass(), name, par);
+        return getMethod(clazz(), name, par);
     }
 
     protected Method getMethod(Class<?> cls, String name, Class[] par) {
@@ -146,7 +146,7 @@ public class PrivateAccessor<T> extends UnboundAccessor<T> {
     }
 
     public Set<Method> findMethod(String nameExpression, Class returnType, Class... args) {
-        return findMethod(instance().getClass(), nameExpression, returnType, args);
+        return findMethod(clazz(), nameExpression, returnType, args);
     }
     
     /**
@@ -188,8 +188,8 @@ public class PrivateAccessor<T> extends UnboundAccessor<T> {
      * @return set of found members
      */
     protected Set<Field> findMembers(String nameExpression, Class returnType) {
-        Field[] fields = instance().getClass().getFields();
-        fields = CollectionUtil.concat(fields, instance().getClass().getDeclaredFields());
+        Field[] fields = clazz().getFields();
+        fields = CollectionUtil.concat(fields, clazz().getDeclaredFields());
         Set<Field> result = new LinkedHashSet<Field>();
         for (int i = 0; i < fields.length; i++) {
             if ((nameExpression == null || fields[i].getName().matches(nameExpression))
@@ -201,8 +201,8 @@ public class PrivateAccessor<T> extends UnboundAccessor<T> {
     }
 
     public Field[] findMembers(Predicate<Field> fieldSelector) {
-        Field[] fields = instance().getClass().getFields();
-        fields = CollectionUtil.concat(fields, instance().getClass().getDeclaredFields());
+        Field[] fields = clazz().getFields();
+        fields = CollectionUtil.concat(fields, clazz().getDeclaredFields());
         return Arrays.stream(fields).filter(fieldSelector).toArray(Field[]::new);
     }
 

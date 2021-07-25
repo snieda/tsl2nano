@@ -38,6 +38,7 @@ public class InitAllAutoTests {
 		IPreferences.reset();
 		System.setProperty("tsl2.nano.logfactory.off", "true");
 		System.setProperty("tsl2.nano.test", "true");
+		System.setProperty("tsl2.json.recursive", "false");
 //		System.setProperty("tsl2.functiontest.testneverfail", "true");
 		BaseTest.useTargetDir();
 		if (Boolean.getBoolean("tsl2.functiontest.forbidSystemExit"))

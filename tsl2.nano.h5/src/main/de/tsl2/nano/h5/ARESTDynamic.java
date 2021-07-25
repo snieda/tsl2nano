@@ -204,7 +204,7 @@ public abstract class ARESTDynamic<RESPONSE> {
 			result = bean.getActionByName(action).activate();
 			if (result != null && !PrimitiveUtil.isPrimitiveOrWrapper(result.getClass())) {
 				Bean<Object> resultBean = Bean.getBean(result);
-				result = action.equals("save") ? resultBean.getId() : MapUtil.toJSON(resultBean.toValueMap(new HashMap<>()));
+				result = action.equals("save") ? resultBean.getId() : MapUtil.toJSon(resultBean.toValueMap(new HashMap<>()));
 			} else if (result == null) {
 				result = bean.getId();
 			}
@@ -305,7 +305,7 @@ public abstract class ARESTDynamic<RESPONSE> {
 			}
 			attributeMap.put("actions", actionMap);
 		}
-		return MapUtil.toJSON(entityMap);
+		return MapUtil.toJSon(entityMap);
 	}
 
 	String printManual() {

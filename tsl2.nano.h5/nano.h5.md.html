@@ -72,6 +72,7 @@ A cool way to see the power of this tool can be seen in chapter _Online Quick-St
 * handling blobs of data (byte[]) to be presented in html as picture, audio, video or object.
 * providing attributes as virtuals (not bound to a real bean-attribute, rule-expressions, sql-query-expressions and RESTful-service-call-expressions
 * automatic translations through network connection
+* manual translations of values through messages.properties (e.g.: mybean.myattribute.myvalue=My Value)
 * secure connection over https and wss (_app.ssl.activate=true)
 * supporting yaml on environment and bean configurations.
 * update mechanism
@@ -79,6 +80,7 @@ A cool way to see the power of this tool can be seen in chapter _Online Quick-St
 * inject onw logic in all phases of presenting through annotations
 * show complex dialogs through websockets to edit beans without leaving the current page
 * REST service for access/modification of all loaded entities
+* JSON representation (with optional recursion: "tsl2.json.recursive: true")
 * planned interfaces:
 	* xsd-->bean
 	* java-interface-->java-bean (mock through internal proxy)
@@ -4348,7 +4350,7 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.4.5  | 20.12.2020 | bugfixes, dependency security fixes, query result fixes, NEW: session menu (edit context)
  2.4.6  | 21.03.2021 | web security extensions, queries with parameters in dilaog, rest-session-authorization, config system.exit, map-bean reactivated, new module 'd8poral' in pre-evaluation mode
  2.4.7  | 24.05.2021 | NEW: autotest as unit test creator, vnet(neuron)+terminal extensions, beanvalues respecting arrays/primitive-arrays and all different number type formattings
- 2.4.8  | 25.07.2021 | autotest enhanced with lots of features, NEW: IPreferences as environment enum
+ 2.4.8  | 25.07.2021 | autotest enhanced with lots of features, NEW: IPreferences as environment enum, NEW: translation of attribute values (through manual messages entry)
  2.5.0  | xx.xx.2021 | see EnvUpdate2v5v0: refactorings: serialization of actions with primitive attributes, move incubation packages
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>

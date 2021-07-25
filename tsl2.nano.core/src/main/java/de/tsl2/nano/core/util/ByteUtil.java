@@ -327,7 +327,9 @@ public class ByteUtil extends Util {
     			? Util.trY( () -> Arrays.toString(toByteArray((ByteBuffer)obj)))
     			: obj instanceof OutputStream
     				? toString((OutputStream)obj, encoding)
-    				: toString((InputStream)obj, encoding);
+    					: obj instanceof Blob
+    						? toString(Util.trY( () -> ((Blob)obj).getBinaryStream()))
+    						: toString((InputStream)obj, encoding);
     }
     
     public static byte[] toByteArray(ByteBuffer bb) {
