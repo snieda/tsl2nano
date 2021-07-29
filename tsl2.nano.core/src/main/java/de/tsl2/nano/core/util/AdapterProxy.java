@@ -27,6 +27,7 @@ import de.tsl2.nano.core.cls.BeanAttribute;
  */
 public class AdapterProxy implements InvocationHandler {
     Map<String, Object> values;
+    boolean toStringRecursion;
     
     AdapterProxy(Map<String, Object> values) {
         this.values = values != null ? values : new HashMap<>();
@@ -63,13 +64,17 @@ public class AdapterProxy implements InvocationHandler {
 
 	private String toProxyString(Object proxy) {
 		//avoid stackoverflow on having member pointing to itself
-		Map<String, Object> valuesWithoutItself;
-		if (values.containsValue(proxy)) {
-			valuesWithoutItself = new HashMap<>(values);
-			valuesWithoutItself.forEach( (k, v) -> {if (v == proxy) valuesWithoutItself.replace(k, proxy.getClass().getSimpleName());});
-		} else
-			valuesWithoutItself = values;
-		return "{\"" + proxy.getClass().getInterfaces()[0].getSimpleName() + "(" + proxy.getClass().getSimpleName() + ")\":" + getClass().getSimpleName() + ")" + ": " + MapUtil.toJSon(valuesWithoutItself) + "}";
+		if (toStringRecursion)
+			return toString();
+		else {
+			try {
+				toStringRecursion = true;
+				return "{\"" + proxy.getClass().getInterfaces()[0].getSimpleName() + "(" + proxy.getClass().getSimpleName() + ")\":" + getClass().getSimpleName() + ")" 
+						+ ": " + MapUtil.toJSon(values) + "}";
+			} finally {
+				toStringRecursion = false;
+			}
+		}
 	}
     
     private Object findReturnValue(Method method, Object[] values, Object[] args) {
