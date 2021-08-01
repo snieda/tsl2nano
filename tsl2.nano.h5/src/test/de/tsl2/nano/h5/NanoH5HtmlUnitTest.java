@@ -16,6 +16,7 @@ import java.io.PipedOutputStream;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -32,6 +33,7 @@ import de.tsl2.nano.persistence.Persistence;
  * @author Tom, Thomas Schneider
  * @version $Revision$ 
  */
+@Ignore
 @net.jcip.annotations.NotThreadSafe
 public class NanoH5HtmlUnitTest extends NanoH5Unit {
 

@@ -139,15 +139,17 @@ public class AutoTestGenerator {
 			FileUtil.writeBytes(("\nfiltered methods             : " + methods.size()).getBytes(), getTimedFileName() + "statistics.txt", true);
 			progress = new ProgressBar(methods.size() * duplication);
 			ArrayList<Integer> dupList = NumberUtil.numbers(duplication);
-			AtomicBoolean fileexists = new AtomicBoolean(true);
 			Util.stream(dupList, def(PARALLEL, false)).forEach( i -> 
 			{
 				Thread.currentThread().setUncaughtExceptionHandler(uncaughtExceptionHandler );
 				if (!getFile(i).exists() || def(CLEAN, false)) {
-					fileexists.set(false);
 					generateExpectations(i, methods);
 				}
-				if (fileexists.get() || count > 0)
+			});
+			Util.stream(dupList, def(PARALLEL, false)).forEach( i -> 
+			{
+				Thread.currentThread().setUncaughtExceptionHandler(uncaughtExceptionHandler );
+				if (getFile(i).exists() || count > 0)
 					testers.addAll(readExpectations(i));
 				
 			});
