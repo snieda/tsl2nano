@@ -3,6 +3,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Launch Flow",
+            "request": "launch",
+            "mainClass": "de.tsl2.nano.h5.Flow",
+            "projectName": "tsl2.nano.h5"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - App",
             "request": "launch",
             "mainClass": "de.tsl2.nano.aspect.App",

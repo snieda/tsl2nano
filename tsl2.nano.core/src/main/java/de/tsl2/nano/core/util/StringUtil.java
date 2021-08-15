@@ -669,6 +669,16 @@ public class StringUtil {
         return buf.toString();
     }
 
+    /** splits the given string in the order of the given separator/splitter strings. Not performance optimized! */
+    public static final String[] splitFix(String source, String...splitter) {
+    	String[] s = new String[splitter.length];
+    	String last = null;
+    	for (int i = 0; i < s.length; i++) {
+			last = substring(source, last, splitter[i]);
+			s[i] = last;
+		}
+    	return s;
+    }
     /**
      * Splits the given string to an array of string. The string is split every time its length is bigger than he given
      * maximum length.
