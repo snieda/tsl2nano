@@ -1300,6 +1300,14 @@ public class BeanClass<T> implements Serializable {
         return name.matches("([a-zA-Z0-9_]+[.])+[A-Z]\\w*[a-zA-Z0-9]$");
     }
 
+    public boolean isPublicClass(String name) {
+    	try {
+			Class cls = BeanClass.load(name);
+			return Modifier.isPublic(cls.getModifiers());
+		} catch (Exception e) {
+			return false;
+		}
+    }
     public boolean isSingleton() {
     	Field f;
     	return ObjectUtil.isInstanceable(clazz) && !hasPublicConstructor() && (f = getField(clazz)) != null && Modifier.isStatic(f.getModifiers()); 

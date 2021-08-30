@@ -1,15 +1,19 @@
 package de.tsl2.nano.core.util;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Scanner;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
-import org.junit.Test;
 
 import de.tsl2.nano.core.cls.BeanClass;
 
@@ -18,6 +22,36 @@ public class Flow {
 	String name;
 	List<Consumer<ITask>> listeners = new LinkedList<>();
 	
+	public void persist(File gravitoFile, ITask root) {
+		StringBuilder buf = new StringBuilder();
+		buildString(root, buf);
+		Util.trY( () -> Files.write(Paths.get(gravitoFile.getPath()), buf.toString().getBytes()));
+	}
+	
+	private void buildString(ITask root, StringBuilder buf) {
+		buf.append(root.asString());
+		root.next().forEach(t -> buildString(t, buf));
+	}
+
+	public static Flow load(File gravitoFile) {
+		return load(gravitoFile, null);
+	}
+	public static Flow load(File gravitoFile, Class<? extends STask> taskType) {
+		Scanner sc = Util.trY( () -> new Scanner(gravitoFile));
+		Flow flow = new Flow();
+		STask task;
+		Map<String, ITask> tasks = new HashMap<>();
+		Queue<String> strTasks = new LinkedList<>();
+		while (sc.hasNextLine()) {
+			strTasks.add(sc.nextLine());
+		}
+		// create from end...
+		while (!strTasks.isEmpty()) {
+			task = taskType != null ? BeanClass.createInstance(taskType) : flow.new STask();
+			task.fromGravString(strTasks.poll(), tasks);
+		}
+		return flow;
+	}
 	public Deque<ITask> process(ITask start, Map<String, Object> context) {
 		assert start.isStart();
 		LinkedList<ITask> solved = new LinkedList<>();
@@ -48,17 +82,13 @@ public class Flow {
 	public boolean isFailed(Deque<ITask> solved) {
 		return solved.getLast().status().equals(ITask.Status.FAIL);
 	}
-	@Test
 	public static void main(String[] args) {
-		Flow flow = new Flow();
-		STask t1 = flow.new STask("task1", ".*init=1.*", c -> c.put("init", 2));
-		STask t2 = flow.new STask("task2", ".*init=2.*", null);
-		ITask start = ITask.createStart(t1);
-		t1.addNeighbours(t2);
-		t2.addNeighbours(ITask.END);
-		flow.listeners.add(t -> System.out.println(t));
-		Deque solved = flow.process(start, MapUtil.asMap("init", 1));
-		flow.isSuccessfull(solved);
+		if (args.length == 0) {
+			System.out.println("usage: Flow <gravito-flow-file>");
+			return;
+		}
+		Flow flow = Flow.load(new File(args[0]), STask.class);
+		flow.process(null, new HashMap<>());
 	}
 	/** base definition to do a simple workflow */
 	public interface ITask {
@@ -104,6 +134,7 @@ public class Flow {
 		}
 		static final ITask END = new ITask() {
 			@Override public String name() { return "END"; }
+			@Override public List<ITask> next() { return Arrays.asList(); }
 			@Override public boolean isEnd() { return true; }
 			@Override public void addNeighbours(ITask...tasks) {}
 			@Override
@@ -122,6 +153,8 @@ public class Flow {
 		private Status status = Status.NEW;
 		private List<ITask> neighbours;
 
+		ATask() {
+		}
 		public ATask(String name, Predicate<Map> condition, Function<Map, ?> function, List<ITask> neighbours) {
 			this.name = name;
 			this.condition = condition;
@@ -176,6 +209,9 @@ public class Flow {
 	public class STask extends ATask {
 		String condition; //for logging output
 		String expression;
+		STask() {
+		}
+		
 		/** Predicate as condition, FunctionalInterface as action */
 		public STask(String predicateClassName, String functionClassName) {
 			super(BeanClass.load(functionClassName).getSimpleName(), 
@@ -193,10 +229,15 @@ public class Flow {
 		public String gravCondition() {
 			return " [label=\"" + condition + "\"]";
 		}
-		public STask fromGravString(String line) {
+		public STask fromGravString(String line, Map<String, ITask> tasks) {
 			// TODO: how to persist/restore action expression
 			String[] t = StringUtil.splitFix(line, " ", " -> ", " ", "[label=\"", "\"]");
-			return new STask(t[0], t[3]);
+			STask task = BeanClass.isPublicClass(t[0]) && BeanClass.isPublicClass(line) 
+					? new STask(t[0], t[3])
+					: new STask();
+			if (tasks.containsKey(t[2]))
+				task.addNeighbours(tasks.get(t[2]));
+			return task;
 		}
 	}
 
