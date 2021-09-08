@@ -20,17 +20,23 @@ import de.tsl2.nano.core.cls.BeanClass;
 /** the maker. goes recursively through all tasks until end. */
 public class Flow {
 	String name;
+	ITask start;
 	List<Consumer<ITask>> listeners = new LinkedList<>();
+
+	public void setTasks(ITask start) {
+		this.start = start;
+	}
 	
-	public void persist(File gravitoFile, ITask root) {
+	public void persist(File gravitoFile) {
 		StringBuilder buf = new StringBuilder();
-		buildString(root, buf);
+		buildString(start, buf);
 		Util.trY( () -> Files.write(Paths.get(gravitoFile.getPath()), buf.toString().getBytes()));
 	}
 	
-	private void buildString(ITask root, StringBuilder buf) {
-		buf.append(root.asString());
+	private StringBuilder buildString(ITask root, StringBuilder buf) {
+		buf.append(root.asString() + "\n");
 		root.next().forEach(t -> buildString(t, buf));
+		return buf;
 	}
 
 	public static Flow load(File gravitoFile) {
@@ -41,19 +47,21 @@ public class Flow {
 		Flow flow = new Flow();
 		STask task;
 		Map<String, ITask> tasks = new HashMap<>();
-		Queue<String> strTasks = new LinkedList<>();
+		tasks.put(ITask.END.name(), ITask.END);
+		Deque<String> strTasks = new LinkedList<>();
+		String line;
 		while (sc.hasNextLine()) {
-			strTasks.add(sc.nextLine());
+			if (!(line = sc.nextLine()).isEmpty())
+			strTasks.add(line);
 		}
 		// create from end...
 		while (!strTasks.isEmpty()) {
 			task = taskType != null ? BeanClass.createInstance(taskType) : flow.new STask();
-			task.fromGravString(strTasks.poll(), tasks);
+			task.fromGravString(strTasks.pollLast(), tasks);
 		}
 		return flow;
 	}
-	public Deque<ITask> process(ITask start, Map<String, Object> context) {
-		assert start.isStart();
+	public Deque<ITask> process(Map<String, Object> context) {
 		LinkedList<ITask> solved = new LinkedList<>();
 		flow(start, context, solved);
 		return solved;
@@ -82,13 +90,20 @@ public class Flow {
 	public boolean isFailed(Deque<ITask> solved) {
 		return solved.getLast().status().equals(ITask.Status.FAIL);
 	}
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof Flow))
+			return false;
+		Flow f = (Flow) obj;
+		return buildString(start, new StringBuilder()).toString().equals(f.buildString(start, new StringBuilder()).toString());
+	}
 	public static void main(String[] args) {
 		if (args.length == 0) {
 			System.out.println("usage: Flow <gravito-flow-file>");
 			return;
 		}
 		Flow flow = Flow.load(new File(args[0]), STask.class);
-		flow.process(null, new HashMap<>());
+		flow.process(new HashMap<>());
 	}
 	/** base definition to do a simple workflow */
 	public interface ITask {
@@ -200,6 +215,14 @@ public class Flow {
 		}
 		
 		@Override
+		public boolean equals(Object obj) {
+			if (!(obj instanceof ATask))
+				return false;
+			ATask o = (ATask) obj;
+			return name.equals(o.name) && condition.equals(o.condition);
+		}
+		
+		@Override
 		public String toString() {
 			return asString();
 		}
@@ -231,10 +254,10 @@ public class Flow {
 		}
 		public STask fromGravString(String line, Map<String, ITask> tasks) {
 			// TODO: how to persist/restore action expression
-			String[] t = StringUtil.splitFix(line, " ", " -> ", " ", "[label=\"", "\"]");
-			STask task = BeanClass.isPublicClass(t[0]) && BeanClass.isPublicClass(line) 
+			String[] t = StringUtil.splitFix(line, " ", " -> ", " [label=\"", "\"]");
+			STask task = BeanClass.isPublicClass(t[0]) && BeanClass.isPublicClass(t[3]) 
 					? new STask(t[0], t[3])
-					: new STask();
+					: new STask(t[0], t[3], null);
 			if (tasks.containsKey(t[2]))
 				task.addNeighbours(tasks.get(t[2]));
 			return task;

@@ -1300,9 +1300,9 @@ public class BeanClass<T> implements Serializable {
         return name.matches("([a-zA-Z0-9_]+[.])+[A-Z]\\w*[a-zA-Z0-9]$");
     }
 
-    public boolean isPublicClass(String name) {
+    public static boolean isPublicClass(String name) {
     	try {
-			Class cls = BeanClass.load(name);
+			Class cls = BeanClass.load(name, null, false);
 			return Modifier.isPublic(cls.getModifiers());
 		} catch (Exception e) {
 			return false;

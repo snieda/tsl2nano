@@ -1,5 +1,6 @@
 package de.tsl2.nano.core.util;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
@@ -27,7 +28,7 @@ public class FlowTest {
 		Flow flow = new Flow();
 		ITask start = createTasks(flow);
 		flow.listeners.add(t -> System.out.println(t));
-		Deque solved = flow.process(start, MapUtil.asMap("init", 1));
+		Deque solved = flow.process(MapUtil.asMap("init", 1));
 		flow.isSuccessfull(solved);
 	}
 
@@ -37,16 +38,17 @@ public class FlowTest {
 		ITask start = ITask.createStart(t1);
 		t1.addNeighbours(t2);
 		t2.addNeighbours(ITask.END);
+		flow.setTasks(start);
 		return start;
 	}
 
 	@Test
 	public void testSaveAndLoad() {
 		Flow flow = new Flow();
-		ITask start = createTasks(flow);
+		createTasks(flow);
 		
-		File file = new File("test.gra");
-		flow.persist(file, start);
+		File file = FileUtil.userDirFile("target/test.gra");
+		flow.persist(file);
 		
 		Flow flow1 = Flow.load(file);
 		assertEquals(flow, flow1);

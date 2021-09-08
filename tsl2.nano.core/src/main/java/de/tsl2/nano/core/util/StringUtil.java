@@ -669,7 +669,7 @@ public class StringUtil {
         return buf.toString();
     }
 
-    /** splits the given string in the order of the given separator/splitter strings. Not performance optimized! */
+    /** splits the given string in the order of the given separator/splitter (show be unique!) strings. Not performance optimized! */
     public static final String[] splitFix(String source, String...splitter) {
     	String[] s = new String[splitter.length];
     	String last = null;
