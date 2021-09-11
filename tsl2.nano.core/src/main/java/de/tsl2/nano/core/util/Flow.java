@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Scanner;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -17,7 +16,23 @@ import java.util.function.Predicate;
 
 import de.tsl2.nano.core.cls.BeanClass;
 
-/** the maker. goes recursively through all tasks until end. */
+/** 
+ * {@link Flow} as simplest workflow base using implementations of {@link ITask}.
+ * It is the maker. going recursively through all tasks until end. experimental implementation
+ * having only one class file with inner classes and a fat interface<p/> 
+ * 
+ * As {@link ATask} is a base implementation of {@link ITask}, the {@link STask}<br/>
+ * provides an extension to be used on functional implementation.<p/>
+ * 
+ * Each task has a name (may be equal to the action definition representation), a condition<br/>
+ * for activation and the action itself.<p/>
+ * 
+ * To persist a flow with its task tree, a gravito state diagram file will be created.<br/>
+ * This can be rendered by gravito inside a markdown file. So, a graphical representation is given.<p/>
+ * 
+ * This base implementation of a workflow is used and extended inside the module 'tsl2.nano.specification'
+ * which provides conditions and actions as rules (through scripting, decision tables etc.) or specified actions. 
+ * */
 public class Flow {
 	String name;
 	ITask start;
@@ -27,6 +42,9 @@ public class Flow {
 		this.start = start;
 	}
 	
+	public void persist() {
+		persist(FileUtil.userDirFile(name + "gra"));
+	}
 	public void persist(File gravitoFile) {
 		StringBuilder buf = new StringBuilder();
 		buildString(start, buf);
@@ -42,10 +60,10 @@ public class Flow {
 	public static Flow load(File gravitoFile) {
 		return load(gravitoFile, null);
 	}
-	public static Flow load(File gravitoFile, Class<? extends STask> taskType) {
+	public static Flow load(File gravitoFile, Class<? extends ITask> taskType) {
 		Scanner sc = Util.trY( () -> new Scanner(gravitoFile));
 		Flow flow = new Flow();
-		STask task;
+		ITask task;
 		Map<String, ITask> tasks = new HashMap<>();
 		tasks.put(ITask.END.name(), ITask.END);
 		Deque<String> strTasks = new LinkedList<>();
@@ -128,6 +146,16 @@ public class Flow {
 		default String gravCondition() {
 			return "";
 		}
+		default ITask fromGravString(String line, Map<String, ITask> tasks) {
+			// TODO: how to persist/restore action expression
+			String[] t = StringUtil.splitFix(line, " ", " -> ", " [label=\"", "\"]");
+			ITask task = createTask(t);
+			if (tasks.containsKey(t[2]))
+				task.addNeighbours(tasks.get(t[2]));
+			return task;
+		}
+
+		default ITask createTask(String[] t) { throw new UnsupportedOperationException(); }
 		public static ITask createStart(final ITask...tasks) {
 			return new ITask() {
 				@Override public String name() { return "START"; }
@@ -168,7 +196,7 @@ public class Flow {
 		private Status status = Status.NEW;
 		private List<ITask> neighbours;
 
-		ATask() {
+		protected ATask() {
 		}
 		public ATask(String name, Predicate<Map> condition, Function<Map, ?> function, List<ITask> neighbours) {
 			this.name = name;
@@ -226,13 +254,12 @@ public class Flow {
 		public String toString() {
 			return asString();
 		}
-		
 	}
 	/** simple string-based task. condition should match context as string. expression has to point to a method. */
 	public class STask extends ATask {
 		String condition; //for logging output
 		String expression;
-		STask() {
+		protected STask() {
 		}
 		
 		/** Predicate as condition, FunctionalInterface as action */
@@ -252,20 +279,18 @@ public class Flow {
 		public String gravCondition() {
 			return " [label=\"" + condition + "\"]";
 		}
-		public STask fromGravString(String line, Map<String, ITask> tasks) {
-			// TODO: how to persist/restore action expression
-			String[] t = StringUtil.splitFix(line, " ", " -> ", " [label=\"", "\"]");
+		public STask createTask(String[] t) {
 			STask task = BeanClass.isPublicClass(t[0]) && BeanClass.isPublicClass(t[3]) 
 					? new STask(t[0], t[3])
 					: new STask(t[0], t[3], null);
-			if (tasks.containsKey(t[2]))
-				task.addNeighbours(tasks.get(t[2]));
 			return task;
 		}
 	}
 
 	/** simple http request task. condition should point to a rest-service with boolean response. expression to any rest service */
 	public class RTask extends ATask {
+		protected RTask() {}
+		
 		public RTask(String name, String urlCondition, String urlExpression) {
 			super(name, m -> new Boolean(NetUtil.getRest(urlCondition, m, Boolean.class)), m -> NetUtil.getRest(urlExpression, m, Object.class), null);
 		}
@@ -280,6 +305,5 @@ public class Flow {
 		public boolean test(Map m) {
 			return m.toString().matches(condition);
 		}
-		
 	}
 }

@@ -5,19 +5,30 @@ import java.util.List;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.Flow;
 import de.tsl2.nano.core.util.Flow.ITask;
-import de.tsl2.nano.core.util.StringUtil;
 
+/**
+ * Provides use of Flow and Tasks through specification items like rules and actions.
+ * @author ts
+ *
+ */
 public class Task extends Flow.ATask {
 
+	/** WORKAROUND to use inner classes in Flow - may be refactored external classes */
+	private static Flow flow;
+	
+	Task() {
+		flow.super();
+	}
 	@SuppressWarnings("unchecked")
 	public Task(Flow flow, String conditionRule, String activationRule, List<ITask> neighbours) {
 		flow.super(activationRule, 
 				m -> (Boolean)ENV.get(Pool.class).get(conditionRule).run(m), 
 				m -> ENV.get(Pool.class).get(activationRule).run(m), 
 				neighbours);
+		Task.flow = flow;
 	}
-	public Task fromGravString(Flow flow, String line) {
-		String[] t = StringUtil.splitFix(line, " ", " -> ", " ", "[label=\"", "\"]");
+	@Override
+	public ITask createTask(String[] t) {
 		return new Task(flow, t[3], t[0], null);
 	}
 }
