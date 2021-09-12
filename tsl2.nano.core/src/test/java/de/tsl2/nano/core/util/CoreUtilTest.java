@@ -463,7 +463,7 @@ public class CoreUtilTest implements ENVTestPreparation {
 			assertTrue(obj.get("mykey2").toString().equals("\"myvalue2\""));
 		} catch (Exception e) {
 			// the URL may be out of service!
-			if (e.toString().contains("code: 503")) {
+			if (e.toString().contains("code: 50")) {
 				LOG.warn(e.toString());
 			} else {
 				ManagedException.forward(e);

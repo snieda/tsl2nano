@@ -45,6 +45,7 @@ A cool way to see the power of this tool can be seen in chapter _Online Quick-St
 * it provides several working modes: single standalone app, network/multi-user and/or access to an application-server
 
 ### Features and Technical Goals
+
 * pure model implementation + platform independence (naked objects, works on android, too).
 * small, having as less as possible static dependencies to other libraries
 * using with zero code possible
@@ -55,7 +56,7 @@ A cool way to see the power of this tool can be seen in chapter _Online Quick-St
 * no new language to learn. knowing html5 allows to improve layout and styling.
 * navigates through given beans, showing bean-lists and bean-detail dialogs.
 * resolves all bean/entity relations to be browsed.
-* navigation can be a configurable workflow - or simply an entity browser 
+* navigation can be a configurable sql-property-workflow, a specification workflow  - or simply an entity browser 
 * pre-defines formatting, validation and presentation of relations
 * pure html-5 (no javascript, only html5-scripting-api for websockets)
 * jvm scripts like javascript, groovy and python can be included by rules using the java scriptengine
@@ -2554,6 +2555,45 @@ Each bean list (BeanCollector) provides a menu action for _replication_ of curre
 *NOTE*: If you have cycling bindings (assozations in both directions) and no cascading defined, the replication import to the second persistence unit may fail.
 In that case, you may do an entity replication from PUNIT1 to any file-serialization (YAML, XML, etc.). Edit the file and remove the redirections from onetomany children to their parent (manytoone).
 
+## A simple specification Workflow
+
+Another type of workflow is implemented as *Flow* inside the core package and extended in the *tsl2.nano.specification* module.
+The flow processes a given tree of tasks from a start task  until an end task. each task is defined by a *condition* and an *action*.
+
+The goal of this simplest type of worklfow is the capability to use all specification types of *tsl2.nano.specification* like Rule, Decisiontable, Query, Webaction and Action, persisting and loading 
+itself to a gravito activity file - with all opportunities to present them as graphical diagrams perhaps in an markdown context.
+
+JUnit Test as Example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+public class TaskTest {
+
+	@Test
+	public void testFlow() throws Exception {
+		Pool pool = new Pool();
+		pool.add(new Rule<>("test", "isnix", null));
+		pool.add(new Action<>(TaskTest.class.getMethod("myAction", new Class[0])));
+		
+		Flow flow = new Flow();
+		Task task = new Task(flow, "test", "myAction", null);
+		ITask.createStart(task);
+		task.addNeighbours(ITask.END);
+		flow.setTasks(task);
+		
+		File file = FileUtil.userDirFile("target/test.gra");
+		flow.persist(file);
+		
+		Flow flow1 = Flow.load(file, Task.class);
+		assertEquals(flow, flow1);
+		
+	}
+
+	public String myAction() {
+		return "machnix";
+	}
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 ## Working on multiple Databases
 
 In standalone mode, database connections are defined inside the _persistence.xml_. Define multiple _persistence_untit_s if you need access to multiple databases. Of course, they need their mapping entity beans. So define the beans jar file in the persistence.xml and store it in the environments directory.
@@ -4351,6 +4391,7 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.4.6  | 21.03.2021 | web security extensions, queries with parameters in dilaog, rest-session-authorization, config system.exit, map-bean reactivated, new module 'd8poral' in pre-evaluation mode
  2.4.7  | 24.05.2021 | NEW: autotest as unit test creator, vnet(neuron)+terminal extensions, beanvalues respecting arrays/primitive-arrays and all different number type formattings
  2.4.8  | 01.08.2021 | autotest enhanced with lots of features, NEW: IPreferences as environment enum, NEW: translation of attribute values (through manual messages entry)
+ 2.4.9  | 03.10.2021 | NEW: core Flow and specification Task (usable as workflow with gravito presentation)
  2.5.0  | xx.xx.2021 | see EnvUpdate2v5v0: refactorings: serialization of actions with primitive attributes, move incubation packages
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>

@@ -118,12 +118,12 @@ public class HistorizeTest implements ENVTestPreparation {
     @Test
     public void testVolatileCachePerformance() throws Exception {
     	Volatile<Long> v = new Volatile<>(100, 100l);
-    	long count = 10000;
+    	long count = 100000;
     	List<Long> durations = Profiler.si().compareTests(BASE_DIR, true, count,
     			() -> { if (v.expired()) v.set(evalTestKleinerGauss(count)); else v.get();} ,
     			() -> evalTestKleinerGauss(count));
     	//check is done in compareTests!
-//    	assertTrue("using Volatile cache should be fast than direct calls!", durations.get(0) > durations.get(1) );
+//    	assertTrue("using Volatile cache should be faster than direct calls!", durations.get(0) > durations.get(1) );
     }
     
     @Test
@@ -131,7 +131,7 @@ public class HistorizeTest implements ENVTestPreparation {
     	long count = 1000000;
     	Volatile<Long> v = new Volatile<>(100, 100l);
     	SVolatile<Long> vs = new SVolatile<>(100, () -> evalTestKleinerGauss(count));
-    	List<Long> durations = Profiler.si().compareTests(BASE_DIR, true, count, 
+    	List<Long> durations = Profiler.si().compareTests(BASE_DIR + "-supplied", true, count, 
     			() -> vs.get() ,
     			() -> { if (v.expired()) v.set(evalTestKleinerGauss(count)); else v.get();});
     	
