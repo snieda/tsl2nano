@@ -9,7 +9,7 @@
  */
 package de.tsl2.nano.format;
 
-import org.apache.commons.lang.builder.StandardToStringStyle;
+import org.apache.commons.lang3.builder.StandardToStringStyle;
 
 /**
  * Encapsulates the ToStringBuilder of apache commons lang. The method ToStringBuilder.reflectionToString(obj) is an optional use through CompatibilityLayer.
@@ -30,10 +30,10 @@ public class ToStringBuilder {
             STYLE_TOSTRING.setSizeEndText("%");
             STYLE_TOSTRING.setSummaryObjectStartText("%");
             STYLE_TOSTRING.setSummaryObjectEndText("%");
-            org.apache.commons.lang.builder.ToStringBuilder.setDefaultStyle(STYLE_TOSTRING);
+            org.apache.commons.lang3.builder.ToStringBuilder.setDefaultStyle(STYLE_TOSTRING);
         }
 
     public static String reflectionToString(Object obj) {
-        return org.apache.commons.lang.builder.ToStringBuilder.reflectionToString(obj);
+        return org.apache.commons.lang3.builder.ToStringBuilder.reflectionToString(obj);
     }
 }

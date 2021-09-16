@@ -3,13 +3,11 @@ package de.tsl2.nano.autotest.creator;
 import java.util.Collection;
 
 import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import de.tsl2.nano.autotest.BaseTest;
 import de.tsl2.nano.autotest.ValueRandomizer;
 import de.tsl2.nano.core.IPreferences;
 

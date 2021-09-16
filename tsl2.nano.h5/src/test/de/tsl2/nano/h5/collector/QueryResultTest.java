@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +28,7 @@ public class QueryResultTest implements ENVTestPreparation {
 
 	@Before
 	public void setUpBefore() throws Exception {
+		Locale.setDefault(Locale.GERMANY);
 		setUp("h5");
 	}
 

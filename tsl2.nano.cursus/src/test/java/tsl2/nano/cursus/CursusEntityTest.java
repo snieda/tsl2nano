@@ -7,6 +7,7 @@ import java.lang.annotation.Annotation;
 import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.persistence.Entity;
@@ -49,6 +50,7 @@ public class CursusEntityTest implements Serializable /* only for the inner-clas
 
     @BeforeClass
     public static void setUp() {
+    	Locale.setDefault(Locale.GERMANY);
     	ENVTestPreparation.setUp("cursus", false);
     }
 

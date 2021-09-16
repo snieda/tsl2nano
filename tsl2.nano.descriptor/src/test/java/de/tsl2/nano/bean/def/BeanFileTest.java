@@ -12,6 +12,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.tsl2.nano.autotest.TypeBean;
@@ -22,10 +25,21 @@ import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 
-public class BeanFileTest {
+public class BeanFileTest implements ENVTestPreparation {
+	@Before
+	public void setUp() {
+		ENVTestPreparation.super.setUp("descriptor");
+	}
+
+	@AfterClass
+	public static void tearDown() {
+		ENVTestPreparation.tearDown();
+	}
+
     @Test
     public void testBeanUtilFromFlatFile() throws Exception {
         /*

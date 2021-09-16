@@ -20,6 +20,7 @@ import java.util.Currency;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -51,12 +52,13 @@ import de.tsl2.nano.currency.CurrencyUtil;
 import de.tsl2.nano.format.GenericTypeMatcher;
 import de.tsl2.nano.format.RegExpFormat;
 
-public class BeanTest {
+public class BeanTest implements ENVTestPreparation {
     private static final Log LOG = LogFactory.getLog(BeanTest.class);
 
     @Before
     public void setUp() {
-    	ENVTestPreparation.setUp("descriptor", false);
+    	Locale.setDefault(Locale.GERMANY);
+    	ENVTestPreparation.super.setUp("descriptor");
     }
 
     @After

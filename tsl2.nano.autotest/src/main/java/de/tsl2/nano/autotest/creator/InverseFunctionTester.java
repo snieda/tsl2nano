@@ -1,7 +1,6 @@
 package de.tsl2.nano.autotest.creator;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Objects;
 
 import de.tsl2.nano.core.util.ObjectUtil;
@@ -26,7 +25,7 @@ public class InverseFunctionTester extends AFunctionTester<InverseFunction> {
 	public InverseFunctionTester(Method source) {
 		super(source);
 		def = source.getAnnotation(InverseFunction.class);
-		log("\t" + source.getDeclaringClass().getSimpleName() + ": " + source.getName() + " -> " + def.methodName() + "\n");
+		logd("\t" + source.getDeclaringClass().getSimpleName() + ": " + source.getName() + " -> " + def.methodName() + "\n");
 	}
 
 	protected Method getFunction(InverseFunction funcAnn) {
@@ -69,10 +68,10 @@ public class InverseFunctionTester extends AFunctionTester<InverseFunction> {
 	@Override
 	public void run() {
 		Method sourceMethod = getFunction(def);
-		log("==> doing test " + cloneIndex + " step 1: ");
+		logd("==> doing test " + cloneIndex + " step 1: ");
 		result = run(sourceMethod, getParameter());
 		doBetween();
-		log("==> doing test " + cloneIndex + " step 2: ");
+		logd("==> doing test " + cloneIndex + " step 2: ");
 		inverseResult = run(source, getInverseParameter());
 	}
 

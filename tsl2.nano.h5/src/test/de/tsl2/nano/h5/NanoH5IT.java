@@ -13,6 +13,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.PipedOutputStream;
+import java.util.Locale;
 
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
@@ -45,6 +46,7 @@ public class NanoH5IT extends NanoH5Unit {
 
     @Before
     public void setUp() {
+    	Locale.setDefault(Locale.GERMANY);
 //    	ENVTestPreparation.removeCaches();
         System.setProperty("app.server.running", "true");
         super.setUp();

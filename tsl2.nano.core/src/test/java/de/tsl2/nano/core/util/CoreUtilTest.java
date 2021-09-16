@@ -17,7 +17,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.lang.Thread.State;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -55,7 +54,6 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.classloader.NetworkClassLoader;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.ClassFinder;
-import de.tsl2.nano.core.cls.IValueAccess;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.ProgressBar;
@@ -63,7 +61,6 @@ import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.execution.ThreadState;
 import de.tsl2.nano.core.http.EHttpClient;
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.core.messaging.EventController;
 import de.tsl2.nano.core.serialize.SimpleXmlAnnotator;
 import de.tsl2.nano.core.serialize.YamlUtil;
 
@@ -80,6 +77,7 @@ public class CoreUtilTest implements ENVTestPreparation {
 	@BeforeClass
 	public static void setUp() {
 		BASE_DIR_CORE = ENVTestPreparation.setUp("core", false);
+		Locale.setDefault(Locale.GERMANY);
 	}
 
 	@AfterClass
@@ -301,20 +299,17 @@ public class CoreUtilTest implements ENVTestPreparation {
 		final String strZeroDate = "01.01.0001";
 		Date shouldDate = df.parse(strZeroDate);
 		shouldDate = DateUtil.change(shouldDate, Calendar.HOUR_OF_DAY, 0);
-		shouldDate = DateUtil.change(shouldDate, Calendar.HOUR_OF_DAY, 0);
 		shouldDate = DateUtil.change(shouldDate, Calendar.MINUTE, 0);
 		shouldDate = DateUtil.change(shouldDate, Calendar.SECOND, 0);
 		shouldDate = DateUtil.change(shouldDate, Calendar.MILLISECOND, 0);
 
-		final Date zeroDate = DateUtil.getDate(0, 1, 1);
+		final Date zeroDate = DateUtil.getDate(0, 1, 1);		
 		final String strDate = DateUtil.getFormattedDate(zeroDate);
 		if (!strDate.equals(strZeroDate)) {
 			fail("date should be " + strZeroDate + " but was " + strDate);
-			// TODO: check the failure!!!
-			// if (!zeroDate.equals(shouldDate))
-			// fail("date should be " + dff.format(shouldDate) + " but was " +
-			// dff.format(zeroDate));
 		}
+		if (!strDate.equals(DateUtil.getFormattedDate(shouldDate)))
+			fail("date should be " + dff.format(shouldDate) + " but was " + dff.format(zeroDate));
 
 		// test date field maximum
 		shouldDate = df.parse("31.12.3000");

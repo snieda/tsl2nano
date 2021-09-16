@@ -251,6 +251,12 @@ public class ManagedException extends RuntimeException {
 		return stackTrace.length == 0 ? "...empty stacktrace" : "...no stacktrace line found for " + regex;
 	}
 
+	public static void handleError(Throwable ex) {
+    	if (ENV.get("app.mode.strict", false))
+    		forward(ex);
+    	else
+    		LOG.error(toStringCause(ex));
+	}
 	public static void handleError(String msg, Object...args) {
 		for (int i=0; i < args.length; i++) {
 			args[i] = StringUtil.toString(args[i], -1);

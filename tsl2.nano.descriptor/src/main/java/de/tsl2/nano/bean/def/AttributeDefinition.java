@@ -1091,10 +1091,11 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     }
 
     public String toDebugString() {
-        return Util.toString(getClass(), "declaringClass: " + getType(), "temporal-type: " + temporalType, "name: "
+        return Util.toString(getClass(), "declaringClass: " + getConstraint().getType(), "temporal-type: " + temporalType, "name: "
             + getName(),
             "id: " + id, "unique: " + unique, "cascading: " + cascading, "composition: " + composition, "\nattribute: "
                 + attribute,
+            "\nhasRuleCover: " + hasRuleCover(),
             "\nstatus: "
                 + status,
             "\nconstraints: "

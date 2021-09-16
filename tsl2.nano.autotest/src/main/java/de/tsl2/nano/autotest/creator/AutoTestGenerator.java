@@ -115,7 +115,9 @@ public class AutoTestGenerator {
 	@SuppressWarnings("rawtypes")
 	public Collection<? extends AFunctionTester> createExpectationTesters() {
 		if (def(DONTTEST, false)) {
-			log("donttest=true ==> Leaving AutoTestGenerator!");
+			log("\n##############################################");
+			log(" donttest=true ==> Leaving AutoTestGenerator!");
+			log("##############################################");
 			return new LinkedList<>();
 		}
 		start = System.currentTimeMillis();
@@ -521,7 +523,7 @@ class FunctionCheck {
 			Object recreatedResult = null;
 			recreatedResult = ObjectUtil.wrap(strResult, result.getClass());
 			return AFunctionTester.best(result).equals(AFunctionTester.best(recreatedResult));
-		} catch (Exception e) {
+		} catch (Throwable e) { //catch Throwable as it is possible that something like OutOfMemoryError occur
 			return false;
 		}
 	}

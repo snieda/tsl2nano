@@ -32,12 +32,12 @@ public final class DateUtil {
      */
     private static final String FORMAT_ISO8601 = "yyyy-MM-dd'T'HH:mm'Z'";
     /** the default date-time format */
-    private static DateFormat DEFAULT_DATETIME_FORMAT = DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
-        DateFormat.MEDIUM);
+    private static DateFormat DEFAULT_DATETIME_FORMAT() {return DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
+        DateFormat.MEDIUM);}
     /** the default date format */
-    private static DateFormat DEFAULT_DATE_FORMAT = DateFormat.getDateInstance(DateFormat.MEDIUM);
+    private static final DateFormat DEFAULT_DATE_FORMAT() {return DateFormat.getDateInstance(DateFormat.MEDIUM);}
     /** the default time format */
-    private static DateFormat DEFAULT_TIME_FORMAT = DateFormat.getTimeInstance(DateFormat.MEDIUM);
+    private static final DateFormat DEFAULT_TIME_FORMAT() {return DateFormat.getTimeInstance(DateFormat.MEDIUM);}
     /** sql date format (used by database queries). not assignable to a specific locale */
     private static DateFormat SQL_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     private static DateFormat MINUTE_FORMAT = new SimpleDateFormat("mm:ss");
@@ -378,7 +378,7 @@ public final class DateUtil {
     public static String getFormattedDate(Date d) {
         String str = "";
         if (d != null) {
-            str = DEFAULT_DATE_FORMAT.format(d);
+            str = DEFAULT_DATE_FORMAT().format(d);
         }
 
         return str;
@@ -405,7 +405,7 @@ public final class DateUtil {
     public static String getFormattedTime(Date d) {
         String str = "";
         if (d != null) {
-            str = DEFAULT_TIME_FORMAT.format(d);
+            str = DEFAULT_TIME_FORMAT().format(d);
         }
 
         return str;
@@ -434,7 +434,7 @@ public final class DateUtil {
     public static String getFormattedDateTime(Date d) {
         String str = "";
         if (d != null) {
-            str = DEFAULT_DATETIME_FORMAT.format(d);
+            str = DEFAULT_DATETIME_FORMAT().format(d);
         }
 
         return str;
@@ -638,7 +638,7 @@ public final class DateUtil {
      */
     public static Date getDate(String formattedString) {
         try {
-            return DEFAULT_DATE_FORMAT.parse(formattedString);
+            return DEFAULT_DATE_FORMAT().parse(formattedString);
         } catch (ParseException e) {
             ManagedException.forward(e);
             return null;

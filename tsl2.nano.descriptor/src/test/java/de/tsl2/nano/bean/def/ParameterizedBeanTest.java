@@ -1,6 +1,5 @@
 package de.tsl2.nano.bean.def;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -8,8 +7,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Locale;
 
-import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,24 +20,28 @@ import de.tsl2.nano.autotest.TypeBean;
 import de.tsl2.nano.autotest.ValueRandomizer;
 import de.tsl2.nano.bean.BeanFileUtil;
 import de.tsl2.nano.bean.BeanFileUtil.FileType;
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.DateUtil;
+import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
 
 @RunWith(Parameterized.class)
-public class ParameterizedBeanTest {
+public class ParameterizedBeanTest implements ENVTestPreparation {
 
 	private FileType fileType;
 	private Object[] typeBeans;
 	private String filename = "testflatfile_";
 	
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
+    	Locale.setDefault(Locale.GERMANY);
     	DateUtil.setUTCTimeZone();
+		ENVTestPreparation.super.setUp("descriptor");
 	}
 
-	@After
-	public void tearDown() throws Exception {
-    	FileUtil.delete(filename);
+	@AfterClass
+	public static void tearDownClass() {
+		ENVTestPreparation.tearDown();
 	}
 
 	public ParameterizedBeanTest(FileType filetype, Object[] typeBeans) {
@@ -66,6 +70,9 @@ public class ParameterizedBeanTest {
     	Collection<TypeBean> myTypeBeans = null;
 		try {
 			myTypeBeans = BeanFileUtil.fromFile(filename, fileType, TypeBean.class);
+		} catch (Exception e) {
+			System.out.println(e.toString() + ": File read: " + filename + "\n" + FileUtil.getFileString(filename));
+			ManagedException.forward(e);
 		} catch (AssertionError e) {
 			if (!fileType.equals(FileType.HTML))
 				fail("only HTML should throw an assertion");

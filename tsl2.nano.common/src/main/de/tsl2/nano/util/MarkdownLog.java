@@ -12,13 +12,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import com.ibm.icu.text.MessageFormat;
-
 import de.tsl2.nano.action.Parameter;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.StringUtil;
+import java.text.MessageFormat;
 import static java.text.MessageFormat.format;
 /**
  * <pre>

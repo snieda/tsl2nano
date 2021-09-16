@@ -7,7 +7,9 @@ import java.text.Format;
 import java.text.NumberFormat;
 import java.util.Currency;
 import java.util.Date;
+import java.util.Locale;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import de.tsl2.nano.autotest.TypeBean;
@@ -21,6 +23,10 @@ import de.tsl2.nano.util.operation.OperableUnit;
 
 public class FormatTest {
 
+	@Before
+	public void setUp() {
+    	Locale.setDefault(Locale.GERMANY);
+	}
 	@Test
 	public void testSimpleDateFormat() throws Exception {
 		Format df = RegExpFormat.createDateRegExp();

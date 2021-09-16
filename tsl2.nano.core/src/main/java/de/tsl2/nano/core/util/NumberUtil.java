@@ -31,12 +31,12 @@ import de.tsl2.nano.core.cls.PrimitiveUtil;
  * @version $Revision$
  */
 public class NumberUtil extends BitUtil {
-    static DecimalFormat numberFormat;
-    static {
-        numberFormat = (DecimalFormat) NumberFormat.getNumberInstance();
+    static DecimalFormat numberFormat() {
+    	DecimalFormat numberFormat = (DecimalFormat) NumberFormat.getNumberInstance();
         //to have the same type (BigDecimal) on all numbers.
         numberFormat.setParseBigDecimal(true);
         LOG.debug("NumberUtil using DecimalFormat with current state:" + numberFormat.toPattern());
+        return numberFormat;
     }
 
     /**
@@ -286,7 +286,7 @@ public class NumberUtil extends BitUtil {
         try {
             //to check, if the whole string s1 was parsed (the parser may parse only the first part of s1), we need the parse position
             ParsePosition pos = new ParsePosition(0);
-            Number number = numberFormat.parse(s1, pos);
+            Number number = numberFormat().parse(s1, pos);
             if (pos.getIndex() < s1.length()) {
                 return null;
             }
