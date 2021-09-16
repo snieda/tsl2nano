@@ -96,14 +96,14 @@
 		<dependency>
 			<groupId>net.sf.jasperreports</groupId>
 			<artifactId>jasperreports</artifactId>
-			<version>6.4.1</version>
+			<version>6.17.0</version>
 			<scope>compile</scope>
-			<exclusions>
+			<!-- <exclusions>
 				<exclusion>
 					<groupId>com.lowagie</groupId>
 					<artifactId>itext</artifactId>
 				</exclusion>
-			</exclusions>
+			</exclusions> -->
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/avalon-framework/avalon-framework-impl -->
 		<!-- <dependency> <groupId>avalon-framework</groupId> <artifactId>avalon-framework-impl</artifactId> 
