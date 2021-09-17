@@ -1,6 +1,5 @@
 package de.tsl2.nano.core.util;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
@@ -49,7 +48,7 @@ public class FlowTest  implements ENVTestPreparation {
 		Flow flow = new Flow();
 		createTasks(flow);
 		
-		File file = FileUtil.userDirFile("target/test.gra");
+		File file = FileUtil.userDirFile("test.gra");
 		flow.persist(file);
 		
 		Flow flow1 = Flow.load(file);
