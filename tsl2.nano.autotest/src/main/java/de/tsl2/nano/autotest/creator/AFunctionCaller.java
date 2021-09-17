@@ -48,6 +48,10 @@ public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
 	public static final <T> T def(String name, T value) {
 		return Util.get(PREF_PROPS + name, value);
 	}
+	protected static final void logd(Object txt) {
+		if ("debug".equals(System.getProperty("tsl2.nano.log.level")))
+			log(txt);
+	}
 	protected static final void log(Object txt) {
 		String s = txt.toString();
 		System.out.print(s.length() > 640 ? s.substring(0, 640) : s);
@@ -95,7 +99,7 @@ public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
 			ConcurrentUtil.runWithTimeout(getID(), this, timeout * 1000);
 	}
 	protected Object run(Method method, Object... args) {
-		log(StringUtil.fixString(this.getClass().getSimpleName(), 25) + " invoking " + method.getDeclaringClass().getSimpleName() + "." + method.getName() + " with " + StringUtil.toString(Arrays.toString(args), 80));
+		logd(StringUtil.fixString(this.getClass().getSimpleName(), 25) + " invoking " + method.getDeclaringClass().getSimpleName() + "." + method.getName() + " with " + StringUtil.toString(Arrays.toString(args), 80));
 		final Object instance = getInstance(method);
 		try {
 			long start = System.currentTimeMillis();

@@ -27,7 +27,7 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 	public ExpectationFunctionTester(Method source) {
 		super(source);
 		def = source.getAnnotation(Expectations.class);
-		log("\t" + source.getDeclaringClass().getSimpleName() + ": " + source.getName() + " -> " + Arrays.toString(def.value()) + "\n");
+		logd("\t" + source.getDeclaringClass().getSimpleName() + ": " + source.getName() + " -> " + Arrays.toString(def.value()) + "\n");
 	}
 
 	@Override
