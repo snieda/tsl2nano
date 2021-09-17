@@ -295,26 +295,24 @@ public class CoreUtilTest implements ENVTestPreparation {
 		}
 		System.out.println(String.format("Test of String.format(): %1$TD", new Date()));
 
+		Locale.setDefault(Locale.GERMAN);
 		// test should date: 01.01.0001
 		final SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy");
 		final SimpleDateFormat dff = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
 		final String strZeroDate = "01.01.0001";
 		Date shouldDate = df.parse(strZeroDate);
 		shouldDate = DateUtil.change(shouldDate, Calendar.HOUR_OF_DAY, 0);
-		shouldDate = DateUtil.change(shouldDate, Calendar.HOUR_OF_DAY, 0);
 		shouldDate = DateUtil.change(shouldDate, Calendar.MINUTE, 0);
 		shouldDate = DateUtil.change(shouldDate, Calendar.SECOND, 0);
 		shouldDate = DateUtil.change(shouldDate, Calendar.MILLISECOND, 0);
 
-		final Date zeroDate = DateUtil.getDate(0, 1, 1);
+		final Date zeroDate = DateUtil.getDate(0, 1, 1);		
 		final String strDate = DateUtil.getFormattedDate(zeroDate);
 		if (!strDate.equals(strZeroDate)) {
 			fail("date should be " + strZeroDate + " but was " + strDate);
-			// TODO: check the failure!!!
-			// if (!zeroDate.equals(shouldDate))
-			// fail("date should be " + dff.format(shouldDate) + " but was " +
-			// dff.format(zeroDate));
 		}
+		if (!strDate.equals(DateUtil.getFormattedDate(shouldDate)))
+			fail("date should be " + dff.format(shouldDate) + " but was " + dff.format(zeroDate));
 
 		// test date field maximum
 		shouldDate = df.parse("31.12.3000");
