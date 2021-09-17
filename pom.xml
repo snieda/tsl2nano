@@ -41,7 +41,8 @@
 	<properties>
 		<module.parent>${project.basedir}</module.parent>
         <timestamp>${maven.build.timestamp}</timestamp>
-		<version.compiler.plugin>3.8.1</version.compiler.plugin> <!--workaround, if ci is not starting properties-maven-plugin -->
+		<!--workaround for automatic gitlab-ci, there ci is not starting properties-maven-plugin -->
+		<version.compiler.plugin>3.8.1</version.compiler.plugin>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<maven.compiler.debug>true</maven.compiler.debug>
