@@ -80,6 +80,7 @@ public class CoreUtilTest implements ENVTestPreparation {
 	@BeforeClass
 	public static void setUp() {
 		BASE_DIR_CORE = ENVTestPreparation.setUp("core", false);
+		Locale.setDefault(Locale.GERMANY);
 	}
 
 	@AfterClass
@@ -295,7 +296,6 @@ public class CoreUtilTest implements ENVTestPreparation {
 		}
 		System.out.println(String.format("Test of String.format(): %1$TD", new Date()));
 
-		Locale.setDefault(Locale.GERMAN);
 		// test should date: 01.01.0001
 		final SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy");
 		final SimpleDateFormat dff = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss.SSS");

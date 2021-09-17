@@ -13,14 +13,16 @@ import org.junit.Test;
 import de.tsl2.nano.core.util.Flow.ITask;
 import de.tsl2.nano.core.util.Flow.STask;
 
-public class FlowTest {
+public class FlowTest  implements ENVTestPreparation {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
+		ENVTestPreparation.setUp("core", false);
 	}
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
+		ENVTestPreparation.tearDown();
 	}
 
 	@Test
