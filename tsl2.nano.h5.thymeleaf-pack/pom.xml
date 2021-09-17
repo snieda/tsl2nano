@@ -31,7 +31,7 @@
 				<executions>
 					<execution>
 						<id>unpack-nanoh5</id>
-						<phase>generate-resources</phase>
+						<phase>prepare-package</phase>
 						<goals>
 							<goal>unpack-dependencies</goal>
 						</goals>
