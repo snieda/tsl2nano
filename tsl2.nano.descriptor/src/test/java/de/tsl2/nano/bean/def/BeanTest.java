@@ -52,7 +52,7 @@ import de.tsl2.nano.currency.CurrencyUtil;
 import de.tsl2.nano.format.GenericTypeMatcher;
 import de.tsl2.nano.format.RegExpFormat;
 
-public class BeanTest {
+public class BeanTest implements ENVTestPreparation {
     private static final Log LOG = LogFactory.getLog(BeanTest.class);
 
     @Before
