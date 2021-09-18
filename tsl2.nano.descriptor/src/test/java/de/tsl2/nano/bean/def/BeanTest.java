@@ -20,6 +20,7 @@ import java.util.Currency;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -56,6 +57,7 @@ public class BeanTest {
 
     @Before
     public void setUp() {
+    	Locale.setDefault(Locale.GERMANY);
     	ENVTestPreparation.setUp("descriptor", false);
     }
 
