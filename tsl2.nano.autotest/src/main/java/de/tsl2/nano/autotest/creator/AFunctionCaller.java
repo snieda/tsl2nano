@@ -52,6 +52,7 @@ public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
 		if ("debug".equals(System.getProperty("tsl2.nano.log.level")))
 			log(txt);
 	}
+	/** this logging is only for console output - logging can be seen in autotest output files */
 	protected static final void log(Object txt) {
 		String s = txt.toString();
 		System.out.print(s.length() > 640 ? s.substring(0, 640) : s);
@@ -118,7 +119,7 @@ public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
 			return ManagedException.forward(e);
 		} finally {
 //			Thread.currentThread().notifyAll(); // you should't call notifyAll() on a Thread! see Thread.join() description
-			log(" -> " + status + "\n");
+			logd(" -> " + status + "\n");
 		}
 	}
 
@@ -136,7 +137,7 @@ public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
 			}
 		} catch(Throwable ex) {
 			status = new Status(StatusTyp.INSTANCE_ERROR, ex.toString(), ex);
-			log(" -> " + status + "\n");
+			logd(" -> " + status + "\n");
 			ManagedException.forward(ex);
 		}
 		return construction.instance;
