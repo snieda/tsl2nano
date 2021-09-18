@@ -3,6 +3,7 @@ package de.tsl2.nano.autotest.creator;
 import java.security.Permission;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Locale;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,6 +37,9 @@ public class InitAllAutoTests {
 	@Parameters
 	public static Collection<?> parameters() {
 		IPreferences.reset();
+		// the string.set uses german city names
+		Locale.setDefault(Locale.GERMANY);
+		
 		System.setProperty("tsl2.nano.logfactory.off", "true");
 		System.setProperty("tsl2.nano.test", "true");
 		System.setProperty("tsl2.json.recursive", "false");
