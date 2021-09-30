@@ -3,13 +3,11 @@ package de.tsl2.nano.bean.def;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.SortedMap;
 
 import org.junit.Test;
 
-import de.tsl2.nano.collection.Entry;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.util.MapUtil;

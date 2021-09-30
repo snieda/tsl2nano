@@ -32,7 +32,7 @@ import de.tsl2.nano.core.util.MapUtil;
 public class BeanFileTest implements ENVTestPreparation {
 	@BeforeClass
 	public static void setUp() {
-		ENVTestPreparation.setUp("core", false);
+		ENVTestPreparation.setUp("descriptor", false);
 	}
 
 	@AfterClass

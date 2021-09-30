@@ -1,6 +1,5 @@
 package de.tsl2.nano.bean.def;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -10,7 +9,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -21,15 +22,26 @@ import de.tsl2.nano.autotest.ValueRandomizer;
 import de.tsl2.nano.bean.BeanFileUtil;
 import de.tsl2.nano.bean.BeanFileUtil.FileType;
 import de.tsl2.nano.core.util.DateUtil;
+import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
 
 @RunWith(Parameterized.class)
-public class ParameterizedBeanTest {
+public class ParameterizedBeanTest implements ENVTestPreparation {
 
 	private FileType fileType;
 	private Object[] typeBeans;
 	private String filename = "testflatfile_";
 	
+	@BeforeClass
+	public static void setUpClass() {
+		ENVTestPreparation.setUp("descriptor", false);
+	}
+
+	@AfterClass
+	public static void tearDownClass() {
+		ENVTestPreparation.tearDown();
+	}
+
 	@Before
 	public void setUp() throws Exception {
     	DateUtil.setUTCTimeZone();
