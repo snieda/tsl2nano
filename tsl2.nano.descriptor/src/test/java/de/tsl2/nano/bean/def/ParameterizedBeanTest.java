@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Locale;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -44,6 +45,7 @@ public class ParameterizedBeanTest implements ENVTestPreparation {
 
 	@Before
 	public void setUp() throws Exception {
+    	Locale.setDefault(Locale.GERMANY);
     	DateUtil.setUTCTimeZone();
 	}
 
