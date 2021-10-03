@@ -22,6 +22,7 @@ import de.tsl2.nano.autotest.TypeBean;
 import de.tsl2.nano.autotest.ValueRandomizer;
 import de.tsl2.nano.bean.BeanFileUtil;
 import de.tsl2.nano.bean.BeanFileUtil.FileType;
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
@@ -80,6 +81,9 @@ public class ParameterizedBeanTest implements ENVTestPreparation {
     	Collection<TypeBean> myTypeBeans = null;
 		try {
 			myTypeBeans = BeanFileUtil.fromFile(filename, fileType, TypeBean.class);
+		} catch (Exception e) {
+			System.out.println(e.toString() + ": File read: " + filename + "\n" + FileUtil.getFileString(filename));
+			ManagedException.forward(e);
 		} catch (AssertionError e) {
 			if (!fileType.equals(FileType.HTML))
 				fail("only HTML should throw an assertion");
