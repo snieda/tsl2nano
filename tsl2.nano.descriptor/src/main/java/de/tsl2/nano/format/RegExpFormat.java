@@ -100,8 +100,8 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
     @Attribute
     boolean isAbleToParse = false;
 
-    public static final char DECIMAL_SEPARATOR = new DecimalFormatSymbols(Locale.getDefault()).getDecimalSeparator();
-    public static final char GROUPING_SEPARATOR = new DecimalFormatSymbols(Locale.getDefault()).getGroupingSeparator();
+    public static final char DECIMAL_SEPARATOR() {return new DecimalFormatSymbols(Locale.getDefault()).getDecimalSeparator();}
+    public static final char GROUPING_SEPARATOR() {return new DecimalFormatSymbols(Locale.getDefault()).getGroupingSeparator();}
     /** characters only to format an expression (like german date '01.01.2001' the dots) */
     public static final String FORMAT_CHARACTERS = " .,;_/*#|-:";
 
@@ -114,7 +114,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
      * this pattern is not only a number format, but a pattern from nothing up to the desired number. E.g.: -999,999 -->
      * you start with '-', than you type the numbers!
      */
-    public static final String FORMAT_DECIMAL = "[-][0-9]{0,2}[" + DECIMAL_SEPARATOR + "][0-9]{0,2}";
+    public static final String FORMAT_DECIMAL = "[-][0-9]{0,2}[" + DECIMAL_SEPARATOR() + "][0-9]{0,2}";
 
     /**
      * All single byte characters, for applications / RDBMS that do not support multibyte/unicode characters.<br>
@@ -154,7 +154,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
             /*
              * standard decimal number
              */
-            systemInitMap.put(FORMAT_DECIMAL, "00" + DECIMAL_SEPARATOR + "00");
+            systemInitMap.put(FORMAT_DECIMAL, "00" + DECIMAL_SEPARATOR() + "00");
             /*
              * standard time
              */
@@ -459,9 +459,9 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
     protected static final String number(int dec, int fract, boolean fixed) {
         final String p = "([-])|([-]{0,1}[0-9]{1," + dec
             + "}"
-            + (fract > 0 ? "([" + DECIMAL_SEPARATOR + "]" + "[0-9]{0," + fract + "}){0,1})" : ")");
+            + (fract > 0 ? "([" + DECIMAL_SEPARATOR() + "]" + "[0-9]{0," + fract + "}){0,1})" : ")");
         if (fixed) {
-            systemInitMap.put(p, fixed('0', dec) + (fract > 0 ? DECIMAL_SEPARATOR + fixed('0', fract) : ""));
+            systemInitMap.put(p, fixed('0', dec) + (fract > 0 ? DECIMAL_SEPARATOR() + fixed('0', fract) : ""));
         }
         return p;
     }
@@ -487,12 +487,12 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
             dec = 1;
         final int r = dec % 3;
         if (r > 0)
-            p.append("\\d{0," + r + "}" + "[" + GROUPING_SEPARATOR + "]?");
+            p.append("\\d{0," + r + "}" + "[" + GROUPING_SEPARATOR() + "]?");
         final int c = (dec - r) / 3;
-        p.append("(\\d{0,3}" + "[" + GROUPING_SEPARATOR + "]?){0," + c + "}");
-        p.append((fract > 0 ? "([" + DECIMAL_SEPARATOR + "]" + "[0-9]{0," + fract + "}){0,1})" : ")"));
+        p.append("(\\d{0,3}" + "[" + GROUPING_SEPARATOR() + "]?){0," + c + "}");
+        p.append((fract > 0 ? "([" + DECIMAL_SEPARATOR() + "]" + "[0-9]{0," + fract + "}){0,1})" : ")"));
         if (fixed) {
-            systemInitMap.put(p.toString(), fixed('0', dec) + (fract > 0 ? DECIMAL_SEPARATOR + fixed('0', fract) : ""));
+            systemInitMap.put(p.toString(), fixed('0', dec) + (fract > 0 ? DECIMAL_SEPARATOR() + fixed('0', fract) : ""));
         }
         return p.toString();
     }
