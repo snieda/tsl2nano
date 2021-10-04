@@ -34,25 +34,16 @@ public class ParameterizedBeanTest implements ENVTestPreparation {
 	private Object[] typeBeans;
 	private String filename = "testflatfile_";
 	
-	@BeforeClass
-	public static void setUpClass() {
-		ENVTestPreparation.setUp("descriptor", false);
+	@Before
+	public void setUp() {
+    	Locale.setDefault(Locale.GERMANY);
+    	DateUtil.setUTCTimeZone();
+		ENVTestPreparation.super.setUp("descriptor");
 	}
 
 	@AfterClass
 	public static void tearDownClass() {
 		ENVTestPreparation.tearDown();
-	}
-
-	@Before
-	public void setUp() throws Exception {
-    	Locale.setDefault(Locale.GERMANY);
-    	DateUtil.setUTCTimeZone();
-	}
-
-	@After
-	public void tearDown() throws Exception {
-    	FileUtil.delete(filename);
 	}
 
 	public ParameterizedBeanTest(FileType filetype, Object[] typeBeans) {

@@ -10,10 +10,10 @@ import java.io.Reader;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Locale;
 import java.util.Map;
 
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -30,9 +30,9 @@ import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 
 public class BeanFileTest implements ENVTestPreparation {
-	@BeforeClass
-	public static void setUp() {
-		ENVTestPreparation.setUp("descriptor", false);
+	@Before
+	public void setUp() {
+		ENVTestPreparation.super.setUp("descriptor");
 	}
 
 	@AfterClass

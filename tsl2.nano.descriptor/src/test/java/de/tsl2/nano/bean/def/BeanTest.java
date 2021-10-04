@@ -58,7 +58,7 @@ public class BeanTest implements ENVTestPreparation {
     @Before
     public void setUp() {
     	Locale.setDefault(Locale.GERMANY);
-    	ENVTestPreparation.setUp("descriptor", false);
+    	ENVTestPreparation.super.setUp("descriptor");
     }
 
     @After
