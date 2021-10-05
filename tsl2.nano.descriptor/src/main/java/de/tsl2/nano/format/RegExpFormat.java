@@ -114,7 +114,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
      * this pattern is not only a number format, but a pattern from nothing up to the desired number. E.g.: -999,999 -->
      * you start with '-', than you type the numbers!
      */
-    public static final String FORMAT_DECIMAL = "[-][0-9]{0,2}[" + DECIMAL_SEPARATOR() + "][0-9]{0,2}";
+    public static final String FORMAT_DECIMAL() {return  "[-][0-9]{0,2}[" + DECIMAL_SEPARATOR() + "][0-9]{0,2}";}
 
     /**
      * All single byte characters, for applications / RDBMS that do not support multibyte/unicode characters.<br>
@@ -154,7 +154,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
             /*
              * standard decimal number
              */
-            systemInitMap.put(FORMAT_DECIMAL, "00" + DECIMAL_SEPARATOR() + "00");
+            systemInitMap.put(FORMAT_DECIMAL(), "00" + DECIMAL_SEPARATOR() + "00");
             /*
              * standard time
              */
