@@ -145,12 +145,12 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
             /*
              * standard german date format mask
              */
-            systemInitMap.put(FORMAT_DATE_DE, DateFormat.getDateInstance(DateFormat.MEDIUM).format(getInitialDate()));
+            systemInitMap.put(FORMAT_DATE_DE, DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.GERMANY).format(getInitialDate()));
             /*
              * on german dates with month-day 31, the standard-initmask '01.01.CURRENTYEAR' does not work.
              * example: input: 31.1 and mask: 01.01.2011 ==> 31.11.2011 ==> error
              */
-            systemInitMap.put("31.1", DateFormat.getDateInstance(DateFormat.MEDIUM).format(getInitialDate_Nov()));
+            systemInitMap.put("31.1", DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.GERMANY).format(getInitialDate_Nov()));
             /*
              * standard decimal number
              */
