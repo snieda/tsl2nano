@@ -105,6 +105,7 @@ public class NanoH5Test implements ENVTestPreparation {
 
     @BeforeClass
     public static void setUpClass() {
+    	Locale.setDefault(Locale.GERMANY);
     	FileUtil.deleteRecursive(new File("jdbc:h2:tcp:"));  // -> yes, not on target/test
     }
     @After
