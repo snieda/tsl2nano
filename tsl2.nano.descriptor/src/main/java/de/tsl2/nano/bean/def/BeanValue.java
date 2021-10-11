@@ -150,7 +150,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                 getConstraint().setType((Class<T>) temporalType());
             } else if (isVirtual() && instance != null) {
                 getConstraint().setType(((IValueAccess<T>) instance).getType());
-            } else if (!Util.isContainer(getConstraint().getType()) && instance != null && ENV.get("value.use.instancetype", true)) {
+            } else if ((getConstraint().getType() == null || !Util.isContainer(getConstraint().getType())) && instance != null && ENV.get("value.use.instancetype", true)) {
                 try {
                     T value = getValue();
                     //don't use inner class infos or enum values
