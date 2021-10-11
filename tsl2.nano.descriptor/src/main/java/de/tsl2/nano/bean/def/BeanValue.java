@@ -139,7 +139,10 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
     @Override
     public Class<T> getType() {
         //TODO: set UNDEFINED instead of object
-        if (getConstraint().getType() == Object.class || getConstraint().getType().isInterface() && !Util.isContainer(getConstraint().getType())) {
+        if ((getConstraint().getType() == null 
+        		|| getConstraint().getType() == Object.class 
+        		|| getConstraint().getType().isInterface()) 
+        			&& !Util.isContainer(getConstraint().getType())) {
             //if a value-expression was defined, the valueexpression-type has to be used!
             if (attribute.isVirtual()) {
                 getConstraint().setType(super.getType());
