@@ -384,7 +384,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     @Override
     public final IConstraint<T> getConstraint() {
         if (constraint == null) {
-            constraint = new Constraint(BeanClass.getDefiningClass(attribute.getType()));
+            constraint = new Constraint(BeanClass.getDefiningClass(attribute != null ? attribute.getType() : Object.class));
         }
         return constraint;
     }
