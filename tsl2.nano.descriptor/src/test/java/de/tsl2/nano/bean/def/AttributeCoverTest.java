@@ -18,7 +18,7 @@ public class AttributeCoverTest implements ENVTestPreparation {
 
     @Before
     public void setUp() {
-    	ConcurrentUtil.sleep(20000); // to not compromise other tests
+    	ConcurrentUtil.sleep(40000); // to not compromise other tests
     	ENVTestPreparation.setUp("descriptor", false);
     }
 
