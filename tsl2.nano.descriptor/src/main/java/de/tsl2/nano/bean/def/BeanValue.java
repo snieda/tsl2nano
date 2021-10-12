@@ -139,7 +139,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
     @Override
     public Class<T> getType() {
     	if (getConstraint().getType() == null) {
-    		throw new IllegalStateException(this.toDebugString());
+    		throw new IllegalStateException("attribute-type should not be null:\n" + this.toDebugString());
     	}
         //TODO: set UNDEFINED instead of object
         if (getConstraint().getType() == Object.class || getConstraint().getType().isInterface() && !Util.isContainer(getConstraint().getType())) {

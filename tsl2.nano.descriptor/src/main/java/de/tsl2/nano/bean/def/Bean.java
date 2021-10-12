@@ -864,6 +864,7 @@ public class Bean<T> extends BeanDefinition<T> {
      * @return amount of cleared objects.
      */
     public static int clearCache() {
+    	AttributeCover.resetTypeCache();
         CompositionFactory.clearCache();
         int cleared = BeanValue.clearCache();
         cleared += BeanClass.clearCache();

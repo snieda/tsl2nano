@@ -1095,6 +1095,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
             + getName(),
             "id: " + id, "unique: " + unique, "cascading: " + cascading, "composition: " + composition, "\nattribute: "
                 + attribute,
+            "\nhasRuleCover: " + hasRuleCover(),
             "\nstatus: "
                 + status,
             "\nconstraints: "

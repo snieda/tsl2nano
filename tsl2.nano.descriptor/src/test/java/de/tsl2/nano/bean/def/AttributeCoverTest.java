@@ -22,6 +22,7 @@ public class AttributeCoverTest implements ENVTestPreparation {
 
     @After
     public void tearDown() {
+    	Bean.clearCache();
     	ENVTestPreparation.tearDown();
     }
     
@@ -50,7 +51,7 @@ public class AttributeCoverTest implements ENVTestPreparation {
 		assertTrue(presentable != null);
 		
 		AttributeCover cover = AttributeCover.cover(MyRuleCover.class, instance.getClass(), attrName, path, "myrule");
-//		assertTrue(cover.getInterfaces() != null);
+		assertTrue(cover.getInterfaces() != null);
 	}
 
 }
