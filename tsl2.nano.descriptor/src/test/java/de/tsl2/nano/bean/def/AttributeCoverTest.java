@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import de.tsl2.nano.autotest.TypeBean;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 
 public class AttributeCoverTest implements ENVTestPreparation {
@@ -17,6 +18,7 @@ public class AttributeCoverTest implements ENVTestPreparation {
 
     @Before
     public void setUp() {
+    	ConcurrentUtil.sleep(20000); // to not compromise other tests
     	ENVTestPreparation.setUp("descriptor", false);
     }
 
