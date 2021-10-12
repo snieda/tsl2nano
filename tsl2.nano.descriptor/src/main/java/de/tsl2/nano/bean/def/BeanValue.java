@@ -138,11 +138,11 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
 
     @Override
     public Class<T> getType() {
+    	if (getConstraint().getType() == null) {
+    		throw new IllegalStateException(this.toDebugString());
+    	}
         //TODO: set UNDEFINED instead of object
-        if (getConstraint().getType() == null 
-        		|| (getConstraint().getType() == Object.class 
-        		|| getConstraint().getType().isInterface()) 
-        			&& !Util.isContainer(getConstraint().getType())) {
+        if (getConstraint().getType() == Object.class || getConstraint().getType().isInterface() && !Util.isContainer(getConstraint().getType())) {
             //if a value-expression was defined, the valueexpression-type has to be used!
             if (attribute.isVirtual()) {
                 getConstraint().setType(super.getType());
@@ -150,7 +150,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                 getConstraint().setType((Class<T>) temporalType());
             } else if (isVirtual() && instance != null) {
                 getConstraint().setType(((IValueAccess<T>) instance).getType());
-            } else if ((getConstraint().getType() == null || !Util.isContainer(getConstraint().getType())) && instance != null && ENV.get("value.use.instancetype", true)) {
+            } else if (!Util.isContainer(getConstraint().getType()) && instance != null && ENV.get("value.use.instancetype", true)) {
                 try {
                     T value = getValue();
                     //don't use inner class infos or enum values
