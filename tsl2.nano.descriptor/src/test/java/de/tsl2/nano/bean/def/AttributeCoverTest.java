@@ -7,19 +7,21 @@ import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import de.tsl2.nano.autotest.TypeBean;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 
+@Ignore
 public class AttributeCoverTest implements ENVTestPreparation {
 	static final String MYRULECOVERVALUE = "MYRULECOVERVALUE";
 
     @Before
     public void setUp() {
-    	ConcurrentUtil.sleep(40000); // to not compromise other tests
-    	ENVTestPreparation.setUp("descriptor", false);
+    	ConcurrentUtil.sleep(20000); // to not compromise other bean tests
+		ENVTestPreparation.super.setUp("descriptor");
     }
 
     @After
