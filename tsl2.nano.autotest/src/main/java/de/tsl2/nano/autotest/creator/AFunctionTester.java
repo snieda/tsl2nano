@@ -52,7 +52,7 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 			revFcts.forEach(m -> runners.add(createRunner(testerType, m)));
 			duplicate(duplication, runners);
 			return runners;
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			ConcurrentUtil.sleep(3000);
 			e.printStackTrace();
 			ManagedException.forward(e);
