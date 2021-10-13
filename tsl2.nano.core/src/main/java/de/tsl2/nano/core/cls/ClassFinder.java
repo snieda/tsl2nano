@@ -165,8 +165,8 @@ public class ClassFinder {
 							i++;
 							System.out.print(".");
 							classes.add(cl.loadClass(pack + "." + line.substring(0, line.lastIndexOf('.'))));
-						} catch (ClassNotFoundException e) {
-							ManagedException.forward(e);
+						} catch (ClassNotFoundException | NoClassDefFoundError e) {
+							ManagedException.handleError(e);
 						}
 					} else {
 						classes.addAll(collectPackageClasses(cl, pack + "." + line, classes));

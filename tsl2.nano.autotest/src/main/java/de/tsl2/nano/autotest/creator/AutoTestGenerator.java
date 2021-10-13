@@ -115,7 +115,9 @@ public class AutoTestGenerator {
 	@SuppressWarnings("rawtypes")
 	public Collection<? extends AFunctionTester> createExpectationTesters() {
 		if (def(DONTTEST, false)) {
-			log("donttest=true ==> Leaving AutoTestGenerator!");
+			log("\n##############################################");
+			log(" donttest=true ==> Leaving AutoTestGenerator!");
+			log("##############################################");
 			return new LinkedList<>();
 		}
 		start = System.currentTimeMillis();
