@@ -4,16 +4,28 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
+import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.Flow;
 import de.tsl2.nano.core.util.Flow.ITask;
 import de.tsl2.nano.incubation.specification.actions.Action;
 import de.tsl2.nano.incubation.specification.rules.Rule;
 
-public class TaskTest {
+public class TaskTest implements ENVTestPreparation {
 
+	@Before
+	public void setUp() {
+		ENVTestPreparation.super.setUp("specification");
+	}
+	@After
+	public void tearDown() {
+		ENVTestPreparation.tearDown();
+	}
+	
 	@Test
 	public void testFlow() throws Exception {
 		Pool pool = new Pool();
@@ -26,7 +38,7 @@ public class TaskTest {
 		task.addNeighbours(ITask.END);
 		flow.setTasks(task);
 		
-		File file = FileUtil.userDirFile("target/test.gra");
+		File file = FileUtil.userDirFile("test.gra");
 		flow.persist(file);
 		
 		Flow flow1 = Flow.load(file, Task.class);
