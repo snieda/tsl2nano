@@ -221,6 +221,16 @@ public class ManagedException extends RuntimeException {
         }
     }
 
+    /**use this throwable-catch only, if you know what you are doing  */
+    public static <T> T trYError(SupplierEx<T> callback, boolean escalate) {
+        try {
+            return callback.get();
+        } catch(Throwable ex) {
+            LOG.error(ex);
+            return escalate ? (T) forward(ex, false) : null;
+        }
+    }
+
     public static <T> T trY(SupplierExVoid<T> callback) {
         return trY(callback, true);
     }

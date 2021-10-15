@@ -2,6 +2,7 @@ package de.tsl2.nano.autotest;
  
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -179,5 +180,9 @@ public class BaseTest extends TextComparison {
 	public static void useTargetDir() {
 		if (!System.getProperty("user.dir").contains("target"))
 			System.setProperty("user.dir", System.getProperty("user.dir") + "/target/autotest");
+	}
+	
+	public static boolean isExternalCIPlatform() {
+		return new File("user.dir").getAbsolutePath().startsWith("/app/");
 	}
 }
