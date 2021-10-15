@@ -3,8 +3,8 @@ package de.tsl2.nano.d8portal;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import de.tsl2.nano.core.util.ENVTestPreparation;
@@ -13,14 +13,14 @@ import de.tsl2.nano.core.util.FileUtil;
 public class RepositoryTest implements ENVTestPreparation {
     private static final String REPOSITORY = "testRep";
 
-	@BeforeClass
-	public static void setUp() {
-		ENVTestPreparation.setUp("d8portal", false);
+	@Before
+	public void setUp() {
+		ENVTestPreparation.super.setUp("d8portal");
         FileUtil.deleteRecursive(FileUtil.userDirFile(REPOSITORY));
 	}
 
-	@AfterClass
-	public static void tearDown() {
+	@After
+	public void tearDown() {
 		ENVTestPreparation.tearDown();
 	}
 
