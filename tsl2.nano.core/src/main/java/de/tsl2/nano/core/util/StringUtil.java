@@ -669,13 +669,23 @@ public class StringUtil {
         return buf.toString();
     }
 
-    /** splits the given string in the order of the given separator/splitter (show be unique!) strings. Not performance optimized! */
+    /** splits the given string in the order of the given separator/splitter (should be unique!) strings. Not performance optimized! */
     public static final String[] splitFix(String source, String...splitter) {
     	String[] s = new String[splitter.length];
     	String last = null;
     	for (int i = 0; i < s.length; i++) {
 			last = substring(source, last, splitter[i]);
+			if (Util.isEmpty(last)) {
+				String msg = "split " + i + ":'" + splitter[i] + "'not found!";
+				if (Boolean.getBoolean("app.mode.strict"))
+					throw new IllegalStateException(msg);
+				else {
+					System.out.println("ERROR: " + msg);
+					break;
+				}
+			}
 			s[i] = last;
+			last = last + splitter[i];
 		}
     	return s;
     }

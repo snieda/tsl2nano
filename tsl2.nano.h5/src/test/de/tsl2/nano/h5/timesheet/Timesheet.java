@@ -409,6 +409,15 @@ public class Timesheet extends NanoH5App {
         a = new Action<>(icsImport);
         ENV.get(Pool.class).add(a);
 
+        java.lang.reflect.Method mdImport = null;
+        try {
+            mdImport = SBRImport.class.getMethod("doImportMD", String.class);
+        } catch (Exception e) {
+            ManagedException.forward(e);
+        }
+        a = new Action<>(mdImport);
+        ENV.get(Pool.class).add(a);
+
         java.lang.reflect.Method printAction = null;
         try {
             printAction = PrintUtil.class.getMethod("print", String.class);

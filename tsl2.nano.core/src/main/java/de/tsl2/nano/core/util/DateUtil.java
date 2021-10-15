@@ -529,6 +529,9 @@ public final class DateUtil {
         return cal.get(field);
     }
 
+    public static int getCurrentYear() {
+    	return getYear(new Date());
+    }
     /**
      * getYear
      * 
@@ -539,6 +542,9 @@ public final class DateUtil {
         return getFieldOfDate(date, Calendar.YEAR);
     }
 
+    public static int getCurrentMonth() {
+    	return getMonth(new Date());
+    }
     /**
      * getMonth
      * 
@@ -549,6 +555,9 @@ public final class DateUtil {
         return getFieldOfDate(date, Calendar.MONTH);
     }
 
+    public static int getCurrentDay() {
+    	return getDay(new Date());
+    }
     /**
      * getDay
      * 
