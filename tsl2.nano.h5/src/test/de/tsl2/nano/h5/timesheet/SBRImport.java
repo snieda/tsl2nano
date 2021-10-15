@@ -9,7 +9,7 @@ import de.tsl2.nano.core.ENV;
 
 public class SBRImport {
 	public static Collection<Charge> doImportHumanReadable(String file) {
-		SimpleBeanReader<Charge> reader = new SimpleBeanReader<>(Charge.class, ENV.get("timesheet.import.expression", "fromdate: fromtime-totime  (pause) value chargeitem: comment"));
+		SimpleBeanReader<Charge> reader = new SimpleBeanReader<>(Charge.class, ENV.get("timesheet.import.expression", "fromdate: fromtime-totime  (pause) value chargeitem comment"));
 		return reader.read(file);
 	}
 }

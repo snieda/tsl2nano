@@ -66,13 +66,6 @@ public class BeanModifier {
                         }
                         String oldString = bv.getValueText();
                         String newString = parms.get(p);
-                        // checkboxes will send 'on' as value
-                        if (boolean.class.isAssignableFrom(type) || Boolean.class.isAssignableFrom(type))
-                            if (newString.equals("on"))
-                                newString = "true";
-                        if (Date.class.isAssignableFrom(type))
-                            if (newString.matches("\\d{2,2}[:]\\d{2,2}"))
-                                newString += ":00"; //append 0 seconds to respect format HH:mm:ss
                         
                         if (oldString == null || !oldString.equals(newString)) {
                             vmodel.setParsedValue(p, newString);

@@ -18,6 +18,7 @@ import java.lang.reflect.Method;
 import java.text.Format;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -248,6 +249,17 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
         }
     }
 
+	protected String typeSpecificChange(Class<?> type, String newString) {
+		// checkboxes will send 'on' as value
+		if (boolean.class.isAssignableFrom(type) || Boolean.class.isAssignableFrom(type))
+		    if (newString.equals("on"))
+		        newString = "true";
+		if (Date.class.isAssignableFrom(type))
+		    if (newString.matches("\\d{2,2}[:]\\d{2,2}"))
+		        newString += ":00"; //append 0 seconds to respect format HH:mm:ss
+		return newString;
+	}
+
     /**
      * setParsedValue
      * 
@@ -257,6 +269,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
     public T setParsedValue(String source) {
         try {
             T v = null;
+            source = typeSpecificChange(getType(), source);
             /* 
              * if 'allowed values' are defined, re-use their instances!
              * it is not possible to move that block to value-expression,

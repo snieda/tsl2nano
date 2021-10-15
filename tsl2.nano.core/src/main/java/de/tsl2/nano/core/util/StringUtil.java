@@ -45,7 +45,8 @@ import de.tsl2.nano.core.Messages;
  */
 @SuppressWarnings("rawtypes")
 public class StringUtil {
-    /** variable (like ant-variables) matching expression. e.g.: ${myvar} */
+    private static final int MAX_TRIES = 80;
+	/** variable (like ant-variables) matching expression. e.g.: ${myvar} */
     public static final String VAR_REGEXP = "\\$\\{[\\w._-]+\\}";
     public static final String STR_ANY = "*";
     static String XTAG = "<[^>]*>";
@@ -671,21 +672,19 @@ public class StringUtil {
 
     /** splits the given string in the order of the given separator/splitter (should be unique!) strings. Not performance optimized! */
     public static final String[] splitFix(String source, String...splitter) {
-    	String[] s = new String[splitter.length];
-    	String last = null;
+    	String[] s = new String[splitter.length + 1];
+    	String last = null, ll = null, split;
     	for (int i = 0; i < s.length; i++) {
-			last = substring(source, last, splitter[i]);
-			if (Util.isEmpty(last)) {
-				String msg = "split " + i + ":'" + splitter[i] + "'not found!";
-				if (Boolean.getBoolean("app.mode.strict"))
-					throw new IllegalStateException(msg);
-				else {
-					System.out.println("ERROR: " + msg);
-					break;
-				}
+			split = i < splitter.length ? splitter[i] : null;
+			last = substring(source, ll, split);
+			int t = 0;
+			while (Util.isEmpty(last) && t++ < MAX_TRIES) { //end directly after begin -> search for the next occurrence
+				last = substring(source, ll += split, split);
 			}
-			s[i] = last;
-			last = last + splitter[i];
+			if (t == MAX_TRIES)
+				throw new IllegalStateException("split " + i + ":'" + split + "'not found!");
+			s[i] = last.trim();
+			ll = last + split;
 		}
     	return s;
     }
