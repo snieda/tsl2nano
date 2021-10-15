@@ -45,6 +45,7 @@ import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * WORKS ONLY IN ORACLES JAVA IMPLEMENTATION
@@ -352,7 +353,9 @@ public class ClassFinder {
 	public Map<Double, Method> fuzzyFindMethods(Class cls, String filter, int modifier,
 			Class<? extends Annotation> annotation) {
 		Map<Double, Method> map = createFuzzyMap(Method.class);
-		Method[] methods = Modifier.isPublic(modifier) ? cls.getMethods() : cls.getDeclaredMethods();
+		Method[] methods = Modifier.isPublic(modifier) ? Util.trY( () -> cls.getMethods(), false) : Util.trY( () -> cls.getDeclaredMethods(), false);
+		if (methods == null) // on ClassLoader Problems, the getMethod() may throw ClassNotFoundException -> NoClassDefError if any type is not loadable
+			return map; // there was an error, but we don't want to stop the workflow as this is only a fuzzy finder...
 		double match;
 		for (int i = 0; i < methods.length; i++) {
 			if ((modifier < 0 || methods[i].getModifiers() == modifier)
