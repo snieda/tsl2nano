@@ -62,7 +62,7 @@ public class SimpleBeanReader<T> {
 			l = sc.nextLine();
 			if (l.trim().isEmpty() || l.startsWith("#"))
 				continue;
-			values = StringUtil.splitFix(l, splitter);
+			values = StringUtil.splitFix(l, false, splitter);
 		
 			bean = Bean.newBean(type);
 			for (int i = 0; i < values.length; i++) {

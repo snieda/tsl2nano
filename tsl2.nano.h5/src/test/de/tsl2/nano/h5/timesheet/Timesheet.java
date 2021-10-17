@@ -411,7 +411,7 @@ public class Timesheet extends NanoH5App {
 
         java.lang.reflect.Method mdImport = null;
         try {
-            mdImport = SBRImport.class.getMethod("doImportMD", String.class);
+            mdImport = SBRImport.class.getMethod(SBRImport.MTD_DOIMPORTHUMANREADABLE, String.class);
         } catch (Exception e) {
             ManagedException.forward(e);
         }

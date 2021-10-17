@@ -47,9 +47,6 @@ import de.tsl2.nano.core.util.StringUtil;
  * java -Dtsl2.nano.log.level=debug ...
  * </pre>
  * 
- * TODO: make singelton, add simple configuration (Map<package, logstate>) and serialization, read filename from
- * system-properties
- * 
  * @author ts
  * @version $Revision$
  */
@@ -87,6 +84,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
     public static final int DEBUG = 16;
     public static final int TRACE = 32;
 
+    public static final int LOG_ERROR = ERROR | FATAL;
     public static final int LOG_WARN = WARN | ERROR | FATAL;
     public static final int LOG_STANDARD = INFO | WARN | ERROR | FATAL;
     public static final int LOG_DEBUG = INFO | WARN | ERROR | FATAL | DEBUG;
@@ -278,6 +276,15 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
         printToConsole = toStandard;
     }
     
+    /** asks a system log level "tsl2.nano.log.level". not only for the logger classes but for some system.out , too. see #class {@link LogFactory} */
+    public static final boolean isDebugLevel() {
+    	return "debug".equals(System.getProperty("tsl2.nano.log.level"));
+    }
+
+    /** asks a system log level "tsl2.nano.log.level". not only for the logger classes but for some system.out , too. see #class {@link LogFactory} */
+    public static final boolean isWarnLevel() {
+    	return "warn".equals(System.getProperty("tsl2.nano.log.level"));
+    }
 
     /**
      * @return Returns the err.
@@ -557,7 +564,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
      * @param ex (optional) exception to log
      */
     protected static void log(Class<?> logClass, int state, Object message, Throwable ex) {
-        if (Boolean.getBoolean("tsl2.nano.logfactory.off")) {
+        if (Boolean.getBoolean("tsl2.nano.logfactory.off") && ex == null) {
         	return;
         } else if (isPreparing.get()) {
     		System.out.println("[LOGPREPARE] " + logClass.getSimpleName() + ": " + message + (ex != null ? " " + ex : ""));

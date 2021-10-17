@@ -8,6 +8,7 @@ import java.io.File;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
+import junit.runner.BaseTestRunner;
 
 /**
  * Prepares a tsl2.nano unit test with an ENV in directory 'target/test'
@@ -47,8 +48,16 @@ public interface ENVTestPreparation {
 		String baseDirModule = moduleShort == null ? "./" : baseDir + moduleShort + "/";
 		if (!System.getProperty("user.dir").endsWith(TARGET_DIR.substring(0, TARGET_DIR.length() - 1)))
 			setUserDirToTarget(baseDirModule);
+		
 		LogFactory.setLogFactoryXml(envDir + "test-logging.xml");
 		LogFactory.setLogFile(envDir + "test.log");
+		if (new File("user.dir").getAbsolutePath().startsWith("/app/")) { //gitlab stops output on too much logging...
+			LogFactory.setPrintToConsole(false);
+//			LogFactory.setLogLevel(LogFactory.LOG_ERROR);
+			System.setProperty("tsl2.nano.log.level", "warn");
+			System.setProperty("tsl2nano.offline", "true");
+		}
+		
 		ENV.create(envDir);
 //		ENV.setProperty(ENV.KEY_CONFIG_PATH, new File(envDir).getAbsolutePath() + "/");
 		ENV.setProperty("app.strict.mode", strict);
@@ -58,7 +67,7 @@ public interface ENVTestPreparation {
 	}
 
 	default String getTestEnv() {
-		String name = StringUtil.substring(this.getClass().getSimpleName(), null, "Test") + "/";
+		String name = StringUtil.substring(this.getClass().getSimpleName(), null, "Test") + "-" + System.currentTimeMillis() + "/";
 		return TEST_DIR + StringUtil.toFirstLower(name);
 	}
 	static void tearDown() {

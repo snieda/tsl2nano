@@ -86,6 +86,14 @@ public class StringUtil {
         }
     }
 
+    /** delegates to {@link #substring(String, String, String, int)} interpreting from and to as regurlar expressions. */
+    public static String subRegex(String data, String from, String to, int start) {
+    	return substring(data, 
+    			from != null ? extract(data.substring(start), from) : null, 
+    			to   != null ? extract(data.substring(start), to) : null, 
+    					start);
+    }
+
     /**
      * delegates to {@link #substring(String, String, String, boolean)} with constrain = false
      */
@@ -522,6 +530,12 @@ public class StringUtil {
         return t.toString();
     }
 
+    /** returns the index of the first occurrency of given regular expression after start index */
+    public static int indexOf(String src, String regex, int start) {
+    	String f = extract(src.substring(start), regex);
+    	return src.indexOf(f, start);
+    }
+    
     /**
      * extracts all expressions found. On StringBuilder/StringBuffer the regexp was replaced with "".
      * 
@@ -671,15 +685,15 @@ public class StringUtil {
     }
 
     /** splits the given string in the order of the given separator/splitter (should be unique!) strings. Not performance optimized! */
-    public static final String[] splitFix(String source, String...splitter) {
+    public static final String[] splitFix(String source, boolean regex, String...splitter) {
     	String[] s = new String[splitter.length + 1];
     	String last = null, ll = null, split;
     	for (int i = 0; i < s.length; i++) {
 			split = i < splitter.length ? splitter[i] : null;
-			last = substring(source, ll, split);
+			last = regex ? subRegex(source, ll, split, 0) : substring(source, ll, split);
 			int t = 0;
 			while (Util.isEmpty(last) && t++ < MAX_TRIES) { //end directly after begin -> search for the next occurrence
-				last = substring(source, ll += split, split);
+				last = regex ? subRegex(source, ll, split, 0) : substring(source, ll += split, split);
 			}
 			if (t == MAX_TRIES)
 				throw new IllegalStateException("split " + i + ":'" + split + "'not found!");

@@ -24,6 +24,7 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.IPredicate;
 import de.tsl2.nano.core.ITransformer;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.messaging.EventController;
 import de.tsl2.nano.core.messaging.IListener;
 import de.tsl2.nano.core.util.FileUtil;
@@ -383,7 +384,8 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
     }
 
     static void log_(String msg) {
-        System.out.print(msg);
+    	if (LogFactory.isDebugLevel())
+    		System.out.print(msg);
     }
 
     static void log(String msg) {

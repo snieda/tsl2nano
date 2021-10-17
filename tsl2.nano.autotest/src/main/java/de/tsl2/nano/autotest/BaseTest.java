@@ -182,6 +182,7 @@ public class BaseTest extends TextComparison {
 			System.setProperty("user.dir", System.getProperty("user.dir") + "/target/autotest");
 	}
 	
+	/** to be used as workaround on some external ci platforms like gitlab or github, if your tests fail on path/file reading/writing */
 	public static boolean isExternalCIPlatform() {
 		return new File("user.dir").getAbsolutePath().startsWith("/app/");
 	}

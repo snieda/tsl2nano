@@ -8,6 +8,8 @@ import de.tsl2.nano.bean.SimpleBeanReader;
 import de.tsl2.nano.core.ENV;
 
 public class SBRImport {
+	public static final String MTD_DOIMPORTHUMANREADABLE = "doImportHumanReadable";
+	
 	public static Collection<Charge> doImportHumanReadable(String file) {
 		SimpleBeanReader<Charge> reader = new SimpleBeanReader<>(Charge.class, ENV.get("timesheet.import.expression", "fromdate: fromtime-totime  (pause) value chargeitem comment"));
 		return reader.read(file);

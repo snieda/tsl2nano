@@ -13,6 +13,7 @@ import de.tsl2.nano.core.IPreferences;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.execution.Profiler;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -49,7 +50,7 @@ public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
 		return Util.get(PREF_PROPS + name, value);
 	}
 	protected static final void logd(Object txt) {
-		if ("debug".equals(System.getProperty("tsl2.nano.log.level")))
+		if (LogFactory.isDebugLevel())
 			log(txt);
 	}
 	/** this logging is only for console output - logging can be seen in autotest output files */

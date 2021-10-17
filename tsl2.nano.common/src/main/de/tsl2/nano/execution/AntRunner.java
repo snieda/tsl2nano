@@ -209,7 +209,7 @@ public class AntRunner {
         final DefaultLogger consoleLogger = new DefaultLogger();
         consoleLogger.setOutputPrintStream(out);
         consoleLogger.setErrorPrintStream(err);
-        consoleLogger.setMessageOutputLevel(true/*LOG.isDebugEnabled()*/ ? Project.MSG_DEBUG : Project.MSG_INFO);
+        consoleLogger.setMessageOutputLevel(LOG.isDebugEnabled() ? Project.MSG_DEBUG : Project.MSG_INFO);
         return consoleLogger;
     }
 
