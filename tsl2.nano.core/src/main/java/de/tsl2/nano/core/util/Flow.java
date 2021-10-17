@@ -148,7 +148,7 @@ public class Flow {
 		}
 		default ITask fromGravString(String line, Map<String, ITask> tasks) {
 			// TODO: how to persist/restore action expression
-			String[] t = StringUtil.splitFix(line, " ", " -> ", " [label=\"", "\"]");
+			String[] t = StringUtil.splitFix(line, false, " ", " -> ", " [label=\"", "\"]");
 			ITask task = createTask(t);
 			if (tasks.containsKey(t[2]))
 				task.addNeighbours(tasks.get(t[2]));
