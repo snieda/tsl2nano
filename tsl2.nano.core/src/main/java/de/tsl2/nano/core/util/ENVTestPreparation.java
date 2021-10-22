@@ -58,7 +58,7 @@ public interface ENVTestPreparation {
 	}
 
 	default String getTestEnv() {
-		String name = StringUtil.substring(this.getClass().getSimpleName(), null, "Test") + "/";
+		String name = StringUtil.substring(this.getClass().getSimpleName(), null, "Test") + "-" + System.currentTimeMillis() + "/";
 		return TEST_DIR + StringUtil.toFirstLower(name);
 	}
 	static void tearDown() {

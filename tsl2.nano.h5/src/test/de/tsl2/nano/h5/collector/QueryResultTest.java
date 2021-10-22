@@ -48,6 +48,7 @@ public class QueryResultTest implements ENVTestPreparation {
 		Object testResult = new Object[] {"id007", "1", };
 		BeanContainer.initEmtpyServiceActions(testResult);
 		queryResult.onActivation(new HashMap());
+		assertEquals(title, queryResult.queryName);
 		assertEquals("Es wurden 1 Elemente gefunden.", queryResult.getSummary());
 		
 		List<AttributeDefinition<?>> attributes = queryResult.getAttributes();
@@ -84,6 +85,7 @@ public class QueryResultTest implements ENVTestPreparation {
 		Object testResult = new Object[] {"id007", "1", };
 		BeanContainer.initEmtpyServiceActions(testResult);
 		queryResult.onActivation(new HashMap());
+		assertEquals(title, queryResult.queryName);
 		// on columns.size > 1 a graph will be added (here empty!)
 		assertEquals("Es wurden 1 Elemente gefunden.<span></span>", queryResult.getSummary());
 		
@@ -119,6 +121,7 @@ public class QueryResultTest implements ENVTestPreparation {
 		Collection<BeanDefinition<?>> virtualDefs = BeanDefinition.loadVirtualDefinitions();
 		QueryResult queryResult = (QueryResult) virtualDefs.iterator().next();
 		List<AttributeDefinition<?>> attributes = queryResult.getAttributes();
+		assertEquals(title, queryResult.queryName);
 		assertEquals(2, attributes.size());
 		assertEquals("id1", attributes.get(0).getName());
 		assertEquals("value1", attributes.get(1).getName());
