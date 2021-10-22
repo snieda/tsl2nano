@@ -87,6 +87,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
     public static final int DEBUG = 16;
     public static final int TRACE = 32;
 
+    public static final int LOG_ERROR = ERROR | FATAL;
     public static final int LOG_WARN = WARN | ERROR | FATAL;
     public static final int LOG_STANDARD = INFO | WARN | ERROR | FATAL;
     public static final int LOG_DEBUG = INFO | WARN | ERROR | FATAL | DEBUG;

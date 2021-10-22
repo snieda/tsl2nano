@@ -62,6 +62,7 @@ import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.DeclaredMethodComparator;
 import de.tsl2.nano.core.execution.SystemUtil;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.messaging.ChangeEvent;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.ConcurrentUtil;
@@ -105,6 +106,7 @@ public class NanoH5Test implements ENVTestPreparation {
 
     @BeforeClass
     public static void setUpClass() {
+		LogFactory.setLogLevel(LogFactory.LOG_ERROR);
     	Locale.setDefault(Locale.GERMANY);
     	FileUtil.deleteRecursive(new File("jdbc:h2:tcp:"));  // -> yes, not on target/test
     }

@@ -49,6 +49,7 @@ public interface ENVTestPreparation {
 			setUserDirToTarget(baseDirModule);
 		LogFactory.setLogFactoryXml(envDir + "test-logging.xml");
 		LogFactory.setLogFile(envDir + "test.log");
+		LogFactory.setLogLevel(LogFactory.LOG_ERROR);
 		ENV.create(envDir);
 //		ENV.setProperty(ENV.KEY_CONFIG_PATH, new File(envDir).getAbsolutePath() + "/");
 		ENV.setProperty("app.strict.mode", strict);
