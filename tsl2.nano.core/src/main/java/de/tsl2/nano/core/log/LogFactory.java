@@ -47,9 +47,6 @@ import de.tsl2.nano.core.util.StringUtil;
  * java -Dtsl2.nano.log.level=debug ...
  * </pre>
  * 
- * TODO: make singelton, add simple configuration (Map<package, logstate>) and serialization, read filename from
- * system-properties
- * 
  * @author ts
  * @version $Revision$
  */
@@ -279,10 +276,12 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
         printToConsole = toStandard;
     }
     
+    /** asks a system log level "tsl2.nano.log.level". not only for the logger classes but for some system.out , too. see #class {@link LogFactory} */
     public static final boolean isDebugLevel() {
     	return "debug".equals(System.getProperty("tsl2.nano.log.level"));
     }
 
+    /** asks a system log level "tsl2.nano.log.level". not only for the logger classes but for some system.out , too. see #class {@link LogFactory} */
     public static final boolean isWarnLevel() {
     	return "warn".equals(System.getProperty("tsl2.nano.log.level"));
     }
