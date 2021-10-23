@@ -279,6 +279,13 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
         printToConsole = toStandard;
     }
     
+    public static final boolean isDebugLevel() {
+    	return "debug".equals(System.getProperty("tsl2.nano.log.level"));
+    }
+
+    public static final boolean isWarnLevel() {
+    	return "warn".equals(System.getProperty("tsl2.nano.log.level"));
+    }
 
     /**
      * @return Returns the err.

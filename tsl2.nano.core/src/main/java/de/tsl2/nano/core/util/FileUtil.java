@@ -332,15 +332,16 @@ public class FileUtil {
             */
             targetStream.write(data);
             targetStream.flush();
-
-            System.out.println("Writing into [" + zipfile
-                + "]:"
-                + zipEntry.getName()
-                + " ("
-                + zipEntry.getCompressedSize()
-                + " / "
-                + zipEntry.getSize()
-                + ")");
+            if (!LogFactory.isWarnLevel()) {
+	            System.out.println("Writing into [" + zipfile
+	                + "]:"
+	                + zipEntry.getName()
+	                + " ("
+	                + zipEntry.getCompressedSize()
+	                + " / "
+	                + zipEntry.getSize()
+	                + ")");
+            }
             targetStream.closeEntry();
             //sourceStream.close();
         } catch (Exception ex) {
