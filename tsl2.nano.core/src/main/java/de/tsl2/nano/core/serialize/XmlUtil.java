@@ -54,7 +54,6 @@ import org.w3c.dom.NodeList;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
-import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.cls.Reflection;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.CompatibilityLayer;

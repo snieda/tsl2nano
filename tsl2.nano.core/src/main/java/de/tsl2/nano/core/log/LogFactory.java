@@ -564,7 +564,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
      * @param ex (optional) exception to log
      */
     protected static void log(Class<?> logClass, int state, Object message, Throwable ex) {
-        if (Boolean.getBoolean("tsl2.nano.logfactory.off")) {
+        if (Boolean.getBoolean("tsl2.nano.logfactory.off") && ex == null) {
         	return;
         } else if (isPreparing.get()) {
     		System.out.println("[LOGPREPARE] " + logClass.getSimpleName() + ": " + message + (ex != null ? " " + ex : ""));
