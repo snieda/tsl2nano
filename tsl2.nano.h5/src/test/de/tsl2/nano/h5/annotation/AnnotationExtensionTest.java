@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 
 import de.tsl2.nano.action.IAction;
@@ -28,9 +28,9 @@ import de.tsl2.nano.h5.expression.RuleExpression;
 public class AnnotationExtensionTest implements ENVTestPreparation {
     static final String MYVIRTUALATTRIBUTE = "myvirtualattribute";
 
-    @BeforeClass
-    public static void setUp() {
-        ENVTestPreparation.setUp();
+    @Before
+    public void setUp() {
+        ENVTestPreparation.super.setUp("h5");
         BeanDefinition.clearCache();
         BeanContainer.initEmtpyServiceActions();
         //load expression classes

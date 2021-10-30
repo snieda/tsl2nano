@@ -505,7 +505,8 @@ public class NanoH5Test implements ENVTestPreparation {
     public void testJarClassloader() {
         ENV.create("target/test/classloader");
         ENV.assignENVClassloaderToCurrentThread();
-        FileUtil.copy("../build.properties", ENV.getConfigPath() + "build-version.properties");
+        if (!FileUtil.copy("../build.properties", ENV.getConfigPath() + "build-version.properties"));
+        	FileUtil.copy("build.properties", ENV.getConfigPath() + "build-version.properties");
         String version = getCurrentVersion();
         assertTrue(version != null);
         String jarname = "target/tsl2.nano.h5-" + version + "-standalone.jar";

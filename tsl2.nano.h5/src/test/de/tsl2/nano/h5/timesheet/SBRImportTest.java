@@ -9,10 +9,12 @@ import java.util.Locale;
 import java.util.Locale;
 
 import org.anonymous.project.Charge;
+import org.anonymous.project.Item;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
@@ -36,6 +38,11 @@ public class SBRImportTest implements ENVTestPreparation {
 				 + "23.06.: 08:30-17:00(0,5h)  8,25h TICKET-234   Implementierung\n"
 				 + "24.06.: 08:30-17:30(0,5h)  8,0h TICKET-345 Implementierung\n";
 		FileUtil.writeBytes(s.getBytes(), file.getPath(), false);
+		//TODO: create the whole tree to persist the relation to TICKET-xxx
+//		Item item = BeanContainer.instance().createBean(Item.class);
+//		item.setId(1);
+//		item.setn
+
 		Collection<Charge> c = SBRImport.doImportHumanReadable(file.getPath());
 		assertEquals(4, c.size());
 	

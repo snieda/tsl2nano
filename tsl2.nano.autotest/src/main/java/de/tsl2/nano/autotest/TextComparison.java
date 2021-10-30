@@ -41,12 +41,13 @@ public class TextComparison {
         exptected = exp.toString();
         result = res.toString();
         Map<String, String> diffs = getDiffs(exptected, result);
+        String formDiff = StringUtil.toFormattedString(diffs, -1, true);
         if (diffs.size() > 0) {
-            System.out.println("====================================================");
-            System.out.println("!!! DIFFERENCE BETWEEN EXPECTED AND RESULT:\n" + StringUtil.toFormattedString(diffs, -1, true));
-            System.out.println("====================================================");
+            formDiff = "\n====================================================\n"
+				+ "!!! DIFFERENCE BETWEEN EXPECTED AND RESULT:\n" + StringUtil.toFormattedString(diffs, -1, true)
+            	+ "\n====================================================\n";
         }
-        Assert.assertEquals(exp.toString(), res.toString());
+        Assert.assertEquals(formDiff, exptected, result);
     }
     
     public static void prepareForComparison(StringBuilder expected, StringBuilder result, Map<String, String> replacements) {
