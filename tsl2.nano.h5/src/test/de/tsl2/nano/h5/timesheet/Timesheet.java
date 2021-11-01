@@ -430,6 +430,7 @@ public class Timesheet extends NanoH5App {
         BeanDefinition<Charge> chargeDef = BeanDefinition.getBeanDefinition(Charge.class);
         chargeDef.addAction(new ActionImportHolidays());
         chargeDef.addAction(new ActionImportCalendar());
+        chargeDef.addAction(new SpecifiedAction<>(mdImport.getName(), null));
         chargeDef.saveDefinition();
         
         /*

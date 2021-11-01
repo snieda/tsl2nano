@@ -7,7 +7,10 @@ import java.util.LinkedList;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
+import org.apache.commons.logging.Log;
+
 import de.tsl2.nano.bean.def.Bean;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
@@ -33,6 +36,8 @@ import de.tsl2.nano.core.util.Util;
  * @param <T> bean type
  */
 public class SimpleBeanReader<T> {
+	private static final Log LOG = LogFactory.getLog(SimpleBeanReader.class);
+	
 	private static final String SPLIT_NAME = "[^\\w]+";
 	Class<T> type;
 	String expression;
@@ -61,6 +66,7 @@ public class SimpleBeanReader<T> {
 			l = sc.nextLine();
 			if (l.trim().isEmpty() || l.startsWith("#"))
 				continue;
+			LOG.info("import: " + l);
 			values = StringUtil.splitFix(l, false, splitter);
 		
 			bean = Bean.newBean(type);

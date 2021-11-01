@@ -638,17 +638,25 @@ public class CoreUtilTest implements ENVTestPreparation {
 	}
 
 	@Test
-	public void testProgressbar() throws Exception {
-		String meinText = "dies ist ein ganz langer progress mit vielen Iterationen: ";
-		final int maxCount = 100;
+	public void testProgressbar7() throws Exception {
+		printProgressbar(7, "dies ist ein ganz kurzer prozess: ");
+	}
+	@Test
+	public void testProgressbar100() throws Exception {
+		printProgressbar(100, "dies ist ein prozess mit Iterationen: ");
+	}
+	@Test
+	public void testProgressbar1253() throws Exception {
+		printProgressbar(1253, "dies ist ein ganz langer prozess mit vielen Iterationen: ");
+	}
+	public void printProgressbar(int maxCount, String meinText) throws Exception {
 		LinkedList<Integer> pi = new LinkedList<>();
 		ProgressBar bar = new ProgressBar(maxCount) {
 			@Override
 			protected void print_(Object txt, char end) {
-				if (pi.size() > 0) {
 					String text = txt.toString();
-					assertTrue(text.length() <= maxCount);
-					if (pi.getLast() >= maxCount - ((maxCount / 30)+2)) {
+					assertTrue(text.length() <= this.barWidth + this.textWidth + PERC_WIDTH);
+					if (!pi.isEmpty() && pi.getLast() >= maxCount) {
 						assertTrue(text, text.contains("=] "));
 						assertTrue(text, text.endsWith(substringFromRight(meinText, 7) + pi.getLast()));
 						if (pi.getLast() >= maxCount) {
@@ -656,12 +664,12 @@ public class CoreUtilTest implements ENVTestPreparation {
 						}
 					} else {
 						assertTrue(text, text.contains(" ] "));
-						assertTrue(text, text.endsWith(substringFromRight(meinText, 7) + pi.getLast()));
+						if (!pi.isEmpty())
+							assertTrue(text, text.endsWith(substringFromRight(meinText, 7) + pi.getLast()));
 						assertTrue(text, end == '\r');
 					}
+					super.print_(txt, end);
 				}
-				super.print_(txt, end);
-			}
 		};
 		
 		for (int i = 0; i < maxCount + 1; i++) {

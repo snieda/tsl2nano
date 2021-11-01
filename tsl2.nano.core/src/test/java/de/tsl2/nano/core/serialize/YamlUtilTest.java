@@ -3,13 +3,20 @@ package de.tsl2.nano.core.serialize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import de.tsl2.nano.core.util.DelegationHandler;
+import de.tsl2.nano.core.util.ENVTestPreparation;
 
-public class YamlUtilTest {
+public class YamlUtilTest implements ENVTestPreparation {
 	static boolean initSerializationPassed;
 	static boolean initDeserializationPassed;
+	
+	@Before
+	public void setUp() {
+		ENVTestPreparation.super.setUp("core");
+	}
 	
 	@Test
 	public void testDumpAndLoad() {

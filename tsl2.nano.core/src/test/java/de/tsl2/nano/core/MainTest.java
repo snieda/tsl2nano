@@ -5,12 +5,18 @@ import static org.junit.Assert.*;
 import java.util.Map;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
+import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.MapUtil;
 
-public class MainTest {
+public class MainTest implements ENVTestPreparation {
 
+	@Before
+	public void setUp() {
+		ENVTestPreparation.super.setUp("core");
+	}
 	@After
 	public void tearDown() {
     	ENV.getProperties().keySet().forEach(k->System.getProperties().remove(k));

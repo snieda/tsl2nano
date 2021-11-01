@@ -120,7 +120,7 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 	@Override
 	public void run() {
 		if (getParameter() == null) {
-			log ("no expectation found for test number " + cloneIndex + "\n");
+			log ("no expectation with own parameters found for test number " + cloneIndex + "\n");
 			if (!status.isFatal())
 				status = new Status(StatusTyp.PARAMETER_UNDEFINED, UNDEFINED, null);
 			result = UNDEFINED;

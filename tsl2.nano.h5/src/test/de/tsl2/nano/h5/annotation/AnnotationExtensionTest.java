@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.tsl2.nano.action.IAction;
@@ -28,10 +29,10 @@ import de.tsl2.nano.h5.expression.RuleExpression;
 public class AnnotationExtensionTest implements ENVTestPreparation {
     static final String MYVIRTUALATTRIBUTE = "myvirtualattribute";
 
-    @Before
-    public void setUp() {
-        ENVTestPreparation.super.setUp("h5");
-        BeanDefinition.clearCache();
+    @BeforeClass //we should not use @Before each test. This would reset the entries done by class annotations...
+    public static void setUp() {
+        ENVTestPreparation.setUp("h5", true);
+        Bean.clearCache();
         BeanContainer.initEmtpyServiceActions();
         //load expression classes
         RuleExpression.expressionPattern();

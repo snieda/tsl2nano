@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import org.anonymous.project.Charge;
 
+import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.SimpleBeanReader;
 import de.tsl2.nano.core.ENV;
 
@@ -12,6 +13,9 @@ public class SBRImport {
 	
 	public static Collection<Charge> doImportHumanReadable(String file) {
 		SimpleBeanReader<Charge> reader = new SimpleBeanReader<>(Charge.class, ENV.get("timesheet.import.expression", "fromdate: fromtime-totime  (pause) value chargeitem comment"));
-		return reader.read(file);
+		Collection<Charge> beans = reader.read(file);
+		if (BeanContainer.isInitialized())
+			beans.forEach(b -> BeanContainer.instance().save(b));
+		return beans;
 	}
 }

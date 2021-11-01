@@ -323,7 +323,7 @@ public class AutoTestGenerator {
 			} else {
 				if (l.matches("\\w+.*\\(.*\\)")) {
 					method = ExpectationCreator.extractMethod(l);
-					progress.increase(method != null ? " " + method.getDeclaringClass().getSimpleName() + "." + method.getName() : "...");
+					progress.increase(method != null ? " " + method.getDeclaringClass().getSimpleName() + "." + method.getName() : " ...");
 					if (method != null)
 						expTesters.add(new ExpectationFunctionTester(iteration, method, exp));
 					else
@@ -346,7 +346,9 @@ public class AutoTestGenerator {
 		if (progress == null)
 			AFunctionCaller.log(obj + "\n");
 		else
-			progress.increase(obj.toString());
+//			synchronized (progress) {
+				progress.increase(" " + obj.toString());
+//			}
 	}
 	private void printStatistics(int iterations, Collection<AFunctionTester> testers, String groupByState) {
 		String p = "\n" + StringUtil.fixString(79, '=') + "\n";

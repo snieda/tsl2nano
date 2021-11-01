@@ -231,9 +231,11 @@ public class ENV implements Serializable {
     }
 
     protected final static ENV self() {
-//        if (selfThread.get() != null)
-//        		return selfThread.get();
-        if (self == null) {
+        if (selfThread.get() != null)
+        		return selfThread.get();
+//        else // clean version
+//        	throw new IllegalStateException("no environment available. please call ENV.create(...) before!");
+        if (self == null) { //dirty version: used in cause of lots of testcases and legacy applications
             create(System.getProperty(KEY_CONFIG_PATH, System.getProperty("user.dir").replace('\\', '/')));
         }
         return self;
@@ -288,11 +290,12 @@ public class ENV implements Serializable {
             self = YamlUtil.load(new File(configFile.getPath()), ENV.class);
         } else {
             self = new ENV();
+            selfThread.set(self);
             self.properties = createSyncSortedMap();
             configFile = getConfigFile(dir, getFileExtension());
 //          LOG.warn("no environment.properties available");
         }
-//        selfThread.set(self);
+        selfThread.set(self);
         self.services = createServiceMap();
         addService(layer);
         addService(ClassLoader.class, Util.getContextClassLoader());
@@ -331,7 +334,7 @@ public class ENV implements Serializable {
         		ENV.get("app.update.interval.days", 30));
         if (versionURL != null)
             if (updater.checkAndUpdate(currentVersion, versionURL)) {
-		        if (updater.run(configFile.getPath(), buildInfo, self))
+		        if (updater.run(configFile.getPath(), buildInfo, self()))
 		            setProperty("app.version", buildInfo);
 //            } else if (currentVersion == null) {
 //	            setProperty("app.version", buildInfo);
@@ -399,6 +402,7 @@ public class ENV implements Serializable {
         ResourceBundle.clearCache();
 //        PersistableSingelton.clearCache();
 //        PersistentCache.clearCache();
+        selfThread.set(null);
         self = null;
     }
 

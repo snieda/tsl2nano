@@ -1,58 +1,63 @@
 package de.tsl2.nano.core.execution;
 
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
- * TODO: print a progess bar to the terminal window
+ * print a progess bar to the terminal window
  * 
  * @author Tom
  * @version $Revision$
  */
 public class ProgressBar {
-	int maxCount;
-	String prefix;
-	int barWidth;
-	int textWidth;
-	int count;
-	int step;
-	boolean profile;
-	long starttime;
+	private static final String STARTING = "..starting..";
+	protected static final int PERC_WIDTH = 8; // '[' + '] 100% '
+	protected int maxCount;
+	protected String prefix;
+	protected int barWidth;
+	protected char bar;
+	protected int textWidth;
+	protected AtomicInteger count = new AtomicInteger();
+	protected int step;
+	protected boolean profile;
+	protected long starttime;
 
-	static final char[] cc = new char[] {' '};
+	static final char[] CC = new char[] {' '};
 	
-	@SuppressWarnings("unused")
-	private transient char end;
-
 	public ProgressBar(int maxCount) {
-		this(maxCount, "", 30, 58, 100, false);
+		this(maxCount, "", 30, '=', 58, 100, false);
 	}
 
+	public ProgressBar(int maxCount, String prefix, int barWidth, int textWidth, int stepCount, boolean profile) {
+		this(maxCount, prefix, barWidth, '=', textWidth, stepCount, profile);
+	}
 	/**
-	 * <pre>
-	 * prepares a terminal progress bar 
-	 * maxCount : end of the bar 
-	 * prefix : optional
-	 * text prefix at the end of the bar 
-	 * barWidth : character count of bar in terminal 
-	 * textWidth: maximum characters to print at the end of the bar
-	 * lineCount: default: 100 (one output per percent). count of outputs for whole progress 
-	 * profile : default: False, if true, additional profile information
-	 * like memory and time will be printed
-	 * </pre>
+	 * prepares a terminal progress bar
+	 * 
+	 * @param maxCount : finish of progress
+	 * @param prefix : optional text prefix at the end of the bar
+	 * @param barWidth : character count of bar (without text) in terminal
+	 * @param barChar : character to fill the bar with
+	 * @param textWidth : maximum characters to print at the end of the bar
+	 * @param stepCount: default: 100 (one output per percent). count of outputs for
+	 *                   whole progress
+	 * @param profile : default: false, if true, additional profile information like
+	 *          memory and time will be printed
 	 */
-	public ProgressBar(int maxCount, String prefix, int barWidth, int textWidth, int lineCount, boolean profile) {
+	public ProgressBar(int maxCount, String prefix, int barWidth, char barChar, int textWidth, int stepCount, boolean profile) {
 		this.maxCount = maxCount;
 		this.prefix = prefix;
 		this.barWidth = barWidth;
+		this.bar = barChar;
 		this.textWidth = textWidth;
-		this.count = 0;
-		this.step = (int) ((maxCount > 99 ? maxCount : lineCount) / (float) lineCount);
+		this.count.set(0);
+		this.step = stepCount > maxCount ? 1 : (int) (maxCount / stepCount);
 		this.profile = profile;
 		this.starttime = new Date().getTime();
-		print(fill(barWidth + textWidth, ' '), end = '\r');
+		print(0, STARTING + fill(barWidth + textWidth - STARTING.length(), ' '));
 	}
 
 	private String fill(int len, char c) {
@@ -69,62 +74,50 @@ public class ProgressBar {
 		this.profile = true;
 	}
 
+	/** convenience method delegating to {@link #print(String, Object...)} increasing the progress count */
 	public void increase(String comment, Object... args) {
 		print(comment, args);
 	}
 		/**
-	 * <pre>
 	 * prints a simple terminal progress bar - count of steps will be increased 
-	 * comment: optional formatable text at the end. will be concatenated with prefix 
-	 * args   : optinoal arguments to be formatted(with{})into(prefix+comment)"
-	 * </pre>
+	 * @param comment: optional formatable text at the end. will be concatenated with prefix 
+	 * @param args   : optional arguments to be formatted(with{})into(prefix+comment)"
 	 */
 	public void print(String comment, Object... args) {
-		print(++count, comment, args);
+		print(count.getAndIncrement(), comment, args);
 	}
 	public void print(int count, String comment, Object... args) {
 		String profMsg, a, b, c;
-		int i, mx, lpref = 0, p, l, x;
-		char bar, cr;
+		int mx, p, x;
+		char cr;
 
 		if (((count - 1) % step) != 0)
 			return;
-		if (profile) {
-			profMsg = " (" + (new Date().getTime() - starttime) + " " + NumberUtil.amount(Profiler.getUsedMem()) + ")";
-		} else {
-			profMsg = "";
-			if (comment.contains("%"))
-				comment = String.format(prefix + comment, args) + profMsg;
-			else
-				comment = prefix + comment +StringUtil.concat(cc, args) + profMsg;
-			lpref = prefix.length();
-		}
-		if (lpref == 0 || comment.length() < this.textWidth || lpref > this.textWidth) {
-			comment = substringFromRight(comment, textWidth);
-		} else {
-			comment = comment.substring(0, lpref) + comment.substring(-textWidth + lpref);
-		}
-		i = count;
-		mx = Math.max(i, maxCount);
+		profMsg = profile ? profMsg = " (" + (new Date().getTime() - starttime) + " " + NumberUtil.amount(Profiler.getUsedMem()) + ")" : "";
+		if (comment.contains("%") && args.length > 0)
+			comment = String.format(prefix + comment, args) + profMsg;
+		else
+			comment = prefix + comment + (args.length > 0 ? StringUtil.concat(CC, args) : "") + profMsg;
+		
+		comment = comment.length() > textWidth ? ".." + substringFromRight(comment, textWidth-2) : comment;
+		mx = Math.max(count, maxCount);
 
-		cr = i >= mx ? '\n' : '\r';
-		bar = '='; // fill character
-		l = barWidth; // progress bar length
+		cr = count >= mx ? '\n' : '\r'; //end
 
-		p = (int) (100 * (i / (float) mx));
-		x = 1 + (int) (l * (i / (float) mx));
+		p = (int) (100 * (count / (float) mx));
+		x = (int) (barWidth * (count / (float) mx));
 
 		a = '[' + fill(x, bar);
-		b = fill(l - x, ' ');
-		c = "] " + p + '%';
-		print_(a + b + c + comment, end = cr);
+		b = fill(barWidth - x, ' ');
+		c = "] " + p + "% ";
+		print_(a + b + c + comment, /*end = */cr);
 	}
 
 	public boolean isFinished() {
-		return count >= maxCount;
+		return count.get() >= maxCount;
 	}
 	public void setFinished() {
-		count = maxCount;
+		count.set(maxCount);
 	}
 	
 	/**

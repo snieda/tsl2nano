@@ -195,9 +195,6 @@ public class Pool {
         ENV.save(fileName, runnable);
     }
 
-    /**
-     * reset
-     */
     public void reset() {
         runnables = null;
     }
