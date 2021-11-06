@@ -20,6 +20,7 @@ import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.annotation.ConstraintValueSet;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
+import de.tsl2.nano.bean.def.BeanModifier;
 import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.MethodAction;
@@ -33,7 +34,6 @@ import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.h5.BeanModifier;
 import de.tsl2.nano.h5.NanoH5;
 import de.tsl2.nano.h5.NanoH5Test;
 

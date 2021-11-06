@@ -1142,4 +1142,8 @@ public final class DateUtil {
     public static String toLocaleFormat(String iso8601UTC) {
     	return FormatUtil.format(iso8601UTC.length() == 10 ? getDateSQL(iso8601UTC) : fromISO8601UTC(iso8601UTC));
     }
+    /** e.g. convert 1,75 to 01:45 */
+    public static String toTimeFormat(double hours) {
+    	return DateFormat.getTimeInstance().format(getTime((int) hours, (int) ((hours - (int)hours) * 60)));
+    }
 }

@@ -1,18 +1,14 @@
-package de.tsl2.nano.h5;
+package de.tsl2.nano.bean.def;
 
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.bean.def.Bean;
-import de.tsl2.nano.bean.def.BeanDefinition;
-import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
@@ -90,7 +86,7 @@ public class BeanModifier {
         }
     }
 
-    static void checkSecurity(Map<String, String> parms) {
+    public static void checkSecurity(Map<String, String> parms) {
         checkSecurity(null, parms);
     }
 

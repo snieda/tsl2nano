@@ -18,6 +18,7 @@ import org.apache.commons.logging.Log;
 import org.java_websocket.WebSocket;
 
 import de.tsl2.nano.bean.def.Bean;
+import de.tsl2.nano.bean.def.BeanModifier;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.exception.ExceptionHandler;
@@ -26,7 +27,6 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.h5.BeanModifier;
 import de.tsl2.nano.h5.NanoH5Session;
 import de.tsl2.nano.h5.websocket.dialog.WSDialog;
 

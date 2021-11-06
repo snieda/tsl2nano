@@ -94,6 +94,18 @@ public class StringUtil {
     					start);
     }
 
+    /** delegates to {@link #substring(String, String, String, int)} interpreting fromRegex as regurlar expressions. */
+    public static String subRegexFrom(String data, String fromRegex, String to, int start) {
+    	return substring(data, 
+    			fromRegex != null ? extract(data.substring(start), fromRegex) : null, to, start);
+    }
+
+    /** delegates to {@link #substring(String, String, String, int)} interpreting toRegex as regurlar expressions. */
+    public static String subRegexTo(String data, String from, String toRegex, int start) {
+    	return substring(data, 
+    			from, toRegex != null ? extract(data.substring(start), toRegex) : null, start);
+    }
+
     /**
      * delegates to {@link #substring(String, String, String, boolean)} with constrain = false
      */
@@ -684,24 +696,79 @@ public class StringUtil {
         return buf.toString();
     }
 
-    /** splits the given string in the order of the given separator/splitter (should be unique!) strings. Not performance optimized! */
+    /** 
+     * splits the given string in the order of the given separator/splitter (should be unique!) strings. 
+     * Not performance optimized! <p/>
+     * @param source text to be splitted
+     * @param regex whether to use the extended regular expression mechanism, if a splitter contains a regex marker '^'
+     * @param splitter short strings to split the source. if marked with '^' and regex==true, it will be interpreted as regular expression. if a part of a splitter is surrounded with '°', this part will be ignored.
+     * @return splitted source or null, if no split found
+     * @throws IllegalStateException if one split failed
+     * <pre>
+     * Example:
+     * source: 21.06.: 07:30-17:00(0,5h)  9,0h TICKET-123 Analyse
+     * regex: false
+     * splitter: [: ,-,(,)  , , ]
+     * 
+     * will split the given string into a date, fromtime, totime, pause, duration, ticketname and description.
+     * 
+     * If you need more flexibility, in cause of different input formats, you may use a regular expression and/or ignore-definitions.
+     * 
+     * source: 21.06.: 07:30-17:00(0,5h)  9,0h TICKET-123 Analyse
+     * regex: true
+     * splitter: [:, -, (, ^\\)\\:? ^, °:°,  ]
+     * 
+     * there the text may have ':' optional on two splits.
+     * 
+     * </pre>
+     */
     public static final String[] splitFix(String source, boolean regex, String...splitter) {
+    	final String REG_MARKER = Util.get("tsl2nano.string.split.regex.marker", "^");
+    	final String IGN_MARKER = Util.get("tsl2nano.string.split.regex.marker", "°");
     	String[] s = new String[splitter.length + 1];
-    	String last = null, ll = null, split;
+    	String last = null, ll = null, split, ignore = null;
+    	int pos=0, lastpos=-1;
+    	boolean regexFrom = false, regexTo = false;
     	for (int i = 0; i < s.length; i++) {
 			split = i < splitter.length ? splitter[i] : null;
-			last = regex ? subRegex(source, ll, split, 0) : substring(source, ll, split);
+			if (split != null) {
+				regexTo = regex && (split.startsWith(REG_MARKER) || split.endsWith(REG_MARKER));
+				if (regexTo)
+					split = split.replace(REG_MARKER, "");
+				ignore = StringUtil.substring(split, IGN_MARKER, IGN_MARKER, false, true);
+				if (ignore != null) {
+					split = split.replace(IGN_MARKER + ignore + IGN_MARKER, "");
+				}
+			}
+			last = substringEx(source, ll, split, pos, regexFrom, regexTo);
 			int t = 0;
 			while (Util.isEmpty(last) && t++ < MAX_TRIES) { //end directly after begin -> search for the next occurrence
-				last = regex ? subRegex(source, ll, split, 0) : substring(source, ll += split, split);
+				last = substringEx(source, ll +=split, split, pos, regexFrom, regexTo);
 			}
 			if (t == MAX_TRIES)
 				throw new IllegalStateException("split " + i + ":'" + split + "'not found!");
-			s[i] = last.trim();
-			ll = last + split;
+			s[i] = ignore == null ? last.trim() : last.trim().replace(ignore, "");
+			ll = ignore == null ? last + split : last.replace(ignore, "") + split;
+			pos = source.indexOf(last, pos);
+			if (pos < 0)
+				throw new IllegalStateException("'" + last + "' on split: '" + split + "' + not found in data:" + source );
+			if (i == 1 && lastpos == pos)
+				return null;
+			regexFrom = regexTo;
+			lastpos = pos;
 		}
     	return s;
     }
+
+	private static String substringEx(String source, String ll, String split, int pos, boolean regexFrom, boolean regexTo) {
+		return regexFrom && regexTo 
+				? subRegex(source, ll, split, pos)
+				: regexFrom
+					? subRegexFrom(source, ll, split, pos) 
+					: regexTo
+						? subRegexTo(source, ll, split, pos)
+						: substring(source, ll, split, pos);
+	}
     /**
      * Splits the given string to an array of string. The string is split every time its length is bigger than he given
      * maximum length.

@@ -16,6 +16,7 @@ import static de.tsl2.nano.bean.def.IPresentable.POSTFIX_SELECTOR;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.text.Format;
+import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -47,6 +48,7 @@ import de.tsl2.nano.core.messaging.ChangeEvent;
 import de.tsl2.nano.core.messaging.EventController;
 import de.tsl2.nano.core.messaging.IListener;
 import de.tsl2.nano.core.util.ByteUtil;
+import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.ObjectUtil;
@@ -257,6 +259,10 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
 		if (Date.class.isAssignableFrom(type))
 		    if (newString.matches("\\d{2,2}[:]\\d{2,2}"))
 		        newString += ":00"; //append 0 seconds to respect format HH:mm:ss
+			if (newString.matches("\\d{1,2}([,.]\\d{1,2})h")) {
+				String strHours = newString.substring(0, newString.length() - 1);
+				newString = Util.trY( () -> DateUtil.toTimeFormat(NumberFormat.getInstance().parse(strHours).doubleValue()));
+			}
 		return newString;
 	}
 

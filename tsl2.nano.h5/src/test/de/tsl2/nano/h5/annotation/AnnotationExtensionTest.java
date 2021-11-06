@@ -10,7 +10,6 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -26,6 +25,7 @@ import de.tsl2.nano.h5.annotation.DependencyListener.ListenerType;
 import de.tsl2.nano.h5.annotation.Specification.SpecificationType;
 import de.tsl2.nano.h5.expression.RuleExpression;
 
+@net.jcip.annotations.NotThreadSafe
 public class AnnotationExtensionTest implements ENVTestPreparation {
     static final String MYVIRTUALATTRIBUTE = "myvirtualattribute";
 

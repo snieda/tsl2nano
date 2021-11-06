@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 
@@ -496,5 +498,14 @@ public class CollectionUtil {
                 map.put(match, item);
         }
         return map;
+    }
+    
+    public static <T> Map<String, T> getPropertiesOfType(Map<String, Object> map, Class<T> type) {
+    	Map<String, T> tmap = new LinkedHashMap<>(map.size());
+    	for (Map.Entry<String, Object> entry : map.entrySet()) {
+    		if (entry.getValue() != null && type.isAssignableFrom(entry.getValue().getClass()))
+    			tmap.put(entry.getKey(), (T) entry.getValue());
+		}
+    	return tmap;
     }
 }

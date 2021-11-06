@@ -303,8 +303,10 @@ public class FormatUtil {
          * the date '31.12.2010' to '31.11.2010'. the day must be edited first - that may be a
          * problem for the user.
          */
-//        return format;
-        return new Format() {
+    	if (!ENV.get("bean.format.date.check", true))
+    		return format;
+    	else
+    	  return new Format() {
             Format mf = format;
 
             @Override

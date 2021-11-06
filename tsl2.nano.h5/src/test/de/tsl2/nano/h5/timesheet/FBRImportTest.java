@@ -6,25 +6,50 @@ import java.io.File;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Locale;
-import java.util.Locale;
+
+import javax.persistence.EntityManager;
 
 import org.anonymous.project.Charge;
-import org.anonymous.project.Item;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.bean.BeanProxy;
+import de.tsl2.nano.bean.IBeanContainer;
+import de.tsl2.nano.bean.def.BeanPresentationHelper;
+import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.h5.Html5Presentation;
+import de.tsl2.nano.persistence.GenericLocalBeanContainer;
+import de.tsl2.nano.persistence.Persistence;
+import de.tsl2.nano.service.util.BeanContainerUtil;
+import de.tsl2.nano.serviceaccess.Authorization;
+import de.tsl2.nano.serviceaccess.IAuthorization;
+import de.tsl2.nano.serviceaccess.ServiceFactory;
 
-public class SBRImportTest implements ENVTestPreparation {
+public class FBRImportTest implements ENVTestPreparation {
 
 	@Before
 	public void setUp() {
 		Locale.setDefault(Locale.GERMANY);
 		ENVTestPreparation.super.setUp("h5");
+		
+        ENV.addService(BeanPresentationHelper.class, new Html5Presentation<>());
+        String userName = Persistence.current().getConnectionUserName();
+        Authorization auth = Authorization.create(userName, false);
+        ENV.addService(IAuthorization.class, auth);
+        ConcurrentUtil.setCurrent(auth);
+
+        BeanContainerUtil.initProxyServiceFactory();
+        GenericLocalBeanContainer.initLocalContainer();
+        ServiceFactory.instance().setSubject(auth.getSubject());
+        ENV.addService(IBeanContainer.class, BeanContainer.instance());
+        ConcurrentUtil.setCurrent(BeanContainer.instance());
+        ENV.addService(EntityManager.class, BeanProxy.createBeanImplementation(EntityManager.class));
 	}
 	@After
 	public void tearDown() {
@@ -32,6 +57,13 @@ public class SBRImportTest implements ENVTestPreparation {
 	}
 	@Test
 	public void testImport() {
+		File file = FileUtil.userDirFile("test-classes/import-timesheet.log");
+		
+		Collection<Charge> c = FBRImport.doImportHumanReadable(file.getPath());
+		assertEquals(527, c.size());
+	}
+	@Test
+	public void testSimpleImport() {
 		File file = FileUtil.userDirFile("test.txt");
 		String s = "21.06.: 07:30-17:00(0,5h)  9,0h TICKET-123 Analyse\n\n"
 				 + "22.06.: 08:15-17:15 (0,25h)8,0h TICKET-234 Implementierung\n"
@@ -43,7 +75,7 @@ public class SBRImportTest implements ENVTestPreparation {
 //		item.setId(1);
 //		item.setn
 
-		Collection<Charge> c = SBRImport.doImportHumanReadable(file.getPath());
+		Collection<Charge> c = FBRImport.doImportHumanReadable(file.getPath());
 		assertEquals(4, c.size());
 	
 		Iterator<Charge> it = c.iterator();
