@@ -332,11 +332,11 @@ public class NanoH5Test implements ENVTestPreparation {
         //TODO: create myapp test db
 //        assertTrue(FileUtil.copy(path + initDB, DIR_TEST + "/" + initDB));
         assertTrue(FileUtil.copy(path + "ICSChargeImport.java", DIR_TEST + "/generated-src/" + srcPath + "ICSChargeImport.java"));
-        assertTrue(FileUtil.copy(path + "SBRImport.java", DIR_TEST + "/generated-src/" + srcPath + "SBRImport.java"));
+        assertTrue(FileUtil.copy(path + "FBRImport.java", DIR_TEST + "/generated-src/" + srcPath + "FBRImport.java"));
         assertTrue(FileUtil.copy(path + "ActionImportHolidays.java", DIR_TEST +  "/generated-src/" + srcPath + "/ActionImportHolidays.java"));
         assertTrue(FileUtil.copy(path + "ActionImportCalendar.java", DIR_TEST +  "/generated-src/" + srcPath + "/ActionImportCalendar.java"));
         assertTrue(FileUtil.copy(BIN_DIR + srcPath + "ICSChargeImport.class", DIR_TEST + "/generated-bin/" + srcPath + "ICSChargeImport.class"));
-        assertTrue(FileUtil.copy(BIN_DIR + srcPath + "SBRImport.class", DIR_TEST + "/generated-bin/" + srcPath + "SBRImport.class"));
+        assertTrue(FileUtil.copy(BIN_DIR + srcPath + "FBRImport.class", DIR_TEST + "/generated-bin/" + srcPath + "FBRImport.class"));
         assertTrue(FileUtil.copy(BIN_DIR + srcPath + "ActionImportHolidays.class", DIR_TEST +  "/generated-bin/" + srcPath + "/ActionImportHolidays.class"));
         assertTrue(FileUtil.copy(BIN_DIR + srcPath + "ActionImportCalendar.class", DIR_TEST +  "/generated-bin/" + srcPath + "/ActionImportCalendar.class"));
 
