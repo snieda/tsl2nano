@@ -526,7 +526,7 @@ public class TableList<H extends Comparable<H>, ID> implements Serializable {
 
     public void save(String relDir) {
         String path = relDir + name + FILE_EXT;
-        new File(path).getParentFile().mkdirs();
+        FileUtil.userDirFile(path).getParentFile().mkdirs();
         FileUtil.writeBytes(dump().getBytes(), path, false);
     }
     

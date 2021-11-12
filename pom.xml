@@ -184,7 +184,7 @@
 						<inherited>true</inherited>
 						<configuration>
 							<argLine>${surefire.argLine}</argLine>
-							<testFailureIgnore>${surefire.testFailureIgnore}</testFailureIgnore>						
+							<testFailureIgnore>${surefire.testFailureIgnore}</testFailureIgnore>				
 							<!-- <parallel>true</parallel> -->
 							<!-- <skipTests>true</skipTests>  -->
 							<!-- <workingDirectory>FORK_DIRECTORY_${surefire.forkNumber}</workingDirectory> -->

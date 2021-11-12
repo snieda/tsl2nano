@@ -1140,7 +1140,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
             ENV.extractResource("drop-" + persistence.getDatabase() + ".sql", false, false, false);
             ENV.extractResource("init-" + persistence.getDatabase() + ".sql", false, false, false);
             ENV.extractResource("create-sql-graphviz.cmd", true, true);
-            SystemUtil.executeShell(new File(ENV.getConfigPathRel()), false, "./create-sql-graphviz.cmd");
+            SystemUtil.executeShell(new File(ENV.getConfigPath()), false, "./create-sql-graphviz.cmd");
         } catch (Exception e) {
             LOG.warn(e);
             //ok, it was only a try ;-)

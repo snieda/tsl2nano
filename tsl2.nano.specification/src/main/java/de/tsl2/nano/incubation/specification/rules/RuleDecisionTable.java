@@ -17,6 +17,7 @@ import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.core.ITransformer;
 import de.tsl2.nano.core.util.CollectionUtil;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.tree.STree;
@@ -285,7 +286,7 @@ class DecisionTableInterpreter {
         Map<String, List<Condition<?>>> par = new LinkedHashMap<String, List<Condition<?>>>();
         Scanner sc = null;
         try {
-            sc = new Scanner(new File(csv));
+            sc = new Scanner(FileUtil.userDirFile(csv));
             sc.useDelimiter(delimiter);
             String key, lastKey = null, values[] = null;
             boolean withinMatrix = false;

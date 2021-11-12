@@ -10,7 +10,7 @@
 	<name>TSL2 Framework Html5 Extensions</name>
 	<description>TSL2 Framework Html5 Extensions (WebServer, Html5Presentation, RuleCover, BeanConfigurator, LogicTable-Sheet, Expression-Descriptors for Actions, Rules, URLs, Queries)</description>
 	<properties>
-		<module.parent>..</module.parent>
+		<module.parent>${project.basedir}/..</module.parent>
 		<keystore>${module.parent}/tsl2store</keystore>
 		<alias>tsl2</alias>
 		<storepass>${gpg.passphrase}</storepass>
@@ -365,6 +365,7 @@
 	                    	<skip>${skipTests}</skip>
 	                        <target>
 								<echo>STARTING ${project.build.finalName} on pre-integration-test</echo>
+								<!--<echoproperties/>-->
 								<mkdir dir="${project.build.directory}/pre-integration-test" />
 	                            <java jar="${project.build.directory}/${artifactId}-${project.version}${jar-extension}.jar"
 	                            	  dir="${project.build.directory}/pre-integration-test"
@@ -384,7 +385,18 @@
 	                        </target>
 	                    </configuration>
 	                </execution>
-	            </executions>
+						<execution>
+							<phase>test-compile</phase>
+							<goals>
+								<goal>run</goal>
+							</goals>
+							<configuration>
+								<tasks>
+									<echoproperties/>
+								</tasks>
+							</configuration>
+						</execution>
+					</executions>
 	        </plugin>
 		</plugins>
 	</build>

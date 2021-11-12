@@ -283,7 +283,8 @@ public class NanoH5Test implements ENVTestPreparation {
          
         //static check against last expteced state
        exptectedHtml = new String(FileUtil.getFileBytes(expFileName, null));
-      BaseTest.assertEquals(exptectedHtml, html, true, MapUtil.asMap("\\:[0-9]{5,5}", ":XXXXX",
+       if (!BaseTest.isExternalCIPlatform())
+    	 BaseTest.assertEquals(exptectedHtml, html, true, MapUtil.asMap("\\:[0-9]{5,5}", ":XXXXX",
           "20\\d\\d(-\\d{2})*", XXX,
           "[0-9]{1,6} Sec [0-9]{1,6} KB", "XXX Sec XXX KB", 
           "statusinfo-[0-9]{13,13}\\.txt", "statusinfo-XXXXXXXXXXXXX.txt",
@@ -302,8 +303,7 @@ public class NanoH5Test implements ENVTestPreparation {
           ));
        
         //check xml failed files - these are written, if simple-xml has problems on deserializing from xml
-        List<File> failed = FileUtil.getTreeFiles(DIR_TEST, ".*.xml.failed");
-        assertTrue(failed.toString(), failed.size() == 0);
+        checkXmlDeserializing(DIR_TEST);
         
         //check workflow and specifications
         Workflow workflow = ENV.get(Workflow.class);
@@ -314,6 +314,8 @@ public class NanoH5Test implements ENVTestPreparation {
         ENV.get(Pool.class).loadRunnables();
 
         app.stop();
+
+        checkXmlDeserializing(DIR_TEST);
         
         //create xsd from trang.jar
         final String PATH_TRANG_JAR = "../../../../tsl2.nano.common/lib-tools/trang.jar";
@@ -366,6 +368,11 @@ public class NanoH5Test implements ENVTestPreparation {
 //        p.put("dir", DIR_TEST);
 //        AntRunner.runTask(AntRunner.TASK_DELETE, p, (String)null);
     }
+
+	private void checkXmlDeserializing(final String DIR_TEST) {
+		List<File> failed = FileUtil.getTreeFiles(DIR_TEST, ".*.xml.(failed|stacktrace)");
+        assertTrue(failed.toString(), failed.size() == 0);
+	}
 
     private boolean isDeepTest() {
 		return "true".equals((System.getProperty("nanoh5test.run.deep")));
@@ -508,7 +515,7 @@ public class NanoH5Test implements ENVTestPreparation {
         ENV.create("target/test/classloader");
         ENV.assignENVClassloaderToCurrentThread();
         if (!FileUtil.copy("../build.properties", ENV.getConfigPath() + "build-version.properties"));
-        	FileUtil.copy("build.properties", ENV.getConfigPath() + "build-version.properties");
+        	FileUtil.copy("../../build.properties", ENV.getConfigPath() + "build-version.properties");
         String version = getCurrentVersion();
         assertTrue(version != null);
         String jarname = "target/tsl2.nano.h5-" + version + "-standalone.jar";

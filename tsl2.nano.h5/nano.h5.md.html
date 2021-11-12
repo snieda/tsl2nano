@@ -5469,7 +5469,14 @@ deploy:
 	* NanoH5HtmlUnitTest
 	* AttributeCoverTest
 	* NanoH5NetUtilTest
-	
+   * AnnotationExtensionTest
+* Test with gitlab-ci env: 
+   * JAVA_TOOL_OPTIONS
+   * US_de -Duser.region=DE, sun.jnu.encoding: ANSI_X3.4-1968
+      * LANG=en_US.UTF-8
+      * check it with: locale
+* GITLAB OHNE ERROR IN H5. -> alle build.properties in die pom übernehmen. oder den pfad dorthin korrigieren
+
    java.lang.RuntimeException: org.simpleframework.xml.core.PersistenceException: Constructor not matched for class de.tsl2.nano.bean.def.BeanCollector$10
 	at de.tsl2.nano.h5.annotation.AnnotationExtensionTest.getVirtualDefinition(AnnotationExtensionTest.java:107)
 	at de.tsl2.nano.h5.annotation.AnnotationExtensionTest.testController(AnnotationExtensionTest.java:59)

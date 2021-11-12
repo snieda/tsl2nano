@@ -17,6 +17,7 @@ import org.junit.Test;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanProxy;
 import de.tsl2.nano.bean.IBeanContainer;
+import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.ConcurrentUtil;
@@ -24,6 +25,7 @@ import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.h5.Html5Presentation;
+import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.persistence.GenericLocalBeanContainer;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.service.util.BeanContainerUtil;
@@ -36,8 +38,8 @@ public class FBRImportTest implements ENVTestPreparation {
 	@Before
 	public void setUp() {
 		Locale.setDefault(Locale.GERMANY);
+		Bean.clearCache();
 		ENVTestPreparation.super.setUp("h5");
-		
         ENV.addService(BeanPresentationHelper.class, new Html5Presentation<>());
         String userName = Persistence.current().getConnectionUserName();
         Authorization auth = Authorization.create(userName, false);

@@ -16,6 +16,7 @@ import org.junit.Test;
 
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.action.IConstraint;
+import de.tsl2.nano.autotest.BaseTest;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.annotation.ConstraintValueSet;
 import de.tsl2.nano.bean.def.AttributeDefinition;
@@ -39,20 +40,11 @@ import de.tsl2.nano.h5.NanoH5Test;
 
 public class BeanConfiguratorTest implements ENVTestPreparation {
 
-    @Before
-    public void setUp() {
-		ENVTestPreparation.super.setUp("h5");
-    }
-
-    @After
-    public void tearDown() {
-//    	ENVTestPreparation.removeCaches();
-    }
-
-
     @SuppressWarnings("rawtypes")
     @Test
     public void testConfigurators() throws Throwable {
+    	if (BaseTest.isExternalCIPlatform())
+    		return;
         System.setProperty("app.mode.strict", "true");
         NanoH5Test.createENV("beanconf");
         NanoH5 nanoH5 = new NanoH5();
@@ -150,6 +142,8 @@ public class BeanConfiguratorTest implements ENVTestPreparation {
 
     @Test
 	public void testConfigureConstraint() throws Exception {
+    	if (BaseTest.isExternalCIPlatform())
+    		return;
 		NanoH5Test.createENV("beanconf");
 		NanoH5 nanoH5 = new NanoH5();
 		BeanContainer.initEmtpyServiceActions();
