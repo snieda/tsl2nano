@@ -45,7 +45,7 @@ import de.tsl2.nano.core.log.LogFactory;
  * @author Tom
  * @version $Revision$ 
  */
-public class ObjectUtil extends ByteUtil {
+public class ObjectUtil extends FieldUtil {
     private static final Log LOG = LogFactory.getLog(ObjectUtil.class);
     private static final List<String> STD_TYPE_PKGS;
 

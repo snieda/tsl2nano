@@ -5475,19 +5475,8 @@ deploy:
    * US_de -Duser.region=DE, sun.jnu.encoding: ANSI_X3.4-1968
       * LANG=en_US.UTF-8
       * check it with: locale
-* GITLAB OHNE ERROR IN H5. -> alle build.properties in die pom übernehmen. oder den pfad dorthin korrigieren
-
-   java.lang.RuntimeException: org.simpleframework.xml.core.PersistenceException: Constructor not matched for class de.tsl2.nano.bean.def.BeanCollector$10
-	at de.tsl2.nano.h5.annotation.AnnotationExtensionTest.getVirtualDefinition(AnnotationExtensionTest.java:107)
-	at de.tsl2.nano.h5.annotation.AnnotationExtensionTest.testController(AnnotationExtensionTest.java:59)
-
-   Caused by: org.simpleframework.xml.core.PersistenceException: Constructor not matched for class de.tsl2.nano.bean.def.BeanCollector$10
-	at de.tsl2.nano.h5.annotation.AnnotationExtensionTest.getVirtualDefinition(AnnotationExtensionTest.java:107)
-	at de.tsl2.nano.h5.annotation.AnnotationExtensionTest.testQueryAndSpecification(AnnotationExtensionTest.java:87)
-
-   Caused by: org.simpleframework.xml.core.PersistenceException: Constructor not matched for class de.tsl2.nano.bean.def.BeanCollector$10
-	at de.tsl2.nano.h5.annotation.AnnotationExtensionTest.getVirtualDefinition(AnnotationExtensionTest.java:107)
-	at de.tsl2.nano.h5.annotation.AnnotationExtensionTest.testCSheet(AnnotationExtensionTest.java:81)
-
-   NanoH5AttachmentTest.testAttachmentsTransferInH5:
-   interface org.java_websocket.WebSocket is not visible from class loader
+* GITLAB STOPS WITHOUT ERROR IN H5 (but: there are test failures)
+   * maven-properties output -> build.properties are used and ok!
+   * maven-surefire (3.0.0-M5) may have problems with flakes in previously executed module tests
+      * build.properties: surefire.testFailureIgnore=true
+* LICENCE: GPLL -> GPL (in cause of problems with compatibility to used GPL licences)
