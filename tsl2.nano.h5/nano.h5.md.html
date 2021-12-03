@@ -5480,3 +5480,10 @@ deploy:
    * maven-surefire (3.0.0-M5) may have problems with flakes in previously executed module tests
       * build.properties: surefire.testFailureIgnore=true
 * LICENCE: GPLL -> GPL (in cause of problems with compatibility to used GPL licences)
+* use FeatureFactory in h5: e.g.: cursus, beanconfiguration, session, remember function, 
+	statistics, compositor, controller, administration, sqltool, workflow, translation, 
+	print, plaintext, json, document, debug, replication, switchrelation, nestingdetails,
+	import, export
+* constrain features with hashcode through: username+featurename+classhash -> checked in featurefactory getImpl().
+	the hashcode must be sent to user. the user has to input that once - then it is stored.
+	reliable runtime attributes to check: stacktrace, classloader 

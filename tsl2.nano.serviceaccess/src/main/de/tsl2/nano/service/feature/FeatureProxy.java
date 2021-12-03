@@ -14,6 +14,8 @@ import java.lang.reflect.Proxy;
 import java.security.Principal;
 
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.core.secure.Hash;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
 import de.tsl2.nano.serviceaccess.ServiceProxy;
 
@@ -51,12 +53,8 @@ public class FeatureProxy<T> extends ServiceProxy<T> {
                 return null;
             }
         }
-
-//        this check has to done on class loading and newInstance
-//        if (delegate == null) {
-//            throw new ManagedException("FEATURE IMPLEMENTATION '" + featureName
-//                + "' IS NOT AVAILABLE! PLEASE CHECK YOUR INSTALLATION.");
-//        }
+//        Hash.checkHash(FileUtil.userDirFile("feature-" + featureName + ".hash"), featureName);
+        
         LOG.info("=====> STARTING FEATURE '" + featureName + "'");
         final Object result = super.invoke(proxy, method, args);
         LOG.info("=====> FEATURE " + featureName + "' RETURNED: " + result);

@@ -30,6 +30,9 @@
 		<tsl2.nano.resources.jar>tsl2.nano.h5.default-resources.jar</tsl2.nano.resources.jar>
 		<tsl2.nano.sample.jar>tsl2.nano.h5.sample.jar</tsl2.nano.sample.jar>
 		<build.debug>${maven.compiler.debug}</build.debug>
+		<surefire.testFailureIgnore>true</surefire.testFailureIgnore>
+		<maven.test.failure.ignore>true</maven.test.failure.ignore>
+		
 	</properties>
 	<build>
 		<sourceDirectory>src/main</sourceDirectory>

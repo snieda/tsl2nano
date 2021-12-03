@@ -9,8 +9,14 @@
  */
 package de.tsl2.nano.core.secure;
 
+import java.io.File;
+import java.util.Arrays;
+
 import org.simpleframework.xml.Attribute;
 
+import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.ObjectUtil;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
 /**
@@ -65,4 +71,30 @@ public class Hash implements ISecure {
     public boolean canDecrypt() {
         return false;
     }
+
+    public static void checkHash(File hashFile, Object...calculationParts) throws IllegalAccessException {
+    	if (!hashFile.exists())
+    		throw new IllegalStateException("please provide the right hash in the file " + hashFile.getAbsolutePath());
+    	checkHash(hashFile.getName(), FileUtil.getFileString(hashFile.getAbsolutePath()), calculationParts);
+    }
+    
+    /** calculates a hash through some reliable runtime parameters and the given calculationParts. compares the calculated 
+     *  hash against the given hash throwing an exception if not equal.
+     * @param label any text to be used by the exception
+     * @param givenHash hash to be equal to the calculated one
+     * @param calculationParts known parts of hash
+     * @throws IllegalAccessException if calculated and given hash are not equal
+     */
+    public static void checkHash(String label, String givenHash, Object...calculationParts) throws IllegalAccessException {
+    	if (!givenHash.equals(calculated(calculationParts)))
+    		throw new IllegalAccessException(label + " not allowed with given " + givenHash);
+    }
+
+	private static String calculated(Object... calculationParts) {
+		String runtime = String.valueOf(new char[] {'a', '3', 'G', '§', 'l', '8', 'P', '%', '#', 'r', '9', 'H', '0', '?', '/', 'l'})
+			+ Arrays.toString(Thread.currentThread().getStackTrace())
+//			+ Thread.currentThread().getContextClassLoader().toString() // only on special classloaders with toString()...
+			;
+		return StringUtil.toBase64(StringUtil.cryptoHash(new String(ObjectUtil.serialize(calculationParts)) + runtime));
+	}
 }
