@@ -21,12 +21,16 @@ public class AttributeCoverTest implements ENVTestPreparation {
 
     @Before
     public void setUp() {
+		if (BaseTest.isExternalCIPlatform())
+			return;
     	ConcurrentUtil.sleep(20000); // to not compromise other bean tests
 		ENVTestPreparation.super.setUp("descriptor");
     }
 
     @After
     public void tearDown() {
+		if (BaseTest.isExternalCIPlatform())
+			return;
     	Bean.clearCache();
     	ENVTestPreparation.tearDown();
     }
