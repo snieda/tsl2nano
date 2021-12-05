@@ -2,6 +2,7 @@ package de.tsl2.nano.core.util;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -61,6 +62,7 @@ public class FieldUtil extends ByteUtil {
 		for (int i = 0; i < fields.length; i++) {
 			result[i] = fields[i].getName();
 		}
+		Arrays.sort(result);
 		return result;
 	}
 }

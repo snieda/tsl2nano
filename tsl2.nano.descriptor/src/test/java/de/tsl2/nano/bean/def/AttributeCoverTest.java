@@ -10,11 +10,12 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import de.tsl2.nano.autotest.BaseTest;
 import de.tsl2.nano.autotest.TypeBean;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 
-@Ignore
+//@Ignore
 public class AttributeCoverTest implements ENVTestPreparation {
 	static final String MYRULECOVERVALUE = "MYRULECOVERVALUE";
 
@@ -33,6 +34,8 @@ public class AttributeCoverTest implements ENVTestPreparation {
 //    @Ignore("Must be done soon...")
 	@Test
 	public void testCache() {
+		if (BaseTest.isExternalCIPlatform())
+			return;
 		TypeBean instance = new TypeBean();
 		String attrName = "string";
 		String path = "presentable.layoutConstraints";

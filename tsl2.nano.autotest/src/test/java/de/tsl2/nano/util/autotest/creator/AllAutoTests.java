@@ -31,7 +31,7 @@ public class AllAutoTests {
 				"ThreadState.top","LogFactory","ConcurrentUtil.getCaller","ConcurrentUtil.sleep",
 				"Profiler","NumberUtil.numbers","StringUtil.fixString","CollectionUtil.copyOfRange",
 				"Profiler.workLoop","NumberUtil.fixLengthNumber","DateUtil.getWorkdayCount", "ByteUtil.getPipe", "IPreferences", "CPUState",
-				"AnnotationProxy.setAnnotationValues", "Message.send", "PrivateAccessor.findMembers", "ValueSet", "Mail"));
+				"AnnotationProxy.setAnnotationValues", "Message.send", "PrivateAccessor.findMembers", "ValueSet", "Mail", "FieldUtil.foreach"));
 		set(FILTER, matchPackage(Main.class));
 	}
 }
