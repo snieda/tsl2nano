@@ -55,7 +55,9 @@ IPv4="-Djava.net.preferIPv4Stack=true"
 #NO_DB_CHECK=-Dapp.db.check.connection=false
 #INTERNAL_DB=-Dapp.database.internal.server.run=true
 #TSL_SERVICE=-Dservice.url=https://tsl2-timesheet.herokuapp.com:5000
-java $IPv4 $OFFLINE $UH $LLANG $ENCODING $JSU_ENC $USERDIR $NANO_DEBUG $AGENT $PROXY  $DEBUG \
+SECURITY_LEAK=-Dlog4j2.formatMsgNoLookups=true
+
+java $SECURITY_LEAK $IPv4 $OFFLINE $UH $LLANG $ENCODING $JSU_ENC $USERDIR $NANO_DEBUG $AGENT $PROXY  $DEBUG \
 	$UH $HPROF_CPU $HPROF_HEAP $PROFILER $NO_DB_CHECK $NOSTARTPAGE $INTERNAL_DB $TSL_SERVICE \
 	$JAVA_OPTS $RESTART_ALL -jar $NAME-$VERSION$EXTENSION.jar $PRJ $PORT $LOG 
 #if [ not "$NOPAUSE" == "nopause" ] then 'read -p' fi

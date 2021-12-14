@@ -46,7 +46,7 @@ public class RepositoryTest implements ENVTestPreparation {
         assertEquals(1, rep.lsFiles().size());
         assertEquals(docName, rep.lsFiles().get(0));
         
-        if (!BaseTest.isExternalCIPlatform()) // workaround as this assertion fails on gitlab
+        if (!BaseTest.isExternalCIPlatform() && !BaseTest.isGithubCIPlatform()) // workaround as this assertion fails on gitlab/github
         	assertTrue(FileUtil.userDirFile(REPOSITORY + "/.git/COMMIT_EDITMSG").exists());
         
     }

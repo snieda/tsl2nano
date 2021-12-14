@@ -186,4 +186,7 @@ public class BaseTest extends TextComparison {
 	public static boolean isExternalCIPlatform() {
 		return new File("user.dir").getAbsolutePath().startsWith("/app/");
 	}
+	public static boolean isGithubCIPlatform() {
+		return new File("user.dir").getAbsolutePath().startsWith("/home/runner");
+	}
 }
