@@ -492,6 +492,10 @@ public class Bean<T> extends BeanDefinition<T> {
         return Bean.getBean(BeanClass.createInstance(type, constructorArgs));
     }
 
+    public static <T> Bean<T> newBeanWithDefaults(Class<T> type) {
+        return (Bean<T>) Bean.getBean(new BeanCollector(type, 0).createItem(null));
+    }
+
     @Override
     public int hashCode() {
         return isVirtual() ? super.hashCode() : 31 * super.hashCode() + instance.hashCode();

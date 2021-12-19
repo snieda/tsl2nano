@@ -12,11 +12,16 @@ package de.tsl2.nano.service.util.finder;
 import static de.tsl2.nano.service.util.ServiceUtil.getLogInfo;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * Finder provider - usable for IQueryService.
@@ -27,6 +32,18 @@ import de.tsl2.nano.core.log.LogFactory;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public final class Finder {
     private static Log LOG = LogFactory.getLog(Finder.class);
+
+    public static <FINDER extends AbstractFinder<T>, T> T findOne(FINDER... finder) {
+    	Collection<T> find = find(finder);
+    	if (find.size() != 1)
+    		throw new IllegalStateException("exptected result of count=1, but was: " + find.size());
+    	return find.iterator().next();
+    }
+    /** convenience, delegating to {@link #createQuery(Collection, Collection, AbstractFinder...)} */
+    public static <FINDER extends AbstractFinder<T>, T> Collection<T> find(FINDER... finder) {
+    	List<Object> parameter = new LinkedList<>();
+    	return BeanContainer.instance().getBeansByQuery(createQuery(parameter, new LinkedList<>(), finder), false, parameter.toArray());
+    }
 
     /**
      * creates the query for the given finders
@@ -144,8 +161,13 @@ public final class Finder {
         return new Example<T>(example, relationsToLoad);
     }
 
+    public static <T, H> Member<T, H> member(H holder,
+            Class<T> beanType,
+            Class... relationsToLoad) {
+    	return member(holder, beanType, StringUtil.toFirstLower(holder.getClass().getSimpleName()), relationsToLoad);
+    }
     /**
-     * between
+     * member
      * 
      * @param <T,H> result bean type and holder type
      * @param holder holder object
@@ -161,8 +183,14 @@ public final class Finder {
         return new Member<T, H>(holder, beanType, attributeName, relationsToLoad);
     }
 
+    public static <T, H> Holder<T, H> holder(T member,
+            Class<H> holderType,
+            Class... relationsToLoad) {
+        return holder(member, holderType, StringUtil.toFirstLower(member.getClass().getSimpleName()), relationsToLoad);
+    }
+
     /**
-     * between
+     * holder
      * 
      * @param <T,H> result bean type and holder type
      * @param member member object

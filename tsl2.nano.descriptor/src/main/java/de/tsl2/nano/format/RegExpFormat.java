@@ -137,6 +137,9 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
     public static final String FORMAT_NAME_ALPHA_NUM = "[a-zA-Z0-9]*";
     public static final String FORMAT_NUMBER = "[0-9]*";
 
+    @Deprecated //in versions before 2.4.8 this was the FORMAT_DATE_DE. some applications have presenters with this format
+    private static final String DEPRECATED_FORMAT_DATE_DE = "[0-3]\\d\\.[0-1]\\d(\\.[1-2]\\d\\d\\d)?";
+
     private static final Map<String, String> systemInitMap = new Hashtable<String, String>();
     @ElementMap(attribute = true, inline = true, required = false, name = "initmask", key = "pattern")
     Map<String, String> initMap = null;
@@ -146,6 +149,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
              * standard german date format mask
              */
             systemInitMap.put(FORMAT_DATE_DE, DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.GERMANY).format(getInitialDate()));
+            systemInitMap.put(DEPRECATED_FORMAT_DATE_DE, DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.GERMANY).format(getInitialDate()));
             /*
              * on german dates with month-day 31, the standard-initmask '01.01.CURRENTYEAR' does not work.
              * example: input: 31.1 and mask: 01.01.2011 ==> 31.11.2011 ==> error

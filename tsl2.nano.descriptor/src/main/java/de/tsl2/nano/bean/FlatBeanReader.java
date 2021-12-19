@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
@@ -18,6 +19,7 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanModifier;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.CollectionUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
@@ -156,6 +158,7 @@ public class FlatBeanReader<T> {
 		String l, values[];
 		int line = 0;
 		List<Integer> ignoredlines = new LinkedList<>();
+		BeanModifier beanModifier = new BeanModifier();
 		while (sc.hasNextLine()) {
 			l = sc.nextLine();
 			line++;
@@ -174,15 +177,18 @@ public class FlatBeanReader<T> {
 					ignoredlines.add(line);
 					continue;
 				}
-				LOG.info("import " + line + ": " + l);
+				Message.send("import " + line + ": " + l);
 				transformValues(values, properties);
-				bean = Bean.newBean(type);
+				bean = Bean.newBeanWithDefaults(type);
 //				bean.fromValueMap(bean.getInstance(), properties);
 				// set default values, loaded from import file
-				new BeanModifier().refreshValues(bean, CollectionUtil.getPropertiesOfType(properties, String.class));
+				beanModifier.refreshValues(bean, CollectionUtil.getPropertiesOfType(properties, String.class));
 				for (int i = 0; i < values.length; i++) {
 					bean.setParsedValue(columns[i], values[i]);
 				}
+				bean = completeBean(bean, properties);
+				if (bean == null)
+					continue;
 				content.add(bean.getInstance());
 				properties.put("lastValues", values);
 			} catch (Exception e) {
@@ -205,6 +211,13 @@ public class FlatBeanReader<T> {
 		String strTransformer;
 		if ((strTransformer = get("transformer", null)) != null)
 			((BiConsumer<String[], Map<String, Object>>)BeanClass.createInstance(strTransformer)).accept(values, properties);
+	}
+
+	protected Bean<T> completeBean(Bean<T> bean, Map<String, Object> properties) {
+		String strCompleter;
+		if ((strCompleter = get("completer", null)) != null)
+			return ((BiFunction<Bean<T>, Map<String, Object>, Bean<T>>)BeanClass.createInstance(strCompleter)).apply(bean, properties);
+		return bean;
 	}
 
 	protected void checkState() {

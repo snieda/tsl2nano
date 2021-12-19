@@ -256,13 +256,17 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
 		if (boolean.class.isAssignableFrom(type) || Boolean.class.isAssignableFrom(type))
 		    if (newString.equals("on"))
 		        newString = "true";
-		if (Date.class.isAssignableFrom(type))
+		if (Date.class.isAssignableFrom(type)) {
 		    if (newString.matches("\\d{2,2}[:]\\d{2,2}"))
 		        newString += ":00"; //append 0 seconds to respect format HH:mm:ss
 			if (newString.matches("\\d{1,2}([,.]\\d{1,2})h")) {
 				String strHours = newString.substring(0, newString.length() - 1);
 				newString = Util.trY( () -> DateUtil.toTimeFormat(NumberFormat.getInstance().parse(strHours).doubleValue()));
 			}
+		} else if (Number.class.isAssignableFrom(type)) {
+			if (newString.matches("\\d{1,2}([,.]\\d{1,2})h"))
+				newString = newString.substring(0, newString.length() - 1);
+		}
 		return newString;
 	}
 

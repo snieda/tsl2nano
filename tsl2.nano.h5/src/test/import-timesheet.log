@@ -1,9 +1,12 @@
 # FlatBeanImport (Thomas Schneider / tsl2nano 2021)
 
 # definitions:
+§ party=MM
+§ item=standard
 § type=org.anonymous.project.Charge
 § expression=fromdate: fromtime-totime (pause^\)\:? ^value°:° chargeitem comment
 § transformer=de.tsl2.nano.h5.timesheet.FBRImport
+§ completer=de.tsl2.nano.h5.timesheet.FBRImport
 § fromtime=08:30
 § totime=17:00
 § pause=00:00:00

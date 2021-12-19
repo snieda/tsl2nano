@@ -138,7 +138,8 @@ import de.tsl2.nano.script.ScriptTool;
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class Html5Presentation<T> extends BeanPresentationHelper<T> implements IPageBuilder<Element, String> {
-    //this class is not serializable - but simple-xml will serialize <- we need transient modifiers
+    private static final String SUBMIT = "submit";
+	//this class is not serializable - but simple-xml will serialize <- we need transient modifiers
     protected transient int tabIndex;
     private transient List<Character> availableshortCuts;
     private transient static final Character SHORTCUTS[];
@@ -423,6 +424,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     Element createFormDocument(ISession session, String name, String image, boolean interactive) {
+//    	Message.send("building page " + name);
         isAuthenticated = session.getUserAuthorization() != null;
         Element body = createHeader(session, name, image, interactive);
         Element glasspane = createGlasspane(body);
@@ -737,6 +739,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * @param navigation
      */
     protected void createNavigationbar(Element parent, BeanDefinition<?>... navigation) {
+//    	Message.send("building navigation bar...");
         Element link;
         Element nav = appendElement(parent, "nav", ATTR_ID, "navigation", ATTR_ALIGN, ALIGN_RIGHT);
         for (BeanDefinition<?> bean : navigation) {
@@ -761,6 +764,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             BeanDefinition bean,
             boolean interactive,
             boolean fullwidth) {
+    	Message.send("building content panel...");
 //        Element frame = appendElement(parent, "iframe", ATTR_SRC, "#data", ATTR_NAME, "dataframe");
 //        panel = appendElement(parent, TAG_LINK, ATTR_NAME, "data", "target", "_blank");
         if (bean instanceof Controller) {
@@ -1330,7 +1334,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ? getCSSPanelAction() : CSS_CLASS_ACTION,
             showText ? a.getShortDescription() : null,
             a.getLongDescription(),
-            "submit",
+            SUBMIT,
             a.getKeyStroke(),
             imagePath,
             a.isEnabled(),
@@ -1371,12 +1375,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * @return html table containing the buttons
      */
     Element createBeanActions(Element form, BeanDefinition<?> model) {
+//    	Message.send("building action panel...");
         Element panel = createActionPanel(form, model.getActions(), true, ATTR_ALIGN, ALIGN_CENTER, ATTR_WIDTH, VAL_100PERCENT);
         if (model.isMultiValue() && model instanceof BeanCollector
             && ((BeanCollector) model).hasMode(MODE_ASSIGNABLE)) {
             String assignLabel = Messages.getStringOpt("tsl2nano.assign", true);
 
-            createAction(panel, BTN_ASSIGN, getCSSPanelAction(), assignLabel, assignLabel, "submit", null,
+            createAction(panel, BTN_ASSIGN, getCSSPanelAction(), assignLabel, assignLabel, SUBMIT, null,
                 "icons/links.png", true, true,
                 false);
         }
@@ -2459,6 +2464,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     Element createFooter(Document doc, Object footer) {
+//    	Message.send("building footer...");
         Element body = (Element) doc.getElementsByTagName(TAG_BODY).item(0);
         Element table = createGrid(body, "Status", "page.footer.table", 0);
 

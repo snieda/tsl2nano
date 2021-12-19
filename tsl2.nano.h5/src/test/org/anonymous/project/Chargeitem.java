@@ -24,7 +24,7 @@ import javax.persistence.Table;
 public class Chargeitem  implements java.io.Serializable {
 
 
-     private int id;
+     private Integer id;
      private Item item;
      private BigDecimal charge;
      private Set<Charge> charges = new HashSet<Charge>(0);
@@ -49,11 +49,11 @@ public class Chargeitem  implements java.io.Serializable {
 
     
     @Column(name="ID", unique=true, nullable=false)
-    public int getId() {
+    public Integer getId() {
         return this.id;
     }
     
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
