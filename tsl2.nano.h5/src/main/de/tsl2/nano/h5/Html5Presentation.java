@@ -138,7 +138,7 @@ import de.tsl2.nano.script.ScriptTool;
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class Html5Presentation<T> extends BeanPresentationHelper<T> implements IPageBuilder<Element, String> {
-    private static final String SUBMIT = "submit";
+    private String SUBMIT = ENV.get("html5.action.type", "submit");
 	//this class is not serializable - but simple-xml will serialize <- we need transient modifiers
     protected transient int tabIndex;
     private transient List<Character> availableshortCuts;
@@ -424,7 +424,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     Element createFormDocument(ISession session, String name, String image, boolean interactive) {
-//    	Message.send("building page " + name);
+    	Message.send("building page " + name);
         isAuthenticated = session.getUserAuthorization() != null;
         Element body = createHeader(session, name, image, interactive);
         Element glasspane = createGlasspane(body);
@@ -1469,7 +1469,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             tooltip,
             enable(ATTR_TYPE, type != null),
             type,
-            enable("onclick", type != null),
+            enable("onclick", type != null), //TODO: wenn submit: onclick='window.location.href = "<action id>"'
             enable("fade(this)", type != null && ENV.get("websocket.use", true)),
             ATTR_ACCESSKEY,
             sc,

@@ -15,13 +15,18 @@ public class H2Util {
 	static final int DEFAULT_H2_PORT = 9092;
 	
 	public static void startH2Datbase() throws Exception {
-		startH2Datbase(DEFAULT_H2_PORT);
+		startH2Datbase(DEFAULT_H2_PORT, false);
 	}
-	public static void startH2Datbase(int tcpPort) throws Exception {
+	public static void startH2Datbase(int tcpPort, boolean startWebInterface) throws Exception {
 		if (!isOpen(tcpPort)) {
+			if (startWebInterface)
 			ULog.call("creating H2 database", 
 					() -> Server.createTcpServer("-baseDir", new File("").getAbsolutePath(), "-tcpPort", String.valueOf(tcpPort), "-tcpAllowOthers", "-ifNotExists").start(),
-					() -> Server.createWebServer("-webPort", "8082", "-webAllowOthers").start());
+					() -> Server.createWebServer("-webPort", "8082" /*, "-webAllowOthers"*/).start());
+			else
+				ULog.call("creating H2 database", 
+						() -> Server.createTcpServer("-baseDir", new File("").getAbsolutePath(), "-tcpPort", String.valueOf(tcpPort), "-tcpAllowOthers", "-ifNotExists").start());
+				
 		} else {
 			ULog.log("H2 database seems already to be open on port " + tcpPort);
 		}
@@ -33,7 +38,7 @@ public class H2Util {
 	public static void stopH2Datbase(int tcpPort) throws Exception {
 		ULog.call("stopping H2 database", 
 				() -> {Server.createTcpServer("-tcpPort", String.valueOf(tcpPort), "-tcpAllowOthers").stop(); return Optional.empty();},
-				() -> {Server.createWebServer("-webPort", "8082", "-webAllowOthers").stop(); return Optional.empty();});
+				() -> {Server.createWebServer("-webPort", "8082" /*, "-webAllowOthers"*/).stop(); return Optional.empty();});
 	}
 	
 	static boolean isOpen(int tcpPort) {

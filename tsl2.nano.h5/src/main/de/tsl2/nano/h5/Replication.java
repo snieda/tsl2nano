@@ -7,6 +7,7 @@ import java.util.Collection;
 import de.tsl2.nano.bean.annotation.Action;
 import de.tsl2.nano.bean.annotation.Constraint;
 import de.tsl2.nano.bean.def.Bean;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.exception.Message;
@@ -54,7 +55,7 @@ public class Replication {
 		case "PUNIT2":
 			if (Persistence.current().getReplication() != null) {
 				try {
-					H2Util.startH2Datbase(Integer.parseInt(Persistence.current().getReplication().getPort()));
+					H2Util.startH2Datbase(Integer.parseInt(Persistence.current().getReplication().getPort()), ENV.get("app.login.administration", true));
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
