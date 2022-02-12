@@ -90,7 +90,7 @@ public class SystemUtil {
         try {
             LOG.info("starting process with command: " + StringUtil.toString(command, 500)
                 + "\n\tdir: "
-                + processBuilder.directory()
+                + processBuilder.directory() + " (current-dir: " + System.getProperty("user.dir") + ")"
                 + (LOG.isDebugEnabled() ? "\n\tenv: "
                     + processBuilder.environment() : ""));
 
