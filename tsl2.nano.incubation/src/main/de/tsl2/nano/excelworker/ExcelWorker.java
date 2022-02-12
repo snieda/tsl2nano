@@ -60,6 +60,9 @@ import de.tsl2.nano.script.PersistenceTool;
  * * tsl2nano.excelworker.blocks.parallel="false"
  * 
  * start it with: ExcelWorker my-delimited-file.csv
+ * 
+ * In Excel it is possible to define a cell starting a VBA-script that executes the ExcelWorker. It would be something 
+ * like 'Call Shell("program location" & " " & Target)'.
  * </pre>
  * 
  * @author Thomas Schneider

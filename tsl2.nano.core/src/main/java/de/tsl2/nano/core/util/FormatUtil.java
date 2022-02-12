@@ -22,8 +22,10 @@ import java.text.Format;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
+import java.util.Arrays;
 import java.util.Currency;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 
@@ -181,7 +183,7 @@ public class FormatUtil {
                     @Override
                     public Object parseObject(String source, ParsePosition pos) {
                         pos.setIndex(!Util.isEmpty(source) ? source.length() : 1);
-                        return !Util.isEmpty(source) ? Boolean.parseBoolean(source) : null;
+                        return !Util.isEmpty(source) ? isTrue(source) : null;
                     }
                 };
             } else if (Enum.class.isAssignableFrom(type)) {
@@ -260,7 +262,16 @@ public class FormatUtil {
         return f;
     }
 
-
+    private static final List<String> istrue = Arrays.asList("on", "yes", "ja", "si", "oui");
+    public static boolean isTrue(String source) {
+    	if (source == null)
+    		return false;
+    	if (istrue.contains(source.toLowerCase()))
+    		return true;
+    	else
+			return Boolean.parseBoolean(source);
+	}
+    
     /**
      * getInstanceFormat
      * @param format
