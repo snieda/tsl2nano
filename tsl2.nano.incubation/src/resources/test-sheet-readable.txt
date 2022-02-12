@@ -1,0 +1,7 @@
+Geschaeftsvorfaelle seit 2020 (!:POLICIEREN:CLS:de.tsl2.nano.excelworker.GeVo:!)
+MyID	ACTION		PAR:Person	PAR:Wirksam	PAR:AENDERUNG	STATUS
+BLOCK: Anlegen
+01		POLICIEREN	Meier		2020-01-01					X
+02		POLICIEREN	Müller		2020-02-01					X
+BLOCK: Beitrag ändern (!:BEITRAGSANPASSUNG:SQL:insert into chronik values(?1, ?2 ):!)
+02		BEITRAGSANPASSUNG		2020-03-01
