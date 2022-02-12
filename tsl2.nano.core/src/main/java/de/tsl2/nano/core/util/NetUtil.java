@@ -173,9 +173,15 @@ public class NetUtil {
      * @return content as string
      */
     public static String get(String strUrl) {
+    	return get(strUrl, 0);
+    }
+    public static String get(String strUrl, int timeout) {
         try {
             LOG.info("starting request: " + strUrl);
-            String response = String.valueOf(FileUtil.getFileData(url(strUrl).openStream(), null));
+            URLConnection con = url(strUrl).openConnection();
+        	con.setConnectTimeout(timeout);
+        	con.setReadTimeout(timeout);
+			String response = String.valueOf(FileUtil.getFileData(con.getInputStream(), null));
             if (LOG.isDebugEnabled()) {
                 LOG.debug("response: " + StringUtil.toString(response, 100));
             }

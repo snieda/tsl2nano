@@ -97,6 +97,7 @@ public class JarResolver {
 
     private static final String KEY_FINDJAR_INDEX = "findjar.index";
     private static final String KEY_FINDJAR_CLASS = "findjar.class";
+    private static final String KEY_FINDJAR_TIMEOUT = "findjar.timeout";
 
     public JarResolver() {
         this(null);
@@ -440,7 +441,8 @@ public class JarResolver {
      */
     public String findJarOnline(String pck) {
         String urlFindjarClass = props.getProperty(KEY_FINDJAR_CLASS, "https://findjar.com/class/");
-        String content = NetUtil.get(urlFindjarClass + pck.replace(".", "/"));
+        int timeout = Util.trY(() -> Integer.valueOf(props.getProperty(KEY_FINDJAR_TIMEOUT, "10000")));
+        String content = NetUtil.get(urlFindjarClass + pck.replace(".", "/"), timeout);
         //try to use that jar file where the a part of the package name could be found
         String jarName = null;
         final String ID_NAMEPART = "$MYNAMEPARTEXPRESSION$";
