@@ -1,13 +1,14 @@
 -- Anyway database - generic database for several use cases (Thomas Schneider / 2012)
 -- ADMIN tables are in anyway-admin.sql
 -- SQL-92 (Transformation: BLOB --> LONGVARBINARY)
+-- quote all names:(^[ \t]+(CONSTRAINT)?| TABLE| COLUMN| INDEX| KEY |REFERENCES \w+)(\s*\(?)(\w+)([ \t]+|\))   -> \1\3"\4\"\5
 
 CREATE TABLE Account (
                 id INTEGER NOT NULL,
                 name VARCHAR(64) NOT NULL,
                 bic VARCHAR(12) NOT NULL,
                 iban VARCHAR(22) NOT NULL,
-                CONSTRAINT id PRIMARY KEY (id)
+                CONSTRAINTCONSTRAINT"id" PRIMARYKEY(id)
 );
 
 
