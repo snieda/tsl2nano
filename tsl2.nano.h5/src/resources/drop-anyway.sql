@@ -2,24 +2,25 @@
 -- drop all anyway tables
 
 -- first: drop constraints
-DROP CONSTRAINT Organisation_Party_fk;
-DROP CONSTRAINT Organisation_Property_fk;
-DROP CONSTRAINT Organisation_Item_fk;
-DROP CONSTRAINT Classification_Item_fk;
-DROP CONSTRAINT Category_Area_fk;
-DROP CONSTRAINT Area_Type_fk;
-DROP CONSTRAINT Type_Item_fk;
-DROP CONSTRAINT Item_Property_fk;
-DROP CONSTRAINT Item_ChargeItem_fk;
-DROP CONSTRAINT ChargeItem_Charge_fk;
-DROP CONSTRAINT Coordinates_Location_fk;
-DROP CONSTRAINT Address_Location_fk;
-DROP CONSTRAINT Party_Charge_fk;
-DROP CONSTRAINT Party_Location_fk;
-DROP CONSTRAINT Party_Property_fk;
-DROP CONSTRAINT Charge_Discharge_fk;
-DROP CONSTRAINT Account_Discharge_fk;
-DROP CONSTRAINT Digital_Location_fk;
+ALTER TABLE Organisation DROP CONSTRAINT Organisation_Party_fk;
+ALTER TABLE Organisation DROP CONSTRAINT Organisation_Property_fk;
+ALTER TABLE Organisation DROP CONSTRAINT Organisation_Item_fk;
+ALTER TABLE Classification DROP CONSTRAINT Classification_Item_fk;
+ALTER TABLE Category DROP CONSTRAINT Category_Area_fk;
+ALTER TABLE Area DROP CONSTRAINT Area_Type_fk;
+ALTER TABLE Type DROP CONSTRAINT Type_Item_fk;
+ALTER TABLE Item DROP CONSTRAINT Item_Property_fk;
+ALTER TABLE Item DROP CONSTRAINT Item_ChargeItem_fk;
+ALTER TABLE ChargeItem DROP CONSTRAINT ChargeItem_Charge_fk;
+ALTER TABLE Coordinates DROP CONSTRAINT Coordinates_Location_fk;
+ALTER TABLE Address DROP CONSTRAINT Address_Location_fk;
+ALTER TABLE Party DROP CONSTRAINT Party_Charge_fk;
+ALTER TABLE Party DROP CONSTRAINT Party_Location_fk;
+ALTER TABLE Party DROP CONSTRAINT Party_Property_fk;
+ALTER TABLE Party DROP CONSTRAINT Party_Mission_fk
+ALTER TABLE Charge DROP CONSTRAINT Charge_Discharge_fk;
+ALTER TABLE Account DROP CONSTRAINT Account_Discharge_fk;
+ALTER TABLE Digital DROP CONSTRAINT Digital_Location_fk;
 -- some database providers don't support the ansi-sql DROP CONSTRAINT 
 commit;
 
@@ -28,6 +29,7 @@ DROP TABLE Classification;
 DROP TABLE Category;
 DROP TABLE Area;
 DROP TABLE Type;
+DROP TABLE Mission;
 DROP TABLE Item;
 DROP TABLE ChargeItem;
 DROP TABLE Coordinate;

@@ -92,21 +92,21 @@
 		<module>tsl2.nano.datastructure</module>
 		<module>tsl2.nano.gp</module>
 		<module>tsl2.nano.common</module>
+		<module>tsl2.nano.jarresolver</module>
 		<module>tsl2.nano.generator</module>
 		<module>tsl2.nano.mavengenerator</module>
 		<module>tsl2.nano.operation</module>
 		<module>tsl2.nano.descriptor</module>
+		<module>tsl2.nano.specification</module>
+		<module>tsl2.nano.repeatable</module>
+		<module>tsl2.nano.logicstructure</module>
+		<module>tsl2.nano.vnet</module>
 		<module>tsl2.nano.replication</module>
 		<module>tsl2.nano.serviceaccess</module>
 		<module>tsl2.nano.directaccess</module>
 		<module>tsl2.nano.ebeanprovider</module>
 		<module>tsl2.nano.ormliteprovider</module>
-		<module>tsl2.nano.jarresolver</module>
-		<module>tsl2.nano.specification</module>
-		<module>tsl2.nano.repeatable</module>
 		<module>tsl2.nano.cursus</module>
-		<module>tsl2.nano.logicstructure</module>
-		<module>tsl2.nano.vnet</module>
 		<module>tsl2.nano.incubation</module>
 		<module>tsl2.nano.d8portal</module>
 		<module>tsl2.nano.terminal</module>

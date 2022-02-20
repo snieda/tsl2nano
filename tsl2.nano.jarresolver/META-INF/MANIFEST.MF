@@ -4,4 +4,5 @@ Ant-Version: Apache Ant 1.7.1
 Created-By: Thomas Schneider
 Main-Class: de.tsl2.nano.jarresolver.JarResolver
 Main-Arguments: ant
-Class-Path: tsl2.nano.common.1.1.2.jar 
+Class-Path: tsl2.nano.core-2.4.11.jar
+ tsl2.nano.common-2.4.11.jar 

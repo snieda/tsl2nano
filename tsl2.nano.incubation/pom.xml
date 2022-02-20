@@ -37,6 +37,7 @@
 							<Application-Source>${application.source}</Application-Source>
 							<Application-redirect>/download</Application-redirect>
 							<Permissions>all-permissions</Permissions>
+							<Class-Path>tools.jar aspectjweaver.jar</Class-Path>
 						</manifestEntries>
 					</archive>
 				</configuration>

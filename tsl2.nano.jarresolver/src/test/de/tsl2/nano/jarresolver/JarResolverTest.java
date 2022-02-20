@@ -1,11 +1,8 @@
 package de.tsl2.nano.jarresolver;
 
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 import static org.junit.Assert.fail;
-
-import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.junit.AfterClass;
@@ -123,6 +120,24 @@ public class JarResolverTest   implements ENVTestPreparation {
 				String jarName = new JarResolver(BASE_DIR_JARRESOLVER).findJarOnline("org.java_websocket.WrappedByteChannel");
 				LOG.info("jar-file: " + jarName);
 				assertTrue(StringUtil.extract(jarName, "\\w+").matches("sparql|org|pusher|firebase"));
+			} catch (Exception e) {
+				if (e.toString().matches(".*HTTP response.*50[023].*"))
+					System.out.println(e.toString()); //OK, Problem on server side...
+				else
+					fail(e.toString());
+			}
+        } else {
+            System.out.println("ignoring test 'testFindJar() - we are offline!");
+        }
+    }
+    @Test
+    public void testJarDownloadCom() throws Exception {
+        if (NetUtil.isOnline()) {
+            try {
+				String mvnpath = new JarResolver(BASE_DIR_JARRESOLVER).findJarDownload("org.java_websocket.WrappedByteChannel");
+				LOG.info("mvn-path: " + mvnpath);
+				assertTrue(mvnpath != null);
+				assertEquals("org.java-websocket/Java-WebSocket", StringUtil.substring(mvnpath, null, ":"));
 			} catch (Exception e) {
 				if (e.toString().matches(".*HTTP response.*50[023].*"))
 					System.out.println(e.toString()); //OK, Problem on server side...

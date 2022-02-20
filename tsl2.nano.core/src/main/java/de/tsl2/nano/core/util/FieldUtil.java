@@ -1,13 +1,27 @@
 package de.tsl2.nano.core.util;
 
+import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
 public class FieldUtil extends ByteUtil {
+	
+	public static Object[][] toObjectArrays(final Collection<?> list, String... attributes) {
+		Object[][] rows = new Object[list.size()][];
+		if (list.size() > 0 && (attributes == null || attributes.length == 0))
+			attributes = getFieldNames(list.iterator().next().getClass());
+		int i = 0;
+		for (Object o : list) {
+			rows[i++] = o != null && o.getClass().isArray() ? (Object[]) o : toObjectArray(o, attributes);
+		}
+		return rows;
+	}
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static Object[] toObjectArray(final Object obj, String... attributes) {
 		return foreach((f, values) -> values.add(getValue(obj, f)), new ArrayList(), obj, attributes).toArray();
@@ -64,5 +78,127 @@ public class FieldUtil extends ByteUtil {
 		}
 		Arrays.sort(result);
 		return result;
+	}
+
+	public static <T> T print(T result) {
+		return print("\t=> result: ", result, System.out);
+	}
+
+	public static <T> T print(String prefix, T obj, PrintStream ps) {
+		if (!ObjectUtil.isEmpty(obj) && obj.getClass().isArray()) {
+			new ObjectPrinter((Object[][]) obj).print(ps);
+		} else if (!ObjectUtil.isEmpty(obj) && obj instanceof Collection) {
+			Object row0 = ((Collection) obj).iterator().next();
+			String[] header = row0.getClass().isArray() ? null : ObjectUtil.getFieldNames(row0.getClass());
+			new ObjectPrinter(ObjectUtil.toObjectArrays((Collection) obj), header).print(System.out);
+		} else
+			ps.append(prefix + obj);
+		return obj;
+	}
+}
+
+class ObjectPrinter {
+	private static final char SPACE = ' ';
+	private static final char LINE = '-';
+	private static final String SLINE = String.valueOf(LINE);
+	private static final String DEFAULT_DELIMITER = "|";
+	String[] header;
+	Object[][] rows;
+	String[] footer;
+	private String leftDelimiter;
+	private String rightDelimiter;
+	private int[] colsizes;
+	int MAX_WIDTH = Integer.valueOf(System.getProperty("fscdimport.printer.maxwidth", "60"));
+
+	public ObjectPrinter(Object[][] rows) {
+		this(rows, null);
+	}
+
+	public ObjectPrinter(Object[][] rows, String[] header) {
+		this(rows, header, DEFAULT_DELIMITER, DEFAULT_DELIMITER + "\n");
+	}
+
+	public ObjectPrinter(Object[][] rows, String[] header, String leftDelimiter, String rightDelimiter) {
+		this.rows = rows;
+		this.header = evalHeader(header, rows);
+		this.footer = evalFooter();
+		this.leftDelimiter = leftDelimiter;
+		this.rightDelimiter = rightDelimiter;
+	}
+
+	private String[] evalFooter() {
+		String[] footer = new String[header.length];
+		for (int i = 0; i < footer.length; i++) {
+			footer[i] = SLINE;
+		}
+		return footer;
+	}
+
+	private String[] evalHeader(String[] header, Object[][] rows) {
+		if (header == null) {
+			header = new String[evalColumnSizes(rows).length];
+			for (int c = 0; c < colsizes.length; c++) {
+				header[c] = "" + (c + 1);
+			}
+		} else {
+			evalColumnSizes(rows);
+			evalColumnSizes(colsizes, header);
+		}
+		return header;
+	}
+
+	void print(PrintStream ps) {
+		ps.append('\n');
+		print(ps, new Object[][] { header }, SPACE);
+		print(ps, new Object[][] { footer }, LINE);
+		print(ps, rows, SPACE);
+		print(ps, new Object[][] { footer }, LINE);
+	}
+
+	void print(PrintStream ps, Object[][] rows, char fillchar) {
+		int[] colsizes = evalColumnSizes(rows);
+		if (colsizes.length > 0) {
+			String cell, spacer;
+			for (int r = 0; r < rows.length; r++) {
+				for (int c = 0; c < colsizes.length; c++) {
+					cell = String.valueOf(rows[r][c]);
+					spacer = cell.equals(SLINE) ? SLINE : " ";
+					ps.append(leftDelimiter + spacer + filterreturn(fixwith(cell, colsizes[c], fillchar)));
+				}
+				ps.append(rightDelimiter);
+			}
+		}
+	}
+
+	private String filterreturn(String txt) {
+		return txt.replace('\r', SPACE).replace('\n', SPACE);
+	}
+
+	private String fixwith(String txt, int width, char fillchar) {
+		StringBuilder b = new StringBuilder(width);
+		b.append(txt.length() > width ? txt.substring(0, width) : txt);
+		for (int i = txt.length(); i < width; i++)
+			b.append(fillchar);
+		return b.toString();
+	}
+
+	private int[] evalColumnSizes(Object[][] rows) {
+		if (colsizes == null) {
+			int length = rows.length > 0 ? rows[0].length : 0;
+			int[] colsizes = new int[length];
+			Object[] row;
+			for (int r = 0; r < rows.length; r++) {
+				row = rows[r];
+				evalColumnSizes(colsizes, row);
+			}
+			this.colsizes = colsizes;
+		}
+		return colsizes;
+	}
+
+	private void evalColumnSizes(int[] colsizes, Object[] row) {
+		for (int c = 0; c < colsizes.length; c++) {
+			colsizes[c] = Math.max(Math.min(MAX_WIDTH, String.valueOf(row[c]).length()), colsizes[c]);
+		}
 	}
 }

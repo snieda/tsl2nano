@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -73,6 +74,7 @@ public class JarResolver {
     String mvnRoot;
     String basedir;
 
+    Properties pckMvnDeps = new Properties();
     /*
      * for a description of these constants, see jarresolver.properties
      */
@@ -98,6 +100,9 @@ public class JarResolver {
     private static final String KEY_FINDJAR_INDEX = "findjar.index";
     private static final String KEY_FINDJAR_CLASS = "findjar.class";
     private static final String KEY_FINDJAR_TIMEOUT = "findjar.timeout";
+
+    private static final String KEY_JARDOWNLOAD_CLASS = "jardownload.class";
+    private static final String KEY_JARDOWNLOAD_TIMEOUT = "jardownload.timeout";
 
     public JarResolver() {
         this(null);
@@ -227,7 +232,14 @@ public class JarResolver {
                 if (groupId == null) {
                     //if artifactId is a class-name itself, try to extract the third part of the package (org.company.product....)
                     if (BeanClass.isPublicClassName(artifactId)) {
-                        if (Boolean.valueOf(props.getProperty("use.findjar.on.unknown", "true"))) {
+                        if (Boolean.valueOf(props.getProperty("use.jar-download.on.unknown", "true"))) {
+                            String mvnpath = findJarDownload(artifactId);
+                            if (mvnpath != null) {
+                                groupId = StringUtil.substring(mvnpath, null, "/");
+                                artifactId = StringUtil.substring(mvnpath, "/", ":");
+                            }
+                        }
+                        if (groupId == null && Boolean.valueOf(props.getProperty("use.findjar.on.unknown", "true"))) {
                             String jarName = findJarOnline(artifactId);
                             if (jarName != null) {
                                 artifactId = StringUtil.extract(jarName, "\\w+");
@@ -441,7 +453,7 @@ public class JarResolver {
      */
     public String findJarOnline(String pck) {
         String urlFindjarClass = props.getProperty(KEY_FINDJAR_CLASS, "https://findjar.com/class/");
-        int timeout = Util.trY(() -> Integer.valueOf(props.getProperty(KEY_FINDJAR_TIMEOUT, "10000")));
+        int timeout = Util.trY(() -> Integer.valueOf(props.getProperty(KEY_FINDJAR_TIMEOUT, "20000")));
         String content = NetUtil.get(urlFindjarClass + pck.replace(".", "/"), timeout);
         //try to use that jar file where the a part of the package name could be found
         String jarName = null;
@@ -462,6 +474,59 @@ public class JarResolver {
     }
 
     /**
+     * tries to find the given package name through jar-downloads.com
+     */
+    public String findJarDownload(String pck) {
+        String urlFindjarClass = props.getProperty(KEY_JARDOWNLOAD_CLASS, "https://jar-download.com/maven-repository-class-search.php?search_box=");
+        int timeout = Util.trY(() -> Integer.valueOf(props.getProperty(KEY_JARDOWNLOAD_TIMEOUT, "10000")));
+        String content = NetUtil.get(urlFindjarClass + pck, timeout);
+        //try to use that jar file where the a part of the package name could be found
+        int i = 0;
+        Map<String, String> mvndeps = new HashMap<>();
+        while ((i = putNextMvnPath(content, i, mvndeps)) != -1)
+        	;
+        String mvnpath = getBestMatch(pck, mvndeps);
+        LOG.info("jar-download.com found '" + mvnpath + "' for class " + pck);
+        return Util.isEmpty(mvnpath) ? null : mvnpath;
+    }
+
+	private String getBestMatch(String pck, Map<String, String> mvndeps) {
+		String file = ENV.getConfigPath() + "jar-download-findings-info.properties";
+		Properties p = FileUtil.loadPropertiesFromFile(file);
+		if (p == null)
+			p = new Properties();
+		String match = null;
+		int i = 0;
+		String pckKey = "PACKAGE." + StringUtil.substring(pck, null, ".", true);
+		for (Map.Entry<String, String> e : mvndeps.entrySet()) {
+			String key = e.getKey();
+			String val = e.getValue();
+			if (pck.contains(key)) {
+				if (match == null || key.length() > match.length())
+					match = key;
+			}
+			p.put(pckKey + "." + ++i, val);
+		}
+		FileUtil.saveProperties(file, p);
+		return match != null ? mvndeps.get(match) : mvndeps.size() > 0 ? mvndeps.values().iterator().next() : null;
+	}
+
+	private int putNextMvnPath(String content, int i, Map<String, String> mvndeps) {
+		String groupId = getByTag(content, "groupId", i);
+		if (groupId == null)
+			return -1;
+        String artifactId = getByTag(content, "artifactId", i);
+        String version = getByTag(content, "version", i);
+        String mvnpath = groupId + "/" + artifactId + ":" + version;
+        mvndeps.put(groupId, mvnpath);
+		return content.indexOf(version, i) + version.length();
+	}
+
+	private String getByTag(String content, String tagName, int i) {
+		return StringUtil.substring(content, "&lt;" + tagName + "&gt;", "&lt;", i, true);
+	}
+
+    /**
      * UNUSED YET! ...is there any usecase?...
      * <p/>
      * tries to find a class for the given package name through www.findjars.com.
@@ -470,7 +535,7 @@ public class JarResolver {
      * @return full class name or null
      */
     public String findClassOnline(String pck) {
-        String urlFindjar = props.getProperty(KEY_FINDJAR_INDEX, "http://findjar.com/index.x?query=");
+        String urlFindjar = props.getProperty(KEY_FINDJAR_INDEX, "https://findjar.com/index.x?query=");
         String content = NetUtil.get(urlFindjar + toURIParameter(pck));
         String jarName = StringUtil.extract(content, "[a-zA-Z0-9_.-]+\\.jar");
         return Util.isEmpty(jarName) ? null : jarName;

@@ -17,7 +17,7 @@ import de.tsl2.nano.core.util.CollectionUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.script.PersistenceTool;
+import de.tsl2.nano.persistence.SQLQuery;
 
 /**
  * Reads data lines from a given flat or CSV file to give each line to a worker
@@ -210,7 +210,7 @@ class Worker implements Runnable {
 	String id;
 	String action;
 	Object[] actionParameter;
-	PersistenceTool p;
+	SQLQuery p;
 
 	public Worker(ActionType type, String expression, String id, String action, Object... actionParameter) {
 		this.type = type;
@@ -235,7 +235,7 @@ class Worker implements Runnable {
 		return pars.toArray();
 	}
 
-	Worker with(PersistenceTool p) {
+	Worker with(SQLQuery p) {
 		this.p = p;
 		return this;
 	}
@@ -276,7 +276,7 @@ class Worker implements Runnable {
 	}
 
 	private Object runSQL(String cmd) {
-		PersistenceTool pt = new PersistenceTool(PERSISTENCEUNIT);
+		SQLQuery pt = new SQLQuery(PERSISTENCEUNIT);
 		if (!Boolean.getBoolean(DRYRUN))
 			return pt.execute(cmd, actionParameter);
 		return "<-- DRYRUN";

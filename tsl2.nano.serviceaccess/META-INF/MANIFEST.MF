@@ -5,6 +5,7 @@ Created-By: Thomas Schneider
 Main-Class: de.tsl2.nano.core.AppLoader
 Main-Arguments: de.tsl2.nano.execution.ScriptUtil ant shell.xml
 Class-Path: 
+ tsl2.nano.core-2.4.11.jar
  commons-collections-3.2.1.jar 
  commons-logging-1.1.1.jar 
  velocity-1.6-dep.jar 

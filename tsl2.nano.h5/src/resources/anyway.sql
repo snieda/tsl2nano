@@ -1,14 +1,15 @@
 -- Anyway database - generic database for several use cases (Thomas Schneider / 2012)
 -- ADMIN tables are in anyway-admin.sql
 -- SQL-92 (Transformation: BLOB --> LONGVARBINARY)
--- quote all names:(^[ \t]+(CONSTRAINT)?| TABLE| COLUMN| INDEX| KEY |REFERENCES \w+)(\s*\(?)(\w+)([ \t]+|\))   -> \1\3"\4\"\5
+-- quote all names:(^[ \t]+(CONSTRAINT|ON)?| TABLE| COLUMN| INDEX| KEY |REFERENCES \w+)([\s\(]*)([\w.]+)([ \t]*|\))   -> $1$3"$4"$5
+-- the quoting does not work in eclipse, there is a replace failure on group 4
 
 CREATE TABLE Account (
                 id INTEGER NOT NULL,
                 name VARCHAR(64) NOT NULL,
                 bic VARCHAR(12) NOT NULL,
                 iban VARCHAR(22) NOT NULL,
-                CONSTRAINTCONSTRAINT"id" PRIMARYKEY(id)
+                CONSTRAINT id PRIMARY KEY (id)
 );
 
 
@@ -151,7 +152,7 @@ CREATE TABLE Party (
 );
 COMMENT ON TABLE Party IS 'may be a person, client, reservation item like a restaurant table etc.';
 
-CREATE TABLE MISSION (
+CREATE TABLE Mission (
                 id INTEGER NOT NULL,
                 name VARCHAR(64) NOT NULL,
                 description VARCHAR(256),
@@ -370,7 +371,7 @@ ON UPDATE NO ACTION
 
 ALTER TABLE Party ADD CONSTRAINT Party_Mission_fk
 FOREIGN KEY (mission)
-REFERENCES mission (id)
+REFERENCES Mission (id)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 -- NOT DEFERRABLE

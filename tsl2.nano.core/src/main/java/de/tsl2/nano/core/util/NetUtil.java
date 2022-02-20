@@ -181,7 +181,8 @@ public class NetUtil {
             URLConnection con = url(strUrl).openConnection();
         	con.setConnectTimeout(timeout);
         	con.setReadTimeout(timeout);
-			String response = String.valueOf(FileUtil.getFileData(con.getInputStream(), null));
+        	con.setRequestProperty ( "User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0" );
+			String response = String.valueOf(FileUtil.getFileData(con.getInputStream(), null, false));
             if (LOG.isDebugEnabled()) {
                 LOG.debug("response: " + StringUtil.toString(response, 100));
             }
@@ -330,17 +331,18 @@ public class NetUtil {
      * @return URL object through surl
      */
     public static final URL url(String surl, String parent) {
+    	String protocol = System.getProperty("tsl2nano.netutil.default.protocol", "https") + ":";
         URI uri = URI.create(surl);
         try {
             if (surl.startsWith("//")) {
-                return new URL("http:" + surl);
+                return new URL(protocol + surl);
             }
             if (uri.getScheme() == null) {
                 if (parent == null || uri.getHost() != null) {
-                    parent = "http://";
+                    parent = protocol + "//";
                 } else {
                     if (URI.create(parent).getScheme() == null) {
-                        parent = "http://" + parent;
+                        parent = protocol + "//" + parent;
                     }
                 }
                 if (parent.endsWith("/") && surl.startsWith("/")) {

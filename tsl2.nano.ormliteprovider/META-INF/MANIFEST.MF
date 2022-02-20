@@ -4,11 +4,13 @@ Ant-Version: Apache Ant 1.7.1
 Created-By: Thomas Schneider
 Main-Class: de.tsl2.nano.core.AppLoader
 Main-Arguments: de.tsl2.nano.execution.ScriptUtil ant shell.xml
-Class-Path: tsl2.nano.common.1.1.2.jar 
+Class-Path: tsl2.nano.core-2.4.11.jar
+ tsl2.nano.common-2.4.11.jar 
  tsl2.nano.serviceaccess.1.0.2.jar 
  tsl2.nano.directaccess.0.0.5.jar 
  tsl2.nano.incubation.0.5.1.jar 
- ant.jar ant-launcher.jar 
+ ant.jar 
+ ant-launcher.jar 
  ant-nodeps.jar
  ormlite-core-4.48.jar
  ormlite-jdbc-4.48.jar

@@ -757,20 +757,24 @@ public class FileUtil {
         }
     }
 
+    public static synchronized char[] getFileData(InputStream stream, String encoding) {
+    	return getFileData(stream, encoding, true);
+    }
     /**
      * getFileData
      * 
      * @param strFile
      * @param encoding (optional)
+     * @param readAvailableBlock if true (normally on reading files) uses stream.available(). Otherwise (on streams like url content) each singular byte will be read.
      * @return content
      */
-    public static synchronized char[] getFileData(InputStream stream, String encoding) {
+    public static synchronized char[] getFileData(InputStream stream, String encoding, boolean readAvailableBlock) {
         InputStreamReader file = null;
         char[] data = null;
         try {
             file = encoding != null ? new InputStreamReader(stream, encoding) : new InputStreamReader(stream);
 
-            final int length = stream.available();
+            final int length = readAvailableBlock ? stream.available() : 0;
             if (length > 0) { //TODO: do we need that? readBytes is not enough?
 	            data = new char[length];
 	            int len = file.read(data);

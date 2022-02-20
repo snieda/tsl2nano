@@ -1,4 +1,4 @@
-package de.tsl2.nano.script;
+package de.tsl2.nano.persistence;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -14,25 +14,27 @@ import javax.transaction.HeuristicRollbackException;
 import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
 
+import de.tsl2.nano.core.util.ObjectUtil;
+
 
 /**
- * provides some convenience for persistence entitymanager with native queries
+ * provides some convenience for a persistence with an entitymanager with native queries
  * and executions. In a JTA context you have to give a sessioncontext.
  * <p/>
  *
  * NOTE: method {@link #get(Class, String, Object...)} works not with native
- * query!
+ * query! Use {@link #select(String, Object...)} instead.
  *
- * @author E_Schneider.Thomas
+ * @author Thomas Schneider
  */
-public class PersistenceTool {
-	private static final Logger LOG = Logger.getLogger(PersistenceTool.class.getSimpleName());
+public class SQLQuery {
+	private static final Logger LOG = Logger.getLogger(SQLQuery.class.getSimpleName());
 	/** em.getTransaction() only usable on transaction resource local */
 	private EntityManager em;
 	/** in JTA context this has to be given to use transactions */
 	private SessionContext sessionContext;
 
-	public PersistenceTool(String persistenceUnitName) {
+	public SQLQuery(String persistenceUnitName) {
 		this(Persistence.createEntityManagerFactory(persistenceUnitName).createEntityManager());
 	}
 
@@ -40,12 +42,12 @@ public class PersistenceTool {
 	 * in a container with JTA context you have to give the @Resource SessionContext
 	 * to get the UserTransaction
 	 */
-	public PersistenceTool(EntityManager em, SessionContext sessionContext) {
+	public SQLQuery(EntityManager em, SessionContext sessionContext) {
 		this(em);
 		this.sessionContext = sessionContext;
 	}
 
-	public PersistenceTool(EntityManager em) {
+	public SQLQuery(EntityManager em) {
 		this.em = em;
 	}
 
@@ -55,7 +57,12 @@ public class PersistenceTool {
 
 	public void close() {
 		if (em != null && em.isOpen()) {
-			em.close();
+			if (em != null) {
+				if (em.getEntityManagerFactory().isOpen())
+				em.getEntityManagerFactory().close();
+				if (em.isOpen())
+							em.close();
+			}
 		}
 	}
 
@@ -66,7 +73,7 @@ public class PersistenceTool {
 
 	public List<?> select(String stmt, Object... args) {
 		Query query = em.createNativeQuery(stmt);
-		return withParameters(query, args).getResultList();
+		return print(withParameters(query, args).getResultList());
 	}
 
 	public <T> Query query(Class<T> model, String constraints, Object... args) {
@@ -77,7 +84,7 @@ public class PersistenceTool {
 	@SuppressWarnings("unchecked")
 	public <T> List<T> get(Class<T> model, String constraints, Object... args) {
 		Query query = em.createQuery("select t from " + model.getSimpleName() + " t " + constraints);
-		return withParameters(query, args).getResultList();
+		return print(withParameters(query, args).getResultList());
 	}
 
 	public int getCount(Class<?> model, String constraints, Object... args) {
@@ -87,7 +94,7 @@ public class PersistenceTool {
 	public int getInt(String select, Object... args) {
 		Query query = em.createNativeQuery(select);
 		Object result = withParameters(query, args).getSingleResult();
-		log("\t => result: " + result);
+		print(result);
 		return result != null ? ((Number) result).intValue() : Integer.MIN_VALUE;
 	}
 
@@ -118,13 +125,13 @@ public class PersistenceTool {
 	public <T> T withTransaction(Supplier<T> s) {
 		try {
 			if (getTransaction().getStatus() == 0) // -> Active
-				PersistenceTool.log("transaction already active: " + getTransaction() + " => " + s);
+				SQLQuery.log("transaction already active: " + getTransaction() + " => " + s);
 			else {
 				getTransaction().begin();
 				log("transaction begin => " + s);
 			}
 			T result = s.get();
-			log("\t=> result: " + result);
+			print(result);
 			getTransaction().commit();
 			log("<= transaction commit");
 			return result;
@@ -136,12 +143,11 @@ public class PersistenceTool {
 		}
 	}
 
-	<T> T print(T result) {
-		log("\t=> rows: " + result);
+	public static <T> T print(T result) {
+		ObjectUtil.print(result);
 		return result;
-	}
-
-	static void log(Object msg) {
+		}
+			static void log(Object msg) {
 		LOG.info(msg.toString());// System.out.println(msg);
 	}
 }
