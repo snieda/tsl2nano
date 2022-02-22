@@ -81,18 +81,22 @@ public class FieldUtil extends ByteUtil {
 	}
 
 	public static <T> T print(T result) {
-		return print("\t=> result: ", result, System.out);
+		return print("\t=> result: ", result, null, System.out);
 	}
 
-	public static <T> T print(String prefix, T obj, PrintStream ps) {
+	public static <T> T print(String title, T result, String[] header) {
+		return print(title, result, header, System.out);
+	}
+
+	public static <T> T print(String title, T obj, String[] header, PrintStream ps) {
 		if (!ObjectUtil.isEmpty(obj) && obj.getClass().isArray()) {
 			new ObjectPrinter((Object[][]) obj).print(ps);
 		} else if (!ObjectUtil.isEmpty(obj) && obj instanceof Collection) {
 			Object row0 = ((Collection) obj).iterator().next();
-			String[] header = row0.getClass().isArray() ? null : ObjectUtil.getFieldNames(row0.getClass());
-			new ObjectPrinter(ObjectUtil.toObjectArrays((Collection) obj), header).print(System.out);
+			header = header != null ? header : row0.getClass().isArray() ? null : ObjectUtil.getFieldNames(row0.getClass());
+			new ObjectPrinter(title, ObjectUtil.toObjectArrays((Collection) obj), header).print(System.out);
 		} else
-			ps.append(prefix + obj);
+			ps.append(title + obj);
 		return obj;
 	}
 }
@@ -102,26 +106,28 @@ class ObjectPrinter {
 	private static final char LINE = '-';
 	private static final String SLINE = String.valueOf(LINE);
 	private static final String DEFAULT_DELIMITER = "|";
+	String title;
 	String[] header;
 	Object[][] rows;
-	String[] footer;
+	String[] frame;
 	private String leftDelimiter;
 	private String rightDelimiter;
 	private int[] colsizes;
 	int MAX_WIDTH = Integer.valueOf(System.getProperty("fscdimport.printer.maxwidth", "60"));
 
 	public ObjectPrinter(Object[][] rows) {
-		this(rows, null);
+		this(null, rows, null);
 	}
 
-	public ObjectPrinter(Object[][] rows, String[] header) {
-		this(rows, header, DEFAULT_DELIMITER, DEFAULT_DELIMITER + "\n");
+	public ObjectPrinter(String title, Object[][] rows, String[] header) {
+		this(title, rows, header, DEFAULT_DELIMITER, DEFAULT_DELIMITER + "\n");
 	}
 
-	public ObjectPrinter(Object[][] rows, String[] header, String leftDelimiter, String rightDelimiter) {
+	public ObjectPrinter(String title, Object[][] rows, String[] header, String leftDelimiter, String rightDelimiter) {
+		this.title = title;
 		this.rows = rows;
 		this.header = evalHeader(header, rows);
-		this.footer = evalFooter();
+		this.frame = evalFooter();
 		this.leftDelimiter = leftDelimiter;
 		this.rightDelimiter = rightDelimiter;
 	}
@@ -148,11 +154,11 @@ class ObjectPrinter {
 	}
 
 	void print(PrintStream ps) {
-		ps.append('\n');
+		ps.append("\n" + (title != null ? title + "\n" : ""));
 		print(ps, new Object[][] { header }, SPACE);
-		print(ps, new Object[][] { footer }, LINE);
+		print(ps, new Object[][] { frame }, LINE);
 		print(ps, rows, SPACE);
-		print(ps, new Object[][] { footer }, LINE);
+		print(ps, new Object[][] { frame }, LINE);
 	}
 
 	void print(PrintStream ps, Object[][] rows, char fillchar) {

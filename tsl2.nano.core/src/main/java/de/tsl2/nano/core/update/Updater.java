@@ -9,7 +9,6 @@
  */
 package de.tsl2.nano.core.update;
 
-import java.io.File;
 import java.util.Date;
 
 import de.tsl2.nano.core.ENV;

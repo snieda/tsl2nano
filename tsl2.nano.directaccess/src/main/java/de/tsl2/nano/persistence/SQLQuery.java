@@ -15,6 +15,7 @@ import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
 
 import de.tsl2.nano.core.util.ObjectUtil;
+import de.tsl2.nano.core.util.StringUtil;
 
 
 /**
@@ -59,21 +60,21 @@ public class SQLQuery {
 		if (em != null && em.isOpen()) {
 			if (em != null) {
 				if (em.getEntityManagerFactory().isOpen())
-				em.getEntityManagerFactory().close();
+					em.getEntityManagerFactory().close();
 				if (em.isOpen())
-							em.close();
+					em.close();
 			}
 		}
 	}
 
 	public int execute(String stmt, Object... args) {
 		Query query = em.createNativeQuery(stmt);
-		return withTransaction(() -> /* print( */withParameters(query, args).executeUpdate()/* ) */);
+		return withTransaction(() -> withParameters(query, args).executeUpdate());
 	}
 
 	public List<?> select(String stmt, Object... args) {
 		Query query = em.createNativeQuery(stmt);
-		return print(withParameters(query, args).getResultList());
+		return print(stmt, withParameters(query, args).getResultList());
 	}
 
 	public <T> Query query(Class<T> model, String constraints, Object... args) {
@@ -83,10 +84,11 @@ public class SQLQuery {
 
 	@SuppressWarnings("unchecked")
 	public <T> List<T> get(Class<T> model, String constraints, Object... args) {
-		Query query = em.createQuery("select t from " + model.getSimpleName() + " t " + constraints);
-		return print(withParameters(query, args).getResultList());
+		String stmt = "select t from " + model.getSimpleName() + " t " + constraints;
+		Query query = em.createQuery(stmt);
+		return print(stmt, withParameters(query, args).getResultList());
 	}
-
+	
 	public int getCount(Class<?> model, String constraints, Object... args) {
 		return getInt("select count(*) from " + model.getSimpleName() + " " + constraints, args);
 	}
@@ -94,7 +96,7 @@ public class SQLQuery {
 	public int getInt(String select, Object... args) {
 		Query query = em.createNativeQuery(select);
 		Object result = withParameters(query, args).getSingleResult();
-		print(result);
+		print(select, result);
 		return result != null ? ((Number) result).intValue() : Integer.MIN_VALUE;
 	}
 
@@ -131,7 +133,7 @@ public class SQLQuery {
 				log("transaction begin => " + s);
 			}
 			T result = s.get();
-			print(result);
+			print("", result);
 			getTransaction().commit();
 			log("<= transaction commit");
 			return result;
@@ -143,11 +145,24 @@ public class SQLQuery {
 		}
 	}
 
-	public static <T> T print(T result) {
-		ObjectUtil.print(result);
+	public static <T> T print(String stmt, T result) {
+		ObjectUtil.print(getTitle(stmt, result), result, getHeader(stmt));
 		return result;
-		}
-			static void log(Object msg) {
+	}
+
+	private static String[] getHeader(String stmt) {
+		if (!stmt.toLowerCase().contains("select "))
+			return null;
+		String select = StringUtil.substring(stmt, "select ", " from", 0);
+		return select == null || select.length() < 2 || select.contains("*") ? null : select.split("[,]");
+	}
+
+	private static String getTitle(String stmt, Object result) {
+		return result instanceof Number || !stmt.toLowerCase().contains("from ") ? "\t=> result: "
+				: StringUtil.substring(stmt, "from ", " ", 0);
+	}
+
+	static void log(Object msg) {
 		LOG.info(msg.toString());// System.out.println(msg);
 	}
 }

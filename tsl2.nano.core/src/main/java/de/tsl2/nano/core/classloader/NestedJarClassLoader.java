@@ -112,7 +112,11 @@ public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
         try {
             return super.findClass(name);
         } catch (ClassNotFoundException e) {
-            return findClassInNestedJar(name);
+        	try {
+        		return findClassInNestedJar(name);
+        	} catch (ClassNotFoundException e1) {
+        		return getSystemClassLoader().loadClass(name);
+        	}
         } catch (NoClassDefFoundError e) {
             return null;
         } catch (NullPointerException e) {

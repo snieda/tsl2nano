@@ -40,7 +40,6 @@ CREATE SCHEMA ${jdbc.scheme} AUTHORIZATION DBA;
 SET SCHEMA ${jdbc.scheme};
 commit;
 SET NON_KEYWORDS;
-SET MODE ORACLE;
 -- following lines are hsqldb compatibility modes:
 -- SET DATABASE SQL SYNTAX DB2 TRUE;
 -- SET DATABASE SQL SYNTAX MYS TRUE;

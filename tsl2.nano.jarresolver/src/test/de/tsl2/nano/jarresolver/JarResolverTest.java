@@ -137,7 +137,7 @@ public class JarResolverTest   implements ENVTestPreparation {
 				String mvnpath = new JarResolver(BASE_DIR_JARRESOLVER).findJarDownload("org.java_websocket.WrappedByteChannel");
 				LOG.info("mvn-path: " + mvnpath);
 				assertTrue(mvnpath != null);
-				assertEquals("org.java-websocket/Java-WebSocket", StringUtil.substring(mvnpath, null, ":"));
+				assertEquals("org.java-websocket:Java-WebSocket", StringUtil.substring(mvnpath, null, ":", true));
 			} catch (Exception e) {
 				if (e.toString().matches(".*HTTP response.*50[023].*"))
 					System.out.println(e.toString()); //OK, Problem on server side...

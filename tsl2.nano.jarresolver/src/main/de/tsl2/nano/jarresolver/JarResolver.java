@@ -74,7 +74,7 @@ public class JarResolver {
     String mvnRoot;
     String basedir;
 
-    Properties pckMvnDeps = new Properties();
+    static Properties pckMvnDeps = null;
     /*
      * for a description of these constants, see jarresolver.properties
      */
@@ -103,6 +103,9 @@ public class JarResolver {
 
     private static final String KEY_JARDOWNLOAD_CLASS = "jardownload.class";
     private static final String KEY_JARDOWNLOAD_TIMEOUT = "jardownload.timeout";
+
+    private static final String KEY_MVNSEARCH_CLASS = "mvnsearch.class";
+    private static final String KEY_MVNSEARCH_TIMEOUT = "mvnsearch.timeout";
 
     public JarResolver() {
         this(null);
@@ -232,11 +235,18 @@ public class JarResolver {
                 if (groupId == null) {
                     //if artifactId is a class-name itself, try to extract the third part of the package (org.company.product....)
                     if (BeanClass.isPublicClassName(artifactId)) {
-                        if (Boolean.valueOf(props.getProperty("use.jar-download.on.unknown", "true"))) {
+                        if (groupId == null && Boolean.valueOf(props.getProperty("use.mvn-search.on.unknown", "true"))) {
+                            String mvnpath = findMvnSearch(artifactId);
+                            if (mvnpath != null) {
+                                groupId = StringUtil.substring(mvnpath, null, ":");
+                                artifactId = StringUtil.substring(mvnpath, ":", ":");
+                            }
+                        }
+                        if (groupId == null && Boolean.valueOf(props.getProperty("use.jar-download.on.unknown", "true"))) {
                             String mvnpath = findJarDownload(artifactId);
                             if (mvnpath != null) {
-                                groupId = StringUtil.substring(mvnpath, null, "/");
-                                artifactId = StringUtil.substring(mvnpath, "/", ":");
+                                groupId = StringUtil.substring(mvnpath, null, ":");
+                                artifactId = StringUtil.substring(mvnpath, ":", ":");
                             }
                         }
                         if (groupId == null && Boolean.valueOf(props.getProperty("use.findjar.on.unknown", "true"))) {
@@ -474,6 +484,22 @@ public class JarResolver {
     }
 
     /**
+     * tries to find the given package name through search.maven.org
+     */
+    public String findMvnSearch(String pck) {
+        String urlFindjarClass = props.getProperty(KEY_MVNSEARCH_CLASS, "https://search.maven.org/solrsearch/select?rows=100&wt=xml&q=fc:");
+        int timeout = Util.trY(() -> Integer.valueOf(props.getProperty(KEY_MVNSEARCH_TIMEOUT, "10000")));
+        String content = NetUtil.get(urlFindjarClass + pck, timeout);
+        //try to use that jar file where the a part of the package name could be found
+        int i = 0;
+        Map<String, String> mvndeps = new HashMap<>();
+        while ((i = putNextMvnSearchMvnPath(content, i, mvndeps)) != -1)
+        	;
+        String mvnpath = getBestMatch(pck, mvndeps);
+        LOG.info("search.mvn.org found '" + mvnpath + "' for class " + pck);
+        return Util.isEmpty(mvnpath) ? null : mvnpath;
+    }
+    /**
      * tries to find the given package name through jar-downloads.com
      */
     public String findJarDownload(String pck) {
@@ -483,18 +509,15 @@ public class JarResolver {
         //try to use that jar file where the a part of the package name could be found
         int i = 0;
         Map<String, String> mvndeps = new HashMap<>();
-        while ((i = putNextMvnPath(content, i, mvndeps)) != -1)
+        while ((i = putNextJarDownloadMvnPath(content, i, mvndeps)) != -1)
         	;
         String mvnpath = getBestMatch(pck, mvndeps);
         LOG.info("jar-download.com found '" + mvnpath + "' for class " + pck);
         return Util.isEmpty(mvnpath) ? null : mvnpath;
     }
-
+    
 	private String getBestMatch(String pck, Map<String, String> mvndeps) {
-		String file = ENV.getConfigPath() + "jar-download-findings-info.properties";
-		Properties p = FileUtil.loadPropertiesFromFile(file);
-		if (p == null)
-			p = new Properties();
+		Properties p = getMvnPaths();
 		String match = null;
 		int i = 0;
 		String pckKey = "PACKAGE." + StringUtil.substring(pck, null, ".", true);
@@ -507,17 +530,25 @@ public class JarResolver {
 			}
 			p.put(pckKey + "." + ++i, val);
 		}
-		FileUtil.saveProperties(file, p);
+		FileUtil.saveProperties(getMvnPathsFile(), p);
 		return match != null ? mvndeps.get(match) : mvndeps.size() > 0 ? mvndeps.values().iterator().next() : null;
 	}
 
-	private int putNextMvnPath(String content, int i, Map<String, String> mvndeps) {
+	private int putNextMvnSearchMvnPath(String content, int i, Map<String, String> mvndeps) {
+		String mvnpath = StringUtil.substring(content, "<str name=\"id\">", "<", i, true);
+		if (mvnpath == null)
+			return -1;
+        mvndeps.put(StringUtil.substring(mvnpath, null, ":"), mvnpath);
+		return content.indexOf(mvnpath, i) + mvnpath.length();
+	}
+
+	private int putNextJarDownloadMvnPath(String content, int i, Map<String, String> mvndeps) {
 		String groupId = getByTag(content, "groupId", i);
 		if (groupId == null)
 			return -1;
         String artifactId = getByTag(content, "artifactId", i);
         String version = getByTag(content, "version", i);
-        String mvnpath = groupId + "/" + artifactId + ":" + version;
+        String mvnpath = groupId + ":" + artifactId + ":" + version;
         mvndeps.put(groupId, mvnpath);
 		return content.indexOf(version, i) + version.length();
 	}
@@ -526,6 +557,18 @@ public class JarResolver {
 		return StringUtil.substring(content, "&lt;" + tagName + "&gt;", "&lt;", i, true);
 	}
 
+	private Properties getMvnPaths() {
+		if (pckMvnDeps == null) {
+			pckMvnDeps = FileUtil.loadPropertiesFromFile(getMvnPathsFile());
+			if (pckMvnDeps == null)
+				pckMvnDeps = new Properties();
+		}
+		return pckMvnDeps;
+	}
+
+	private String getMvnPathsFile() {
+		return ENV.getConfigPath() + "mvn-search-findings-info.properties";
+	}
     /**
      * UNUSED YET! ...is there any usecase?...
      * <p/>
