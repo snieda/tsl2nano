@@ -524,7 +524,7 @@ public class JarResolver {
 		for (Map.Entry<String, String> e : mvndeps.entrySet()) {
 			String key = e.getKey();
 			String val = e.getValue();
-			if (pck.contains(key)) {
+			if (pck.replace('_', '-').contains(key)) {
 				if (match == null || key.length() > match.length())
 					match = key;
 			}
