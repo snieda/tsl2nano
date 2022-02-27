@@ -4393,8 +4393,8 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.4.7  | 24.05.2021 | NEW: autotest as unit test creator, vnet(neuron)+terminal extensions, beanvalues respecting arrays/primitive-arrays and all different number type formattings
  2.4.8  | 01.08.2021 | autotest enhanced with lots of features, NEW: IPreferences as environment enum, NEW: translation of attribute values (through manual messages entry)
  2.4.9  | 12.12.2021 | NEW: core Flow and specification Task (usable as workflow with gravito presentation), FlatBeanReader, FieldUtil, subRegex, checkHash, fix: formatters on runtime, progressbar, gitlab-ci build/tests
- 2.4.10 | 09.01.2022 | FlatBeanReader extended, security fixes
- 2.4.11 | 13.02.2022 | NEW: ExcelWorker, html-dialog fix ("Yes" -> true), timemout on findjars
+ 2.4.10 | 09.01.2022 | FlatBeanReader extended, security fixes (log4j etc.)
+ 2.4.11 | 06.03.2022 | NEW: ExcelWorker, html-dialog fix ("Yes" -> true), timemout on findjars, NEW: search.mvn.org, jardownload.com, fix: page clear on submit
  2.5.0  | xx.xx.2022 | see EnvUpdate2v5v0: refactorings: serialization of actions with primitive attributes, move incubation packages
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
@@ -5497,4 +5497,5 @@ deploy:
 	* [!] ormliteprovider EntityManagerTest problem on 'DELETE FROM Adress where id = ?'
 		-> Data conversion error converting "JAVA_OBJECT to CHARACTER VARYING"
 	* [v] *workaround*: don't start h2 web-interface, but if you do, don't set "-webAllowOthers"
+* using tsl2nano h5 as virgin jar: h2-2.1.210.jar uses as tabletype "BASE TABLE" instead of "TABLE". At least hibernate-core-5.6.5.Final.jar is able to work with this h2 version.
 
