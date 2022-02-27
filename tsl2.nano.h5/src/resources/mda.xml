@@ -38,6 +38,7 @@ GRANT DBA to ${jdbc.username};
 commit;
 CREATE SCHEMA ${jdbc.scheme} AUTHORIZATION DBA;
 SET SCHEMA ${jdbc.scheme};
+GRANT ALL ON SCHEMA PUBLIC TO ${jdbc.username};
 commit;
 SET NON_KEYWORDS;
 -- following lines are hsqldb compatibility modes:

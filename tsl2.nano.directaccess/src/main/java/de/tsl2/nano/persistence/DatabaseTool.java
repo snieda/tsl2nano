@@ -69,6 +69,12 @@ public class DatabaseTool {
                 if (BeanContainer.isInitialized()) {
                 	Persistence persistence = Persistence.current();
                     EMessage.broadcast(this, "APPLICATION SHUTDOWN INITIALIZED...", "*");
+                    
+                    String scriptFile = ENV.get("app.backup.statement.file", "db-backup.sql");
+                    String backupScript = ENV.get("app.backup.statement", "SCRIPT TO '<FILE>'");
+                    if (backupScript != null)
+                    	BeanContainer.instance().executeStmt(backupScript.replace("<FILE>", FileUtil.getUniqueFileName(ENV.getTempPath() + scriptFile)), true, null);
+    			    
                     shutdownDBServer();
 //                    shutdownDatabase(); //doppelt gemoppelt hält besser ;-)
                     String hsqldbScript = isH2(persistence.getConnectionUrl())

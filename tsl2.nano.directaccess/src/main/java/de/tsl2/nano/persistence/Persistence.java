@@ -389,7 +389,8 @@ public class Persistence implements Serializable, Cloneable {
         put(prop, "hibernate.connection.username", getConnectionUserName());
         put(prop, "hibernate.connection.password", getConnectionPassword());
         put(prop, "hibernate.default_schema", getDefaultSchema());
-
+        put(prop, "hibernate.hbm2dll.extra_physical_table_types", "TABLE,BASE TABLE");
+        
         //WORKAROUND FOR OPENJPA REVERSE ENGENINEERING
         put(prop, "openjpa.provider", "org.apache.openjpa.persistence.PersistenceProviderImpl");
 
