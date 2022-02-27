@@ -273,8 +273,12 @@ function fade(btn) {
 
 function disablePage(e) {
 	e = e || window.event;
-	gp = document.getElementById('glasspane');    
-	gp.style.display='none';
+
+  var all = document.querySelectorAll("#container select, #container input, #container textarea, #container button");
+  for (let el of all) { el.disabled = true; }
+
+//	gp = document.getElementById('glasspane');    
+//	gp.style.display='none';
 //	e.stopPropagation();
 }
 
