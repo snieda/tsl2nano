@@ -5497,5 +5497,8 @@ deploy:
 	* [!] ormliteprovider EntityManagerTest problem on 'DELETE FROM Adress where id = ?'
 		-> Data conversion error converting "JAVA_OBJECT to CHARACTER VARYING"
 	* [v] *workaround*: don't start h2 web-interface, but if you do, don't set "-webAllowOthers"
+	* [ ] H2 Version 2: anyway: the fields "value" and "end" must be quoted! But standard queries without quotes wont be correct after that change
+	
 * using tsl2nano h5 as virgin jar: h2-2.1.210.jar uses as tabletype "BASE TABLE" instead of "TABLE". At least hibernate-core-5.6.5.Final.jar is able to work with this h2 version.
+* hbm2doc not working anymore...
 

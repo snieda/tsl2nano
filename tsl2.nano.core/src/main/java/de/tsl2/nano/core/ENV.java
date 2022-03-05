@@ -911,7 +911,7 @@ public class ENV implements Serializable {
      */
     public static final void saveBackup(String environmentFile) {
         FileUtil.copy(getConfigPath() + environmentFile,
-            getTempPath() + environmentFile + "." + System.currentTimeMillis());
+            getTempPath() + FileUtil.getUniqueFileName(environmentFile));
     }
 
     /**

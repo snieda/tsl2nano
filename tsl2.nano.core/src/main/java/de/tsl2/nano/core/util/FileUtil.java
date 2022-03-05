@@ -39,12 +39,12 @@ import java.io.Serializable;
 import java.io.Writer;
 import java.net.URI;
 import java.net.URL;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -57,7 +57,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.autotest.creator.InverseFunction;
@@ -976,10 +975,10 @@ public class FileUtil {
             if (fileName.endsWith(File.separator) || fileName.endsWith("/")) {
                 fileName = fileName.substring(0, fileName.length() - 1);
             }
-            final File bakFile = userDirFile(fileName + (multiple ? DateUtil.getFormattedTimeStamp() : "") + ".bak");
+            final File bakFile = userDirFile(fileName + (multiple ? DateUtil.getFormattedTimeStamp() : "") + backupExtension);
             if (!multiple && bakFile.exists() && bakFile.canWrite()) {
                 if (!bakFile.delete()) {
-                    LOG.warn("couldn't delete bak file:" + bakFile.getPath());
+                    LOG.warn("couldn't delete backup file:" + bakFile.getPath());
                 }
             }
             if (f.renameTo(bakFile)) {
@@ -1059,7 +1058,7 @@ public class FileUtil {
      */
     public static void encodeBase64(String fileName) {
         byte[] bytes = getFileBytes(fileName, null);
-        byte[] base64 = Base64.encodeBase64(bytes);
+        byte[] base64 = Base64.getEncoder().encode(bytes);
         writeBytes(base64, fileName + ".base64", false);
     }
 
@@ -1070,7 +1069,7 @@ public class FileUtil {
      */
     public static void decodeBase64(String fileName) {
         byte[] bytes = getFileBytes(fileName, null);
-        byte[] base64 = Base64.decodeBase64(bytes);
+        byte[] base64 = Base64.getDecoder().decode(bytes);
         writeBytes(base64, fileName + ".base64decoded", false);
     }
 

@@ -1,6 +1,9 @@
 -- Anyway database - generic database for several use cases (Thomas Schneider / 2012)
 -- ADMIN tables are in anyway-admin.sql
 -- SQL-92 (Transformation: BLOB --> LONGVARBINARY)
+
+-- H2 Version 1: quoting fields seems not to work!
+-- H2 Version 2: the fields "value" and "end" must be quoted! But standard queries without quotes wont be correct after that change
 -- quote all names:(^[ \t]+(CONSTRAINT|ON)?| TABLE| COLUMN| INDEX| KEY |REFERENCES \w+)([\s\(]*)([\w.]+)([ \t]*|\))   -> $1$3"$4"$5
 -- the quoting does not work in eclipse, there is a replace failure on group 4
 
