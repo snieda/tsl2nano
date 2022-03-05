@@ -16,9 +16,11 @@ if "%3"=="ndebug" (set NANO_DEBUG=-Dtsl2.nano.log.level=debug)
 if "%3"=="test" (set NANO_TEST=-Dtsl2.nano.test=true)
 if "%3"=="nopause" (set NOPAUSE=nopause)
 if "%4"=="move" (mv %PRJ% %PRJ%~)
+
 set NAME=${project.artifactId}
 set VERSION=${project.version}
 set EXTENSION=-standalone
+if %$EXTENSION% != "-virgin" (set OFFLINE=-Dtsl2nano.offline=true)
 set OFFLINE=-Dtsl2nano.offline=true
 rem set UH=-Denv.user.home=true
 rem set USERDIR=-Duser.dir=%PRJ%
