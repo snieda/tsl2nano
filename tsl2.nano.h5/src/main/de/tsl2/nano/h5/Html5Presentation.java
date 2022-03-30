@@ -2498,11 +2498,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         appendElement(preFooter, TAG_IMAGE, ATTR_SRC, "icons/properties.png");
                     }
                     //evaluate the text and optional a title (tooltip)
-                    txt = split[i].split("§");
+                    txt = split[i].split("[^\\[({]§");
                     Element e = appendElement(preFooter, isKey ? "b" : "i", content(txt[0] + "  "), ATTR_COLOR, isKey
                         ? COLOR_BLUE
                         : COLOR_BLACK);
-                    if (txt.length > 1) {
+                    if (txt.length > 1 && StringUtil.isHexString(txt[1])) {
                         txt[1] = StringUtil.fromHexString(txt[1]);
                         appendAttributes(e, ATTR_TITLE, txt[1]);
                         appendElement(e, TAG_PARAGRAPH, content(txt[1]), ATTR_CLASS, "tooltip");
