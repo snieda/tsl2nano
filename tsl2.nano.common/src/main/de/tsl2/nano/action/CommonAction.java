@@ -11,8 +11,10 @@ package de.tsl2.nano.action;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
+import org.mozilla.javascript.IdFunctionCall;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.ElementList;
@@ -49,19 +51,27 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
     private static final Log LOG = LogFactory.getLog(CommonAction.class);
     protected static final String UNNAMED = "unknown";
 
+    /** while a function is not really serializeable/changeable/deserializeable, this function should only be used, where the action should not be deserialized!<p/>
+     * NOTE: technically it is possible to serialize the function, e.g.: (Runnable & Serializable) () -> doSomething;. but it is not changable
+     * inside a readable xml serialization like in simple-xml. */
+    protected transient Function<?, RETURNTYPE> function = null;
+    
     /**
      * The default constructor can be used for hidden actions. This are action, not connected to a user interface like a
      * button.
      */
     public CommonAction() {
-        this(String.valueOf(System.currentTimeMillis()), UNNAMED, UNNAMED);
+        this(String.valueOf(System.currentTimeMillis()), UNNAMED, UNNAMED, null);
     }
 
     /**
      * @param id unique id
      */
     public CommonAction(String id) {
-        this(id, UNNAMED, UNNAMED);
+    	this(id, null);
+    }
+    public CommonAction(String id, Function<?, RETURNTYPE> function) {
+        this(id, UNNAMED, UNNAMED, function);
     }
 
     /**
@@ -70,7 +80,10 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
      * @param longDescription tooltip text of the button (representing this action).
      */
     public CommonAction(String id, String shortDescription, String longDescription) {
-        this(id, false, true, null, shortDescription, longDescription, true, (IActivable) null, null);
+    	this(id, shortDescription, longDescription, null);
+    }
+    public CommonAction(String id, String shortDescription, String longDescription, Function<?, RETURNTYPE> function) {
+        this(id, false, true, null, shortDescription, longDescription, true, (IActivable) null, null, function);
     }
 
     /**
@@ -79,8 +92,8 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
      * @param longDescription tooltip text of the button (representing this action).
      * @param instance for an action enabler
      */
-    public CommonAction(String id, String shortDescription, String longDescription, IActivable actionEnabler) {
-        this(id, false, true, null, shortDescription, longDescription, true, actionEnabler, null);
+    public CommonAction(String id, String shortDescription, String longDescription, IActivable actionEnabler, Function<?, RETURNTYPE> function) {
+        this(id, false, true, null, shortDescription, longDescription, true, actionEnabler, null, function);
     }
 
     /**
@@ -94,8 +107,9 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
             String shortDescription,
             String longDescription,
             IActivable enabler,
-            Collection<String> receiverIDs) {
-        this(id, false, true, null, shortDescription, longDescription, true, enabler, receiverIDs);
+            Collection<String> receiverIDs,
+            Function<?, RETURNTYPE> function) {
+        this(id, false, true, null, shortDescription, longDescription, true, enabler, receiverIDs, function);
     }
 
     /**
@@ -108,6 +122,7 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
      * @param longDescription tooltip text of the button (representing this action).
      * @param shortDescription name of the button (representing this action).
      * @param synchron whether this method is synchron or asynchron.
+     * @param function @see {@link #function}
      */
     public CommonAction(String id,
             boolean isDefault,
@@ -117,7 +132,8 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
             String longDescription,
             boolean synchron,
             IActivable actionEnabler,
-            Collection<String> receiverIDs) {
+            Collection<String> receiverIDs,
+            Function<?, RETURNTYPE> function) {
         super();
         this.id = id;
         this.isDefault = isDefault;
@@ -128,6 +144,7 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
         this.enabler = actionEnabler;
         this.receiverIDs = receiverIDs;
         this.keyStroke = keyStroke;
+        this.function = function;
     }
 
     /**
@@ -228,6 +245,20 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
     }
 
     /**
+     * override this method to enable debugging
+     * 
+     * @return true, if debugging is enabled
+     */
+    protected boolean isDebugMode() {
+        return false;
+    }
+
+    @Override
+    public RETURNTYPE action() throws Exception {
+    	if (function != null) return function.apply(null); else throw new UnsupportedOperationException();
+    }
+    
+    /**
      * run
      * 
      * @see de.tsl2.nano.action.IAction#run()
@@ -256,15 +287,6 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
         } catch (final Exception e) {
             ManagedException.forward(e);
         }
-    }
-
-    /**
-     * override this method to enable debugging
-     * 
-     * @return true, if debugging is enabled
-     */
-    protected boolean isDebugMode() {
-        return false;
     }
 
     /**

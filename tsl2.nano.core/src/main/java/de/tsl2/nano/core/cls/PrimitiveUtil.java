@@ -190,6 +190,11 @@ public class PrimitiveUtil {
         }
     }
 
+    /** delegates to {@link #isDefaultValue(Class, Object)} */
+    public static <T> boolean isDefaultValue(T value) {
+    	return value == null || !isPrimitiveOrWrapper(value.getClass())? false : isDefaultValue((Class<T>)value.getClass() , value);
+    }
+    
     /**
      * on primitives we have the problem, that they always have a value. sometimes we need the workaround to check, if
      * it is a 'real' value.

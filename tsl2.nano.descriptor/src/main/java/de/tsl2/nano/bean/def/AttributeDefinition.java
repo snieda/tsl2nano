@@ -1085,6 +1085,24 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
 		return BeanDefinition.getBeanDefinition(getType()).getAttribute(name);
 	}
 
+    public BeanDefinition<?> getParentBean() {
+    	return BeanDefinition.getBeanDefinition(StringUtil.substring(getId(), null, ".", true, true));
+    }
+    
+	/**
+	 * convenience to get an attributedefinition through a given expression like myBeanName.myAttributeName
+	 * @param path
+	 * @return attribute definition belonging to a path holding the bean name + attriute name
+	 */
+	public static IAttributeDefinition<?> getAttributeDefinitionFromPath(String path) {
+		BeanDefinition<?> bean;
+		String attrName = StringUtil.substring(path, ".", null, true);
+		path = StringUtil.substring(path, null, ".", true);
+		bean = BeanDefinition.getBeanDefinition(path);
+		IAttributeDefinition<?> attr = bean.getAttribute(attrName);
+		return attr;
+	}
+
     @Override
     public String toString() {
         return attribute != null ? attribute.toString() : super.toString();

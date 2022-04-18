@@ -22,8 +22,9 @@ import static de.tsl2.nano.h5.HtmlUtil.ATTR_BORDER;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_SIZE;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_SPANCOL;
 import static de.tsl2.nano.h5.NanoH5Util.define;
+import static de.tsl2.nano.h5.NanoH5Util.defineAction;
 import static de.tsl2.nano.h5.NanoH5Util.icon;
-import static de.tsl2.nano.h5.NanoH5Util.ve;
+import static de.tsl2.nano.h5.NanoH5Util.*;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_CHARGEITEM;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_COMMENT;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_FROMDATE;
@@ -103,12 +104,10 @@ import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.bean.def.ValueColumn;
 import de.tsl2.nano.collection.TableList;
 import de.tsl2.nano.core.ENV;
-import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
-import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.ScriptUtil;
 import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.NanoH5App;
@@ -133,12 +132,12 @@ import de.tsl2.nano.h5.websocket.WebSocketRuleDependencyListener;
 import de.tsl2.nano.incubation.specification.ParType;
 import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.incubation.specification.actions.Action;
-import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RuleDecisionTable;
 import de.tsl2.nano.incubation.specification.rules.RuleDependencyListener;
 import de.tsl2.nano.incubation.specification.rules.RuleScript;
 import de.tsl2.nano.util.PrintUtil;
 import my.app.Times;
+import static de.tsl2.nano.bean.BeanUtil.*;
 
 /**
  * Creates a timesheet configuration on NanoH5 and anyway database
@@ -147,7 +146,7 @@ import my.app.Times;
  * @version $Revision$
  */
 public class Timesheet extends NanoH5App {
-    private static final String STAT_TYPES = "Types";
+	private static final String STAT_TYPES = "Types";
     private static final String STAT_PROJECTS = "Projects";
     private static final String STAT_TIMESHEET_STATISTICS = "Timesheet-Statistics";
     String redColorStyle = "color: red;";
@@ -183,8 +182,7 @@ public class Timesheet extends NanoH5App {
             new RuleScript<String>(ATTR_WEEKDAY,
                 "charge.getFromdate() != null ? formatter.format(charge.getFromdate()) : \"\";", pt);
         ENV.get(Pool.class).add(script);
-        charge.addAttribute(ATTR_WEEKDAY, new RuleExpression<>(Charge.class, RuleScript.PREFIX + ATTR_WEEKDAY), null,
-            null);
+        addVirtualAttribute(charge, RuleScript.PREFIX + ATTR_WEEKDAY);
 
         /*
          * define all beans
@@ -276,8 +274,8 @@ public class Timesheet extends NanoH5App {
                 "presValueColor", "var map = new java.util.HashMap(); map.put('style', (typeof value != 'undefined' ? value : 0) > 10 ? '" + redColorStyle
                     + "' : '" + greenColorStyle + "'); map;", null);
         ENV.get(Pool.class).add(presValueColor);
-        RuleCover.cover(Charge.class, ATTR_VALUE, "presentable.layoutConstraints", "%" + presValueColor.getName());
-        RuleCover.cover(Charge.class, ATTR_VALUE, "columnDefinition.presentable.layoutConstraints", "%" + presValueColor.getName());
+        RuleCover.cover(Charge.class, ATTR_VALUE, PATH_LAYOUTCONSTRAINTS, "%" + presValueColor.getName());
+        RuleCover.cover(Charge.class, ATTR_VALUE, PATH_COLDEF_LAYOUTCONSTRAINTS, "%" + presValueColor.getName());
         //one rulecover on columndefs..presentable.layoutconstraints
 //        ruleCover = new RuleCover("%" + presValueColor.getName(), MapUtil.asMap(
 //                "columnDefinition.presentable.layoutConstraints", presValueColor.getName()));
@@ -293,8 +291,8 @@ public class Timesheet extends NanoH5App {
         tl.save(ruleDir);
         RuleDecisionTable dtRule = RuleDecisionTable.fromCSV(ruleDir + "weekcolor.csv");
         ENV.get(Pool.class).add(dtRule);
-        RuleCover.cover(Charge.class, ATTR_FROMDATE, "presentable.layoutConstraints", "&" + dtRule.getName());
-        RuleCover.cover(Charge.class, ATTR_FROMDATE, "columnDefinition.presentable.layoutConstraints", "&" + dtRule.getName());
+        RuleCover.cover(Charge.class, ATTR_FROMDATE, PATH_LAYOUTCONSTRAINTS, "&" + dtRule.getName());
+        RuleCover.cover(Charge.class, ATTR_FROMDATE, PATH_COLDEF_LAYOUTCONSTRAINTS, "&" + dtRule.getName());
         
         //copy fromdate to todate
         charge.getAttribute(ATTR_TODATE).getPresentation().setVisible(false);
@@ -381,51 +379,13 @@ public class Timesheet extends NanoH5App {
         /*
          * define an action
          */
-        java.lang.reflect.Method antCaller = null;
-        try {
-            antCaller = ScriptUtil.class.getMethod("ant", new Class[] { String.class, String.class, Properties.class });
-        } catch (Exception e) {
-            ManagedException.forward(e);
-        }
-        Action<Object> a = new Action<>(antCaller);
-        a.addConstraint("arg1", new Constraint<String>(ENV.getConfigPath() + "antscripts.xml"));
-        a.addConstraint("arg2", new Constraint<String>("help"));
-        ENV.get(Pool.class).add(a);
-
-        java.lang.reflect.Method icsHolidays = null;
-        try {
-            icsHolidays = ICSChargeImport.class.getMethod("doImportHolidays");
-        } catch (Exception e) {
-            ManagedException.forward(e);
-        }
-        ENV.get(Pool.class).add(new Action<>(icsHolidays));
-
-        java.lang.reflect.Method icsImport = null;
-        try {
-            icsImport = ICSChargeImport.class.getMethod("doImportICS", String.class);
-        } catch (Exception e) {
-            ManagedException.forward(e);
-        }
-        a = new Action<>(icsImport);
-        ENV.get(Pool.class).add(a);
-
-        java.lang.reflect.Method mdImport = null;
-        try {
-            mdImport = FBRImport.class.getMethod(FBRImport.MTD_DOIMPORTHUMANREADABLE, String.class);
-        } catch (Exception e) {
-            ManagedException.forward(e);
-        }
-        a = new Action<>(mdImport);
-        ENV.get(Pool.class).add(a);
-
-        java.lang.reflect.Method printAction = null;
-        try {
-            printAction = PrintUtil.class.getMethod("print", String.class);
-        } catch (Exception e) {
-            ManagedException.forward(e);
-        }
-        a = new Action<>(printAction);
-        ENV.get(Pool.class).add(a);
+        defineAction(ScriptUtil.class, "ant", new Class[] { String.class, String.class, Properties.class }, 
+        		new Constraint<String>(ENV.getConfigPath() + "antscripts.xml"),
+        		new Constraint<String>("help"));
+        defineAction(ICSChargeImport.class, "doImportHolidays", null);
+        defineAction(ICSChargeImport.class, "doImportICS", new Class[] {String.class});
+        Action<Object> mdImport = defineAction(FBRImport.class, FBRImport.MTD_DOIMPORTHUMANREADABLE, new Class[] {String.class});
+        defineAction(PrintUtil.class, "print", new Class[] {String.class});
 
         BeanDefinition<Charge> chargeDef = BeanDefinition.getBeanDefinition(Charge.class);
         chargeDef.addAction(new ActionImportHolidays());

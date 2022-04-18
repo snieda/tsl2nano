@@ -71,9 +71,9 @@ public interface IAttribute<T> extends Comparable<IAttribute<T>>, Serializable {
     void setName(String name);
 
     /**
-     * convenience to recurse into the next given attribute
+     * convenience to recurse into the given sibling attribute
      * @param name name of this attributes attribute (evaluated through return type)
-     * @return relation attribute
+     * @return sibling attribute
      */
     default IAttribute<?> getAttribute(String name) { throw new UnsupportedOperationException();}
 }

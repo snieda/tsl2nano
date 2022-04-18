@@ -1194,6 +1194,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     private void saveResourceEntries() {
         String name = "messages.properties";
         saveResourceEntries(ENV.getSortedProperties(name), name);
+
+        name = BeanUtil.FILENAME_SPEC_PROPERTIES;
+        BeanUtil.saveSpecificationEntries(this, ENV.getSortedProperties(name));
     }
 
     /**
@@ -1500,7 +1503,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         return seal < getBeanDefinition(getDeclaringClass()).seal;
     }
     
-    private void newSeal() {
+    private void newSeal() { //TODO: real seal would be a hash through whole content
         seal = new Date().getTime();
     }
     

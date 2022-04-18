@@ -55,7 +55,7 @@ public class Pool {
     public static void registerTypes(Class<? extends IPRunnable>...types) {
         for (int i = 0; i < types.length; i++) {
             if (!IPrefixed.class.isAssignableFrom(types[i]))
-    		throw new IllegalArgumentException("type " + types[i] + " must implement IPrefixed!");
+            	throw new IllegalArgumentException("type " + types[i] + " must implement IPrefixed!");
             registeredTypes.add(types[i]);
         }
     }
@@ -175,6 +175,16 @@ public class Pool {
         return name.matches(".*[.][a-z]{3}") ? name : getDirectory(type) + name + ENV.getFileExtension();
     }
 
+    public void add(String prefixedName, String expression) {
+    	String pref = prefixedName.substring(0, 1);
+    	for (Class<? extends IPRunnable> rt : registeredTypes) {
+			if (IPrefixed.class.isAssignableFrom(rt) && ((IPrefixed)BeanClass.createInstance(rt)).prefix().equals(pref)) {
+				add(BeanClass.createInstance(rt, prefixedName.substring(1), expression, null));
+				return;
+			}
+		}
+    	throw new IllegalArgumentException(" prefixedName rule name must start with: " + getExpressionPattern());
+    }
     /**
      * delegates to {@link #add(String, IPRunnable)} using {@link IPRunnable#getName()}
      */

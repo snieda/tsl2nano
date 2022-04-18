@@ -914,6 +914,11 @@ public class ENV implements Serializable {
             getTempPath() + FileUtil.getUniqueFileName(environmentFile));
     }
 
+    public static final void moveBackup(String environmentFile) {
+        FileUtil.userDirFile(getConfigPath() + environmentFile)
+        	.renameTo(FileUtil.userDirFile(getTempPath() + FileUtil.getUniqueFileName(environmentFile)));
+    }
+
     /**
      * saveResourceToFileSystem
      * 

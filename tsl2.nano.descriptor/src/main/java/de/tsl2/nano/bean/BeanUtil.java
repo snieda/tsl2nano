@@ -15,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 
@@ -23,13 +24,16 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
+import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.bean.def.NamedValue;
 import de.tsl2.nano.collection.CollectionUtil;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DefaultFormat;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NumberUtil;
@@ -46,7 +50,22 @@ import de.tsl2.nano.util.operation.IConverter;
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class BeanUtil extends ObjectUtil {
-    private static final Log LOG = LogFactory.getLog(BeanUtil.class);
+	private static final Log LOG = LogFactory.getLog(BeanUtil.class);
+
+    public static final String FILENAME_SPEC_PROPERTIES = "specification.properties";
+
+    public static final String PROP_RULECOVER = "rulecover";
+	public static final String PROP_LISTENER = "listener";
+	public static final String PROP_ENABLER = "enabler";
+	public static final String PREFIX_ATTRIBUTE = "addattribute";
+	public static final String PREFIX_ACTION = "addaction";
+	public static final String PROP_ICON = "icon";
+	public static final String PROP_VALUEEXPRESSION = "valueexpression";
+	public static final String PROP_ATTRIBUTEFILTER = "attributefilter";
+	
+	public static final String PATH_LAYOUTCONSTRAINTS = "presentable.layoutConstraints";
+	public static final String PATH_COLDEF_LAYOUTCONSTRAINTS = "columnDefinition." + PATH_LAYOUTCONSTRAINTS;
+
     /**
      * as BeanUtil.copyProperties(..) does only a shallow copy, this method does a deep recursive copy.
      * <p/>
@@ -369,6 +388,32 @@ private static Object deepCopy(Object src, Object dest) throws Exception {
         //workaround to have a simple instance for calling getIdAttribute(). poor performance - but works
         TYPE instance = BeanClass.createInstance(type);
         return RegExpFormat.getParser(type, BeanContainer.getIdAttribute(instance).getName(), pattern, null, converter, true);
+    }
+
+    /**
+     * generates resource entries for each attribute+tooltip and each action to be edited later.
+     */
+    public static void saveSpecificationEntries(BeanDefinition bean, Properties p) {
+    	if (p.contains(bean.getId()))
+    		return;
+//        p.put(bean.getId(), bean.getName());
+        Collection<IAttributeDefinition<?>> attributes = bean.getBeanAttributes();
+        String id;
+        for (IAttributeDefinition<?> a : attributes) {
+        		p.put("#" + bean.getId() + "." + PROP_ATTRIBUTEFILTER, "<attribute names comma or space separated>");
+        		p.put("#" + bean.getId() + "." + PROP_VALUEEXPRESSION, "<map-bean-to-value: e.g.: {name}-{surname}>");
+        		p.put("#" + bean.getId() + "." + PROP_ICON, "<path-to-icon-file>");
+        		p.put("#" + bean.getId() + "." + PREFIX_ACTION + "XXX", "<rule>");
+                p.put("#" + bean.getId() + "." + PREFIX_ATTRIBUTE + "XXX", "<rule>");
+            id = a.getId();
+            if (p.getProperty(id) == null) {
+            	//TODO: listener (rulecover -> attributecover) are unknown here (-> specification)
+                p.put("#" + id + "." + PROP_ENABLER, "<rule>");
+                p.put("#" + id + "." + PROP_LISTENER, "<rule>:<comma-separated-list-of-observable-attribute-names>");
+                p.put("#" + id + "." + PROP_RULECOVER, "<path like 'presentable.layoutconstaints'>:<rule>");
+            }
+        }
+        FileUtil.saveProperties(ENV.getConfigPath() + FILENAME_SPEC_PROPERTIES, p);
     }
 
 }

@@ -1143,6 +1143,30 @@ Example:
 TODO
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+### Generating the rules etc. through a Specification Document
+
+A more convenienced way would be to generate the specification elements like rules etc. through a document, created by a speicification team itself. A developer would adjust the details.
+
+NanoH5 provides the following convenience:
+
+* The application creates all the beans and presenters through a given ddl or database
+* a messages.properties file will be created, to adjust all names and texts
+* a specification.properties file will be created, holding empty adjustments for each field to be filled by a skilled worker
+* on next application start, this filled specification.properties will be read to create the rules and their bindings to the fields (overwriting old verisons)
+
+The provided entries look like:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   #myBean.addattributeXXX=<rule>
+   #myBean.icon=<path-to-icon-file>
+   #myBean.addactionXXX=<rule>
+   #myBean.attributefilter=<attribute names comma or space separated>
+
+   #myBean.myAttribute.enabler=<rule>
+   #myBean.myAttribute.rulecover=<path like 'presentable.layoutconstaints'>\:<rule>
+   #myBean.myAttribute.listener=<rule>\:<comma-separated-list-of-observable-attribute-names>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   
 ## The _ScriptTool_
 
 After login, you are able to execute queries and scripts like ant-scripts. You have to enable it in your _environment.xml_ to see the _ScriptTool_ in the list of _BeanCollectors_.

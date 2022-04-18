@@ -36,11 +36,17 @@ public interface ENVTestPreparation {
 		return setUp(BASE_DIR, moduleShort, getTestEnv(), true, false);
 	}
 	static String setUp(String moduleShort, boolean strict) {
-		return setUp(moduleShort, strict, true);
+		return setUp(moduleShort, FileUtil.getUniqueFileName("unittest-"), strict);
 	}
-	static String setUp(String moduleShort, boolean strict, boolean deleteExistingEnvironment) {
+	static String setUp(String moduleShort, Class<?> testClass, boolean strict) {
+		return setUpClass(moduleShort, StringUtil.toFirstLower(testClass.getSimpleName()), strict, true);
+	}
+	static String setUp(String moduleShort, String testname, boolean strict) {
+		return setUpClass(moduleShort, testname, strict, true);
+	}
+	static String setUpClass(String moduleShort, String testname, boolean strict, boolean deleteExistingEnvironment) {
 		//ATTENTION: here the BASE_DIR path is relative!
-		return setUp(BASE_DIR, moduleShort, TEST_DIR + System.currentTimeMillis() + "/", strict, deleteExistingEnvironment);
+		return setUp(BASE_DIR, moduleShort, TEST_DIR + testname + "/", strict, deleteExistingEnvironment);
 	}
 	
 	static String setUp(String baseDir, String moduleShort, String envDir, boolean strict, boolean deleteExistingEnvironment) {
@@ -67,7 +73,7 @@ public interface ENVTestPreparation {
 	}
 
 	default String getTestEnv() {
-		String name = StringUtil.substring(this.getClass().getSimpleName(), null, "Test") + "-" + System.currentTimeMillis() + "/";
+		String name = StringUtil.substring(this.getClass().getSimpleName(), null, "Test") + "-" + DateUtil.getFormattedTimeStamp() + "/";
 		return TEST_DIR + StringUtil.toFirstLower(name);
 	}
 	static void tearDown() {

@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Stack;
 import java.util.concurrent.Executors;
@@ -798,7 +799,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         ENV.addService(ClassLoader.class, runtimeClassloader);
 
         createAuthorization(persistence.getAuth());
-
+        NanoH5Util.enrichFromSpecificationProperties();
+        
         //load all beans from selected jar-file and provide them in a beancontainer
         List<Class> beanClasses = null;
         try {
@@ -811,7 +813,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         return createBeanCollectors(beanClasses);
     }
 
-    @Override
+	@Override
     public void disconnect(Persistence connectionEnd) {
         //nothing to clean
     }

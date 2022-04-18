@@ -44,14 +44,14 @@ public abstract class AbstractPrincipalAction<RETURNTYPE> extends CommonAction<R
             String longDescription,
             IActivable enabler,
             Collection<String> receiverIDs) {
-        super(id, shortDescription, longDescription, enabler, receiverIDs);
+        super(id, shortDescription, longDescription, enabler, receiverIDs, null);
     }
 
     /**
      * {@inheritDoc}
      */
     public AbstractPrincipalAction(String id, String shortDescription, String longDescription, IActivable actionEnabler) {
-        super(id, shortDescription, longDescription, actionEnabler);
+        super(id, shortDescription, longDescription, actionEnabler, null);
     }
 
     /**

@@ -9,11 +9,9 @@
  */
 package de.tsl2.nano.core.util;
 
-import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Proxy;
 import java.security.MessageDigest;
 import java.text.Format;
 import java.text.ParseException;
@@ -21,9 +19,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Stream;
@@ -32,7 +27,6 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
-import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.cls.UnboundAccessor;
 import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.log.LogFactory;
@@ -555,5 +549,17 @@ public class Util {
 	}
 	public static <T> Stream<T> stream(Collection<T> c, boolean parallel) {
 		return parallel ? c.parallelStream() : c.stream();
+	}
+
+	/**
+	 * tries to evaluate the given object to be true or not.
+	 * 
+	 * @param value
+	 * @return true, if the value is not empty and has a value like 'true', !=0
+	 */
+	public static boolean isTrue(Object value) {
+		return value instanceof Boolean 
+				? (boolean) value 
+				: value != null && (!PrimitiveUtil.isDefaultValue(value) || Boolean.getBoolean(value.toString()) || FormatUtil.isTrue(value.toString()));
 	}
 }

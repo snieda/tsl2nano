@@ -66,7 +66,7 @@ public class Action<T> extends AbstractRunnable<T> {
      * @param method
      * @return 
      */
-    static Method getMethod(String method) {
+    public static Method getMethod(String method) {
         String clsName = StringUtil.substring(method, null, ".", true);
         String methodName = StringUtil.substring(method, ".", null, true);
         Class<?> cls = BeanClass.load(clsName);
