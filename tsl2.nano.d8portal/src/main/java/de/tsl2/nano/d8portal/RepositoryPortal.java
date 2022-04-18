@@ -17,7 +17,7 @@ import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.secure.Crypt;
 import de.tsl2.nano.core.secure.DistinguishedName;
 import de.tsl2.nano.core.util.FileUtil;
-import de.tsl2.nano.core.util.MyProperties;
+import de.tsl2.nano.core.util.MainProperties;
 import de.tsl2.nano.core.util.Period;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.util.Mail;
@@ -54,7 +54,7 @@ public class RepositoryPortal implements IRepositoryPortal {
     String publishOptions;
     private boolean mailEnabled;
 
-    private static final MyProperties MY = new MyProperties(RepositoryPortal.class, "tsl2nano.portal.");
+    private static final MainProperties MY = new MainProperties(RepositoryPortal.class, "tsl2nano.portal.");
     static <T> T property(String name, T defValue) { return MY.geT(name, defValue);}
 
     static final String SIG_EXT = ".sig";

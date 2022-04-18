@@ -15,13 +15,13 @@ import de.tsl2.nano.core.log.LogFactory;
  * public static final String MYCONSTANT = MY.get("myconstant", "my-default-value");
  * </pre>
  */
-public class MyProperties {
+public class MainProperties {
     private String propPrefix;
 
-    public MyProperties(Class<?> mainCls) {
+    public MainProperties(Class<?> mainCls) {
         this(mainCls, mainCls.getSimpleName().toLowerCase() + ".");
     }
-    public MyProperties(Class<?> mainCls, String propPrefix) {
+    public MainProperties(Class<?> mainCls, String propPrefix) {
         LogFactory.log("creating myproperties for: " + mainCls.getSimpleName() + ", prefix: " + propPrefix);
         this.propPrefix = propPrefix.endsWith(".") ? propPrefix : propPrefix + ".";
         loadProperties(mainCls);
