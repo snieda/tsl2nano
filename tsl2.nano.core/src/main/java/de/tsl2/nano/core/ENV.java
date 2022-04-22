@@ -885,15 +885,7 @@ public class ENV implements Serializable {
         String rc = ENV.getConfigPath() + fileName;
         File rcFile = new File(rc);
         //create a sorted property map
-        Properties p = new Properties() {
-            /** serialVersionUID */
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public synchronized Enumeration<Object> keys() {
-                return Collections.enumeration(new TreeSet<Object>(super.keySet()));
-            }
-        };
+        Properties p = MapUtil.createSortedProperties();
         if (rcFile.canRead()) {
             try {
                 p.load(new FileReader(rcFile));

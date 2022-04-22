@@ -12,6 +12,8 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -24,6 +26,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentNavigableMap;
@@ -80,6 +83,23 @@ public class MapUtil {
 //        return BeanUtil.toValueMap(o, keyPrefix, onlySingleValues, filterAttributes);
 //    }
 //
+	public static Properties createSortedProperties() {
+		Properties p = new Properties() {
+            /** serialVersionUID */
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public synchronized Enumeration<Object> keys() {
+                return Collections.enumeration(new TreeSet<>(super.keySet()));
+            }
+            @Override
+            public Set<java.util.Map.Entry<Object, Object>> entrySet() {
+            	return (Set<java.util.Map.Entry<Object, Object>>) CollectionUtil.getSortedSet(super.entrySet());
+            }
+        };
+		return p;
+	}
+
     public static Map asProperties(Object... keysAndValues) {
         return asMap(new Properties(), keysAndValues);
     }

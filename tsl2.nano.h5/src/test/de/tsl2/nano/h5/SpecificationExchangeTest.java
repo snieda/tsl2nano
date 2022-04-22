@@ -76,9 +76,10 @@ public class SpecificationExchangeTest implements ENVTestPreparation {
 
 	private String fillSpecificationProperties(Class<?> type, Properties p) {
 		String file = ENV.getConfigPath() + SpecificationH5Exchange.FILENAME_SPEC_PROPERTIES;
-		Pool pool = ENV.get(Pool.class);
-		pool.add("%testrule", "TEST");
+//		Pool pool = ENV.get(Pool.class);
+//		pool.add("%testrule", "TEST");
 		Properties pp = new Properties();
+		pp.put("%testrule", "TEST");
 		for (Map.Entry<Object, Object> entry : p.entrySet()) {
 			String key = entry.getKey().toString();
 			String val = entry.getValue().toString();

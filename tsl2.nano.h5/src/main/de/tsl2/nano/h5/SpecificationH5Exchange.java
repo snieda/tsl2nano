@@ -17,6 +17,7 @@ import de.tsl2.nano.bean.def.SpecificationExchange;
 import de.tsl2.nano.bean.def.ValueExpression;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.specification.Pool;
@@ -52,7 +53,7 @@ public class SpecificationH5Exchange extends SpecificationExchange {
     				v = (String)e.getValue();
 					object = StringUtil.substring(k, null, ".", true);
 					property = StringUtil.substring(k, ".", null, true);
-					if (k.equals(pool.getFullExpressionPattern())) { // rule
+					if (k.matches(pool.getFullExpressionPattern())) { // rule
 						pool.add(k, v);
 					} else {
 						if (!object.contains(".")) { // bean
@@ -124,7 +125,7 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 
 	protected Properties fromCSV() {
 		Scanner sc = Util.trY(() -> new Scanner(FileUtil.userDirFile(ENV.getConfigPath() + FILENAME_SPEC_PROPERTIES + EXT_CSV)));
-		Properties p = new Properties();
+		Properties p = MapUtil.createSortedProperties();
 		String l, k, v;
 		while (sc.hasNextLine()) {
 			l = sc.nextLine();

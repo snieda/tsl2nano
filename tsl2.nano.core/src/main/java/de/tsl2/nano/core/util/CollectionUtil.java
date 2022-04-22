@@ -267,6 +267,17 @@ public class CollectionUtil {
      * delegates to {@link #getSortedList(Collection, Comparator, String, boolean)}, using
      * {@link #getSimpleComparator(Format)}.
      */
+    public static Collection<?> getSortedSet(Collection<?> collection) {
+        return getSortedList(collection,
+            NumberUtil.getNumberAndStringComparator(new DefaultFormat()),
+            collection.toString(),
+            true);
+    }
+
+    /**
+     * delegates to {@link #getSortedList(Collection, Comparator, String, boolean)}, using
+     * {@link #getSimpleComparator(Format)}.
+     */
     public static Collection<?> getSortedList(Collection<?> collection, Format formatter, String name) {
         return getSortedList(collection, NumberUtil.getNumberAndStringComparator(formatter), name, false);
     }
