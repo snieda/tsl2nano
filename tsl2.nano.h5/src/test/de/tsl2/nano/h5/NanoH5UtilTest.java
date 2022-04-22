@@ -1,6 +1,8 @@
 package de.tsl2.nano.h5;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Proxy;
 import java.util.Map;
@@ -11,7 +13,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.tsl2.nano.autotest.TypeBean;
-import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.ENVTestPreparation;
@@ -33,15 +34,43 @@ public class NanoH5UtilTest implements ENVTestPreparation {
 	}
 	
 	@Test
-	public void testEmptySpecificationProperties() {
-		BeanDefinition bean = BeanDefinition.getBeanDefinition(TypeBean.class);
-		Properties p = new Properties();
-		BeanUtil.saveSpecificationEntries(bean, p);
+	public void testSimpleSpecificationProperties() {
+		Class<?> type = TypeBean.class;
+		Properties p = initializeBeanSpecProperties(type, 95);
+		String file = fillSpecificationProperties(type, p);
+		int errors = NanoH5Util.enrichFromSpecificationProperties();
 		
-		String file = ENV.getConfigPath() + BeanUtil.FILENAME_SPEC_PROPERTIES;
-		assertTrue(FileUtil.userDirFile(file).exists());
-		assertEquals(95, p.size());
+		checkSpecificationDone(type, file, errors);
+	}
+
+	@Test
+	public void testSimpleSpecificationCSV() {
+		Class<?> type = TypeBean.class;
+		Properties p = initializeBeanSpecProperties(type, 95);
+		String file = fillSpecificationProperties(type, p);
 		
+		new SpecificationH5Exchange().saveAsCSV(file, p);
+		FileUtil.delete(file); // -> the csv file will be used!
+		
+		int errors = NanoH5Util.enrichFromSpecificationProperties();
+		
+		checkSpecificationDone(type, file, errors);
+	}
+	
+	private void checkSpecificationDone(Class<?> type, String file, int errors) {
+		//		assertTrue(FileUtil.userDirFile(ENV.getTempPath() + BeanUtil.FILENAME_SPEC_PROPERTIES).exists());
+				assertFalse(FileUtil.userDirFile(ENV.getTempPath() + SpecificationH5Exchange.FILENAME_SPEC_PROPERTIES).exists());
+				assertTrue(FileUtil.userDirFile(file + ".done").exists());
+				assertEquals(0, errors);
+				
+				BeanDefinition<?> bean = BeanDefinition.getBeanDefinition(type);
+				assertTrue(bean.getAttribute("testrule") != null);
+				assertTrue(bean.getAction("%testrule") != null);
+				assertTrue(Proxy.isProxyClass(bean.getAttribute("string").getPresentation().getClass()));
+	}
+
+	private String fillSpecificationProperties(Class<?> type, Properties p) {
+		String file = ENV.getConfigPath() + SpecificationH5Exchange.FILENAME_SPEC_PROPERTIES;
 		Pool pool = ENV.get(Pool.class);
 		pool.add("%testrule", "TEST");
 		Properties pp = new Properties();
@@ -49,7 +78,7 @@ public class NanoH5UtilTest implements ENVTestPreparation {
 			String key = entry.getKey().toString();
 			String val = entry.getValue().toString();
 			
-			String allnames = StringUtil.toString(bean.getAttributeNames(), -1).replace(" ", "");
+			String allnames = StringUtil.toString(BeanDefinition.getBeanDefinition(type).getAttributeNames(), -1).replace(" ", "");
 			allnames = allnames.substring(1, allnames.length() - 1);
 			pp.put(key.substring(1), 
 					val.replace("<rule>", "%testrule")
@@ -59,17 +88,19 @@ public class NanoH5UtilTest implements ENVTestPreparation {
 					);
 		}
 		FileUtil.saveProperties(file, pp);
-		
-		int errors = NanoH5Util.enrichFromSpecificationProperties();
-		
-//		assertTrue(FileUtil.userDirFile(ENV.getTempPath() + BeanUtil.FILENAME_SPEC_PROPERTIES).exists());
-		assertFalse(FileUtil.userDirFile(ENV.getTempPath() + BeanUtil.FILENAME_SPEC_PROPERTIES).exists());
-		assertTrue(FileUtil.userDirFile(file + ".done").exists());
-		assertEquals(0, errors);
-		
-		assertTrue(bean.getAttribute("testrule") != null);
-		assertTrue(bean.getAction("%testrule") != null);
-		assertTrue(Proxy.isProxyClass(bean.getAttribute("string").getPresentation().getClass()));
+		return file;
+	}
+
+	private Properties initializeBeanSpecProperties(Class<?> type, int expectedElementCount) {
+		BeanDefinition bean = BeanDefinition.getBeanDefinition(TypeBean.class);
+		Properties p = new Properties();
+		SpecificationH5Exchange specExchange = new SpecificationH5Exchange();
+		specExchange.saveSpecificationEntries(bean, p);
+
+		String file = ENV.getConfigPath() + SpecificationH5Exchange.FILENAME_SPEC_PROPERTIES;
+		assertTrue(FileUtil.userDirFile(file).exists());
+		assertEquals(expectedElementCount, p.size());
+		return p;
 	}
 
 }
