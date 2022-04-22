@@ -20,17 +20,17 @@ import de.tsl2.nano.core.util.StringUtil;
  * @author ts
  */
 public class SpecificationExchange {
-	protected static final String SEP = ";";
-
 	private static final Log LOG = LogFactory.getLog(SpecificationExchange.class);
 
+	public static final String EXT_CSV = ".csv";
+	protected static final String SEP = ";";
     public static final String FILENAME_SPEC_PROPERTIES = "specification.properties";
 
-    public enum Change {valueexpression, attributefilter, icon, addattribute, addaction, enabler, listener, rulecover};
-    
 	public static final String PATH_LAYOUTCONSTRAINTS = "presentable.layoutConstraints";
 	public static final String PATH_COLDEF_LAYOUTCONSTRAINTS = "columnDefinition." + PATH_LAYOUTCONSTRAINTS;
 
+    public enum Change {valueexpression, attributefilter, icon, addattribute, addaction, enabler, listener, rulecover};
+    
     /**
      * generates resource entries for each attribute+tooltip and each action to be edited later.
      */
@@ -41,7 +41,7 @@ public class SpecificationExchange {
         Collection<IAttributeDefinition<?>> attributes = bean.getBeanAttributes();
 		String keyPrefix = "#" + bean.getId() + ".";
 		p.put(keyPrefix + Change.attributefilter, "<attribute names comma or space separated>");
-		p.put(keyPrefix + Change.valueexpression, "<map-bean-to-value: e.g.: {name}-{surname}>");
+		p.put(keyPrefix + Change.valueexpression, "<map-bean-to-value e.g. {name}-{surname}>");
 		p.put(keyPrefix + Change.icon, "<path-to-icon-file>");
 		p.put(keyPrefix + Change.addaction + "XXX", "<rule>");
         p.put(keyPrefix + Change.addattribute + "XXX", "<rule>");
@@ -57,7 +57,7 @@ public class SpecificationExchange {
             }
         }
         FileUtil.saveProperties(ENV.getConfigPath() + FILENAME_SPEC_PROPERTIES, p);
-        saveAsCSV(ENV.getConfigPath() + FILENAME_SPEC_PROPERTIES + ".csv", p);
+        saveAsCSV(ENV.getConfigPath() + FILENAME_SPEC_PROPERTIES + EXT_CSV, p);
     }
 
     /** converts the given properties to csv (objectname, rule, optional-parameter) */

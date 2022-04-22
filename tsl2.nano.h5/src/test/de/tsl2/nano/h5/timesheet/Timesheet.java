@@ -137,7 +137,7 @@ import de.tsl2.nano.incubation.specification.rules.RuleDependencyListener;
 import de.tsl2.nano.incubation.specification.rules.RuleScript;
 import de.tsl2.nano.util.PrintUtil;
 import my.app.Times;
-import static de.tsl2.nano.bean.BeanUtil.*;
+import static de.tsl2.nano.bean.def.SpecificationExchange.*;
 
 /**
  * Creates a timesheet configuration on NanoH5 and anyway database

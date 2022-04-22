@@ -1,8 +1,15 @@
 package de.tsl2.nano.h5;
 
+import static de.tsl2.nano.bean.def.SpecificationExchange.Change.addaction;
+import static de.tsl2.nano.bean.def.SpecificationExchange.Change.addattribute;
+import static de.tsl2.nano.h5.NanoH5Util.LOG;
+import static de.tsl2.nano.h5.NanoH5Util.addListener;
+import static de.tsl2.nano.h5.NanoH5Util.addVirtualAttribute;
+import static de.tsl2.nano.h5.NanoH5Util.cover;
+
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Scanner;
-import java.util.Map.Entry;
 
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.BeanDefinition;
@@ -11,20 +18,26 @@ import de.tsl2.nano.bean.def.ValueExpression;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.incubation.specification.rules.RuledEnabler;
-import static de.tsl2.nano.h5.NanoH5Util.*;
-import static de.tsl2.nano.bean.def.SpecificationExchange.Change.*;
+
 public class SpecificationH5Exchange extends SpecificationExchange {
 	
     public int enrichFromSpecificationProperties() {
     	String file = FILENAME_SPEC_PROPERTIES;
 		Properties spec = ENV.getSortedProperties(file);
-		if (spec == null)
+		if (Util.isEmpty(spec)) {
+			LOG.info("file " + file + " emtpy or not existing. try to load from csv file...");
 			spec = fromCSV();
-		int errors = 0;
+			file += EXT_CSV;
+			if (Util.isEmpty(spec))
+				LOG.warn(file + " is empty!");
+		}
+		int errors = 0, rules = 0, attributes = 0, actions = 0, beanchanges = 0, attrchanges = 0;
     	if (spec != null) {
         	ENV.moveBackup(file);
+        	LOG.info("=> importing " + spec.size() + " entries from " + file + " ...");
     		Pool pool = ENV.get(Pool.class);
     		String k, v, object, property;
     		BeanDefinition bean;
@@ -47,9 +60,11 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 							if (property.startsWith(addattribute.name())) {
 								checkRule(pool, v);
 								addVirtualAttribute(bean, v);
+								attributes++;
 							} else if (property.startsWith(addaction.name())) {
 								checkRule(pool, v);
 								bean.addAction(new SpecifiedAction<>(v, null));
+								actions++;
 							} else {
 								switch (Change.valueOf(property)) {
 								case valueexpression: bean.setValueExpression(new ValueExpression<>(v)); break;
@@ -58,6 +73,7 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 								default:
 									throw new IllegalArgumentException(property);
 								}
+								beanchanges++;
 							}
 						} else { // field
 							AttributeDefinition<?> attr = (AttributeDefinition<?>) AttributeDefinition.getAttributeDefinitionFromPath(object);
@@ -81,6 +97,7 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 							default:
 								throw new IllegalArgumentException(property);
 							}
+							attrchanges++;
 						}
 					}
 					LOG.info("specification imported: " + k + " -> " + v);
@@ -90,19 +107,31 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 					errors++;
 				}
 			}
+    		if (errors > 0)
+    			LOG.error(errors + " errors on import from file " + file);
+    		else
+    			LOG.info("<= import of " + (rules + attributes + actions + beanchanges + attrchanges) + " specification entries finished successfull"
+    					+ "\n\trules        : " + rules
+    					+ "\n\tattributes   : " + attributes
+    					+ "\n\tactions      : " + actions
+    					+ "\n\tbean changes : " + beanchanges
+    					+ "\n\tattr changes : " + attrchanges
+    					+ "\n\n");
     		FileUtil.saveProperties(ENV.getConfigPath() + file + (errors == 0 ? ".done" : ".errors"), spec);
     	}
     	return errors;
 	}
 
 	protected Properties fromCSV() {
-		Scanner sc = new Scanner(ENV.getConfigPath() + FILENAME_SPEC_PROPERTIES);
+		Scanner sc = Util.trY(() -> new Scanner(FileUtil.userDirFile(ENV.getConfigPath() + FILENAME_SPEC_PROPERTIES + EXT_CSV)));
 		Properties p = new Properties();
 		String l, k, v;
 		while (sc.hasNextLine()) {
 			l = sc.nextLine();
 			k = StringUtil.substring(l, null, SEP);
 			v = StringUtil.substring(l, SEP, null).replace(SEP, ":");
+			if (v.endsWith(":"))
+				v = v.substring(0, v.length() - 1);
 			p.put(k, v);
 		}
 		return p;
