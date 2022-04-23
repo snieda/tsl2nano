@@ -1,5 +1,6 @@
 package de.tsl2.nano.h5;
 
+import static de.tsl2.nano.bean.def.SpecificationExchange.EXT_CSV;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -9,21 +10,22 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 
 import de.tsl2.nano.autotest.TypeBean;
+import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.incubation.specification.Pool;
-import static de.tsl2.nano.bean.def.SpecificationExchange.*;
 
 public class SpecificationExchangeTest implements ENVTestPreparation {
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
+	
+	@Before
+	public void setUpBefore() throws Exception {
+		Bean.clearCache();
 		ENVTestPreparation.setUp("h5", SpecificationExchangeTest.class, false);
 		NanoH5.registereExpressionsAndPools();
 	}
@@ -69,7 +71,7 @@ public class SpecificationExchangeTest implements ENVTestPreparation {
 		assertEquals(0, errors);
 		
 		BeanDefinition<?> bean = BeanDefinition.getBeanDefinition(type);
-		assertTrue(bean.getAttribute("testrule", false) != null);
+		assertTrue("attribute 'testrule' was not created", bean.getAttribute("testrule", false) != null);
 		assertTrue(bean.getAction("%testrule") != null);
 		assertTrue(Proxy.isProxyClass(bean.getAttribute("string").getPresentation().getClass()));
 	}
@@ -80,12 +82,13 @@ public class SpecificationExchangeTest implements ENVTestPreparation {
 //		pool.add("%testrule", "TEST");
 		Properties pp = new Properties();
 		pp.put("%testrule", "TEST");
+		String allnames = StringUtil.toString(BeanDefinition.getBeanDefinition(type).getAttributeNames(), -1).replace(" ", "");
+		allnames = allnames.substring(1, allnames.length() - 1);
+		allnames += ",testrule";
 		for (Map.Entry<Object, Object> entry : p.entrySet()) {
 			String key = entry.getKey().toString();
 			String val = entry.getValue().toString();
 			
-			String allnames = StringUtil.toString(BeanDefinition.getBeanDefinition(type).getAttributeNames(), -1).replace(" ", "");
-			allnames = allnames.substring(1, allnames.length() - 1);
 			pp.put(key.substring(1), 
 					val.replace("<rule>", "%testrule")
 					.replace("<attribute names comma or space separated>", allnames)
