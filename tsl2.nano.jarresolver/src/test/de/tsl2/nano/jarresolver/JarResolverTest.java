@@ -11,6 +11,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
@@ -123,7 +124,7 @@ public class JarResolverTest   implements ENVTestPreparation {
 				LOG.info("jar-file: " + jarName);
 				assertTrue(StringUtil.extract(jarName, "\\w+").matches("sparql|org|pusher|firebase"));
 			} catch (Exception e) {
-				if (e instanceof SocketTimeoutException || e.toString().matches(".*HTTP response.*50[023].*"))
+				if (ManagedException.getRootCause(e) instanceof SocketTimeoutException || e.toString().matches(".*HTTP response.*50[023].*"))
 					System.out.println(e.toString()); //OK, Problem on server side...
 				else
 					fail(e.toString());

@@ -31,6 +31,7 @@ public class LogicTableTest implements ENVTestPreparation {
     @BeforeClass
     public static void setUp() {
     	ENVTestPreparation.setUp();
+    	Pool.registerTypes(Rule.class, RuleScript.class, RuleDecisionTable.class, Action.class);
     }
 
     @AfterClass
@@ -79,7 +80,6 @@ public class LogicTableTest implements ENVTestPreparation {
     
     @Test
     public void testEquationSolverWithRule() throws NoSuchMethodException, SecurityException {
-    	Pool.registerTypes(Rule.class, RuleScript.class, RuleDecisionTable.class, Action.class);
     	LinkedHashMap pars = new LinkedHashMap();
     	pars.put("x1", new ParType(Integer.class));
 		Rule rule = new Rule("inc", "1+x1", pars);
