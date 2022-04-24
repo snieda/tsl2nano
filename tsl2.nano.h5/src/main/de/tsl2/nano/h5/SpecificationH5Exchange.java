@@ -12,10 +12,15 @@ import java.util.Properties;
 import java.util.Scanner;
 
 import de.tsl2.nano.bean.def.AttributeDefinition;
+import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
+import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.bean.def.SpecificationExchange;
 import de.tsl2.nano.bean.def.ValueExpression;
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.cls.ValuePath;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -25,7 +30,7 @@ import de.tsl2.nano.incubation.specification.rules.RuledEnabler;
 
 public class SpecificationH5Exchange extends SpecificationExchange {
 	
-    public int enrichFromSpecificationProperties() {
+	public int enrichFromSpecificationProperties() {
     	String file = FILENAME_SPEC_PROPERTIES;
 		Properties spec = ENV.getSortedProperties(file);
 		if (Util.isEmpty(spec)) {
@@ -55,6 +60,12 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 					property = StringUtil.substring(k, ".", null, true);
 					if (k.matches(pool.getFullExpressionPattern())) { // rule
 						pool.add(k, v);
+					} else if (k.endsWith(PATH_POSTIFX)){ // set any attribute property
+						String type = StringUtil.substring(object, null, ".");
+						bean = BeanDefinition.getBeanDefinition(type);
+						IAttributeDefinition attr = bean.getAttribute(StringUtil.substring(object, type + ".", "."));
+						AttributeDefinition.getAttributePropertyFromPath(k.substring(0, k.length() - 1)).setValue(v);
+						attrchanges++;
 					} else {
 						if (!object.contains(".")) { // bean
 							bean = BeanDefinition.getBeanDefinition(object);
@@ -77,7 +88,7 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 								beanchanges++;
 							}
 						} else { // field
-							AttributeDefinition<?> attr = (AttributeDefinition<?>) AttributeDefinition.getAttributeDefinitionFromPath(object);
+							AttributeDefinition<?> attr = (AttributeDefinition<?>) AttributeDefinition.getAttributeDefinitionFromIDPath(object);
 							String rule;
 							switch (Change.valueOf(property)) {
 							case enabler: 

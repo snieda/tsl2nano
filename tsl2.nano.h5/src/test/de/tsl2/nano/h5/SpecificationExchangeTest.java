@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import de.tsl2.nano.autotest.TypeBean;
+import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.core.ENV;
@@ -74,6 +75,7 @@ public class SpecificationExchangeTest implements ENVTestPreparation {
 		assertTrue("attribute 'testrule' was not created", bean.getAttribute("testrule", false) != null);
 		assertTrue(bean.getAction("%testrule") != null);
 		assertTrue(Proxy.isProxyClass(bean.getAttribute("string").getPresentation().getClass()));
+		assertEquals(2, (int)AttributeDefinition.getAttributePropertyFromPath("typeBean.bigDecimal.constraint.scale").getValue());
 	}
 
 	private String fillSpecificationProperties(Class<?> type, Properties p) {
@@ -82,6 +84,7 @@ public class SpecificationExchangeTest implements ENVTestPreparation {
 //		pool.add("%testrule", "TEST");
 		Properties pp = new Properties();
 		pp.put("%testrule", "TEST");
+		pp.put("typeBean.bigDecimal.constraint.scale*", "2");
 		String allnames = StringUtil.toString(BeanDefinition.getBeanDefinition(type).getAttributeNames(), -1).replace(" ", "");
 		allnames = allnames.substring(1, allnames.length() - 1);
 		allnames += ",testrule";

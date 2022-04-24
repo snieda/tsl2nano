@@ -58,6 +58,8 @@ public class ValuePath {
 	public static IValueAccess getValueAccess(Object bean, String... path) {
         if (bean == null || path == null)
             throw new IllegalArgumentException("bean and path must not be null!");
+        if (path.length == 1 && path[0].contains("."))
+        	path = path[0].split("[.]");
         Object value = bean;
         IValue result = null;
         for (int i = 0; i < path.length; i++) {

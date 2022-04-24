@@ -52,6 +52,10 @@ public interface NanoH5Util {
         return bean;
     }
 
+    static void define(String attributePropertyPath, Object value) {
+    	AttributeDefinition.getAttributePropertyFromPath(attributePropertyPath).setValue(value);
+    }
+    
 	static <T> void assureHtml5Presentation(BeanDefinition<T> bean) {
 		if (!(bean.getPresentationHelper() instanceof Html5Presentation))
         		bean.setPresentationHelper(new Html5Presentation<>(bean));

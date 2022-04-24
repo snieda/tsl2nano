@@ -17,6 +17,7 @@ import de.tsl2.nano.action.IConstraint;
 import de.tsl2.nano.action.IStatus;
 import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.cls.IValueAccess;
 import de.tsl2.nano.core.messaging.EventController;
 import de.tsl2.nano.core.secure.ISecure;
 
@@ -112,4 +113,5 @@ public interface IAttributeDefinition<T> extends IAttribute<T>, IAttributeDef, I
     EventController changeHandler();
     
     boolean hasRuleCover();
+    IValueAccess<?> getPropertyAccess(String path);
 }

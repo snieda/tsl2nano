@@ -782,6 +782,8 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
+     * @deprecated not really working on instance path. use {@link ValuePath#getValueAccess(Object, String...)} or {@link #getValue(Object, String...)} instead.
+     * 
      * @param attributePath can be given as e.g: myAttr1.myAttr2 or as String array
      *                      MYATTR1, MYATTR2
      * @return last attribute in given path

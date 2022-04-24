@@ -26,6 +26,7 @@ public class SpecificationExchange {
 	protected static final String SEP = ";";
     public static final String FILENAME_SPEC_PROPERTIES = "specification.properties";
 
+    public static final String PATH_POSTIFX = "*";
 	public static final String PATH_LAYOUTCONSTRAINTS = "presentable.layoutConstraints";
 	public static final String PATH_COLDEF_LAYOUTCONSTRAINTS = "columnDefinition." + PATH_LAYOUTCONSTRAINTS;
 

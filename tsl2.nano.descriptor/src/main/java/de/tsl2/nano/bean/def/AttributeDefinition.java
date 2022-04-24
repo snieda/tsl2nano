@@ -51,6 +51,7 @@ import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.cls.IValueAccess;
 import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.cls.UnboundAccessor;
+import de.tsl2.nano.core.cls.ValuePath;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.messaging.EventController;
 import de.tsl2.nano.core.messaging.IListener;
@@ -1085,20 +1086,32 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
 		return BeanDefinition.getBeanDefinition(getType()).getAttribute(name);
 	}
 
+    /** convenience to get the attributes parent bean */
     public BeanDefinition<?> getParentBean() {
     	return BeanDefinition.getBeanDefinition(StringUtil.substring(getId(), null, ".", true, true));
+    }
+
+    /** convenience to get access to an attribute internal property (see {@link ValuePath}.<p/>
+     * example: myBean.myAttributename.constraint.scale, or simplified: constraint.scal) */
+    public IValueAccess<?> getPropertyAccess(String path) {
+    	return ValuePath.getValueAccess(this, StringUtil.substring(path, getId() + ".", null));
+    }
+    
+    public static IValueAccess getAttributePropertyFromPath(String path) {
+    	return getAttributeDefinitionFromIDPath(path).getPropertyAccess(path);
     }
     
 	/**
 	 * convenience to get an attributedefinition through a given expression like myBeanName.myAttributeName
-	 * @param path
-	 * @return attribute definition belonging to a path holding the bean name + attriute name
+	 * @param path <beanname>.<attributename> (the rest will be ignored!)
+	 * @return attribute definition belonging to a path holding the bean name + attribute name
 	 */
-	public static IAttributeDefinition<?> getAttributeDefinitionFromPath(String path) {
+	public static IAttributeDefinition<?> getAttributeDefinitionFromIDPath(String path) {
 		BeanDefinition<?> bean;
-		String attrName = StringUtil.substring(path, ".", null, true);
-		path = StringUtil.substring(path, null, ".", true);
-		bean = BeanDefinition.getBeanDefinition(path);
+		String attrID = StringUtil.extract(path, "\\w+[.]\\w+");
+		String beanName = StringUtil.substring(attrID, null, ".", true);
+		bean = BeanDefinition.getBeanDefinition(beanName);
+		String attrName = StringUtil.substring(attrID, ".", null);
 		IAttributeDefinition<?> attr = bean.getAttribute(attrName);
 		return attr;
 	}
