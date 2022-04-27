@@ -1,4 +1,4 @@
-package de.tsl2.nano.excelworker;
+package de.tsl2.nano.incubation.specification;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -12,12 +12,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.util.CollectionUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.persistence.SQLQuery;
 
 /**
  * Reads data lines from a given flat or CSV file to give each line to a worker
@@ -210,7 +211,7 @@ class Worker implements Runnable {
 	String id;
 	String action;
 	Object[] actionParameter;
-	SQLQuery p;
+	IRunnable<Object, String> p; // -> de.tsl2.nano.persistence.SQLQuery from directaccess
 
 	public Worker(ActionType type, String expression, String id, String action, Object... actionParameter) {
 		this.type = type;
@@ -235,7 +236,7 @@ class Worker implements Runnable {
 		return pars.toArray();
 	}
 
-	Worker with(SQLQuery p) {
+	Worker with(IRunnable<Object, String> p /*SQLQuery*/) {
 		this.p = p;
 		return this;
 	}
@@ -276,9 +277,9 @@ class Worker implements Runnable {
 	}
 
 	private Object runSQL(String cmd) {
-		SQLQuery pt = new SQLQuery(PERSISTENCEUNIT);
+		IRunnable<Object, String> query = BeanClass.createInstance("de.tsl2.nano.persistence.SQLQuery", PERSISTENCEUNIT);
 		if (!Boolean.getBoolean(DRYRUN))
-			return pt.execute(cmd, actionParameter);
+			return query.run(cmd, actionParameter);
 		return "<-- DRYRUN";
 	}
 

@@ -14,6 +14,7 @@ import javax.transaction.HeuristicRollbackException;
 import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
 
+import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
@@ -28,7 +29,7 @@ import de.tsl2.nano.core.util.StringUtil;
  *
  * @author Thomas Schneider
  */
-public class SQLQuery {
+public class SQLQuery implements IRunnable<Object, String>{
 	private static final Logger LOG = Logger.getLogger(SQLQuery.class.getSimpleName());
 	/** em.getTransaction() only usable on transaction resource local */
 	private EntityManager em;
@@ -164,6 +165,11 @@ public class SQLQuery {
 
 	static void log(Object msg) {
 		LOG.info(msg.toString());// System.out.println(msg);
+	}
+
+	@Override
+	public Object run(String stmt, Object... args) {
+		return execute(stmt, args);
 	}
 }
 

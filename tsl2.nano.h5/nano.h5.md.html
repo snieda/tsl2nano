@@ -1166,7 +1166,47 @@ The provided entries look like:
    #myBean.myAttribute.rulecover=<path like 'presentable.layoutconstaints'>\:<rule>
    #myBean.myAttribute.listener=<rule>\:<comma-separated-list-of-observable-attribute-names>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   
+
+You may create a specification.properties like (example from timesheet):
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%weekday=charge.getFromdate() != null ? formatter.format(charge.getFromdate()) : "";
+%calcTime=var from = fromtime != null ? fromtime.getTime() % 24*3600 : 0; var to = totime != null ? totime.getTime() % 24*3600 : 0; var p = pause != null ? (pause.getTime() - new Date(pause.toGMTString()).getTimezoneOffset()*60000) % dayTimeFraction : 0; Math.round(((to - from) - p) / (3600 * 10)) / 100;
+%presValueColor=var map = new java.util.HashMap(); map.put('style', (typeof value != 'undefined' ? value : 0) > 10 ? 'color: red;' : 'color: green;'); map;
+&weekcolor= \
+    matrix, <1>, <2>, <3>, <4>, <5>, <6>, <7> \
+    weekday, Mo, Di, Mi, Do, Fr, Sa, So \
+    result, color: green;,color: green;,color: green;,color: green;,color: green;,color: red;,color: red
+%id=value
+
+charge.addattribute=%weekday
+charge.value.listener=%calcTime:fromtime,totime,pause
+charge.value.rulecover=%presValueColor:presentable.layoutConstraints
+charge.value.rulecover=%presValueColor:columndefinition.presentable.layoutConstraints
+charge.fromdate.listener=%id:todate
+charge.fromdate.rulecover=&weekcolor:presentable.layoutConstraints
+charge.fromdate.rulecover=&weekcolor:columndefinition.presentable.layoutConstraints
+charge.todate.presentation.visible=false
+charge.fromtime.presentation.type*=16
+charge.totime.presentation.type*=16
+charge.pause.presentation.type*=16
+charge.value.constraint.scale=2
+charge.value.constraint.precision=4
+
+type.icon=equipment.png
+type.valueexpression={name}
+category.icon=equipment.png
+category.valueexpression={name}
+account.icon=euro.png
+account.valueexpression={name}
+property.icon=table.png
+property.valueexpression={akey}
+#property.attributefilter=
+chargeItem.icon=buy.png
+chargeItem.valueexpression={item}
+chargeItem.charge.constraint.nullable*=false
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 ## The _ScriptTool_
 
 After login, you are able to execute queries and scripts like ant-scripts. You have to enable it in your _environment.xml_ to see the _ScriptTool_ in the list of _BeanCollectors_.

@@ -1,6 +1,6 @@
-package de.tsl2.nano.excelworker;
+package de.tsl2.nano.incubation.specification;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
@@ -12,7 +12,7 @@ public class ExcelWorkerTest {
 	@Test
 	public void testExcelWorker() {
 		policiert = 0;
-		Util.trY( () -> new ExcelWorker("src/resources/test-sheet.txt").run(), false);
+		Util.trY( () -> new ExcelWorker("src/test/resources/test-sheet.txt").run(), false);
 		assertEquals(2, policiert);
 	}
 
@@ -20,7 +20,7 @@ public class ExcelWorkerTest {
 	public void testExcelWorkerDryRun() {
 		System.setProperty(Worker.DRYRUN, "true");
 		policiert = 0;
-		new ExcelWorker("src/resources/test-sheet.txt").run();
+		new ExcelWorker("src/test/resources/test-sheet.txt").run();
 		assertEquals(0, policiert);
 	}
 
@@ -28,7 +28,7 @@ public class ExcelWorkerTest {
 	public void testExcelWorkerSwallowTabs() {
 		System.setProperty("tsl2nano.excelworker.swallowtabs", "true");
 		policiert = 0;
-		new ExcelWorker("src/resources/test-sheet.txt").run();
+		new ExcelWorker("src/test/resources/test-sheet.txt").run();
 		assertEquals(2, policiert);
 	}
 }
