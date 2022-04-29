@@ -9,7 +9,7 @@ for basedir in $(find . -type d -name classes); do
     classpath=$classpath:$basedir
     echo " ==> BASEDIR: $basedir"
     for class in $(find . -name "*.class" -printf "%P\n"); do
-        (java -cp $classpath ${class%.*} >$tmp && [ $? == 0 ] && echo $tmp >> $output)
+        (java -cp $classpath ${class%.*} >$tmp && [ $? == 0 ] && echo < $tmp >> $output)
     done 
 done
 

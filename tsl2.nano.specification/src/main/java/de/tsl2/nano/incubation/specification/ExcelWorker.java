@@ -192,7 +192,11 @@ public class ExcelWorker implements Runnable {
 	}
 
 	public static void main(String[] args) {
-		Util.trY(() -> new ExcelWorker(args[0]).run());
+		if (args.length > 0) {
+			Util.trY(() -> new ExcelWorker(args[0]).run());
+		} else {
+			System.out.println("usage: ExcelWorker {csv-file-name}");
+		}
 	}
 }
 enum ActionType { PRN, CLS, CMD, URL, SQL};
