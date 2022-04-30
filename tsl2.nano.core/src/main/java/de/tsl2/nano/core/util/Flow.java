@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -21,7 +22,7 @@ import de.tsl2.nano.core.cls.BeanClass;
  * It is the maker. going recursively through all tasks until end. experimental implementation
  * having only one class file with inner classes and a fat interface<p/> 
  * 
- * As {@link ATask} is a base implementation of {@link ITask}, the {@link STask}<br/>
+ * As {@link AFunctionalTask} is a base implementation of {@link ITask}, the {@link STask}<br/>
  * provides an extension to be used on functional implementation.<p/>
  * 
  * Each task has a name (may be equal to the action definition representation), a condition<br/>
@@ -188,17 +189,80 @@ public class Flow {
 		
 	}
 
+	public abstract class ATask implements ITask {
+		protected String condition;
+		protected String expression;
+		private Status status = Status.NEW;
+		private List<ITask> neighbours = new LinkedList<>();
+
+		public ATask(String condition, String expression) {
+			this.condition = condition;
+			this.expression = expression;
+		}
+		@Override
+		public String name() {
+			return condition + ":" + expression;
+		}
+
+		@Override
+		public List<ITask> next() {
+			return neighbours;
+		}
+		@Override
+		public Status status() {
+			return status;
+		}
+		@Override
+		public boolean canActivate(Map<String, Object> context) {
+			status = Status.ASK;
+			return canActivateImpl(context);
+		}
+		protected abstract boolean canActivateImpl(Map<String, Object> context);
+		
+		@Override
+		public Object activate(Map<String, Object> context) {
+			status = Status.RUN;
+			Object result = null;
+			try {
+				result = activateImpl(context);
+				status = Status.OK;
+			} catch (Exception ex) {
+				status = Status.FAIL;
+			}
+			return result;
+		}
+		protected abstract Object activateImpl(Map<String, Object> context);
+
+		@Override
+		public void addNeighbours(ITask... tasks) {
+			neighbours.addAll(Arrays.asList(tasks));
+		}
+		@Override
+		public int hashCode() {
+			return Objects.hash(condition, expression);
+		}
+		@Override
+		public boolean equals(Object obj) {
+			return hashCode() == obj.hashCode();
+		}
+		
+		@Override
+		public String toString() {
+			return asString();
+		}
+	}
+
 	@SuppressWarnings("rawtypes")
-	public class ATask implements ITask {
+	public class AFunctionalTask implements ITask { // TODO: extend from ATask
 		private String name;
 		private Predicate<Map> condition;
 		private Function<Map, ?> function;
 		private Status status = Status.NEW;
 		private List<ITask> neighbours;
 
-		protected ATask() {
+		protected AFunctionalTask() {
 		}
-		public ATask(String name, Predicate<Map> condition, Function<Map, ?> function, List<ITask> neighbours) {
+		public AFunctionalTask(String name, Predicate<Map> condition, Function<Map, ?> function, List<ITask> neighbours) {
 			this.name = name;
 			this.condition = condition;
 			this.function = function;
@@ -244,9 +308,9 @@ public class Flow {
 		
 		@Override
 		public boolean equals(Object obj) {
-			if (!(obj instanceof ATask))
+			if (!(obj instanceof AFunctionalTask))
 				return false;
-			ATask o = (ATask) obj;
+			AFunctionalTask o = (AFunctionalTask) obj;
 			return name.equals(o.name) && condition.equals(o.condition);
 		}
 		
@@ -255,8 +319,8 @@ public class Flow {
 			return asString();
 		}
 	}
-	/** simple string-based task. condition should match context as string. expression has to point to a method. */
-	public class STask extends ATask {
+	/** simple string-based task. context should match condition as string. expression has to point to a method. */
+	public class STask extends AFunctionalTask {
 		String condition; //for logging output
 		String expression;
 		protected STask() {
@@ -288,7 +352,7 @@ public class Flow {
 	}
 
 	/** simple http request task. condition should point to a rest-service with boolean response. expression to any rest service */
-	public class RTask extends ATask {
+	public class RTask extends AFunctionalTask {
 		protected RTask() {}
 		
 		public RTask(String name, String urlCondition, String urlExpression) {

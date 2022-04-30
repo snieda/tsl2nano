@@ -11,7 +11,7 @@ import de.tsl2.nano.core.util.Flow.ITask;
  * @author ts
  *
  */
-public class Task extends Flow.ATask {
+public class Task extends Flow.AFunctionalTask {
 
 	/** WORKAROUND to use inner classes in Flow - may be refactored external classes */
 	private static Flow flow;
