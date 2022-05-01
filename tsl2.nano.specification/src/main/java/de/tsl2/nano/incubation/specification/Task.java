@@ -1,6 +1,9 @@
 package de.tsl2.nano.incubation.specification;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.Flow;
@@ -11,7 +14,10 @@ import de.tsl2.nano.core.util.Flow.ITask;
  * @author ts
  *
  */
-public class Task extends Flow.AFunctionalTask {
+@SuppressWarnings({ "unchecked", "rawtypes" })
+public class Task extends Flow.ATask {
+	Predicate<Map> fctCondition;
+	Function<Map, ?> fctFunction;
 
 	/** WORKAROUND to use inner classes in Flow - may be refactored external classes */
 	private static Flow flow;
@@ -19,15 +25,16 @@ public class Task extends Flow.AFunctionalTask {
 	Task() {
 		flow.super();
 	}
-	@SuppressWarnings("unchecked")
 	public Task(Flow flow, String conditionRule, String activationRule, List<ITask> neighbours) {
-		flow.super(conditionRule, activationRule, 
-				m -> (Boolean)ENV.get(Pool.class).get(conditionRule).run(m), 
-				m -> ENV.get(Pool.class).get(activationRule).run(m));
+		flow.super(conditionRule, activationRule);
 		Task.flow = flow;
 	}
 	@Override
-	public ITask createTask(String[] t) {
-		return new Task(flow, t[3], t[0], null);
+	protected Predicate<Map> getFctCondition(String condition) {
+		return m -> (Boolean)ENV.get(Pool.class).get(condition).run(m);
+	}
+	@Override
+	protected Function<Map, ?> getFctFunction(String expression) {
+		return m -> ENV.get(Pool.class).get(expression).run(m);
 	}
 }

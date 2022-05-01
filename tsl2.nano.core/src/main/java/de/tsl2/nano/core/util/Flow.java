@@ -22,7 +22,7 @@ import de.tsl2.nano.core.cls.BeanClass;
  * It is the maker. going recursively through all tasks until end. experimental implementation
  * having only one class file with inner classes and a fat interface<p/> 
  * 
- * As {@link AFunctionalTask} is a base implementation of {@link ITask}, the {@link STask}<br/>
+ * As {@link AFunctionalTask} is a base implementation of {@link ITask}, the {@link CTask}<br/>
  * provides an extension to be used on functional implementation.<p/>
  * 
  * Each task has a name (may be equal to the action definition representation), a condition<br/>
@@ -64,7 +64,7 @@ public class Flow {
 	public static Flow load(File gravitoFile, Class<? extends ITask> taskType) {
 		Scanner sc = Util.trY( () -> new Scanner(gravitoFile));
 		Flow flow = new Flow();
-		ITask task;
+		ITask task = null;
 		Map<String, ITask> tasks = new HashMap<>();
 		tasks.put(ITask.END.name(), ITask.END);
 		Deque<String> strTasks = new LinkedList<>();
@@ -75,9 +75,10 @@ public class Flow {
 		}
 		// create from end...
 		while (!strTasks.isEmpty()) {
-			task = taskType != null ? BeanClass.createInstance(taskType) : flow.new STask();
+			task = taskType != null ? BeanClass.createInstance(taskType) : flow.new CTask();
 			task.fromGravString(strTasks.pollLast(), tasks);
 		}
+		flow.setTasks(task);
 		return flow;
 	}
 	public Deque<ITask> process(Map<String, Object> context) {
@@ -125,7 +126,7 @@ public class Flow {
 			System.out.println("usage: Flow <gravito-flow-file>");
 			return;
 		}
-		Flow flow = Flow.load(new File(args[0]), STask.class);
+		Flow flow = Flow.load(new File(args[0]), CTask.class);
 		flow.process(new HashMap<>());
 	}
 	/** base definition to do a simple workflow */
@@ -196,6 +197,8 @@ public class Flow {
 	public abstract class ATask implements ITask {
 		protected String condition;
 		protected String expression;
+		private Predicate<Map> fctCondition;
+		private Function<Map, ?> fctFunction;
 		private Status status = Status.NEW;
 		private List<ITask> neighbours = new LinkedList<>();
 
@@ -218,26 +221,33 @@ public class Flow {
 		public Status status() {
 			return status;
 		}
+		public String gravCondition() {
+			return " [label=\"" + condition + "\"]";
+		}
 		@Override
 		public boolean canActivate(Map<String, Object> context) {
 			status = Status.ASK;
-			return canActivateImpl(context);
+			if (fctCondition == null)
+				fctCondition  = getFctCondition(condition);
+			return fctCondition.test(context);
 		}
-		protected abstract boolean canActivateImpl(Map<String, Object> context);
+		protected abstract Predicate<Map> getFctCondition(String condition);
 		
 		@Override
 		public Object activate(Map<String, Object> context) {
 			status = Status.RUN;
 			Object result = null;
 			try {
-				result = activateImpl(context);
+				if (fctFunction == null)
+					fctFunction = getFctFunction(expression);
+				result = fctFunction.apply(context);
 				status = Status.OK;
 			} catch (Exception ex) {
 				status = Status.FAIL;
 			}
 			return result;
 		}
-		protected abstract Object activateImpl(Map<String, Object> context);
+		protected abstract Function<Map, ?> getFctFunction(String expression);
 
 		@Override
 		public void addNeighbours(ITask... tasks) {
@@ -252,68 +262,50 @@ public class Flow {
 			return hashCode() == obj.hashCode();
 		}
 		
+		public CTask createTask(String[] t) {
+			return new CTask(t[0], t[3]);
+		}
 		@Override
 		public String toString() {
 			return asString();
 		}
 	}
 
-	@SuppressWarnings("rawtypes")
-	public class AFunctionalTask extends ATask {
-		private Predicate<Map> fctCondition;
-		private Function<Map, ?> fctFunction;
-
-		protected AFunctionalTask() {
-		}
-		public AFunctionalTask(String condition, String function, Predicate<Map> fctCondition, Function<Map, ?> fctFunction) {
-			super(condition, function);
-			this.fctCondition = fctCondition;
-			this.fctFunction = fctFunction;
-		}
-
-		@Override
-		public boolean canActivateImpl(Map<String, Object> context) {
-			return fctCondition.test(context);
-		}
-		
-		@Override
-		public Object activateImpl(Map<String, Object> context) {
-				return fctFunction.apply(context);
-		}
-	}
 	/** simple string-based task. context should match condition as string. expression has to point to a method. */
-	public class STask extends AFunctionalTask {
-		protected STask() {
-		}
+	public class CTask extends ATask {
+		protected CTask() {}
 		
 		/** Predicate as condition, FunctionalInterface as action */
-		public STask(String predicateClassName, String functionClassName) {
-			super(predicateClassName, functionClassName, 
-					m -> ((Predicate<Map>)BeanClass.createInstance(predicateClassName)).test(m),
-					m -> ((Function<Map, ?>)BeanClass.createInstance(functionClassName)).apply(m));
-			this.expression = "@" + functionClassName;
+		public CTask(String predicateClassName, String functionClassName) {
+			super(predicateClassName, functionClassName);
 		}
-		/** direct function implementation -> not persistable! */
-		public STask(String condition, String functionName, Function<Map, ?> function) {
-			super(condition, functionName, m -> m.toString().matches(condition), function);
+
+		@Override
+		protected Predicate<Map> getFctCondition(String condition) {
+			return BeanClass.createInstance(condition);
 		}
-		public String gravCondition() {
-			return " [label=\"" + condition + "\"]";
-		}
-		public STask createTask(String[] t) {
-			STask task = BeanClass.isPublicClass(t[0]) && BeanClass.isPublicClass(t[3]) 
-					? new STask(t[0], t[3])
-					: new STask(t[0], t[3], null);
-			return task;
+		@Override
+		protected Function<Map, ?> getFctFunction(String expression) {
+			return BeanClass.createInstance(expression);
 		}
 	}
 
 	/** simple http request task. condition should point to a rest-service with boolean response. expression to any rest service */
-	public class RTask extends AFunctionalTask {
+	public class RTask extends ATask {
 		protected RTask() {}
 		
 		public RTask(String urlCondition, String urlExpression) {
-			super(urlCondition, urlExpression, m -> new Boolean(NetUtil.getRest(urlCondition, m, Boolean.class)), m -> NetUtil.getRest(urlExpression, m, Object.class));
+			super(urlCondition, urlExpression);
+		}
+
+		@Override
+		protected Predicate<Map> getFctCondition(String condition) {
+			return m -> new Boolean(NetUtil.getRest(condition, m, Boolean.class));
+		}
+
+		@Override
+		protected Function<Map, ?> getFctFunction(String expression) {
+			return m -> NetUtil.getRest(expression, m, Object.class);
 		}
 	}
 	public class RegExMatchContext implements Predicate<Map> {

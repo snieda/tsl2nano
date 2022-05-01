@@ -1,16 +1,43 @@
 package de.tsl2.nano.incubation.specification;
 
-import static org.junit.Assert.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.ScheduledFuture;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
-public class WorkflowTest {
+import de.tsl2.nano.autotest.TypeBean;
+import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.util.ConcurrentUtil;
+import de.tsl2.nano.core.util.ENVTestPreparation;
 
+public class WorkflowTest implements ENVTestPreparation{
+	@Before
+	public void setUp() throws Exception {
+		ENVTestPreparation.super.setUp("specification");
+		new TaskTest().testFlow();
+	}
+	@After
+	public void tearDown() {
+		ENVTestPreparation.tearDown();
+	}
+	
 	@Test
 	public void testWorkflow() {
-		String flowFileName = null;
+		String flowFileName = ENV.getConfigPath() + "/test.gra";
 		String queryName = null;
-		new Workflow(Task.class.getName(), flowFileName, "0/10/100/SECONDS", queryName);
+		Workflow workflow = new Workflow(Task.class.getName(), flowFileName, "0/2/6/SECONDS", queryName) {
+			@Override
+			protected Collection<Object> getData() {
+				return Arrays.asList(new TypeBean(true));
+			}
+		};
+		Thread.setDefaultUncaughtExceptionHandler((t, e) -> e.printStackTrace());
+		ScheduledFuture<?> future = workflow.activate();
+//		ConcurrentUtil.waitFor(() -> future.isCancelled() || future.isDone());
+		ConcurrentUtil.sleep(7000);
 	}
 
 }

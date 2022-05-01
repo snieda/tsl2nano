@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -38,7 +39,6 @@ public class Workflow implements Runnable {
 	@Attribute
 	String queryName;
 	Map<String, Object> context;
-	transient Class<? extends ITask> flowClass;
 	
 	transient Collection<Flow> flows = new LinkedList<>();
 	
@@ -50,26 +50,34 @@ public class Workflow implements Runnable {
 		this.flowType = flowType;
 		this.schedule = schedule;
 		this.queryName = queryName;
-		init();
 	}
 
-	private void init() {
-		flowClass = BeanClass.load(flowType);
+	public ScheduledFuture<?> activate() {
 		String[] time = schedule.split("[/]");
-		SchedulerUtil.runAt(Integer.valueOf(time[0]), Integer.valueOf(time[1]), Integer.valueOf(time[2]), TimeUnit.valueOf(time[3]), this);
+		return SchedulerUtil.runAt(Integer.valueOf(time[0]), Integer.valueOf(time[1]), Integer.valueOf(time[2]), TimeUnit.valueOf(time[3]), this);
 	}
 
 	@Override
 	public void run() {
-		IPRunnable query = ENV.get(Pool.class).get(queryName);
-		Collection<Object> items = (Collection<Object>) query.run(context);
-		items.forEach(i -> {
+		Class<? extends ITask> flowClass = BeanClass.load(flowType);
+		log("starting workflow [" + flowClass.getName() + "]");
+		Collection<Object> items = getData();
+		items.parallelStream().forEach(i -> {
 			Map<String, Object> flowContext = BeanUtil.toValueMap(i);
 			Flow flow = Flow.load(new File(flowFileName), flowClass);
 			flow.addListener(new TaskListener(i, System.currentTimeMillis()));
 			flows.add(flow);
 			flow.process(flowContext);
 		});
+	}
+
+	protected Collection<Object> getData() {
+		IPRunnable query = ENV.get(Pool.class).get(queryName);
+		Collection<Object> items = (Collection<Object>) query.run(context);
+		return items;
+	}
+	void log(Object obj) {
+		System.out.println(obj);
 	}
 }
 

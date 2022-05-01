@@ -8,6 +8,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.Flow;
@@ -38,7 +39,7 @@ public class TaskTest implements ENVTestPreparation {
 		task.addNeighbours(ITask.END);
 		flow.setTasks(task);
 		
-		File file = FileUtil.userDirFile("test.gra");
+		File file = FileUtil.userDirFile(ENV.getConfigPath() + "/test.gra");
 		flow.persist(file);
 		
 		Flow flow1 = Flow.load(file, Task.class);

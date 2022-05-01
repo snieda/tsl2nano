@@ -10,7 +10,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.tsl2.nano.core.util.Flow.ITask;
-import de.tsl2.nano.core.util.Flow.STask;
+import de.tsl2.nano.core.util.Flow.CTask;
 
 public class FlowTest  implements ENVTestPreparation {
 
@@ -34,8 +34,22 @@ public class FlowTest  implements ENVTestPreparation {
 	}
 
 	private ITask createTasks(Flow flow) {
-		STask t1 = flow.new STask("task1", ".*init=1.*", c -> c.put("init", 2));
-		STask t2 = flow.new STask("task2", ".*init=2.*", null);
+		CTask t1 = flow.new CTask("task1", ".*init=1.*") {
+			protected java.util.function.Predicate<java.util.Map> getFctCondition(String condition) {
+				return m -> m.toString().matches(condition);
+			}
+			protected java.util.function.Function<java.util.Map,?> getFctFunction(String expression) {
+				return c -> c.put("init", 2);
+			}
+		};
+		CTask t2 = flow.new CTask("task2", ".*init=2.*") {
+			protected java.util.function.Predicate<java.util.Map> getFctCondition(String condition) {
+				return m -> m.toString().matches(condition);
+			}
+			protected java.util.function.Function<java.util.Map,?> getFctFunction(String expression) {
+				return null;
+			}
+		};
 		ITask start = ITask.createStart(t1);
 		t1.addNeighbours(t2);
 		t2.addNeighbours(ITask.END);
