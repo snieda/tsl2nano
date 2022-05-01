@@ -21,10 +21,9 @@ public class Task extends Flow.AFunctionalTask {
 	}
 	@SuppressWarnings("unchecked")
 	public Task(Flow flow, String conditionRule, String activationRule, List<ITask> neighbours) {
-		flow.super(activationRule, 
+		flow.super(conditionRule, activationRule, 
 				m -> (Boolean)ENV.get(Pool.class).get(conditionRule).run(m), 
-				m -> ENV.get(Pool.class).get(activationRule).run(m), 
-				neighbours);
+				m -> ENV.get(Pool.class).get(activationRule).run(m));
 		Task.flow = flow;
 	}
 	@Override

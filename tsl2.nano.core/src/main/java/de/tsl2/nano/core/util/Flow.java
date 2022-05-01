@@ -99,6 +99,10 @@ public class Flow {
 			}
 		}
 	}
+	public void addListener(Consumer<ITask> l) {
+		listeners.add(l);
+	}
+	
 	public boolean isSuccessfull(Deque<ITask> solved) {
 		return solved.getLast().isEnd();
 	}
@@ -195,6 +199,8 @@ public class Flow {
 		private Status status = Status.NEW;
 		private List<ITask> neighbours = new LinkedList<>();
 
+		protected ATask() {}
+		
 		public ATask(String condition, String expression) {
 			this.condition = condition;
 			this.expression = expression;
@@ -253,92 +259,43 @@ public class Flow {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public class AFunctionalTask implements ITask { // TODO: extend from ATask
-		private String name;
-		private Predicate<Map> condition;
-		private Function<Map, ?> function;
-		private Status status = Status.NEW;
-		private List<ITask> neighbours;
+	public class AFunctionalTask extends ATask {
+		private Predicate<Map> fctCondition;
+		private Function<Map, ?> fctFunction;
 
 		protected AFunctionalTask() {
 		}
-		public AFunctionalTask(String name, Predicate<Map> condition, Function<Map, ?> function, List<ITask> neighbours) {
-			this.name = name;
-			this.condition = condition;
-			this.function = function;
-			this.neighbours = neighbours != null ? neighbours : new LinkedList<>();
+		public AFunctionalTask(String condition, String function, Predicate<Map> fctCondition, Function<Map, ?> fctFunction) {
+			super(condition, function);
+			this.fctCondition = fctCondition;
+			this.fctFunction = fctFunction;
 		}
 
 		@Override
-		public String name() {
-			return name;
-		}
-
-		@Override
-		public boolean canActivate(Map<String, Object> context) {
-			status = Status.ASK;
-			return condition.test(context);
+		public boolean canActivateImpl(Map<String, Object> context) {
+			return fctCondition.test(context);
 		}
 		
 		@Override
-		public Object activate(Map<String, Object> context) {
-			status = Status.RUN;
-			Object result = null;
-			try {
-				result = function.apply(context);
-				status = Status.OK;
-			} catch (Exception ex) {
-				status = Status.FAIL;
-			}
-			return result;
-		}
-		
-		@Override
-		public List<ITask> next() {
-			return neighbours;
-		}
-		@Override
-		public Status status() {
-			return status;
-		}
-		@Override
-		public void addNeighbours(ITask... tasks) {
-			neighbours.addAll(Arrays.asList(tasks));
-		}
-		
-		@Override
-		public boolean equals(Object obj) {
-			if (!(obj instanceof AFunctionalTask))
-				return false;
-			AFunctionalTask o = (AFunctionalTask) obj;
-			return name.equals(o.name) && condition.equals(o.condition);
-		}
-		
-		@Override
-		public String toString() {
-			return asString();
+		public Object activateImpl(Map<String, Object> context) {
+				return fctFunction.apply(context);
 		}
 	}
 	/** simple string-based task. context should match condition as string. expression has to point to a method. */
 	public class STask extends AFunctionalTask {
-		String condition; //for logging output
-		String expression;
 		protected STask() {
 		}
 		
 		/** Predicate as condition, FunctionalInterface as action */
 		public STask(String predicateClassName, String functionClassName) {
-			super(BeanClass.load(functionClassName).getSimpleName(), 
+			super(predicateClassName, functionClassName, 
 					m -> ((Predicate<Map>)BeanClass.createInstance(predicateClassName)).test(m),
-					m -> ((Function<Map, ?>)BeanClass.createInstance(functionClassName)).apply(m), 
-					null);
-			this.condition = predicateClassName;
+					m -> ((Function<Map, ?>)BeanClass.createInstance(functionClassName)).apply(m));
 			this.expression = "@" + functionClassName;
 		}
 		/** direct function implementation -> not persistable! */
-		public STask(String name, String condition, Function<Map, ?> function) {
-			super(name, m -> m.toString().matches(condition), function, null);
-			this.condition = condition;
+		public STask(String condition, String functionName, Function<Map, ?> function) {
+			super(condition, functionName, m -> m.toString().matches(condition), function);
 		}
 		public String gravCondition() {
 			return " [label=\"" + condition + "\"]";
@@ -355,8 +312,8 @@ public class Flow {
 	public class RTask extends AFunctionalTask {
 		protected RTask() {}
 		
-		public RTask(String name, String urlCondition, String urlExpression) {
-			super(name, m -> new Boolean(NetUtil.getRest(urlCondition, m, Boolean.class)), m -> NetUtil.getRest(urlExpression, m, Object.class), null);
+		public RTask(String urlCondition, String urlExpression) {
+			super(urlCondition, urlExpression, m -> new Boolean(NetUtil.getRest(urlCondition, m, Boolean.class)), m -> NetUtil.getRest(urlExpression, m, Object.class));
 		}
 	}
 	public class RegExMatchContext implements Predicate<Map> {
