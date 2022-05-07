@@ -1,8 +1,10 @@
 package de.tsl2.nano.incubation.specification;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
+
+import javax.management.Query;
 
 import org.junit.After;
 import org.junit.Before;
@@ -15,12 +17,15 @@ import de.tsl2.nano.core.util.Flow;
 import de.tsl2.nano.core.util.Flow.ITask;
 import de.tsl2.nano.incubation.specification.actions.Action;
 import de.tsl2.nano.incubation.specification.rules.Rule;
+import de.tsl2.nano.incubation.specification.rules.RuleDecisionTable;
+import de.tsl2.nano.incubation.specification.rules.RuleScript;
 
 public class TaskTest implements ENVTestPreparation {
 
 	@Before
 	public void setUp() {
 		ENVTestPreparation.super.setUp("specification");
+    	Pool.registerTypes(Rule.class, RuleScript.class, RuleDecisionTable.class, Action.class);
 	}
 	@After
 	public void tearDown() {
@@ -34,10 +39,10 @@ public class TaskTest implements ENVTestPreparation {
 		pool.add(new Action<>(TaskTest.class.getMethod("myAction", new Class[0])));
 		
 		Flow flow = new Flow();
-		Task task = new Task(flow, "test", "myAction", null);
-		ITask.createStart(task);
+		Task task = new Task("test", "myAction");
+		ITask start = ITask.createStart(task);
 		task.addNeighbours(ITask.END);
-		flow.setTasks(task);
+		flow.setTasks(start);
 		
 		File file = FileUtil.userDirFile(ENV.getConfigPath() + "/test.gra");
 		flow.persist(file);

@@ -34,7 +34,15 @@ import de.tsl2.nano.core.cls.BeanClass;
  * This base implementation of a workflow is used and extended inside the module 'tsl2.nano.specification'
  * which provides conditions and actions as rules (through scripting, decision tables etc.) or specified actions. 
  * */
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class Flow {
+	public static final String FILE_EXT = ".gra";
+	protected static Class<? extends ITask> DEFAULT_TASK_TYPE = BeanClass.load(System.getProperty("tsl2nano.flow.default.task.type", CTask.class.getName()));
+	protected static final String NAME_START = "START";
+	protected static final String NAME_END = "END";
+	protected static final String GRVT_LABEL_START = " [label=\"";
+	protected static final String GRVT_LABEL_END = "\"]";
+
 	String name;
 	ITask start;
 	List<Consumer<ITask>> listeners = new LinkedList<>();
@@ -44,7 +52,7 @@ public class Flow {
 	}
 	
 	public void persist() {
-		persist(FileUtil.userDirFile(name + "gra"));
+		persist(FileUtil.userDirFile(name + FILE_EXT));
 	}
 	public void persist(File gravitoFile) {
 		StringBuilder buf = new StringBuilder();
@@ -64,19 +72,23 @@ public class Flow {
 	public static Flow load(File gravitoFile, Class<? extends ITask> taskType) {
 		Scanner sc = Util.trY( () -> new Scanner(gravitoFile));
 		Flow flow = new Flow();
+		flow.name = StringUtil.substring(FileUtil.replaceToJavaSeparator(gravitoFile.getPath()), "/", ".", true);
 		ITask task = null;
 		Map<String, ITask> tasks = new HashMap<>();
-		tasks.put(ITask.END.name(), ITask.END);
+//		tasks.put(ITask.END.name(), ITask.END);
 		Deque<String> strTasks = new LinkedList<>();
 		String line;
 		while (sc.hasNextLine()) {
-			if (!(line = sc.nextLine()).isEmpty())
-			strTasks.add(line);
+			if (!(line = sc.nextLine()).isEmpty() && !line.trim().startsWith("#"))
+				strTasks.add(line);
 		}
 		// create from end...
 		while (!strTasks.isEmpty()) {
+//			task = BeanClass.createInstance((Class<? extends ITask>)(taskType != null ? taskType : DEFAULT_TASK_TYPE));
 			task = taskType != null ? BeanClass.createInstance(taskType) : flow.new CTask();
-			task.fromGravString(strTasks.pollLast(), tasks);
+			//TODO: thats nonsense - we throw the new instance away...
+			task = task.fromGravString(strTasks.pollLast(), tasks);
+			tasks.put(task.name(), task);
 		}
 		flow.setTasks(task);
 		return flow;
@@ -119,7 +131,7 @@ public class Flow {
 		if (!(obj instanceof Flow))
 			return false;
 		Flow f = (Flow) obj;
-		return buildString(start, new StringBuilder()).toString().equals(f.buildString(start, new StringBuilder()).toString());
+		return buildString(start, new StringBuilder()).toString().equals(f.buildString(f.start, new StringBuilder()).toString());
 	}
 	public static void main(String[] args) {
 		if (args.length == 0) {
@@ -152,21 +164,32 @@ public class Flow {
 		default String gravCondition() {
 			return "";
 		}
+		void setCondition(String condition);
 		default ITask fromGravString(String line, Map<String, ITask> tasks) {
-			// TODO: how to persist/restore action expression
-			String[] t = StringUtil.splitFix(line, false, " ", " -> ", " [label=\"", "\"]");
-			ITask task = createTask(t);
-			if (tasks.containsKey(t[2]))
-				task.addNeighbours(tasks.get(t[2]));
-			return task;
+			String[] t = StringUtil.splitFix(line, false, " ", " -> ", GRVT_LABEL_START, GRVT_LABEL_END);
+			if (!line.contains("[label")) {
+				t[3] = t[4] = null;
+			}
+			ITask task2 = tasks.get(t[2]);
+			if (task2 == null)
+				task2 = t[2].equals(NAME_END) ? ITask.END : createTask(t[2], t[3], null);
+			else
+				task2.setCondition(t[3]);
+			ITask task1 /*= tasks.remove(t[0]);
+			if (task1 == null)
+				task1 */= t[0].equals(NAME_START) ? createStart(task2) : createTask(t[0], null, StringUtil.substring(t[1], "(", ")"));
+			if (!task1.name().equals(NAME_START))
+				task1.addNeighbours(task2);
+			return task1;
 		}
 
-		default ITask createTask(String[] t) { throw new UnsupportedOperationException(); }
+		default ITask createTask(String name, String condition, String status) { throw new UnsupportedOperationException(); }
 		public static ITask createStart(final ITask...tasks) {
 			return new ITask() {
-				@Override public String name() { return "START"; }
+				@Override public String name() { return NAME_START; }
 				@Override public boolean isStart() { return true; }
 				@Override public void addNeighbours(ITask...tasks) {}
+				@Override public void setCondition(String condition) {}
 				@Override
 				public List<ITask> next() {
 					return Arrays.asList(tasks);
@@ -182,13 +205,14 @@ public class Flow {
 			};
 		}
 		static final ITask END = new ITask() {
-			@Override public String name() { return "END"; }
+			String condition;
+			@Override public String name() { return NAME_END; }
 			@Override public List<ITask> next() { return Arrays.asList(); }
 			@Override public boolean isEnd() { return true; }
 			@Override public void addNeighbours(ITask...tasks) {}
-			@Override
-			public String toString() {
-				return name();
+			@Override public String gravCondition() { return condition != null ? GRVT_LABEL_START + condition + GRVT_LABEL_END : ""; }
+			@Override public void setCondition(String condition) { this.condition = condition;}
+			@Override public String toString() { return name();
 			}
 		};
 		
@@ -210,7 +234,7 @@ public class Flow {
 		}
 		@Override
 		public String name() {
-			return condition + ":" + expression;
+			return expression;
 		}
 
 		@Override
@@ -222,7 +246,11 @@ public class Flow {
 			return status;
 		}
 		public String gravCondition() {
-			return " [label=\"" + condition + "\"]";
+			return GRVT_LABEL_START + condition + GRVT_LABEL_END;
+		}
+		@Override
+		public void setCondition(String condition) {
+			this.condition = condition;
 		}
 		@Override
 		public boolean canActivate(Map<String, Object> context) {
@@ -262,8 +290,13 @@ public class Flow {
 			return hashCode() == obj.hashCode();
 		}
 		
-		public CTask createTask(String[] t) {
-			return new CTask(t[0], t[3]);
+		public ATask createTask(String name, String condition, String status) {
+			ATask task = this.getClass().isMemberClass() 
+				? BeanClass.createInstance(this.getClass(), Flow.this, condition, name)
+				: BeanClass.createInstance(this.getClass(), condition, name);
+			if (status != null)
+			task.status = Status.valueOf(status);
+			return task;
 		}
 		@Override
 		public String toString() {

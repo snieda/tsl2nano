@@ -64,6 +64,9 @@ public class JobServer implements Runnable, Closeable {
         this(Executors.newCachedThreadPool(), Arrays.asList("127.0.0.1"), 9876, true);
     }
 
+    public JobServer(int port) {
+        this(Executors.newCachedThreadPool(), Arrays.asList("127.0.0.1"), port, true);
+    }
     /**
      * constructor
      */

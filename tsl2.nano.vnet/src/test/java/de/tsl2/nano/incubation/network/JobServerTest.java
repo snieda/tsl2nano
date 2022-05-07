@@ -29,7 +29,7 @@ public class JobServerTest {
     
    @Test
     public void testJobServerDirectly() throws Exception {
-        JobServer jobServer = new JobServer();
+        JobServer jobServer = new JobServer(NetUtil.getFreePort());
         String result = jobServer.executeWait("test", new TestJob(), 5000);
         jobServer.close();
         assertEquals("my-test-job", result);

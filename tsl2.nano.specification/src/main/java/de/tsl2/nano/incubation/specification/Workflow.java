@@ -63,6 +63,7 @@ public class Workflow implements Runnable {
 		log("starting workflow [" + flowClass.getName() + "]");
 		Collection<Object> items = getData();
 		items.parallelStream().forEach(i -> {
+			Thread.currentThread().setUncaughtExceptionHandler((t, e)  -> e.printStackTrace());
 			Map<String, Object> flowContext = BeanUtil.toValueMap(i);
 			Flow flow = Flow.load(new File(flowFileName), flowClass);
 			flow.addListener(new TaskListener(i, System.currentTimeMillis()));
@@ -94,6 +95,9 @@ class TaskListener implements Consumer<ITask> {
 	@Override
 	public void accept(ITask t) {
 		Util.trY( () -> fileWriter.write(t.asString()));
+		if (t.isEnd()) {
+			Util.trY( () -> fileWriter.close());
+		}
 	}
 	
 }

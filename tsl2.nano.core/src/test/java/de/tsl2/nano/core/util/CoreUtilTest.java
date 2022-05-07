@@ -681,8 +681,8 @@ public class CoreUtilTest implements ENVTestPreparation {
 	@Test
 	public void testWaitFor() {
 		LinkedList<Integer> list = new LinkedList<>();
-		ConcurrentUtil.waitFor(()->isTrue(list));
-		//TODO: check		
+		ConcurrentUtil.runWorker(() -> list.add(1));
+		assertTrue(ConcurrentUtil.waitFor( () -> isTrue(list)));
 	}
 
 	@Test

@@ -262,7 +262,7 @@ public class FormatUtil {
         return f;
     }
 
-    private static final List<String> istrue = Arrays.asList("on", "yes", "ja", "si", "oui");
+    private static final List<String> istrue = Arrays.asList("on", "yes", "ja", "si", "oui", "1");
     public static boolean isTrue(String source) {
     	if (source == null)
     		return false;

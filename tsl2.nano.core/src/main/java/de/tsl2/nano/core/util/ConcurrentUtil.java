@@ -209,17 +209,17 @@ public class ConcurrentUtil {
         return getCurrent(responseType);
     }
 
-    public static final void waitFor(Supplier<Boolean> callback) {
-        waitFor(Util.get("tsl2.nano.concurrent.pullwaittime", 1000), callback);
+    public static final boolean waitFor(Supplier<Boolean> callback) {
+        return waitFor(Util.get("tsl2.nano.concurrent.pullwaittime", 1000), callback);
     }
 
-    public static final void waitFor(long pullWaitTime, Supplier<Boolean> callback) {
+    public static final boolean waitFor(long pullWaitTime, Supplier<Boolean> callback) {
         // try {
         //     Thread.currentThread().wait();
         // } catch (InterruptedException e) {
         //     e.printStackTrace();
         // }
-        createReadWriteLock().read(() -> callback.get());
+        return createReadWriteLock().read( () -> {while (!callback.get()) sleep(pullWaitTime); return true;});
     	// while (!callback.get())
     	// 	sleep(pullWaitTime);
     }
