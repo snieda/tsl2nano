@@ -44,6 +44,7 @@ import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
+import de.tsl2.nano.bean.def.IBeanDefinitionSaver;
 import de.tsl2.nano.bean.def.IIPresentable;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.PathExpression;
@@ -85,6 +86,7 @@ import de.tsl2.nano.h5.navigation.EntityBrowser;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.h5.navigation.Workflow;
 import de.tsl2.nano.h5.plugin.INanoPlugin;
+import de.tsl2.nano.incubation.specification.PFlow;
 import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.incubation.specification.actions.Action;
 import de.tsl2.nano.incubation.specification.rules.Rule;
@@ -198,7 +200,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         AbstractExpression.registerExpression(SQLExpression.class);
         AbstractExpression.registerExpression(URLExpression.class);
         AbstractExpression.registerExpression(SimpleExpression.class);
-        Pool.registerTypes(Rule.class, RuleScript.class, RuleDecisionTable.class, Query.class, Action.class, WebClient.class);
+        Pool.registerTypes(Rule.class, RuleScript.class, RuleDecisionTable.class, Query.class, Action.class, WebClient.class, PFlow.class);
 	}
 
     /**
@@ -852,6 +854,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
      * @return a root bean-collector holding all bean-type collectors.
      */
     protected BeanDefinition<?> createBeanCollectors(List<Class> beanClasses) {
+    	ENV.addService(IBeanDefinitionSaver.class, new SpecificationH5Exchange());
         Message.send("loading bean collectors for " + beanClasses.size() + " types");
         LOG.debug("creating collector for: ");
         List<BeanDefinition> types = new ArrayList(beanClasses.size());

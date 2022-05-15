@@ -1,4 +1,4 @@
-package de.tsl2.nano.core.util;
+package de.tsl2.nano.util;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -10,12 +10,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.Scanner;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.MapUtil;
+import de.tsl2.nano.core.util.NetUtil;
+import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 
 /** 
  * {@link Flow} as simplest workflow base using implementations of {@link ITask}.
@@ -70,8 +76,10 @@ public class Flow {
 		return load(gravitoFile, null);
 	}
 	public static Flow load(File gravitoFile, Class<? extends ITask> taskType) {
+		return load(new Flow(), gravitoFile, taskType);
+	}
+	public static <F extends Flow> F load(F flow, File gravitoFile, Class<? extends ITask> taskType) {
 		Scanner sc = Util.trY( () -> new Scanner(gravitoFile));
-		Flow flow = new Flow();
 		flow.name = StringUtil.substring(FileUtil.replaceToJavaSeparator(gravitoFile.getPath()), "/", ".", true);
 		ITask task = null;
 		Map<String, ITask> tasks = new HashMap<>();
@@ -93,7 +101,12 @@ public class Flow {
 		flow.setTasks(task);
 		return flow;
 	}
-	public Deque<ITask> process(Map<String, Object> context) {
+	
+	public String getName() {
+		return name;
+	}
+	
+	public Deque<ITask> run(Map<String, Object> context) {
 		LinkedList<ITask> solved = new LinkedList<>();
 		flow(start, context, solved);
 		return solved;
@@ -135,11 +148,13 @@ public class Flow {
 	}
 	public static void main(String[] args) {
 		if (args.length == 0) {
-			System.out.println("usage: Flow <gravito-flow-file>");
+			System.out.println("usage: Flow <gravito-flow-file> [key1=value1 [key2=value2]...]\n\ttries to load a same named property file");
 			return;
 		}
 		Flow flow = Flow.load(new File(args[0]), CTask.class);
-		flow.process(new HashMap<>());
+		Properties p = FileUtil.loadProperties(args[0] + ".properties");
+		MapUtil.fill(p, args, 1, "=");
+		flow.run(new HashMap<>((Map)Util.untyped(p)));
 	}
 	/** base definition to do a simple workflow */
 	public interface ITask {

@@ -1,5 +1,8 @@
 package de.tsl2.nano.persistence;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
@@ -125,6 +128,21 @@ public class SQLQuery implements IRunnable<Object, String>{
 		return sessionContext != null ? sessionContext.getUserTransaction() : new PTUserTransaction(em);
 	}
 
+    public SessionContext createSessionContextProxyForTest(ClassLoader classLoader) {
+        // to many methods to implement , so we use a proxy
+        return (SessionContext) Proxy.newProxyInstance(
+                classLoader != null ? classLoader : Thread.currentThread().getContextClassLoader(),
+                new Class[] { SessionContext.class }, new InvocationHandler() {
+                    @Override
+                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                        if (method.getName().equals("getUserTransaction")) {
+                            return new PTUserTransaction(em);
+                        }
+                        throw new UnsupportedOperationException();
+                    }
+                });
+    }
+
 	public <T> T withTransaction(Supplier<T> s) {
 		try {
 			if (getTransaction().getStatus() == 0) // -> Active
@@ -180,10 +198,13 @@ class PTUserTransaction implements UserTransaction {
 		this.em = em;
 	}
 
-	@Override
-	public void begin() {
-		em.getTransaction().begin();
-	}
+    @Override
+    public void begin() {
+        if (em.getTransaction().isActive())
+            SQLQuery.log("WARN: transaction already active -> using that transaction");
+        else
+            em.getTransaction().begin();
+    }
 
 	@Override
 	public void commit() throws RollbackException, HeuristicMixedException, HeuristicRollbackException,

@@ -17,6 +17,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.bean.def.IBeanDefinitionSaver;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -53,6 +54,8 @@ public class Pool {
     private static Set<Class<? extends IPRunnable>> registeredTypes = new HashSet<>();
     
     public static void registerTypes(Class<? extends IPRunnable>...types) {
+    	if (ENV.get(IBeanDefinitionSaver.class) == null)
+    		ENV.addService(IBeanDefinitionSaver.class, new SpecificationExchange());
         for (int i = 0; i < types.length; i++) {
             if (!IPrefixed.class.isAssignableFrom(types[i]))
             	throw new IllegalArgumentException("type " + types[i] + " must implement IPrefixed!");
@@ -143,7 +146,7 @@ public class Pool {
      * gets the runnable by name
      * 
      * @param name runnable to find
-     * @param type runnable type
+     * @param type (optional)runnable type
      * @return runnable or null
      */
     @SuppressWarnings("unchecked")

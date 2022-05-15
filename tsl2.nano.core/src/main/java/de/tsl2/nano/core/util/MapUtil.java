@@ -388,4 +388,13 @@ public class MapUtil {
 		}
 		return map;
 	}
+
+	/** fills the given property map with args that will be split into key value pairs starting from given startIndex */
+	public static void fill(Properties p, String[] args, int startIndex, String split) {
+		String[] sp;
+		for (int i = startIndex; i < args.length; i++) {
+			sp = args[i].split(split);
+			p.put(sp[0], sp[1]);
+		}
+	}
 }

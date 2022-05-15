@@ -20,12 +20,13 @@ import de.tsl2.nano.incubation.specification.actions.Action;
 import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RuleDecisionTable;
 import de.tsl2.nano.incubation.specification.rules.RuleScript;
+import de.tsl2.nano.util.FilePath;
 
 public class WorkflowTest implements ENVTestPreparation{
 	@Before
 	public void setUp() throws Exception {
 		ENVTestPreparation.super.setUp("specification");
-    	Pool.registerTypes(Rule.class, RuleScript.class, RuleDecisionTable.class, Action.class);
+    	Pool.registerTypes(Rule.class, RuleScript.class, RuleDecisionTable.class, Action.class, PFlow.class);
 		new TaskTest().testFlow();
 	}
 	@After
@@ -51,4 +52,14 @@ public class WorkflowTest implements ENVTestPreparation{
 //		assertEquals("machnix", future.get());
 	}
 
+	@Test
+	public void testWorkflowMainHelp() {
+		Workflow.main(new String[0]);
+	}
+	@Test
+	public void testWorkflowMain() {
+		String file = ENV.getConfigPath() + "/test.tab";
+		FilePath.write(file, "isnix	2	3\n4	5	6".getBytes());
+		Workflow.main(new String[] {ENV.getConfigPath() + "/test.gra", "now", "-file=" + file});
+	}
 }

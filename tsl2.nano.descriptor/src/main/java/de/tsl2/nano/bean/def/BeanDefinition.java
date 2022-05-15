@@ -1194,9 +1194,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     private void saveResourceEntries() {
         String name = "messages.properties";
         saveResourceEntries(ENV.getSortedProperties(name), name);
-
-        name = SpecificationExchange.FILENAME_SPEC_PROPERTIES;
-        new SpecificationExchange().saveSpecificationEntries(this, ENV.getSortedProperties(name));
+        IBeanDefinitionSaver saver = ENV.get(IBeanDefinitionSaver.class);
+        if (saver != null)
+        	saver.saveResourceEntries(this);
     }
 
     /**

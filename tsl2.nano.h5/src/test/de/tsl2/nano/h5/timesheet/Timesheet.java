@@ -24,6 +24,7 @@ import static de.tsl2.nano.h5.HtmlUtil.ATTR_SPANCOL;
 import static de.tsl2.nano.h5.NanoH5Util.define;
 import static de.tsl2.nano.h5.NanoH5Util.defineAction;
 import static de.tsl2.nano.h5.NanoH5Util.icon;
+import static de.tsl2.nano.incubation.specification.SpecificationExchange.*;
 import static de.tsl2.nano.h5.NanoH5Util.*;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_CHARGEITEM;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_COMMENT;
@@ -137,7 +138,6 @@ import de.tsl2.nano.incubation.specification.rules.RuleDependencyListener;
 import de.tsl2.nano.incubation.specification.rules.RuleScript;
 import de.tsl2.nano.util.PrintUtil;
 import my.app.Times;
-import static de.tsl2.nano.bean.def.SpecificationExchange.*;
 
 /**
  * Creates a timesheet configuration on NanoH5 and anyway database

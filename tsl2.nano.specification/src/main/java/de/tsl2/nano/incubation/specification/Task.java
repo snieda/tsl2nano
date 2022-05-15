@@ -5,7 +5,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import de.tsl2.nano.core.ENV;
-import de.tsl2.nano.core.util.Flow;
+import de.tsl2.nano.core.util.ObjectUtil;
+import de.tsl2.nano.util.Flow;
 
 /**
  * Provides use of Flow and Tasks through specification items like rules and actions.
@@ -23,7 +24,7 @@ public class Task extends Flow.ATask {
 	}
 	@Override
 	protected Predicate<Map> getFctCondition(String condition) {
-		return m -> (Boolean)ENV.get(Pool.class).get(condition).run(m);
+		return m -> ObjectUtil.wrap(ENV.get(Pool.class).get(condition).run(m), Boolean.class);
 	}
 	@Override
 	protected Function<Map, ?> getFctFunction(String expression) {

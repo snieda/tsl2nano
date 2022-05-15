@@ -16,11 +16,11 @@ import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.DateUtil;
-import de.tsl2.nano.core.util.Flow;
-import de.tsl2.nano.core.util.Flow.ITask;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.IPRunnable;
 import de.tsl2.nano.util.FilePath;
+import de.tsl2.nano.util.Flow;
+import de.tsl2.nano.util.Flow.ITask;
 import de.tsl2.nano.util.SchedulerUtil;
 
 /**
@@ -37,24 +37,32 @@ public class Workflow implements Runnable {
 	@Attribute
 	String schedule;
 	@Attribute
-	String queryName;
+	String queryOrFileName;
 	Map<String, Object> context;
 	
 	transient Collection<Flow> flows = new LinkedList<>();
 	
 	protected Workflow() {}
 
-	public Workflow(String flowType, String flowFileName, String schedule, String queryName) {
+	public Workflow(String flowFileName, String schedule, String queryOrFileName) {
+		this(Task.class.getName(), flowFileName, schedule, queryOrFileName);
+	}
+	public Workflow(String flowType, String flowFileName, String schedule, String queryOrFileName) {
 		super();
 		this.flowFileName = flowFileName;
 		this.flowType = flowType;
 		this.schedule = schedule;
-		this.queryName = queryName;
+		this.queryOrFileName = queryOrFileName;
 	}
 
 	public ScheduledFuture<?> activate() {
-		String[] time = schedule.split("[/]");
-		return SchedulerUtil.runAt(Integer.valueOf(time[0]), Integer.valueOf(time[1]), Integer.valueOf(time[2]), TimeUnit.valueOf(time[3]), this);
+		if (schedule == null || schedule.equals("now")) {
+			run();
+			return null;
+		} else {
+			String[] time = schedule.split("[/]");
+			return SchedulerUtil.runAt(Integer.valueOf(time[0]), Integer.valueOf(time[1]), Integer.valueOf(time[2]), TimeUnit.valueOf(time[3]), this);
+		}
 	}
 
 	@Override
@@ -68,16 +76,37 @@ public class Workflow implements Runnable {
 			Flow flow = Flow.load(new File(flowFileName), flowClass);
 			flow.addListener(new TaskListener(i, System.currentTimeMillis()));
 			flows.add(flow);
-			flow.process(flowContext);
+			flow.run(flowContext);
 		});
 	}
 
+	public static void main(String[] args) {
+		if (args.length == 0 || (args.length == 1 && args[1].equals("--help"))) {
+			log("usage: Workflow <flowfilename> <schedule|'now'> <queryname || -file[:beantypeclassname]=filename>" +
+					"\n\twith: flowfilename: file with gravito mind map" +
+					"\n\t      schedule    : delay/period/end/TimeUnit (TimeUnit=SECONDS, MINUTES, etc) or simply 'now'" +
+					"\n\t      queryname   : query rule name or '-file'[:beantypeclassname]=<data-file-name>");
+			return;
+		}
+		new Workflow(args[0], args[1], args[2]).activate();
+	}
 	protected Collection<Object> getData() {
-		IPRunnable query = ENV.get(Pool.class).get(queryName);
+		if (queryOrFileName.startsWith("-file="))
+			return getFileItems(queryOrFileName, context);
+		else
+			return getQueryItems(queryOrFileName, context);
+	}
+
+	protected Collection<Object> getFileItems(String queryOrFileName, Map<String, Object> context) {
+		return FileReader.getFileItems(queryOrFileName);
+	}
+
+	protected Collection<Object> getQueryItems(String queryOrFileName, Map<String, Object> context) {
+		IPRunnable query = ENV.get(Pool.class).get(queryOrFileName);
 		Collection<Object> items = (Collection<Object>) query.run(context);
 		return items;
 	}
-	void log(Object obj) {
+	static final void log(Object obj) {
 		System.out.println(obj);
 	}
 }

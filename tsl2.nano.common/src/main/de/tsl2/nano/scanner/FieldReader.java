@@ -246,6 +246,8 @@ public class FieldReader {
     static List readRow(String line, String fieldDelimiter, Locale locale, Class... columnTypes) {
         if (line == null)
             return null;
+        if (Util.isEmpty(columnTypes))
+        	columnTypes = new Class[] {String[].class};
         Scanner sc = new Scanner(line);
         sc.useDelimiter(fieldDelimiter);
         sc.useLocale(locale);

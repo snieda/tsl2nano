@@ -1,4 +1,4 @@
-package de.tsl2.nano.core.util;
+package de.tsl2.nano.util;
 
 import static org.junit.Assert.assertEquals;
 
@@ -9,8 +9,12 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import de.tsl2.nano.core.util.Flow.ITask;
-import de.tsl2.nano.core.util.Flow.CTask;
+import de.tsl2.nano.core.util.ENVTestPreparation;
+import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.MapUtil;
+import de.tsl2.nano.util.Flow;
+import de.tsl2.nano.util.Flow.CTask;
+import de.tsl2.nano.util.Flow.ITask;
 
 public class FlowTest  implements ENVTestPreparation {
 
@@ -29,7 +33,7 @@ public class FlowTest  implements ENVTestPreparation {
 		Flow flow = new Flow();
 		ITask start = createTasks(flow);
 		flow.listeners.add(t -> System.out.println(t));
-		Deque solved = flow.process(MapUtil.asMap("init", 1));
+		Deque solved = flow.run(MapUtil.asMap("init", 1));
 		flow.isSuccessfull(solved);
 	}
 

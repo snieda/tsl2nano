@@ -1,4 +1,4 @@
-package de.tsl2.nano.bean.def;
+package de.tsl2.nano.incubation.specification;
 
 import java.util.Collection;
 import java.util.Map;
@@ -6,6 +6,9 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.bean.def.BeanDefinition;
+import de.tsl2.nano.bean.def.IAttributeDefinition;
+import de.tsl2.nano.bean.def.IBeanDefinitionSaver;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
@@ -13,16 +16,18 @@ import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * provides a mechanism to read all specifications (rules, queries, actions etc.) and their use in the 
- * bean-presentations from a single property or csv file.<p/>
+ * bean-presentations or workflows from a single property, csv or markdown file.<p/>
  * as convenience, each new bean writes all possible attribute properties to be used for a specification 
  * definition to a file inside the applications configuration directory.
  * 
  * @author ts
  */
-public class SpecificationExchange {
+public class SpecificationExchange implements IBeanDefinitionSaver {
 	private static final Log LOG = LogFactory.getLog(SpecificationExchange.class);
 
 	public static final String EXT_CSV = ".csv";
+	public static final String EXT_MARKDOWN = ".md.html";
+	
 	protected static final String SEP = ";";
     public static final String FILENAME_SPEC_PROPERTIES = "specification.properties";
 
@@ -35,6 +40,10 @@ public class SpecificationExchange {
     /**
      * generates resource entries for each attribute+tooltip and each action to be edited later.
      */
+    public void saveResourceEntries(BeanDefinition bean) {
+    	saveSpecificationEntries(bean, ENV.getSortedProperties(FILENAME_SPEC_PROPERTIES));
+
+    }
     public void saveSpecificationEntries(BeanDefinition bean, Properties p) {
     	if (p.contains(bean.getId()))
     		return;
@@ -59,10 +68,30 @@ public class SpecificationExchange {
         }
         FileUtil.saveProperties(ENV.getConfigPath() + FILENAME_SPEC_PROPERTIES, p);
         saveAsCSV(ENV.getConfigPath() + FILENAME_SPEC_PROPERTIES + EXT_CSV, p);
+        saveAsMarkdown(ENV.getConfigPath() + FILENAME_SPEC_PROPERTIES + EXT_MARKDOWN, p);
     }
 
     /** converts the given properties to csv (objectname, rule, optional-parameter) */
     public String saveAsCSV(String filename, Properties p) {
+    	StringBuilder buf = new StringBuilder();
+    	//TODO: performance: don't write whole properties on each bean...
+    	for (Map.Entry<Object, Object> entry : p.entrySet()) {
+			String key = entry.getKey().toString();
+			String val = entry.getValue().toString();
+			String first = StringUtil.substring(val, null, ":");
+			String second = val.contains(":") ? StringUtil.substring(val, ":", null) : "";
+			buf.append(key + SEP + first + SEP + second + "\n");
+		}
+    	FileUtil.writeBytes(buf.toString().getBytes(), filename, false);
+    	return filename;
+	}
+
+    /** converts the given properties to markdown (objectname, rule, optional-parameter) */
+    public String saveAsMarkdown(String filename, Properties p) {
+    	// TODO: implement markdown
+    	if (true)
+    		throw new UnsupportedOperationException();
+    	
     	StringBuilder buf = new StringBuilder();
     	//TODO: performance: don't write whole properties on each bean...
     	for (Map.Entry<Object, Object> entry : p.entrySet()) {

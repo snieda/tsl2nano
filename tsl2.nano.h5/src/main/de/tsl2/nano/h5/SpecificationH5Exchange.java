@@ -1,32 +1,29 @@
 package de.tsl2.nano.h5;
 
-import static de.tsl2.nano.bean.def.SpecificationExchange.Change.addaction;
-import static de.tsl2.nano.bean.def.SpecificationExchange.Change.addattribute;
 import static de.tsl2.nano.h5.NanoH5Util.LOG;
 import static de.tsl2.nano.h5.NanoH5Util.addListener;
 import static de.tsl2.nano.h5.NanoH5Util.addVirtualAttribute;
 import static de.tsl2.nano.h5.NanoH5Util.cover;
+import static de.tsl2.nano.incubation.specification.SpecificationExchange.Change.addaction;
+import static de.tsl2.nano.incubation.specification.SpecificationExchange.Change.addattribute;
 
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Scanner;
 
 import de.tsl2.nano.bean.def.AttributeDefinition;
-import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
-import de.tsl2.nano.bean.def.SpecificationExchange;
 import de.tsl2.nano.bean.def.ValueExpression;
 import de.tsl2.nano.core.ENV;
-import de.tsl2.nano.core.cls.BeanClass;
-import de.tsl2.nano.core.cls.IAttribute;
-import de.tsl2.nano.core.cls.ValuePath;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.specification.Pool;
+import de.tsl2.nano.incubation.specification.SpecificationExchange;
 import de.tsl2.nano.incubation.specification.rules.RuledEnabler;
+import de.tsl2.nano.util.FilePath;
 
 public class SpecificationH5Exchange extends SpecificationExchange {
 	
@@ -38,7 +35,11 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 			spec = fromCSV();
 			file += EXT_CSV;
 			if (Util.isEmpty(spec))
-				LOG.warn(file + " is empty!");
+				LOG.info("file " + file + " emtpy or not existing. try to load from markdown file...");
+				spec = fromMarkdown();
+				file += EXT_MARKDOWN;
+				if (Util.isEmpty(spec))
+					LOG.warn(file + " is empty!");
 		}
 		int errors = 0, rules = 0, attributes = 0, actions = 0, beanchanges = 0, attrchanges = 0;
     	if (spec != null) {
@@ -66,6 +67,10 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 						IAttributeDefinition attr = bean.getAttribute(StringUtil.substring(object, type + ".", "."));
 						AttributeDefinition.getAttributePropertyFromPath(k.substring(0, k.length() - 1)).setValue(v);
 						attrchanges++;
+					} else if (k.startsWith(">")) { //workflow
+						String mdfile = ENV.getConfigPath() + "/" + k.substring(1) + SpecificationExchange.EXT_MARKDOWN;
+						FilePath.write(mdfile, v.getBytes());
+						// TODO implement Workflow
 					} else {
 						if (!object.contains(".")) { // bean
 							bean = BeanDefinition.getBeanDefinition(object);
@@ -136,6 +141,22 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 
 	protected Properties fromCSV() {
 		Scanner sc = Util.trY(() -> new Scanner(FileUtil.userDirFile(ENV.getConfigPath() + FILENAME_SPEC_PROPERTIES + EXT_CSV)));
+		Properties p = MapUtil.createSortedProperties();
+		String l, k, v;
+		while (sc.hasNextLine()) {
+			l = sc.nextLine();
+			k = StringUtil.substring(l, null, SEP);
+			v = StringUtil.substring(l, SEP, null).replace(SEP, ":");
+			if (v.endsWith(":"))
+				v = v.substring(0, v.length() - 1);
+			p.put(k, v);
+		}
+		return p;
+	}
+
+	protected Properties fromMarkdown() {
+		// TODO: implement
+		Scanner sc = Util.trY(() -> new Scanner(FileUtil.userDirFile(ENV.getConfigPath() + FILENAME_SPEC_PROPERTIES + EXT_MARKDOWN)));
 		Properties p = MapUtil.createSortedProperties();
 		String l, k, v;
 		while (sc.hasNextLine()) {

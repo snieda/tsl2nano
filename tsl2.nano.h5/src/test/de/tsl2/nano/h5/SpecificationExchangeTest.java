@@ -1,6 +1,6 @@
 package de.tsl2.nano.h5;
 
-import static de.tsl2.nano.bean.def.SpecificationExchange.EXT_CSV;
+import static de.tsl2.nano.incubation.specification.SpecificationExchange.EXT_CSV;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

@@ -13,19 +13,19 @@ import org.junit.Test;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
-import de.tsl2.nano.core.util.Flow;
-import de.tsl2.nano.core.util.Flow.ITask;
 import de.tsl2.nano.incubation.specification.actions.Action;
 import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RuleDecisionTable;
 import de.tsl2.nano.incubation.specification.rules.RuleScript;
+import de.tsl2.nano.util.Flow;
+import de.tsl2.nano.util.Flow.ITask;
 
 public class TaskTest implements ENVTestPreparation {
 
 	@Before
 	public void setUp() {
 		ENVTestPreparation.super.setUp("specification");
-    	Pool.registerTypes(Rule.class, RuleScript.class, RuleDecisionTable.class, Action.class);
+    	Pool.registerTypes(Rule.class, RuleScript.class, RuleDecisionTable.class, Action.class, PFlow.class);
 	}
 	@After
 	public void tearDown() {
@@ -35,11 +35,11 @@ public class TaskTest implements ENVTestPreparation {
 	@Test
 	public void testFlow() throws Exception {
 		Pool pool = new Pool();
-		pool.add(new Rule<>("test", "isnix", null));
+		pool.add(new Rule<>("test", "1", null));
 		pool.add(new Action<>(TaskTest.class.getMethod("myAction", new Class[0])));
 		
 		Flow flow = new Flow();
-		Task task = new Task("test", "myAction");
+		Task task = new Task("§test", "!myAction");
 		ITask start = ITask.createStart(task);
 		task.addNeighbours(ITask.END);
 		flow.setTasks(start);
@@ -52,7 +52,7 @@ public class TaskTest implements ENVTestPreparation {
 		
 	}
 
-	public String myAction() {
+	public static String myAction() {
 		return "machnix";
 	}
 }
