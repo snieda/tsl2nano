@@ -5,6 +5,9 @@ import java.io.Serializable;
 import java.util.Deque;
 import java.util.Map;
 
+import org.simpleframework.xml.Default;
+import org.simpleframework.xml.DefaultType;
+
 import de.tsl2.nano.execution.IPRunnable;
 import de.tsl2.nano.util.Flow;
 import de.tsl2.nano.util.Flow.ITask;
@@ -14,6 +17,7 @@ import de.tsl2.nano.util.Flow.ITask;
  * 
  * @author ts
  */
+@Default(value = DefaultType.FIELD, required = false)
 public class PFlow extends Flow implements IPRunnable<Deque<ITask>, Map<String, Object>> , IPrefixed {
 
 	public static PFlow load(File gravitoFile, Class<? extends ITask> taskType) {

@@ -1,6 +1,5 @@
 package de.tsl2.nano.incubation.specification;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -58,6 +57,11 @@ public class WorkflowTest implements ENVTestPreparation{
 	}
 	@Test
 	public void testWorkflowMain() {
+		// only as smoke test to check xml serialization...TODO: how to let simple-xml work on inner class
+//		PFlow pflow = PFlow.load(new File(ENV.getConfigPath() + "/test.gra"), Task.class);
+//		ENV.get(Pool.class).add(pflow);
+		
+		// now the real test
 		String file = ENV.getConfigPath() + "/test.tab";
 		FilePath.write(file, "isnix	2	3\n4	5	6".getBytes());
 		Workflow.main(new String[] {ENV.getConfigPath() + "/test.gra", "now", "-file=" + file});

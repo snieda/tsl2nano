@@ -16,6 +16,7 @@ import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.DateUtil;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.IPRunnable;
 import de.tsl2.nano.util.FilePath;
@@ -77,6 +78,7 @@ public class Workflow implements Runnable {
 			flow.addListener(new TaskListener(i, System.currentTimeMillis()));
 			flows.add(flow);
 			flow.run(flowContext);
+			FilePath.write(flowFileName + ".finished", MapUtil.toJSon(flowContext).getBytes());
 		});
 	}
 
@@ -117,8 +119,9 @@ class TaskListener implements Consumer<ITask> {
 
 	public TaskListener(Object i, long start) {
 		Bean<Object> bean = Bean.getBean(i);
-		fileWriter = FilePath.getFileWriter(ENV.getConfigPath() + "/" + bean.getName() + "-" + bean.getId() + ".flow");
-		Util.trY( () -> fileWriter.write("starting flow at " + DateUtil.getFormattedTime(start)));
+		String file = bean.getName().replace("[]", "Array");
+		fileWriter = FilePath.getFileWriter(ENV.getConfigPath() + "/" + file + ".flow.log");
+		Util.trY( () -> fileWriter.write("\nstarting flow at " + DateUtil.getFormattedTime(start) + "\n"));
 	}
 
 	@Override
