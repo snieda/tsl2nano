@@ -2,6 +2,7 @@ package de.tsl2.nano.incubation.specification;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
@@ -15,6 +16,7 @@ import de.tsl2.nano.autotest.TypeBean;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.incubation.specification.actions.Action;
 import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RuleDecisionTable;
@@ -58,12 +60,14 @@ public class WorkflowTest implements ENVTestPreparation{
 	@Test
 	public void testWorkflowMain() {
 		// only as smoke test to check xml serialization...TODO: how to let simple-xml work on inner class
-//		PFlow pflow = PFlow.load(new File(ENV.getConfigPath() + "/test.gra"), Task.class);
-//		ENV.get(Pool.class).add(pflow);
+		String gravitoFile = ENV.getConfigPath() + "/test.gra";
+		PFlow pflow = PFlow.load(new File(gravitoFile), Task.class);
+		ENV.get(Pool.class).add(pflow);
 		
 		// now the real test
 		String file = ENV.getConfigPath() + "/test.tab";
 		FilePath.write(file, "isnix	2	3\n4	5	6".getBytes());
-		Workflow.main(new String[] {ENV.getConfigPath() + "/test.gra", "now", "-file=" + file});
+		Workflow.main(new String[] {gravitoFile, "now", "-file=" + file});
+		assertTrue(FileUtil.userDirFile(gravitoFile + ".finished").exists());
 	}
 }

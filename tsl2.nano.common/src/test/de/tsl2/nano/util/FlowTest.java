@@ -38,7 +38,7 @@ public class FlowTest  implements ENVTestPreparation {
 	}
 
 	private ITask createTasks(Flow flow) {
-		CTask t1 = flow.new CTask("task1", ".*init=1.*") {
+		CTask t1 = new CTask("task1", ".*init=1.*") {
 			protected java.util.function.Predicate<java.util.Map> getFctCondition(String condition) {
 				return m -> m.toString().matches(condition);
 			}
@@ -46,7 +46,7 @@ public class FlowTest  implements ENVTestPreparation {
 				return c -> c.put("init", 2);
 			}
 		};
-		CTask t2 = flow.new CTask("task2", ".*init=2.*") {
+		CTask t2 = new CTask("task2", ".*init=2.*") {
 			protected java.util.function.Predicate<java.util.Map> getFctCondition(String condition) {
 				return m -> m.toString().matches(condition);
 			}

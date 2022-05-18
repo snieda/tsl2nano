@@ -1,6 +1,7 @@
 package de.tsl2.nano.util;
 
 import java.io.File;
+import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -93,7 +94,7 @@ public class Flow {
 		// create from end...
 		while (!strTasks.isEmpty()) {
 //			task = BeanClass.createInstance((Class<? extends ITask>)(taskType != null ? taskType : DEFAULT_TASK_TYPE));
-			task = taskType != null ? BeanClass.createInstance(taskType) : flow.new CTask();
+			task = taskType != null ? BeanClass.createInstance(taskType) : new CTask();
 			//TODO: thats nonsense - we throw the new instance away...
 			task = task.fromGravString(strTasks.pollLast(), tasks);
 			tasks.put(task.name(), task);
@@ -233,7 +234,7 @@ public class Flow {
 		
 	}
 
-	public abstract class ATask implements ITask {
+	public static abstract class ATask implements ITask {
 		protected String condition;
 		protected String expression;
 		private Predicate<Map> fctCondition;
@@ -306,8 +307,8 @@ public class Flow {
 		}
 		
 		public ATask createTask(String name, String condition, String status) {
-			ATask task = this.getClass().isMemberClass() 
-				? BeanClass.createInstance(this.getClass(), Flow.this, condition, name)
+			ATask task = this.getClass().isMemberClass() && !Modifier.isStatic(this.getClass().getModifiers())
+				? BeanClass.createInstance(this.getClass(), this, condition, name)
 				: BeanClass.createInstance(this.getClass(), condition, name);
 			if (status != null)
 			task.status = Status.valueOf(status);
@@ -320,7 +321,7 @@ public class Flow {
 	}
 
 	/** simple string-based task. context should match condition as string. expression has to point to a method. */
-	public class CTask extends ATask {
+	public static class CTask extends ATask {
 		protected CTask() {}
 		
 		/** Predicate as condition, FunctionalInterface as action */
@@ -339,7 +340,7 @@ public class Flow {
 	}
 
 	/** simple http request task. condition should point to a rest-service with boolean response. expression to any rest service */
-	public class RTask extends ATask {
+	public static class RTask extends ATask {
 		protected RTask() {}
 		
 		public RTask(String urlCondition, String urlExpression) {

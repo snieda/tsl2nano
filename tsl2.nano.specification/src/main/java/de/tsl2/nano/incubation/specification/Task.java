@@ -17,10 +17,10 @@ import de.tsl2.nano.util.Flow;
 public class Task extends Flow.ATask {
 
 	Task() {
-		new Flow().super();
+		super();
 	}
 	public Task(String conditionRule, String activationRule) {
-		new Flow().super(conditionRule, activationRule);
+		super(conditionRule, activationRule);
 	}
 	@Override
 	protected Predicate<Map> getFctCondition(String condition) {
