@@ -1,13 +1,13 @@
-<h6 align="center">FullRelation Nano.H5<br/>
+<font size="6" align="center">FullRelation Nano.H5<br/></font>
 <font size="-1">&copy; Thomas Schneider 2012-2021
 <br/>
 <a href="http://sourceforge.net/projects/tsl2nano/files/1.1.0/tsl2.nano.h5.1.1.0.jar/download">Download on sourceforge</a>
 <br/>
 <a href="http://sourceforge.net/projects/tsl2nano/files/1.1.0/nano.h5.jnlp">Start Nano.H5 through WebStart</a>
-</font></h6>
+</font>
 <p/>
 
-[TOC]
+[[TOC]]
 
 
 [[members limit=20]]
@@ -227,26 +227,36 @@ Inside the standalone package, the driver for _hsqldb_ is included. If you use t
 It is possible to work on _H2_ as database, that will be started and initialized - but the driver is not included in the standalone package. So you have to be online to be downloaded by nano.h5 - or you have to put the driver by yourself into the environment directory. 
 As URL you should input the following path:
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	jdbc:h2:tcp://<host>:<9092>/<database-name>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 for example:
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	jdbc:h2:tcp://localhost:9092/anyway
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 on default (see mda.xml) a h2-tool web-server will be provided at port 8082. if not, you can start that server-tool inside your environment directory through:
 	
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	java -cp * org.h2.tools.Server
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	
 to access the database from other than local and if you want to start sql-statements directly:
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	java -cp * org.h2.tools.Server  -web -webDaemon -tcp -tcpPort ${jdbc.port} -tcpAllowOthers -trace
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  
 
 #### Commandline arguments
 
 start parameters:
 
-`java [-Denv.user.home=true] -jar tsl2.nano.h5.<version>.jar [environment-path (default: .nanoh5.environment] [http-server-port (default: 8067)]`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	java [-Denv.user.home=true] -jar tsl2.nano.h5.<version>.jar [environment-path (default: .nanoh5.environment] [http-server-port (default: 8067)]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This call is implemented inside the _run.bat_ script. Use that, if you are on windows. But normally, nano-h5 should be runnable through a double-click on the jar file _tsl2.nano.h5.<version-number>.jar_.
 
@@ -264,6 +274,7 @@ Direct dependencies exist to the following libararies (contained inside the _tsl
 * Serviceaccess using: jpa-api, connector-api, jta-api, ejb-api, interceptor-api
 
 The following library was a helper to generate an xsd-file for the beandef-xml files.
+
 * [Jing-Trang xml2xsd-Generator](https://code.google.com/p/jing-trang/downloads/list)
 
 For more indirect dependencies, have a look at chapter _Dependencies_.
@@ -349,7 +360,7 @@ java -jar trang.jar .* <myxsdfilename>
 With an xsd file you are able to generate java classes through jaxb, which is integrated in oracles java implementation. the command:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-xjc -d <src-base-directory> <xsd-schema-file>
+	xjc -d <src-base-directory> <xsd-schema-file>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 will generate the desired java classes into _src-base_directory_.
@@ -367,17 +378,21 @@ This methods are called only if _bean.use.beanpresentationhelper.filter_ is true
 All formats, constraints and basic presentation-properties will be evaluated through the type and jpa-annotations of an attribute.
 
 *Rules on evaluating the best order*
+
 1. attr.id() || attr.unique()
 2. !attr.nullable()
 3. !attr.isRelation()
 4. bean.best.attribute.type (default: String.class)
 5. bean.best.attribute.regexp (default:.*(name|bezeichnung|description|id).*)
-6.a. bean.best.attribute.minlength (default: 2)
-6.b. bean.best.attribute.maxlength (default: 99)
+6. a. bean.best.attribute.minlength (default: 2)
+6. b. bean.best.attribute.maxlength (default: 99)
 7. attr.getConstraint().getPrecision() > 0
-8. attr.getType().isInterface()
+8. 
+```
+attr.getType().isInterface()
 	|| (!BeanUtil.isStandardType(attr.getType()) && !BeanClass.hasDefaultConstructor(attr.getType()))
 	|| (!attr.isVirtual() && isGeneratedValue(bean.getDeclaringClass(), names[i])))
+```
 9. attr.isMultiValue() //always the multivalues at the end!
 
 The found best attribute will be checked against an available database to be unique inside the current table-data.
@@ -385,9 +400,9 @@ The found best attribute will be checked against an available database to be uni
 ##### Configuration through Serialization
 
 The environment and the bean-definitions are the main constructs serializing it's properties to the file-system.
-...
-The _BeanDefinition_ expects only _AttributeDefinition_s from deserializings - to be more readable. This  means, that extensions of AttributeDefinition are not handled!
-...
+
+The _BeanDefinition_ expects only _AttributeDefinitions_ from deserializings -- to be more readable. This  means, that extensions of AttributeDefinition are not handled!
+
 On the data side, all collections are wrapped into an object of type _BeanCollector_, single instances that are prepared to be presented are wrapped into an object of type _Bean_. All attributes of a _Bean_ are wrapped into _BeanValue_s. The _BeanCollector_ and the _Bean_ are extensions of _BeanDefinition_, handling the attributes. While the used xml-serializer _Simple-XML_ is not able to create the desired root instance through reading an xml (we have to define the instance type on calling simple-xml), extensions of a _BeanDefinition_ are handled through a special mechanism, implemented in the class _Extension_.
 
 *Tip*: If you delete your environment.xml file, it will be re-created on next restart - all beandefinitions will be re-created, too.
@@ -398,7 +413,9 @@ On default, all configuration and serialization files are stored into and read f
 
 To switch to yaml, change the following environment property:
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	app.configuration.persist.yaml=true
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	
 On starting the application, the environment doesn't know whether to load from xml or yaml - not having load the environment properties yet. so it tries to load first from xml and then from yaml.
 So, you should rename the _environement.xml_ file to something like _environement.xml__. This will let the application to search for a file named _environement.yml_.
@@ -533,7 +550,7 @@ Example output of http://localhost:8067/rest/address/city/B* (gives you all addr
 
 ### Quick-Start
 
-* install a <a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html">java jdk at least version 1.7</a>. If you only install a java jre-version, the bean-jar file cannot be generated - then you have to select an existing one.
+* install a <a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html">java jdk at least version 1.8</a>. If you only install a java jre-version, the bean-jar file cannot be generated - then you have to select an existing one.
 * get the newest version of <a href="https://sourceforge.net/projects/tsl2nano/">tsl2.nano.h5</a>
 * start this jar file with _java -jar tsl2.nano.h5.[version-number].jar_. this will create the environments _nanoh5.environment_ and a _run.bat_.
 * go into the extracted sub-directory _sample_ and start the _Windows_-batch file _runServer.cmd_. This will start the sample database.
@@ -595,9 +612,12 @@ A sample environment is contained in the _tsl2.nano.h5.<version>.jar_ file, cont
 * sample databae _anyway_
 * sample icons for all buttons
 
-_nano.h5_, will start the sample h2 or hsqldb database for you calling the script:
+_nano.h5_, will start the sample h2 or hsqldb database (named 'anyway') for you calling the script:
 
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 <environment-directory>/runServer.cmd
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 [[img src=h5.sample.database.jpg alt=sample-database]]
 
@@ -922,6 +942,30 @@ Example for programmatically adding plugins:
 	myattribute.addPlugin(myPlugin);
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+## Specifications
+
+Specifications are textual definitions to be simply done by skilled workers (to be extended by developers) and to be shown by standard visualizers like gravizo in markdown documents and to be interpreted on runtime.
+
+There are several parts working together:
+
+![](http://g.gravizo.com/g?digraph G {
+
+SpecificationExchange -> {property-file, delimited-file}
+delimited-file -> {Excel, property-file}
+property-file -> {beandefinition, pool}
+beandefinition -> {attributes, presentation}
+presentation -> {type, style, format, constraint}
+pool -> {rule, rulescript, decisiontable, action, query, webaction, pflow}
+Workflow -> {data-query, flow, schedule-expression}
+data-query [label="use named query or load from simple or bean file"]
+scheduled-expression [label="start/period/end time definition"]
+flow -> task [label="tasks from start-point until end-point""]
+task -> rule [label="condition (rule) as entry point, action as activity"]
+ExcelWorker -> {excel-sheet, sql-queries, java-actions}
+excel-sheet [label="holding id rows partitioned into blocks, defining actions with parameters"]
+FlatBeanReader [label="reads a markdown file defining any specification elements and starting any actions"]
+})
+
 ## Specifying Rules, Queries and Actions to be used on Beans and Attributes
 
 To do a structured work on a usable specification, rules, queries and actions can be defined before implementing or configuring the presentation. This is done by creating these items as xml-files inside the environments _specifiation_ directory. To see how it works, hit the applications menu button 'sample-codes' and have a look into the specification directory.
@@ -1130,7 +1174,12 @@ Use a _ActionScript_ to define an action with a javascript expression.
 Example:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-TODO
+	<action name="doImportHolidays" declaringClass="de.tsl2.nano.h5.timesheet.ICSChargeImport">
+		<parameter name="importFilePath">
+			<type javaType="java.lang.String"/>
+		</parameter>
+		<operation>doImportHolidays</operation>
+	</action>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Defining a rule through standard java operations
@@ -1140,18 +1189,20 @@ Use a _Rule_ to define an action with an expression containing standard java ope
 Example:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-TODO
+<ruleScript name="id">
+   <operation>(x_pos - y_pos) / x_scale * y_scale</operation>
+</ruleScript>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Generating the rules etc. through a Specification Document
 
 A more convenienced way would be to generate the specification elements like rules etc. through a document, created by a speicification team itself. A developer would adjust the details.
 
-NanoH5 provides the following convenience:
+NanoH5 provides the following conveniences:
 
 * The application creates all the beans and presenters through a given ddl or database
-* a messages.properties file will be created, to adjust all names and texts
-* a specification.properties file will be created, holding empty adjustments for each field to be filled by a skilled worker
+* a messages.properties file will be created, to adjust all names and texts with automatic translation
+* a specification.properties (or simple tabbed file to work with excel sheets) file will be created, holding empty adjustments for each field to be filled by a skilled worker
 * on next application start, this filled specification.properties will be read to create the rules and their bindings to the fields (overwriting old verisons)
 
 The provided entries look like:
@@ -1205,6 +1256,162 @@ property.valueexpression={akey}
 chargeItem.icon=buy.png
 chargeItem.valueexpression={item}
 chargeItem.charge.constraint.nullable*=false
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If the skilled workers prefer to fill excel sheets instead of a properties file, a tabbed simple file (to be imported to excel like applications) is provided , too.
+
+
+TODO: instead of a properties or a excel like tabbed file a markdown file is on our todo list. this would be the best way to work with a full specification document, showing workflows etc. through gravidot inside the docu
+
+### Using specified Workflows
+
+The specification module provides the creation and use of simple workflows. A workflow defines data to work on and a flow, defined by a simple text in a gravito mind map format.
+The flow will be stored (as PFlow) inside the pool, where all the rules, queries and actions are stored. Any action may start the workflow.
+
+The data to work on may be a database query, a simple delimited text file holding table-data or the content of beans or through a markdown file with a full definition of beantypes and human readable expressions (see FlatBeanReader).
+
+Extraction of java doc:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * workflow on a {@link Flow} starting through schedule expression (delay/period/end/TimeUnit) and loading data through given query rule. 
+ * Each data row will go through flow of given type.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#### creating the Flow
+
+Extraction of java doc:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * {@link Flow} as simplest workflow base using implementations of {@link ITask}.
+ * It is the maker. going recursively through all tasks until end. experimental implementation
+ * having only one class file with inner classes and a fat interface<p/> 
+ * 
+ * As {@link AFunctionalTask} is a base implementation of {@link ITask}, the {@link CTask}<br/>
+ * provides an extension to be used on functional implementation.<p/>
+ * 
+ * Each task has a name (may be equal to the action definition representation), a condition<br/>
+ * for activation and the action itself.<p/>
+ * 
+ * To persist a flow with its task tree, a gravito state diagram file will be created.<br/>
+ * This can be rendered by gravito inside a markdown file. So, a graphical representation is given.<p/>
+ * 
+ * This base implementation of a workflow is used and extended inside the module 'tsl2.nano.specification'
+ * which provides conditions and actions as rules (through scripting, decision tables etc.) or specified actions. 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+programatic Example of creating a very simple flow:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	Pool pool = new Pool();
+	pool.add(new Rule<>("test", "1", null));
+	pool.add(new Action<>(TaskTest.class.getMethod("myAction", new Class[0])));
+	
+	Flow flow = new Flow();
+	Task task = new Task("§test", "!myAction");
+	ITask start = ITask.createStart(task);
+	task.addNeighbours(ITask.END);
+	flow.setTasks(start);
+	
+	File file = FileUtil.userDirFile(ENV.getConfigPath() + "/test.gra");
+	flow.persist(file);
+	
+	Flow flow1 = Flow.load(file, Task.class);
+	assertEquals(flow, flow1);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+this would result in the following gravito formatted text file *test.gra*:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	START (OK) -> !myAction [label="§test"]
+	!myAction (NEW) -> END
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+So, after START, if the rule *§test* returns true, the action *!MyAction* will be called, and the end task will be reached.
+
+#### creating the workflow
+
+programatic Example of creating a very simple workflow:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	String gravitoFile = ENV.getConfigPath() + "/test.gra";
+	PFlow pflow = PFlow.load(new File(gravitoFile), Task.class);
+	ENV.get(Pool.class).add(pflow);
+	
+	// now the real test
+	String file = ENV.getConfigPath() + "/test.tab";
+	FilePath.write(file, "isnix	2	3\n4	5	6".getBytes());
+	Workflow.main(new String[] {gravitoFile, "now", "-file=" + file});
+	assertTrue(FileUtil.userDirFile(gravitoFile + ".finished").exists());
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Here, the flow of file *test.gra* will be loaded through the pool. a data file like
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+isnix	2	3
+4	5	6
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+would be read to go through the flow. This will be done *now*. But you could schedule it with an expression of *delay/period/end/TimeUnit*, example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	0/2/6/SECONDS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+### Using specified ExcelWorkers
+
+Extraction of the java doc:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Reads data lines from a given flat or CSV file to give each line to a worker
+ * executing an action with parameters (given in line). The Excel/CSV sheet
+ * has to have the following structure:
+ * 
+ * <pre>
+ * 1. line: Title or Action definition line
+ * 2. line: data headers
+ * n. line: if exactly one column or starting with BLOCK: name of a block combining the following data lines
+ *          else a data line with columns:
+ *          	1. column: row identifier (has to match property "tsl2nano.excelworker.id.match"="\\d+")
+ *          	following columns in any order, but:
+ *          	if column-name: 'ACTION' -> name of action to be executed by the worker
+ *          	if column-name starts with 'PAR' -> action parameter (given as type Object, on multiple: type Object[]) 
+ *          	if column-value: 'ACTIONDEF' -> the following column value in line will be used as action definition:
+ *          		if 'SQL' -> next column value is an sql statement to be used as action with query parameters. the 
+ *                              connection is done through a persistence context (unit-name: EXCELWORKER) that has to
+ *                              be in path 'META-INF/persistence.xml'
+ *          		if 'CLS' -> full class name implementing the actions to be excecuted by the worker
+ *          		if 'URL' -> url with placeholders to be executed
+ *          		if 'CMD' -> system call with arguments
+ *          		if 'PRN' -> (default) do nothing but print output to console
+ * 
+ * The expression in an ACTIONDEF cell (e.g.: !:URL:https://myserver.de/%1$s/show.html:!) may be  a formatted expression with placeholders like %s.
+ * The placeholders are filled through the action parameters: {id, all-values-with-columnheaders-starting-with-PAR:}. The formatter is 
+ * defined here: https://docs.oracle.com/javase/7/docs/api/java/util/Formatter.html
+ * 
+ * The action name will always converted to lowercase!
+ * 
+ * To execute the ExcelWorker the sheet has to be exported from Excel to a csv or any other delimited (default: \t) file.
+ * You are able to configure some properties:
+ * 
+ * * tsl2nano.excelworker.tag.block="BLOCK"
+ * * tsl2nano.excelworker.delimiter="\t"
+ * * tsl2nano.excelworker.persistenceunit="EXCELWORKER"
+ * * tsl2nano.excelworker.id.match"="\\d+"
+ * * tsl2nano.excelworker.swallowtabs="false"
+ * * tsl2nano.excelworker.dryrun="false"
+ * * tsl2nano.excelworker.blocks.parallel="false"
+ * 
+ * start it with: ExcelWorker my-delimited-file.csv
+ * 
+ * In Excel it is possible to define a cell starting a VBA-script that executes the ExcelWorker. It would be something 
+ * like 'Call Shell("program location" & " " & Target)'.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A programatic simple example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//	System.setProperty(Worker.DRYRUN, "true");
+	policiert = 0;
+	Util.trY( () -> new ExcelWorker("src/test/resources/test-sheet.txt").run(), false);
+	assertEquals(2, policiert);
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ## The _ScriptTool_
@@ -1324,7 +1531,7 @@ If you set *layout.sidenav* to *true*, all actions and their buttons will be pos
 
 Each bean and each bean-attribute can define a layout and layout-constraints through it's presentable object (see class _IPresentable_). It is easy to do layout definitions programmatically through the _BeanPresentationHelper_, but in this chapter we describe only the xml configuration. Help on programmatical configurations, see chapter _Programmatical configuration_. Inside the application (on runtime), there is a _BeanConfigurator_ providing to edit your _BeanDefinition_s as administrator. 
 
-Setting the layout for beans or attributes may often be done through setting their styles. Be carefull with this, while this overwrite framework-styles. The best way is, to have a look at the html source to see, which style was set before.
+Setting the layout for beans or attributes may often be done through setting their styles. Be carefull with this, while this overwrite framework-styles. The best way is to have a look at the html source to see, which style was set before.
 
 TODO describe
 
@@ -1421,7 +1628,7 @@ the variable _party.name_ must be defined by the user before while selecting (se
 
 #### direct queries through _QueryResult_
 
-To define direct sql or jpa-ql queries beside the standard mechanism though compiled beans you have the possibility to show a list of values direct through _QueryResult_ which is an extension of _BeanCollector_.
+To define direct sql or jpa-ql queries beside the standard mechanism through compiled beans you have the possibility to show a list of values direct through _QueryResult_ which is an extension of _BeanCollector_.
 _QueryResult_s can be defined through the _ScriptTool_. There you can test your queries and save it as _QueryResult_. The _QueryResult_ will be loaded into the list of available bean-collector on next application start.
  
 Example:
@@ -2446,7 +2653,7 @@ Permissions are set after connecting to the datasource through the persistence-u
 
 The application class _NanoH5_ has a method _createAuthorization()_ that defines a subject with a user-principal and it's roles, defined by permissions. If a file _[username]-permissions.xml_ is found, it will be used to fill the subject - if not, an admin-role with a wildcard-permission will permit anything!
 
-Permissions contain a name - perhaps ended by a wildcard - and comma separated actions (a wildcard is possible, too. The permissions work on actions and data. The _BeanContainer_ provides to ask for permissions: call _BeanContainer.instance().hasPermission(name, actions) to check access to a call or to any data. The _Environment_ provides access to the implementation of _IAuthorization_. Call _Environment.get(IAuthorization.class).hasAccess(name, actions) to check for permissions.
+Permissions contain a name - perhaps ended by a wildcard - and comma separated actions (a wildcard is possible, too. The permissions work on actions and data. The _BeanContainer_ provides to ask for permissions: call _BeanContainer.instance().hasPermission(name, actions)_ to check access to a call or to any data. The _Environment_ provides access to the implementation of _IAuthorization_. Call _Environment.get(IAuthorization.class).hasAccess(name, actions)_ to check for permissions.
 
 To define special permissions for a user, change the content of the file _[username]-permissions.xml_ and use the translation resourcebundle _messages.properties_ to find the field and action names to fill in.
 To use your own Authorization, set your implementation of IAuthorization as service in the environment.
@@ -2459,6 +2666,7 @@ To check whether a user can access a button (action) you call the _hasAccess_ of
 
 Example configuration for the user SA with role admin:
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	<?xml version="1.0" encoding="UTF-8"?>
 	<subject>
 	   <principals class="java.util.Collections$SynchronizedSet">
@@ -2469,9 +2677,11 @@ Example configuration for the user SA with role admin:
 	   </principals>
 	   <readOnly>false</readOnly>
 	</subject>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Example configuration for the user Test with role bet (in a bet game):
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	<?xml version="1.0" encoding="UTF-8"?>
 	<subject>
 	   <principals class="java.util.Collections$SynchronizedSet">
@@ -2488,6 +2698,7 @@ Example configuration for the user Test with role bet (in a bet game):
 	   </principals>
 	   <readOnly>false</readOnly>
 	</subject>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Be sure to grant the user to the desired tables and views:
 
@@ -2503,12 +2714,15 @@ Example, creating a new user Test:
 To check whether an entity should be accessed by the current user, you call the _hasAccess_ of IAuthorization or _hasPermission_ of BeanContainer with the full-class-name[.]value-expression(data) representation of the current object. The second method parameter tells whether to read or/and write the object.
 Means, if you have a class mypath.MyBean with attributes 'name', 'value' and you define a beans value-expression: {name}, you can constrain the data with:
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	<basicPermission class="de.tsl2.nano.serviceaccess.aas.principal.APermission" actions="read" name0="mypath.MyClass.Sch.*"/>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 this will list only data for beans having a name starting with 'Sch'.
 
 Example configuration for a user seeing contents of Bet, Match, Tournament:
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	<?xml version="1.0" encoding="UTF-8"?>
 	<subject>
 	   <principals class="java.util.Collections$SynchronizedSet">
@@ -2530,6 +2744,7 @@ Example configuration for a user seeing contents of Bet, Match, Tournament:
 	   </principals>
 	   <readOnly>false</readOnly>
 	</subject>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  
 ## Navigation and Workflows
 
@@ -2956,12 +3171,23 @@ Another feature is to define a timer through _createTimer(periodInSeconds)_ (xml
 #### WebClient: The Expression for a service url
 
 The expression for an URL can contain extended informations. The syntax is:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	http[s]?//.*<<(PUT|POST|DELETE)[:]<CONTENTTYPE>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	
-The expression can contain url query arguments and it can end with '=' or the nano specific method/content-type description (e.g. "<<PUT:application/xml")
+The expression can contain url query arguments and it can end with '=' or the nano specific method/content-type description
+
+Example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	<<PUT:application/xml
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 Examples:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	http://www.openstreetmap.org/search?query=						// it ends with '=', bean attributes (given as context) will be appended directly without names. no restful syntax will be used
 	http://localhost:8080/myresource/								// a port is given, so it's not a public service. the response will be embedded with its content into the html page
 	http://localhost:8080/myresource/<<PUT:application/json			// rest syntax will be used, method is PUT and content-type is application/json.
@@ -2972,6 +3198,8 @@ If your bean is something like:
 		city
 		code
 		street
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 all three attributes will be appended as rest query parameters at the end. to change that, edit the address.xml tag: *parameterNames*. Or you give an expression holding something like {city} - this will be extracted as *parameterNames*.
 
 ## The content
@@ -3911,54 +4139,61 @@ both will have similar configuration files for heroku. To start your application
 
 Example Procfile:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# start local with .env and debug app  : heroku local
-# push to heroku master                : git push heroku master
-# restart the web process              : heroku ps:scale web=1
-# see the running configuration folder : heroku ps:exec
-# see the deployed remote files        : heroku ps bash
-# see the logs                         : heroku logs --tail
-# open app in browser                  : heroku apps:open tsl2-timesheet
-# all-in-one: git add Procfile && git commit -m "..." && git push heroku master && heroku logs --tail
-#
-# NOTE: start the internal database with heroku ps:exec -> ls target/logbook -> source runServer.cmd
-# NOTE: change the path of jar file to be relative, starting on target/
-#
-# see .env vor environment variables - only for local start
-web: java $NOLOGIN $NOSTARTPAGE $DEBUG $INTERNAL_DB $NO_DB_CHECK $TSL_SERVICE $TSL_SSL_ACTIVATE $TSL_SSL $TSL_SSL_FILE $TSL_SSL_PASSWORD $JAVAX_TSL12 $JAVAX_NET_DEBUG $JAVAX_TRUSTSTORE $JAVAX_TRUSTPASSWD -jar target/classes/tsl2.nano.h5-2.4.2-SNAPSHOT-standalone.jar target/classes/.nanoh5.timesheet "$APP_URL:$PORT"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~```sh
 
+	# start local with .env and debug app  : heroku local
+	# push to heroku master                : git push heroku master
+	# restart the web process              : heroku ps:scale web=1
+	# see the running configuration folder : heroku ps:exec
+	# see the deployed remote files        : heroku ps bash
+	# see the logs                         : heroku logs --tail
+	# open app in browser                  : heroku apps:open tsl2-timesheet
+	# all-in-one: git add Procfile && git commit -m "..." && git push heroku master && heroku logs --tail
+	#
+	# NOTE: start the internal database with heroku ps:exec -> ls target/logbook -> source runServer.cmd
+	# NOTE: change the path of jar file to be relative, starting on target/
+	#
+	# see .env vor environment variables - only for local start
+	web: java $NOLOGIN $NOSTARTPAGE $DEBUG $INTERNAL_DB $NO_DB_CHECK $TSL_SERVICE $TSL_SSL_ACTIVATE $TSL_SSL $TSL_SSL_FILE $TSL_SSL_PASSWORD $JAVAX_TSL12 $JAVAX_NET_DEBUG $JAVAX_TRUSTSTORE $JAVAX_TRUSTPASSWD -jar target/classes/tsl2.nano.h5-2.4.2-SNAPSHOT-standalone.jar target/classes/.nanoh5.timesheet "$APP_URL:$PORT"
+
+```
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 Example .env file:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# heroku/foreman (Procfile) local environment variables
-# heroku config:set $(cat .env | sed '/^$/d; /#[[:print:]]*$/d')
 
-APP_URL=http://tsl2-timesheet.herokuapp.com
-#APP_URL=http://localhost
-PORT=5001
-OFFLINE=-Dtsl2nano.offline=true
-#DEBUG="-agentlib:jdwp=transport=dt_socket,address=localhost:8787,server=y,suspend=n"
-NOSTARTPAGE=-Dapp.show.startpage=false
-NO_DB_CHECK=-Dapp.db.check.connection=false
-INTERNAL_DB=-Dapp.database.internal.server.run=true
-#TSL_SERVICE=-Dservice.url=https://tsl2-timesheet.herokuapp.com:5001
-TSL_SSL_ACTIVATE=-Dapp.ssl.activate=false
-# TSL_SSL=-Dapp.ssl.protocol=TLSv1_2
-# TSL_SSL_FILE=-Dapp.ssl.keystore.file=nanoh5.pks
-# TSL_SSL_PASSWORD=-Dapp.ssl.keystore.password=XXXXX
-# JAVAX_TSL12=-Dhttps.protocols=TLSv1.2
-JAVAX_NET_DEBUG=-Djavax.net.debug=all
-# JAVAX_TRUSTSTORE=-Djavax.net.ssl.trustStore=nanoh5.pks
-# JAVAX_TRUSTPASSWD=-Djavax.net.ssl.trustStorePassword=nanoh5
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~```sh
+	# heroku/foreman (Procfile) local environment variables
+	# heroku config:set $(cat .env | sed '/^$/d; /#[[:print:]]*$/d')
+	
+	APP_URL=http://tsl2-timesheet.herokuapp.com
+	#APP_URL=http://localhost
+	PORT=5001
+	OFFLINE=-Dtsl2nano.offline=true
+	#DEBUG="-agentlib:jdwp=transport=dt_socket,address=localhost:8787,server=y,suspend=n"
+	NOSTARTPAGE=-Dapp.show.startpage=false
+	NO_DB_CHECK=-Dapp.db.check.connection=false
+	INTERNAL_DB=-Dapp.database.internal.server.run=true
+	#TSL_SERVICE=-Dservice.url=https://tsl2-timesheet.herokuapp.com:5001
+	TSL_SSL_ACTIVATE=-Dapp.ssl.activate=false
+	# TSL_SSL=-Dapp.ssl.protocol=TLSv1_2
+	# TSL_SSL_FILE=-Dapp.ssl.keystore.file=nanoh5.pks
+	# TSL_SSL_PASSWORD=-Dapp.ssl.keystore.password=XXXXX
+	# JAVAX_TSL12=-Dhttps.protocols=TLSv1.2
+	JAVAX_NET_DEBUG=-Djavax.net.debug=all
+	# JAVAX_TRUSTSTORE=-Djavax.net.ssl.trustStore=nanoh5.pks
+	# JAVAX_TRUSTPASSWD=-Djavax.net.ssl.trustStorePassword=nanoh5
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 
 If you start the second line comment of the .env example file, you can set all that variables on heroku for you remote application.
 
 To configure your heroku applications, you should start the dashboard web interface 
 
-https://dashboard.heroku.com/apps
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	https://dashboard.heroku.com/apps
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 but most things can be done through a bash terminal.
 
@@ -4459,6 +4694,7 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.4.9  | 12.12.2021 | NEW: core Flow and specification Task (usable as workflow with gravito presentation), FlatBeanReader, FieldUtil, subRegex, checkHash, fix: formatters on runtime, progressbar, gitlab-ci build/tests
  2.4.10 | 09.01.2022 | FlatBeanReader extended, security fixes (log4j etc.)
  2.4.11 | 03.04.2022 | NEW: ExcelWorker, ObjectPrinter, SQLQuery, html-dialog fix ("Yes" -> true), timemout on findjars, NEW: search.mvn.org, jardownload.com, fix: page clear on submit
+ 2.4.12 | 22.05.2022 | specification refactored: Workflow, ExcelWorker, (massive changes)Flow, Task, lots of conveniences extracted to util-classes
  2.5.0  | xx.xx.2022 | see EnvUpdate2v5v0: refactorings: serialization of actions with primitive attributes, move incubation packages, java9+, h2-v2+, hibernate 6
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
@@ -5567,7 +5803,7 @@ deploy:
 * hbm2doc not working anymore...
 
 * Workflow: read data from 
-	* [ ] FieldReader   : simple read delimited values into object array
-	* [ ] BeanFileUtil  : read delimited values and create a set of beans of given bean type
-	* [ ] FlatBeanReader: read markdown-like file with definitions and an import expression to create a set of beans
+	* [v] FieldReader   : simple read delimited values into object array
+	* [v] BeanFileUtil  : read delimited values and create a set of beans of given bean type
+	* [v] FlatBeanReader: read markdown-like file with definitions and an import expression to create a set of beans
 

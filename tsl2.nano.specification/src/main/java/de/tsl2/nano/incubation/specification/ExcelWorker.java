@@ -21,7 +21,7 @@ import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
 /**
- * Reads data lines from a given flat or CSV file to give each line to a worker
+ * Reads data lines from a given flat or CSV file to give each line to a worker,
  * executing an action with parameters (given in line). The Excel/CSV sheet
  * has to have the following structure:
  * 
