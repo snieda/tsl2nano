@@ -14,7 +14,7 @@ import org.anonymous.project.Chargeitem;
 import org.anonymous.project.Item;
 
 import de.tsl2.nano.bean.BeanContainer;
-import de.tsl2.nano.bean.FlatBeanReader;
+import de.tsl2.nano.bean.TransformableBeanReader;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.exception.Message;
@@ -24,7 +24,7 @@ public class FBRImport implements BiConsumer<String[], Map<String, Object>>, BiF
 	public static final String MTD_DOIMPORTHUMANREADABLE = "doImportHumanReadable";
 	
 	public static Collection<Charge> doImportHumanReadable(String file) {
-		FlatBeanReader<Charge> reader = new FlatBeanReader<>(Charge.class, 
+		TransformableBeanReader<Charge> reader = new TransformableBeanReader<>(Charge.class, 
 				ENV.get("timesheet.import.expression", "fromdate: fromtime-totime (pause^\\)\\:? ^value chargeitem comment"));
 		Collection<Charge> beans = reader.read(file);
 		Message.send("pesisting " + beans.size() + " items");

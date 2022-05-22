@@ -79,9 +79,9 @@ import de.tsl2.nano.core.util.Util;
  * @author ts
  * @param <T> bean type
  */
-public class FlatBeanReader<T> {
+public class TransformableBeanReader<T> {
 
-	private static final Log LOG = LogFactory.getLog(FlatBeanReader.class);
+	private static final Log LOG = LogFactory.getLog(TransformableBeanReader.class);
 	
 	private static final String SPLIT_NAME = "[^\\w]+";
 	private static final String REGEX_NAME = "[\\w]+";
@@ -91,10 +91,10 @@ public class FlatBeanReader<T> {
 	Map<String, Object> properties = new HashMap<>();
 	
 	/** read type and expression on file start */
-	public FlatBeanReader() {
+	public TransformableBeanReader() {
 	}
 
-	public FlatBeanReader(Class<T> type, String expression) {
+	public TransformableBeanReader(Class<T> type, String expression) {
 		this.type = type;
 		this.expression = expression;
 	}

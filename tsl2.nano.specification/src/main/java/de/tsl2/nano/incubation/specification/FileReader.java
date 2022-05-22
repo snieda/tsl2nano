@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import de.tsl2.nano.bean.BeanFileUtil;
-import de.tsl2.nano.bean.FlatBeanReader;
+import de.tsl2.nano.bean.TransformableBeanReader;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.scanner.FieldReader;
@@ -29,7 +29,7 @@ public class FileReader {
 			file = StringUtil.substring(queryOrFileName, "=", null);
 		if (type == null) {
 			if (file.endsWith("md")) {
-				return new FlatBeanReader().read(file);
+				return new TransformableBeanReader().read(file);
 			} else {
 				Map<Object, List> table = FieldReader.readTable(file, null);
 				List<Object> result = new LinkedList<>();
