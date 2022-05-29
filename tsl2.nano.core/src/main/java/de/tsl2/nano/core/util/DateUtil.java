@@ -411,6 +411,11 @@ public final class DateUtil {
         return str;
     }
 
+    /** creates diff on start and current time and delegates to {@link #getFormattedTime(long)} */
+    public static String fromStartTime(long start) {
+    	return getFormattedTime(start - System.currentTimeMillis());
+    }
+    
     /**
      * Formats a time to the default time-format
      * 

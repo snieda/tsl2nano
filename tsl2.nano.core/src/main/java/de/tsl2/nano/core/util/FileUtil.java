@@ -478,6 +478,14 @@ public class FileUtil {
         }
     }
 
+    public static Properties loadOptionalProperties(String resourceFile) {
+    	try {
+    		return loadProperties(resourceFile);
+    	} catch(Exception e) {
+    		LOG.debug(e.toString());
+    		return new Properties();
+    	}
+    }
     public static Properties loadProperties(String resourceFile) {
     	return loadProperties(resourceFile, null);
     }

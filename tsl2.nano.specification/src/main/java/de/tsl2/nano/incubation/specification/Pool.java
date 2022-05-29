@@ -63,6 +63,10 @@ public class Pool {
         }
     }
     
+    public static boolean hasRegisteredTypes() {
+    	return !registeredTypes.isEmpty();
+    }
+    
     private Map<String, IPRunnable> runnables() {
         if (runnables == null)
             loadRunnables();

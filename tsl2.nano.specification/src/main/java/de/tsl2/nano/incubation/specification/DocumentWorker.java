@@ -1,17 +1,25 @@
 package de.tsl2.nano.incubation.specification;
 
 import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.function.Consumer;
 
+import org.apache.commons.logging.Log;
+
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.incubation.specification.documentconsumer.ExcelWorkerConsumer;
+import de.tsl2.nano.incubation.specification.documentconsumer.FileImportConsumer;
+import de.tsl2.nano.incubation.specification.documentconsumer.SimpleDocumentTag;
+import de.tsl2.nano.incubation.specification.documentconsumer.SpecificationExchangeConsumer;
+import de.tsl2.nano.incubation.specification.documentconsumer.WorkflowConsumer;
 import de.tsl2.nano.util.FilePath;
 
 /**
@@ -77,19 +85,20 @@ in markdown: a markdown table
  * @author Thomas Schneider
  */
 public class DocumentWorker {
+	private static final String LINK = "\\s+\\[.*\\]\\(.*\\)";
 
+	private static final Log LOG = LogFactory.getLog(DocumentWorker.class);
+	
+	private static final String TAG_MATCH = ".*\\[\\w+\\:\\w+\\].*";
 	static final String TAG_DIR = ENV.getConfigPath() + "/tagdir";
 	private Properties properties;
-
-	enum Tag { APP, IMPORT, SPEC, MODEL, FLOW, WORKFLOW};
-
 	
 	public DocumentWorker() {
 		init();
 	}
 
 	protected void init() {
-		properties = FileUtil.loadProperties(ENV.getConfigPath() + "/" + getClass().getSimpleName().toLowerCase() + ".properties");
+		properties = FileUtil.loadOptionalProperties(ENV.getConfigPath() + getClass().getSimpleName().toLowerCase() + ".properties");
 		if (properties.isEmpty()) {
 			preInitProperties();
 		}
@@ -97,14 +106,20 @@ public class DocumentWorker {
 	}
 
 	protected void preInitProperties() {
-		properties.put("APP", null);
-		properties.put("MODEL", null);
-		properties.put("SPEC", null);
-		properties.put("IMPORT", null);
+		properties.put("APP", SimpleDocumentTag.class.getName());
+		properties.put("MODEL", SimpleDocumentTag.class.getName());
+		properties.put("SPEC", SpecificationExchangeConsumer.class.getName());
+		properties.put("FLOW", WorkflowConsumer.class.getName());
+		properties.put("IMPORT", FileImportConsumer.class.getName());
+		properties.put("WORKER", ExcelWorkerConsumer.class.getName());
+		// TODO: let SpecificationExchange, Workflow, ExcelWorker and TransformableBeanReader implement Consumer
 	}
 
-	public void read(String fileName) {
+	public void consume(String fileName) {
 		long start = System.currentTimeMillis();
+		LOG.info("\n=============================================================================");
+		LOG.info("starting documentworker on " + fileName);
+		LOG.info("=============================================================================\n");
 		Scanner sc = Util.trY( () -> new Scanner(new File(fileName)));
 		String l, tag = null, tagfile;
 		StringBuilder content = new StringBuilder();
@@ -112,31 +127,43 @@ public class DocumentWorker {
 		while (sc.hasNextLine()) {
 			l = sc.nextLine();
 			line++;
-			content.append(l + "\n");
 			try {
-				if (isNewChapter(l)) {
-					tag = readTag(l);
+				if (isNewChapterWithTag(l)) {
 					if (content.length() > 0) {
 						tagfile = writeLastChapter(line, tag, content);
 						runTag(tag, tagfile);
+						tag = readTag(l);
 						content.setLength(0);
+					} else {
+						tag = readTag(l);
 					}
 				}
+				else if (l.matches(LINK)) {
+					String link = StringUtil.substring(l, "(", ")");
+					content.append(new String(FilePath.read(link)));
+				} else if (!isCodeTag(l))
+					content.append(l + "\n");
 			} catch (Exception e) {
 				throw new IllegalStateException("Exception thrown reading line [" + line + "]:" + l, e);
 			}
 		}
+		LOG.info("documentworker finished (time: " + DateUtil.fromStartTime(start) + ", file: " + fileName + ")");
+		LOG.info("=============================================================================\n");
+
 	}
 
 	private void runTag(String tag, String tagfile) {
-		System.out.println("starting " + tag + " on " + tagfile);
-		Consumer<File> worker = BeanClass.createInstance(properties.getProperty(tag));
+		LOG.info("starting " + tag + " on " + tagfile);
+		if (!properties.containsKey(tag))
+			throw ManagedException.implementationError("can't consume tag", tag, properties.keySet().toArray());
+		Class<Consumer<File>> workerType = BeanClass.load(properties.getProperty(tag));
+		Consumer<File> worker;
+		if ((worker = ENV.get(workerType)) == null)
+			BeanClass.createInstance(workerType);
 		worker.accept(new File(tagfile));
-		
-		// TODO: let SpecificationExchange, Workflow, ExcelWorker and TransformableBeanReader implement Consumer
 	}
 
-	private String writeLastChapter(int line, String tag, StringBuilder content) {
+	protected String writeLastChapter(int line, String tag, StringBuilder content) {
 		String tagfile = TAG_DIR + "/" + tag + "-" + line;
 		FilePath.write(tagfile, content.toString().getBytes());
 		return tagfile;
@@ -146,17 +173,16 @@ public class DocumentWorker {
 		return StringUtil.substring(l, ":", "]");
 	}
 
-	private boolean isNewChapter(String l) {
+	private boolean isNewChapterWithTag(String l) {
+		return isChapter(l) && l.matches(TAG_MATCH);
+	}
+
+	private boolean isCodeTag(String l) {
+		return l.startsWith("~~~") || l.startsWith("===");
+	}
+
+	private boolean isChapter(String l) {
 		return l.startsWith("#");
 	}
 
-	static class StandardDocumentTag implements Consumer<File> {
-
-		@Override
-		public void accept(File f) {
-			byte[] content = FilePath.read(f.getAbsolutePath());
-			// TODO: what to do? set definitions, load and start actions?
-		}
-		
-	}
 }

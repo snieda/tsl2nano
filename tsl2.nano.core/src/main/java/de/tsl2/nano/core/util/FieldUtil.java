@@ -71,13 +71,12 @@ public class FieldUtil extends ByteUtil {
 	}
 
 	public static String[] getFieldNames(Class<? extends Object> cls) {
-		Field[] fields = cls.getDeclaredFields();
-		String[] result = new String[fields.length];
-		for (int i = 0; i < fields.length; i++) {
-			result[i] = fields[i].getName();
-		}
-		Arrays.sort(result);
-		return result;
+
+		return Arrays.stream(cls.getDeclaredFields())
+			.filter(f -> !f.isSynthetic())
+            .map(f -> f.getName())
+            .sorted()
+            .toArray(String[]::new);
 	}
 
 	public static <T> T print(T result) {

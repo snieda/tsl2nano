@@ -965,7 +965,7 @@ public class BeanClass<T> implements Serializable {
             }
             if (instance == null) {
                 throw ManagedException.implementationError(
-                        "BeanClass could not create the desired instance of type " + clazz, args,
+                        "BeanClass could not create the desired instance of type " + clazz, Arrays.toString(args),
                         (Object[]) constructors);
             }
         }

@@ -143,6 +143,9 @@ public class TransformableBeanReader<T> {
 		return expression.split(SPLIT_NAME);
 	}
 
+	public static Collection<Object> importFrom(String fileName) {
+		return new TransformableBeanReader<>().read(fileName);
+	}
 	/**
 	 * @param fileName
 	 * @return loaded beans

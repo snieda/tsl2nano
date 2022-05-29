@@ -1,0 +1,83 @@
+# [TSL:APP] Create an Html Application from Scratch
+
+The *[TSL:APP]* tag is a reservation for future. perhaps some libraries will be defined and downloaded or plugins are defined.
+
+## 1. [TSL:MODEL] Create a Data Model and save it as DDL
+
+The *[TSL:MODEL]* defines the uml model as plant-uml directly, or a path to load and save a ddl file to the environment directory.
+
+Example:
+
+	![Path to my ddl-file](https://ponyorm.com/mydiagram/oracle)
+
+## 2. [TSL:SPEC] Create Specification Files
+
+The *[TSL:SPEC]* tag lets load a specification file or defines the properties inside this block
+
+Fill *specification.properties* or *specification.properties.csv* to define the following elements.
+
+Example:
+
+	mykey=myvalue
+	§dim2plus1=(x*y)+1
+	%presvalcolor=var map = new java.util.HashMap(); map.put(&apos;style&apos;, value &gt; 10 ? &apos;color: red;&apos; : &apos;color: green;&apos;); map;
+
+### 2.2 Virtual Types
+
+add bean attributes that belong to rule definitions
+
+### 2.3 Field Property Rules
+
+Type    Field   Property    Rule
+
+### 2.4 Type Actions
+
+add bean actions that belong to rule/action definitions
+
+### [TSL:FLOW] Flow as simple workflow
+
+write simple text in format of gravizo to define a workflow
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+§test=true
+!myAction=1
+?myquery=select * from tables
+flowfilename=myflowfile
+schedule=01/2/20/SECONDS
+queryname=?myquery
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Example:
+
+START (OK) -> !myAction [label="§test"]
+!myAction (NEW) -> END
+
+
+### [TSL:WORKER] Excelworker defining data for simple workflows
+
+Example:
+
+	ID	ACTION	PARAMETER1	PARAMETER2
+	001	UPDATE	STARTTIME	10:00
+
+The first line is a header to name the columns. in line 2 the bean with id=001 will be updated. here, the attribute starttime may be changed to be '10:00'
+
+## [TSL:IMPORT] Import human readable data 
+
+# definitions:
+§ type=de.tsl2.nano.autotest.TypeBean
+§ expression=date: string
+# transformer=de.tsl2.nano.h5.timesheet.SBRImport
+§ date=01.01.2022
+§ immutableInteger=0
+
+## Times
+
+<details>
+  <summary>Click to expand!</summary>
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+07.01.: 08:30-18:00(1,0h): 8,5h Ticket-1234
+08.01.: 09:30-19:00(1,0h): 8,5h Ticket-2345
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+</details>

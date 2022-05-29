@@ -948,6 +948,9 @@ Specifications are textual definitions to be simply done by skilled workers (to 
 
 There are several parts working together:
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*** Defining the gravizo diagram inside a code block, in cause of showing an empty diagram
+
 ![](http://g.gravizo.com/g?digraph G {
 SpecificationExchange -> {propertyfile, delimitedfile}
 delimitedfile -> {Excel, propertyfile}
@@ -964,6 +967,7 @@ ExcelWorker -> {excelsheet, sqlqueries, javaactions}
 excelsheet [label="holding id rows partitioned into blocks, defining actions with parameters"]
 FlatBeanReader [label="reads a markdown file defining any specification elements and starting any actions"]
 })
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### The Specification Exchange
 
@@ -1450,7 +1454,7 @@ The *[TSL:MODEL]* defines the uml model as plant-uml directly, or a path to load
 
 Example:
 
-![Path to my ddl-file](https://ponyorm.com/mydiagram/oracle)
+	![Path to my ddl-file](https://ponyorm.com/mydiagram/oracle)
 
 ## 2. [TSL:SPEC] Create Specification Files
 
@@ -1460,9 +1464,9 @@ Fill *specification.properties* or *specification.properties.csv* to define the 
 
 Example:
 
-mykey=myvalue
-§dim2plus1=(x*y)+1
-%presvalcolor=var map = new java.util.HashMap(); map.put(&apos;style&apos;, value &gt; 10 ? &apos;color: red;&apos; : &apos;color: green;&apos;); map;
+	mykey=myvalue
+	§dim2plus1=(x*y)+1
+	%presvalcolor=var map = new java.util.HashMap(); map.put(&apos;style&apos;, value &gt; 10 ? &apos;color: red;&apos; : &apos;color: green;&apos;); map;
 
 ### 2.2 Virtual Types
 
@@ -1490,10 +1494,8 @@ START (OK) -> !myAction [label="§test"]
 
 Example:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-ID	ACTION	PARAMETER1	PARAMETER2
-001	UPDATE	STARTTIME	10:00
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	ID	ACTION	PARAMETER1	PARAMETER2
+	001	UPDATE	STARTTIME	10:00
 
 The first line is a header to name the columns. in line 2 the bean with id=001 will be updated. here, the attribute starttime may be changed to be '10:00'
 
