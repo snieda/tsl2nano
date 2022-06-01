@@ -121,7 +121,9 @@ public class ExcelWorker implements Runnable {
 			}
 			if (sc.hasNextLine()) {
 				header = sc.nextLine().split(DELIMITER);
-				iaction = getIndexes(header, ACTION)[0];
+				int[] ia = getIndexes(header, ACTION);
+				if (ia.length > 0)
+					iaction = ia[0];
 				ipars = getIndexes(header, PAR);
 			}
 			log("\tCOLUMN-INDEXES: id=" + ID_INDEX + ", action=" + iaction + ", parameters=" + Arrays.toString(ipars));

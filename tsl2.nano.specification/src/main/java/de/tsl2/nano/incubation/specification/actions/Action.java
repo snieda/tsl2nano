@@ -56,6 +56,11 @@ public class Action<T> extends AbstractRunnable<T> {
         this(getMethod(method));
     }
 
+    public Action(String name, String method, LinkedHashMap<String, ParType> parameter) {
+    	this(name, method);
+    	this.parameter = parameter;
+    }
+    
     public Action(String name, String method) {
         this(getMethod(method));
         this.name = name;

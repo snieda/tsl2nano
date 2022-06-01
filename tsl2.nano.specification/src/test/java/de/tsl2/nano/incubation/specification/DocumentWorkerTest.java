@@ -39,5 +39,9 @@ public class DocumentWorkerTest implements ENVTestPreparation {
 		
 		assertTrue(specCalled);
 	}
+	
+	public void myAction() {
+		
+	}
 
 }

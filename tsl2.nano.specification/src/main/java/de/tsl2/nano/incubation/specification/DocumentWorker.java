@@ -98,11 +98,15 @@ public class DocumentWorker {
 	}
 
 	protected void init() {
-		properties = FileUtil.loadOptionalProperties(ENV.getConfigPath() + getClass().getSimpleName().toLowerCase() + ".properties");
+		properties = FileUtil.loadOptionalProperties(getPropertyFileName());
 		if (properties.isEmpty()) {
 			preInitProperties();
 		}
 		new File(TAG_DIR).mkdirs();
+	}
+
+	protected String getPropertyFileName() {
+		return ENV.getConfigPath() + getClass().getSimpleName().toLowerCase() + ".properties";
 	}
 
 	protected void preInitProperties() {
@@ -112,7 +116,7 @@ public class DocumentWorker {
 		properties.put("FLOW", WorkflowConsumer.class.getName());
 		properties.put("IMPORT", FileImportConsumer.class.getName());
 		properties.put("WORKER", ExcelWorkerConsumer.class.getName());
-		// TODO: let SpecificationExchange, Workflow, ExcelWorker and TransformableBeanReader implement Consumer
+		FileUtil.saveProperties(getPropertyFileName(), properties);
 	}
 
 	public void consume(String fileName) {
