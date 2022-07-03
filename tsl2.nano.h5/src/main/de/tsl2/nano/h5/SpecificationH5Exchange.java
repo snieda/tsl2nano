@@ -140,7 +140,9 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 	}
 
 	protected Properties fromCSV() {
-		Scanner sc = Util.trY(() -> new Scanner(FileUtil.userDirFile(ENV.getConfigPath() + FILENAME_SPEC_PROPERTIES + EXT_CSV)));
+		Scanner sc = Util.trY(() -> new Scanner(FileUtil.userDirFile(ENV.getConfigPath() + FILENAME_SPEC_PROPERTIES + EXT_CSV)), false);
+		if (sc == null)
+			return null;
 		Properties p = MapUtil.createSortedProperties();
 		String l, k, v;
 		while (sc.hasNextLine()) {
@@ -156,7 +158,9 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 
 	protected Properties fromMarkdown() {
 		// TODO: implement
-		Scanner sc = Util.trY(() -> new Scanner(FileUtil.userDirFile(ENV.getConfigPath() + FILENAME_SPEC_PROPERTIES + EXT_MARKDOWN)));
+		Scanner sc = Util.trY(() -> new Scanner(FileUtil.userDirFile(ENV.getConfigPath() + FILENAME_SPEC_PROPERTIES + EXT_MARKDOWN)), false);
+		if (sc == null)
+			return null;
 		Properties p = MapUtil.createSortedProperties();
 		String l, k, v;
 		while (sc.hasNextLine()) {

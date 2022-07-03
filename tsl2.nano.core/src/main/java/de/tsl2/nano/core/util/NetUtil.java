@@ -48,6 +48,7 @@ import javax.net.ssl.SSLHandshakeException;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.core.ENV;
 //import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
@@ -176,11 +177,14 @@ public class NetUtil {
     	return get(strUrl, 0);
     }
     public static String get(String strUrl, int timeout) {
+    	return get(strUrl, /*ENV.get("url.connection.timeout", 15)*/timeout, timeout);
+    }
+    public static String get(String strUrl, int connectionTimeout, int readTimeout) {
         try {
             LOG.info("starting request: " + strUrl);
             URLConnection con = url(strUrl).openConnection();
-        	con.setConnectTimeout(timeout);
-        	con.setReadTimeout(timeout);
+        	con.setConnectTimeout(connectionTimeout);
+        	con.setReadTimeout(readTimeout);
         	con.setRequestProperty ( "User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0" );
 			String response = String.valueOf(FileUtil.getFileData(con.getInputStream(), null, false));
             if (LOG.isDebugEnabled()) {

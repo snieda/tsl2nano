@@ -48,17 +48,16 @@ SET NON_KEYWORDS;
 -- SET DATABASE SQL SYNTAX ORA TRUE;
 -- SET DATABASE SQL SYNTAX PGS TRUE;
 -- following lines are h2 compatibility modes:
--- SET MODE	
---			REGULAR	
---			STRICT	
---			LEGACY	
---			DB2	
---			DERBY	
---			HSQLDB	
---			MSSQLSERVER	
---			MYSQL	
---			ORACLE	
---			POSTGRESQL	
+SET MODE LEGACY;
+--			REGULAR;
+--			STRICT;	
+--			DB2;
+--			DERBY;	
+--			HSQLDB;	
+--			MSSQLSERVER;	
+--			MYSQL;
+--			ORACLE;	
+--			POSTGRESQL;	
 commit;
 		</echo>
 

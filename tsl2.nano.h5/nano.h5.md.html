@@ -1344,6 +1344,8 @@ So, after START, if the rule *§test* returns true, the action *!MyAction* will 
 
 #### creating the workflow
 
+A flow holds connections/links between actions and states. The workflow needs additional informations like the data to work on and a starting time.
+
 programatic Example of creating a very simple workflow:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1372,6 +1374,12 @@ would be read to go through the flow. This will be done *now*. But you could sch
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Using specified ExcelWorkers
+
+ExcelWorkers are defined inside a tab-spaced flat text file, that can be exported from an excel-sheet. 
+Inside the header lines, actions can be defined. All other lines hold the ID to a data element, an action name with parameter to be executed for this data element.
+
+The advantage is, a skilled worker is able to do specific actions on specific data to generate new data or something like a history. The initial idea
+came as we needed a test to generate changing data.
 
 Extraction of the java doc:
 
@@ -1432,7 +1440,7 @@ A programatic simple example:
 
 ### A full markdown specification document
 
-The specification exchange puts almost all specification elements together. The markdown specification documents provides one step more:
+The specification exchange puts almost all specification elements together. A markdown specification document provides one step more:
 
 * do all the things, the specification exchange provides
 * import interpretable data
@@ -5896,3 +5904,5 @@ deploy:
 	* [v] BeanFileUtil  : read delimited values and create a set of beans of given bean type
 	* [v] FlatBeanReader: read markdown-like file with definitions and an import expression to create a set of beans
 
+* interactive mode: ask for each first access on env properties
+* ki mode: learn best property values

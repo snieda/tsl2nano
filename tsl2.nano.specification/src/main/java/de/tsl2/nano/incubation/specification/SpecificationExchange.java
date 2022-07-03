@@ -89,8 +89,8 @@ public class SpecificationExchange implements IBeanDefinitionSaver {
     /** converts the given properties to markdown (objectname, rule, optional-parameter) */
     public String saveAsMarkdown(String filename, Properties p) {
     	// TODO: implement markdown
-    	if (true)
-    		throw new UnsupportedOperationException();
+//    	if (true)
+//    		throw new UnsupportedOperationException();
     	
     	StringBuilder buf = new StringBuilder();
     	//TODO: performance: don't write whole properties on each bean...
