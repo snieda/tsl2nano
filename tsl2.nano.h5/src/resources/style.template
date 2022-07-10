@@ -198,6 +198,7 @@ td, th, .td, .th {
 #title,.title {
 	background: transparent;
     color: white;
+    text-shadow: 1px 2px 2px black;
 	font-size: 1.4em; 
 }
 
@@ -227,6 +228,7 @@ nav {
     background: transparent;
     border: 1px solid #333;
     color: white;
+    text-shadow: 1px 2px 2px black;
     display: block;
     margin: 0;
     overflow: hidden;
@@ -245,6 +247,7 @@ nav ul li {
 
 nav > ul > li > a {
     color: white;
+    text-shadow: 1px 2px 2px black;
     display: block !important;
     line-height: 2em;
     padding: 0.5em 2em;
@@ -262,6 +265,7 @@ nav li > ul li{
 
 nav  li > ul li button {
     color: white;
+    text-shadow: 1px 2px 2px black;
     display: block;
     line-height: 2em;
     padding: 0.5em 2em;

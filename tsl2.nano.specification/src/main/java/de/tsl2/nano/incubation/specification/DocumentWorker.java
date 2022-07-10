@@ -10,6 +10,7 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
@@ -124,6 +125,7 @@ public class DocumentWorker {
 		LOG.info("\n=============================================================================");
 		LOG.info("starting documentworker on " + fileName);
 		LOG.info("=============================================================================\n");
+		Message.send("starting documentworker on " + fileName);
 		Scanner sc = Util.trY( () -> new Scanner(new File(fileName)));
 		String l, tag = null, tagfile;
 		StringBuilder content = new StringBuilder();

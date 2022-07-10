@@ -21,6 +21,7 @@ import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.ScriptUtil;
 import de.tsl2.nano.h5.expression.RuleExpression;
 import de.tsl2.nano.incubation.specification.Pool;
+import de.tsl2.nano.incubation.specification.SpecificationExchange;
 import de.tsl2.nano.incubation.specification.actions.Action;
 import de.tsl2.nano.incubation.specification.rules.RuledEnabler;
 
@@ -108,6 +109,6 @@ public interface NanoH5Util {
 	}
 
     public static int enrichFromSpecificationProperties() {
-    	return new SpecificationH5Exchange().enrichFromSpecificationProperties();
+    	return ENV.get(SpecificationExchange.class).enrichFromSpecificationProperties();
 	}
 }

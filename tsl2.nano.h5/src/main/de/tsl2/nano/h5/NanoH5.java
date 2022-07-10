@@ -86,8 +86,10 @@ import de.tsl2.nano.h5.navigation.EntityBrowser;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.h5.navigation.Workflow;
 import de.tsl2.nano.h5.plugin.INanoPlugin;
+import de.tsl2.nano.incubation.specification.DocumentWorker;
 import de.tsl2.nano.incubation.specification.PFlow;
 import de.tsl2.nano.incubation.specification.Pool;
+import de.tsl2.nano.incubation.specification.SpecificationExchange;
 import de.tsl2.nano.incubation.specification.actions.Action;
 import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RuleDecisionTable;
@@ -799,6 +801,9 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         //TODO: the environment and current thread shouldn't use the new sessions classloader! 
         Thread.currentThread().setContextClassLoader(runtimeClassloader);
         ENV.addService(ClassLoader.class, runtimeClassloader);
+    	SpecificationH5Exchange h5Exchange = new SpecificationH5Exchange();
+		ENV.addService(IBeanDefinitionSaver.class, h5Exchange);
+    	ENV.addService(SpecificationExchange.class, h5Exchange);
 
         createAuthorization(persistence.getAuth());
         NanoH5Util.enrichFromSpecificationProperties();
@@ -854,7 +859,12 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
      * @return a root bean-collector holding all bean-type collectors.
      */
     protected BeanDefinition<?> createBeanCollectors(List<Class> beanClasses) {
-    	ENV.addService(IBeanDefinitionSaver.class, new SpecificationH5Exchange());
+    	File docWorkerFile = new File(ENV.getConfigPath() + "documentworker.md.html");
+    	if (docWorkerFile.exists()) {
+	    	ENV.addService(DocumentWorker.class);
+	    	ENV.get(DocumentWorker.class).consume(docWorkerFile.getAbsolutePath());
+    	}
+    	
         Message.send("loading bean collectors for " + beanClasses.size() + " types");
         LOG.debug("creating collector for: ");
         List<BeanDefinition> types = new ArrayList(beanClasses.size());

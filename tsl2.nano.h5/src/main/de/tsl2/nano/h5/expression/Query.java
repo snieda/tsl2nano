@@ -77,6 +77,12 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>>, I
     public Query() {
     }
 
+    public Query(String name, String query) {
+    	this(name, query, null);
+    }
+    public Query(String name, String query, Map<String, Serializable> parameter) {
+    	this(name, query, true, parameter);
+    }
     /**
      * constructor
      * 
