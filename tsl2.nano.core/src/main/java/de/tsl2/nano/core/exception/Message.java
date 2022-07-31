@@ -120,7 +120,7 @@ public class Message extends RuntimeException {
     }
     
     public static Object obj(String hex) {
-        byte[] obj = ByteUtil.fromHex(hex.substring(Message.PREFIX_DIALOG.length()));
+        byte[] obj = ByteUtil.fromHex(StringUtil.substring(hex, Message.PREFIX_DIALOG, null));
         return ObjectUtil.convertToObject(obj);
     }
     

@@ -4,6 +4,7 @@ import static de.tsl2.nano.bean.def.IBeanCollector.MODE_CREATABLE;
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_EDITABLE;
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_MULTISELECTION;
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_SEARCHABLE;
+import static de.tsl2.nano.h5.NanoHTTPD.MIME_HTML;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -563,6 +564,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
     //        //workaround to avoid doing a cached request twice
     //        lastHeader = header;
         } catch(Exception ex) {
+        	if (session == null)
+            	return createResponse(Status.BAD_REQUEST, MIME_HTML, ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : "Request unauthorized");
             Message.send(ex);//don't let the server go down on any exception
         }
         requests++;
