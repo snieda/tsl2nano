@@ -243,9 +243,10 @@ public class ENV implements Serializable {
 
     public static ENV create(String dir) {
         new File(dir).getAbsoluteFile().mkdirs();
-        String name = StringUtil.substring(dir, PREFIX_ENVNAME, "/");
+        dir = dir.endsWith("/") ? dir : dir + "/";
+        String name = dir + StringUtil.substring(dir, PREFIX_ENVNAME, "/");
         LogFactory.setLogFile(name + ".log");
-        LogFactory.setLogFactoryXml("logfactory.xml");
+        LogFactory.setLogFactoryXml(dir + "logfactory.xml");
         String buildInfo = getBuildInformations();
         
         LogFactory.log("\n===========================================================\n"
@@ -937,6 +938,11 @@ public class ENV implements Serializable {
         		? false : extractResource(resourceName, destinationDir + destName, flat, executable, logError);
     }
 
+    public static final boolean hasResourceOrFile(String resourceName) {
+    	String name = System.getProperty(resourceName, resourceName);
+    	return get(ClassLoader.class).getResourceAsStream(name) != null || new File(getConfigPath() + name).exists();
+    }
+    
     public static final boolean extractResource(String resourceName, boolean flat, boolean executable, boolean logError) {
         return extractResourceToDir(resourceName, "", flat, executable, logError);
     }

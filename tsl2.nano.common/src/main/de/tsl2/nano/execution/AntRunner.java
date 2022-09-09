@@ -230,7 +230,7 @@ public class AntRunner {
             public void messageLogged(BuildEvent arg0) {
                 if (arg0.getException() != null)
                     Message.send(arg0.getException());
-                else if (arg0.getPriority() == 1)
+                else if (arg0.getPriority() <= 2)
                     Message.send(arg0.getMessage());
             }
 

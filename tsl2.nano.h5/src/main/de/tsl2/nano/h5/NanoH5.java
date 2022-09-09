@@ -124,7 +124,8 @@ import de.tsl2.nano.util.Translator;
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, IEnvChangeListener {
-    private static final Log LOG = LogFactory.getLog(NanoH5.class);
+
+	private static final Log LOG = LogFactory.getLog(NanoH5.class);
 
     public static final String JAR_COMMON = "tsl2.nano.common.jar";
     public static final String JAR_SERVICEACCESS = "tsl2.nano.serviceaccess.jar";
@@ -137,6 +138,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
 
     public static final String ZIP_STANDALONE = "standalone.zip";
 
+    static final String MDA_SCRIPT = "mda.xml";
     /** ant script to start the hibernatetool 'hbm2java' */
     static final String REVERSE_ENG_SCRIPT = "reverse-eng.xml";
     /** hibernate reverse engeneer configuration */
@@ -325,7 +327,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
             }
             ENV.extractResource("readme.txt");
             ENV.extractResource("shell.xml");
-            ENV.extractResource("mda.xml");
+            ENV.extractResource(MDA_SCRIPT);
             ENV.extractResource("compilejar.cmd");
             ENV.extractResource("tsl2nano-appcache.mf");
             ENV.extractResource("favicon.ico");
@@ -988,9 +990,15 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
             selectedFile = new File(ENV.getConfigPath() + FileUtil.getURIFilePath(jarName));
         }
         jarName = selectedFile.getPath();
+        DatabaseTool dbTool = new DatabaseTool(persistence);
         if (!selectedFile.exists() && !isAbsolutePath) {
+        	if (dbTool.hasLocalDatabaseFile()
+        			&& ! ENV.hasResourceOrFile(persistence.getDatabase() + ".sql")) {
+       			runLocalDatabaseAndGenerateEntities(persistence, jarName, dbTool);
+        	} else {
             //ant-scripts can't use the nested jars. but normal beans shouldn't have dependencies to simple-xml.
-            generateDatabaseAndEntities(persistence, jarName);
+        		generateDatabaseAndEntities(persistence, jarName);
+        	}
         } else if (isAbsolutePath) {//copy it into the own classpath (to don't lock the file)
             if (!selectedFile.exists()) {
                 throw new IllegalArgumentException(
@@ -1002,7 +1010,6 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         }
 
         //may be on second start after having already generated the jar file
-        DatabaseTool dbTool = new DatabaseTool(persistence);
         if (dbTool.isLocalDatabase(persistence) && !dbTool.canConnectToLocalDatabase(persistence)) {
             runLocalDatabase(persistence);
         }
@@ -1019,7 +1026,17 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         return beanClasses;
     }
 
-    private void createLuceneIntegration(Persistence persistence) {
+	private void runLocalDatabaseAndGenerateEntities(final Persistence persistence, String jarName, DatabaseTool dbTool) {
+		dbTool.copyJavaDBDriverFiles(persistence);
+		if (!dbTool.canConnectToLocalDatabase()) {
+			runAntScript(new Properties(), MDA_SCRIPT, "create.db.server.run.file");
+			runLocalDatabase(persistence);
+		}
+		provideJarFileGenerator(persistence);
+		generateJarFile(jarName, persistence.getGenerator(), persistence.getDefaultSchema());
+	}
+
+	private void createLuceneIntegration(Persistence persistence) {
         if (isH2(persistence.getConnectionUrl()) && ENV.get("app.db.h2.lucene.integration", false)) {
             new H2LuceneIntegration(persistence).activateOnTables();
 
@@ -1084,14 +1101,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         provideScripts(persistence);
         dbTool.copyJavaDBDriverFiles(persistence);
 
-        String generatorTask;
-        if (persistence.getGenerator().equals(Persistence.GEN_HIBERNATE)) {
-            generatorTask = "org.hibernate.tool.ant.HibernateToolTask";
-        } else {
-            generatorTask = "org.apache.openjpa.jdbc.ant.ReverseMappingToolTask";
-        }
-        ENV.loadClassDependencies("org.apache.tools.ant.taskdefs.Taskdef",
-            generatorTask, persistence.getConnectionDriverClass(), persistence.getProvider());
+        provideJarFileGenerator(persistence);
 
         if ((dbTool.isLocalDatabase(persistence) 
         		&& (!dbTool.canConnectToLocalDatabase(persistence) || !dbTool.checkJDBCConnection(false)))
@@ -1118,8 +1128,20 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         }
     }
 
+	private void provideJarFileGenerator(final Persistence persistence) {
+		String generatorTask;
+        if (persistence.getGenerator().equals(Persistence.GEN_HIBERNATE)) {
+            generatorTask = "org.hibernate.tool.ant.HibernateToolTask";
+        } else {
+            generatorTask = "org.apache.openjpa.jdbc.ant.ReverseMappingToolTask";
+        }
+        ENV.loadClassDependencies("org.apache.tools.ant.taskdefs.Taskdef",
+            generatorTask, persistence.getConnectionDriverClass(), persistence.getProvider());
+	}
+
     protected void runLocalDatabase(final Persistence persistence) {
-    	if (DatabaseTool.isDBRunInternally()) {
+    	if (DatabaseTool.isDBRunInternally() && isH2(persistence.getConnectionUrl())) {
+    		// at this moment, only implemented for h2 (hsqldb in future!)
     		new DatabaseTool(persistence).runDBServer();
     		ConcurrentUtil.sleep(1000);
     	} else {
@@ -1187,13 +1209,17 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         
         //give mda.xml the information to don't start nano.h5
         p.put("nano.h5.running", "true");
-        p.put("base.dir", ENV.getConfigPath());
-        ENV.get(CompatibilityLayer.class).runRegistered("ant",
-            ENV.getConfigPath() + "mda.xml",
-            "do.all",
-            p);
+        runAntScript(p, MDA_SCRIPT, "do.all");
         Plugins.process(INanoPlugin.class).databaseGenerated(Persistence.current());
     }
+
+	private static Boolean runAntScript(Properties p, String script, String target) {
+		p.put("basedir", ENV.getConfigPath());
+        return (Boolean) ENV.get(CompatibilityLayer.class).runRegistered("ant",
+            ENV.getConfigPath() + script,
+            target,
+            p);
+	}
 
     protected static Boolean generateJarFile(String jarFile, String generator, String schema) {
         ENV.extractResource(REVERSE_ENG_SCRIPT);
@@ -1201,7 +1227,6 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         Properties properties = new Properties();
         properties.setProperty(HIBREVNAME, ENV.getConfigPath() + HIBREVNAME);
 //    properties.setProperty("hbm.conf.xml", "hibernate.conf.xml");
-        properties.setProperty("base.dir", ENV.getConfigPath());
         properties.setProperty("server.db-config.file", Persistence.FILE_JDBC_PROP_FILE);
         properties.setProperty("dest.file", jarFile);
         properties.setProperty("generator", generator);
@@ -1217,10 +1242,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         //If no environment was saved before, we should do it now!
         ENV.persist();
 
-        Boolean result = (Boolean) ENV.get(CompatibilityLayer.class).runRegistered("ant",
-            ENV.getConfigPath() + REVERSE_ENG_SCRIPT,
-            "create.bean.jar",
-            properties);
+        Boolean result = runAntScript(properties, REVERSE_ENG_SCRIPT, "create.bean.jar");
         if (result != null && result)
             Plugins.process(INanoPlugin.class).beansGenerated(Persistence.current());
         return result;

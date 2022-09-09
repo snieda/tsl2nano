@@ -981,11 +981,14 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     private Element createExpandable(Element parent, String title, boolean open) {
+    	return createExpandable(parent, title, open, "color: #6666FF;");
+    }
+    private Element createExpandable(Element parent, String title, boolean open, String style) {
         parent = appendElement(parent, TAG_EXP_DETAILS, enable(ATTR_EXP_OPEN, open));
         String key = shortCut(++tabIndex);
         appendElement(parent, TAG_EXP_SUMMARY, content(title), ATTR_ACCESSKEY, key, ATTR_TITLE, "ALT+" + key,
             ATTR_ALIGN,
-            ALIGN_LEFT, ATTR_STYLE, "color: #6666FF;");
+            ALIGN_LEFT, ATTR_STYLE, style);
         return parent;
     }
 
@@ -2472,58 +2475,75 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         appendAttributes((Element) table.getParentNode(), ATTR_STYLE,
             ENV.get("layout.footer.grid.style", "background-image: url(icons/spe.jpg);"));
 
+        String shortText;
+        Element expandableFooter;
         Element preFooter;
-        if (footer instanceof Throwable) {
-            if (!ENV.get("app.login.secure", false)) {
-                preFooter = doc.createElement(TAG_PRE);
-                preFooter.setTextContent(((Throwable) footer).getMessage());
-                Element details = doc.createElement(TAG_LINK);
-                details.setAttribute(ATTR_HREF, "./" + new File(LogFactory.getLogFileName()).getName());
-                details.setTextContent(ENV.translate("tsl2nano.exception", true));
-                addRow(table, details);
-            }
+        Element exceptionLink = null;
+        boolean isError = footer instanceof Throwable;
+		if (isError) {
+        	shortText = "ERROR: " + ((Throwable)footer).getLocalizedMessage();
             preFooter = doc.createElement(TAG_PRE);
-            preFooter.setTextContent(((Throwable) footer).getMessage());
+            preFooter.setTextContent(shortText);
+            if (!ENV.get("app.login.secure", false)) {
+                exceptionLink = createLogFileLink(doc);
+            }
         } else {
             String strFooter = Util.asString(footer);
+            shortText = strFooter;
             if (strFooter != null && !isHtml(strFooter)) {
                 String[] split = strFooter.split("([:,=] )|[\t\n]");
                 preFooter = doc.createElement(TAG_SPAN);
                 preFooter.setAttribute(ATTR_ID, "footer");
-                boolean isKey;
-                String[] txt;//text + optional tooltip
-                for (int i = 0; i < split.length; i++) {
-                    isKey = i % 2 == 0;
-                    if (isKey) {
-                        appendElement(preFooter, TAG_IMAGE, ATTR_SRC, "icons/properties.png");
-                    }
-                    //evaluate the text and optional a title (tooltip)
-                    txt = split[i].split("[^\\[({]§");
-                    Element e = appendElement(preFooter, isKey ? "b" : "i", content(txt[0] + "  "), ATTR_COLOR, isKey
-                        ? COLOR_BLUE
-                        : COLOR_BLACK);
-                    if (txt.length > 1 && StringUtil.isHexString(txt[1])) {
-                        txt[1] = StringUtil.fromHexString(txt[1]);
-                        appendAttributes(e, ATTR_TITLE, txt[1]);
-                        appendElement(e, TAG_PARAGRAPH, content(txt[1]), ATTR_CLASS, "tooltip");
-                    }
+                if (split.length > 1) {
+	                boolean isKey;
+	                String[] txt;//text + optional tooltip
+	                for (int i = 0; i < split.length; i++) {
+	                    isKey = i % 2 == 0;
+	                    if (isKey) {
+	                        appendElement(preFooter, TAG_IMAGE, ATTR_SRC, "icons/properties.png");
+	                    }
+	                    //evaluate the text and optional a title (tooltip)
+	                    txt = split[i].split("[^\\[({]§");
+	                    Element e = appendElement(preFooter, isKey ? "b" : "i", content(txt[0] + "  "), ATTR_COLOR, isKey
+	                        ? COLOR_BLUE
+	                        : COLOR_BLACK);
+	                    if (txt.length > 1 && StringUtil.isHexString(txt[1])) {
+	                        txt[1] = StringUtil.fromHexString(txt[1]);
+	                        appendAttributes(e, ATTR_TITLE, txt[1]);
+	                        appendElement(e, TAG_PARAGRAPH, content(txt[1]), ATTR_CLASS, "tooltip");
+	                    }
+	                }
+	                appendElement(preFooter, TAG_IMAGE, ATTR_SRC, "icons/properties.png");
                 }
-                appendElement(preFooter, TAG_IMAGE, ATTR_SRC, "icons/properties.png");
             } else {
                 preFooter = doc.createElement(TAG_SPAN);
                 preFooter.setNodeValue(strFooter);
             }
         }
 
-        //append progress bar for websocket messsages
-//            Element progress = doc.createElement("progress");
-        appendElement(preFooter, "progress", ATTR_ID, "progressbar", "hidden", "true");
-        appendElement(preFooter, TAG_SPAN, content(" \tWAITING FOR WEBSOCKET TO CONNECT...!"), ATTR_ID, MSG_FOOTER);
-//            appendElement(progress, TAG_SPAN, content("0"), ATTR_STYLE, "position:relative");
+        Element footerTag = doc.createElement(TAG_SPAN);
+        appendElement(footerTag, MSG_FOOTER, ATTR_ID, "progressbar", "hidden", "true");
+        appendElement(footerTag, TAG_SPAN, content(" \tWAITING FOR WEBSOCKET TO CONNECT...!"), ATTR_ID, MSG_FOOTER);
+		//            appendElement(progress, TAG_SPAN, content("0"), ATTR_STYLE, "position:relative");
 //            appendAttributes(progress, "max", "100", "value", "0%", ATTR_STYLE, "position:relative");
-
-        return addRow(table, preFooter);
+        if (isError) {
+            String style = "color: " + (isError ? "FF6666" : "000000") + ";";
+        	expandableFooter = createExpandable(footerTag, StringUtil.toString(StringUtil.substring(shortText, null, "\n"), 120), isError, style);
+        	if (exceptionLink != null)
+        		expandableFooter.appendChild(exceptionLink);
+        	expandableFooter.appendChild(preFooter);
+        } else {
+        	footerTag.appendChild(preFooter);
+        }
+        return addRow(table, footerTag);
     }
+
+	private Element createLogFileLink(Document doc) {
+		Element logLink = doc.createElement(TAG_LINK);
+		logLink.setAttribute(ATTR_HREF, "./" + new File(LogFactory.getLogFileName()).getName());
+		logLink.setTextContent(ENV.translate("tsl2nano.exception", true));
+		return logLink;
+	}
 
     @Override
     public boolean isDefaultAttribute(IAttribute attribute) {

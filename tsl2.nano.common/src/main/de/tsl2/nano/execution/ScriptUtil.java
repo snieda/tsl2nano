@@ -61,7 +61,7 @@ public class ScriptUtil extends SystemUtil {
         final File buildFile = new File(filePath);
         final Project p = new Project();
         p.setName(buildFile.getName());
-        p.setBasedir(properties.getProperty("base.dir", System.getProperty("user.dir"))); // must be set after parsing through helper
+        p.setBasedir(properties.getProperty("basedir", System.getProperty("user.dir"))); // must be set after parsing through helper
         p.setCoreLoader(Thread.currentThread().getContextClassLoader());
 //        boolean t = true;
 //        Path path = null;
@@ -97,7 +97,7 @@ public class ScriptUtil extends SystemUtil {
             target = target != null ? target : p.getDefaultTarget();
             p.setSystemProperties();
             // basedir have to be set before parsing (for imports) and after parsing through helper
-            p.setBasedir(properties.getProperty("base.dir", System.getProperty("user.dir")));
+            p.setBasedir(properties.getProperty("basedir", System.getProperty("user.dir")));
 
             LOG.info("starting ant script: " + buildFile.getAbsolutePath()
                 + "\ntarget: "

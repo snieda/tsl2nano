@@ -211,23 +211,27 @@ public class ManagedException extends RuntimeException {
     public static <T> T trY(SupplierEx<T> callback) {
         return trY(callback, true);
     }
-    /**let the trY to the standard exception handling  */
-    public static <T> T trY(SupplierEx<T> callback, boolean escalate) {
+    /**lets trY with standard exception handling. with escalate=false or warnOnly Exceptions given, 
+     * only a WARN message will be printed on that exception  */
+    public static <T> T trY(SupplierEx<T> callback, boolean escalate, Exception...warnOnly) {
         try {
             return callback.get();
         } catch(Exception ex) {
-            LOG.error(ex);
-            return escalate ? (T) forward(ex, false) : null;
+            return (T) handleException(escalate, ex, warnOnly);
         }
     }
 
+	private static Object handleException(boolean escalate, Throwable ex, Exception... warnOnly) {
+		LOG.warn(ex.getMessage());
+		return !escalate || Arrays.asList(warnOnly).contains(ex.getClass())? null : forward(ex, true);
+	}
+
     /**use this throwable-catch only, if you know what you are doing  */
-    public static <T> T trYError(SupplierEx<T> callback, boolean escalate) {
+    public static <T> T trYError(SupplierEx<T> callback, boolean escalate, Exception...warnOnly) {
         try {
             return callback.get();
         } catch(Throwable ex) {
-            LOG.error(ex);
-            return escalate ? (T) forward(ex, false) : null;
+        	return (T) handleException(escalate, ex, warnOnly);
         }
     }
 
@@ -235,12 +239,11 @@ public class ManagedException extends RuntimeException {
         return trY(callback, true);
     }
     /**let the trY to the standard exception handling  */
-    public static <T> T trY(SupplierExVoid<T> callback, boolean escalate) {
+    public static <T> T trY(SupplierExVoid<T> callback, boolean escalate, Exception...warnOnly) {
         try {
             return callback.get();
         } catch(Exception ex) {
-            LOG.error(ex);
-            return escalate ? (T) forward(ex, false) : null;
+        	return (T) handleException(escalate, ex, warnOnly);
         }
     }
 

@@ -577,7 +577,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
         			: */nav != null ? ENV.translate(nav.getName(), true) : "unknown";
         return PREFIX_STATUS_LINE + user
             + ENV.translate("tsl2nano.time", true)
-            + ": " + DateUtil.getFormattedDateTime(new Date()) + ", "
+            + ": " + DateUtil.getFormattedTime(new Date()) + ", "
             + (nav != null ? ENV.translate("tsl2nano.session", true)
                 + ": " + workflow + "§"
                 + StringUtil.toHexString(getContext().toString().getBytes()) : "")

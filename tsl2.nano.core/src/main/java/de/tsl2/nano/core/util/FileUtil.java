@@ -379,7 +379,7 @@ public class FileUtil {
     }
 
     /**
-     * guarantees existing the full path.
+     * guarantees full path existing.
      * 
      * @param fileWithPath file with path
      */

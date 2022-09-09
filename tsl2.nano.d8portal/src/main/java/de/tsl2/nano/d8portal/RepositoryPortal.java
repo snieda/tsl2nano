@@ -39,7 +39,7 @@ import de.tsl2.nano.util.Mail;
  * repository will be sent by email to the client.
  * <p/>
  * NOTE: This simplified implementation belongs to oracles command line tool implementation 'keytool' 
- * and is used in linux shell command execution. So, it does only work on linux with a jdk of oracle!.
+ * and is used in linux shell command execution. So, it does only work on linux with a jdk  (>=8u301) of oracle!.
  * 
  */
 public class RepositoryPortal implements IRepositoryPortal {

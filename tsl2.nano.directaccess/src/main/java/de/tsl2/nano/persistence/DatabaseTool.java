@@ -54,7 +54,11 @@ public class DatabaseTool {
         return false;
     }
 
-    public boolean canConnectToLocalDatabase(Persistence persistence) {
+    public boolean canConnectToLocalDatabase() {
+    	return canConnectToLocalDatabase(persistence);
+    }
+    
+    public static boolean canConnectToLocalDatabase(Persistence persistence) {
         if (!Util.isEmpty(persistence.getPort())) {
             int p = Integer.valueOf(persistence.getPort());
             return NetUtil.isOpen(p);
@@ -77,8 +81,7 @@ public class DatabaseTool {
     			    
                     shutdownDBServer();
 //                    shutdownDatabase(); //doppelt gemoppelt hält besser ;-)
-                    String hsqldbScript = isH2(persistence.getConnectionUrl())
-                        ? persistence.getDefaultSchema() + ".mv.db" : persistence.getDatabase() + ".script";
+                    String hsqldbScript = isH2() ? persistence.getDefaultSchema() + ".mv.db" : persistence.getDatabase() + ".script";
                     String backupFile =
                         ENV.getTempPath() + FileUtil.getUniqueFileName(ENV.get("app.database.backup.file",
                             persistence.getDatabase()) + ".zip");
@@ -274,6 +277,10 @@ public class DatabaseTool {
     	return isInternalDatabase(urlOrDriver) && !urlOrDriver.contains(":tcp:") && !urlOrDriver.matches(".*[:](hsql|http)[s]?[:].*");
     }
     
+    public boolean isH2() {
+    	return isH2(persistence.getConnectionUrl());
+    }
+    
     public static boolean isH2(String url) {
         return url.matches("jdbc[:]h2[:].*");
     }
@@ -282,12 +289,12 @@ public class DatabaseTool {
      * @return optional SQL Tool like the one of H2 on port 8082
      */
     public String getSQLToolURL() {
-        return isInternalDatabase() && isH2(persistence.getConnectionUrl()) 
+        return isInternalDatabase() && isH2() 
         		? ENV.get("app.database.sqltool.url", "http://localhost:8082") : null;
     }
 
     public void replaceKeyWords() {
-        if (isH2(persistence.getConnectionUrl()))
+        if (isH2())
             H2DatabaseTool.replaceKeyWords(persistence);
     }
 	public static Boolean isDBRunInternally() {
@@ -303,6 +310,7 @@ public class DatabaseTool {
 		if (getConnection(Persistence.current(), false) == null)
 			runDBServer(ENV.getConfigPath(), Persistence.current().getPort());
 	}
+	/** calls h2 server directly though java...*/
 	public static void runDBServer(String... args) {
 		String cmd = ENV.get("app.database.internal.server.run.cmd", "org.h2.tools.Server.main(-baseDir, {0}, -tcp, -tcpPort, {1}, -trace, -ifNotExists)");
 		LOG.info("running database internally: " + cmd + " <- [" + Arrays.toString(args) + "]");
@@ -314,12 +322,13 @@ public class DatabaseTool {
 	}
 	
 	public void shutdownDBServer() {
-		if (isEmbeddedDatabase())
+		if (isEmbeddedDatabase() && !isH2())
 			shutdownDatabase();
 		else
 			stopDBServer(persistence.getConnectionUrl(), persistence.getConnectionPassword());
 	}
 	
+	/** calls h2 server directly though java...*/
 	static void stopDBServer(String... args) {
 		String cmd = ENV.get("app.database.internal.server.shutdown.cmd", "org.h2.tools.Server.shutdownTcpServer({0}, {1}, true, true)");
 		LOG.info("shutdown database server: " + cmd + "[" + args[0] + ", ***]");
@@ -339,6 +348,7 @@ public class DatabaseTool {
 	}
 	
 	/**
+	 * calls h2 server directly though java...<p/>
 	 * args: driver, url, user, password
 	 */
 	public static void dbDump(String... args) {
@@ -351,5 +361,16 @@ public class DatabaseTool {
         } catch (Exception e) {
             LOG.error(e.toString());
         }
+	}
+
+
+	public boolean hasLocalDatabaseFile() {
+		return hasLocalDatabaseFile(persistence);
+	}
+
+
+	public static boolean hasLocalDatabaseFile(Persistence persistence) {
+		return new File(ENV.getConfigPath() + persistence.getDatabase() 
+				+ (isH2(persistence.getConnectionUrl()) ? ".mv.db" : ".script")).exists();
 	}
 }

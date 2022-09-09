@@ -296,16 +296,18 @@ public class PersistenceUI {
                             .getAttribute("database")) {
                             @Override
                             public String evaluate(WSEvent evt) {
-                                Object value = evt.newValue;
-                                String url = Util.asString(value);
-                                if (url != null) {
-                                    String prefix = getDriverPrefix(url);
-                                    if (!Util.isEmpty(prefix)) {
-                                        return StringUtil.extract(url, "[:]\\d+[:/;](\\w+)");
-                                    } else {
-                                        return StringUtil.extract(url, "(\\w+)");
-                                    }
-                                }
+                            	if (!Util.isEmpty(evt.newValue) && evt.getOldValue() != null) {
+	                                Object value = evt.newValue;
+	                                String url = Util.asString(value);
+	                                if (url != null) {
+	                                    String prefix = getDriverPrefix(url);
+	                                    if (!Util.isEmpty(prefix)) {
+	                                        return StringUtil.extract(url, "[:]\\d+[:/;](\\w+)");
+	                                    } else {
+	                                        return StringUtil.extract(url, "(\\w+)");
+	                                    }
+	                                }
+                            	}
                                 //fallback
                                 return persistence.getDatabase();
                             }

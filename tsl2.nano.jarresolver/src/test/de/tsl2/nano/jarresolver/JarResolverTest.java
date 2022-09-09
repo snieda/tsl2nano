@@ -121,6 +121,8 @@ public class JarResolverTest   implements ENVTestPreparation {
         if (NetUtil.isOnline()) {
             try {
 				String jarName = new JarResolver(BASE_DIR_JARRESOLVER).findJarOnline("org.java_websocket.WrappedByteChannel");
+				if (jarName == null) // catched SocketTimeoutException returns null, not escalatinng, now
+					return;
 				LOG.info("jar-file: " + jarName);
 				assertTrue(StringUtil.extract(jarName, "\\w+").matches("sparql|org|pusher|firebase"));
 			} catch (Exception e) {

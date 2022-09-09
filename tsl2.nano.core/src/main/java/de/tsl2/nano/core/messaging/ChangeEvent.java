@@ -53,6 +53,10 @@ public class ChangeEvent extends EventObject {
         this.oldValue = oldValue;
     }
 
+    public Object getOldValue() {
+		return oldValue;
+	}
+    
     /**
      * {@inheritDoc}
      */

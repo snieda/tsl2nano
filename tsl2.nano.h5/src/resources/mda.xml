@@ -38,8 +38,9 @@ GRANT DBA to ${jdbc.username};
 commit;
 CREATE SCHEMA ${jdbc.scheme} AUTHORIZATION DBA;
 SET SCHEMA ${jdbc.scheme};
-GRANT ALL ON SCHEMA PUBLIC TO ${jdbc.username};
+GRANT ALL ON SCHEMA ${jdbc.scheme} TO ${jdbc.username};
 commit;
+--SET DATABASE DEFAULT INITIAL SCHEMA ${jdbc.scheme};
 SET NON_KEYWORDS;
 -- following lines are hsqldb compatibility modes:
 -- SET DATABASE SQL SYNTAX DB2 TRUE;
@@ -101,10 +102,12 @@ commit;
 		</parallel>
 	</target>
 
-	<target name="do.all" description="creates database from ddl and entity beans from jdbc-connection">
+	<target name="init.jdbc.connection">
 		<property file="${basedir}/mda.properties" />
 		<property file="${basedir}/jdbc-connection.properties"/>
+	</target>
 
+	<target name="create.db.server.run.file" depends="init.jdbc.connection">
 		<!-- on windows we start the hsqldb/h2 in a new shell - as background process -->
 		<condition property="start" value="start" else="">
 			<!-- <equals casesensitive="false" arg1="${env.os.name}" arg2="windows" /> -->
@@ -128,7 +131,7 @@ commit;
 			<contains string="${os.name}" substring="windows" casesensitive="false"/>
 		</condition>
 		<condition property="cmdline"
-			value="${cmdpref}java -cp ${cp} org.hsqldb.Server -database ${jdbc.database} -port ${jdbc.port} -silent false -trace true -ifNotExists ${cmdargs}" 
+			value="${cmdpref}java -cp ${cp} org.hsqldb.Server -database.0 file:${jdbc.database} -port ${jdbc.port} -silent false -trace true ${cmdargs}" 
 			else="${cmdpref}java -cp ${cp} org.h2.tools.Server -baseDir ${basedir} -tcp -tcpPort ${jdbc.port} -trace -ifNotExists ${cmdargs}">
 			<contains string="${jdbc.driver}" substring="hsqldb" casesensitive="true"/>
 		</condition>
@@ -137,16 +140,24 @@ commit;
 		</condition>
 		<echo file="runServer.cmd">${cmdline}</echo>
 		<chmod perm="+x" file="runServer.cmd" />
+	</target>
+	
+	<target name="run.db.server" depends="create.db.server.run.file">
 		<!-- start the database with name ${basedir} -->
 		<!-- optional but unsecure:  -web -webDaemon -tcpAllowOthers -->
+		<ant antfile="shell.xml" target="sh.exec.cmd">
+			<property name="sh.exec.cmd.dir" value="${basedir}"/>
+			<property name="sh.exec.cmd.arg1" value="${start}"/>
+			<property name="sh.exec.cmd.arg2" value="${dotslash}runServer.cmd"/>
+			<property name="sh.exec.cmd.arg3" value="${background}"/>
+		</ant>
+	</target>
+
+	<target name="do.all" depends="init.jdbc.connection" description="creates database from ddl and entity beans from jdbc-connection">
+
 		<parallel failonany="true">
 			<!-- first, start the database server and wait... -->
-			<ant antfile="shell.xml" target="sh.exec.cmd">
-				<property name="sh.exec.cmd.dir" value="${basedir}"/>
-				<property name="sh.exec.cmd.arg1" value="${start}"/>
-				<property name="sh.exec.cmd.arg2" value="${dotslash}runServer.cmd"/>
-				<property name="sh.exec.cmd.arg3" value="${background}"/>
-			</ant>
+			<antcall target="run.db.server" />
 			<sequential>
 				<property name="sh.sleep.milliseconds" value="3000" />
 				<ant antfile="shell.xml" target="sh.sleep"/>

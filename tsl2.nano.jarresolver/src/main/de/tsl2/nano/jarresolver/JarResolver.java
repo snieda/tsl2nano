@@ -464,22 +464,24 @@ public class JarResolver {
     public String findJarOnline(String pck) {
         String urlFindjarClass = props.getProperty(KEY_FINDJAR_CLASS, "https://findjar.com/class/");
         int timeout = Util.trY(() -> Integer.valueOf(props.getProperty(KEY_FINDJAR_TIMEOUT, "20000")));
-        String content = NetUtil.get(urlFindjarClass + pck.replace(".", "/"), timeout);
+        String content = Util.trY(() -> NetUtil.get(urlFindjarClass + pck.replace(".", "/"), timeout), false);
         //try to use that jar file where the a part of the package name could be found
         String jarName = null;
-        final String ID_NAMEPART = "$MYNAMEPARTEXPRESSION$";
-        final String JAR_REGEX = "[a-zA-Z0-9_.-]*" + ID_NAMEPART + "[a-zA-Z0-9_.-]*" + "\\.jar";
-        String[] pckParts = pck.split("\\.");
-        int i = pckParts.length;
-        while (i > 0 && Util.isEmpty(jarName)) {
-            jarName = StringUtil.extract(content, JAR_REGEX.replace(ID_NAMEPART, pckParts[--i]));
+        if (content != null) {
+	        final String ID_NAMEPART = "$MYNAMEPARTEXPRESSION$";
+	        final String JAR_REGEX = "[a-zA-Z0-9_.-]*" + ID_NAMEPART + "[a-zA-Z0-9_.-]*" + "\\.jar";
+	        String[] pckParts = pck.split("\\.");
+	        int i = pckParts.length;
+	        while (i > 0 && Util.isEmpty(jarName)) {
+	            jarName = StringUtil.extract(content, JAR_REGEX.replace(ID_NAMEPART, pckParts[--i]));
+	        }
+	        //OK, then take anyone
+	        if (Util.isEmpty(jarName)) {
+	            final String JAR_REGEX0 = "[a-zA-Z0-9_.-]+" + "\\.jar";
+	            jarName = StringUtil.extract(content, JAR_REGEX0);
+	        }
+	        LOG.info("findjar.com found '" + jarName + "' for class " + pck);
         }
-        //OK, then take anyone
-        if (Util.isEmpty(jarName)) {
-            final String JAR_REGEX0 = "[a-zA-Z0-9_.-]+" + "\\.jar";
-            jarName = StringUtil.extract(content, JAR_REGEX0);
-        }
-        LOG.info("findjar.com found '" + jarName + "' for class " + pck);
         return Util.isEmpty(jarName) ? null : jarName;
     }
 

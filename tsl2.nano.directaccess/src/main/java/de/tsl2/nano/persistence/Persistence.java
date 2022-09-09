@@ -44,30 +44,6 @@ public class Persistence implements Serializable, Cloneable {
     public static final String DEFAULT_SCHEMA = "PUBLIC";
     public static final String DEFAULT_CATALOG = DEFAULT_SCHEMA;
     
-    protected String persistenceUnit = System.getProperty(KEY_PREF + "persistenceunit", "genericPersistenceUnit");
-    protected String transactionType = System.getProperty(KEY_PREF + "transactiontype", "RESOURCE_LOCAL");
-    protected String provider = System.getProperty(KEY_PREF + "provider", "org.hibernate.jpa.HibernatePersistenceProvider");
-    protected String jtaDataSource = System.getProperty(KEY_PREF + "jtadatasource", "<UNDEFINED>");
-    protected String jarFile = System.getProperty(KEY_PREF + "jarfile", DEFAULT_DATABASE + ".jar");
-    protected String connectionDriverClass = System.getProperty(KEY_PREF + "connectiondriverclass", STD_LOCAL_DATABASE_DRIVER);
-    protected String connectionUrl = System.getProperty(KEY_PREF + "connectionurl", STD_LOCAL_DATABASE_URL);
-    protected String connectionUserName = System.getProperty(KEY_PREF + "connectionusername", "SA");//used for persistence
-    protected String connectionPassword = System.getProperty(KEY_PREF + "connectionPassword", "");
-    protected String hibernateDialect = System.getProperty(KEY_PREF + "hibernatedialect", "org.hibernate.dialect.H2Dialect");
-    protected String defaultSchema = System.getProperty(KEY_PREF + "defaultschema", DEFAULT_SCHEMA);
-//    protected String datasourceClass = "org.hsqldb.jdbc.JDBCDataSource";
-    protected String datasourceClass = System.getProperty(KEY_PREF + "datasourceclass", H2_DATABASE_DRIVER);
-    protected String port = System.getProperty(KEY_PREF + "port", "9092");//"9003";
-    protected String database = System.getProperty(KEY_PREF + "database", DEFAULT_DATABASE);
-    private Persistence replication;
-    transient private String auth = "SA"; //used for authentication/authorization
-    /** One of 'hbm2java' or 'openjpa-reverse-eng' */
-    private String generator = System.getProperty(KEY_PREF + "generator", GEN_HIBERNATE);
-    /**
-     * whether to enable auto-ddl creation of the current provider. possible values: false, validate, update, create,
-     * create-drop
-     */
-    private String autoddl = System.getProperty(KEY_PREF + "autoddl", "false");
     /** jdbc connection properties - used by ejb creator */
     public static final String FILE_JDBC_PROP_FILE = "jdbc-connection.properties";
     /** xml serialization of Persistence object */
@@ -93,6 +69,31 @@ public class Persistence implements Serializable, Cloneable {
 
     public static final String[] STD_LOCAL_DATABASE_DRIVERS = { HSQLDB_DATABASE_DRIVER, "org.hsqldb.jdbcDriver",
         H2_DATABASE_DRIVER, DERBY_DATABASE_DRIVER };
+
+    protected String persistenceUnit = System.getProperty(KEY_PREF + "persistenceunit", "genericPersistenceUnit");
+    protected String transactionType = System.getProperty(KEY_PREF + "transactiontype", "RESOURCE_LOCAL");
+    protected String provider = System.getProperty(KEY_PREF + "provider", "org.hibernate.jpa.HibernatePersistenceProvider");
+    protected String jtaDataSource = System.getProperty(KEY_PREF + "jtadatasource", "<UNDEFINED>");
+    protected String jarFile = System.getProperty(KEY_PREF + "jarfile", DEFAULT_DATABASE + ".jar");
+    protected String connectionDriverClass = System.getProperty(KEY_PREF + "connectiondriverclass", STD_LOCAL_DATABASE_DRIVER);
+    protected String connectionUrl = System.getProperty(KEY_PREF + "connectionurl", STD_LOCAL_DATABASE_URL);
+    protected String connectionUserName = System.getProperty(KEY_PREF + "connectionusername", "SA");//used for persistence
+    protected String connectionPassword = System.getProperty(KEY_PREF + "connectionPassword", "");
+    protected String hibernateDialect = System.getProperty(KEY_PREF + "hibernatedialect", "org.hibernate.dialect.H2Dialect");
+    protected String defaultSchema = System.getProperty(KEY_PREF + "defaultschema", DEFAULT_SCHEMA);
+//    protected String datasourceClass = "org.hsqldb.jdbc.JDBCDataSource";
+    protected String datasourceClass = System.getProperty(KEY_PREF + "datasourceclass", H2_DATABASE_DRIVER);
+    protected String port = System.getProperty(KEY_PREF + "port", "9092");//"9003";
+    protected String database = System.getProperty(KEY_PREF + "database", DEFAULT_DATABASE);
+    private Persistence replication;
+    transient private String auth = "SA"; //used for authentication/authorization
+    /** One of 'hbm2java' or 'openjpa-reverse-eng' */
+    private String generator = System.getProperty(KEY_PREF + "generator", GEN_HIBERNATE);
+    /**
+     * whether to enable auto-ddl creation of the current provider. possible values: false, validate, update, create,
+     * create-drop
+     */
+    private String autoddl = System.getProperty(KEY_PREF + "autoddl", "false");
 
     /**
      * constructor

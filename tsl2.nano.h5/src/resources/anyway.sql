@@ -1,5 +1,5 @@
 -- Anyway database - generic database for several use cases (Thomas Schneider / 2012)
--- ADMIN tables are in anyway-admin.sql
+-- ADMIN table"s" are in anyway-admin.sql
 -- SQL-92 (Transformation: BLOB --> LONGVARBINARY)
 
 -- H2 Version 1: quoting fields seems not to work!
@@ -7,406 +7,408 @@
 -- quote all names:(^[ \t]+(CONSTRAINT|ON)?| TABLE| COLUMN| INDEX| KEY |REFERENCES \w+)([\s\(]*)([\w.]+)([ \t]*|\))   -> $1$3"$4"$5
 -- the quoting does not work in eclipse, there is a replace failure on group 4
 
-CREATE TABLE Account (
-                id INTEGER NOT NULL,
-                name VARCHAR(64) NOT NULL,
-                bic VARCHAR(12) NOT NULL,
-                iban VARCHAR(22) NOT NULL,
-                CONSTRAINT id PRIMARY KEY (id)
+-- Hsqldb 2.7.0: if you quote everything, all queries must be quoted, too! But if you use uppercase, then not!
+
+CREATE TABLE "ACCOUNT" (
+                "ID" INTEGER NOT NULL,
+                "NAME" VARCHAR(64) NOT NULL,
+                "BIC" VARCHAR(12) NOT NULL,
+                "IBAN" VARCHAR(22) NOT NULL,
+                CONSTRAINT "ID" PRIMARY KEY ("ID")
 );
 
 
-CREATE TABLE Digital (
-                id INTEGER NOT NULL,
-                location INTEGER NOT NULL,
-                name VARCHAR(64) NOT NULL,
-                value VARCHAR(64) NOT NULL,
-                CONSTRAINT idx_digital PRIMARY KEY (id)
+CREATE TABLE "DIGITAL" (
+                "ID" INTEGER NOT NULL,
+                "LOCATION" INTEGER NOT NULL,
+                "NAME" VARCHAR(64) NOT NULL,
+                "VALUE" VARCHAR(64) NOT NULL,
+                CONSTRAINT "IDX_DIGITAL" PRIMARY KEY ("ID")
 );
 
-CREATE TABLE Organisation (
-                id INTEGER NOT NULL,
-                name VARCHAR(64) NOT NULL,
-                description VARCHAR(256),
-                icon BLOB,
-                CONSTRAINT idx_organisation PRIMARY KEY (id)
+CREATE TABLE "ORGANISATION" (
+                "ID" INTEGER NOT NULL,
+                "NAME" VARCHAR(64) NOT NULL,
+                "DESCRIPTION" VARCHAR(256),
+                "ICON" BLOB,
+                CONSTRAINT "IDX_ORGANISATION" PRIMARY KEY ("ID")
 );
-COMMENT ON TABLE Organisation IS 'root definition - may be used for different clients';
+COMMENT ON TABLE "ORGANISATION" IS 'ROOT DEFINITION - MAY BE USED FOR DIFFERENT CLIENTS';
 
 
-CREATE UNIQUE INDEX Organisation_idx
- ON Organisation
- ( name );
+CREATE UNIQUE INDEX "ORGANISATION_IDX"
+ ON "ORGANISATION"
+ ( "NAME" );
 
-CREATE TABLE Classification (
-                id INTEGER NOT NULL,
-                value INTEGER NOT NULL,
-                name VARCHAR(64) NOT NULL,
-                icon BLOB,
-                CONSTRAINT idx_classification PRIMARY KEY (id)
+CREATE TABLE "CLASSIFICATION" (
+                "ID" INTEGER NOT NULL,
+                "VALUE" INTEGER NOT NULL,
+                "NAME" VARCHAR(64) NOT NULL,
+                "ICON" BLOB,
+                CONSTRAINT "IDX_CLASSIFICATION" PRIMARY KEY ("ID")
 );
-COMMENT ON TABLE Classification IS 'items level or status';
+COMMENT ON TABLE "CLASSIFICATION" IS 'ITEMS LEVEL OR STATUS';
 
 
-CREATE INDEX Classification_idx
- ON Classification
- ( name );
+CREATE INDEX "CLASSIFICATION_IDX"
+ ON "CLASSIFICATION"
+ ( "NAME" );
 
-CREATE TABLE Category (
-                id INTEGER NOT NULL,
-                name VARCHAR(64) NOT NULL,
-                icon BLOB,
-                CONSTRAINT idx_category PRIMARY KEY (id)
+CREATE TABLE "CATEGORY" (
+                "ID" INTEGER NOT NULL,
+                "NAME" VARCHAR(64) NOT NULL,
+                "ICON" BLOB,
+                CONSTRAINT "IDX_CATEGORY" PRIMARY KEY ("ID")
 );
-COMMENT ON TABLE Category IS 'combines a group of areas. may be useless on some use cases';
+COMMENT ON TABLE "CATEGORY" IS 'COMBINES A GROUP OF AREAS. MAY BE USELESS ON SOME USE CASES';
 
 
-CREATE INDEX Category_idx
- ON Category
- ( name );
+CREATE INDEX "CATEGORY_IDX"
+ ON "CATEGORY"
+ ( "NAME" );
 
-CREATE TABLE Area (
-                id INTEGER NOT NULL,
-                category INTEGER NOT NULL,
-                name VARCHAR(64) NOT NULL,
-                icon BLOB,
-                CONSTRAINT idx_area PRIMARY KEY (id)
+CREATE TABLE "AREA" (
+                "ID" INTEGER NOT NULL,
+                "CATEGORY" INTEGER NOT NULL,
+                "NAME" VARCHAR(64) NOT NULL,
+                "ICON" BLOB,
+                CONSTRAINT "IDX_AREA" PRIMARY KEY ("ID")
 );
-COMMENT ON TABLE Area IS 'an area combines a group of item types';
+COMMENT ON TABLE "AREA" IS 'AN AREA COMBINES A GROUP OF ITEM TYPES';
 
 
-CREATE INDEX Area_idx
- ON Area
- ( name );
+CREATE INDEX "AREA_IDX"
+ ON "AREA"
+ ( "NAME" );
 
-CREATE TABLE Type (
-                id INTEGER NOT NULL,
-                area INTEGER NOT NULL,
-                name VARCHAR(64) NOT NULL,
-                icon BLOB,
-                CONSTRAINT idx_type PRIMARY KEY (id)
+CREATE TABLE "TYPE" (
+                "ID" INTEGER NOT NULL,
+                "AREA" INTEGER NOT NULL,
+                "NAME" VARCHAR(64) NOT NULL,
+                "ICON" BLOB,
+                CONSTRAINT "IDX_TYPE" PRIMARY KEY ("ID")
 );
-COMMENT ON TABLE Type IS 'item type';
+COMMENT ON TABLE "TYPE" IS 'ITEM TYPE';
 
 
-CREATE INDEX Type_idx
- ON Type
- ( name );
+CREATE INDEX "TYPE_IDX"
+ ON "TYPE"
+ ( "NAME" );
 
-CREATE TABLE Item (
-                id INTEGER NOT NULL,
-                orga INTEGER NOT NULL,
-                class INTEGER NOT NULL,
-                type INTEGER NOT NULL,
-                name VARCHAR(64) NOT NULL,
-                start DATE NOT NULL,
-                end DATE,
-                value DECIMAL(8,2) NOT NULL,
-                description VARCHAR(256),
-                icon BLOB,
-                CONSTRAINT idx_item PRIMARY KEY (id)
+CREATE TABLE "ITEM" (
+                "ID" INTEGER NOT NULL,
+                "ORGA" INTEGER NOT NULL,
+                "CLASS" INTEGER NOT NULL,
+                "TYPE" INTEGER NOT NULL,
+                "NAME" VARCHAR(64) NOT NULL,
+                "START" DATE NOT NULL,
+                "END" DATE,
+                "VALUE" DECIMAL(8,2) NOT NULL,
+                "DESCRIPTION" VARCHAR(256),
+                "ICON" BLOB,
+                CONSTRAINT "IDX_ITEM" PRIMARY KEY ("ID")
 );
-COMMENT ON TABLE Item IS 'shopping item, menu item in a restaurant, time-period in a timesheet, etc.';
-COMMENT ON COLUMN Item.end IS 'availability';
-COMMENT ON COLUMN Item.icon IS 'item image for better user experience';
+COMMENT ON TABLE "ITEM" IS 'SHOPPING ITEM, MENU ITEM IN A RESTAURANT, TIME-PERIOD IN A TIMESHEET, ETC.';
+COMMENT ON COLUMN "ITEM"."END" IS 'AVAILABILITY';
+COMMENT ON COLUMN "ITEM"."ICON" IS 'ITEM IMAGE FOR BETTER USER EXPERIENCE';
 
 
-CREATE INDEX Item_idx
- ON Item
- ( name );
+CREATE INDEX "ITEM_IDX"
+ ON "ITEM"
+ ( "NAME" );
 
-CREATE TABLE ChargeItem (
-                id INTEGER NOT NULL,
-                charge DECIMAL(8,2) NOT NULL,
-                item INTEGER NOT NULL,
-                CONSTRAINT idx_chargeitem PRIMARY KEY (id)
+CREATE TABLE "CHARGEITEM" (
+                "ID" INTEGER NOT NULL,
+                "CHARGE" DECIMAL(8,2) NOT NULL,
+                "ITEM" INTEGER NOT NULL,
+                CONSTRAINT "IDX_CHARGEITEM" PRIMARY KEY ("ID")
 );
-COMMENT ON TABLE ChargeItem IS 'mapping between party and charge - resolving a many-to-many relation. a party will charge items.';
+COMMENT ON TABLE "CHARGEITEM" IS 'MAPPING BETWEEN PARTY AND CHARGE - RESOLVING A MANY-TO-MANY RELATION. A PARTY WILL CHARGE ITEMS.';
 
 
-CREATE TABLE Coordinate (
-                id INTEGER NOT NULL,
-                x NUMERIC NOT NULL,
-                y NUMERIC NOT NULL,
-                z NUMERIC DEFAULT 0,
-                CONSTRAINT idx_coordinate PRIMARY KEY (id)
-);
-
-
-CREATE TABLE Address (
-                id INTEGER NOT NULL,
-                street VARCHAR(64) NOT NULL,
-                code VARCHAR(64) NOT NULL,
-                city VARCHAR(64) NOT NULL,
-                country VARCHAR(64) NOT NULL,
-                CONSTRAINT idx_address PRIMARY KEY (id)
+CREATE TABLE "COORDINATE" (
+                "ID" INTEGER NOT NULL,
+                "X" NUMERIC NOT NULL,
+                "Y" NUMERIC NOT NULL,
+                "Z" NUMERIC DEFAULT 0,
+                CONSTRAINT "IDX_COORDINATE" PRIMARY KEY ("ID")
 );
 
 
-CREATE TABLE Party (
-                id INTEGER NOT NULL,
-                orga INTEGER NOT NULL,
-                mission INTEGER NOT NULL,
-                name VARCHAR(64) NOT NULL,
-                description VARCHAR(256),
-                shortname VARCHAR(8) NOT NULL,
-                icon BLOB,
-                CONSTRAINT idx_party PRIMARY KEY (id)
-);
-COMMENT ON TABLE Party IS 'may be a person, client, reservation item like a restaurant table etc.';
-
-CREATE TABLE Mission (
-                id INTEGER NOT NULL,
-                name VARCHAR(64) NOT NULL,
-                description VARCHAR(256),
-                icon BLOB,
-                CONSTRAINT idx_mission PRIMARY KEY (id)
-);
-COMMENT ON TABLE Mission IS 'defines the mission/operation of a party';
-
-CREATE TABLE Property (
-                id INTEGER NOT NULL,
-                item INTEGER,
-                party INTEGER,
-                orga INTEGER,
-                akey VARCHAR(64) NOT NULL,
-                avalue VARCHAR(64) NOT NULL,
-                CONSTRAINT idx_property PRIMARY KEY (id)
-);
-COMMENT ON TABLE Property IS 'extended optional properties for main entries like an organisation, party or item.
-
-on a party, it may be a bank connection or a party category.';
-
-
-CREATE INDEX Property_idx
- ON Property
- ( akey );
-
-CREATE TABLE Location (
-                id INTEGER NOT NULL,
-                name VARCHAR(64) NOT NULL,
-                address INTEGER,
-                coordinate INTEGER,
-                party INTEGER NOT NULL,
-                digital INTEGER NOT NULL,
-                CONSTRAINT idx_location PRIMARY KEY (id)
-);
-COMMENT ON TABLE Location IS 'location of a party. can have an address or a coordinate';
-
-
-CREATE TABLE Charge (
-                id INTEGER NOT NULL,
-                party INTEGER NOT NULL,
-                location INTEGER,
-                chargeitem INTEGER NOT NULL,
-                fromdate DATE NOT NULL,
-                fromtime TIME NOT NULL,
-                todate DATE NOT NULL,
-                totime TIME NOT NULL,
-                pause TIME,
-                value DECIMAL(8,2) NOT NULL,
-                status INTEGER,
-                comment VARCHAR(512),
-                CONSTRAINT idx_charge PRIMARY KEY (id)
-);
-COMMENT ON TABLE Charge IS 'agreement, booking or reservation';
-
-
-CREATE INDEX Charge_idx
- ON Charge
- ( fromdate );
-
-CREATE TABLE ChargeStatus (
-                id INTEGER NOT NULL,
-                name VARCHAR(64) NOT NULL,
-                description VARCHAR(256),
-                icon BLOB,
-                CONSTRAINT idx_chargestatus PRIMARY KEY (id)
-);
-
-CREATE INDEX Chargestatus_idx
- ON ChargeStatus
- ( name );
-
-CREATE TABLE Discharge (
-                id INTEGER NOT NULL,
-                charge INTEGER NOT NULL,
-                account INTEGER NOT NULL,
-                date TIMESTAMP NOT NULL,
-                value DECIMAL(8,2) NOT NULL,
-                comment VARCHAR(512),
-                document BLOB,
-                CONSTRAINT idx_discharge PRIMARY KEY (id)
+CREATE TABLE "ADDRESS" (
+                "ID" INTEGER NOT NULL,
+                "STREET" VARCHAR(64) NOT NULL,
+                "CODE" VARCHAR(64) NOT NULL,
+                "CITY" VARCHAR(64) NOT NULL,
+                "COUNTRY" VARCHAR(64) NOT NULL,
+                CONSTRAINT "IDX_ADDRESS" PRIMARY KEY ("ID")
 );
 
 
-CREATE INDEX Discharge_idx
- ON Discharge
- ( date );
+CREATE TABLE "PARTY" (
+                "ID" INTEGER NOT NULL,
+                "ORGA" INTEGER NOT NULL,
+                "MISSION" INTEGER NOT NULL,
+                "NAME" VARCHAR(64) NOT NULL,
+                "DESCRIPTION" VARCHAR(256),
+                "SHORTNAME" VARCHAR(8) NOT NULL,
+                "ICON" BLOB,
+                CONSTRAINT "IDX_PARTY" PRIMARY KEY ("ID")
+);
+COMMENT ON TABLE "PARTY" IS 'MAY BE A PERSON, CLIENT, RESERVATION ITEM LIKE A RESTAURANT TABLE "ETC."';
 
-ALTER TABLE Discharge ADD CONSTRAINT Account_Discharge_fk
-FOREIGN KEY (account)
-REFERENCES Account (id)
+CREATE TABLE "MISSION" (
+                "ID" INTEGER NOT NULL,
+                "NAME" VARCHAR(64) NOT NULL,
+                "DESCRIPTION" VARCHAR(256),
+                "ICON" BLOB,
+                CONSTRAINT "IDX_MISSION" PRIMARY KEY ("ID")
+);
+COMMENT ON TABLE "MISSION" IS 'DEFINES THE MISSION/OPERATION OF A PARTY';
+
+CREATE TABLE "PROPERTY" (
+                "ID" INTEGER NOT NULL,
+                "ITEM" INTEGER,
+                "PARTY" INTEGER,
+                "ORGA" INTEGER,
+                "AKEY" VARCHAR(64) NOT NULL,
+                "AVALUE" VARCHAR(64) NOT NULL,
+                CONSTRAINT "IDX_PROPERTY" PRIMARY KEY ("ID")
+);
+COMMENT ON TABLE "PROPERTY" IS 'EXTENDED OPTIONAL PROPERTIES FOR MAIN ENTRIES LIKE AN ORGANISATION, PARTY OR ITEM.
+
+ON A PARTY, IT MAY BE A BANK CONNECTION OR A PARTY CATEGORY.';
+
+
+CREATE INDEX "PROPERTY_IDX"
+ ON "PROPERTY"
+ ( "AKEY" );
+
+CREATE TABLE "LOCATION" (
+                "ID" INTEGER NOT NULL,
+                "NAME" VARCHAR(64) NOT NULL,
+                "ADDRESS" INTEGER,
+                "COORDINATE" INTEGER,
+                "PARTY" INTEGER NOT NULL,
+                "DIGITAL" INTEGER NOT NULL,
+                CONSTRAINT "IDX_LOCATION" PRIMARY KEY ("ID")
+);
+COMMENT ON TABLE "LOCATION" IS 'LOCATION OF A PARTY. CAN HAVE AN ADDRESS OR A COORDINATE';
+
+
+CREATE TABLE "CHARGE" (
+                "ID" INTEGER NOT NULL,
+                "PARTY" INTEGER NOT NULL,
+                "LOCATION" INTEGER,
+                "CHARGEITEM" INTEGER NOT NULL,
+                "FROMDATE" DATE NOT NULL,
+                "FROMTIME" TIME NOT NULL,
+                "TODATE" DATE NOT NULL,
+                "TOTIME" TIME NOT NULL,
+                "PAUSE" TIME,
+                "VALUE" DECIMAL(8,2) NOT NULL,
+                "STATUS" INTEGER,
+                "COMMENT" VARCHAR(512),
+                CONSTRAINT "IDX_CHARGE" PRIMARY KEY ("ID")
+);
+COMMENT ON TABLE "CHARGE" IS 'AGREEMENT, BOOKING OR RESERVATION';
+
+
+CREATE INDEX "CHARGE_IDX"
+ ON "CHARGE"
+ ( "FROMDATE" );
+
+CREATE TABLE "CHARGESTATUS" (
+                "ID" INTEGER NOT NULL,
+                "NAME" VARCHAR(64) NOT NULL,
+                "DESCRIPTION" VARCHAR(256),
+                "ICON" BLOB,
+                CONSTRAINT "IDX_CHARGESTATUS" PRIMARY KEY ("ID")
+);
+
+CREATE INDEX "CHARGESTATUS_IDX"
+ ON "CHARGESTATUS"
+ ( "NAME" );
+
+CREATE TABLE "DISCHARGE" (
+                "ID" INTEGER NOT NULL,
+                "CHARGE" INTEGER NOT NULL,
+                "ACCOUNT" INTEGER NOT NULL,
+                "DATE" TIMESTAMP NOT NULL,
+                "VALUE" DECIMAL(8,2) NOT NULL,
+                "COMMENT" VARCHAR(512),
+                "DOCUMENT" BLOB,
+                CONSTRAINT "IDX_DISCHARGE" PRIMARY KEY ("ID")
+);
+
+
+CREATE INDEX "DISCHARGE_IDX"
+ ON "DISCHARGE"
+ ( "DATE" );
+
+ALTER TABLE "DISCHARGE" ADD CONSTRAINT ACCOUNT_DISCHARGE_FK
+FOREIGN KEY ("ACCOUNT")
+REFERENCES ACCOUNT ("ID")
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 -- NOT DEFERRABLE
 ;
 
-ALTER TABLE Location ADD CONSTRAINT Digital_Location_fk
-FOREIGN KEY (digital)
-REFERENCES Digital (id)
+ALTER TABLE "LOCATION" ADD CONSTRAINT DIGITAL_LOCATION_FK
+FOREIGN KEY ("DIGITAL")
+REFERENCES DIGITAL ("ID")
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 -- NOT DEFERRABLE
 ;
 
-ALTER TABLE Party ADD CONSTRAINT Organisation_Party_fk
-FOREIGN KEY (orga)
-REFERENCES Organisation (id)
+ALTER TABLE "PARTY" ADD CONSTRAINT ORGANISATION_PARTY_FK
+FOREIGN KEY ("ORGA")
+REFERENCES ORGANISATION ("ID")
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 -- NOT DEFERRABLE
 ;
 
-ALTER TABLE Property ADD CONSTRAINT Organisation_Property_fk
-FOREIGN KEY (orga)
-REFERENCES Organisation (id)
+ALTER TABLE "PROPERTY" ADD CONSTRAINT ORGANISATION_PROPERTY_FK
+FOREIGN KEY ("ORGA")
+REFERENCES ORGANISATION ("ID")
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 -- NOT DEFERRABLE
 ;
 
-ALTER TABLE Item ADD CONSTRAINT Organisation_Item_fk
-FOREIGN KEY (orga)
-REFERENCES Organisation (id)
+ALTER TABLE "ITEM" ADD CONSTRAINT ORGANISATION_ITEM_FK
+FOREIGN KEY ("ORGA")
+REFERENCES ORGANISATION ("ID")
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 -- NOT DEFERRABLE
 ;
 
-ALTER TABLE Item ADD CONSTRAINT Classification_Item_fk
-FOREIGN KEY (class)
-REFERENCES Classification (id)
+ALTER TABLE "ITEM" ADD CONSTRAINT CLASSIFICATION_ITEM_FK
+FOREIGN KEY ("CLASS")
+REFERENCES CLASSIFICATION ("ID")
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 -- NOT DEFERRABLE
 ;
 
-ALTER TABLE Area ADD CONSTRAINT Category_Area_fk
-FOREIGN KEY (category)
-REFERENCES Category (id)
+ALTER TABLE "AREA" ADD CONSTRAINT CATEGORY_AREA_FK
+FOREIGN KEY ("CATEGORY")
+REFERENCES CATEGORY ("ID")
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 -- NOT DEFERRABLE
 ;
 
-ALTER TABLE Type ADD CONSTRAINT Area_Type_fk
-FOREIGN KEY (area)
-REFERENCES Area (id)
+ALTER TABLE "TYPE" ADD CONSTRAINT AREA_TYPE_FK
+FOREIGN KEY ("AREA")
+REFERENCES AREA ("ID")
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 -- NOT DEFERRABLE
 ;
 
-ALTER TABLE Item ADD CONSTRAINT Type_Item_fk
-FOREIGN KEY (type)
-REFERENCES Type (id)
+ALTER TABLE "ITEM" ADD CONSTRAINT TYPE_ITEM_FK
+FOREIGN KEY ("TYPE")
+REFERENCES TYPE ("ID")
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 -- NOT DEFERRABLE
 ;
 
-ALTER TABLE Property ADD CONSTRAINT Item_Property_fk
-FOREIGN KEY (item)
-REFERENCES Item (id)
+ALTER TABLE "PROPERTY" ADD CONSTRAINT ITEM_PROPERTY_FK
+FOREIGN KEY ("ITEM")
+REFERENCES ITEM ("ID")
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 -- NOT DEFERRABLE
 ;
 
-ALTER TABLE ChargeItem ADD CONSTRAINT Item_ChargeItem_fk
-FOREIGN KEY (item)
-REFERENCES Item (id)
+ALTER TABLE "CHARGEITEM" ADD CONSTRAINT ITEM_CHARGEITEM_FK
+FOREIGN KEY ("ITEM")
+REFERENCES ITEM ("ID")
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 -- NOT DEFERRABLE
 ;
 
-ALTER TABLE Charge ADD CONSTRAINT ChargeItem_Charge_fk
-FOREIGN KEY (chargeitem)
-REFERENCES ChargeItem (id)
+ALTER TABLE "CHARGE" ADD CONSTRAINT CHARGEITEM_CHARGE_FK
+FOREIGN KEY ("CHARGEITEM")
+REFERENCES CHARGEITEM ("ID")
 ON DELETE CASCADE
 ON UPDATE NO ACTION
 -- NOT DEFERRABLE
 ;
 
-ALTER TABLE Charge ADD CONSTRAINT ChargeStatus_Charge_fk
-FOREIGN KEY (status)
-REFERENCES ChargeStatus (id)
+ALTER TABLE "CHARGE" ADD CONSTRAINT CHARGESTATUS_CHARGE_FK
+FOREIGN KEY ("STATUS")
+REFERENCES CHARGESTATUS ("ID")
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 -- NOT DEFERRABLE
 ;
 
-ALTER TABLE Location ADD CONSTRAINT Coordinates_Location_fk
-FOREIGN KEY (coordinate)
-REFERENCES Coordinate (id)
+ALTER TABLE "LOCATION" ADD CONSTRAINT COORDINATES_LOCATION_FK
+FOREIGN KEY ("COORDINATE")
+REFERENCES COORDINATE ("ID")
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 -- NOT DEFERRABLE
 ;
 
-ALTER TABLE Location ADD CONSTRAINT Address_Location_fk
-FOREIGN KEY (address)
-REFERENCES Address (id)
+ALTER TABLE "LOCATION" ADD CONSTRAINT ADDRESS_LOCATION_FK
+FOREIGN KEY ("ADDRESS")
+REFERENCES ADDRESS ("ID")
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 -- NOT DEFERRABLE
 ;
 
-ALTER TABLE Charge ADD CONSTRAINT Party_Charge_fk
-FOREIGN KEY (party)
-REFERENCES Party (id)
+ALTER TABLE "CHARGE" ADD CONSTRAINT PARTY_CHARGE_FK
+FOREIGN KEY ("PARTY")
+REFERENCES PARTY ("ID")
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 -- NOT DEFERRABLE
 ;
 
-ALTER TABLE Party ADD CONSTRAINT Party_Mission_fk
-FOREIGN KEY (mission)
-REFERENCES Mission (id)
+ALTER TABLE "PARTY" ADD CONSTRAINT PARTY_MISSION_FK
+FOREIGN KEY ("MISSION")
+REFERENCES MISSION ("ID")
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 -- NOT DEFERRABLE
 ;
 
-ALTER TABLE Charge ADD CONSTRAINT Charge_Location_fk
-FOREIGN KEY (location)
-REFERENCES location (id)
+ALTER TABLE "CHARGE" ADD CONSTRAINT CHARGE_LOCATION_FK
+FOREIGN KEY ("LOCATION")
+REFERENCES LOCATION ("ID")
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 -- NOT DEFERRABLE
 ;
 
-ALTER TABLE Location ADD CONSTRAINT Party_Location_fk
-FOREIGN KEY (party)
-REFERENCES Party (id)
+ALTER TABLE "LOCATION" ADD CONSTRAINT PARTY_LOCATION_FK
+FOREIGN KEY ("PARTY")
+REFERENCES PARTY ("ID")
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 -- NOT DEFERRABLE
 ;
 
-ALTER TABLE Property ADD CONSTRAINT Party_Property_fk
-FOREIGN KEY (party)
-REFERENCES Party (id)
+ALTER TABLE "PROPERTY" ADD CONSTRAINT PARTY_PROPERTY_FK
+FOREIGN KEY ("PARTY")
+REFERENCES PARTY ("ID")
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 -- NOT DEFERRABLE
 ;
 
-ALTER TABLE Discharge ADD CONSTRAINT Charge_Discharge_fk
-FOREIGN KEY (charge)
-REFERENCES Charge (id)
+ALTER TABLE "DISCHARGE" ADD CONSTRAINT CHARGE_DISCHARGE_FK
+FOREIGN KEY ("CHARGE")
+REFERENCES CHARGE ("ID")
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 -- NOT DEFERRABLE
