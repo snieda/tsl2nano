@@ -983,7 +983,7 @@ public class FileUtil {
             if (fileName.endsWith(File.separator) || fileName.endsWith("/")) {
                 fileName = fileName.substring(0, fileName.length() - 1);
             }
-            final File bakFile = userDirFile(fileName + (multiple ? DateUtil.getFormattedTimeStamp() : "") + backupExtension);
+            final File bakFile = userDirFile(fileName + (multiple ? "." + DateUtil.getFormattedTimeStamp() : "") + backupExtension);
             if (!multiple && bakFile.exists() && bakFile.canWrite()) {
                 if (!bakFile.delete()) {
                     LOG.warn("couldn't delete backup file:" + bakFile.getPath());

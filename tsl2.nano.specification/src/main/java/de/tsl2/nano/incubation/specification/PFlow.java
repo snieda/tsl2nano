@@ -20,6 +20,9 @@ import de.tsl2.nano.util.Flow.ITask;
 @Default(value = DefaultType.FIELD, required = false)
 public class PFlow extends Flow implements IPRunnable<Deque<ITask>, Map<String, Object>> , IPrefixed {
 
+	public static PFlow load(File gravitoFile) {
+		return load(gravitoFile, Task.class);
+	}
 	public static PFlow load(File gravitoFile, Class<? extends ITask> taskType) {
 		return Flow.load(new PFlow(), gravitoFile, taskType);
 	}

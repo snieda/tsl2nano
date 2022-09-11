@@ -90,7 +90,9 @@ public class Workflow implements Runnable {
 					"\n\t      queryname   : query rule name or '-file'[:beantypeclassname]=<data-file-name>");
 			return;
 		}
-		new Workflow(args[0], args[1], args[2]).activate();
+		Workflow workflow = new Workflow(args[0], args[1], args[2]);
+		ENV.save(Pool.getSpecificationRootDir() + "workflow." + args[0], workflow);
+		workflow.activate();
 	}
 	protected Collection<Object> getData() {
 		if (queryOrFileName.startsWith("-file="))

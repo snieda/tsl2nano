@@ -116,12 +116,16 @@ public class Pool {
     }
 
     public String getDirectory(Class<? extends IPRunnable> rType) {
-        String dir = ENV.getConfigPathRel() + "specification/" + (rType != null ? rType.getSimpleName().toLowerCase() + "/" : "");
+        String dir = getSpecificationRootDir() + (rType != null ? rType.getSimpleName().toLowerCase() + "/" : "");
         FileUtil.userDirFile(dir).mkdirs();
         return dir;
     }
 
-    private <I extends IPRunnable> I loadRunnable(String path, Class<I> type) {
+    public static final String getSpecificationRootDir() {
+		return ENV.getConfigPathRel() + "specification/";
+	}
+
+	private <I extends IPRunnable> I loadRunnable(String path, Class<I> type) {
         try {
             I r = ENV.load(path, type, false);
             runnables.put(getPrefixedName(r), r);

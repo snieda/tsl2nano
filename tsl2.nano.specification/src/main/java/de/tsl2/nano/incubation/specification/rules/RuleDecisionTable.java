@@ -15,11 +15,14 @@ import java.util.Set;
 
 import org.simpleframework.xml.core.Commit;
 
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ITransformer;
 import de.tsl2.nano.core.util.CollectionUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.incubation.specification.ParType;
+import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.incubation.tree.STree;
 import de.tsl2.nano.incubation.tree.Tree;
 
@@ -91,7 +94,11 @@ public class RuleDecisionTable<T> extends AbstractRule<T> {
     public RuleDecisionTable() {
     }
 
-    RuleDecisionTable(Map<String, Object> properties, Map<String, List<Condition<?>>> par) {
+    public RuleDecisionTable(String name, String csvExpression, LinkedHashMap<String, ParType> parameter) {
+    	super(name, saveCSV(name, csvExpression), parameter);
+    }
+
+	RuleDecisionTable(Map<String, Object> properties, Map<String, List<Condition<?>>> par) {
         super();
         this.name = (String) properties.get("name");
         setOperation((String) properties.get("operation"));
@@ -99,6 +106,12 @@ public class RuleDecisionTable<T> extends AbstractRule<T> {
         this.par = par;
         checkConsistence(properties, par);
     }
+
+    private static String saveCSV(String name, String csvExpression) {
+        String path = ENV.get(Pool.class).getDirectory(RuleDecisionTable.class) + name;
+        FileUtil.save(path, csvExpression);
+        return path;
+	}
 
     /**
      * check for overlapping conditions

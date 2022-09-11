@@ -864,10 +864,12 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
      * @return a root bean-collector holding all bean-type collectors.
      */
     protected BeanDefinition<?> createBeanCollectors(List<Class> beanClasses) {
-    	File docWorkerFile = new File(ENV.getConfigPath() + "documentworker.md.html");
+    	File docWorkerFile = new File(ENV.getConfigPath() + "specification-documentworker.md.html");
     	if (docWorkerFile.exists()) {
-	    	ENV.addService(DocumentWorker.class);
-	    	ENV.get(DocumentWorker.class).consume(docWorkerFile.getAbsolutePath());
+	    		if (Message.ask("Run Specification Documentworker on file " + docWorkerFile + "?", true)) {
+			    	ENV.addService(new DocumentWorker());
+			    	ENV.get(DocumentWorker.class).consume(docWorkerFile.getAbsolutePath());
+	    	}
     	}
     	
         Message.send("loading bean collectors for " + beanClasses.size() + " types");

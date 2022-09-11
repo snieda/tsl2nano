@@ -28,7 +28,7 @@ public class SpecificationExchange implements IBeanDefinitionSaver {
 	public static final String EXT_CSV = ".csv";
 	public static final String EXT_MARKDOWN = ".md.html";
 	
-	protected static final String SEP = ";";
+	protected static final String SEP = "\t";
     public static final String FILENAME_SPEC_PROPERTIES = "specification.properties";
 
     public static final String PATH_POSTIFX = "*";
@@ -67,31 +67,11 @@ public class SpecificationExchange implements IBeanDefinitionSaver {
             }
         }
         FileUtil.saveProperties(ENV.getConfigPath() + FILENAME_SPEC_PROPERTIES, p);
-        saveAsCSV(ENV.getConfigPath() + FILENAME_SPEC_PROPERTIES + EXT_CSV, p);
-        saveAsMarkdown(ENV.getConfigPath() + FILENAME_SPEC_PROPERTIES + EXT_MARKDOWN, p);
+        saveAsTSV(ENV.getConfigPath() + FILENAME_SPEC_PROPERTIES + EXT_CSV, p);
     }
 
     /** converts the given properties to csv (objectname, rule, optional-parameter) */
-    public String saveAsCSV(String filename, Properties p) {
-    	StringBuilder buf = new StringBuilder();
-    	//TODO: performance: don't write whole properties on each bean...
-    	for (Map.Entry<Object, Object> entry : p.entrySet()) {
-			String key = entry.getKey().toString();
-			String val = entry.getValue().toString();
-			String first = StringUtil.substring(val, null, ":");
-			String second = val.contains(":") ? StringUtil.substring(val, ":", null) : "";
-			buf.append(key + SEP + first + SEP + second + "\n");
-		}
-    	FileUtil.writeBytes(buf.toString().getBytes(), filename, false);
-    	return filename;
-	}
-
-    /** converts the given properties to markdown (objectname, rule, optional-parameter) */
-    public String saveAsMarkdown(String filename, Properties p) {
-    	// TODO: implement markdown
-//    	if (true)
-//    		throw new UnsupportedOperationException();
-    	
+    public String saveAsTSV(String filename, Properties p) {
     	StringBuilder buf = new StringBuilder();
     	//TODO: performance: don't write whole properties on each bean...
     	for (Map.Entry<Object, Object> entry : p.entrySet()) {

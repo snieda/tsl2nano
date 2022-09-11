@@ -21,6 +21,7 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.incubation.specification.SpecificationExchange;
 
 public class SpecificationExchangeTest implements ENVTestPreparation {
 	
@@ -58,7 +59,7 @@ public class SpecificationExchangeTest implements ENVTestPreparation {
 		String file = fillSpecificationProperties(type, p);
 		FileUtil.delete(file); // -> the csv file will be used!
 		
-		file = new SpecificationH5Exchange().saveAsCSV(file + EXT_CSV, p);
+		file = new SpecificationH5Exchange().saveAsTSV(file + EXT_CSV, p);
 		
 		int errors = NanoH5Util.enrichFromSpecificationProperties();
 		
@@ -110,7 +111,8 @@ public class SpecificationExchangeTest implements ENVTestPreparation {
 		Properties p = new Properties();
 		SpecificationH5Exchange specExchange = new SpecificationH5Exchange();
 		specExchange.saveSpecificationEntries(bean, p);
-
+		ENV.addService(SpecificationExchange.class, specExchange);
+		
 		String file = ENV.getConfigPath() + SpecificationH5Exchange.FILENAME_SPEC_PROPERTIES;
 		assertTrue(FileUtil.userDirFile(file).exists());
 		assertEquals(expectedElementCount, p.size());

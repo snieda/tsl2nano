@@ -91,7 +91,7 @@ public class DocumentWorker {
 	private static final Log LOG = LogFactory.getLog(DocumentWorker.class);
 	
 	private static final String TAG_MATCH = ".*\\[\\w+\\:\\w+\\].*";
-	static final String TAG_DIR = ENV.getConfigPath() + "/tagdir";
+	final String tagDir = Pool.getSpecificationRootDir() + DocumentWorker.class.getSimpleName().toLowerCase() + ".tagdir";
 	private Properties properties;
 	
 	public DocumentWorker() {
@@ -103,11 +103,13 @@ public class DocumentWorker {
 		if (properties.isEmpty()) {
 			preInitProperties();
 		}
-		new File(TAG_DIR).mkdirs();
+		File tagDirFile = new File(tagDir);
+		tagDirFile.delete();
+		tagDirFile.mkdirs();
 	}
 
 	protected String getPropertyFileName() {
-		return ENV.getConfigPath() + getClass().getSimpleName().toLowerCase() + ".properties";
+		return Pool.getSpecificationRootDir() + getClass().getSimpleName().toLowerCase() + ".properties";
 	}
 
 	protected void preInitProperties() {
@@ -153,6 +155,7 @@ public class DocumentWorker {
 				throw new IllegalStateException("Exception thrown reading line [" + line + "]:" + l, e);
 			}
 		}
+		ENV.moveBackup(fileName);
 		LOG.info("documentworker finished (time: " + DateUtil.fromStartTime(start) + ", file: " + fileName + ")");
 		LOG.info("=============================================================================\n");
 
@@ -170,9 +173,8 @@ public class DocumentWorker {
 	}
 
 	protected String writeLastChapter(int line, String tag, StringBuilder content) {
-		String tagfile = TAG_DIR + "/" + tag + "-" + line;
-		FilePath.write(tagfile, content.toString().getBytes());
-		return tagfile;
+		String tagfile = tagDir + "/" + tag + "-" + line;
+		return FilePath.write(tagfile, content.toString().getBytes()).toAbsolutePath().toString();
 	}
 
 	private String readTag(String l) {

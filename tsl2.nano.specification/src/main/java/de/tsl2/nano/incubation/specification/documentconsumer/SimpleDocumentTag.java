@@ -30,35 +30,37 @@ public class SimpleDocumentTag implements Consumer<File> {
 	public void accept(File f) {
 		LOG.info("consuming " + f);
 		before(f);
-		String content = new String(FilePath.read(f.getAbsolutePath()));
 		Scanner sc = Util.trY( () -> new Scanner(f));
+		String l;
+		StringBuilder toBeConsumed = new StringBuilder();
 		while (sc.hasNextLine()) {
-			String l = sc.nextLine();
+			l = sc.nextLine();
 			if (l.trim().isEmpty() || l.startsWith("#"))
 				continue;
-			else if (l.contains("="))
+			else if (l.contains("=") && StringUtil.substring(l.substring(1), null, "=").matches("\\w+"))
 				define(l);
 			else if (l.trim().startsWith(">>")) 
-				run(l);
+				toBeConsumed.append(run(l) + "\n");
 			else
-				consumeSpecific(l);
+				toBeConsumed.append(consumeSpecific(l) + "\n");
 		}
-		after(f);
+		after(f, toBeConsumed.toString());
 	}
 
 	protected void before(File f) {
 	}
 
-	protected void after(File f) {
+	protected void after(File f, String toBeConsumed) {
 	}
 
-	protected void consumeSpecific(String l) {
+	protected String consumeSpecific(String l) {
 		LOG.info("emtpy consumeSpecific called");
+		return l;
 	}
 
-	private void run(String l) {
+	private String run(String l) {
 		String action = StringUtil.substring(l, ">>", null);
-		ENV.get(Pool.class).get(action).run(ENV.getProperties());
+		return String.valueOf(ENV.get(Pool.class).get(action).run(ENV.getProperties()));
 	}
 
 	private void define(String l) {

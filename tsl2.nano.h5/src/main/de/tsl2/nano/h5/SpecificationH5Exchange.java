@@ -7,15 +7,20 @@ import static de.tsl2.nano.h5.NanoH5Util.cover;
 import static de.tsl2.nano.incubation.specification.SpecificationExchange.Change.addaction;
 import static de.tsl2.nano.incubation.specification.SpecificationExchange.Change.addattribute;
 
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Scanner;
+import java.util.Set;
 
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.bean.def.ValueExpression;
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -32,22 +37,16 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 		Properties spec = ENV.getSortedProperties(file);
 		if (Util.isEmpty(spec)) {
 			LOG.info("file " + file + " emtpy or not existing. try to load from csv file...");
-			spec = fromCSV();
-			file += EXT_CSV;
-			if (Util.isEmpty(spec))
-				LOG.info("file " + file + " emtpy or not existing. try to load from markdown file...");
-				spec = fromMarkdown();
-				file += EXT_MARKDOWN;
-				if (Util.isEmpty(spec))
-					LOG.warn(file + " is empty!");
+			spec = fromFlatFile((file += EXT_CSV), SEP);
 		}
 		int errors = 0, rules = 0, attributes = 0, actions = 0, beanchanges = 0, attrchanges = 0;
-    	if (spec != null) {
+    	if (spec != null && Message.ask("Run Specification Exchange on file " + file + "?", true)) {
         	ENV.moveBackup(file);
         	LOG.info("=> importing " + spec.size() + " entries from " + file + " ...");
     		Pool pool = ENV.get(Pool.class);
     		String k, v, object, property;
-    		BeanDefinition bean;
+    		Set<BeanDefinition> changedBeans = new LinkedHashSet<>();
+    		BeanDefinition bean = null;
     		for (Entry<Object, Object> e : spec.entrySet()) {
     			// as we get all entries by a map, we have to filter comments ourself
     			try {
@@ -94,6 +93,7 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 							}
 						} else { // field
 							AttributeDefinition<?> attr = (AttributeDefinition<?>) AttributeDefinition.getAttributeDefinitionFromIDPath(object);
+							bean = attr.getParentBean();
 							String rule;
 							switch (Change.valueOf(property)) {
 							case enabler: 
@@ -118,6 +118,8 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 						}
 					}
 					LOG.info("specification imported: " + k + " -> " + v);
+					if (bean != null)
+						changedBeans.add(bean);
 				} catch (Exception e1) {
 					LOG.error(e1);
 					spec.put(e.getKey(), "!!!" + e.getValue() + "!!! " + e1.getMessage());
@@ -134,41 +136,38 @@ public class SpecificationH5Exchange extends SpecificationExchange {
     					+ "\n\tbean changes : " + beanchanges
     					+ "\n\tattr changes : " + attrchanges
     					+ "\n\n");
-    		FileUtil.saveProperties(ENV.getConfigPath() + file + (errors == 0 ? ".done" : ".errors"), spec);
+    		changedBeans.stream().forEach(b -> b.saveDefinition());
+    		FileUtil.saveProperties(Pool.getSpecificationRootDir() + file + (errors == 0 ? ".done" : ".errors"), spec);
     	}
     	return errors;
 	}
 
-	protected Properties fromCSV() {
-		Scanner sc = Util.trY(() -> new Scanner(FileUtil.userDirFile(ENV.getConfigPath() + FILENAME_SPEC_PROPERTIES + EXT_CSV)), false);
+	protected Properties fromFlatFile(String filename, String sep) {
+		Scanner sc = Util.trY(() -> new Scanner(FileUtil.userDirFile(ENV.getConfigPath() + filename)), false);
 		if (sc == null)
 			return null;
 		Properties p = MapUtil.createSortedProperties();
-		String l, k, v;
+		String l, l0 = "", k, keq, v, s;
 		while (sc.hasNextLine()) {
 			l = sc.nextLine();
-			k = StringUtil.substring(l, null, SEP);
-			v = StringUtil.substring(l, SEP, null).replace(SEP, ":");
-			if (v.endsWith(":"))
-				v = v.substring(0, v.length() - 1);
-			p.put(k, v);
-		}
-		return p;
-	}
-
-	protected Properties fromMarkdown() {
-		// TODO: implement
-		Scanner sc = Util.trY(() -> new Scanner(FileUtil.userDirFile(ENV.getConfigPath() + FILENAME_SPEC_PROPERTIES + EXT_MARKDOWN)), false);
-		if (sc == null)
-			return null;
-		Properties p = MapUtil.createSortedProperties();
-		String l, k, v;
-		while (sc.hasNextLine()) {
-			l = sc.nextLine();
-			k = StringUtil.substring(l, null, SEP);
-			v = StringUtil.substring(l, SEP, null).replace(SEP, ":");
-			if (v.endsWith(":"))
-				v = v.substring(0, v.length() - 1);
+			if (l.trim().length() == 0 || l.trim().startsWith("#"))
+				continue;
+			l = l0 + l;
+			if (l.endsWith( "\\")) {
+				l0 = l.substring(0, l.length() - 1) + "\n";
+				continue;
+			} else
+				l0 = "";
+			k = StringUtil.substring(l, null, sep);
+			keq = StringUtil.substring(l, null, "=");
+			if (keq.length() < k.length() && keq.substring(1).trim().matches("\\w+")) {
+				k = keq;
+				s = "=";
+			} else
+				s = sep;
+			v = StringUtil.substring(l, s, null);//.replace(s, ":");
+//			if (v.endsWith(":"))
+//				v = v.substring(0, v.length() - 1);
 			p.put(k, v);
 		}
 		return p;
