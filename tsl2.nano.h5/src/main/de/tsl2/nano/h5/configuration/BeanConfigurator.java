@@ -388,9 +388,10 @@ public class BeanConfigurator<T> implements Serializable {
         Bean.clearCache();
     }
 
-    public void createCompositor(String baseType, String baseAttribute, String targetAttribute, String iconAttribute) {
+    public Compositor createCompositor(String baseType, String baseAttribute, String targetAttribute, String iconAttribute) {
         Compositor compositor = createCompositorBean(Compositor.class, "icons/properties.png", baseType, baseAttribute, null, targetAttribute, iconAttribute);
         compositor.saveDefinition();
+        return compositor;
     }
 
     @de.tsl2.nano.bean.annotation.Action(name = "createController"

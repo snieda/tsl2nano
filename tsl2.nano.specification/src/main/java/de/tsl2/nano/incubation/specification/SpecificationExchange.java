@@ -35,7 +35,8 @@ public class SpecificationExchange implements IBeanDefinitionSaver {
 	public static final String PATH_LAYOUTCONSTRAINTS = "presentable.layoutConstraints";
 	public static final String PATH_COLDEF_LAYOUTCONSTRAINTS = "columnDefinition." + PATH_LAYOUTCONSTRAINTS;
 
-    public enum Change {valueexpression, attributefilter, icon, addattribute, addaction, enabler, listener, rulecover};
+    public enum Change {valueexpression, attributefilter, icon, addattribute, addaction, enabler, listener, rulecover, 
+    	createstatistic, createquery, createcompositor, createcontroller, createsheet};
     
     /**
      * generates resource entries for each attribute+tooltip and each action to be edited later.

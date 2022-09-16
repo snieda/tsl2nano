@@ -312,10 +312,8 @@ public class Timesheet extends NanoH5App {
 //        GenericLocalBeanContainer.initLocalContainer(Thread.currentThread().getContextClassLoader(), false);
 
         //TODO: Statistics executes queries immediately to evaluate group-by column names
-        Statistic<Collection<Charge>, Charge> statistic = new Statistic<>(Charge.class);
-        statistic.getPresentable().setIcon("icons/barchart.png");
-        statistic.onActivation(null).saveDefinition();
-
+        createStatistics(Charge.class, "icons/barchart.png");
+        
         /*
          * statistic queries
          */
@@ -507,10 +505,7 @@ public class Timesheet extends NanoH5App {
 
         b.saveDefinition();
         
-        /*
-         * create a user 
-         */
-        Users.load().auth("MUSTER", "meinmuster", "SA", "", true);
+        createUser("MUSTER", "meinmuster", "SA", "", true);
         
         /*
          * define your own navigation stack

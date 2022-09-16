@@ -1,13 +1,13 @@
 package de.tsl2.nano.h5;
 
-import java.lang.reflect.Method;
-import java.util.Properties;
+import java.io.Serializable;
+import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 
-import java.util.Map.Entry;
-
 import de.tsl2.nano.bean.def.AttributeDefinition;
+import de.tsl2.nano.bean.def.Bean;
+import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
@@ -15,18 +15,22 @@ import de.tsl2.nano.bean.def.ValueExpression;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.core.util.FileUtil;
-import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.execution.ScriptUtil;
+import de.tsl2.nano.h5.collector.CSheet;
+import de.tsl2.nano.h5.collector.Controller;
+import de.tsl2.nano.h5.collector.QueryResult;
+import de.tsl2.nano.h5.collector.Statistic;
+import de.tsl2.nano.h5.configuration.BeanConfigurator;
 import de.tsl2.nano.h5.expression.RuleExpression;
 import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.incubation.specification.SpecificationExchange;
 import de.tsl2.nano.incubation.specification.actions.Action;
-import de.tsl2.nano.incubation.specification.rules.RuledEnabler;
 
-import static de.tsl2.nano.bean.BeanUtil.*;
-
+/**
+ * convenience class to create and configure bean types and their attributes.
+ * 
+ * @author ts
+ */
 public interface NanoH5Util {
 	static final Log LOG = LogFactory.getLog(NanoH5Util.class);
 	
@@ -108,6 +112,52 @@ public interface NanoH5Util {
 		return bean.addAttribute(new RuleExpression<>(bean.getClazz(), prefixedRuleName));
 	}
 
+	public static <T> Statistic<Collection<T>, T> createStatistics(Class<T> type, String iconPath) {
+        Statistic<Collection<T>, T> statistic = new Statistic<>(type);
+        statistic.getPresentable().setIcon(iconPath);
+        statistic.onActivation(null).saveDefinition();
+        return statistic;
+	}
+	
+	public static QueryResult createQuery(String name, String sqlQuery) {
+		return QueryResult.createQueryResult(name, sqlQuery);
+	}
+	
+	public static <T> Statistic<Collection<T>, T> createStatistic(Class<T> type) {
+		Statistic<Collection<T>, T> statistic = new Statistic<>(type);
+		statistic.saveDefinition();
+		return statistic;
+	}
+
+	public static CSheet createSheet(String title, int rows, int cols) {
+		CSheet sheet = new CSheet(title, cols, rows);
+		sheet.save();
+		return sheet;
+	}
+
+	public static <T extends Serializable> BeanCollector<Collection<T>, T> createCompositor(Class<?> baseType, String baseAttribute, Class<T> targetType, String targetAttribute, 
+			String iconAttribute) {
+		return bc(targetType).createCompositor(baseType.getName(), baseAttribute, targetAttribute, iconAttribute);
+	}
+
+    /**
+     * define a Controller as Collector of Actions of a Bean
+     */
+	public static <T extends Serializable> Controller<Collection<T>, T> createController(
+			Class<?> baseType, String baseAttribute, Class<T> targetType, String targetAttribute, 
+			String iconAttribute, String increaseAttribute) {
+		return bc(targetType).createControllerBean(baseType.getName(), baseAttribute, targetType.getName(), targetAttribute, 
+				iconAttribute, increaseAttribute, 1, 1, false, true, false);
+	}
+
+	static <T extends Serializable> BeanConfigurator<T> bc(Class<T> type) {
+		return BeanConfigurator.create(type).getInstance();
+	}
+	
+	public static User createUser(String name, String passwd, String dbUser, String dbPasswd, boolean admin) {
+		return Users.load().auth(name, passwd, dbUser, dbPasswd, admin);
+	}
+	
     public static int enrichFromSpecificationProperties() {
     	return ENV.get(SpecificationExchange.class).enrichFromSpecificationProperties();
 	}

@@ -3,9 +3,9 @@ package de.tsl2.nano.h5;
 import static de.tsl2.nano.h5.NanoH5Util.LOG;
 import static de.tsl2.nano.h5.NanoH5Util.addListener;
 import static de.tsl2.nano.h5.NanoH5Util.addVirtualAttribute;
-import static de.tsl2.nano.h5.NanoH5Util.cover;
+import static de.tsl2.nano.h5.NanoH5Util.*;
 import static de.tsl2.nano.incubation.specification.SpecificationExchange.Change.addaction;
-import static de.tsl2.nano.incubation.specification.SpecificationExchange.Change.addattribute;
+import static de.tsl2.nano.incubation.specification.SpecificationExchange.Change.*;
 
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -25,6 +25,7 @@ import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.h5.collector.CSheet;
 import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.incubation.specification.SpecificationExchange;
 import de.tsl2.nano.incubation.specification.rules.RuledEnabler;
@@ -60,6 +61,9 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 					property = StringUtil.substring(k, ".", null, true);
 					if (k.matches(pool.getFullExpressionPattern())) { // rule
 						pool.add(k, v);
+					} else if (k.matches("createuser")) { // user
+						String[] args = getArgs(v);
+						createUser(args[0], args[1], args[2], args[3], Boolean.valueOf(args[4]));
 					} else if (k.endsWith(PATH_POSTIFX)){ // set any attribute property
 						String type = StringUtil.substring(object, null, ".");
 						bean = BeanDefinition.getBeanDefinition(type);
@@ -81,10 +85,27 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 								checkRule(pool, v);
 								bean.addAction(new SpecifiedAction<>(v, null));
 								actions++;
+							} else if (property.startsWith(createstatistic.name())) {
+								createStatistic(bean.getDeclaringClass());
+							} else if (property.startsWith(createquery.name())) {
+								createQuery(k, v);
+							} else if (property.startsWith(createcompositor.name())) {
+								String[] args = getArgs(v);
+								BeanDefinition<?> baseType = BeanDefinition.getBeanDefinition(args[0]);
+								String baseAttribute = args[1];
+								createCompositor(baseType.getDeclaringClass(), baseAttribute, bean.getDeclaringClass(), args[2], args[3]);
+							} else if (property.startsWith(createcontroller.name())) {
+								String[] args = getArgs(v);
+								BeanDefinition<?> baseType = BeanDefinition.getBeanDefinition(args[0]);
+								String baseAttribute = args[1];
+								createController(baseType.getDeclaringClass(), baseAttribute, bean.getDeclaringClass(), args[2], args[3], args[4]);
+							} else if (property.startsWith(createsheet.name())) {
+								String[] args = getArgs(v);
+								new CSheet(args[0], Integer.valueOf(args[1]), Integer.valueOf(args[2])).save();
 							} else {
 								switch (Change.valueOf(property)) {
 								case valueexpression: bean.setValueExpression(new ValueExpression<>(v)); break;
-								case attributefilter: bean.setAttributeFilter(v.split("[;,\\s]")); break;
+								case attributefilter: bean.setAttributeFilter(getArgs(v)); break;
 								case icon: bean.getPresentable().setIcon(ENV.getConfigPathRel() + v); break;
 								default:
 									throw new IllegalArgumentException(property);
@@ -142,6 +163,10 @@ public class SpecificationH5Exchange extends SpecificationExchange {
     	return errors;
 	}
 
+	private String[] getArgs(String v) {
+		return v.split("[:;,\\s]");
+	}
+
 	protected Properties fromFlatFile(String filename, String sep) {
 		Scanner sc = Util.trY(() -> new Scanner(FileUtil.userDirFile(ENV.getConfigPath() + filename)), false);
 		if (sc == null)
@@ -160,7 +185,7 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 				l0 = "";
 			k = StringUtil.substring(l, null, sep);
 			keq = StringUtil.substring(l, null, "=");
-			if (keq.length() < k.length() && keq.substring(1).trim().matches("\\w+")) {
+			if (keq.length() < k.length() && keq.substring(1).trim().matches("[*\\w.]+")) {
 				k = keq;
 				s = "=";
 			} else

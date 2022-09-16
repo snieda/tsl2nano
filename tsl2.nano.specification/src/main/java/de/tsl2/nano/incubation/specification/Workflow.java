@@ -91,7 +91,9 @@ public class Workflow implements Runnable {
 			return;
 		}
 		Workflow workflow = new Workflow(args[0], args[1], args[2]);
-		ENV.save(Pool.getSpecificationRootDir() + "workflow." + args[0], workflow);
+		String file = Pool.getSpecificationRootDir() + "workflow/" + new File(args[0]).getName() + ".workflow";
+		new File(file).getParentFile().mkdirs();
+		ENV.save(file, workflow);
 		workflow.activate();
 	}
 	protected Collection<Object> getData() {
