@@ -954,6 +954,11 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         return BeanContainer.getIdAttribute(getClazz());
     }
 
+    /** pre define beandefinitions for the given types to be accessible through simple names */
+    public static void defineBeanDefinitions(Class...types) {
+    	Arrays.stream(types).forEach(t -> BeanDefinition.getBeanDefinition(t));
+    }
+    
     /**
      * delegates to {@link #getBeanDefinition(String, Class, boolean)} with null and true.
      */

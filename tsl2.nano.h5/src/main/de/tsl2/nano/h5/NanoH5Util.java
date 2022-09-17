@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.bean.def.AbstractExpression;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
@@ -16,6 +17,7 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.execution.IPRunnable;
 import de.tsl2.nano.h5.collector.CSheet;
 import de.tsl2.nano.h5.collector.Controller;
 import de.tsl2.nano.h5.collector.QueryResult;
@@ -109,7 +111,9 @@ public interface NanoH5Util {
     }
     
 	public static AttributeDefinition addVirtualAttribute(BeanDefinition bean, String prefixedRuleName) {
-		return bean.addAttribute(new RuleExpression<>(bean.getClazz(), prefixedRuleName));
+//		IPRunnable rule = ENV.get(Pool.class).get(prefixedRuleName);
+		return bc(bean.getDeclaringClass()).addAttribute(null, prefixedRuleName);
+//		return bean.addAttribute(new RuleExpression<>(bean.getClazz(), prefixedRuleName));
 	}
 
 	public static <T> Statistic<Collection<T>, T> createStatistics(Class<T> type, String iconPath) {

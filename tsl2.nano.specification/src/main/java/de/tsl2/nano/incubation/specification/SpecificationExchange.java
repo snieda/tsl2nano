@@ -38,15 +38,17 @@ public class SpecificationExchange implements IBeanDefinitionSaver {
     public enum Change {valueexpression, attributefilter, icon, addattribute, addaction, enabler, listener, rulecover, 
     	createstatistic, createquery, createcompositor, createcontroller, createsheet};
     
+    protected boolean exists;
+    	
     /**
      * generates resource entries for each attribute+tooltip and each action to be edited later.
      */
     public void saveResourceEntries(BeanDefinition bean) {
     	saveSpecificationEntries(bean, ENV.getSortedProperties(FILENAME_SPEC_PROPERTIES));
-
     }
+
     public void saveSpecificationEntries(BeanDefinition bean, Properties p) {
-    	if (p.contains(bean.getId()))
+    	if (exists || p.contains(bean.getId()))
     		return;
 //        p.put(bean.getId(), bean.getName());
         Collection<IAttributeDefinition<?>> attributes = bean.getBeanAttributes();
@@ -86,6 +88,10 @@ public class SpecificationExchange implements IBeanDefinitionSaver {
     	return filename;
 	}
 
+    public void setExists(boolean exists) {
+		this.exists = exists;
+	}
+    
     /** does the job - imports the specification into the bean presentation layer - must be implmented. */
 	public int enrichFromSpecificationProperties() {
     	throw new UnsupportedOperationException();

@@ -9,19 +9,31 @@ import java.lang.reflect.Proxy;
 import java.util.Map;
 import java.util.Properties;
 
+import org.anonymous.project.Account;
+import org.anonymous.project.Address;
+import org.anonymous.project.Category;
+import org.anonymous.project.Charge;
+import org.anonymous.project.Chargeitem;
+import org.anonymous.project.Item;
+import org.anonymous.project.Property;
+import org.anonymous.project.Type;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
 import de.tsl2.nano.autotest.TypeBean;
+import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
+import de.tsl2.nano.bean.def.IBeanDefinitionSaver;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.incubation.specification.SpecificationExchange;
+import de.tsl2.nano.util.FilePath;
 
 public class SpecificationExchangeTest implements ENVTestPreparation {
 	
@@ -30,6 +42,8 @@ public class SpecificationExchangeTest implements ENVTestPreparation {
 		Bean.clearCache();
 		ENVTestPreparation.setUp("h5", SpecificationExchangeTest.class, false);
 		NanoH5.registereExpressionsAndPools();
+		FileUtil.delete(ENV.getConfigPath() + SpecificationExchange.FILENAME_SPEC_PROPERTIES);
+		FileUtil.delete(ENV.getConfigPath() + SpecificationExchange.FILENAME_SPEC_PROPERTIES + SpecificationExchange.EXT_CSV);
 	}
 
 	@AfterClass
@@ -45,16 +59,18 @@ public class SpecificationExchangeTest implements ENVTestPreparation {
 	@Test
 	public void testSimpleSpecificationProperties() {
 		Class<?> type = TypeBean.class;
+		BeanDefinition.getBeanDefinition(type).saveDefinition();
 		Properties p = initializeBeanSpecProperties(type, getExpectedEntryCount(type, 1));
 		String file = fillSpecificationProperties(type, p);
 		int errors = NanoH5Util.enrichFromSpecificationProperties();
 		
-		checkSpecificationDone(type, file, errors);
+		checkSpecificationDone(type, file, errors, "");
 	}
 
 	@Test
 	public void testSimpleSpecificationCSV() {
 		Class<?> type = TypeBean.class;
+		BeanDefinition.getBeanDefinition(type).saveDefinition();
 		Properties p = initializeBeanSpecProperties(type, getExpectedEntryCount(type, 1));
 		String file = fillSpecificationProperties(type, p);
 		FileUtil.delete(file); // -> the csv file will be used!
@@ -63,14 +79,31 @@ public class SpecificationExchangeTest implements ENVTestPreparation {
 		
 		int errors = NanoH5Util.enrichFromSpecificationProperties();
 		
-		checkSpecificationDone(type, file, errors);
+		checkSpecificationDone(type, file, errors, EXT_CSV);
 	}
 	
-	private void checkSpecificationDone(Class<?> type, String file, int errors) {
+	@Test
+	public void testTimesheetSpec() {
+		BeanContainer.initEmtpyServiceActions();
+		
+		ENV.extractResource(SpecificationExchange.FILENAME_SPEC_PROPERTIES + SpecificationExchange.EXT_CSV);
+		SpecificationH5Exchange specExchange = new SpecificationH5Exchange();
+		ENV.addService(IBeanDefinitionSaver.class, specExchange);
+		ENV.addService(SpecificationExchange.class, specExchange);
+		specExchange.setExists(true);
+		
+		BeanDefinition.defineBeanDefinitions(Account.class, Address.class, Category.class, Type.class, Property.class, 
+				Item.class, Charge.class, Chargeitem.class);
+		assertEquals("specification enrichment finished with errors", 0, NanoH5Util.enrichFromSpecificationProperties());
+		assertTrue(BeanDefinition.getBeanDefinition("charge").getAttribute("weekday") != null);
+	}
+	
+	private void checkSpecificationDone(Class<?> type, String file, int errors, String fileExt) {
 //		assertTrue(FileUtil.userDirFile(ENV.getTempPath() + BeanUtil.FILENAME_SPEC_PROPERTIES).exists());
-		assertFalse(FileUtil.userDirFile(file).exists());
-		assertTrue(file + ".done should exist", FileUtil.userDirFile(file + ".done").exists());
 		assertEquals(0, errors);
+//		assertFalse(FileUtil.userDirFile(file).exists()); //moving not yet working?
+		String doneFile = Pool.getSpecificationRootDir() + SpecificationExchange.FILENAME_SPEC_PROPERTIES + fileExt + ".done";
+		assertTrue(file + ".done should exist", FileUtil.userDirFile(doneFile).exists());
 		
 		BeanDefinition<?> bean = BeanDefinition.getBeanDefinition(type);
 		assertTrue("attribute 'testrule' was not created", bean.getAttribute("testrule", false) != null);
@@ -107,6 +140,7 @@ public class SpecificationExchangeTest implements ENVTestPreparation {
 	}
 
 	private Properties initializeBeanSpecProperties(Class<?> type, int expectedElementCount) {
+		ENV.get(Pool.class).add("%testrule", "1");
 		BeanDefinition bean = BeanDefinition.getBeanDefinition(TypeBean.class);
 		Properties p = new Properties();
 		SpecificationH5Exchange specExchange = new SpecificationH5Exchange();

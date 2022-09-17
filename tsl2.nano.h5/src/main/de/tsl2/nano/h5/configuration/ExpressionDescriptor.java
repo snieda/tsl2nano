@@ -47,8 +47,10 @@ public class ExpressionDescriptor<T> extends AbstractExpression<T> {
         return null;
     }
 
-    public static String getName(String url) {
-        return FileUtil.getValidFileName(!Util.isEmpty(url) ? StringUtil.substring(url, "://", "/") : "[undefined]");
+    public static String getName(String expression) {
+    	if (expression.matches(AbstractExpression.createRegExpOnAllRegistered()))
+    		expression = expression.substring(1);
+        return FileUtil.getValidFileName(!Util.isEmpty(expression) ? StringUtil.substring(expression, "://", "/") : "[undefined]");
     }
     @Override
     public String getName() {

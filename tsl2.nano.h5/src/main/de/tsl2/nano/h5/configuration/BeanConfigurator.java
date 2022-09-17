@@ -484,7 +484,7 @@ public class BeanConfigurator<T> implements Serializable {
         Bean.clearCache();
     }
 
-    public void addAttribute(String attributeType, String attributeExpression) {
+    public AttributeDefinition addAttribute(String attributeType, String attributeExpression) {
         if (Util.isEmpty(attributeType)) {
             ManagedException.assertion(!Util.isEmpty(attributeExpression), "At least attributeExpression or attributeType must be filled!", attributeExpression, attributeType);
             attributeType = String.valueOf(attributeExpression.charAt(0));
@@ -497,6 +497,7 @@ public class BeanConfigurator<T> implements Serializable {
         AttributeDefinition attr = def.addAttribute(exDescr.getName(), exDescr.toInstance(), null, null);
         attr.getPresentation().setType(IPresentable.TYPE_DEPEND);
         attr.getPresentation().setStyle(IPresentable.UNDEFINED);
+        return attr;
     }
 
 }

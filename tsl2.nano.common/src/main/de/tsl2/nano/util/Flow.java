@@ -54,8 +54,14 @@ public class Flow {
 	ITask start;
 	List<Consumer<ITask>> listeners = new LinkedList<>();
 
+	public void setName(String name) {
+		this.name = name;
+	}
 	public void setTasks(ITask start) {
 		this.start = start;
+	}
+	public void setListeners(List<Consumer<ITask>> listeners) {
+		this.listeners = listeners;
 	}
 	
 	public void persist() {
@@ -80,15 +86,20 @@ public class Flow {
 		return load(new Flow(), gravitoFile, taskType);
 	}
 	public static <F extends Flow> F load(F flow, File gravitoFile, Class<? extends ITask> taskType) {
-		Scanner sc = Util.trY( () -> new Scanner(gravitoFile));
-		flow.name = StringUtil.substring(FileUtil.replaceToJavaSeparator(gravitoFile.getPath()), "/", ".", true);
+		String name = StringUtil.substring(FileUtil.replaceToJavaSeparator(gravitoFile.getPath()), "/", ".", true);
+		String expression = FileUtil.getFileString(gravitoFile.getPath());
+		return fromString(flow, name, expression, taskType);
+	}
+	public static <F extends Flow> F fromString(F flow, String name, String expression, Class<? extends ITask> taskType) {
+		Scanner sc = Util.trY( () -> new Scanner(expression));
+		flow.name = name;
 		ITask task = null;
 		Map<String, ITask> tasks = new HashMap<>();
 //		tasks.put(ITask.END.name(), ITask.END);
 		Deque<String> strTasks = new LinkedList<>();
 		String line;
 		while (sc.hasNextLine()) {
-			if (!(line = sc.nextLine()).isEmpty() && !line.trim().startsWith("#"))
+			if (!(line = sc.nextLine().trim()).isEmpty() && !line.startsWith("#"))
 				strTasks.add(line);
 		}
 		// create from end...

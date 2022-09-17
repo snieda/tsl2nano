@@ -1,0 +1,53 @@
+%weekday=charge.getFromdate() != null ? formatter.format(charge.getFromdate()) : "";
+%calcTime=var from = fromtime != null ? fromtime.getTime() % 24*3600 : 0; var to = totime != null ? totime.getTime() % 24*3600 : 0; var p = pause != null ? (pause.getTime() - new Date(pause.toGMTString()).getTimezoneOffset()*60000) % dayTimeFraction : 0; Math.round(((to - from) - p) / (3600 * 10)) / 100;
+%presValueColor=var map = new java.util.HashMap(); map.put('style', (typeof value != 'undefined' ? value : 0) > 10 ? 'color: red;' : 'color: green;'); map;
+&weekcolor= \
+    matrix, <1>, <2>, <3>, <4>, <5>, <6>, <7> \
+    weekday, Mo, Di, Mi, Do, Fr, Sa, So \
+    result, color: green;,color: green;,color: green;,color: green;,color: green;,color: red;,color: red
+%id=value
+
+>myflow= \
+	START (OK) -> !myAction [label="§test"] \
+	!myAction (NEW) -> END
+
+charge.valueexpression={name}
+charge.addattribute=%weekday
+charge.value.listener=%calcTime:fromtime,totime,pause
+charge.value.rulecover=%presValueColor:presentable.layoutConstraint
+charge.value.rulecover=%presValueColor:columnDefinition.presentable.layoutConstraints
+charge.fromdate.listener=%id:todate
+charge.fromdate.rulecover=&weekcolor:presentable.layoutConstraints
+charge.fromdate.rulecover=&weekcolor:columnDefinition.presentable.layoutConstraints
+charge.todate.presentation.visible*=false
+charge.fromtime.presentation.type*=16
+charge.totime.presentation.type*=16
+charge.pause.presentation.type*=16
+charge.value.constraint.scale*=2
+charge.value.constraint.precision*=4
+
+type.icon=icons/equipment.png
+type.valueexpression={name}
+category.icon=icons/equipment.png
+category.valueexpression={name}
+account.icon=icons/euro.png
+account.valueexpression={name}
+property.icon=icons/table.png
+property.valueexpression={akey}
+#property.attributefilter=
+chargeitem.icon=icons/buy.png
+chargeitem.valueexpression={item}
+chargeitem.charge.constraint.nullable*=false
+item.valueexpression={name}
+
+charge.createcompositor=item,chargeitems,chargeitem,icon
+charge.createcontroller=item,chargeitems,chargeitem,icon,value
+charge.createsheet=mysheet,3,3
+charge.createstatistic=mystatistics
+charge.createquery=select * from Adress
+
+times.addattribute=party.name
+
+createuser=MUSTER:mypasswd:SA::true
+
+

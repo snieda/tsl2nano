@@ -18,6 +18,7 @@ import java.util.Set;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
+import de.tsl2.nano.bean.def.PathExpression;
 import de.tsl2.nano.bean.def.ValueExpression;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.exception.Message;
@@ -33,6 +34,8 @@ import de.tsl2.nano.util.FilePath;
 
 public class SpecificationH5Exchange extends SpecificationExchange {
 	
+	private static final String DIV = "[:;,\\s]";
+
 	public int enrichFromSpecificationProperties() {
     	String file = FILENAME_SPEC_PROPERTIES;
 		Properties spec = ENV.getSortedProperties(file);
@@ -40,9 +43,9 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 			LOG.info("file " + file + " emtpy or not existing. try to load from csv file...");
 			spec = fromFlatFile((file += EXT_CSV), SEP);
 		}
+		exists = spec != null;
 		int errors = 0, rules = 0, attributes = 0, actions = 0, beanchanges = 0, attrchanges = 0;
     	if (spec != null && Message.ask("Run Specification Exchange on file " + file + "?", true)) {
-        	ENV.moveBackup(file);
         	LOG.info("=> importing " + spec.size() + " entries from " + file + " ...");
     		Pool pool = ENV.get(Pool.class);
     		String k, v, object, property;
@@ -51,12 +54,12 @@ public class SpecificationH5Exchange extends SpecificationExchange {
     		for (Entry<Object, Object> e : spec.entrySet()) {
     			// as we get all entries by a map, we have to filter comments ourself
     			try {
-    				k = e.getKey().toString();
+    				k = e.getKey().toString().trim();
         			// as we get all entries by a map, we have to filter comments ourself
     				if (k.trim().startsWith("#") /*|| k.trim().startsWith("\\#")*/)
     					continue;
     				
-    				v = (String)e.getValue();
+    				v = (String)e.getValue().toString().trim();
 					object = StringUtil.substring(k, null, ".", true);
 					property = StringUtil.substring(k, ".", null, true);
 					if (k.matches(pool.getFullExpressionPattern())) { // rule
@@ -78,7 +81,8 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 						if (!object.contains(".")) { // bean
 							bean = BeanDefinition.getBeanDefinition(object);
 							if (property.startsWith(addattribute.name())) {
-								checkRule(pool, v);
+								if (!PathExpression.isPath(v))
+									checkRule(pool, v);
 								addVirtualAttribute(bean, v);
 								attributes++;
 							} else if (property.startsWith(addaction.name())) {
@@ -106,7 +110,7 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 								switch (Change.valueOf(property)) {
 								case valueexpression: bean.setValueExpression(new ValueExpression<>(v)); break;
 								case attributefilter: bean.setAttributeFilter(getArgs(v)); break;
-								case icon: bean.getPresentable().setIcon(ENV.getConfigPathRel() + v); break;
+								case icon: bean.getPresentable().setIcon(v); break;
 								default:
 									throw new IllegalArgumentException(property);
 								}
@@ -121,14 +125,14 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 								checkRule(pool, v); attr.getPresentation().setEnabler(new RuledEnabler(attr, v)); 
 								break;
 							case listener: 
-								rule = StringUtil.substring(v, null, ":");
-								String[] observables = StringUtil.substring(v, ":", null).split("[,;\\s]");
+								rule = StringUtil.subRegex(v, null, DIV, 0);
+								String[] observables = StringUtil.subRegex(v, DIV, null, 0).split(DIV);
 								checkRule(pool, rule); 
 								addListener(attr.getParentBean(), attr.getName(), rule, observables); 
 								break;
 							case rulecover: 
-								String child = StringUtil.substring(v, ":", null);
-								rule = StringUtil.substring(v, null, ":");
+								String child = StringUtil.subRegex(v, DIV, null, 0);
+								rule = getArgs(v)[0];
 								checkRule(pool, rule); 
 								cover(attr, child, rule); 
 								break;
@@ -148,8 +152,9 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 				}
 			}
     		if (errors > 0)
-    			LOG.error(errors + " errors on import from file " + file);
+    			Message.send(errors + " errors on import from file " + file);
     		else
+            	ENV.moveBackup(file);
     			LOG.info("<= import of " + (rules + attributes + actions + beanchanges + attrchanges) + " specification entries finished successfull"
     					+ "\n\trules        : " + rules
     					+ "\n\tattributes   : " + attributes
@@ -164,7 +169,7 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 	}
 
 	private String[] getArgs(String v) {
-		return v.split("[:;,\\s]");
+		return v.split(DIV);
 	}
 
 	protected Properties fromFlatFile(String filename, String sep) {

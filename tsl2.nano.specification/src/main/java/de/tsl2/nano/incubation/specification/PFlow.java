@@ -3,6 +3,7 @@ package de.tsl2.nano.incubation.specification;
 import java.io.File;
 import java.io.Serializable;
 import java.util.Deque;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.simpleframework.xml.Default;
@@ -20,6 +21,13 @@ import de.tsl2.nano.util.Flow.ITask;
 @Default(value = DefaultType.FIELD, required = false)
 public class PFlow extends Flow implements IPRunnable<Deque<ITask>, Map<String, Object>> , IPrefixed {
 
+	public PFlow() {
+	}
+	
+	public PFlow(String name, String expression, LinkedHashMap<String, ParType> parameter) {
+		fromString(this, name, expression, DEFAULT_TASK_TYPE);
+	}
+	
 	public static PFlow load(File gravitoFile) {
 		return load(gravitoFile, Task.class);
 	}
