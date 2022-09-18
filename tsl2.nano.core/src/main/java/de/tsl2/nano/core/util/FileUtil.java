@@ -524,12 +524,15 @@ public class FileUtil {
      * @param p properties to save
      */
     public static void saveProperties(String resourceFile, Properties p) {
+    	String comment = "generated at " + DateFormat.getDateTimeInstance()
+        .format(new Date()) + " from code " + ConcurrentUtil.getCaller() + " by user "
+        + System.getProperty("user.name");
+    	saveProperties(resourceFile, p, comment);
+    }
+    public static void saveProperties(String resourceFile, Properties p, String comment) {
     	userDirFile(resourceFile).getParentFile().mkdirs();
         try (FileOutputStream out = new FileOutputStream(userDirFile(resourceFile))) {
-			p.store(out,
-                "generated at " + DateFormat.getDateTimeInstance()
-                    .format(new Date()) + " from code " + ConcurrentUtil.getCaller() + " by user "
-                    + System.getProperty("user.name"));
+			p.store(out, comment);
         } catch (Exception e) {
             ManagedException.forward(e);
         }

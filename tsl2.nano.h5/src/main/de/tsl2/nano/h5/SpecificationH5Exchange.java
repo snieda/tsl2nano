@@ -89,7 +89,7 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 								checkRule(pool, v);
 								bean.addAction(new SpecifiedAction<>(v, null));
 								actions++;
-							} else if (property.startsWith(createstatistic.name())) {
+							} else if (property.startsWith(createstatistics.name())) {
 								createStatistic(bean.getDeclaringClass());
 							} else if (property.startsWith(createquery.name())) {
 								createQuery(k, v);

@@ -1,3 +1,44 @@
+##############################################################################
+# Tsl2Nano H5 Specification Properties (Thomas Schneider / 2022)
+# 
+# Syntax:
+# <create-property>|<create-user><create-rule><bean-change>
+#
+# with:
+#   create-property   : <property-name>=<property-value>
+#   create-user       : createuser=<user-name>:<password>:<db-user-name>:<db-password>
+#   create-rule       : <<rule-type-character><rule-simple-name>=<rule-expression>
+#   bean-change       : <bean-name>[.<bean-attribute>.[<prop-change>|<attr-change>]] | [bean-change-ex]
+#     with:  
+#       bean-name     : <simple-bean-class-name>
+#       bean-attribute: <simple-bean-attribute-name>
+#       prop-change   : <<presentable>|<columnDefinition>|<constraint>|type|id|unique|temporalType|description|doValidation>*=<new-value>
+#	    attr-change   :
+#			  enabler=<rule>
+#			| listener=<rule>:<list-of-observables>
+#			| rulecover=<rule>:<attribute-property>
+#       bean-change-ex:
+#			  <valueexpression=<{attribute-name}[[any-seperator-characters]{attribute-name}...]>
+#			| addattribute=<rule-name>
+#			| addaction=<rule-name>
+#			| attributefilter=<list-of-attribute-names-of-this-bean>
+#			| icon=<relative-path-to-image-file>
+#			| createcompositor=<basetype>,<baseattribute>,<attribte-of-this-bean-as-target><icon-attribte>
+#			| createcontroller=<basetype>,<baseattribute>,<attribte-of-this-bean-as-target><icon-attribte><attribute-to-be-increased-by-clicks>
+#			| createquery=<sql-query>
+#			| createstatistics
+#			| createsheet=<name>,<rows>,<cols>
+#
+#      with:
+#        rule       : <rule-type-character><rule-simple-name>
+#        constraint : constraint.<type|format|scale|precision|nullable|length|min|max|defaultValue|allowedValues>
+#        presentable: presentable.<type|style|label|description|layout|layoutConstraints|visible|searchable|icon|nesting>
+#        columndef  : columndefinition.<name|format|columnIndex|sortIndex|isSortUpDirection|width|<presentable>|minsearch|maxsearch|standardSummary>
+#
+# The character ':' can be replaced by one of ';:,\s'. The character '=' can be
+# replaced by a tab character.
+##############################################################################
+
 %weekday=charge.getFromdate() != null ? formatter.format(charge.getFromdate()) : "";
 %calcTime=var from = fromtime != null ? fromtime.getTime() % 24*3600 : 0; var to = totime != null ? totime.getTime() % 24*3600 : 0; var p = pause != null ? (pause.getTime() - new Date(pause.toGMTString()).getTimezoneOffset()*60000) % dayTimeFraction : 0; Math.round(((to - from) - p) / (3600 * 10)) / 100;
 %presValueColor=var map = new java.util.HashMap(); map.put('style', (typeof value != 'undefined' ? value : 0) > 10 ? 'color: red;' : 'color: green;'); map;
@@ -43,11 +84,9 @@ item.valueexpression={name}
 charge.createcompositor=item,chargeitems,chargeitem,icon
 charge.createcontroller=item,chargeitems,chargeitem,icon,value
 charge.createsheet=mysheet,3,3
-charge.createstatistic=mystatistics
+charge.createstatistics=mystatistics
 charge.createquery=select * from Adress
 
 times.addattribute=party.name
 
 createuser=MUSTER:mypasswd:SA::true
-
-

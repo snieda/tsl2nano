@@ -23,6 +23,8 @@ import de.tsl2.nano.core.util.StringUtil;
  * @author ts
  */
 public class SpecificationExchange implements IBeanDefinitionSaver {
+	private static final String SPECIFICATION_README_TXT = "specification-readme.txt";
+
 	private static final Log LOG = LogFactory.getLog(SpecificationExchange.class);
 
 	public static final String EXT_CSV = ".csv";
@@ -36,10 +38,59 @@ public class SpecificationExchange implements IBeanDefinitionSaver {
 	public static final String PATH_COLDEF_LAYOUTCONSTRAINTS = "columnDefinition." + PATH_LAYOUTCONSTRAINTS;
 
     public enum Change {valueexpression, attributefilter, icon, addattribute, addaction, enabler, listener, rulecover, 
-    	createstatistic, createquery, createcompositor, createcontroller, createsheet};
+    	createstatistics, createquery, createcompositor, createcontroller, createsheet};
     
     protected boolean exists;
-    	
+
+    static final String doc = "##############################################################################\n"
+    		+ "# Tsl2Nano H5 Specification Properties (Thomas Schneider / 2022)\n"
+    		+ "# \n"
+    		+ "# Syntax:\n"
+    		+ "# <create-property>|<create-user><create-rule><bean-change>\n"
+    		+ "#\n"
+    		+ "# with:\n"
+    		+ "#   create-property   : <property-name>=<property-value>\n"
+    		+ "#   create-user       : createuser=<user-name>:<password>:<db-user-name>:<db-password>\n"
+    		+ "#   create-rule       : <<rule-type-character><rule-simple-name>=<rule-expression>\n"
+    		+ "#   bean-change       : <bean-name>[.<bean-attribute>.[<prop-change>|<attr-change>]] | [bean-change-ex]\n"
+    		+ "#     with:  \n"
+    		+ "#       bean-name     : <simple-bean-class-name>\n"
+    		+ "#       bean-attribute: <simple-bean-attribute-name>\n"
+    		+ "#       prop-change   : <<presentable>|<columnDefinition>|<constraint>|type|id|unique|temporalType|description|doValidation>*=<new-value>\n"
+    		+ "#	    attr-change   :\n"
+    		+ "#			  enabler=<rule>\n"
+    		+ "#			| listener=<rule>:<list-of-observables>\n"
+    		+ "#			| rulecover=<rule>:<attribute-property>\n"
+    		+ "#       bean-change-ex:\n"
+    		+ "#			  <valueexpression=<{attribute-name}[[any-seperator-characters]{attribute-name}...]>\n"
+    		+ "#			| addattribute=<rule-name>\n"
+    		+ "#			| addaction=<rule-name>\n"
+    		+ "#			| attributefilter=<list-of-attribute-names-of-this-bean>\n"
+    		+ "#			| icon=<relative-path-to-image-file>\n"
+    		+ "#			| createcompositor=<basetype>,<baseattribute>,<attribte-of-this-bean-as-target><icon-attribte>\n"
+    		+ "#			| createcontroller=<basetype>,<baseattribute>,<attribte-of-this-bean-as-target><icon-attribte><attribute-to-be-increased-by-clicks>\n"
+    		+ "#			| createquery=<sql-query>\n"
+    		+ "#			| createstatistics\n"
+    		+ "#			| createsheet=<name>,<rows>,<cols>\n"
+    		+ "#\n"
+    		+ "#      with:\n"
+    		+ "#        rule       : <rule-type-character><rule-simple-name>\n"
+    		+ "#        constraint : constraint.<type|format|scale|precision|nullable|length|min|max|defaultValue|allowedValues>\n"
+    		+ "#        presentable: presentable.<type|style|label|description|layout|layoutConstraints|visible|searchable|icon|nesting>\n"
+    		+ "#        columndef  : columndefinition.<name|format|columnIndex|sortIndex|isSortUpDirection|width|<presentable>|minsearch|maxsearch|standardSummary>\n"
+    		+ "#\n"
+    		+ "# The character ':' can be replaced by one of ';:,\\s'. The character '=' can be\n"
+    		+ "# replaced by a tab character.\n"
+    		+ "##############################################################################\n"
+    		+ "\n";
+    
+	public String loadDocumentation() {
+        // TODO: load from file, when resource provided inside jar file.
+//		ENV.extractResource(SPECIFICATION_README_TXT);
+//		return FileUtil.getFileString(SPECIFICATION_README_TXT);
+		return doc;
+	}
+
     /**
      * generates resource entries for each attribute+tooltip and each action to be edited later.
      */
@@ -69,7 +120,7 @@ public class SpecificationExchange implements IBeanDefinitionSaver {
                 p.put(keyPrefix + Change.rulecover, "<rule>:<path like 'presentable.layoutconstaints'>");
             }
         }
-        FileUtil.saveProperties(ENV.getConfigPath() + FILENAME_SPEC_PROPERTIES, p);
+        FileUtil.saveProperties(ENV.getConfigPath() + FILENAME_SPEC_PROPERTIES, p, loadDocumentation());
         saveAsTSV(ENV.getConfigPath() + FILENAME_SPEC_PROPERTIES + EXT_CSV, p);
     }
 

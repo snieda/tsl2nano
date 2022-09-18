@@ -1237,6 +1237,47 @@ The provided entries look like:
 You may create a specification.properties like (example from timesheet):
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##############################################################################
+# Tsl2Nano H5 Specification Properties (Thomas Schneider / 2022)
+# 
+# Syntax:
+# <create-property>|<create-user><create-rule><bean-change>
+#
+# with:
+#   create-property   : <property-name>=<property-value>
+#   create-user       : createuser=<user-name>:<password>:<db-user-name>:<db-password>
+#   create-rule       : <<rule-type-character><rule-simple-name>=<rule-expression>
+#   bean-change       : <bean-name>[.<bean-attribute>.[<prop-change>|<attr-change>]] | [bean-change-ex]
+#     with:  
+#       bean-name     : <simple-bean-class-name>
+#       bean-attribute: <simple-bean-attribute-name>
+#       prop-change   : <<presentable>|<columnDefinition>|<constraint>|type|id|unique|temporalType|description|doValidation>*=<new-value>
+#	    attr-change   :
+#			  enabler=<rule>
+#			| listener=<rule>:<list-of-observables>
+#			| rulecover=<rule>:<attribute-property>
+#       bean-change-ex:
+#			  <valueexpression=<{attribute-name}[[any-seperator-characters]{attribute-name}...]>
+#			| addattribute=<rule-name>
+#			| addaction=<rule-name>
+#			| attributefilter=<list-of-attribute-names-of-this-bean>
+#			| icon=<relative-path-to-image-file>
+#			| createcompositor=<basetype>,<baseattribute>,<attribte-of-this-bean-as-target><icon-attribte>
+#			| createcontroller=<basetype>,<baseattribute>,<attribte-of-this-bean-as-target><icon-attribte><attribute-to-be-increased-by-clicks>
+#			| createquery=<sql-query>
+#			| createstatistics
+#			| createsheet=<name>,<rows>,<cols>
+#
+#      with:
+#        rule       : <rule-type-character><rule-simple-name>
+#        constraint : constraint.<type|format|scale|precision|nullable|length|min|max|defaultValue|allowedValues>
+#        presentable: presentable.<type|style|label|description|layout|layoutConstraints|visible|searchable|icon|nesting>
+#        columndef  : columndefinition.<name|format|columnIndex|sortIndex|isSortUpDirection|width|<presentable>|minsearch|maxsearch|standardSummary>
+#
+# The character ':' can be replaced by one of ';:,\s'. The character '=' can be
+# replaced by a tab character.
+##############################################################################
+
 %weekday=charge.getFromdate() != null ? formatter.format(charge.getFromdate()) : "";
 %calcTime=var from = fromtime != null ? fromtime.getTime() % 24*3600 : 0; var to = totime != null ? totime.getTime() % 24*3600 : 0; var p = pause != null ? (pause.getTime() - new Date(pause.toGMTString()).getTimezoneOffset()*60000) % dayTimeFraction : 0; Math.round(((to - from) - p) / (3600 * 10)) / 100;
 %presValueColor=var map = new java.util.HashMap(); map.put('style', (typeof value != 'undefined' ? value : 0) > 10 ? 'color: red;' : 'color: green;'); map;
@@ -1246,32 +1287,49 @@ You may create a specification.properties like (example from timesheet):
     result, color: green;,color: green;,color: green;,color: green;,color: green;,color: red;,color: red
 %id=value
 
+>myflow= \
+	START (OK) -> !myAction [label="§test"] \
+	!myAction (NEW) -> END
+
+charge.valueexpression={name}
 charge.addattribute=%weekday
 charge.value.listener=%calcTime:fromtime,totime,pause
-charge.value.rulecover=%presValueColor:presentable.layoutConstraints
-charge.value.rulecover=%presValueColor:columndefinition.presentable.layoutConstraints
+charge.value.rulecover=%presValueColor:presentable.layoutConstraint
+charge.value.rulecover=%presValueColor:columnDefinition.presentable.layoutConstraints
 charge.fromdate.listener=%id:todate
 charge.fromdate.rulecover=&weekcolor:presentable.layoutConstraints
-charge.fromdate.rulecover=&weekcolor:columndefinition.presentable.layoutConstraints
-charge.todate.presentation.visible=false
+charge.fromdate.rulecover=&weekcolor:columnDefinition.presentable.layoutConstraints
+charge.todate.presentation.visible*=false
 charge.fromtime.presentation.type*=16
 charge.totime.presentation.type*=16
 charge.pause.presentation.type*=16
-charge.value.constraint.scale=2
-charge.value.constraint.precision=4
+charge.value.constraint.scale*=2
+charge.value.constraint.precision*=4
 
-type.icon=equipment.png
+type.icon=icons/equipment.png
 type.valueexpression={name}
-category.icon=equipment.png
+category.icon=icons/equipment.png
 category.valueexpression={name}
-account.icon=euro.png
+account.icon=icons/euro.png
 account.valueexpression={name}
-property.icon=table.png
+property.icon=icons/table.png
 property.valueexpression={akey}
 #property.attributefilter=
-chargeItem.icon=buy.png
-chargeItem.valueexpression={item}
-chargeItem.charge.constraint.nullable*=false
+chargeitem.icon=icons/buy.png
+chargeitem.valueexpression={item}
+chargeitem.charge.constraint.nullable*=false
+item.valueexpression={name}
+
+charge.createcompositor=item,chargeitems,chargeitem,icon
+charge.createcontroller=item,chargeitems,chargeitem,icon,value
+charge.createsheet=mysheet,3,3
+charge.createstatistics=mystatistics
+charge.createquery=select * from Adress
+
+times.addattribute=party.name
+
+createuser=MUSTER:mypasswd:SA::true
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If the skilled workers prefer to fill excel sheets instead of a properties file, a tabbed simple file (to be imported to excel like applications) is provided , too.
@@ -1492,6 +1550,15 @@ add bean actions that belong to rule/action definitions
 
 write simple text in format of gravizo to define a workflow
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+§test=true
+!myAction=java.lang.System.currentTimeMillis()
+?myquery=select * from tables
+flowfilename=myflowfile
+schedule=01/2/20/SECONDS
+queryname=?myquery
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Example:
 
 START (OK) -> !myAction [label="§test"]
@@ -1508,6 +1575,24 @@ Example:
 The first line is a header to name the columns. in line 2 the bean with id=001 will be updated. here, the attribute starttime may be changed to be '10:00'
 
 ## [TSL:IMPORT] Import human readable data 
+
+# definitions:
+§ type=de.tsl2.nano.autotest.TypeBean
+§ expression=date: string
+# transformer=de.tsl2.nano.h5.timesheet.SBRImport
+§ date=01.01.2022
+§ immutableInteger=0
+
+## Times
+
+<details>
+  <summary>Click to expand!</summary>
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+07.01.: 08:30-18:00(1,0h): 8,5h Ticket-1234
+08.01.: 09:30-19:00(1,0h): 8,5h Ticket-2345
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+</details>
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
