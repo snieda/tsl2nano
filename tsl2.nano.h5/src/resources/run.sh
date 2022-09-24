@@ -56,7 +56,7 @@ IPv4="-Djava.net.preferIPv4Stack=true"
 #INTERNAL_DB=-Dapp.database.internal.server.run=true
 #TSL_SERVICE=-Dservice.url=https://tsl2-timesheet.herokuapp.com:5000
 SECURITY_LEAK=-Dlog4j2.formatMsgNoLookups=true
-#MODULES=" --add-modules=ALL-SYSTEM --illegal-access=warn --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/javax.security.auth=ALL-UNNAMED"
+MODULES=" --add-modules=ALL-SYSTEM --illegal-access=warn --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/javax.security.auth=ALL-UNNAMED"
 
 java $MODULES $SECURITY_LEAK $IPv4 $OFFLINE $UH $LLANG $ENCODING $JSU_ENC $USERDIR $NANO_DEBUG $AGENT $PROXY  $DEBUG \
 	$UH $HPROF_CPU $HPROF_HEAP $PROFILER $NO_DB_CHECK $NOSTARTPAGE $INTERNAL_DB $TSL_SERVICE \

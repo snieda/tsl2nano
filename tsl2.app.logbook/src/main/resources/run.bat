@@ -34,6 +34,8 @@ rem set LOG=">%PRJ%.log"
 set IPv4="-Djava.net.preferIPv4Stack=true"
 rem set SILENT=true
 if "%SILENT%"=="true" (set JAVA=@start javaw) else (set JAVA=java)
+set SECURITY_LEAK=-Dlog4j2.formatMsgNoLookups=true
+set MODULES=" --add-modules=ALL-SYSTEM --illegal-access=warn --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/javax.security.auth=ALL-UNNAMED"
 
-%JAVA% %IPv4% %OFFLINE% %LANG% %ENCODING% %JSU_ENC% %USERDIR% %NANO_DEBUG% %AGENT% %PROXY% %PROFILER% %JAVA_OPTS% %DEBUG% %UH% -jar %NAME%-%VERSION%%EXTENSION%.jar %PRJ% %PORT%  %LOG%
+%JAVA% %MODULES% %SECURITY_LEAK% %IPv4% %OFFLINE% %LANG% %ENCODING% %JSU_ENC% %USERDIR% %NANO_DEBUG% %AGENT% %PROXY% %PROFILER% %JAVA_OPTS% %DEBUG% %UH% %RESTART_ALL% -jar %NAME%-%VERSION%%EXTENSION%.jar %PRJ% %PORT%  %LOG%
 if not "%SILENT%"=="true" pause
