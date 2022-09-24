@@ -30,12 +30,12 @@ import de.tsl2.nano.core.util.CLI.Color;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.incubation.vnet.workflow.Condition;
 import de.tsl2.nano.terminal.AsciiImage;
 import de.tsl2.nano.terminal.IContainer;
 import de.tsl2.nano.terminal.IItem;
 import de.tsl2.nano.terminal.SIShell;
 import de.tsl2.nano.terminal.TextTerminal.Frame;
+import de.tsl2.nano.vnet.workflow.Condition;
 
 /**
  * the base implementation for all item types.

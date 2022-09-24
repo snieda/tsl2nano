@@ -17,8 +17,8 @@ import java.util.Properties;
 import de.tsl2.nano.action.IConstraint;
 import static de.tsl2.nano.core.util.CLI.*;
 
-import de.tsl2.nano.incubation.vnet.workflow.Condition;
 import de.tsl2.nano.terminal.TextTerminal.Frame;
+import de.tsl2.nano.vnet.workflow.Condition;
 
 /**
  * root definition for the terminal application. all items are extensions of it. only the types {@link Type} are

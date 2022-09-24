@@ -236,24 +236,24 @@
             <option name="NeuralNet">
                <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
                <description>NeuralNet implementation class</description>
-               <defaultValue class="java.lang.String">de.tsl2.nano.incubation.vnet.neuron.VNeuron</defaultValue>
-               <value class="java.lang.String">de.tsl2.nano.incubation.vnet.neuron.VNeuron</value>
+               <defaultValue class="java.lang.String">de.tsl2.nano.vnet.neuron.VNeuron</defaultValue>
+               <value class="java.lang.String">de.tsl2.nano.vnet.neuron.VNeuron</value>
             </option>
             <option name="RoutingStar">
                <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
                <description>Routing implementation class</description>
-               <defaultValue class="java.lang.String">de.tsl2.nano.incubation.vnet.routing.RoutingAStar</defaultValue>
-               <value class="java.lang.String">de.tsl2.nano.incubation.vnet.routing.RoutingAStar</value>
+               <defaultValue class="java.lang.String">de.tsl2.nano.vnet.routing.RoutingAStar</defaultValue>
+               <value class="java.lang.String">de.tsl2.nano.vnet.routing.RoutingAStar</value>
             </option>
             <option name="Workflow">
                <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
                <description>Workflow implementation class</description>
-               <defaultValue class="java.lang.String">de.tsl2.nano.incubation.vnet.workflow.VActivity</defaultValue>
-               <value class="java.lang.String">de.tsl2.nano.incubation.vnet.workflow.VActivity</value>
+               <defaultValue class="java.lang.String">de.tsl2.nano.vnet.workflow.VActivity</defaultValue>
+               <value class="java.lang.String">de.tsl2.nano.vnet.workflow.VActivity</value>
             </option>
          </container>
          <mainaction name="NetCommunicator">
-            <mainClass>de.tsl2.nano.incubation.vnet.NetCommunicator</mainClass>
+            <mainClass>de.tsl2.nano.vnet.NetCommunicator</mainClass>
             <method>main</method>
             <argNames length="2">
                <string>configuration</string>

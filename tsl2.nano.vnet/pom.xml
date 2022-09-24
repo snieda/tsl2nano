@@ -25,7 +25,7 @@
 					</manifest>
 					<manifestEntries>
 						<Created-By>Thomas Schneider</Created-By>
-						<Main-Arguments>de.tsl2.nano.incubation.vnet.NetCommunicator</Main-Arguments>
+						<Main-Arguments>de.tsl2.nano.vnet.NetCommunicator</Main-Arguments>
 						<Application-Name>VNet</Application-Name>
 						<Application-Source>${application.source}</Application-Source>
 						<Application-redirect>/download</Application-redirect>

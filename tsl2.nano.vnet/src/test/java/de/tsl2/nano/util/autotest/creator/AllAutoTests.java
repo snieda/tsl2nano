@@ -12,8 +12,8 @@ import de.tsl2.nano.autotest.creator.AutoFunctionTest;
 import de.tsl2.nano.autotest.creator.CurrentStatePreservationTest;
 import de.tsl2.nano.autotest.creator.InitAllAutoTests;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.incubation.network.JobServer;
-import de.tsl2.nano.incubation.vnet.Net;
+import de.tsl2.nano.network.JobServer;
+import de.tsl2.nano.vnet.Net;
 
 @RunWith(Suite.class)
 @SuiteClasses({InitAllAutoTests.class, AutoFunctionTest.class, CurrentStatePreservationTest.class})

@@ -30,9 +30,9 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.incubation.vnet.Net;
-import de.tsl2.nano.incubation.vnet.Notification;
 import de.tsl2.nano.util.GraphLog;
+import de.tsl2.nano.vnet.Net;
+import de.tsl2.nano.vnet.Notification;
 
 /**
  * EJB-Query Navigator reading it's configuration from xml. The Navigator itself uses a parallel-working net

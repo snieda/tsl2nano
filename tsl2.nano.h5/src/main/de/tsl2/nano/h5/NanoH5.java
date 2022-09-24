@@ -720,7 +720,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         Bean login = Bean.getBean(conn.createConnectionInfo());
 
         //on webstart, the incubation jar (Workflow-->Parameter-->ComparableMap) is not present
-        if (!ENV.get(CompatibilityLayer.class).isAvailable("de.tsl2.nano.incubation.vnet.workflow.ComparableMap")) {
+        if (!ENV.get(CompatibilityLayer.class).isAvailable("de.tsl2.nano.vnet.workflow.ComparableMap")) {
             ENV.extractResource(JAR_INCUBATION);
             //ENV holds an old class reference, so we use the threads context classloader
 //            ((NetworkClassLoader)Thread.currentThread().getContextClassLoader()).addFile(ENV.getConfigPath() + System.getProperty(JAR_INCUBATION));

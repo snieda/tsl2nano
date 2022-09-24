@@ -28,7 +28,6 @@ import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.AntRunner;
 import de.tsl2.nano.format.RegExpFormat;
-import de.tsl2.nano.incubation.vnet.workflow.Condition;
 import de.tsl2.nano.terminal.TextTerminal.Frame;
 import de.tsl2.nano.terminal.item.AItem;
 import de.tsl2.nano.terminal.item.Action;
@@ -46,6 +45,7 @@ import de.tsl2.nano.terminal.item.selector.PropertySelector;
 import de.tsl2.nano.terminal.item.selector.SQLSelector;
 import de.tsl2.nano.terminal.item.selector.Sequence;
 import de.tsl2.nano.terminal.item.selector.XPathSelector;
+import de.tsl2.nano.vnet.workflow.Condition;
 
 /**
  * item administration shell

@@ -9,7 +9,7 @@
  */
 package de.tsl2.nano.h5.navigation;
 
-import de.tsl2.nano.incubation.vnet.workflow.ComparableMap;
+import de.tsl2.nano.vnet.workflow.ComparableMap;
 
 /**
  * helper for vnet connection descriptor.

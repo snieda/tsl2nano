@@ -27,11 +27,6 @@ import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.execution.AntRunner;
 import de.tsl2.nano.gp.EvolutionalAlgorithm;
-import de.tsl2.nano.incubation.vnet.NetCommunicator;
-import de.tsl2.nano.incubation.vnet.neuron.VNeuron;
-import de.tsl2.nano.incubation.vnet.routing.RoutingAStar;
-import de.tsl2.nano.incubation.vnet.workflow.Condition;
-import de.tsl2.nano.incubation.vnet.workflow.VActivity;
 import de.tsl2.nano.terminal.AsciiImage;
 import de.tsl2.nano.terminal.IItem;
 import de.tsl2.nano.terminal.SIShell;
@@ -51,6 +46,11 @@ import de.tsl2.nano.terminal.item.selector.Sequence;
 import de.tsl2.nano.terminal.item.selector.XPathSelector;
 import de.tsl2.nano.util.PrintUtil;
 import de.tsl2.nano.util.XmlGenUtil;
+import de.tsl2.nano.vnet.NetCommunicator;
+import de.tsl2.nano.vnet.neuron.VNeuron;
+import de.tsl2.nano.vnet.routing.RoutingAStar;
+import de.tsl2.nano.vnet.workflow.Condition;
+import de.tsl2.nano.vnet.workflow.VActivity;
 
 public class TerminalTest implements ENVTestPreparation {
 
