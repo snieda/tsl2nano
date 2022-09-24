@@ -42,7 +42,7 @@ import de.tsl2.nano.core.util.ListWrapper;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.incubation.graph.SVGChart;
+import de.tsl2.nano.graph.SVGChart;
 import de.tsl2.nano.service.util.ServiceUtil;
 
 /**

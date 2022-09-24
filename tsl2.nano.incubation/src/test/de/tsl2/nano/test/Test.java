@@ -1,4 +1,4 @@
-package de.tsl2.nano.incubation.test;
+package de.tsl2.nano.test;
 
 import de.tsl2.nano.agent.AttachAgent;
 

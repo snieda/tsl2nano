@@ -10,7 +10,7 @@ import de.tsl2.nano.agent.AttachAgent;
 import de.tsl2.nano.autotest.creator.AutoFunctionTest;
 import de.tsl2.nano.autotest.creator.CurrentStatePreservationTest;
 import de.tsl2.nano.autotest.creator.InitAllAutoTests;
-import de.tsl2.nano.incubation.graph.SVGChart;
+import de.tsl2.nano.graph.SVGChart;
 
 @RunWith(Suite.class)
 @SuiteClasses({InitAllAutoTests.class, AutoFunctionTest.class, CurrentStatePreservationTest.class})

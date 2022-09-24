@@ -5,7 +5,7 @@ Created-By: Thomas Schneider
 Application-Name: SI-Shell
 Permissions: all-permissions
 Main-Class: de.tsl2.nano.core.AppLoader
-Main-Arguments: de.tsl2.nano.incubation.terminal.SIShell
+Main-Arguments: de.tsl2.nano.terminal.SIShell
 Class-Path: tsl2.nano.core-2.4.11.jar
  tsl2.nano.common-2.4.11.jar 
  tsl2.nano.serviceaccess-2.4.11.jar

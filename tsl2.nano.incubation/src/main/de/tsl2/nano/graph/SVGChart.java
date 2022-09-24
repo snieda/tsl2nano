@@ -1,4 +1,4 @@
-package de.tsl2.nano.incubation.graph;
+package de.tsl2.nano.graph;
 
 import java.io.BufferedInputStream;
 import java.io.FileNotFoundException;

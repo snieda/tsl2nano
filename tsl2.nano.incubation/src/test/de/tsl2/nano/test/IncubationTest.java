@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2012, all rights reserved
  */
-package de.tsl2.nano.incubation.test;
+package de.tsl2.nano.test;
 
 import static junit.framework.Assert.assertEquals;
 
@@ -31,7 +31,7 @@ import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.incubation.graph.SVGChart;
+import de.tsl2.nano.graph.SVGChart;
 import de.tsl2.nano.util.XmlGenUtil;
 
 /**
