@@ -179,13 +179,13 @@
             </argNames>
          </action>
          <foreach name="sequential echo command" multiple="false" sequential="false">
-            <doAction class="de.tsl2.nano.incubation.terminal.item.Command" name="sequential echo command">
+            <doAction class="de.tsl2.nano.terminal.item.Command" name="sequential echo command">
                <mainClass>de.tsl2.nano.core.execution.SystemUtil</mainClass>
                <method>executeAndGetOutput</method>
                <argNames length="0"/>
                <cmd>echo</cmd>
             </doAction>
-            <sequence class="de.tsl2.nano.incubation.terminal.item.selector.XPathSelector" name="xpathselector" multiple="false" sequential="false">
+            <sequence class="de.tsl2.nano.terminal.item.selector.XPathSelector" name="xpathselector" multiple="false" sequential="false">
                <xml>bin/sishell.xml</xml>
                <xpath>//@name</xpath>
             </sequence>
@@ -455,7 +455,7 @@
             </argNames>
          </action>
          <mainaction name="Imageviewer">
-            <mainClass>de.tsl2.nano.incubation.terminal.AsciiImage</mainClass>
+            <mainClass>de.tsl2.nano.terminal.AsciiImage</mainClass>
             <method>main</method>
             <argNames length="4">
                <string>file</string>

@@ -9,8 +9,8 @@ import org.junit.runners.Suite.SuiteClasses;
 import de.tsl2.nano.autotest.creator.AutoFunctionTest;
 import de.tsl2.nano.autotest.creator.CurrentStatePreservationTest;
 import de.tsl2.nano.autotest.creator.InitAllAutoTests;
-import de.tsl2.nano.incubation.platform.PlatformManagement;
-import de.tsl2.nano.incubation.terminal.SIShell;
+import de.tsl2.nano.platform.PlatformManagement;
+import de.tsl2.nano.terminal.SIShell;
 
 @RunWith(Suite.class)
 @SuiteClasses({InitAllAutoTests.class, AutoFunctionTest.class, CurrentStatePreservationTest.class})

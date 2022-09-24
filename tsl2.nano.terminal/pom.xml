@@ -67,7 +67,7 @@
 						</manifest>
 						<manifestEntries>
 							<Created-By>Thomas Schneider</Created-By>
-							<Main-Arguments>de.tsl2.nano.incubation.terminal.SIShell</Main-Arguments>
+							<Main-Arguments>de.tsl2.nano.terminal.SIShell</Main-Arguments>
 							<Application-Name>SI-Shell</Application-Name>
 							<Application-Source>${application.source}</Application-Source>
 							<Application-redirect>/download</Application-redirect>
