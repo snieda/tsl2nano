@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2014, all rights reserved
  */
-package de.tsl2.nano.incubation.repeat;
+package de.tsl2.nano.repeat;
 
 /**
  * simple macro manager definition

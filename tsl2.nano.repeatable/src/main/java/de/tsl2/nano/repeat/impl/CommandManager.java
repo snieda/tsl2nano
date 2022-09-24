@@ -7,14 +7,14 @@
  * 
  * Copyright: (c) Thomas Schneider 2014, all rights reserved
  */
-package de.tsl2.nano.incubation.repeat.impl;
+package de.tsl2.nano.repeat.impl;
 
 import java.util.Deque;
 import java.util.concurrent.LinkedBlockingDeque;
 
-import de.tsl2.nano.incubation.repeat.IChange;
-import de.tsl2.nano.incubation.repeat.ICommand;
-import de.tsl2.nano.incubation.repeat.ICommandManager;
+import de.tsl2.nano.repeat.IChange;
+import de.tsl2.nano.repeat.ICommand;
+import de.tsl2.nano.repeat.ICommandManager;
 
 /**
  * simple implementation of undo/redo and macro mechanism. you have to implement one simple method

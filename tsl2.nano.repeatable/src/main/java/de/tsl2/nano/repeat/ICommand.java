@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2014, all rights reserved
  */
-package de.tsl2.nano.incubation.repeat;
+package de.tsl2.nano.repeat;
 
 /**
  * command holding it's context and optional changes done by execution - to be undo-able or to be used by macros.

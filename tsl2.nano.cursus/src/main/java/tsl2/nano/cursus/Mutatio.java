@@ -3,7 +3,7 @@ package tsl2.nano.cursus;
 import java.io.Serializable;
 
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.incubation.repeat.IChange;
+import de.tsl2.nano.repeat.IChange;
 
 /**
  * describes the change of an item/res from an old to a new value

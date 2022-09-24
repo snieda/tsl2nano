@@ -14,8 +14,8 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.messaging.EventController;
-import de.tsl2.nano.incubation.repeat.ICommand;
-import de.tsl2.nano.incubation.repeat.impl.CommandManager;
+import de.tsl2.nano.repeat.ICommand;
+import de.tsl2.nano.repeat.impl.CommandManager;
 import tsl2.nano.cursus.IConsilium.Status;
 /**
  * Change Process for Entities using Cursus. It's final to secure the use of IConsilium.refreshSeal(Processor)

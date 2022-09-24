@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2014, all rights reserved
  */
-package de.tsl2.nano.incubation.repeat;
+package de.tsl2.nano.repeat;
 
 /**
  * any change to be done on the item. if the item is null, the complete item will change from 'old' to 'new'.

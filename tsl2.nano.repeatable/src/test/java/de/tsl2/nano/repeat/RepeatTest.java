@@ -1,4 +1,4 @@
-package de.tsl2.nano.incubation.repeat;
+package de.tsl2.nano.repeat;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -15,9 +15,11 @@ import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.incubation.repeat.impl.AChange;
-import de.tsl2.nano.incubation.repeat.impl.ACommand;
-import de.tsl2.nano.incubation.repeat.impl.CommandManager;
+import de.tsl2.nano.repeat.IChange;
+import de.tsl2.nano.repeat.ICommand;
+import de.tsl2.nano.repeat.impl.AChange;
+import de.tsl2.nano.repeat.impl.ACommand;
+import de.tsl2.nano.repeat.impl.CommandManager;
 
 public class RepeatTest {
 

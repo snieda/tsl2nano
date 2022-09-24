@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2014, all rights reserved
  */
-package de.tsl2.nano.incubation.repeat;
+package de.tsl2.nano.repeat;
 
 /**
  * all you need for undo/redo and macros. this generic solution allows to write a small framework to be enhanced by an

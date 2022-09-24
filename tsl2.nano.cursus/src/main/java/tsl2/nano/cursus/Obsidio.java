@@ -9,8 +9,8 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.incubation.repeat.IChange;
-import de.tsl2.nano.incubation.repeat.ICommand;
+import de.tsl2.nano.repeat.IChange;
+import de.tsl2.nano.repeat.ICommand;
 
 /**
  * Defines blocker to block a consilium in a special timespan

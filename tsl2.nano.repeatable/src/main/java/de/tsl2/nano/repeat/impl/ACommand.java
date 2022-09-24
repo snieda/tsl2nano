@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2014, all rights reserved
  */
-package de.tsl2.nano.incubation.repeat.impl;
+package de.tsl2.nano.repeat.impl;
 
 import java.io.Serializable;
 
@@ -16,8 +16,8 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.incubation.repeat.IChange;
-import de.tsl2.nano.incubation.repeat.ICommand;
+import de.tsl2.nano.repeat.IChange;
+import de.tsl2.nano.repeat.ICommand;
 
 /**
  * simple command implementation to be used by a command manager

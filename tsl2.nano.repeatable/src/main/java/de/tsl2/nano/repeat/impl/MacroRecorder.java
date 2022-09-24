@@ -1,4 +1,4 @@
-package de.tsl2.nano.incubation.repeat.impl;
+package de.tsl2.nano.repeat.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.incubation.repeat.ICommand;
-import de.tsl2.nano.incubation.repeat.IMacroManager;
+import de.tsl2.nano.repeat.ICommand;
+import de.tsl2.nano.repeat.IMacroManager;
 
 /**
  * Simple implementation of {@link IMacroManager}

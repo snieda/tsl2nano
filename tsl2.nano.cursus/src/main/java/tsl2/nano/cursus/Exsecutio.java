@@ -7,8 +7,8 @@ import java.util.List;
 import de.tsl2.nano.bean.PReference;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.incubation.repeat.IChange;
-import de.tsl2.nano.incubation.repeat.ICommand;
+import de.tsl2.nano.repeat.IChange;
+import de.tsl2.nano.repeat.ICommand;
 import tsl2.nano.cursus.effectus.Effectree;
 import tsl2.nano.cursus.effectus.Effectus;
 

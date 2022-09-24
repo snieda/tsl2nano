@@ -3,7 +3,7 @@ package tsl2.nano.cursus;
 import java.util.Date;
 import java.util.Set;
 
-import de.tsl2.nano.incubation.repeat.ICommand;
+import de.tsl2.nano.repeat.ICommand;
 import tsl2.nano.cursus.Processor.Id;
 
 /**

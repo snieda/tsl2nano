@@ -10,7 +10,7 @@ import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.incubation.repeat.ICommand;
+import de.tsl2.nano.repeat.ICommand;
 import tsl2.nano.cursus.Processor.Id;
 
 public class Consilium implements IConsilium, Comparable<Consilium>, Serializable, Cloneable {
