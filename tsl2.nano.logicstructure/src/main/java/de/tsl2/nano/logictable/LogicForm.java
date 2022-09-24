@@ -15,7 +15,7 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.CollectionUtil;
 import de.tsl2.nano.core.util.FormatUtil;
 import de.tsl2.nano.execution.IPRunnable;
-import de.tsl2.nano.incubation.specification.Pool;
+import de.tsl2.nano.specification.Pool;
 
 /**
  * Adds direct cell formatting to the {@link LogicTable}.

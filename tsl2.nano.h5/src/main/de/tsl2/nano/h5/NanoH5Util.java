@@ -24,9 +24,9 @@ import de.tsl2.nano.h5.collector.QueryResult;
 import de.tsl2.nano.h5.collector.Statistic;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
 import de.tsl2.nano.h5.expression.RuleExpression;
-import de.tsl2.nano.incubation.specification.Pool;
-import de.tsl2.nano.incubation.specification.SpecificationExchange;
-import de.tsl2.nano.incubation.specification.actions.Action;
+import de.tsl2.nano.specification.Pool;
+import de.tsl2.nano.specification.SpecificationExchange;
+import de.tsl2.nano.specification.actions.Action;
 
 /**
  * convenience class to create and configure bean types and their attributes.

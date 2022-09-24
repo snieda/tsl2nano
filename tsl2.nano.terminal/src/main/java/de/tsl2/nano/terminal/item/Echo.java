@@ -11,7 +11,7 @@ import de.tsl2.nano.core.util.StringUtil;
  * @author Tom, Thomas Schneider
  * @version $Revision$ 
  */
-public class Echo<T> extends de.tsl2.nano.incubation.specification.actions.Action<T> {
+public class Echo<T> extends de.tsl2.nano.specification.actions.Action<T> {
 
     public Echo() {
         super("echo-action", Echo.class, "nothing", new LinkedHashMap());

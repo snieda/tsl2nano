@@ -3,9 +3,8 @@ package de.tsl2.nano.h5;
 import static de.tsl2.nano.h5.NanoH5Util.LOG;
 import static de.tsl2.nano.h5.NanoH5Util.addListener;
 import static de.tsl2.nano.h5.NanoH5Util.addVirtualAttribute;
+import static de.tsl2.nano.specification.SpecificationExchange.Change.*;
 import static de.tsl2.nano.h5.NanoH5Util.*;
-import static de.tsl2.nano.incubation.specification.SpecificationExchange.Change.addaction;
-import static de.tsl2.nano.incubation.specification.SpecificationExchange.Change.*;
 
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -27,9 +26,9 @@ import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.h5.collector.CSheet;
-import de.tsl2.nano.incubation.specification.Pool;
-import de.tsl2.nano.incubation.specification.SpecificationExchange;
-import de.tsl2.nano.incubation.specification.rules.RuledEnabler;
+import de.tsl2.nano.specification.Pool;
+import de.tsl2.nano.specification.SpecificationExchange;
+import de.tsl2.nano.specification.rules.RuledEnabler;
 import de.tsl2.nano.util.FilePath;
 
 public class SpecificationH5Exchange extends SpecificationExchange {

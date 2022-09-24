@@ -41,11 +41,11 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.h5.Html5Presentable;
-import de.tsl2.nano.incubation.specification.Pool;
-import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.logictable.ICellVisitor;
 import de.tsl2.nano.logictable.LogicForm;
 import de.tsl2.nano.logictable.LogicTable;
+import de.tsl2.nano.specification.Pool;
+import de.tsl2.nano.specification.rules.Rule;
 
 /**
  * Provides calculation sheets as tables with columns and rows. each cell is owned by an {@link MapValue} as BeanValue.

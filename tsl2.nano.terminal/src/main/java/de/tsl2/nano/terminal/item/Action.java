@@ -121,7 +121,7 @@ public class Action<T> extends AItem<T> {
             Set<Method> methods = PrivateAccessor.findMethod(mainClass, method, null, cls);
             //if nothing found, throw a nosuchmethod exception
             Method m = methods.size() > 0 ? methods.iterator().next() : getMainClass().getMethod(method, cls);
-            runner = new de.tsl2.nano.incubation.specification.actions.Action(m);
+            runner = new de.tsl2.nano.specification.actions.Action(m);
         } catch (Exception e) {
             ManagedException.forward(e);
         }

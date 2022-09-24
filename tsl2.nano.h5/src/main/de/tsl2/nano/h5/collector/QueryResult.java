@@ -34,7 +34,7 @@ import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.h5.expression.Query;
-import de.tsl2.nano.incubation.specification.Pool;
+import de.tsl2.nano.specification.Pool;
 
 /**
  * Special {@link BeanCollector} to show the result of an SQL or JPAQL Query gotten by a defined query-name in a

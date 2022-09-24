@@ -15,7 +15,7 @@ import java.util.Map;
 
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.execution.IPRunnable;
-import de.tsl2.nano.incubation.specification.Pool;
+import de.tsl2.nano.specification.Pool;
 
 /**
  * Usable as attribute getting it's value through a given sql-query.

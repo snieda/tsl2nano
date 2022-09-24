@@ -27,9 +27,9 @@ import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.incubation.specification.ParType;
-import de.tsl2.nano.incubation.specification.Pool;
-import de.tsl2.nano.incubation.specification.actions.Action;
+import de.tsl2.nano.specification.ParType;
+import de.tsl2.nano.specification.Pool;
+import de.tsl2.nano.specification.actions.Action;
 
 /**
  * action defined in action pool

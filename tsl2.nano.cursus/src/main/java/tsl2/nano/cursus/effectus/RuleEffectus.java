@@ -2,7 +2,7 @@ package tsl2.nano.cursus.effectus;
 
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.core.ENV;
-import de.tsl2.nano.incubation.specification.Pool;
+import de.tsl2.nano.specification.Pool;
 import tsl2.nano.cursus.Res;
 
 public class RuleEffectus<O, V> extends Effectus<O, V> {

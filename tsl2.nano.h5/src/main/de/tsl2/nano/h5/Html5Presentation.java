@@ -118,12 +118,12 @@ import de.tsl2.nano.h5.plugin.IDOMDecorator;
 import de.tsl2.nano.h5.websocket.WSEvent;
 import de.tsl2.nano.h5.websocket.WebSocketRuleDependencyListener;
 import de.tsl2.nano.h5.websocket.dialog.WSDialog;
-import de.tsl2.nano.incubation.specification.Pool;
-import de.tsl2.nano.incubation.specification.rules.RuleDependencyListener;
 import de.tsl2.nano.persistence.DatabaseTool;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.plugin.Plugins;
 import de.tsl2.nano.script.ScriptTool;
+import de.tsl2.nano.specification.Pool;
+import de.tsl2.nano.specification.rules.RuleDependencyListener;
 
 /**
  * is able to present a bean as an html page. main method is {@link #build(Element, String)}.

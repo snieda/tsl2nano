@@ -54,10 +54,10 @@ import de.tsl2.nano.h5.collector.Controller;
 import de.tsl2.nano.h5.collector.Increaser;
 import de.tsl2.nano.h5.expression.Query;
 import de.tsl2.nano.h5.expression.WebClient;
-import de.tsl2.nano.incubation.specification.Pool;
-import de.tsl2.nano.incubation.specification.actions.Action;
-import de.tsl2.nano.incubation.specification.rules.Rule;
-import de.tsl2.nano.incubation.specification.rules.RuleScript;
+import de.tsl2.nano.specification.Pool;
+import de.tsl2.nano.specification.actions.Action;
+import de.tsl2.nano.specification.rules.Rule;
+import de.tsl2.nano.specification.rules.RuleScript;
 
 /**
  * wrapper class to handle presentation of a bean-definition. at a time, only one BeanConfigurator is active. this

@@ -55,11 +55,11 @@ import de.tsl2.nano.h5.navigation.Workflow;
 import de.tsl2.nano.h5.websocket.WSEvent;
 import de.tsl2.nano.h5.websocket.WebSocketDependencyListener;
 import de.tsl2.nano.h5.websocket.WebSocketRuleDependencyListener;
-import de.tsl2.nano.incubation.specification.ParType;
-import de.tsl2.nano.incubation.specification.actions.Action;
-import de.tsl2.nano.incubation.specification.actions.ActionPool;
-import de.tsl2.nano.incubation.specification.rules.Rule;
-import de.tsl2.nano.incubation.specification.rules.RulePool;
+import de.tsl2.nano.specification.ParType;
+import de.tsl2.nano.specification.actions.Action;
+import de.tsl2.nano.specification.actions.ActionPool;
+import de.tsl2.nano.specification.rules.Rule;
+import de.tsl2.nano.specification.rules.RulePool;
 
 /**
  * Example implementations for Nano.h5

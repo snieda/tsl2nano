@@ -12,7 +12,7 @@ package de.tsl2.nano.terminal.item.selector;
 import java.util.List;
 import java.util.Map;
 
-import de.tsl2.nano.incubation.specification.actions.Action;
+import de.tsl2.nano.specification.actions.Action;
 
 /**
  * Selector starting an action to evaluate the selectable elements

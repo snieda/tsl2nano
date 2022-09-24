@@ -39,10 +39,10 @@ import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.RuleCover;
-import de.tsl2.nano.incubation.specification.Pool;
-import de.tsl2.nano.incubation.specification.actions.Action;
-import de.tsl2.nano.incubation.specification.rules.Rule;
-import de.tsl2.nano.incubation.specification.rules.RuleScript;
+import de.tsl2.nano.specification.Pool;
+import de.tsl2.nano.specification.actions.Action;
+import de.tsl2.nano.specification.rules.Rule;
+import de.tsl2.nano.specification.rules.RuleScript;
 
 /**
  * Provides a specific set of Attribute members to configure.

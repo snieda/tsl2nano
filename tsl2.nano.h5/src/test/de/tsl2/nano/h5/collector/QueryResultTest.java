@@ -21,7 +21,7 @@ import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.h5.expression.Query;
-import de.tsl2.nano.incubation.specification.Pool;
+import de.tsl2.nano.specification.Pool;
 
 @net.jcip.annotations.NotThreadSafe
 public class QueryResultTest implements ENVTestPreparation {

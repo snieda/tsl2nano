@@ -18,11 +18,11 @@ import java.util.Set;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.IPRunnable;
-import de.tsl2.nano.incubation.specification.Pool;
-import de.tsl2.nano.incubation.specification.rules.AbstractRule;
-import de.tsl2.nano.incubation.specification.rules.Rule;
-import de.tsl2.nano.incubation.specification.rules.RuleDecisionTable;
-import de.tsl2.nano.incubation.specification.rules.RuleScript;
+import de.tsl2.nano.specification.Pool;
+import de.tsl2.nano.specification.rules.AbstractRule;
+import de.tsl2.nano.specification.rules.Rule;
+import de.tsl2.nano.specification.rules.RuleDecisionTable;
+import de.tsl2.nano.specification.rules.RuleScript;
 
 /**
  * Attribute providing the calculation of a {@link Rule}. This attribute can be connected to a 'real' bean-attribute to

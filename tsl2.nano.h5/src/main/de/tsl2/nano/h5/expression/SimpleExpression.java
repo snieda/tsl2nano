@@ -13,7 +13,7 @@ import java.util.Map;
 
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.execution.IPRunnable;
-import de.tsl2.nano.incubation.specification.AbstractRunnable;
+import de.tsl2.nano.specification.AbstractRunnable;
 
 /**
  * simple runnable expression. useful to show an url in an iframe. all context properties are filled into expression if

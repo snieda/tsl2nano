@@ -19,12 +19,12 @@ import de.tsl2.nano.collection.TableList;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.incubation.specification.ParType;
-import de.tsl2.nano.incubation.specification.Pool;
-import de.tsl2.nano.incubation.specification.actions.Action;
-import de.tsl2.nano.incubation.specification.rules.Rule;
-import de.tsl2.nano.incubation.specification.rules.RuleDecisionTable;
-import de.tsl2.nano.incubation.specification.rules.RuleScript;
+import de.tsl2.nano.specification.ParType;
+import de.tsl2.nano.specification.Pool;
+import de.tsl2.nano.specification.actions.Action;
+import de.tsl2.nano.specification.rules.Rule;
+import de.tsl2.nano.specification.rules.RuleDecisionTable;
+import de.tsl2.nano.specification.rules.RuleScript;
 
 public class LogicTableTest implements ENVTestPreparation {
 

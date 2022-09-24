@@ -32,7 +32,7 @@ import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.historize.Volatile;
-import de.tsl2.nano.incubation.specification.AbstractRunnable;
+import de.tsl2.nano.specification.AbstractRunnable;
 
 /**
  * 

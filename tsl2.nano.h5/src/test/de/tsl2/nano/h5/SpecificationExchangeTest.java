@@ -1,6 +1,6 @@
 package de.tsl2.nano.h5;
 
-import static de.tsl2.nano.incubation.specification.SpecificationExchange.EXT_CSV;
+import static de.tsl2.nano.specification.SpecificationExchange.EXT_CSV;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -31,8 +31,8 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.incubation.specification.Pool;
-import de.tsl2.nano.incubation.specification.SpecificationExchange;
+import de.tsl2.nano.specification.Pool;
+import de.tsl2.nano.specification.SpecificationExchange;
 import de.tsl2.nano.util.FilePath;
 
 public class SpecificationExchangeTest implements ENVTestPreparation {

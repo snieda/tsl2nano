@@ -19,8 +19,8 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.IPRunnable;
-import de.tsl2.nano.incubation.specification.AbstractRunnable;
-import de.tsl2.nano.incubation.specification.Pool;
+import de.tsl2.nano.specification.AbstractRunnable;
+import de.tsl2.nano.specification.Pool;
 import de.tsl2.nano.util.operation.NumericOperator;
 
 /**

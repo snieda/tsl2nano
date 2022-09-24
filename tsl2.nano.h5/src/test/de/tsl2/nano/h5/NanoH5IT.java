@@ -23,7 +23,7 @@ import org.junit.Test;
 
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.incubation.specification.rules.ActionScript;
+import de.tsl2.nano.specification.rules.ActionScript;
 
 /**
  * 

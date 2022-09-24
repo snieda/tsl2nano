@@ -24,9 +24,9 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.incubation.specification.rules.ActionScript;
 import de.tsl2.nano.persistence.DatabaseTool;
 import de.tsl2.nano.persistence.Persistence;
+import de.tsl2.nano.specification.rules.ActionScript;
 
 /**
  * 

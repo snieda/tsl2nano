@@ -73,7 +73,7 @@ public class MainAction<T> extends Action<T> {
         method = StringUtil.insertProperties(method, context);
         if (runner == null) {
             try {
-                runner = new de.tsl2.nano.incubation.specification.actions.Action(getMainClass().getMethod(method,
+                runner = new de.tsl2.nano.specification.actions.Action(getMainClass().getMethod(method,
                     new Class[] { String[].class }));
             } catch (Exception e) {
                 ManagedException.forward(e);

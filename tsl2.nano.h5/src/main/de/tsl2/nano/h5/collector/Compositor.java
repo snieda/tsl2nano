@@ -40,7 +40,7 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.execution.IPRunnable;
-import de.tsl2.nano.incubation.specification.Pool;
+import de.tsl2.nano.specification.Pool;
 
 /**
  * The Compositor is a fast- or one-click collector using a base-type to create composition instances from. It's a kind

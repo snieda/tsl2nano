@@ -29,9 +29,9 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.IPRunnable;
-import de.tsl2.nano.incubation.specification.AbstractRunnable;
-import de.tsl2.nano.incubation.specification.IPrefixed;
 import de.tsl2.nano.service.util.ServiceUtil;
+import de.tsl2.nano.specification.AbstractRunnable;
+import de.tsl2.nano.specification.IPrefixed;
 
 /**
  * class to execute sql statements. not an inheritance of AbstractRunnable in cause of not having constraints in its

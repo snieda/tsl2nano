@@ -13,7 +13,7 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.incubation.specification.rules.RuleDependencyListener;
+import de.tsl2.nano.specification.rules.RuleDependencyListener;
 
 /**
  * Attribute dependency listener using websocket to refresh it's value on client-side. the real attribute value wont
