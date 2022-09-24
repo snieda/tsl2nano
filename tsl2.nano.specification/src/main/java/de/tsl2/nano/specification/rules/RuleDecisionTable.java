@@ -21,10 +21,10 @@ import de.tsl2.nano.core.util.CollectionUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.incubation.tree.STree;
-import de.tsl2.nano.incubation.tree.Tree;
 import de.tsl2.nano.specification.ParType;
 import de.tsl2.nano.specification.Pool;
+import de.tsl2.nano.tree.STree;
+import de.tsl2.nano.tree.Tree;
 
 /**
  * Reads a CSV-file containing a decision table and creates rule conditions. enables creating (business) rules on

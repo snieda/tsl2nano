@@ -7,9 +7,9 @@ import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.IPredicate;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.incubation.tree.STree;
-import de.tsl2.nano.incubation.tree.Tree;
 import de.tsl2.nano.repeat.IChange;
+import de.tsl2.nano.tree.STree;
+import de.tsl2.nano.tree.Tree;
 import tsl2.nano.cursus.Grex;
 import tsl2.nano.cursus.Res;
 

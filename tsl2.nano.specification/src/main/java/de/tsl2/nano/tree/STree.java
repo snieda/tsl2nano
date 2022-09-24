@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2015, all rights reserved
  */
-package de.tsl2.nano.incubation.tree;
+package de.tsl2.nano.tree;
 
 import java.util.Map;
 
