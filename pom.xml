@@ -21,6 +21,9 @@
 	* aggregate coverage output: "mvn jacoco:report-aggregate"
 	* increase version number: "mvn release:update-versions -DautoVersionSubmodules=true"
 	* batch-increase version : "mvn - -batch-mode release:update-versions -DdevelopmentVersion=1.2.0-SNAPSHOT"
+    * show all possible newer dependency versions: versions:display-dependency-updates
+    * remove the SNAPSHOTS in a release: mvn versions:use-releases
+    * use only newest RELEASES: mvn versions:use-latest-releases
 	* to deploy a new snapshot-version: "mvn deploy"
 	* to deploy a release version, install gnupg or gpg4win and start:
 	*   (OPTIONAL) git config - -global gpg.program "c:/Program Files (x86)/GNU/GnuPG/gpg.exe"
@@ -42,9 +45,9 @@
 		<module.parent>${project.basedir}</module.parent>
         <timestamp>${maven.build.timestamp}</timestamp>
 		<!--workaround for automatic gitlab-ci, there ci is not starting properties-maven-plugin -->
-		<version.compiler.plugin>3.8.1</version.compiler.plugin>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
+		<version.compiler.plugin>3.10.1</version.compiler.plugin>
+		<!-- <maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target> -->
 		<maven.compiler.debug>true</maven.compiler.debug>
 		
         <maven.build.timestamp.format>dd-MM-yyyy HH:mm</maven.build.timestamp.format>
@@ -149,6 +152,19 @@
         </pluginManagement>
         <plugins>
 			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${version.compiler.plugin}</version>
+				<configuration>
+					<source>${maven.compiler.source}</source>
+					<target>${maven.compiler.target}</target>
+					<encoding>${project.build.sourceEncoding}</encoding>
+                    <compilerArgs>
+                        <!-- <arg>-verbose</arg> -->
+                        <arg>--add-exports</arg><arg>java.base/sun.security.x509=ALL-UNNAMED</arg>
+                    </compilerArgs>                  
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>properties-maven-plugin</artifactId>
 				<version>1.0.0</version>
@@ -220,7 +236,7 @@
  			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.5</version>
+				<version>0.8.8</version>
 				<!-- TODO: the configuration is duplicated in the reporting section and h5... -->
 				<configuration>
 					<skip>${skipTests}</skip>
@@ -450,7 +466,7 @@
    			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.5</version>
+				<version>0.8.8</version>
 				<configuration>
 				<includes>
 					<include>de/tsl2/**/*.class</include>
@@ -468,15 +484,6 @@
 						</reports>
 					</reportSet>
 				</reportSets>
-			</plugin>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>${version.compiler.plugin}</version>
-				<configuration>
-					<source>${maven.compiler.source}</source>
-					<target>${maven.compiler.target}</target>
-					<encoding>${project.build.sourceEncoding}</encoding>
-				</configuration>
 			</plugin>
 		</plugins>
 	</reporting>

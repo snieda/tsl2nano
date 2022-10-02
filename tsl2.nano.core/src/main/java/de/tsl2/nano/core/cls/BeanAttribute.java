@@ -17,7 +17,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
+//import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Attribute;
@@ -631,7 +631,7 @@ public class BeanAttribute<T> implements IAttribute<T> {
     /**
      * Extension for {@link Serializable}
      */
-    @PostConstruct
+//    @javax.annotations.PostConstruct //not available any more (after jdk8)
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         //Method is not serializable, so we use informations to reconstruct it.
         in.defaultReadObject();

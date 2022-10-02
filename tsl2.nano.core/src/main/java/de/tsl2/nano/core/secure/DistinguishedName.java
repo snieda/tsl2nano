@@ -174,7 +174,7 @@ public class DistinguishedName {
         return (outputSimpleValuesOnly ? "" : "EMAILADDRESS=") + email;
     }
 
-    public X500Name toX500Name() {
+    public Object toX500Name() {
         try {
             return new X500Name(toString());
         } catch (IOException e) {

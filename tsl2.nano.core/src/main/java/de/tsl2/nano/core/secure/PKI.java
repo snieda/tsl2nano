@@ -184,7 +184,7 @@ public class PKI {
         info.set(X509CertInfo.ISSUER, owner);
         info.set(X509CertInfo.KEY, new CertificateX509Key(pair.getPublic()));
         info.set(X509CertInfo.VERSION, new CertificateVersion(CertificateVersion.V3));
-        AlgorithmId algo = new AlgorithmId(AlgorithmId.md5WithRSAEncryption_oid);
+        AlgorithmId algo = AlgorithmId.get("MD5withRSA");
         info.set(X509CertInfo.ALGORITHM_ID, new CertificateAlgorithmId(algo));
 
         // Sign the cert to identify the algorithm that's used.

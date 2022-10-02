@@ -257,8 +257,9 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
 
     private static void enableTrace() {
         instance().statesToLog = LOG_ALL;
-        Runtime.getRuntime().traceInstructions(true);
-        Runtime.getRuntime().traceMethodCalls(true);
+        // traceInstructinos was removed after jdk8
+//        Runtime.getRuntime().traceInstructions(true);
+//        Runtime.getRuntime().traceMethodCalls(true);
     }
 
     /**
