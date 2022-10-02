@@ -41,6 +41,7 @@ import de.tsl2.nano.core.log.LogFactory;
  * 
  * @author TS
  */
+// TODO: very old style -> encapsulate into a pool of formatters/wrappers/converters (read type->converter type from property file
 @SuppressWarnings({"rawtypes", "serial"})
 public class FormatUtil {
     private static final Log LOG = LogFactory.getLog(FormatUtil.class);

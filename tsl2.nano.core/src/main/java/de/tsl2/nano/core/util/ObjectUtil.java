@@ -329,6 +329,7 @@ public class ObjectUtil extends FieldUtil {
         return (T) new PrivateAccessor<T>(src).call("clone", null);
     }
 
+    // TODO: very old style -> encapsulate into a pool of formatters/wrappers/converters
     /**
      * sometimes the value is easily convertable to the desired type, like String-->File etc. respects primitives and
      * wrapperType {@link Class}.
