@@ -184,6 +184,7 @@ public class SystemUtil {
         String info =
             "  build : ${build.info}\n"
                 + "  args  : ${sun.java.command}\n"
+            	+ "  libs  : ${java.library.path}"
                 + "  dir   : ${user.dir}\n"
                 + "  time  : ${nano.tstamp}\n"
                 + "  user  : ${user.name}, home: ${user.home}\n"
@@ -191,9 +192,9 @@ public class SystemUtil {
                 + "  encode: ${file.encoding}\n"
                 + "  loader: ${main.context.classloader}\n"
                 + "  secure: ${security}\n"
-                + "  java  : ${java.vm.name}, ${java.runtime.version}, ${java.vm.vendor}\n"
+                + "  java  : ${java.vm.name}, ${java.runtime.version}, ${java.vm.vendor} ${java.version.date}\n"
                 + "  javhom: ${java.home}\n"
-                + "  complr: ${java.compiler}\n"
+                + "  complr: ${sun.management.compiler}\n"
                 + "  memory: ${memory}\n"
                 + "  discs : ${disc}\n"
                 + "  io.tmp: ${java.io.tmpdir}\n"
@@ -203,8 +204,8 @@ public class SystemUtil {
                 + "  net-ip: ${inetadress.myip} (host-name: ${inetadress.hostname})\n";
         Properties p = new Properties();
         p.putAll(System.getProperties());
-        if (System.getProperty("java.compiler") == null)
-            p.put("java.compiler", "unspecified");
+        if (System.getProperty("sun.management.compiler") == null)
+            p.put("sun.management.compiler", "unspecified");
         p.put("nano.tstamp", new Date());
         p.put("main.context.classloader", Util.getContextClassLoader());
 

@@ -35,9 +35,9 @@ import mockit.Mock;
 import mockit.MockUp;
 import mockit.Tested;
 import mockit.Verifications;
-import mockit.integration.junit4.JMockit;
+//import mockit.integration.junit4.JMockit;
 
-@RunWith(JMockit.class)
+//@RunWith(JMockit.class)
 public class EntityReplicationTest implements ENVTestPreparation {
 	@Injectable EntityManagerFactory entityManagerFactory;
 	@Injectable EntityManager em;

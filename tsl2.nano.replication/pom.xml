@@ -10,7 +10,6 @@
   <description>Provides Database/XML Replication through JPA</description>
 	<properties>
 		<module.parent>..</module.parent>
-		<jmockit.version>1.39</jmockit.version>
 		<!-- this argline normally is in surefire-configuration - but there it would create a collision with jacoco  -->
 		<argLine>${tsl2.argline.options} -javaagent:${settings.localRepository}/org/jmockit/jmockit/${jmockit.version}/jmockit-${jmockit.version}.jar</argLine>
 	</properties>
@@ -59,7 +58,7 @@
 		<dependency>
 			<groupId>org.simpleframework</groupId>
 			<artifactId>simple-xml</artifactId>
-			<version>2.7.1</version>
+			<version>${simple-xml.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.yaml</groupId>
@@ -80,7 +79,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.13.1</version>
+			<version>${junit4.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

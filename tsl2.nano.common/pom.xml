@@ -58,7 +58,6 @@
 		</plugins>
 	</build>
 	<dependencies>
-		<!-- https://mvnrepository.com/artifact/org.apache.xmlgraphics/fop -->
 		<dependency>
 			<groupId>org.apache.xmlgraphics</groupId>
 			<artifactId>fop</artifactId>
@@ -73,6 +72,11 @@
 					<groupId>org.apache.avalon.framework</groupId>
 					<artifactId>avalon-framework-impl</artifactId>
 				</exclusion>
+		<!-- since JDK14 inside JDK -->			
+		        <exclusion>
+		            <groupId>xml-apis</groupId>
+		            <artifactId>xml-apis</artifactId>
+		        </exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>

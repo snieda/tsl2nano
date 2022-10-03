@@ -54,6 +54,9 @@
 		<dependency.locations.enabled>false</dependency.locations.enabled>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 		<properties.quiet>false</properties.quiet>
+		<simple-xml.version>2.7.1</simple-xml.version>
+		<junit4.version>4.13.2</junit4.version>
+		<jmockit.version>1.49</jmockit.version>
     </properties>
 	<inceptionYear>2012</inceptionYear>
 	<licenses>
@@ -161,6 +164,7 @@
                     <compilerArgs>
                         <!-- <arg>-verbose</arg> -->
                         <arg>--add-exports</arg><arg>java.base/sun.security.x509=ALL-UNNAMED</arg>
+                        <arg>--add-exports</arg><arg>java.base/jdk.internal.module=ALL-UNNAMED</arg>
                     </compilerArgs>                  
 				</configuration>
 			</plugin>
@@ -171,7 +175,7 @@
 				<executions>
 					<execution>
 						<id>read-properties</id>
-						<phase>initialize</phase>
+						<phase>validate</phase>
 						<goals>
 							<goal>read-project-properties</goal>
 						</goals>
@@ -198,20 +202,14 @@
       			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.0.0-M5</version>
-				<executions>
-					<execution>
-						<id>junit</id>
-						<inherited>true</inherited>
-						<configuration>
-							<argLine>${surefire.argLine}</argLine>
-							<testFailureIgnore>${surefire.testFailureIgnore}</testFailureIgnore>				
-							<!-- <parallel>true</parallel> -->
-							<!-- <skipTests>true</skipTests>  -->
-							<!-- <workingDirectory>FORK_DIRECTORY_${surefire.forkNumber}</workingDirectory> -->
-							</configuration>
-					</execution>
-				</executions>
+				<version>3.0.0-M7</version>
+				<configuration>
+					<argLine>${surefire.argLine}</argLine>
+					<testFailureIgnore>${surefire.testFailureIgnore}</testFailureIgnore>				
+					<!-- <parallel>true</parallel> -->
+					<!-- <skipTests>true</skipTests>  -->
+					<!-- <workingDirectory>FORK_DIRECTORY_${surefire.forkNumber}</workingDirectory> -->
+					</configuration>
 			</plugin>
    			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

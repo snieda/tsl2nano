@@ -35,6 +35,26 @@
 			</resource>
 		</resources>
 		<plugins>
+            <plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.0.0-M7</version>
+				<executions>
+					<execution>
+						<id>junit</id>
+						<inherited>true</inherited>
+						<configuration>
+							<argLine>
+                                --add-export java.management/sun.management=ALL-UNNAMED
+                            </argLine>
+							<testFailureIgnore>${surefire.testFailureIgnore}</testFailureIgnore>				
+							<!-- <parallel>true</parallel> -->
+							<!-- <skipTests>true</skipTests>  -->
+							<!-- <workingDirectory>FORK_DIRECTORY_${surefire.forkNumber}</workingDirectory> -->
+							</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
@@ -72,6 +92,8 @@
 							<Application-Source>${application.source}</Application-Source>
 							<Application-redirect>/download</Application-redirect>
 							<Permissions>all-permissions</Permissions>
+                            <Add-Modules>ALL-SYSTEM</Add-Modules>
+                            <Add-Exports>java.management/sun.management</Add-Exports>
 						</manifestEntries>
 					</archive>
 				</configuration>

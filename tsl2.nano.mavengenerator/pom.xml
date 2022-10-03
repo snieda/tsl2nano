@@ -59,7 +59,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.13.1</version>
+      <version>${junit4.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -93,7 +93,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-plugin-plugin</artifactId>
-        <version>3.6.4</version>
         <configuration>
           <!-- <goalPrefix>maven-archetype-plugin</goalPrefix> -->
           <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
@@ -105,12 +104,12 @@
               <goal>descriptor</goal>
             </goals>
           </execution>
-          <execution>
+<!--          <execution> JDK15-mojo: descriptor and help are the same?
             <id>help-goal</id>
             <goals>
               <goal>helpmojo</goal>
             </goals>
-          </execution>
+          </execution> -->
         </executions>
       </plugin>
     </plugins>
@@ -125,7 +124,6 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-invoker-plugin</artifactId>
-            <version>3.3.0</version>
             <configuration>
               <debug>true</debug>
               <cloneProjectsTo>${project.build.directory}/tsl2</cloneProjectsTo>

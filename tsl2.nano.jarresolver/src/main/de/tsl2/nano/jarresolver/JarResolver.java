@@ -426,7 +426,7 @@ public class JarResolver {
         } else if (props.values().contains(dependency)) {
             return findPackageByArtifactId(dependency);
         } else {
-            return (pck = findGroupId(dependency)) != null ? pck + (!packageKey ? "/" : "") : null;
+            return (pck = findGroupAndArtifactID(dependency, false)) != null ? pck + (!pck.contains("/") && !packageKey ? "/" : "") : null;
         }
     }
 
@@ -437,6 +437,10 @@ public class JarResolver {
      * @return group id name or null
      */
     private String findGroupId(String artifactIdPart) {
+    	return findGroupAndArtifactID(artifactIdPart, true);
+    }
+    
+    private String findGroupAndArtifactID(String artifactIdPart, boolean groupIDOnly) {
         Collection<Object> packs = props.values();
         String a, pkg;
         for (Object p : packs) {
@@ -445,7 +449,7 @@ public class JarResolver {
                 pkg = findPackageByArtifactId(a);
                 if (pkg != null) {
                     if (a.contains("/")) {
-                        return StringUtil.substring(a, null, "/");
+                        return groupIDOnly ? StringUtil.substring(a, null, "/") : a;
                     } else {
                         return StringUtil.substring(pkg, PRE_PACKAGE, null);
                     }

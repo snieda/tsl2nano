@@ -116,15 +116,15 @@ public class Translator {
             words = words.substring(1, words.length()-1);
         String trans = translate(srcLang, destLang, words);
         //create the target properties
-        String[] t = trans.split("[,]\\s*");
+        String[] t = trans.split("[,\\s]+");
         Properties target = new Properties();
         int i = 0;
         String tos[];
         StringBuilder tt = new StringBuilder();
-        String key;
+        String value;
         for (Object k : origin.keySet()) {
-            key = (String) origin.get(k);
-            tos = /*CollectionUtil.concat(*/StringUtil.splitCamelCase(key)/*, StringUtil.splitWordBinding(key))*/;
+            value = (String) origin.get(k);
+            tos = /*CollectionUtil.concat(*/StringUtil.splitCamelCase(value)/*, StringUtil.splitWordBinding(key))*/;
             tt.setLength(0);
             //concat camelcase words...works only on same length
             for (int j = 0; j < tos.length; j++) {

@@ -14,8 +14,10 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Element;
@@ -213,8 +215,15 @@ public class DelegationHandler<T> implements IDelegationHandler<T>, Serializable
     public static final <T> T createProxy(DelegationHandler<T> invocationHandler) {
         LOG.debug("creating proxy for handler: " + invocationHandler);
         return (T) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
-            invocationHandler.getInterfaces(), invocationHandler);
+            removeSealedJDKClasses(invocationHandler.getInterfaces()), invocationHandler);
     }
+
+    /** new in jdk17: sealed interfaces/classes constraining the implementors */
+	private static Class<?>[] removeSealedJDKClasses(Class[] interfaces) {
+		return Arrays.stream(interfaces)
+		.filter(i-> !(i.isSealed() && (i.getName().startsWith("java.") || !i.getName().startsWith("sun."))))
+		.collect(Collectors.toSet()).toArray(new Class[0]);
+	}
     
     
 }

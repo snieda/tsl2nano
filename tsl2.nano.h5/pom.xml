@@ -228,6 +228,18 @@
 									<Application-Source>${application.source}</Application-Source>
 									<Application-redirect>/download</Application-redirect>
 									<Permissions>all-permissions</Permissions>
+                                    <Add-Modules>ALL-SYSTEM</Add-Modules>
+                                    <Add-Opens>
+                                        java.base/java.lang=ALL-UNNAMED
+                                        java.base/sun.reflect.annotation=ALL-UNNAMED
+                                        java.base/jdk.internal.module=ALL-UNNAMED
+                                        java.base/sun.security.x509=ALL-UNNAMED
+                                        java.base/java.xml=ALL-UNNAMED
+                                    </Add-Opens>
+                                    <Add-Exports>
+                                        java.base/sun.security.x509=ALL-UNNAMED
+                                        java.management/sun.management=ALL-UNNAMED
+                                    </Add-Exports>
 								</manifestEntries>
 							</archive>
 							<excludes>

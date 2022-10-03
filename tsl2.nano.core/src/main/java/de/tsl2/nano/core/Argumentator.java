@@ -15,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.jar.Attributes;
 
@@ -373,6 +374,24 @@ public class Argumentator {
         return RuntimeClassloader.readManifest();
     }
     
+	public static void addExportsFromManifest() {
+		addVMModuleFromManifest("Add-Exports", s -> jdk.internal.module.Modules.addExports(ModuleLayer.boot().findModule(s[0]).orElseThrow(), s[1]));
+	}
+//	public static void addOpensFromManifest() {
+//		addVMModuleFromManifest("Add-Opens", s -> jdk.internal.module.Modules.addOpens(ModuleLayer.boot().findModule(s[0]).orElseThrow(), s[1]));
+//	}
+	public static void addVMModuleFromManifest(String manifestKey, Consumer<String[]> vmModuleAction) {
+		String exports = readManifest().getValue(manifestKey);
+		if (exports != null) {
+			for (String moduleAndPackage : exports.split(" ")) {
+				String[] s = moduleAndPackage.trim().split("/");
+				if (s.length != 2)
+					continue;
+				vmModuleAction.accept(s);
+			}
+		}
+	}
+
     /**
      * 
      * @param prinStream
