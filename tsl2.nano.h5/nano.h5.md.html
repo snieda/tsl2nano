@@ -5994,8 +5994,20 @@ deploy:
 * [v] hsqldb: remove '-ifNotExists' from runServer.cmd, wrong extract on sql file (instead of anyway.sql : PUBLIC.sql)
 * [ ] Formtter refactoring to have a pool of formatters, read from configuration file
 * [ ] jdk17-compile: 
-    * [ ] add-exports X509 not working , 
+    * [v] add-exports X509 now working , 
     * [v] BeanAttribute: PostConstruct raus  , 
-    * [ ] instrumentation (link to jdk tools.jar)
-    * [ ] generator-maven-plugin (unsupported class version 61)
-    * [ ] service-access: javax.annotation does not exist
+    * [v] instrumentation (link to jdk tools.jar)
+    * [v] generator-maven-plugin (unsupported class version 61)
+    * [v] service-access: javax.annotation does not exist
+* [ ] jdk17 tests:
+    * [ ] possibly FileUtil.userDir() not working?
+    * [v] core: default year of date pattern changed (e.g.: from '0001' to '1') 
+    * [ ] core: surefire not working on @{argLine} with add-opens and add-exports
+    * [v] gp: no script engine availabe -> use org.openjdk.nashorn or org.graalvm.js 
+    * [v] common: WARNING: regexp pattern more restrictive (or simply wrong?)
+    * [ ] descriptor: BeanProxy not working
+    * [ ] replication: EntityReplicationTest works in eclipse but not in maven (ArrayIndexOutOfBounds)
+    * [ ] serviceaccess: ServiceAccessTest works in eclipse but not in maven (ArrayIndexOutOfBounds)
+    * [ ] terminal: surefire not working on @{argLine} with add-opens and add-exports
+    * [ ] thymeleaf: compile problems?
+    

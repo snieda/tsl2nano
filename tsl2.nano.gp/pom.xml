@@ -46,5 +46,24 @@
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
+        <!-- since JDK15 no ScriptEngine is included! -->
+        <!-- <dependency>
+            <groupId>org.graalvm.js</groupId>
+            <artifactId>js</artifactId>
+            <version>22.0.0</version>
+            <scope>test</scope>
+          </dependency>  
+          <dependency>
+            <groupId>org.graalvm.js</groupId>
+            <artifactId>js-scriptengine</artifactId>
+            <version>22.2.0</version>
+            <scope>test</scope>
+        </dependency> -->
+        <dependency>
+            <groupId>org.openjdk.nashorn</groupId>
+            <artifactId>nashorn-core</artifactId>
+            <version>15.4</version>
+            <scope>test</scope>
+        </dependency>
 	</dependencies>
 </project>

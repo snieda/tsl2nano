@@ -10,7 +10,7 @@
   <description>Provides Database/XML Replication through JPA</description>
 	<properties>
 		<module.parent>..</module.parent>
-		<jmockit.version>1.39</jmockit.version>
+		<jmockit.version>1.49</jmockit.version>
 		<!-- this argline normally is in surefire-configuration - but there it would create a collision with jacoco  -->
 		<argLine>${tsl2.argline.options} -javaagent:${settings.localRepository}/org/jmockit/jmockit/${jmockit.version}/jmockit-${jmockit.version}.jar</argLine>
 	</properties>

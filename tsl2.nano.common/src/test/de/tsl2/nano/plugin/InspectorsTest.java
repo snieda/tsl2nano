@@ -14,20 +14,20 @@ public class InspectorsTest {
         assertEquals("HALLOHALLO", Plugins.process(IInspectorTest.class).machWas("hallo"));
     }
 
-}
-
-interface IInspectorTest extends Plugin {
-    String machWas(String txt);
-}
-class InspectorImpl1Test implements IInspectorTest {
-    @Override
-    public String machWas(String txt) {
-        return txt.toUpperCase();
+    //changes to >JDK15: the classes+interface have to be public (and static to be constructable)
+    public interface IInspectorTest extends Plugin {
+        String machWas(String txt);
     }
-}
-class InspectorImpl2Test implements IInspectorTest {
-    @Override
-    public String machWas(String txt) {
-        return txt + txt;
+    public static class InspectorImpl1Test implements IInspectorTest {
+        @Override
+        public String machWas(String txt) {
+            return txt.toUpperCase();
+        }
+    }
+    public static class InspectorImpl2Test implements IInspectorTest {
+        @Override
+        public String machWas(String txt) {
+            return txt + txt;
+        }
     }
 }

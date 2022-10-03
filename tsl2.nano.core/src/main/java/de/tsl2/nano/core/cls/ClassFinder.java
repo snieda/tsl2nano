@@ -119,11 +119,11 @@ public class ClassFinder {
 	private ClassLoader addClasses(ClassLoader classLoader, Set<Class<?>> classes) {
 		try {
 			classes.addAll(
-				(Collection<? extends Class<?>>) new PrivateAccessor(classLoader).member("classes", Vector.class));
-			collectPackageClasses(classLoader, classes);
+				(Collection<? extends Class<?>>) new PrivateAccessor(classLoader).member("classes", ArrayList.class));
 		} catch(Exception ex) {
 			LOG.warn("cannot access specific private member 'classes' of classloader. this may result in problems on finding classes.");
 		}
+		collectPackageClasses(classLoader, classes);
 		return classLoader.getParent();
 	}
 	/** may be called by a java-agent using the instrumentation.getAllLoadedClass()  */
