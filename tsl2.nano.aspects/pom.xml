@@ -16,12 +16,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <aspectj.version>1.9.9.1</aspectj.version>
         <java.debug>-agentlib:jdwp=transport=dt_socket,address=localhost:8787,server=y,suspend=n</java.debug>
-        <aspectj.javaagent>-javaagent:"${settings.localRepository}"/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar</aspectj.javaagent>
+        <settings.localRepository>${user.home}/.m2/repository</settings.localRepository>
+        <aspectj.javaagent>-javaagent:${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar</aspectj.javaagent>
         <exec.args>${java.debug} ${aspectj.javaagent}</exec.args>
         <exec.mainClass>org.test.App</exec.mainClass>
         <exec.arguments></exec.arguments>
 		<!-- this argline normally is in surefire-configuration - but there it would create a collision with jacoco  -->
-        <argLine>${aspectj.javaagent} ${tsl2.argline.options}</argLine>
+        <argLine> ${surefire.argLine} ${aspectj.javaagent} ${tsl2.argline.options}</argLine>
     </properties>
     <dependencies>
         <dependency>

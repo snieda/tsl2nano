@@ -6005,9 +6005,10 @@ deploy:
     * [v] core: surefire not working on @{argLine} with add-opens and add-exports -- argLine was in executions/execution/configuration
     * [ ] aspects: tests not working - result ist always null
     * [v] gp: no script engine availabe -> use org.openjdk.nashorn or org.graalvm.js 
-    * [v] common: regexp pattern more restrictive (or simply wrong?)
+    * [v] common: regexp pattern more restrictive (or simply wrong?) pom.xml: exclusion of 'xml-apis'
     * [ ] descriptor: BeanProxy not working
     * [ ] replication: EntityReplicationTest works in eclipse but not in maven (ArrayIndexOutOfBounds)
     * [v] serviceaccess: ServiceAccessTest works in eclipse but not in maven (ArrayIndexOutOfBounds)
     * [v] terminal: surefire not working on @{argLine} with add-opens and add-exports
     * [v] thymeleaf: compile problems?
+    * [ ] check h5 tests with *surefire.testFailureIgnore*=false

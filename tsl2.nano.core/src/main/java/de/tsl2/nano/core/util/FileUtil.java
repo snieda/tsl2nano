@@ -672,7 +672,16 @@ public class FileUtil {
     }
 
     public static File userDirFile(String file) {
-		return new File(file).getAbsoluteFile();
+        //the behaviour changed since JDK11 (see https://bugs.openjdk.org/browse/JDK-8202127)
+        //setting the system property for 'user.dir' does not work anymore to change the absolute path
+//		return new File(file).getAbsoluteFile();
+        
+        if (Boolean.getBoolean("tsl2.nano.test")) // see ENV
+                return new File(file).getAbsoluteFile();
+        //now using two system properties. 'user.dir.on.start' is set on test by EnvTestPreparation
+        return new File(new File(file).getAbsolutePath().replace(
+                System.getProperty("user.dir.on.start", "ZZZZZZZZZZZ"), 
+                System.getProperty("user.dir")));
 	}
 
 	/**

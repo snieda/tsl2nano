@@ -91,6 +91,7 @@ public interface ENVTestPreparation {
 	}
 	static void setUserDirToTarget(String baseDir) {
 		String userDir = System.getProperty("user.dir");
+		System.setProperty("user.dir.on.start", userDir);
 		if (!userDir.endsWith(baseDir))
 	        userDir = new File(baseDir + TARGET_DIR).getAbsolutePath();
 		else
@@ -101,7 +102,8 @@ public interface ENVTestPreparation {
 			throw new IllegalAccessError("cannot access project directory " + userDir);
 		System.setProperty("user.dir", userDir);
 		System.out.println("------------------------------------------------------------");
-		System.out.println("user.dir: " + System.getProperty("user.dir"));
+		System.out.println("user.dir         : " + System.getProperty("user.dir"));
+        System.out.println("user.dir.on.start: " + System.getProperty("user.dir.on.start"));
 		System.out.println("------------------------------------------------------------");
 	}
 	
