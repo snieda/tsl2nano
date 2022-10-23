@@ -24,6 +24,10 @@
 			<version>${simple-xml.version}</version>
 		<!-- since JDK14 inside JDK -->			
 			    <exclusions>
+			    <exclusion>
+				  <groupId>stax</groupId>
+				  <artifactId>stax-api</artifactId>
+			    </exclusion>
 			        <exclusion>
 			            <groupId>stax-api</groupId>
 			            <artifactId>stax-api</artifactId>
