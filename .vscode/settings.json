@@ -2,4 +2,10 @@
     "java.configuration.updateBuildConfiguration": "automatic",
     "editor.cursorBlinking": "smooth",
     "editor.cursorStyle": "block-outline"
-}
+  "java.test.config": [
+        {
+            "name": "jmockitConfig",
+            "vmArgs": [ "-javaagent:/home/ts/.m2/repository/org/jmockit/jmockit/1.49/jmockit-1.49.jar" ]
+        }
+    ],
+    "java.test.defaultConfig": "jmockitConfig"}

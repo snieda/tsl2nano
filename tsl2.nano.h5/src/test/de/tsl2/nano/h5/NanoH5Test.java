@@ -106,6 +106,7 @@ public class NanoH5Test implements ENVTestPreparation {
 
     @BeforeClass
     public static void setUpClass() {
+        System.setProperty(ENV.KEY_TESTMODE, "true");
     	if (BaseTest.isExternalCIPlatform()) {
 			LogFactory.setPrintToConsole(false);
     		LogFactory.setLogLevel(LogFactory.LOG_ERROR);

@@ -6000,13 +6000,16 @@ deploy:
     * [v] generator-maven-plugin (unsupported class version 61)
     * [v] service-access: javax.annotation does not exist
 * [ ] jdk17 tests:
-    * [ ] possibly FileUtil.userDir() not working?
+    * [v] possibly FileUtil.userDir() not working
     * [v] core: default year of date pattern changed (e.g.: from '0001' to '1') 
     * [v] core: surefire not working on @{argLine} with add-opens and add-exports -- argLine was in executions/execution/configuration
-    * [ ] aspects: tests not working - result ist always null
+    * [v] aspects: tests not working - result is always null -> agent in maven reconfigured
     * [v] gp: no script engine availabe -> use org.openjdk.nashorn or org.graalvm.js 
     * [v] common: regexp pattern more restrictive (or simply wrong?) pom.xml: exclusion of 'xml-apis'
-    * [ ] descriptor: BeanProxy not working
+    * [x] descriptor: BeanProxy not working
+       * [v] BeanTest.testCurrency(): NO-BREAK SPACE [\x08-\x14\x20] before currency (), in html: &nbsp;
+         * [v] "0,00 €".matches("[-]?(\\d{1,3}[.]?){0,3}([,]\\d{0,2})?(.?€)?") = false
+         * [ ] BeanTest.testEnhancing() -> cannot edit frozen class -> defrost not working
     * [ ] replication: EntityReplicationTest works in eclipse but not in maven (ArrayIndexOutOfBounds)
     * [v] serviceaccess: ServiceAccessTest works in eclipse but not in maven (ArrayIndexOutOfBounds)
     * [v] terminal: surefire not working on @{argLine} with add-opens and add-exports

@@ -6,6 +6,8 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+
+import de.tsl2.nano.core.util.FileUtil;
  
 /**
 * extend this class for your test. create a (not junit) test-method with all method-parameters you need, but the last method-parameter should be the list of expected values (see
@@ -178,15 +180,18 @@ public class BaseTest extends TextComparison {
   }
   
 	public static void useTargetDir() {
-		if (!System.getProperty("user.dir").contains("target"))
-			System.setProperty("user.dir", System.getProperty("user.dir") + "/target/autotest");
+		String userDir = System.getProperty("user.dir");
+    if (!userDir.contains("target")) {
+			System.setProperty("user.dir.on.start", userDir);
+  		System.setProperty("user.dir", userDir + "/target/autotest");
+    }
 	}
 	
 	/** to be used as workaround on some external ci platforms like gitlab or github, if your tests fail on path/file reading/writing */
 	public static boolean isExternalCIPlatform() {
-		return new File("user.dir").getAbsolutePath().startsWith("/app/");
+		return FileUtil.userDirFile("user.dir").getAbsolutePath().startsWith("/app/");
 	}
 	public static boolean isGithubCIPlatform() {
-		return new File("user.dir").getAbsolutePath().startsWith("/home/runner");
+		return FileUtil.userDirFile("user.dir").getAbsolutePath().startsWith("/home/runner");
 	}
 }

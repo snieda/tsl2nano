@@ -184,7 +184,7 @@ public class SystemUtil {
         String info =
             "  build : ${build.info}\n"
                 + "  args  : ${sun.java.command}\n"
-            	+ "  libs  : ${java.library.path}"
+            	+ "  libs  : ${java.library.path}\n"
                 + "  dir   : ${user.dir}\n"
                 + "  time  : ${nano.tstamp}\n"
                 + "  user  : ${user.name}, home: ${user.home}\n"

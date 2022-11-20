@@ -13,12 +13,10 @@ import static junit.framework.Assert.assertEquals;
 
 import java.io.File;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.util.Map;
-import java.util.Properties;
 
 import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 
 import de.tsl2.nano.autotest.TypeBean;
@@ -30,6 +28,7 @@ import de.tsl2.nano.core.secure.Permutator;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.MapUtil;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.graph.SVGChart;
 import de.tsl2.nano.util.XmlGenUtil;
@@ -41,11 +40,11 @@ import de.tsl2.nano.util.XmlGenUtil;
  * @version $Revision$
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class IncubationTest {
+public class IncubationTest implements ENVTestPreparation {
 
-    @BeforeClass
-    public static void setUp() {
-        ENVTestPreparation.setUp();
+    @Before
+    public void setUp() {
+        ENVTestPreparation.super.setUp("incubation");
     }
 
     @AfterClass
@@ -95,7 +94,7 @@ public class IncubationTest {
         bean.setType(cls);
 
         String xmlfile = "test/typebean.xml";
-        File file = new File(xmlfile).getAbsoluteFile();
+        File file = FileUtil.userDirFile(xmlfile);
         file.getParentFile().mkdirs();
         XmlGenUtil.saveSimpleXml_(file.getPath(), bean);
         TypeBean bean1 = XmlGenUtil.loadSimpleXml_(file.getPath(), TypeBean.class, true);

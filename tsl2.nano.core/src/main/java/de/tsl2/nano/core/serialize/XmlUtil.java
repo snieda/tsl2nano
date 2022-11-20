@@ -273,7 +273,7 @@ public class XmlUtil {
             if (!FileUtil.userDirFile(stackTraceFile).exists()) {
                 PrintStream printStream = null;
                 try {
-                    printStream = new PrintStream(new File(stackTraceFile).getAbsolutePath());
+                    printStream = new PrintStream(FileUtil.userDirFile(stackTraceFile).getAbsolutePath());
                     e.printStackTrace(printStream);
                 } catch (FileNotFoundException e1) {
                     LOG.error("cant' write stacktrace to " + stackTraceFile);
@@ -310,16 +310,16 @@ public class XmlUtil {
         try {
             new org.simpleframework.xml.core.Persister(getSimpleXmlProxyStrategy(),
                 new Format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")).write(
-                    obj, new File(xmlFile).getAbsoluteFile());
+                    obj, FileUtil.userDirFile(xmlFile).getAbsoluteFile());
             //workaround for empty files
             if (FileUtil.userDirFile(xmlFile).exists() && FileUtil.getFile(xmlFile).available() == 0) {
-                new File(xmlFile).getAbsoluteFile().delete();
+                FileUtil.userDirFile(xmlFile).getAbsoluteFile().delete();
             }
         } catch (Exception e) {
             //as simple-xml doesn't delete corrupt created files, we move it to temp
-            File file = new File(xmlFile).getAbsoluteFile();
+            File file = FileUtil.userDirFile(xmlFile).getAbsoluteFile();
             if (file.exists()) {
-                File temp = new File(xmlFile + ".failed");
+                File temp = FileUtil.userDirFile(xmlFile + ".failed");
                 if (!temp.exists() || temp.delete()) {
                     file.renameTo(temp);
                 }

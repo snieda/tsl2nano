@@ -532,7 +532,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         } else {
             String docURL;
             if (bean != null && ENV.class.isAssignableFrom(bean.getClazz()))
-                docURL = new File("./").getAbsolutePath();
+                docURL = FileUtil.userDirFile("./").getAbsolutePath();
             else
                 docURL = ENV.get("doc.url." + bean.getName().toLowerCase(),
                     "doc/" + StringUtil.toFirstLower(title) + "/index.html");

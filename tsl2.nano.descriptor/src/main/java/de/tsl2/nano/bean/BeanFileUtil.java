@@ -42,7 +42,7 @@ public class BeanFileUtil {
     /**
      * convenience for {@link #fromFlatFile(Reader, Class, String...)}.
      */
-    public static <T> Collection<T> fromFile(String fileName, FileType fileType, Class<T> rootType, String... attributeNames) {
+    public static <T> Collection<T> fromFile(String fileName, final FileType fileType, Class<T> rootType, String... attributeNames) {
     	assert fileType != null && !Util.in(fileType, FileType.HTML) : "FileType HTML is not supported!";
     	
         return Util.trY(() -> fromFlatFile(reader(fileName),

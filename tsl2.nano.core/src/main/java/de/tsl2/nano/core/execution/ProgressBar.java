@@ -3,8 +3,10 @@ package de.tsl2.nano.core.execution;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import de.tsl2.nano.core.util.CLI;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.CLI.Color;
 
 /**
  * print a progess bar to the terminal window
@@ -91,6 +93,10 @@ public class ProgressBar {
 		int mx, p, x;
 		char cr;
 
+		if (count == maxCount) {
+			print_(comment + CLI.tag(" -> done (" + (System.currentTimeMillis() - starttime) + " ms)", Color.GREEN), '\n');
+			return;
+		}
 		if (((count - 1) % step) != 0)
 			return;
 		profMsg = profile ? profMsg = " (" + (new Date().getTime() - starttime) + " " + NumberUtil.amount(Profiler.getUsedMem()) + ")" : "";

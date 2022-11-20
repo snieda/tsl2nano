@@ -1,6 +1,6 @@
 package de.tsl2.nano.specification;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
 
@@ -10,8 +10,6 @@ import org.junit.Test;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
-import de.tsl2.nano.specification.DocumentWorker;
-import de.tsl2.nano.specification.SpecificationExchange;
 import de.tsl2.nano.util.FilePath;
 
 public class DocumentWorkerTest implements ENVTestPreparation {

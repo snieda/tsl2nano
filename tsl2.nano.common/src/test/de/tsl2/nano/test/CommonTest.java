@@ -41,6 +41,7 @@ import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.AdapterProxy;
 import de.tsl2.nano.core.util.ENVTestPreparation;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.execution.AntRunner;
@@ -148,8 +149,8 @@ public class CommonTest implements ENVTestPreparation {
         Properties props = new Properties();
         props.put("destFile", ENVTestPreparation.testpath(destFile));
         AntRunner.runTask("Jar", props, fileSets);
-        assertTrue(new File(destFile).getAbsoluteFile().exists());
-        new File(destFile).getAbsoluteFile().delete();
+        assertTrue(FileUtil.userDirFile(destFile).exists());
+        FileUtil.userDirFile(destFile).delete();
     }
 
     @Test

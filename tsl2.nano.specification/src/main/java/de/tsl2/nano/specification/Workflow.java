@@ -18,6 +18,7 @@ import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.execution.IPRunnable;
 import de.tsl2.nano.util.FilePath;
 import de.tsl2.nano.util.Flow;
@@ -92,7 +93,7 @@ public class Workflow implements Runnable {
 		}
 		Workflow workflow = new Workflow(args[0], args[1], args[2]);
 		String file = Pool.getSpecificationRootDir() + "workflow/" + new File(args[0]).getName() + ".workflow";
-		new File(file).getParentFile().mkdirs();
+		FileUtil.userDirFile(file).getParentFile().mkdirs();
 		ENV.save(file, workflow);
 		workflow.activate();
 	}

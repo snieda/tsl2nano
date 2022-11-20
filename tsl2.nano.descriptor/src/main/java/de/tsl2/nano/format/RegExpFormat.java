@@ -479,7 +479,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
      * @return regular expression describing the given number.
      */
     protected static final String numberWithGrouping(int dec, int fract, boolean fixed) {
-        final StringBuilder p = new StringBuilder("([-])|([-]?");
+        final StringBuilder p = new StringBuilder("[-]?");
         /*
          * involve grouping separators (3-digits-blocks).
          * if text input doesn't contain fractions, fractions will be added automated,
@@ -491,10 +491,10 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
             dec = 1;
         final int r = dec % 3;
         if (r > 0)
-            p.append("\\d{0," + r + "}" + "[" + GROUPING_SEPARATOR() + "]?");
+            p.append("\\d{1," + r + "}" + "[" + GROUPING_SEPARATOR() + "]?");
         final int c = (dec - r) / 3;
-        p.append("(\\d{0,3}" + "[" + GROUPING_SEPARATOR() + "]?){0," + c + "}");
-        p.append((fract > 0 ? "([" + DECIMAL_SEPARATOR() + "]" + "[0-9]{0," + fract + "})?)" : ")"));
+        p.append("(\\d{1,3}" + "[" + GROUPING_SEPARATOR() + "]?){0," + c + "}");
+        p.append((fract > 0 ? "([" + DECIMAL_SEPARATOR() + "]" + "\\d{0," + fract + "})?" : ""));
         if (fixed) {
             systemInitMap.put(p.toString(), fixed('0', dec) + (fract > 0 ? DECIMAL_SEPARATOR() + fixed('0', fract) : ""));
         }
@@ -1001,7 +1001,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
      * @return regexp for currency postfix
      */
     protected static final String getCurrencyPostfix(String symbol) {
-        return "( " + symbol + ")?";
+        return "([\u202F\u00A0\\s]?" + symbol + ")?"; // added unicode for 'NO-BREAK SPACE'
     }
 
 

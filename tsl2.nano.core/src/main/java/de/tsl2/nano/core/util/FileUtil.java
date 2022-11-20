@@ -676,7 +676,7 @@ public class FileUtil {
         //setting the system property for 'user.dir' does not work anymore to change the absolute path
 //		return new File(file).getAbsoluteFile();
         
-        if (Boolean.getBoolean("tsl2.nano.test")) // see ENV
+        if (!Boolean.getBoolean("tsl2.nano.test") || file.startsWith(System.getProperty("user.dir"))) // see ENV
                 return new File(file).getAbsoluteFile();
         //now using two system properties. 'user.dir.on.start' is set on test by EnvTestPreparation
         return new File(new File(file).getAbsolutePath().replace(

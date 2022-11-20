@@ -197,7 +197,7 @@ public abstract class ACodeGenerator {
         fillVelocityContext(model, modelFile, templateFile, destFile, properties, getUtil(), context);
         final Template template = engine.getTemplate(templateFile);
 
-        final File file = new File(destFile).getAbsoluteFile();
+        final File file = FileUtil.userDirFile(destFile);
         if (file.getParentFile() != null)
             file.getParentFile().mkdirs();
         try {

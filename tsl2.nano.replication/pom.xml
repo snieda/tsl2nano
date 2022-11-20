@@ -11,7 +11,8 @@
 	<properties>
 		<module.parent>..</module.parent>
 		<!-- this argline normally is in surefire-configuration - but there it would create a collision with jacoco  -->
-		<argLine>${tsl2.argline.options} -javaagent:${settings.localRepository}/org/jmockit/jmockit/${jmockit.version}/jmockit-${jmockit.version}.jar</argLine>
+		<jmockit.javaagent>-javaagent:${settings.localRepository}/org/jmockit/jmockit/${jmockit.version}/jmockit-${jmockit.version}.jar</jmockit.javaagent>
+        <argLine> ${surefire.argLine} ${jmockit.javaagent} ${tsl2.argline.options}</argLine>
 	</properties>
 	<build>
 		<plugins>
@@ -35,6 +36,15 @@
 							<Permissions>all-permissions</Permissions>
 						</manifestEntries>
 					</archive>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<argLine>${surefire.argLine} ${jmockit.javaagent} ${tsl2.argline.options}</argLine>
+					<useSystemClassLoader>true</useSystemClassLoader>
+					<forkMode>always</forkMode>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -88,15 +98,15 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${junit4.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 		    <groupId>org.jmockit</groupId>
 		    <artifactId>jmockit</artifactId>
 		    <version>${jmockit.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit4.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

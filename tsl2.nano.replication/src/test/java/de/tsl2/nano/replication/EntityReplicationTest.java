@@ -17,7 +17,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+//import org.junit.runner.RunWith;
 
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.replication.serializer.SerializeBytes;
@@ -26,7 +26,6 @@ import de.tsl2.nano.replication.serializer.SerializeJSON;
 import de.tsl2.nano.replication.serializer.SerializeSimpleXml;
 import de.tsl2.nano.replication.serializer.SerializeXML;
 import de.tsl2.nano.replication.serializer.SerializeYAML;
-import de.tsl2.nano.replication.serializer.Serializer;
 import de.tsl2.nano.replication.util.H2Util;
 import de.tsl2.nano.replication.util.SimpleTransformer;
 import mockit.Expectations;
@@ -35,9 +34,9 @@ import mockit.Mock;
 import mockit.MockUp;
 import mockit.Tested;
 import mockit.Verifications;
-//import mockit.integration.junit4.JMockit;
+// import mockit.integration.junit4.JMockit;
 
-//@RunWith(JMockit.class)
+// @RunWith(JMockit.class)
 public class EntityReplicationTest implements ENVTestPreparation {
 	@Injectable EntityManagerFactory entityManagerFactory;
 	@Injectable EntityManager em;

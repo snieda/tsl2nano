@@ -1236,7 +1236,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         properties.setProperty(BEAN_GENERATION_PACKAGENAME,
             ENV.get(BEAN_GENERATION_PACKAGENAME, "org.anonymous.project"));
         String plugin_dir = System.getProperty("user.dir");
-        properties.setProperty("plugin.dir", new File(plugin_dir).getAbsolutePath());
+        properties.setProperty("plugin.dir", FileUtil.userDirFile(plugin_dir).getAbsolutePath());
         if (plugin_dir.endsWith(".jar/")) {
             properties.setProperty("plugin_isjar", Boolean.toString(true));
         } 

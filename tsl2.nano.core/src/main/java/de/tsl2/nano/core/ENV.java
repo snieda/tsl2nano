@@ -240,7 +240,7 @@ public class ENV implements Serializable {
     }
 
     public static ENV create(String dir) {
-        new File(dir).getAbsoluteFile().mkdirs();
+        FileUtil.userDirFile(dir).mkdirs();
         dir = dir.endsWith("/") ? dir : dir + "/";
         String name = dir + StringUtil.substring(dir, PREFIX_ENVNAME, "/");
         LogFactory.setLogFile(name + ".log");
@@ -300,7 +300,7 @@ public class ENV implements Serializable {
         addService(ClassLoader.class, Util.getContextClassLoader());
 
         self.properties.put(KEY_CONFIG_RELPATH, dir + (dir.endsWith("/") ? "" : "/"));
-        self.properties.put(KEY_CONFIG_PATH, new File(dir).getAbsolutePath().replace("\\", "/") + "/");
+        self.properties.put(KEY_CONFIG_PATH, FileUtil.userDirFile(dir).getAbsolutePath().replace("\\", "/") + "/");
 
         registerBundle(PREFIX + "messages", true);
         if (FileUtil.hasResource("messages.properties")) {

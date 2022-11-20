@@ -1,5 +1,10 @@
 package de.tsl2.nano.core.log;
 
+import static de.tsl2.nano.core.util.CLI.tag;
+import static de.tsl2.nano.core.util.CLI.Color.LIGHT_RED;
+import static de.tsl2.nano.core.util.CLI.Color.YELLOW;
+import static de.tsl2.nano.core.util.CLI.Color.ORANGE;
+
 import java.io.File;
 import java.io.PrintStream;
 import java.io.Serializable;
@@ -27,8 +32,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.serialize.XmlUtil;
 import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.ConcurrentUtil;
-import static  de.tsl2.nano.core.util.CLI.*;
-import static  de.tsl2.nano.core.util.CLI.Color.*;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
@@ -128,7 +132,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
              * while it not possible to use convenience method from other base classes,
              * because the all use this logfactory, we have to create some not-nice code.
              */
-            if (new File(logFactoryXml).getAbsoluteFile().canRead()) {
+            if (FileUtil.userDirFile(logFactoryXml).getAbsoluteFile().canRead()) {
                 try {
                     self = XmlUtil.loadSimpleXml_(logFactoryXml, LogFactory.class, true);
                     if (self.loglevels == null) {

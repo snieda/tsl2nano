@@ -652,10 +652,11 @@ public class CoreUtilTest implements ENVTestPreparation {
 			@Override
 			protected void print_(Object txt, char end) {
 					String text = txt.toString();
-					assertTrue(text.length() <= this.barWidth + this.textWidth + PERC_WIDTH);
+					assertTrue(text.contains("-> done") || text.length() <= this.barWidth + this.textWidth + PERC_WIDTH);
 					if (!pi.isEmpty() && pi.getLast() >= maxCount) {
-						assertTrue(text, text.contains("=] "));
-						assertTrue(text, text.endsWith(substringFromRight(meinText, 7) + pi.getLast()));
+						assertTrue(text.contains("-> done"));
+						// assertTrue(text, text.contains("=] "));
+						// assertTrue(text, text.endsWith(substringFromRight(meinText, 7) + pi.getLast()));
 						if (pi.getLast() >= maxCount) {
 							assertTrue(end == '\n');
 						}

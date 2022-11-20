@@ -102,6 +102,7 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.Main;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.exception.Message;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.h5.NanoHTTPD.Response.IStatus;
 import de.tsl2.nano.h5.NanoHTTPD.Response.Status;
 
@@ -2663,13 +2664,13 @@ public abstract class NanoHTTPD extends Main {
 
         // Defaults
         int port = 8080;
-        File wwwroot = new File(".").getAbsoluteFile();
+        File wwwroot = FileUtil.userDirFile(".").getAbsoluteFile();
 
         for (int i = 0; i < args.length; ++i) {
             if (args[i].equalsIgnoreCase("-p")) {
                 port = Integer.parseInt(args[i + 1]);
             } else if (args[i].equalsIgnoreCase("-d")) {
-                wwwroot = new File(args[i + 1]).getAbsoluteFile();
+                wwwroot = FileUtil.userDirFile(args[i + 1]).getAbsoluteFile();
             }
         }
 

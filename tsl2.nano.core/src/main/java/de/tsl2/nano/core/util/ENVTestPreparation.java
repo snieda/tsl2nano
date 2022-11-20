@@ -29,7 +29,7 @@ public interface ENVTestPreparation {
 	
 	static String setUp(boolean deleteExistingEnvironment) {
 		//baseDir path is absolute!
-		return setUp(System.getProperty("user.dir"), "", TEST_DIR, false, deleteExistingEnvironment);
+		return setUp(BASE_DIR, "", TEST_DIR, false, deleteExistingEnvironment);
 	}
 	
 	default String setUp(String moduleShort) {
@@ -57,7 +57,7 @@ public interface ENVTestPreparation {
 		
 		LogFactory.setLogFactoryXml(envDir + "test-logging.xml");
 		LogFactory.setLogFile(envDir + "test.log");
-		if (new File("user.dir").getAbsolutePath().startsWith("/app/")) { //gitlab stops output on too much logging...
+		if (FileUtil.userDirFile("user.dir").getAbsolutePath().startsWith("/app/")) { //gitlab stops output on too much logging...
 			LogFactory.setPrintToConsole(false);
 //			LogFactory.setLogLevel(LogFactory.LOG_ERROR);
 			System.setProperty("tsl2.nano.log.level", "warn");
@@ -93,7 +93,7 @@ public interface ENVTestPreparation {
 		String userDir = System.getProperty("user.dir");
 		System.setProperty("user.dir.on.start", userDir);
 		if (!userDir.endsWith(baseDir))
-	        userDir = new File(baseDir + TARGET_DIR).getAbsolutePath();
+	        userDir = Util.trY( () -> new File(baseDir + TARGET_DIR).getCanonicalPath());
 		else
 			userDir = new File(TARGET_DIR).getAbsolutePath();
 			
