@@ -66,11 +66,11 @@ public class CommonTest implements ENVTestPreparation {
 
     @AfterClass
     public static void tearDown() {
-        ENVTestPreparation.tearDown();
+        // ENVTestPreparation.tearDown();
     }
     
     
-    @Ignore("old ant version 1.65 is on the classpath, result in error")
+    // @Ignore("old ant version 1.65 is on the classpath, result in error")
     @Test
     public void testScriptUtil() throws Exception {
         final Properties p = new Properties();

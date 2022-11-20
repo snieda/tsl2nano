@@ -29,7 +29,7 @@ public interface ENVTestPreparation {
 	
 	static String setUp(boolean deleteExistingEnvironment) {
 		//baseDir path is absolute!
-		return setUp(BASE_DIR, "", TEST_DIR, false, deleteExistingEnvironment);
+		return setUp(System.getProperty("user.dir"), "", TEST_DIR, false, deleteExistingEnvironment);
 	}
 	
 	default String setUp(String moduleShort) {
