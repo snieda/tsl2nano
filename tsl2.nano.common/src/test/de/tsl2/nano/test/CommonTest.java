@@ -28,12 +28,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
 
 import de.tsl2.nano.action.IConstraint;
-import de.tsl2.nano.autotest.creator.AutoFunctionTest;
 import de.tsl2.nano.core.Argumentator;
 import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -70,7 +66,7 @@ public class CommonTest implements ENVTestPreparation {
     }
     
     
-    // @Ignore("old ant version 1.65 is on the classpath, result in error")
+    @Ignore("old ant version 1.65 is on the classpath, result in error")
     @Test
     public void testScriptUtil() throws Exception {
         final Properties p = new Properties();

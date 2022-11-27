@@ -26,6 +26,7 @@ public class ProgressBar {
 	protected int step;
 	protected boolean profile;
 	protected long starttime;
+	protected boolean done;
 
 	static final char[] CC = new char[] {' '};
 	
@@ -93,7 +94,10 @@ public class ProgressBar {
 		int mx, p, x;
 		char cr;
 
-		if (count == maxCount) {
+		if (done)
+			return;
+		if (count >= maxCount) {
+			done = true;
 			print_(comment + CLI.tag(" -> done (" + (System.currentTimeMillis() - starttime) + " ms)", Color.GREEN), '\n');
 			return;
 		}

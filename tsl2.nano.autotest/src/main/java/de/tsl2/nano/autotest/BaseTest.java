@@ -189,9 +189,9 @@ public class BaseTest extends TextComparison {
 	
 	/** to be used as workaround on some external ci platforms like gitlab or github, if your tests fail on path/file reading/writing */
 	public static boolean isExternalCIPlatform() {
-		return FileUtil.userDirFile("user.dir").getAbsolutePath().startsWith("/app/");
+		return FileUtil.userDirFile("./").getAbsolutePath().startsWith("/app/");
 	}
 	public static boolean isGithubCIPlatform() {
-		return FileUtil.userDirFile("user.dir").getAbsolutePath().startsWith("/home/runner");
+		return FileUtil.userDirFile("./").getAbsolutePath().startsWith("/home/runner");
 	}
 }

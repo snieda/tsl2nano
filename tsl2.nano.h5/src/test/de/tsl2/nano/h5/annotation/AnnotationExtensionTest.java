@@ -101,7 +101,7 @@ public class AnnotationExtensionTest implements ENVTestPreparation {
     public void testVirtualAttributeAndDependencyListener() {
     	if (!BaseTest.isExternalCIPlatform()) {
 	        //TODO: attribute name not correct!
-	        assertEquals("_" + MYVIRTUALATTRIBUTE, BeanDefinition.getBeanDefinition(BeanType.class).getAttribute("_" + MYVIRTUALATTRIBUTE).getName());
+	        assertEquals(MYVIRTUALATTRIBUTE, BeanDefinition.getBeanDefinition(BeanType.class).getAttribute(MYVIRTUALATTRIBUTE).getName());
 	        
 	        Base base = new Base();
 	        base.setName("XXX");

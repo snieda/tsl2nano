@@ -19,11 +19,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import de.tsl2.nano.autotest.creator.AFunctionCaller;
@@ -97,7 +95,6 @@ public class ValueRandomizer {
 	protected static <V> V createRandomValue(Class<V> typeOf, boolean zeroNumber) {
 		return createRandomValue(typeOf, zeroNumber, 0);
 	}
-	@SuppressWarnings({ "unchecked" })
 	protected static <V> V createRandomValue(Class<V> typeOf, boolean zeroNumber, int depth) {
 		Object n;
 		if (!Util.isEmpty(AFunctionCaller.def(AutoTest.VALUESET_GROUP, ValueSets.DEFAULT)) && valueSets.hasValueSet(typeOf)) {
@@ -110,6 +107,9 @@ public class ValueRandomizer {
 		}
 		if (NumberUtil.isNumber(n))
 			n = convert(n, typeOf, zeroNumber, depth);
+		else if (File.class.isAssignableFrom(typeOf)) {
+			n = FileUtil.userDirFile(String.valueOf(n)).getAbsolutePath();
+		}
 		try {
 			return ObjectUtil.wrap(n, typeOf);
 		} catch (Exception e) {
@@ -134,6 +134,12 @@ public class ValueRandomizer {
 				n = TypeBean.class; // TODO: create randomly
 		} else if (typeOf.equals(ClassLoader.class))
 			n = Thread.currentThread().getContextClassLoader(); // TODO: create randomly
+		else if (File.class.isAssignableFrom(typeOf))
+			n = FileUtil.userDirFile(StringUtil.toBase64(n)).getAbsolutePath();
+		else if (PrintWriter.class.isAssignableFrom(typeOf)) {
+			final String nn = StringUtil.toBase64(n);
+			n = Util.trY( () -> new PrintWriter(FileUtil.userDirFile(nn).getAbsolutePath()));
+		}
 		else if (Collection.class.isAssignableFrom(typeOf))
 			n = new ListSet<>(n);
 		else if (Properties.class.isAssignableFrom(typeOf))

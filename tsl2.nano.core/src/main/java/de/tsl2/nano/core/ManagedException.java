@@ -287,7 +287,7 @@ public class ManagedException extends RuntimeException {
 			PrintWriter s = new PrintWriter(file);
 			e.printStackTrace(s);
 			s.flush();
-			s.close();
+			s.close(); // TODO: must be in finally block
 		});
 	}
 }

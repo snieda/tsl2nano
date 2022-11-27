@@ -18,6 +18,7 @@ import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.Util;
 
 /**
@@ -118,14 +119,17 @@ public class FilePath {
 
 	public static byte[] read(String file) {
 		// the absolute path is used to respect changes on 'user.dir' (in tests)
-		return Util.trY( () -> Files.readAllBytes(Paths.get(file).toAbsolutePath()));
+		return Util.trY( () -> Files.readAllBytes(Paths.get(absolutePath(file))));
 	}
 	public static Path write(String file, byte[] bytes) {
 		// the absolute path is used to respect changes on 'user.dir' (in tests)
-		return Util.trY( () -> Files.write(Paths.get(file).toAbsolutePath(), bytes, CREATE, WRITE, APPEND));
+		return Util.trY( () -> Files.write(Paths.get(absolutePath(file)), bytes, CREATE, WRITE, APPEND));
 	}
 	public static BufferedWriter getFileWriter(String file) {
 		// the absolute path is used to respect changes on 'user.dir' (in tests)
-		return Util.trY( () -> Files.newBufferedWriter(Paths.get(file).toAbsolutePath(), CREATE, WRITE, APPEND));
+		return Util.trY( () -> Files.newBufferedWriter(Paths.get(absolutePath(file)), CREATE, WRITE, APPEND));
+	}
+	private static String absolutePath(String file) {
+		return file;//FileUtil.userDirFile(file).getAbsolutePath();
 	}
 }

@@ -179,7 +179,6 @@ public class CSheet extends Bean<Object> {
     private void toLogicForm() {
         int rc = logicForm.getRowCount();
         int cc = logicForm.getColumnCount();
-        String s;
         Object v, oldValue;
         for (int i = 0; i < rc; i++) {
             for (int j = 0; j < cc; j++) {

@@ -44,7 +44,7 @@ public class SpecifiedActionTest {
 		ENV.get(Pool.class).add(new Action(name, System.class, "getProperty", null));
 		BeanDefinition<TypeBean> bean = Bean.getBean(instance).addAction(new SpecifiedAction(name, instance));
 		
-		bean.getAction(name).setParameter(instance, "user.dir").run();
+		bean.getAction(name).setParameter("user.dir").run();
 	}
 
 }

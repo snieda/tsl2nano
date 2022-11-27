@@ -9,11 +9,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import de.tsl2.nano.autotest.BaseTest;
 import de.tsl2.nano.autotest.ValueRandomizer;
 
 /**
- * creates test fro {@link AutoTestGenerator} calling a set of functions in the
+ * creates test from {@link AutoTestGenerator} calling a set of functions in the
  * classpath, storing the result as expectation ("as is") to preserve the
  * current state.
  * <p/>

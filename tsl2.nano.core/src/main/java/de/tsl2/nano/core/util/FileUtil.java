@@ -653,20 +653,12 @@ public class FileUtil {
      */
     public static void writeBytes(byte[] data, String file, boolean append) {
         LOG.info("writing " + ByteUtil.amount(data.length) + " into file " + file);
-        FileOutputStream out = null;
-        try {
-            File f = userDirFile(file);
-            if (f.getParentFile() != null)
-                f.getParentFile().mkdirs();
-            out = new FileOutputStream(f, append);
-        } catch (/*FileNotFound*/final Exception ex) {
-            ManagedException.forward(ex);
-            return;
-        }
-        try {
+        File f = userDirFile(file);
+        if (f.getParentFile() != null)
+            f.getParentFile().mkdirs();
+        try (FileOutputStream out = new FileOutputStream(f, append)) {
             out.write(data);
-            out.close();
-        } catch (/*IO*/final Exception ex) {
+        } catch (/*FileNotFound*/final Exception ex) {
             ManagedException.forward(ex);
         }
     }
