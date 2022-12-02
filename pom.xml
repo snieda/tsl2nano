@@ -22,6 +22,7 @@
 	* increase version number: "mvn release:update-versions -DautoVersionSubmodules=true"
 	* batch-increase version : "mvn - -batch-mode release:update-versions -DdevelopmentVersion=1.2.0-SNAPSHOT"
     * show all possible newer dependency versions: versions:display-dependency-updates
+	* update all minor versions: mvn versions:use-latest-releases -DallowMajorUpdates=false  -DgenerateBackupPoms=false
     * remove the SNAPSHOTS in a release: mvn versions:use-releases
     * use only newest RELEASES: mvn versions:use-latest-releases
 	* to deploy a new snapshot-version: "mvn deploy"
@@ -144,12 +145,12 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-site-plugin</artifactId>
-                    <version>3.7.1</version>
+                    <version>3.9.0</version>
                 </plugin>
                     <!-- before this management, the antrun version was 1.3 -->
 		        <plugin>
 		          <artifactId>maven-antrun-plugin</artifactId>
-		          <version>1.8</version>
+		          <version>3.0.0</version>
 		        </plugin>
 	        </plugins>
         </pluginManagement>
@@ -290,7 +291,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>2.4</version>
+				<version>3.2.1</version>
 				<configuration>
 					<excludes>
 						<exclude>**/*.zip</exclude>
@@ -309,7 +310,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.4</version>
+				<version>3.2.0</version>
 				<configuration>
 					<force>true</force>
 					<failOnError>false</failOnError>
@@ -433,12 +434,12 @@
                 <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
-                <version>3.6.0.1398</version>
+                <version>3.7.0.174</version>
             </plugin>
 			<plugin>
             	<groupId>org.apache.maven.plugins</groupId>
             	<artifactId>maven-pmd-plugin</artifactId>
-            	<version>3.9.0</version>
+            	<version>3.13.0</version>
 				<reportSets>
 					<reportSet>
 						<id>module</id>

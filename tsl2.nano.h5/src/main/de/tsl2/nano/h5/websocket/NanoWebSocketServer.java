@@ -9,7 +9,6 @@
  */
 package de.tsl2.nano.h5.websocket;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
@@ -296,7 +295,7 @@ public class NanoWebSocketServer extends WebSocketServer {
     }
     
     @Override
-    public void stop() throws IOException, InterruptedException {
+    public void stop() throws InterruptedException {
     	super.stop();
     	session = null;
     }
