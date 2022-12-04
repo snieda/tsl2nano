@@ -477,7 +477,7 @@ public class NanoH5Test implements ENVTestPreparation {
 
         //TODO: queries are defined in 'specification'.
         //TODO: name clash...
-        attr = bean.getAttribute(FileUtil.getValidFileName("?select count(*) from Address"));
+        attr = bean.getAttribute(FileUtil.getValidFileName("select count(*) from Address"));
         System.out.println(attr.getValue());
     }
     

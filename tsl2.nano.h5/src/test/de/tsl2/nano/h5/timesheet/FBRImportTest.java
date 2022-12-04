@@ -55,7 +55,7 @@ public class FBRImportTest implements ENVTestPreparation {
 	}
 	@After
 	public void tearDown() {
-		ENVTestPreparation.tearDown();
+		// ENVTestPreparation.tearDown();
 	}
 	@Test
 	public void testImport() {

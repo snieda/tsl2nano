@@ -68,12 +68,12 @@ public class SpecifiedAction<RETURNTYPE> extends SecureAction<RETURNTYPE> implem
     @SuppressWarnings("unchecked")
     @Override
     public RETURNTYPE action() throws Exception {
+        int i = instance == null ? 1 : 0;
         if (instance == null && !Util.isEmpty(getParameter()))
             instance = getParameter(0);
         //fill specified action parameters
         Set<String> argNames = getArgumentNames();
         LinkedHashMap<String, Object> pars = new LinkedHashMap<String, Object>();
-        int i = 1;
         for (String argName : argNames) {
             if (getParameter().length <= i)
                 break;
