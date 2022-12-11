@@ -3,6 +3,8 @@ package de.tsl2.nano.h5.timesheet;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
+import java.lang.reflect.InvocationHandler;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Locale;
@@ -10,28 +12,26 @@ import java.util.Locale;
 import javax.persistence.EntityManager;
 
 import org.anonymous.project.Charge;
+import org.anonymous.project.Chargeitem;
+import org.anonymous.project.Item;
+import org.anonymous.project.Party;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanProxy;
-import de.tsl2.nano.bean.IBeanContainer;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
+import de.tsl2.nano.configuration.ConfigBeanContainer;
 import de.tsl2.nano.core.ENV;
-import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.h5.Html5Presentation;
-import de.tsl2.nano.persistence.GenericLocalBeanContainer;
-import de.tsl2.nano.persistence.Persistence;
-import de.tsl2.nano.service.util.BeanContainerUtil;
-import de.tsl2.nano.serviceaccess.Authorization;
-import de.tsl2.nano.serviceaccess.IAuthorization;
+import de.tsl2.nano.h5.NanoH5Util;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
-import de.tsl2.nano.specification.Pool;
+import de.tsl2.nano.serviceaccess.ServiceProxy;
 
 public class FBRImportTest implements ENVTestPreparation {
 
@@ -41,17 +41,7 @@ public class FBRImportTest implements ENVTestPreparation {
 		Bean.clearCache();
 		ENVTestPreparation.super.setUp("h5");
         ENV.addService(BeanPresentationHelper.class, new Html5Presentation<>());
-        String userName = Persistence.current().getConnectionUserName();
-        Authorization auth = Authorization.create(userName, false);
-        ENV.addService(IAuthorization.class, auth);
-        ConcurrentUtil.setCurrent(auth);
-
-        BeanContainerUtil.initProxyServiceFactory();
-        GenericLocalBeanContainer.initLocalContainer();
-        ServiceFactory.instance().setSubject(auth.getSubject());
-        ENV.addService(IBeanContainer.class, BeanContainer.instance());
-        ConcurrentUtil.setCurrent(BeanContainer.instance());
-        ENV.addService(EntityManager.class, BeanProxy.createBeanImplementation(EntityManager.class));
+        ConfigBeanContainer.initAuthAndLocalBeanContainer();
 	}
 	@After
 	public void tearDown() {
@@ -59,10 +49,19 @@ public class FBRImportTest implements ENVTestPreparation {
 	}
 	@Test
 	public void testImport() {
+		Item item = new Item();
+		item.setName("XXX");
+		ConfigBeanContainer.simpleReturnExampleItself();
+		BeanProxy.doReturnWhen(ConfigBeanContainer.getGenServiceProxy(), (m, a) -> Arrays.asList(item), "findByQuery");
+
+		NanoH5Util.define(Party.class, null, "{name}");
+		NanoH5Util.define(Chargeitem.class, null, "{item}");
+		NanoH5Util.define(Item.class, null, "{name}");
+		
 		File file = FileUtil.userDirFile("test-classes/import-timesheet.log");
 		
 		Collection<Charge> c = FBRImport.doImportHumanReadable(file.getPath());
-		assertEquals(527, c.size());
+		assertEquals(462, c.size());
 	}
 	@Test
 	public void testSimpleImport() {

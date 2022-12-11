@@ -5,7 +5,6 @@ import java.util.Scanner;
 import org.junit.Assert;
 import org.junit.Test;
 
-import de.tsl2.nano.tree.Tree;
 
 public class TreeTest {
 

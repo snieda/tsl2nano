@@ -12,6 +12,8 @@ import java.lang.reflect.Proxy;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.def.BeanProperty;
@@ -42,7 +44,7 @@ import de.tsl2.nano.core.util.StringUtil;
  * <p>
  * for testing purposes, the proxy puts its last invocation arguments to the beanProperties. call
  * {@link #getLastInvokationArgs(Object, String)} or
- * <code>(({@link BeanProperty})myProxyInstance).getProperty({@link #PROPERTY_INVOKATION_INFO} + methodName)</code>
+ * <code>(({@link BeanProperty})myProxyInstance).get_({@link #PROPERTY_INVOKATION_INFO} + methodName)</code>
  * 
  * @author ts 15.12.2008
  * @version $Revision: 1.0 $
@@ -59,8 +61,8 @@ public class BeanProxy<T> extends DelegationHandler<T> {
     static/*final*/Method METHOD_SET_PROPERTY;
     static {
         try {
-            METHOD_GET_PROPERTY = BeanProperty.class.getMethod("getProperty", new Class[] { String.class });
-            METHOD_SET_PROPERTY = BeanProperty.class.getMethod("setProperty",
+            METHOD_GET_PROPERTY = BeanProperty.class.getMethod("get_", new Class[] { String.class });
+            METHOD_SET_PROPERTY = BeanProperty.class.getMethod("set_",
                 new Class[] { String.class, Object.class });
         } catch (final Exception e) {
             ManagedException.forward(e);
@@ -68,7 +70,7 @@ public class BeanProxy<T> extends DelegationHandler<T> {
     }
 
     /** to be used to get the last proxy invocation - for test purpose only */
-    public static final String PROPERTY_INVOKATION_INFO = "BeanProxyInvocationInfo.";
+    static final String PROPERTY_INVOKATION_INFO = "BeanProxyInvocationInfo.";
 
     /**
      * Constructor
@@ -123,7 +125,7 @@ public class BeanProxy<T> extends DelegationHandler<T> {
      * @param attributes map of bean attributes for this bean implementation
      * @return implementation of the given interface.
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({ "rawtypes" })
     public static <T> T createBeanImplementation(Class<T> interfaze,
             Map<String, Object> attributes,
             T delegate,
@@ -186,11 +188,15 @@ public class BeanProxy<T> extends DelegationHandler<T> {
              * key = method-name. otherwise it is possible to store full method call
              * with arguments in the properties.
              */
-            result = properties.get(method.getName());
+            result = properties.get(getMethodArgsId(method, args));
+            if (result == null)
+                result = properties.get(getMethodArgsId(method, new Object[0]));
+            if (result == null)
+                result = properties.get(method.getName());
             if (result instanceof IAction) {
                 result = ((IAction)result).activate();
-            } else if (result == null) {
-                result = properties.get(getMethodArgsId(method, args));
+            } else if (result instanceof BiFunction) {
+                result = ((BiFunction)result).apply(method, args);
             }
             //auto-boxing - storing the default value in properties
             result = getDefaultPrimitive(method, args, result);
@@ -234,9 +240,28 @@ public class BeanProxy<T> extends DelegationHandler<T> {
      * @return last method args
      */
     public static String getLastInvokationArgs(Object proxyInstance, String methodName) {
-        final String invInfo = (String) ((BeanProperty) proxyInstance).getProperty(PROPERTY_INVOKATION_INFO + methodName);
+        final String invInfo = (String) ((BeanProperty) proxyInstance).get_(PROPERTY_INVOKATION_INFO + methodName);
         return StringUtil.substring(invInfo, "(", ")", true);
-
     }
 
+    /**
+     * for testing with results on explizit method calls
+     * 
+     * Examples:
+     *   BeanProxy.doReturnWhen(em, item, EntityManager.class.getMethod("createQuery", String.class));
+     *   BeanProxy.doReturnWhen(ServiceFactory.getGenService(), item, "findByExample");
+     */
+    public static void doReturnWhen(Object proxyInstance, Object doReturn, Method whenMethod, Object...whenArgs) {
+        doReturnWhen(proxyInstance, doReturn, getMethodArgsId(whenMethod, whenArgs));
+    }
+    public static void doReturnWhen(Object proxyInstance, BiFunction<Method, Object[], Object> doReturn, String methodNameAndArgs) {
+        doReturnWhen(proxyInstance, (Object)doReturn, methodNameAndArgs);
+    }
+    public static void doReturnWhen(Object proxyInstance, Object doReturn, String methodNameAndArgs) {
+        ManagedException.assertion(Proxy.isProxyClass(proxyInstance.getClass()), "no proxy: " + proxyInstance);
+        ManagedException.assertion(BeanProxy.class.isAssignableFrom(Proxy.getInvocationHandler(proxyInstance).getClass()), 
+            "no beanproxy: " + Proxy.getInvocationHandler(proxyInstance));
+        
+        ((BeanProperty)proxyInstance).set_(methodNameAndArgs, doReturn);
+    }        
 }

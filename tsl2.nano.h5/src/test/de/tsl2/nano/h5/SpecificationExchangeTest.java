@@ -33,7 +33,6 @@ import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.specification.Pool;
 import de.tsl2.nano.specification.SpecificationExchange;
-import de.tsl2.nano.util.FilePath;
 
 public class SpecificationExchangeTest implements ENVTestPreparation {
 	

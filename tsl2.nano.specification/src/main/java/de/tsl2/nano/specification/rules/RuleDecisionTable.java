@@ -1,6 +1,5 @@
 package de.tsl2.nano.specification.rules;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -141,17 +140,24 @@ public class RuleDecisionTable<T> extends AbstractRule<T> {
 
     public T run(Map<String, Object> context, Object... extArgs) {
         //first, we create a matching table with 0 or 1
-        return evalResult(createMatchTable(context));
+        T result = evalResult(createMatchTable(context));
+        if (result == null) {
+            throw new IllegalArgumentException("no value of given context matches any rule in decision table!\n\tcontext: " + context + "\n\tdecisiontable:\n\t" + par);
+        }
+        return result;
     }
 
     @SuppressWarnings("unchecked")
     byte[][] createMatchTable(Map<String, Object> args) {
         byte[][] mt = createEmptyMatchTable();
         int k = 0;
+        List<Condition<?>> conditions;
+        Comparable value;
         for (String name : par.keySet()) {
-            List<Condition<?>> conditions = par.get(name);
+            conditions = par.get(name);
+            value = (Comparable) args.get(name);
             for (int i = 0; i < conditions.size(); i++) {
-                mt[k][i] = (byte) (conditions.get(i).isTrue((Comparable) args.get(name)) ? 1 : 0);
+                mt[k][i] = (byte) (conditions.get(i).isTrue(value) ? 1 : 0);
             }
             k++;
         }
@@ -178,6 +184,7 @@ public class RuleDecisionTable<T> extends AbstractRule<T> {
                     if (matched)
                         throw new IllegalStateException(this + " is inconsistent at parameter index" + i);
                 }
+                matched = true;
             }
         }
         return null;

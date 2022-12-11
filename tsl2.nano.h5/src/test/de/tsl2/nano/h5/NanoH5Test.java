@@ -33,7 +33,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.persistence.EntityManager;
 
 import org.anonymous.project.Address;
 import org.anonymous.project.Charge;
@@ -44,9 +43,6 @@ import org.junit.Test;
 
 import de.tsl2.nano.action.IStatus;
 import de.tsl2.nano.autotest.BaseTest;
-import de.tsl2.nano.bean.BeanContainer;
-import de.tsl2.nano.bean.BeanProxy;
-import de.tsl2.nano.bean.IBeanContainer;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
@@ -54,6 +50,7 @@ import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.IPresentableColumn;
 import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.codegen.ACodeGenerator;
+import de.tsl2.nano.configuration.ConfigBeanContainer;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.Main;
 import de.tsl2.nano.core.ManagedException;
@@ -65,7 +62,6 @@ import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.messaging.ChangeEvent;
 import de.tsl2.nano.core.util.ByteUtil;
-import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
@@ -78,12 +74,7 @@ import de.tsl2.nano.h5.collector.CSheet;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
 import de.tsl2.nano.h5.navigation.Workflow;
 import de.tsl2.nano.h5.timesheet.Timesheet;
-import de.tsl2.nano.persistence.GenericLocalBeanContainer;
 import de.tsl2.nano.persistence.Persistence;
-import de.tsl2.nano.service.util.BeanContainerUtil;
-import de.tsl2.nano.serviceaccess.Authorization;
-import de.tsl2.nano.serviceaccess.IAuthorization;
-import de.tsl2.nano.serviceaccess.ServiceFactory;
 import de.tsl2.nano.specification.ParType;
 import de.tsl2.nano.specification.Pool;
 import de.tsl2.nano.specification.rules.Rule;
@@ -381,19 +372,7 @@ public class NanoH5Test implements ENVTestPreparation {
 
 	private void initServices() {
         ENV.addService(BeanPresentationHelper.class, new Html5Presentation<>());
-        String userName = Persistence.current().getConnectionUserName();
-        Authorization auth = Authorization.create(userName, false);
-        ENV.addService(IAuthorization.class, auth);
-        ConcurrentUtil.setCurrent(auth);
-
-        // BeanContainer.initEmtpyServiceActions();
-        // BeanContainerUtil.initEmptyProxyServices();
-        BeanContainerUtil.initProxyServiceFactory();
-        GenericLocalBeanContainer.initLocalContainer();
-        ServiceFactory.instance().setSubject(auth.getSubject());
-        ENV.addService(IBeanContainer.class, BeanContainer.instance());
-        ConcurrentUtil.setCurrent(BeanContainer.instance());
-        ENV.addService(EntityManager.class, BeanProxy.createBeanImplementation(EntityManager.class));
+        ConfigBeanContainer.initAuthAndLocalBeanContainer();
     }
 
     //workaround for different base-paths on starting the tests (windows+maven <-> linux+maven)
@@ -433,7 +412,7 @@ public class NanoH5Test implements ENVTestPreparation {
     public void testTimesheet() throws Exception {
     	// deep scheint mit andreren Tests zu kollidieren....
         System.setProperty("app.session.anticsrf", "false");
-        System.setProperty("nanoh5test.run.deep", "true");
+        System.setProperty("nanoh5test.run.deep", "false");
         System.setProperty("app.update.interval.days", "-1");
         System.setProperty("app.stop.allow.system.exit", "false");
         Properties mapper = new Properties();

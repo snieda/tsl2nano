@@ -34,7 +34,6 @@ import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Vector;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
@@ -45,7 +44,6 @@ import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.core.util.Util;
 
 /**
  * WORKS ONLY IN ORACLES JAVA IMPLEMENTATION

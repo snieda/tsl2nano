@@ -143,9 +143,15 @@ public class ServiceProxy<T> extends DefaultService implements InvocationHandler
      * convenience to turn off logging for the given service. see {@link #doLog} and {@link #setDoLog(boolean)}
      * @param service
      */
-    @SuppressWarnings("rawtypes")
     public static final void dontLog(Object service) {
         LOG.info("turning off logging for service " + service);
         ((ServiceProxy)Proxy.getInvocationHandler(service)).setDoLog(false);
     }
+
+    /**
+     * return the delegate - only if it is a proxy - otherwise null
+     */
+    public Object delegationProxy() {
+        return Proxy.isProxyClass(delegate.getClass()) ? delegate : null;
+    } 
 }

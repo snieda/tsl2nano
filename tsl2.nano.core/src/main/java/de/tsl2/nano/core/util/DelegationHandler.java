@@ -105,7 +105,7 @@ public class DelegationHandler<T> implements IDelegationHandler<T>, Serializable
      * @param properties
      */
 	public DelegationHandler(T delegate, Map<String, Object> properties) {
-        super();
+        LOG.info("creating proxy -> " + this); 
         if (delegate == null && Util.isEmpty(properties))
             //don't escalate here - this may be done in extension 
             LOG.warn("delegate handler without delegate and any property!");
@@ -170,7 +170,7 @@ public class DelegationHandler<T> implements IDelegationHandler<T>, Serializable
         return method.getDeclaringClass() + "."
             + method.getName()
             + "("
-            + StringUtil.toString(args, Integer.MAX_VALUE)
+            + args != null ? StringUtil.toString(args, Integer.MAX_VALUE) : ""
             + ")";
     }
 

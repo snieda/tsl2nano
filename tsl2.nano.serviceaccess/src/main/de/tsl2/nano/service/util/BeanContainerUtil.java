@@ -66,17 +66,25 @@ public class BeanContainerUtil {
     private static final Log LOG = LogFactory.getLog(BeanContainerUtil.class);
 
     public static ClassLoader initProxyServiceFactory() {
-        System.setProperty(ServiceLocator.NO_JNDI, "true");
+        return initServiceFactory(createProxyGenService(), true);
+    }
+    public static ClassLoader initServiceFactory(IGenericService service, boolean noJNDI) {
+        if (noJNDI)
+            System.setProperty(ServiceLocator.NO_JNDI, "true");
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         if (!ServiceFactory.isInitialized()) {
             ServiceFactory.createInstance(cl);
         }
-        IGenericService service = BeanProxy.createBeanImplementation(IGenericService.class);
-        BeanProxy.setReturnEmptyCollections(service, true);
         ServiceFactory.instance().setInitialServices(
             MapUtil.asMap(IGenericService.class.getName(), service));
         ENV.addService(IGenericService.class, service);
         return cl;
+    }
+
+    public static IGenericService createProxyGenService() {
+        IGenericService service = BeanProxy.createBeanImplementation(IGenericService.class);
+        BeanProxy.setReturnEmptyCollections(service, true);
+        return service;
     }
 
     /**

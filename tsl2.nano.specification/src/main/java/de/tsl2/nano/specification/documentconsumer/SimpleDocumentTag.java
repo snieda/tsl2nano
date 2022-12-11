@@ -16,7 +16,6 @@ import de.tsl2.nano.specification.actions.Action;
 import de.tsl2.nano.specification.rules.Rule;
 import de.tsl2.nano.specification.rules.RuleDecisionTable;
 import de.tsl2.nano.specification.rules.RuleScript;
-import de.tsl2.nano.util.FilePath;
 
 public class SimpleDocumentTag implements Consumer<File> {
 	private static final Log LOG = LogFactory.getLog(SimpleDocumentTag.class);

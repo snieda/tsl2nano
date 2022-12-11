@@ -10,8 +10,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.anonymous.project.Address;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import de.tsl2.nano.action.IAction;
@@ -25,7 +23,6 @@ import de.tsl2.nano.bean.def.BeanModifier;
 import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.MethodAction;
-import de.tsl2.nano.bean.def.Presentable;
 import de.tsl2.nano.bean.def.ValueColumn;
 import de.tsl2.nano.bean.def.ValueGroup;
 import de.tsl2.nano.core.ManagedException;

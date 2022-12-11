@@ -28,7 +28,7 @@ public class H2LuceneIntegrationTest implements ENVTestPreparation {
         
         persistence = new Persistence();
 //        persistence.setConnectionUrl("jdbc:h2:tcp://localhost:9099/PUBLIC");
-        persistence.setConnectionUrl("jdbc:h2:./h2lucene-test");
+        persistence.setConnectionUrl("jdbc:h2:./target/h2lucene-test");
         databaseTool = new DatabaseTool(persistence);
 //        databaseTool.runDBServer();
         createTestDatabase();

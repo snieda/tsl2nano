@@ -4,9 +4,6 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import de.tsl2.nano.plugin.Plugins;
-import de.tsl2.nano.plugin.Plugin;
-
 public class InspectorsTest {
 
     @Test

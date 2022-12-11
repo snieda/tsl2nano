@@ -7,7 +7,6 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -15,7 +14,6 @@ import java.util.Map.Entry;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
-import de.tsl2.nano.core.util.MapUtil;
 
 /**
  * exports any objects to ics format. example: new ICSCalendarExport("myCal").addAll(myObjects, MapUtil.asMap(FIELD.SUMMARY, "myTitle", ...)).write();

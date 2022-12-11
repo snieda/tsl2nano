@@ -26,7 +26,6 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.execution.ScriptEngineProvider;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.specification.ParType;
-import de.tsl2.nano.specification.Pool;
 import de.tsl2.nano.util.operation.Operator;
 
 /**

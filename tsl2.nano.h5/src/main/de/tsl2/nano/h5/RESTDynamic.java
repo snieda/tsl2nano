@@ -3,7 +3,6 @@ package de.tsl2.nano.h5;
 import java.util.Map;
 
 import de.tsl2.nano.core.ENV;
-import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.h5.NanoHTTPD.Response;
 import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.IAuthorization;

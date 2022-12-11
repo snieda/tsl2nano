@@ -13,8 +13,6 @@ import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.MapUtil;
-import de.tsl2.nano.specification.ParType;
-import de.tsl2.nano.specification.Pool;
 import de.tsl2.nano.specification.rules.Rule;
 
 public class RuleTest implements ENVTestPreparation {

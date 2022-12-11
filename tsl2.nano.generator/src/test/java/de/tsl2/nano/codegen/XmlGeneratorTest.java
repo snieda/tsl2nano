@@ -16,7 +16,6 @@ import org.yaml.snakeyaml.Yaml;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
-import de.tsl2.nano.codegen.XmlGenerator;
 
 public class XmlGeneratorTest implements ENVTestPreparation {
     private static final Log LOG = LogFactory.getLog(XmlGeneratorTest.class);

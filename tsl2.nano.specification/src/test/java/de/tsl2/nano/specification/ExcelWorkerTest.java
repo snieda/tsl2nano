@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.specification.ExcelWorker;
-import de.tsl2.nano.specification.Worker;
 
 public class ExcelWorkerTest {
 	static int policiert = 0;

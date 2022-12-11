@@ -4,12 +4,10 @@ import static de.tsl2.nano.bean.def.IBeanCollector.MODE_CREATABLE;
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_EDITABLE;
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_MULTISELECTION;
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_SEARCHABLE;
-import static de.tsl2.nano.h5.NanoHTTPD.MIME_HTML;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.lang.Thread.State;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -27,8 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Map.Entry;
 import java.util.Stack;
 import java.util.concurrent.Executors;
 

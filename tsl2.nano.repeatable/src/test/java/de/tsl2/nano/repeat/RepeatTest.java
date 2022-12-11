@@ -15,8 +15,6 @@ import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.repeat.IChange;
-import de.tsl2.nano.repeat.ICommand;
 import de.tsl2.nano.repeat.impl.AChange;
 import de.tsl2.nano.repeat.impl.ACommand;
 import de.tsl2.nano.repeat.impl.CommandManager;

@@ -27,7 +27,7 @@ public class FBRImport implements BiConsumer<String[], Map<String, Object>>, BiF
 		TransformableBeanReader<Charge> reader = new TransformableBeanReader<>(Charge.class, 
 				ENV.get("timesheet.import.expression", "fromdate: fromtime-totime (pause^\\)\\:? ^value chargeitem comment"));
 		Collection<Charge> beans = reader.read(file);
-		Message.send("pesisting " + beans.size() + " items");
+		Message.send("persisting " + beans.size() + " items");
 		if (BeanContainer.isInitialized())
 			beans.forEach(b -> BeanContainer.instance().save(b));
 		Message.send("finished successfull (" + beans.size() + " items imported");

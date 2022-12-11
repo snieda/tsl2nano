@@ -14,9 +14,6 @@ import org.junit.Test;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.NetUtil;
-import de.tsl2.nano.network.JobContext;
-import de.tsl2.nano.network.JobServer;
-import de.tsl2.nano.network.Request;
 
 public class JobServerTest {
 

@@ -6015,3 +6015,5 @@ deploy:
     * [v] terminal: surefire not working on @{argLine} with add-opens and add-exports
     * [v] thymeleaf: compile problems?
     * [ ] check h5 tests with *surefire.testFailureIgnore*=false
+    * [ ] SimpleDateFormatter works not conform with JDK Versions before 10.0.1 and is deprecated. e.g. "EE" in german will now get "Mo." instead of "Mo". Use DateTimeFormatter instead.
+    

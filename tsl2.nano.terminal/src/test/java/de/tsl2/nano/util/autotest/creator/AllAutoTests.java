@@ -18,6 +18,6 @@ public class AllAutoTests {
 	public static void init() {
 		System.setProperty("tsl2.functiontest.filter.void.return", "true");
 		System.setProperty("tsl2.functiontest.filter", matchPackage(PlatformManagement.class, SIShell.class));
-		System.setProperty("tsl2.functiontest.filter.exclude", ".*(SIShell.main|PrintWriter).*");
+		System.setProperty("tsl2.functiontest.filter.exclude", ".*(SIShell.main|PrintWriter|Platform).*");
 	}
 }

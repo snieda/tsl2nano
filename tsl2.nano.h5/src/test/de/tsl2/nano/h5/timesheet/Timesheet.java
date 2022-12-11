@@ -114,7 +114,6 @@ import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.NanoH5App;
 import de.tsl2.nano.h5.RuleCover;
 import de.tsl2.nano.h5.SpecifiedAction;
-import de.tsl2.nano.h5.Users;
 import de.tsl2.nano.h5.collector.CSheet;
 import de.tsl2.nano.h5.collector.Compositor;
 import de.tsl2.nano.h5.collector.Controller;

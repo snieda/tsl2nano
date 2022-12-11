@@ -9,27 +9,15 @@
  */
 package de.tsl2.nano.codegen;
 
-import java.io.File;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Properties;
-import java.util.stream.Collectors;
 
 import org.apache.velocity.VelocityContext;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import de.tsl2.nano.core.ManagedException;
-import de.tsl2.nano.core.classloader.RuntimeClassloader;
-import de.tsl2.nano.core.cls.BeanClass;
-import de.tsl2.nano.core.cls.ClassFinder;
 import de.tsl2.nano.core.serialize.XmlUtil;
-import de.tsl2.nano.core.util.FileUtil;
-import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.core.util.Util;
+
 
 /**
  * <pre>

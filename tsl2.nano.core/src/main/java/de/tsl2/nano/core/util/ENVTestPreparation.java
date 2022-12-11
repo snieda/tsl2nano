@@ -8,7 +8,6 @@ import java.io.File;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
-import junit.runner.BaseTestRunner;
 
 /**
  * Prepares a tsl2.nano unit test with an ENV in directory 'target/test'

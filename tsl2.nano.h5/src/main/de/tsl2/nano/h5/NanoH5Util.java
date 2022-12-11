@@ -5,9 +5,7 @@ import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.bean.def.AbstractExpression;
 import de.tsl2.nano.bean.def.AttributeDefinition;
-import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.Constraint;
@@ -17,13 +15,11 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.execution.IPRunnable;
 import de.tsl2.nano.h5.collector.CSheet;
 import de.tsl2.nano.h5.collector.Controller;
 import de.tsl2.nano.h5.collector.QueryResult;
 import de.tsl2.nano.h5.collector.Statistic;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
-import de.tsl2.nano.h5.expression.RuleExpression;
 import de.tsl2.nano.specification.Pool;
 import de.tsl2.nano.specification.SpecificationExchange;
 import de.tsl2.nano.specification.actions.Action;

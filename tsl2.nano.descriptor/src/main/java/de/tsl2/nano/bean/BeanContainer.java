@@ -577,7 +577,7 @@ public class BeanContainer implements IBeanContainer {
      * see {@link #getIdAttribute(Object)}
      * 
      * @param bean instance
-     * @return true, if bean is persistable and id attribute is null
+     * @return true, if bean is persistable but id attribute is null
      */
     public boolean isTransient(Object bean) {
         final BeanAttribute idAttribute = getIdAttribute(bean);
@@ -687,7 +687,7 @@ public class BeanContainer implements IBeanContainer {
     }
 
     /**
-     * tries to create the 
+     * tries to create a composite key
      * @param newItem
      * @param idAttribute
      * @return

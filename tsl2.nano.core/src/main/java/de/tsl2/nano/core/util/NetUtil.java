@@ -48,7 +48,6 @@ import javax.net.ssl.SSLHandshakeException;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.core.ENV;
 //import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;

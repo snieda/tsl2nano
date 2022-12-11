@@ -18,7 +18,6 @@ import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
-import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.Util;
 
 /**
