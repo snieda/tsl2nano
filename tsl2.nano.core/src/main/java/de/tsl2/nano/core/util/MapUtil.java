@@ -100,14 +100,14 @@ public class MapUtil {
 	}
 
     public static Map asProperties(Object... keysAndValues) {
-        return asMap(new Properties(), keysAndValues);
+        return add(new Properties(), keysAndValues);
     }
 
     public static SortedMap asSortedMap(Object... keysAndValues) {
     	if (keysAndValues[0] instanceof Comparable)
-    		return asMap(new TreeMap<Object, Object>(), keysAndValues);
+    		return add(new TreeMap<Object, Object>(), keysAndValues);
     	else
-    		return asMap(new TreeMap<Object, Object>((o1, o2) -> o1.toString().compareTo(o2.toString())), keysAndValues);
+    		return add(new TreeMap<Object, Object>((o1, o2) -> o1.toString().compareTo(o2.toString())), keysAndValues);
     }
 
     /**
@@ -117,10 +117,10 @@ public class MapUtil {
      * @return map containing the given keys and values.
      */
     public static Map asMap(Object... keysAndValues) {
-        return asMap(new LinkedHashMap<Object, Object>(), keysAndValues);
+        return add(new LinkedHashMap<Object, Object>(), keysAndValues);
     }
 
-    public static <M extends Map> M asMap(M instance, Object... keysAndValues) {
+    public static <M extends Map> M add(M instance, Object... keysAndValues) {
         if (keysAndValues == null || keysAndValues.length % 2 == 1) {
             throw ManagedException.implementationError(
                 "the 'keysAndValues' parameters must not be null and must contain pairs of keys and values!",

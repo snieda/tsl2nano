@@ -3,13 +3,11 @@ package de.tsl2.nano.h5.timesheet;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
-import java.lang.reflect.InvocationHandler;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Locale;
 
-import javax.persistence.EntityManager;
 
 import org.anonymous.project.Charge;
 import org.anonymous.project.Chargeitem;
@@ -19,7 +17,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanProxy;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
@@ -30,8 +27,6 @@ import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.NanoH5Util;
-import de.tsl2.nano.serviceaccess.ServiceFactory;
-import de.tsl2.nano.serviceaccess.ServiceProxy;
 
 public class FBRImportTest implements ENVTestPreparation {
 

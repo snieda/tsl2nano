@@ -79,7 +79,7 @@ public class Workflow extends EntityBrowser implements Cloneable {
         	for (BeanAct a : activities) {
 //        		Message.send(this + " adding activity: " + a);
         		if (prev != null)
-        			net.addAndConnect(prev, a, MapUtil.asMap(new Parameter(), "condition", a.getCondition()
+        			net.addAndConnect(prev, a, MapUtil.add(new Parameter(), "condition", a.getCondition()
         					.replaceAll("[}{)(]", "").replace("&", "&amp;")));
 				prev = a;
 			}

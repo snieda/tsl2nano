@@ -437,7 +437,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             ATTR_METHOD,
             ENV.get("html5.http.method", "post"),
             enable("autocomplete", ENV.get("html5.form.autocomplete", true)), null);
-        addAntiCSRFTokenToForm(session, form);
+        if (session.getUserAuthorization() != null)
+            addAntiCSRFTokenToForm(session, form);
         return form;
     }
 
@@ -556,33 +557,35 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ATTR_METHOD,
                 ENV.get("html5.http.method", "post"), ATTR_STYLE,
                 style("display", "inline"));
-            addAntiCSRFTokenToForm(session, c2);
-            if (!useSideNav(99)) {
-                Element menu = createMenu(c2, "Menu");
-                createSubMenu(menu, ENV.translate("tsl2nano.application", true), "icons/equipment.png",
-                    getApplicationActions(session));
-                createSubMenu(menu, ENV.translate("tsl2nano.session", true), "icons/home.png",
-                    getSessionActions(session));
-                createSubMenu(menu, ENV.translate("tsl2nano.page", true), "icons/full_screen.png",
-                    getPageActions(session));
-            } else {
-                Collection<IAction> actions = new ArrayList<IAction>(getPageActions(session));
-                actions.addAll(getApplicationActions(session));
-                actions.addAll(getSessionActions(session));
-                if (!useSideNav(1 + actions.size()))
-                   ;//c3 = createExpandable(c3, "Menu", ENV.get("layout.header.menu.open", false));
-                createActionPanel(c2, actions,
-                    ENV.get("layout.header.button.text.show", true),
-                    ATTR_ALIGN, ALIGN_RIGHT);
+            if (session.getUserAuthorization() != null) {
+                addAntiCSRFTokenToForm(session, c2);
+                if (!useSideNav(99)) {
+                    Element menu = createMenu(c2, "Menu");
+                    createSubMenu(menu, ENV.translate("tsl2nano.application", true), "icons/equipment.png",
+                        getApplicationActions(session));
+                    createSubMenu(menu, ENV.translate("tsl2nano.session", true), "icons/home.png",
+                        getSessionActions(session));
+                    createSubMenu(menu, ENV.translate("tsl2nano.page", true), "icons/full_screen.png",
+                        getPageActions(session));
+                } else {
+                    Collection<IAction> actions = new ArrayList<IAction>(getPageActions(session));
+                    actions.addAll(getApplicationActions(session));
+                    actions.addAll(getSessionActions(session));
+                    if (!useSideNav(1 + actions.size()))
+                    ;//c3 = createExpandable(c3, "Menu", ENV.get("layout.header.menu.open", false));
+                    createActionPanel(c2, actions,
+                        ENV.get("layout.header.button.text.show", true),
+                        ATTR_ALIGN, ALIGN_RIGHT);
+                }
             }
         }
         return body;
     }
 
 	private void addAntiCSRFTokenToForm(ISession session, Element c2) {
-		if (WebSecurity.useAntiCSRFToken() && session instanceof NanoH5Session) {
+		if (WebSecurity.useAntiCSRFTokenInContent() && session instanceof NanoH5Session) {
 			String token = ((NanoH5Session)session).createAntiCSRFToken();
-			appendElement(c2, TAG_INPUT, ATTR_NAME, WebSecurity.HIDDEN_NAME, ATTR_ID, WebSecurity.HIDDEN_NAME, ATTR_VALUE, token, ATTR_HIDDEN);
+			appendElement(c2, TAG_INPUT, ATTR_NAME, WebSecurity.CSRF_TOKEN, ATTR_ID, WebSecurity.CSRF_TOKEN, ATTR_VALUE, token, ATTR_HIDDEN);
 		}
 	}
 
@@ -714,7 +717,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         }
 
         //navigation bar
-        if (interactive && !Util.isEmpty(navigation)) {
+        if (interactive && !Util.isEmpty(navigation) && session.getUserAuthorization() != null) {
             createNavigationbar(parent, navigation);
         }
 
@@ -1487,7 +1490,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             enable(ATTR_AUTOFOCUS, asDefault),
             null);
         if (image != null) {
-            appendElement(action, TAG_IMAGE, ATTR_SRC, image, ATTR_ALT, label);
+            appendElement(action, TAG_IMAGE, ATTR_SRC, image/*, ATTR_ALT, label //don't show the label twice*/);
         }
         String style =
             ENV.get("layout.action.style", ""/*STYLE_BACKGROUND_TRANSPARENT + style(STYLE_COLOR, COLOR_WHITE)*/);

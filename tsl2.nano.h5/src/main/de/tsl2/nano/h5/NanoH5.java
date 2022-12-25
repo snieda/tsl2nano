@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Map.Entry;
 import java.util.Stack;
 import java.util.concurrent.Executors;
 
@@ -497,6 +496,9 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         try {
             Plugins.process(INanoPlugin.class).requestHandler(uri, m, header, parms, files);
             InetAddress requestor = ((Socket) ((Map) header).get("socket")).getInetAddress();
+            Response whiteListError = checkWhiteList(requestor);
+            if (whiteListError != null)
+                return whiteListError;
             if (RESTDynamic.canRest(uri)) {
             	session = getSession(header, requestor);
             	if (session != null && checkSessionTimeout(session, requestor)) {
@@ -504,12 +506,12 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
             	}
             	return new RESTDynamic().serve(uri, method, header, parms, files);
             }
-            if (method.equals("GET") && !isAdmin(uri) && !RESTDynamic.canRest(uri)) {
+            if (method.equals("GET") && !isAdmin(uri) && !uri.endsWith("/help") && !RESTDynamic.canRest(uri)) {
                 // serve files
                 if (!NumberUtil.isNumber(uri.substring(1)) && HtmlUtil.isURI(uri)
                     && !uri.contains(Html5Presentation.PREFIX_BEANREQUEST)) {
                     Response response = super.serve(uri, method, header, parms, files);
-                    webSec.addETag(uri, response, "" + 24 * 3600);
+                    webSec.addETag(uri, response, ENV.get("app.session.etag.timeout", "" + 24 * 3600));
                     webSec.addSessionHeader(null, response);
                     return response;
                 }
@@ -527,18 +529,20 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
             //ETag from Browser: If-None-Match
             session = getSession(header, requestor);
             // application commands
-            if (uri.endsWith("/help"))
+            if ((method.equals("GET") && uri.endsWith("/help")) || method.equals("OPTIONS"))
                 return help();
             if (isAdmin(uri)) {
                 control(StringUtil.substring(uri, String.valueOf(hashCode())+"-", null), session);
             }
             if (session != null && session.getNavigationStack() == null) {
+                Message.send("bad session state, please login again!");
                 session.close();
                 session = null;
             }
             //if a user reconnects on the same machine, we remove his old session
             if (session != null && session.getUserAuthorization() != null && parms.containsKey("connectionUserName")
                 && !parms.get("connectionUserName").equals(session.getUserAuthorization().getUser().toString())) {
+                Message.send("cretaing new user session");
                 session.close();
                 session = null;
             }
@@ -563,17 +567,30 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
             }
     //        //workaround to avoid doing a cached request twice
     //        lastHeader = header;
-        } catch(Exception ex) {
+        } catch(Throwable ex) {
         	if (session == null)
-            	return createResponse(Status.BAD_REQUEST, MIME_HTML, ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : "Request unauthorized");
-            Message.send(ex);//don't let the server go down on any exception
+            	return createResponse(Status.UNAUTHORIZED, MIME_HTML, ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : "Request unauthorized");
+            else {
+                if (ex instanceof Exception) {
+                    Message.send(ex);//don't let the server go down on any exception
+            	    return createResponse(Status.BAD_REQUEST, MIME_HTML, ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : "Bad Request");
+                }
+                else
+                    return createResponse(Status.INTERNAL_ERROR, MIME_HTML, "Internal Server Error");
+            }
         }
         requests++;
         session.startTime = startTime;
         return session.serve(uri, method, header, parms, files);
     }
 
-	private void addRestAuthorizationFromSession(ISession session, String uri, String method, Map<String, String> header) {
+	private Response checkWhiteList(InetAddress requestor) {
+        return requestor.getHostAddress().matches(ENV.get("app.session.requestor.whitelist.regex", ".*"))
+            ? null
+            : createResponse(Status.FORBIDDEN, MIME_HTML, "Request forbidden");
+    }
+
+    private void addRestAuthorizationFromSession(ISession session, String uri, String method, Map<String, String> header) {
 		header.put("authorization", ARESTDynamic.createDigest(uri, method, ""));
 		((Map)header).put("session", session);
 		header.put("user", ((IAuthorization)session.getUserAuthorization()).getUser().toString());
@@ -602,7 +619,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
 	}
 
     private boolean isAdmin(String uri) {
-        return uri != null && uri.contains(String.valueOf(hashCode()));
+        return uri != null && HtmlUtil.isURI(uri) && uri.contains(String.valueOf(hashCode()));
     }
 
     private Response help() {

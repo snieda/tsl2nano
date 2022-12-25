@@ -143,7 +143,7 @@ public class NanoH5Test implements ENVTestPreparation {
         System.setProperty("file.encoding", "UTF-8");
         System.setProperty("sun.jnu.encoding", "UTF-8");
         System.setProperty("JAVA_OPTS", "-Xmx512m -Djava.awt.headless -agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=n");
-//        System.setProperty("tsl2nano.offline", "true");
+       System.setProperty("tsl2nano.offline", "true");
 //        System.setProperty("websocket.use", "false");
         System.setProperty("app.show.startpage", "false");
         System.setProperty("app.session.anticsrf", "false");
@@ -410,6 +410,8 @@ public class NanoH5Test implements ENVTestPreparation {
 
     @Test
     public void testTimesheet() throws Exception {
+        // starting with JDK9, date/time locale formats changed!
+        System.setProperty("java.locale.providers", "COMPAT,CLDR");
     	// deep scheint mit andreren Tests zu kollidieren....
         System.setProperty("app.session.anticsrf", "false");
         System.setProperty("nanoh5test.run.deep", "false");

@@ -299,6 +299,10 @@ public class UnboundAccessor<T> {
         return name.split("\\.");
     }
 
+    public boolean hasMember(String path) {
+        return forceMember(path) != null;
+    }
+    
     /**
      * calls {@link #member(Object, String...)} and catches Exceptions. if member is not available, null will be
      * returned instead of throwing an exception.

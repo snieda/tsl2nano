@@ -141,7 +141,7 @@ public class RuleDecisionTable<T> extends AbstractRule<T> {
     public T run(Map<String, Object> context, Object... extArgs) {
         //first, we create a matching table with 0 or 1
         T result = evalResult(createMatchTable(context));
-        if (result == null) {
+        if (result == null && ENV.isModeStrict()) {
             throw new IllegalArgumentException("no value of given context matches any rule in decision table!\n\tcontext: " + context + "\n\tdecisiontable:\n\t" + par);
         }
         return result;
@@ -364,7 +364,7 @@ class DecisionTableInterpreter {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private List<Condition<?>> interpret(String[] conditions) {
-        final String OPEXP = "[^\\w]{1,2}";
+        final String OPEXP = "[^\\w\\s.,;]{1,2}";
         ArrayList<Condition<?>> conds = new ArrayList<Condition<?>>();
         String op, c;
         for (int i = 0; i < conditions.length; i++) {
@@ -392,5 +392,10 @@ class Condition<T extends Comparable<T>> {
         int c = comparable != null ? comparable.compareTo(operand2) : -1;
         return op.equals("=") ? c == 0 : op.equals("<") ? c < 0 : op.equals("<=") ? c <= 0 : op.equals(">") ? c > 0
             : op.equals(">=") ? c >= 0 : op.equals("!=") ? c != 0 : false;
+    }
+
+    @Override
+    public String toString() {
+        return Util.toString(getClass(), op, operand2);
     }
 }

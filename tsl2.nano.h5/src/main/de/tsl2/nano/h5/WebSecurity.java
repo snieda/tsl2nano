@@ -1,13 +1,17 @@
 package de.tsl2.nano.h5;
 
 import java.net.InetAddress;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.Map;
+
 
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.secure.Crypt;
 import de.tsl2.nano.core.util.DateUtil;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.h5.NanoHTTPD.Response;
 
@@ -15,21 +19,43 @@ import de.tsl2.nano.h5.NanoHTTPD.Response;
  * tries to resolve simple OWASP security aspects.<p/>
  * asks ENV for properties starting with "app.session."
  * 
+ * see: https://cheatsheetseries.owasp.org/IndexTopTen.html
+ * see: https://infosec.mozilla.org/guidelines/web_security#cross-origin-resource-sharing
+ * 
  * @author ts
  */
 public class WebSecurity {
-	private static final String SEP = "---";
-
 	private String antiCSRFKey;
 	
 	private static final String ENV_PREF = "app.session.";
 
 	private static final String PREF_ANTICSRF = ENV_PREF + "anticsrf";
-	public static final String HIDDEN_NAME = "hiddentoken";
+	public static final String CSRF_TOKEN = "csrftoken";
 	public static final String DEF_ALG = "AES";
 	
+	private static final String ETAG = "ETag";
+	private static final String REQUEST_COOKIE = "cookie";
+	private static final String SET_COOKIE = "Set-Cookie";
+	private static final String SEP = "---";
+	private static final String SESSION_ID = "session-id";
+
+	private static final String STANDARD_HEADER = 
+	  "Referrer-Policy: same-origin; "
+	+ "X-XSS-Protection: 1;mode=block; "
+	+ "X-Frame-Options: sameorigin; "
+	+ "Content-Security-Policy: frame-ancestors 'self'; "
+	+ "X-Content-Type-Options: nosniff; "
+	+ "Strict-Transport-Security: maxage=31536000; "
+	+ "IncludeSubDomains: true";
+
     public static boolean useAntiCSRFToken() {
     	return ENV.get(PREF_ANTICSRF, true);
+    }
+    public static boolean useAntiCSRFTokenInContent() {
+    	return useAntiCSRFToken() && ENV.get(PREF_ANTICSRF + ".incontent", true);
+    }
+    public static boolean useAntiCSRFTokenInHeader() {
+    	return useAntiCSRFToken() && ENV.get(PREF_ANTICSRF + ".inheader", true);
     }
     public String createAntiCSRFToken(NanoH5Session session) {
     	try {
@@ -48,9 +74,12 @@ public class WebSecurity {
 			antiCSRFKey = Crypt.generatePassword((byte)16);
 		return antiCSRFKey;
 	}
-	public void checkAntiCSRFToken(NanoH5Session session, String token) {
-		if (!useAntiCSRFToken()/* || antiCSRFKey == null*/)
+
+	private void checkAntCSRFToken(NanoH5Session session, String token) {
+		if (!useAntiCSRFToken())
 			return;
+		if (token == null)
+			throw new IllegalStateException("request is missing anti-csrf token");
 		String sessionInfo = Crypt.decrypt(token, getAntiCSRFKey(), ENV.get(PREF_ANTICSRF + ".algorithm", DEF_ALG));
 		String[] splitInfo = sessionInfo.split("[-]{3}");
 		boolean attack = false;
@@ -60,8 +89,8 @@ public class WebSecurity {
 			if (tokenAge.before(now))
 				attack = true;
 			else {
-				if (ENV.get(PREF_ANTICSRF + ".check.form", false)) {
-					if (!splitInfo[1].equals(session.getWorkingObject().getId()))
+				if (ENV.get(PREF_ANTICSRF + ".check.request", true)) {
+					if (!splitInfo[1].equals(String.valueOf(session.getWorkingObject().getId())))
 						attack = true;
 				}
 			}
@@ -75,42 +104,78 @@ public class WebSecurity {
 		}
 	}
 
+	public void checkSession(NanoH5Session session, String method, Map<String, String> header, Map<String, String> params) {
+		if (session.isNew())
+			return;
+		String sessionTag = header.get(REQUEST_COOKIE);
+		String[] hs = sessionTag.split("[;]");
+		Map<String, String> sessionValues = new LinkedHashMap<>(hs.length);
+		Arrays.stream(hs).forEach(e -> MapUtil.add(sessionValues, e.trim().split("\\s*=\\s*")));
+
+		checkSessionID(session, sessionValues);
+		if (session.getUserAuthorization() != null) {
+			if (useAntiCSRFTokenInHeader())
+				checkAntCSRFToken(session, sessionValues.get(CSRF_TOKEN));
+			if (method.equals("POST") && useAntiCSRFTokenInContent())
+				checkAntCSRFToken(session, params.get(CSRF_TOKEN));
+		}
+
+	}
+
+	private void checkSessionID(NanoH5Session session, Map<String, String> sessionValues) {
+		String sessionId = sessionValues.get(SESSION_ID);
+		if (sessionId == null)
+			throw new IllegalStateException("missing " + SESSION_ID);
+		if (!sessionId.equals(session.getKey()))
+			throw new IllegalStateException("bad " + SESSION_ID);
+	}
 	public Response addSessionHeader(NanoH5Session session, Response response) {
-		if (session != null)
+		if (session != null) {
 			addSessionID(session, response);
-		
-		String header = ENV.get(ENV_PREF + "httpheader", "X-XSS-Protection: 1; mode=block, X-Frame-Options: sameorigin, X-Content-Type-Options: nosniff;");
-		String[] keyValues = header.split("\\s*[,:]\\s*");
+			if (session.getUserAuthorization() != null && useAntiCSRFTokenInHeader()) {
+				response.addHeader(getSessionTagName(), CSRF_TOKEN + "=" + createAntiCSRFToken(session));
+			}
+		}
+		String header = getStandardHeader();
+		String[] keyValues = header.split("\\s*[;:]\\s+");
 		for (int i = 0; i < keyValues.length; i+=2) {
 			response.addHeader(keyValues[i].trim(), keyValues[i+1].trim());
 		}
 		return response;
 	}
+	private String getStandardHeader() {
+		String header = ENV.get(ENV_PREF + "httpheader", 
+			  STANDARD_HEADER);
+		return header;
+	}
     public static Object getSessionID(Map<String, String> header, InetAddress requestor) {
         //header keys are case insenstive and are stored by NanoHttpd in lower case!
         return header.containsKey("if-none-match") ? header.get("if-none-match") 
-            : header.containsKey("cookie") ? StringUtil.substring(header.get("cookie"), "session-id=", ";")
+            : header.containsKey(REQUEST_COOKIE) ? StringUtil.substring(header.get(REQUEST_COOKIE), SESSION_ID + "=", ";")
                 : requestor;
     }
 
 	protected void addSessionID(NanoH5Session session, Response response) {
-        if (session.getKey() != null) {
-            String sessionMode = ENV.get(ENV_PREF + "id", "Cookie");
-            String maxAge = "Max-Age=" + (ENV.get("session.timeout.millis", 30 * DateUtil.T_MINUTE) / 1000) + ";";
-            if (sessionMode.equals("Cookie")) {
-                String secure = ENV.get("app.ssl.activate", false) ? "secure; " : ";";
-                response.addHeader("Set-Cookie", "session-id=" + session.getKey() + ";" + secure + maxAge 
-                		+ ENV.get(ENV_PREF + "cookie.parameter", "SameSite=Strict; HttpOnly;"));                    
-            } else if (sessionMode.equals("ETag")) {
-                addETag(session.getKey(), response, maxAge);
-            } else { // client-ip
-            }
-        }
+		String sessionMode = getSessionTagName();
+		String maxAge = getMaxAge();
+		if (sessionMode.equals(SET_COOKIE)) {
+			String secure = ENV.get("app.ssl.activate", false) ? "secure; " : ";";
+			response.addHeader(SET_COOKIE, SESSION_ID + "=" + session.getKey() + ";" + secure + maxAge 
+					+ ENV.get(ENV_PREF + "cookie.parameter", "SameSite=Strict; HttpOnly; Path=/"));                    
+		} else if (sessionMode.equals(ETAG)) {
+			addETag(session.getKey(), response, maxAge);
+		} else { // client-ip
+		}
+	}
+	private String getMaxAge() {
+		return "Max-Age=" + (ENV.get(ENV_PREF + "timeout.millis", 30 * DateUtil.T_MINUTE) / 1000) + ";";
+	}
+	private String getSessionTagName() {
+		return ENV.get(ENV_PREF + "tag", SET_COOKIE);
 	}
 	public void addETag(String name, Response response, String maxAge) {
-		response.addHeader("ETag", "\"" + name + "\"");
+		response.addHeader(ETAG, "\"" + name + "\"");
 		// response.addHeader("Vary", "User-Agent");
 		response.addHeader("Cache-Control",maxAge);
 	}
-
 }

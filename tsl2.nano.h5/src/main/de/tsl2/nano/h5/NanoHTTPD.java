@@ -2244,7 +2244,7 @@ public abstract class NanoHTTPD extends Main {
             Map<String, String> parms,
             Map<String, String> files) {
 //        return newFixedLengthResponse(Response.Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Not Found");
-        return serveFile(uri, headers, myRootDir, true);
+        return serveFile(uri, headers, myRootDir, ENV.get("app.http.allow.directorylisting", true));
     }
 
     /**
@@ -2388,7 +2388,7 @@ public abstract class NanoHTTPD extends Main {
 //                              files.getProperty( value ) + "'" );
 //      }
 //
-        return serveFile(uri, header, myRootDir, true);
+        return serveFile(uri, header, myRootDir, ENV.get("app.http.allow.directorylisting", true));
     }
 
     /**

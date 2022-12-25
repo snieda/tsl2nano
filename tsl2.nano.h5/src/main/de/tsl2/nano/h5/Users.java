@@ -117,7 +117,9 @@ public class Users {
         Integer tries = userTries.get(userName);
         tries = tries == null ? 2 : tries + 1;
         userTries.put(userName, tries);
-        ConcurrentUtil.sleep(tries * tries * 1000);
+        long sleepTime = tries * tries * tries * ENV.get("app.session.loginfailure.sleep.mul.ms", 1000);
+        LOG.warn("sleep on retry: user login failed " + tries + " times, sleeping: " + sleepTime);
+        ConcurrentUtil.sleep(sleepTime);
     }
 
     private static void resetRetries(String userName) {

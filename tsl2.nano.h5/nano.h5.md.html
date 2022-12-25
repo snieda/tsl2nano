@@ -6015,5 +6015,20 @@ deploy:
     * [v] terminal: surefire not working on @{argLine} with add-opens and add-exports
     * [v] thymeleaf: compile problems?
     * [ ] check h5 tests with *surefire.testFailureIgnore*=false
-    * [ ] SimpleDateFormatter works not conform with JDK Versions before 10.0.1 and is deprecated. e.g. "EE" in german will now get "Mo." instead of "Mo". Use DateTimeFormatter instead.
-    
+    * [ ] SimpleDateFormat works not conform with JDK Versions before 10.0.1 and is deprecated. e.g. "EE" in german will now get "Mo." instead of "Mo". Use DateTimeFormatter instead.
+      * But be careful: SimpleDateFormat is an instance of Format, but DateTimeFormatter not!
+      * [v] settings java.locale.providers=COMPAT,CLDR while using SimpleDateFormat
+* security checks:
+    * how does OWASP ZAP bypass the login?
+    * why does OWASP ZAP show sql injections possibilities and CSRF?
+    * no rate limit: user name brute force attack?
+    * what happens of change http method (e.g.: POST <-> GET)
+    * check all links to other pages like help and ponyorm
+    * check for broken links
+    * check SQL injection, XSS
+    * check file up- and downloads (through fields and nanohttpd)
+    * check security leaks on java_websocket, nanohttpd and simple-xml
+    * which checks does OWASP ZAP provide?
+    * have a look at older penetrationtesting apps
+    * provide an additional optional request key
+    * check hiddentoken

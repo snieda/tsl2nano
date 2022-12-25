@@ -22,10 +22,14 @@ public class ENVUpdate2v5v0 implements IVersionRunner {
     public void update(ENV env, String currentVersion) {
         //TODO: implement ;-(
     	System.out.println("UPDATE 2.4.12 -> 2.5.0: PLEASE UPDATE THE FOLLOWING IN YOUR APPLICATION:\n"
+            + "    changed compiler/runtime from JDK8 to JDK17"
     		+ "    change all presentations having actions: all boolean/int values and the shortDescription are now attributes!\n"
     		+ "    change all activites of workflows: do the same changes as on the actions!\n"
     		+ "    secureactions, methodactions -> the same\n"
             + "    the following incubation packages will be moved ('incubation' part will be removed): specification, vnet, terminal"
+            + "    html security headers changed - test applications response..."
+            + "    JDK10 changed localized formatters (e.g. SimpleDateFormat.pattern 'EE': 'So' -> 'So.')"
+            + "    JDK17 removed ScriptEngine Nashorn (Rhino). Include a dependency in your pom or put it into environment directory"
             + "    h5: the standalone libraries will be actualized to newest versions, default database will be changed from h2 to hsqldb");
     }
 }

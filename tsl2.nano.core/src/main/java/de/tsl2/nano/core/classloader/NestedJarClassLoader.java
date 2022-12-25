@@ -26,7 +26,6 @@ import java.util.zip.ZipInputStream;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.log.LogFactory;
@@ -310,8 +309,10 @@ public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
     }
 
     public void reset() {
-    	if (!AppLoader.isJdkOracle())
-    		new PrivateAccessor<>(this).member("classes", Collection.class).clear();
+        PrivateAccessor<NestedJarClassLoader> acc = new PrivateAccessor<>(this);
+    	if (acc.hasMember("classes")) {
+            acc.member("classes", Collection.class).clear();
+        }
 	}
     
     @Override

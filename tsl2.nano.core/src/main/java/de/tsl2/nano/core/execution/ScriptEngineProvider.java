@@ -18,6 +18,8 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineFactory;
 import javax.script.ScriptEngineManager;
 
+import de.tsl2.nano.core.ENV;
+
 /**
  * Uses javascript engine (java6+7: rhino, java8: nashorn) to evaluate an operation.
  * 
@@ -59,6 +61,10 @@ public class ScriptEngineProvider<T> {
 		List<ScriptEngineFactory> engines = managerThread.getEngineFactories();
         if (engines.isEmpty()) {
         	engines = new ScriptEngineManager(System.class.getClassLoader()).getEngineFactories();
+            if (!ENV.isModeOffline()) {
+                ENV.loadJarDependencies(language);
+                engines = managerThread.getEngineFactories();
+            }
         	if (engines.isEmpty())
         		throw new IllegalStateException("no script engine available!");
         }

@@ -283,7 +283,7 @@ public class Timesheet extends NanoH5App {
         //create a decision-table
         TableList tl = new TableList<>("weekcolor", 2);
         tl.add("matrix", "<1>", "<2>", "<3>", "<4>", "<5>", "<6>", "<7>");
-        tl.add("weekday", "Mo", "Di", "Mi", "Do", "Fr","Sa", "So");
+        tl.add("weekday", "Mo.", "Di.", "Mi.", "Do.", "Fr.","Sa.", "So.");
         tl.add("result", greenColorStyle, greenColorStyle, greenColorStyle, greenColorStyle, greenColorStyle, redColorStyle, redColorStyle);
         String ruleDir = ENV.get(Pool.class).getDirectory(RuleDecisionTable.class);
         FileUtil.save(ruleDir + "weekcolor", tl.dump());

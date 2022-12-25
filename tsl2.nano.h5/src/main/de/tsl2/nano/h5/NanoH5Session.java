@@ -373,14 +373,12 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
             Map<String, String> header,
             Map<String, String> parms,
             Map<String, String> files) {
-        String msg = "[undefined]";
+        String msg = "No Usersession available - Please log in again!";
         ManagedException ex = null;
         try {
             logRequest(uri, method, header, parms, files);
             cacheReloaded = false;
-            if (method.equals("POST") && !(parms.get(WebSecurity.HIDDEN_NAME) == null && nav.current() == null))
-            	webSec.checkAntiCSRFToken(this, parms.get(WebSecurity.HIDDEN_NAME));
-            
+            webSec.checkSession(this, method, header, parms);
             //refresh session values on the current thread
             assignSessionToCurrentThread(true, MapUtil.filter(header, "User-Agent"));
 
@@ -391,7 +389,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
                 uri = "/";
             }
             //extract bean-specific prefix
-            BeanDefinition<?> linkToModel = nav.fromUrl(uri);
+            BeanDefinition<?> linkToModel = getUserAuthorization() != null ? nav.fromUrl(uri) : null;
             Object userResponse = null;
             /*
              * uri:
@@ -400,7 +398,11 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
              * - selection-link-number in beancollector
              * - bean action of Html5PresentationHelper
              */
-            Number uriLinkNumber = linkToModel != null ? null : NumberUtil.extractNumber(uri.substring(1));
+            Number uriLinkNumber = linkToModel != null 
+                ? null 
+                : getUserAuthorization() != null 
+                    ? NumberUtil.extractNumber(uri.substring(1)) 
+                    : null;
             //form-button clicked - or first page
             if (!parms.isEmpty() || linkToModel != null || uriLinkNumber != null || response == null
                 || uri.contains(Html5Presentation.PREFIX_BEANREQUEST)) {
@@ -431,7 +433,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
         } catch (Throwable e /*respect errors like NoClassDefFound...the application should continue!*/) {
             LOG.error(e);
             if (nav == null) // -> session closed
-            	return server.createResponse(Status.BAD_REQUEST, MIME_HTML, e.getLocalizedMessage() != null ? e.getLocalizedMessage() : "Request unauthorized");
+            	return server.createResponse(Status.NOT_FOUND, MIME_HTML, e.getLocalizedMessage() != null ? e.getLocalizedMessage() : "Please login again!");
             ex = new ManagedException(e) {
                 /** serialVersionUID */
                 private static final long serialVersionUID = 1L;
@@ -1284,4 +1286,8 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
 	public void sendMessage(String txt) {
    		exceptionHandler.uncaughtException(Thread.currentThread(), new Message(txt));
 	}
+
+    public boolean isNew() {
+        return requests == 0;
+    }
 }

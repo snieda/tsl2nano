@@ -325,7 +325,7 @@ public class ENV implements Serializable {
             return;
         }
         String versionURL = get("app.update.url", "https://sourceforge.net/projects/tsl2nano/files/latest/download?source=navbar");
-        String currentVersion = get("app.version", "0.0.0");
+        String currentVersion = get("app.update.current.version", "0.0.0");
         Updater updater = new Updater("h5",
         		versionURL,
         		currentVersion,
@@ -334,9 +334,9 @@ public class ENV implements Serializable {
         if (versionURL != null)
             if (updater.checkAndUpdate(currentVersion, versionURL)) {
 		        if (updater.run(configFile.getPath(), buildInfo, self()))
-		            setProperty("app.version", buildInfo);
+		            setProperty("app.update.current.version", buildInfo);
 //            } else if (currentVersion == null) {
-//	            setProperty("app.version", buildInfo);
+//	            setProperty("app.update.current.version", buildInfo);
             }
     }
 
@@ -1259,5 +1259,13 @@ public class ENV implements Serializable {
      */
     public static void trace(Object caller, Object item) {
         logger(caller.getClass()).trace(item);
+    }
+
+    public static boolean isModeStrict() {
+        return get("app.mode.strict", false);
+    }
+
+    public static boolean isModeOffline() {
+        return Boolean.getBoolean("tsl2nano.offline");
     }
 }
