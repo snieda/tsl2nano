@@ -390,10 +390,11 @@
 	                                <sysproperty key="app.server.running" value="true" />
 	                                <sysproperty key="app.database.internal.server.run" value="true" />
 	                                <sysproperty key="websocket.use" value="true" />
-	                                <sysproperty key="tsl2nano.offline" value="false" />
+	                                <sysproperty key="tsl2nano.offline" value="true" />
 	                                <sysproperty key="app.show.startpage" value="false" />
 									<sysproperty key="app.update.interval.days" value="-1"/>
 									<sysproperty key="app.stop.allow.system.exit" value="false"/>
+									<sysproperty key="app.session.anticsrf" value="false" />>
 	                            </java>
 								<sleep seconds="20" />
 								<echo>RESUMING ${project.build.finalName} integration-test</echo>

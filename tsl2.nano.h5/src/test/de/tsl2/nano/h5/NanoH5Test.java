@@ -144,7 +144,7 @@ public class NanoH5Test implements ENVTestPreparation {
         System.setProperty("file.encoding", "UTF-8");
         System.setProperty("sun.jnu.encoding", "UTF-8");
         System.setProperty("JAVA_OPTS", "-Xmx512m -Djava.awt.headless -agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=n");
-       System.setProperty("tsl2nano.offline", "true");
+        System.setProperty("tsl2nano.offline", "true");
 //        System.setProperty("websocket.use", "false");
         System.setProperty("app.show.startpage", "false");
         System.setProperty("app.session.anticsrf", "false");
