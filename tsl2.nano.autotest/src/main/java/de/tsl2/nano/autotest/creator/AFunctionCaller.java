@@ -1,6 +1,5 @@
 package de.tsl2.nano.autotest.creator;
 
-import static de.tsl2.nano.autotest.creator.AFunctionCaller.def;
 import static de.tsl2.nano.autotest.creator.AutoTest.TIMEOUT;
 
 import java.lang.reflect.Method;

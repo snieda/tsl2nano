@@ -6,6 +6,7 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.io.File;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.lang.annotation.Retention;
@@ -111,6 +112,8 @@ public class ValueRandomizer {
 			n = FileUtil.userDirFile(String.valueOf(n)).getAbsolutePath();
 		}
 		try {
+			// best place to prepare all strings, used as filenames....
+			n = FileUtil.userDirFile(String.valueOf(n)).getAbsolutePath();
 			return ObjectUtil.wrap(n, typeOf);
 		} catch (Exception e) {
 			if (checkMaxDepth(depth) && ObjectUtil.isInstanceable(typeOf)) {
@@ -171,8 +174,8 @@ public class ValueRandomizer {
 		try {
 			Constructor<?> constructor;
 			Object[] parameters;
-			if (PrintWriter.class.isAssignableFrom(typeOf)) { // poor workaround to avoid PrintWriter writing to project directory (instead of target)
-				constructor = (Constructor<?>) Util.trY( () -> PrintWriter.class.getConstructor(File.class));
+			if (hasFileConstructor(typeOf)) {
+				constructor = (Constructor<?>) Util.trY( () -> typeOf.getConstructor(File.class));
 				parameters = new Object[] {FileUtil.userDirFile(createRandomValue(String.class))};
 			} else {
 				constructor = getBestConstructor(typeOf);
@@ -188,6 +191,14 @@ public class ValueRandomizer {
 			return null;
 		}
 	}
+
+	private static boolean hasFileConstructor(Class<?> typeOf) {
+		String fileConstructorNames = System.getProperty(AutoTest.PREFIX_FUNCTIONTEST + "fileconstructor.classes", 
+			PrintWriter.class.getName() + ", " + 
+			PrintStream.class.getName());
+		List<String> fileConstructorClasses = Arrays.asList(fileConstructorNames.split("\\s*[,;]\\s*"));
+		return fileConstructorClasses.contains(typeOf.getName());
+}
 
 	private static <T> Constructor<T> getBestConstructor(Class<T> typeOf) {
 		if (BeanClass.hasDefaultConstructor(typeOf))
@@ -269,7 +280,7 @@ public class ValueRandomizer {
 		valueSets.clear();
 	}
 }
-@SuppressWarnings({"serial", "rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked"})
 class ValueSets extends HashMap<Class, List<String>> {
 	
 	private static final String MINMAX = "<->";

@@ -61,7 +61,7 @@ public class ActionScript<T> extends AbstractRunnable<T> {
     private static void provideLanguage(String language) {
         if (language != null && ClassFinder.self().findClass(language) == null) {
             String pck = ENV.getPackagePrefix(language);
-            if (pck != null)
+            if (pck != null && !ENV.isModeOffline())
             	ENV.loadClassDependencies(pck);
         }
     }

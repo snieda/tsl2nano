@@ -585,7 +585,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
     }
 
 	private Response checkWhiteList(InetAddress requestor) {
-        return requestor.getHostAddress().matches(ENV.get("app.session.requestor.whitelist.regex", ".*"))
+        return requestor == null
+                || requestor.getHostAddress().matches(ENV.get("app.session.requestor.whitelist.regex", ".*"))
             ? null
             : createResponse(Status.FORBIDDEN, MIME_HTML, "Request forbidden");
     }

@@ -114,6 +114,7 @@ public class NanoH5Test implements ENVTestPreparation {
 
     @Test
     public void testJS() throws Exception {
+        setENVProperties();
         LinkedHashMap<String, ParType> p = new LinkedHashMap<String, ParType>();
         Charge charge = new Charge();
         charge.setFromdate(DateUtil.getToday());
@@ -148,7 +149,13 @@ public class NanoH5Test implements ENVTestPreparation {
         System.setProperty("app.show.startpage", "false");
         System.setProperty("app.session.anticsrf", "false");
         System.setProperty("app.update.last", new java.sql.Date(0).toString());
+        System.setProperty("app.update.interval.days", "-1");
         System.setProperty("app.stop.allow.system.exit", "false");
+
+        // starting with JDK9, date/time locale formats changed!
+        System.setProperty("java.locale.providers", "COMPAT,CLDR");
+    	// deep scheint mit andreren Tests zu kollidieren....
+        System.setProperty("nanoh5test.run.deep", "false");
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -410,13 +417,9 @@ public class NanoH5Test implements ENVTestPreparation {
 
     @Test
     public void testTimesheet() throws Exception {
-        // starting with JDK9, date/time locale formats changed!
-        System.setProperty("java.locale.providers", "COMPAT,CLDR");
-    	// deep scheint mit andreren Tests zu kollidieren....
-        System.setProperty("app.session.anticsrf", "false");
-        System.setProperty("nanoh5test.run.deep", "false");
-        System.setProperty("app.update.interval.days", "-1");
-        System.setProperty("app.stop.allow.system.exit", "false");
+        setENVProperties();
+        // System.setProperty("nanoh5test.run.deep", "true");
+
         Properties mapper = new Properties();
         createAndTest(new Timesheet(getServiceURL(), null) {
             @Override
