@@ -40,7 +40,7 @@ public class WebSecurity {
 	private static final String SESSION_ID = "session-id";
 
 	private static final String STANDARD_HEADER = 
-	  "Referrer-Policy: same-origin\n"
+	  "\nReferrer-Policy: same-origin\n"
 	+ "X-XSS-Protection: 1;mode=block\n"
 	+ "X-Permitted-Cross-Domain-Policies: master-only\n"
 	+ "X-Frame-Options: sameorigin\n"
@@ -50,6 +50,8 @@ public class WebSecurity {
 	+ "IncludeSubDomains: true;\n"
 	+ "Content-Security-Policy: script-src 'self' 'unsafe-inline' 'XnXoXnXcXe-${requestId}';\n"
 	+ "Content-Security-Policy: frame-src 'self';\n"
+	+ "Content-Security-Policy: frame-ancestors 'self';\n"
+	+ "Content-Security-Policy: form-action 'self';\n"
 	+ "Content-Security-Policy: default-src 'self' 'unsafe-inline' filesystem ${service.url} ${websocket.url};\n"; 
 
     public static boolean useAntiCSRFToken() {
