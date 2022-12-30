@@ -352,3 +352,19 @@ function isHex(h) {
 	var a = parseInt(h,16);
 	return (a.toString(16) ===h.toLowerCase())
 }
+
+function selectOnClick(e) {
+	e = e || window.event;
+	this_ = target(e).parentElement
+
+	/*if (e.originalEvent.detail < 2 || window.event.originalEvent.detail < 2) */
+	this_.getElementsByTagName('input')[0].checked = !this_.getElementsByTagName('input')[0].checked;
+}
+
+function openOnDblClick(e) {
+	e = e || window.event;
+	this_ = target(e).parentElement
+	
+	location=this_.getElementsByTagName('a')[0];
+	disablePage(e);
+}

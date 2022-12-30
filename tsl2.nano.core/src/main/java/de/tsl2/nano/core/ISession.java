@@ -65,4 +65,6 @@ public interface ISession<WORK> {
     WORK getWorkingObject();
 
 	InetAddress getInetAddress();
+
+    String getRequestId();
 }

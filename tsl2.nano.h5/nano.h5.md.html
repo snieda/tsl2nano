@@ -6018,17 +6018,18 @@ deploy:
     * [ ] SimpleDateFormat works not conform with JDK Versions before 10.0.1 and is deprecated. e.g. "EE" in german will now get "Mo." instead of "Mo". Use DateTimeFormatter instead.
       * But be careful: SimpleDateFormat is an instance of Format, but DateTimeFormatter not!
       * [v] settings java.locale.providers=COMPAT,CLDR while using SimpleDateFormat
-* security checks:
-    * how does OWASP ZAP bypass the login?
-    * why does OWASP ZAP show sql injections possibilities and CSRF?
-    * no rate limit: user name brute force attack?
-    * what happens of change http method (e.g.: POST <-> GET)
-    * check all links to other pages like help and ponyorm
-    * check for broken links
-    * check SQL injection, XSS
-    * check file up- and downloads (through fields and nanohttpd)
-    * check security leaks on java_websocket, nanohttpd and simple-xml
-    * which checks does OWASP ZAP provide?
-    * have a look at older penetrationtesting apps
-    * provide an additional optional request key
-    * check hiddentoken
+* security checks (see https://stackoverflow.com/questions/30280370/how-does-content-security-policy-csp-work):
+    * [v] how does OWASP ZAP bypass the login? <- does not anymore
+    * [ ] why does OWASP ZAP show sql injections possibilities and CSRF?
+    * [v] no rate limit: user name brute force attack? <- sleep on wrong input increased
+    * [-] what happens of change http method (e.g.: POST <-> GET)
+    * [ ] check all links to other pages like help and ponyorm
+    * [ ] check for broken links
+    * [ ] check SQL injection, XSS
+    * [v] check file up- and downloads (through fields and nanohttpd) <- env property added
+    * [ ] check security leaks on java_websocket, nanohttpd and simple-xml
+    * [?] have a look at older penetrationtesting apps
+    * [v] provide an additional optional request key
+    * [v] check csrf hiddentoken and session-id
+    * [x] Inline code is considered harmful, and you should avoid it. Copy all the JavaScript code and CSS to separate files and add them to the white-list.
+*[ ] layout: add high contrast scheme through click on status line

@@ -40,6 +40,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import javax.net.ssl.SSLContext;
@@ -74,6 +75,7 @@ import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.messaging.EMessage;
 import de.tsl2.nano.core.messaging.IListener;
+import de.tsl2.nano.core.secure.Crypt;
 import de.tsl2.nano.core.secure.PKI;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.DateUtil;
@@ -163,6 +165,8 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
     private String key;
 
     private WebSecurity webSec = new WebSecurity();
+
+    private String requestId;
     
     public static final String PREFIX_STATUS_LINE = "@";
 
@@ -656,6 +660,9 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
             return IAction.CANCELED;
         }
         refreshValues(nav.current(), parms);
+        
+        requestId = createRequestID();
+        
         Plugins.process(INanoPlugin.class).handleSessionRequest(this, parms);
         
         if (nav.current() instanceof Controller) {
@@ -718,6 +725,10 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
             responseObject = performAction(uri, nav.current(), parms, responseObject);
         }
         return responseObject;
+    }
+
+    private String createRequestID() {
+        return Crypt.hashHex("" + new Random().nextDouble() + System.currentTimeMillis());
     }
 
     private IAction<?> setNavigationGimmicks(Object responseObject, Map<String, String> parms) {
@@ -1289,5 +1300,9 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
 
     public boolean isNew() {
         return requests == 0;
+    }
+
+    public String getRequestId() {
+        return requestId;
     }
 }

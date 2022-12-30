@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
+import java.util.Properties;
 
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
@@ -40,13 +40,17 @@ public class WebSecurity {
 	private static final String SESSION_ID = "session-id";
 
 	private static final String STANDARD_HEADER = 
-	  "Referrer-Policy: same-origin; "
-	+ "X-XSS-Protection: 1;mode=block; "
-	+ "X-Frame-Options: sameorigin; "
-	+ "Content-Security-Policy: frame-ancestors 'self'; "
-	+ "X-Content-Type-Options: nosniff; "
-	+ "Strict-Transport-Security: maxage=31536000; "
-	+ "IncludeSubDomains: true";
+	  "Referrer-Policy: same-origin\n"
+	+ "X-XSS-Protection: 1;mode=block\n"
+	+ "X-Permitted-Cross-Domain-Policies: master-only\n"
+	+ "X-Frame-Options: sameorigin\n"
+	+ "Content-Security-Policy: default-src 'self';\n"
+	+ "X-Content-Type-Options: nosniff;\n"
+	+ "Strict-Transport-Security: maxage=31536000;\n"
+	+ "IncludeSubDomains: true;\n"
+	+ "Content-Security-Policy: script-src 'self' 'unsafe-inline' 'XnXoXnXcXe-${requestId}';\n"
+	+ "Content-Security-Policy: frame-src 'self';\n"
+	+ "Content-Security-Policy: default-src 'self' 'unsafe-inline' filesystem ${service.url} ${websocket.url};\n"; 
 
     public static boolean useAntiCSRFToken() {
     	return ENV.get(PREF_ANTICSRF, true);
@@ -136,12 +140,29 @@ public class WebSecurity {
 				response.addHeader(getSessionTagName(), CSRF_TOKEN + "=" + createAntiCSRFToken(session));
 			}
 		}
+		Properties p = provideProperties(session);
 		String header = getStandardHeader();
-		String[] keyValues = header.split("\\s*[;:]\\s+");
-		for (int i = 0; i < keyValues.length; i+=2) {
-			response.addHeader(keyValues[i].trim(), keyValues[i+1].trim());
+		String[] keyValues = header.split("\n");
+		String k, v, kk = "", vv = "";
+		for (int i = 0; i < keyValues.length; i++) {
+			k = StringUtil.substring(keyValues[i], null, ":").trim();
+			v = (k.equals(kk) ? vv + " ": "") + StringUtil.substring(keyValues[i], ":",null).trim();
+			v = StringUtil.insertProperties(v, p);
+			response.addHeader(k, v);
+			kk = k;
+			vv = v;
 		}
 		return response;
+	}
+	private Properties provideProperties(NanoH5Session session) {
+		Properties p = new Properties(System.getProperties());
+		String serviceUrl = ENV.get("service.url", "");
+		String websocketUrl = session != null ? StringUtil.substring(serviceUrl.replace("http", "ws"), null, ":", true) 
+			+ ":" + session.getWebsocketPort() : "";
+		p.put("service.url", serviceUrl);
+		p.put("websocket.url", websocketUrl);
+		p.put("requestId", session != null ? session.getRequestId() : "");
+		return p;
 	}
 	private String getStandardHeader() {
 		String header = ENV.get(ENV_PREF + "httpheader", 
