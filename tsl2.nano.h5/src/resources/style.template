@@ -1,3 +1,32 @@
+:root {
+    --font-color: white;
+    --disabled-color: lightgray;
+    --text-shadow: 1px 2px 2px black;
+    --bg-color: radial-gradient(#9960CC, #56246f);
+    --table-bg-color: rgba(247,247,247,.5);
+    --table-bg-even-color: rgba(255,255,255,.3);
+    --table-bg-odd-color: rgba(196,196,196,.3);
+}
+/* theme switching through a button (see footer panel) */
+html[data-theme='light'] {
+    --font-color: black;
+    --disabled-color: lightgray;
+    --text-shadow: none;
+    --bg-color: radial-gradient(#FFFFFF, #BBBBBB);
+    --table-bg-color: rgba(247,247,247,.5);
+    --table-bg-even-color: rgba(255,255,255,.3);
+    --table-bg-odd-color: rgba(196,196,196,.3);
+}
+html[data-theme='dark'] {
+    --font-color: white;
+    --disabled-color: lightgray;
+    --text-shadow: 1px 2px 2px black;
+    --bg-color: radial-gradient(#9960CC, #56246f);
+    --table-bg-color: rgba(247,247,247,.5);
+    --table-bg-even-color: rgba(255,255,255,.3);
+    --table-bg-odd-color: rgba(196,196,196,.3);
+}
+
 /* will be assigned as tag style under the html header */
 body {
     font-family: Lato, sans-serif;
@@ -13,13 +42,13 @@ tbody, .tbody {
 }
 thead, .thead {
    	display: table-header-group;
-   	background-color: rgba(247,247,247,.5);
+   	background-color: var(--table-bg-color);
    	font-weight: bold; 
 } 
 tfoot, .tfoot {
    	display: table-footer-group;
    	font-weight: bold;
-	background-color: rgba(247,247,247,.5); 
+	background-color: var(--table-bg-color); 
 } 
 tr, .tr, .beancollectorsearchrow {
    	display: table-row; 
@@ -30,13 +59,13 @@ td, th, .td, .th {
    	border: 1px; 
 } 
 tr:nth-child(even), .tr:nth-child(even) {
-  background-color: rgba(255,255,255,.3);
+  background-color: var(--table-bg-even-color);
 }
 tr:nth-child(odd), .tr:nth-child(odd) {
-  background-color: rgba(196,196,196,.3);
+  background-color: var(--table-bg-odd-color);
 }
 tr:hover, .tr:hover {
-  background-color: rgba(247,247,247,.5);
+  background-color: var(--table-bg-color);
 }
 
 .fade-out {
@@ -104,7 +133,7 @@ i:hover + p {
 .openbtn, .closebtn {
 	font-size: 36px;
 	cursor: pointer;
-	color: white;
+	color: var(--font-color);
 	background: radial-gradient(#9999FF, #000000);
 }
 
@@ -141,7 +170,7 @@ button {
     opacity: 0.7;
     background: #0055AA;
     border-bottom: 1px solid #0099ff;
-    color: white;
+    color: var(--font-color);
     font-weight: bold;
     margin: 0 0.1rem;
     text-align: center;
@@ -154,7 +183,7 @@ a{
     padding: 0.0rem 0.0em;
     opacity: 0.7;
     background: #0055AA;
-    color: white;
+    color: var(--font-color);
     font-weight: bold;
     margin: 0 0.0rem;
     text-align: center;
@@ -163,10 +192,10 @@ a{
 }
 button:disabled,button[disabled],ul:not(.menu)>li>a:not([href]){
   background: #999999;
-  color: lightgray;
+  color: var(--disabled-color);
 }
 button:hover,a:hover, button:focus,a:focus {
-    color: white;
+    color: var(--font-color);
     background: black;
     cursor: pointer;
 }
@@ -197,8 +226,8 @@ td, th, .td, .th {
 }
 #title,.title {
 	background: transparent;
-    color: white;
-    text-shadow: 1px 2px 2px black;
+    color: var(--font-color);
+    text-shadow: var(--text-shadow);
 	font-size: 1.4em; 
 }
 
@@ -227,8 +256,8 @@ body{
 nav {
     background: transparent;
     border: 1px solid #333;
-    color: white;
-    text-shadow: 1px 2px 2px black;
+    color: var(--font-color);
+    text-shadow: var(--text-shadow);
     display: block;
     margin: 0;
     overflow: hidden;
@@ -246,8 +275,8 @@ nav ul li {
 }
 
 nav > ul > li > a {
-    color: white;
-    text-shadow: 1px 2px 2px black;
+    color: var(--font-color);
+    text-shadow: var(--text-shadow);
     display: block !important;
     line-height: 2em;
     padding: 0.5em 2em;
@@ -264,8 +293,8 @@ nav li > ul li{
 }
 
 nav  li > ul li button {
-    color: white;
-    text-shadow: 1px 2px 2px black;
+    color: var(--font-color);
+    text-shadow: var(--text-shadow);
     display: block;
     line-height: 2em;
     padding: 0.5em 2em;
@@ -279,4 +308,28 @@ nav li:hover > ul, li:focus > ul, li:active > ul {
     position:absolute  !important;
     z-index: 1000;
     display : block !important;
+}
+
+* the media types for theme switching in browser tools */
+@media (prefers-color-scheme: dark) {
+    :root{
+        --font-color: white;
+        --disabled-color: lightgray;
+        --text-shadow: 1px 2px 2px black;
+        --bg-color: radial-gradient(#9960CC, #56246f);
+        --table-bg-color: rgba(247,247,247,.5);
+        --table-bg-even-color: rgba(255,255,255,.3);
+        --table-bg-odd-color: rgba(196,196,196,.3);
+    }
+}
+@media (prefers-color-scheme: light) {
+    :root{
+        --font-color: black;
+        --disabled-color: lightgray;
+        --text-shadow: none;
+        --bg-color: radial-gradient(#FFFFFF, #BBBBBB);
+        --table-bg-color: rgba(247,247,247,.5);
+        --table-bg-even-color: rgba(255,255,255,.3);
+        --table-bg-odd-color: rgba(196,196,196,.3);
+    }
 }

@@ -657,7 +657,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ENV.get("websocket.speak.alert.message", true);
                 ENV.get("app.login.secure", false);
             }
-            Element script = appendElement(parent, TAG_SCRIPT, ATTR_TYPE, ATTR_TYPE_JS, "nonce", session.getRequestId());
+            Element script = appendElement(parent, TAG_SCRIPT, ATTR_TYPE, ATTR_TYPE_JS, "nonce", (ENV.isTestMode() ? "1" : session.getRequestId()));
 
             TreeMap p = new TreeMap<>();
             //on reset, before re-loading ENV, it may be null
@@ -1645,7 +1645,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     true/*tableDescriptor.hasMode(IBeanCollector.MODE_EDITABLE)*/
                         ? "selectOnClick(event)"
                         : null,
-                        "nonce", session.getRequestId()
+                        "nonce", ENV.isTestMode() ? 1 : session.getRequestId()
                         );
                 }
         }
@@ -1678,7 +1678,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 true/*tableDescriptor.hasMode(IBeanCollector.MODE_EDITABLE)*/
                     ? "selectOnClick(event)"
                     : null,
-                "nonce", session.getRequestId()
+                "nonce", ENV.isTestMode() ? 1 : session.getRequestId()
                 );
                 return row;
             }
