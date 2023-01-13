@@ -205,7 +205,7 @@ public class HtmlUtil {
     public static final String STYLE_BACKGROUND_COLOR = "background-color";
     public static final String STYLE_BACKGROUND_TRANSPARENT = "background: transparent;";
     public static final String STYLE_BACKGROUND_RADIAL_GRADIENT =
-        "background: radial-gradient(#9999FF, #000000);";
+        "background: var(--bg-color);";
     public static final String STYLE_BACKGROUND_FADING_TRANSITION =
         "-webkit-transition: background 2.5s ease-in-out; -moz-transition: background 2.5s ease-in-out; -ms-transition: background 2.5s ease-in-out; -o-transition: background 2.5s ease-in-out; transition: background 2.5s ease-in-out;";
     public static final String STYLE_BACKGROUND_FADING_KEYFRAMES =

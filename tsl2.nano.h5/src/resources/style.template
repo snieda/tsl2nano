@@ -1,40 +1,76 @@
 :root {
+    --font-family: "Lato", "sans-serif";
     --font-color: white;
     --disabled-color: lightgray;
     --text-shadow: 1px 2px 2px black;
-    --bg-color: radial-gradient(#9960CC, #56246f);
+    --bg-color: radial-gradient(#9999FF, #000000);
+    --button-bg-color: #0055AA;
+    --button-bg-hover: black;
     --table-bg-color: rgba(247,247,247,.5);
     --table-bg-even-color: rgba(255,255,255,.3);
     --table-bg-odd-color: rgba(196,196,196,.3);
+    --border: none;
 }
-/* theme switching through a button (see footer panel) */
+/* theme switching through a button (see left header panel) */
 html[data-theme='light'] {
     --font-color: black;
     --disabled-color: lightgray;
     --text-shadow: none;
     --bg-color: radial-gradient(#FFFFFF, #BBBBBB);
-    --table-bg-color: rgba(247,247,247,.5);
-    --table-bg-even-color: rgba(255,255,255,.3);
-    --table-bg-odd-color: rgba(196,196,196,.3);
+    --button-bg-color: lightgray;
+    --button-bg-hover: white;
+    --table-bg-color: rgba(247,247,247,.8);
+    --table-bg-even-color: rgba(255,255,255,.6);
+    --table-bg-odd-color: rgba(196,196,196,.6);
 }
 html[data-theme='dark'] {
     --font-color: white;
     --disabled-color: lightgray;
     --text-shadow: 1px 2px 2px black;
-    --bg-color: radial-gradient(#9960CC, #56246f);
+    --bg-color: radial-gradient(#9999FF, #000000);
+    --button-bg-color: #0055AA;
+    --button-bg-hover: black;
     --table-bg-color: rgba(247,247,247,.5);
     --table-bg-even-color: rgba(255,255,255,.3);
     --table-bg-odd-color: rgba(196,196,196,.3);
 }
 
+html[data-theme='light-contrast'] {
+    --font-color: black;
+    --disabled-color: lightgray;
+    --text-shadow: none;
+    --bg-color: white;
+    --button-bg-color: lightgray;
+    --button-bg-hover: lightgray;
+    --table-bg-color: rgba(247,247,247,.8);
+    --table-bg-even-color: rgba(255,255,255,.6);
+    --table-bg-odd-color: rgba(196,196,196,.6);
+    --border: 1 px;
+}
+
+html[data-theme='dark-contrast'] {
+    --font-family: "Comic Sans MS", "serif";
+    --font-color: white;
+    --disabled-color: lightgray;
+    --text-shadow: none;
+    --bg-color: black;
+    --button-bg-color: #0055AA;
+    --button-bg-hover: gray;
+    --table-bg-color: rgba(247,247,247,.6);
+    --table-bg-even-color: rgba(255,255,255,.6);
+    --table-bg-odd-color: rgba(196,196,196,.6);
+    --border: 1 px;
+}
+
 /* will be assigned as tag style under the html header */
 body {
-    font-family: Lato, sans-serif;
+    font-family: var(--font-family);
     transition: background-color .5s;
 }
 .table .fieldpanel {
        display: table;
        margin: 0 auto;
+      color: var(--font-color);
    	/* width: 100%;  */
 } 
 tbody, .tbody {
@@ -164,11 +200,11 @@ dialog {
 button {
     display: inline-block;
     border-radius: 3px;
-    border: none;
+    border: var(--border);
     font-size: 0.9rem;
     padding: 0.4rem 0.8em;
     opacity: 0.7;
-    background: #0055AA;
+    background: var(--button-bg-color);
     border-bottom: 1px solid #0099ff;
     color: var(--font-color);
     font-weight: bold;
@@ -178,11 +214,11 @@ button {
 a{
     display: inline-block;
     border-radius: 0px;
-    border: none;
+    border: var(--border);
     font-size: 0.9rem;
     padding: 0.0rem 0.0em;
     opacity: 0.7;
-    background: #0055AA;
+    background: var(--button-bg-color);
     color: var(--font-color);
     font-weight: bold;
     margin: 0 0.0rem;
@@ -196,7 +232,7 @@ button:disabled,button[disabled],ul:not(.menu)>li>a:not([href]){
 }
 button:hover,a:hover, button:focus,a:focus {
     color: var(--font-color);
-    background: black;
+    background: var(--button-bg-hover);
     cursor: pointer;
 }
 dialog::backdrop{
@@ -316,7 +352,9 @@ nav li:hover > ul, li:focus > ul, li:active > ul {
         --font-color: white;
         --disabled-color: lightgray;
         --text-shadow: 1px 2px 2px black;
-        --bg-color: radial-gradient(#9960CC, #56246f);
+        --bg-color: radial-gradient(#9999FF, #000000);
+        --button-bg-color: #0055AA;
+        --button-bg-hover: black;
         --table-bg-color: rgba(247,247,247,.5);
         --table-bg-even-color: rgba(255,255,255,.3);
         --table-bg-odd-color: rgba(196,196,196,.3);
@@ -328,8 +366,10 @@ nav li:hover > ul, li:focus > ul, li:active > ul {
         --disabled-color: lightgray;
         --text-shadow: none;
         --bg-color: radial-gradient(#FFFFFF, #BBBBBB);
-        --table-bg-color: rgba(247,247,247,.5);
-        --table-bg-even-color: rgba(255,255,255,.3);
-        --table-bg-odd-color: rgba(196,196,196,.3);
+        --button-bg-color: lightgray;
+        --button-bg-hover: white;
+        --table-bg-color: rgba(247,247,247,.8);
+        --table-bg-even-color: rgba(255,255,255,.6);
+        --table-bg-odd-color: rgba(196,196,196,.6);
     }
 }

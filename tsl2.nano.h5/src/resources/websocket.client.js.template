@@ -4,6 +4,8 @@
 // to see the source in browser dev source tab, we give it a name
 //# sourceURL=websocket.client.js
 
+setTheme(false);
+
 /**
  * websocket client implementation.
  */
@@ -368,3 +370,25 @@ function openOnDblClick(e) {
 	location=this_.getElementsByTagName('a')[0];
 	disablePage(e);
 }
+function toggleOnClick() {
+	setTheme(true);
+}
+
+function setTheme(next) {
+	const themes = ['dark', 'light', 'dark-contrast', 'light-contrast'];
+    var currentTheme = document.documentElement.getAttribute("data-theme");
+	if (currentTheme === null)
+		currentTheme = localStorage.getItem('data-theme');
+	var index = themes.indexOf(currentTheme);
+
+	if (next == true) {
+		if (index < themes.length - 1) 
+			index++
+		else
+			index = 0;
+	}
+	var targetTheme = themes[index];
+    document.documentElement.setAttribute('data-theme', targetTheme);
+    localStorage.setItem('data-theme', targetTheme);
+    console.log('data-theme: ' + targetTheme);
+};

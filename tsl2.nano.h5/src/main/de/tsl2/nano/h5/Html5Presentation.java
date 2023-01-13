@@ -504,7 +504,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
          * c3: center: Page-Title with image
          */
         Element row = appendTag(createGrid(body, "page.header.table", "page.header.table", 0), TABLE(TAG_ROW));
-        Element c1 = appendTag(row, TABLE(TAG_CELL));
+        Element c1 = appendTag(row, TABLE(TAG_CELL, "onclick", "toggleOnClick()", "content", "T"));
         Element c2 = appendTag(row, TABLE(TAG_CELL));
         Element c3 = appendTag(row, TABLE(TAG_CELL));
         String localDoc = ENV.getConfigPath() + "nano.h5.html";
@@ -704,9 +704,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             availableshortCuts = new ArrayList(Arrays.asList(SHORTCUTS));
             tabIndex = -1;
             row1style = "";
-            ENV.get("layout.grid.row1.style", "background-color: rgba(128,128,128,.3);");
+            ENV.get("layout.grid.row1.style", "background-color: var(--table-bg-even-color);");
             row2style = "";
-            ENV.get("layout.grid.row2.style", "background-color: rgba(247,247,247,.3);");
+            ENV.get("layout.grid.row2.style", "background-color: var(--table-bg-odd-color);");
 
             if (bean == null) {
                 return createFormDocument(session, message.toString(), null, interactive);
