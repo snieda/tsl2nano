@@ -5,15 +5,19 @@ import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import java.io.Closeable;
 import java.io.File;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.io.Writer;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -108,9 +112,11 @@ public class ValueRandomizer {
 		}
 		// avoid writing files into the project folder (and not into target)
 		if (File.class.isAssignableFrom(typeOf) 
+			|| Path.class.isAssignableFrom(typeOf) 
 			|| String.class.isAssignableFrom(typeOf)
-			|| PrintWriter.class.isAssignableFrom(typeOf)
-			|| PrintStream.class.isAssignableFrom(typeOf)) {
+			|| Writer.class.isAssignableFrom(typeOf)
+			|| Closeable.class.isAssignableFrom(typeOf) 
+			|| OutputStream.class.isAssignableFrom(typeOf)) {
 			n = FileUtil.userDirFile(StringUtil.toBase64(n)).getAbsolutePath();
 		} else if (NumberUtil.isNumber(n)) {
 			n = convert(n, typeOf, zeroNumber, depth);
