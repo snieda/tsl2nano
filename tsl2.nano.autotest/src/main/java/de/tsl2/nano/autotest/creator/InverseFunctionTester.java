@@ -35,13 +35,20 @@ public class InverseFunctionTester extends AFunctionTester<InverseFunction> {
 	}
 
 	protected Object[] getParameter() {
-		if (parameter == null)
-			parameter = createStartParameter(def.parameters());
-		return parameter;
+		if (parameter == null && !status.in(StatusTyp.PARAMETER_UNDEFINED, StatusTyp.PARAMETER_ERROR)) {
+			try{
+				parameter = createStartParameter(def.parameters());
+			} catch (Exception e) {
+				status = new Status(StatusTyp.PARAMETER_ERROR, e.getMessage(), e);
+				parameter = null;
+				return null;
+			}
+		}
+	return parameter;
 	}
 	
 	protected Object[] getInverseParameter() {
-		if (parameterInverse == null) {
+		if (parameterInverse == null && !status.in(StatusTyp.PARAMETER_UNDEFINED, StatusTyp.PARAMETER_ERROR)) {
 			try {
 				parameterInverse = createStartParameter(source.getParameterTypes());
 				int[] bind = def.bindParameterIndexesOnInverse();

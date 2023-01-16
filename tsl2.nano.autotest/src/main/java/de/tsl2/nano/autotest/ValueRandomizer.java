@@ -106,14 +106,16 @@ public class ValueRandomizer {
 					&& (!PrimitiveUtil.isAssignableFrom(byte.class, typeOf)  || AFunctionCaller.def(AutoTest.ALLOW_SINGLE_BYTE_ZERO, false))
 					? 0d : createRandomNumber(typeOf);
 		}
-		if (NumberUtil.isNumber(n))
+		// avoid writing files into the project folder (and not into target)
+		if (File.class.isAssignableFrom(typeOf) 
+			|| String.class.isAssignableFrom(typeOf)
+			|| PrintWriter.class.isAssignableFrom(typeOf)
+			|| PrintStream.class.isAssignableFrom(typeOf)) {
+			n = FileUtil.userDirFile(StringUtil.toBase64(n)).getAbsolutePath();
+		} else if (NumberUtil.isNumber(n)) {
 			n = convert(n, typeOf, zeroNumber, depth);
-		else if (File.class.isAssignableFrom(typeOf)) {
-			n = FileUtil.userDirFile(String.valueOf(n)).getAbsolutePath();
 		}
 		try {
-			// best place to prepare all strings, used as filenames....
-			n = FileUtil.userDirFile(String.valueOf(n)).getAbsolutePath();
 			return ObjectUtil.wrap(n, typeOf);
 		} catch (Exception e) {
 			if (checkMaxDepth(depth) && ObjectUtil.isInstanceable(typeOf)) {
@@ -137,12 +139,6 @@ public class ValueRandomizer {
 				n = TypeBean.class; // TODO: create randomly
 		} else if (typeOf.equals(ClassLoader.class))
 			n = Thread.currentThread().getContextClassLoader(); // TODO: create randomly
-		else if (File.class.isAssignableFrom(typeOf))
-			n = FileUtil.userDirFile(StringUtil.toBase64(n)).getAbsolutePath();
-		else if (PrintWriter.class.isAssignableFrom(typeOf)) {
-			final String nn = StringUtil.toBase64(n);
-			n = Util.trY( () -> new PrintWriter(FileUtil.userDirFile(nn).getAbsolutePath()));
-		}
 		else if (Collection.class.isAssignableFrom(typeOf))
 			n = new ListSet<>(n);
 		else if (Properties.class.isAssignableFrom(typeOf))

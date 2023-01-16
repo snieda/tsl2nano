@@ -150,7 +150,8 @@ public class WebSecurity {
 			k = StringUtil.substring(keyValues[i], null, ":").trim();
 			v = (k.equals(kk) ? vv + " ": "") + StringUtil.substring(keyValues[i], ":",null).trim();
 			v = StringUtil.insertProperties(v, p);
-			response.addHeader(k, v);
+			if (k.trim().length() > 0 && v.trim().length() > 0)
+				response.addHeader(k, v);
 			kk = k;
 			vv = v;
 		}

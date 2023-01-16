@@ -369,7 +369,8 @@
 	            <artifactId>maven-antrun-plugin</artifactId>
 	            <executions>
 	                <execution>
-	                    <id>start-nanoh5-jar</id>
+	                    <!-- <id>start-nanoh5-jar</id> -->
+						<id>default-cli</id>
 	                    <phase>pre-integration-test</phase>
 	                    <goals>
 	                        <goal>run</goal>
@@ -377,26 +378,48 @@
 	                    <inherited>true</inherited>
 	                    <configuration>
 	                    	<failOnError>true</failOnError>
-	                    	<skip>${skipTests}</skip>
+	                    	<skip>${skipTests}</skip><!-- to be runnable through mvn antrun:run -->
 	                        <target>
 								<echo>STARTING ${project.build.finalName} on pre-integration-test</echo>
 								<!--<echoproperties/>-->
+								<!--output="${project.build.directory}/pre-integration-test/pre-integration-test.log" -->
 								<mkdir dir="${project.build.directory}/pre-integration-test" />
 	                            <java jar="${project.build.directory}/${artifactId}-${project.version}${jar-extension}.jar"
 	                            	  dir="${project.build.directory}/pre-integration-test"
 	                                  fork="true"
 									  spawn="true"
 									  >
-	                                <sysproperty key="app.server.running" value="true" />
+									   <jvmarg value="--add-modules=ALL-SYSTEM" />
+									   <jvmarg value="--illegal-access=warn" />
+									   <jvmarg value="--add-opens=java.base/java.lang=ALL-UNNAMED" />
+									   <jvmarg value="--add-opens=java.base/java.util=ALL-UNNAMED" />
+									   <jvmarg value="--add-opens=java.base/java.text=ALL-UNNAMED" />
+									   <jvmarg value="--add-opens=java.base/java.time.format=ALL-UNNAMED" />
+									   <jvmarg value="--add-opens=java.base/java.lang.reflect=ALL-UNNAMED" />
+									   <jvmarg value="--add-opens=java.base/sun.reflect.annotation=ALL-UNNAMED" />
+									   <jvmarg value="--add-opens=jdk.unsupported/jdk.internal.module=ALL-UNNAMED" />
+									   <jvmarg value="--add-exports=jdk.unsupported/jdk.internal.module=ALL-UNNAMED" />
+									   <jvmarg value="--add-opens=java.base/sun.security.x509=ALL-UNNAMED" />
+									   <jvmarg value="--add-opens=java.base/javax.security.auth=ALL-UNNAMED" />
+									   <jvmarg value="--add-opens=java.base/java.io=ALL-UNNAMED" />
+									   <jvmarg value="--add-opens=java.base/sun.nio.ch=ALL-UNNAMED" />
+									   <jvmarg value="--add-opens=java.base/java.net=ALL-UNNAMED" />
+									   <jvmarg value="--add-opens=java.base/sun.security.ssl=ALL-UNNAMED" />
+									   <jvmarg value="--add-opens=java.xml/javax.xml.stream.events=ALL-UNNAMED" />
+									   <jvmarg value="--add-opens=java.xml/org.w3c.dom=ALL-UNNAMED" />
+									   <jvmarg value="--add-opens=java.xml/javax.xml.namespace=ALL-UNNAMED" />
+									   <jvmarg value="--add-exports=java.management/sun.management=ALL-UNNAMED" />
+									<sysproperty key="app.server.running" value="true" />
 	                                <sysproperty key="app.database.internal.server.run" value="true" />
 	                                <sysproperty key="websocket.use" value="true" />
 	                                <sysproperty key="tsl2nano.offline" value="true" />
+	                                <sysproperty key="tsl2.nano.test" value="true" />
 	                                <sysproperty key="app.show.startpage" value="false" />
 									<sysproperty key="app.update.interval.days" value="-1"/>
 									<sysproperty key="app.stop.allow.system.exit" value="false"/>
 									<sysproperty key="app.session.anticsrf" value="false" />>
 	                            </java>
-								<sleep seconds="20" />
+								<sleep seconds="5" />
 								<echo>RESUMING ${project.build.finalName} integration-test</echo>
 	                        </target>
 	                    </configuration>

@@ -81,7 +81,8 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
     
     public void setUpUnit(String moduleShort) {
 //    	tearDownAfter(250000);
-		System.setProperty(ENV.KEY_TESTMODE, "true");
+        System.setProperty("tsl2nano.offline", "true");
+        System.setProperty(ENV.KEY_TESTMODE, "true");
         System.setProperty("app.stop.allow.system.exit", "false");
         nanoAlreadyRunning = Boolean.getBoolean("app.server.running");
         NanoH5UnitPlugin.setEnabled(!nanoAlreadyRunning);
@@ -99,7 +100,7 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
 //        	DatabaseTool.runDBServerDefault(); //in the test it seems not enough (forks?) to let nanoh5 start h2 internally....
             System.out.println("NanoH5TestBase: nanoAlreadyRunning=true ==> trying to connect to external NanoH5");
         }
-		ConcurrentUtil.sleep(20000); //otherwise the nano-server is not started completely on parallel testing
+		// ConcurrentUtil.sleep(20000); //otherwise the nano-server is not started completely on parallel testing
     }
 
 	protected void setPersistenceConnectionPort() {
@@ -161,7 +162,6 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
         webClient.getOptions().setJavaScriptEnabled(true);
         webClient.getOptions().setTimeout(1200000); //20min
         webClient.getOptions().setPrintContentOnFailingStatusCode(true);
-        webClient.getOptions().setCssEnabled(true);
         webClient.getOptions().setThrowExceptionOnScriptError(false);
         webClient.getOptions().setCssEnabled(false);
         webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
