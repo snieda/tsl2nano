@@ -114,9 +114,7 @@ public class ValueRandomizer {
 		if (File.class.isAssignableFrom(typeOf) 
 			|| Path.class.isAssignableFrom(typeOf) 
 			|| String.class.isAssignableFrom(typeOf)
-			|| Writer.class.isAssignableFrom(typeOf)
-			|| Closeable.class.isAssignableFrom(typeOf) 
-			|| OutputStream.class.isAssignableFrom(typeOf)) {
+			|| Closeable.class.isAssignableFrom(typeOf)) {
 			n = FileUtil.userDirFile(StringUtil.toBase64(n)).getAbsolutePath();
 		} else if (NumberUtil.isNumber(n)) {
 			n = convert(n, typeOf, zeroNumber, depth);

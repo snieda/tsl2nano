@@ -543,7 +543,7 @@ public class SIShell implements IItemHandler, Serializable {
                     useNetworkExtension = !useNetworkExtension;
                     prepareEnvironment(env, root);
                 } else if (isCommand(input, KEY_ADMIN)) {
-                    startAmin(item);
+                    startAdmin(item);
                 } else if (isCommand(input, KEY_SAVE)) {
                     save(true);
                 } else if (isCommand(input, KEY_QUIT)) {
@@ -606,7 +606,7 @@ public class SIShell implements IItemHandler, Serializable {
         return p[0];
     }
 
-    private void startAmin(IItem item) {
+    private void startAdmin(IItem item) {
         Frame ostyle = style;
         style = Frame.DOUBLE_LINE;
         ItemAdministrator administrator = new ItemAdministrator(this, (Container) item);
