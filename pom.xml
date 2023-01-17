@@ -205,7 +205,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>3.0.0-M7</version>
 				<configuration>
-					<argLine>${surefire.argLine}</argLine>
+					<argLine>${surefire.argLine} ${argLine}</argLine>
 					<testFailureIgnore>${surefire.testFailureIgnore}</testFailureIgnore>				
 					<!-- <parallel>true</parallel> -->
 					<!-- <skipTests>true</skipTests>  -->
