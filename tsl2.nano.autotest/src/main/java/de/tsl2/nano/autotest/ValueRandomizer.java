@@ -7,15 +7,13 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.io.Closeable;
 import java.io.File;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.io.Serializable;
-import java.io.Writer;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -76,7 +74,7 @@ public class ValueRandomizer {
 		return fillRandom(obj, false, 0);
 	}
 	
-	public static Object fillRandom(Object obj, boolean zeroNumber, final int depth) {
+	public static <T> T fillRandom(T obj, boolean zeroNumber, final int depth) {
 		PrivateAccessor<?> acc = new PrivateAccessor<>(obj);
 		Field[] fields = acc.findMembers(PrivateAccessor::notStaticAndNotFinal);
 		Arrays.stream(fields).forEach(f -> acc.set(f.getName(), createRandomValue(f.getType(), zeroNumber, depth+1)));
@@ -140,7 +138,11 @@ public class ValueRandomizer {
 			else if (typeOf.isInterface())
 				n = ITestInterface.class;
 			else
-				n = TypeBean.class; // TODO: create randomly
+				n = TypeBean.class;
+		} else if (Method.class.isAssignableFrom(typeOf)) {
+				n = Util.trY( () -> TypeBean.class.getMethod("getString"));
+		} else if (Field.class.isAssignableFrom(typeOf)) {
+				n = Util.trY( () -> TypeBean.class.getField("string"));
 		} else if (typeOf.equals(ClassLoader.class))
 			n = Thread.currentThread().getContextClassLoader(); // TODO: create randomly
 		else if (Collection.class.isAssignableFrom(typeOf))
@@ -157,7 +159,9 @@ public class ValueRandomizer {
 			n = ObjectUtil.wrap(n, typeOf.getComponentType());
 			n = typeOf.getComponentType().isPrimitive() ? MapUtil.asArray(typeOf.getComponentType(), n)
 					: MapUtil.asArray(MapUtil.asMap(n, n), typeOf.getComponentType());
-		} else if (typeOf.equals(Object.class) || !ObjectUtil.isStandardType(typeOf) && !Util.isFrameworkClass(typeOf))
+		} else if (typeOf.equals(Object.class)) {
+			n = n.toString();
+		} else if (!ObjectUtil.isStandardType(typeOf) && !Util.isFrameworkClass(typeOf))
 			n = typeOf.getSimpleName() + "(" + ByteUtil.hashCode(n) + ")";
 		return n;
 	}
@@ -181,11 +185,14 @@ public class ValueRandomizer {
 				constructor = getBestConstructor(typeOf);
 				if (constructor == null)
 					throw new RuntimeException(typeOf + " is not constructable!");
-				if (constructor.getParameterCount() > 0 && !checkMaxDepth(depth))
+				else if (constructor.getParameterCount() > 0 && !checkMaxDepth(depth))
 					throw new IllegalStateException("max depth reached on recursion. there is a cycle in parameter instantiation: " + typeOf);
 				parameters = provideRandomizedObjects(depth, 1, constructor.getParameterTypes());
 			}
-			return new Construction(constructor.newInstance(parameters), constructor, parameters);
+			V instance = (V) constructor.newInstance(parameters);
+			if (constructor.getParameterCount() == 0 && Boolean.getBoolean(AutoTest.PREFIX_FUNCTIONTEST + "fillinstance"))
+				instance = fillRandom(instance, false, ++depth);
+			return new Construction(instance, constructor, parameters);
 		} catch (Exception e) {
 			ManagedException.forward(e);
 			return null;
@@ -201,13 +208,13 @@ public class ValueRandomizer {
 }
 
 	private static <T> Constructor<T> getBestConstructor(Class<T> typeOf) {
-		if (BeanClass.hasDefaultConstructor(typeOf))
-			return Util.trY( () -> typeOf.getConstructor(new Class[0]));
 		Constructor<T>[] cs = (Constructor<T>[]) typeOf.getConstructors();
 		for (int i = 0; i < cs.length; i++) {
 			if (cs[i].getParameterTypes().length == 1)
 				return cs[i];
 		}
+		if (BeanClass.hasDefaultConstructor(typeOf))
+			return Util.trY( () -> typeOf.getConstructor(new Class[0]));
 		return cs.length > 0 ? cs[0] : null;
 	}
 
@@ -243,14 +250,7 @@ public class ValueRandomizer {
 		Object[] randomObjects = new Object[countPerType * types.length];
 		for (int i = 0; i < countPerType; i++) {
 			for (int j = 0; j < types.length; j++) {
-				if (ObjectUtil.isStandardType(types[j]) || types[j].isEnum() || ByteUtil.isByteStream(types[j]) || Serializable.class.isAssignableFrom(types[j]))
-					randomObjects[i+j] = createRandomValue(types[j], zero || respectZero(countPerType, i), depth);
-				else if (types[j].isInterface())
-					randomObjects[i+j] = createRandomProxy(types[j], zero, depth);
-				else {
-					Class type = types[j].equals(Object.class) ? TypeBean.class : types[j];
-					randomObjects[i+j] = fillRandom(constructWithRandomParameters(type, ++depth).instance, zero || respectZero(countPerType, i), depth);
-				}
+				randomObjects[i+j] = createRandomValue(types[j], zero || respectZero(countPerType, i), depth);
 			}
 		}
 		return randomObjects;

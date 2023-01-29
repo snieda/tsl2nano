@@ -14,7 +14,6 @@ import java.util.Collection;
 import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
-import org.mozilla.javascript.IdFunctionCall;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.ElementList;
@@ -445,6 +444,7 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
     /**
      * @return Returns the isRunning.
      */
+    @Override
     public boolean isRunning() {
         return isRunning;
     }

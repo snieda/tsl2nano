@@ -9,6 +9,9 @@ import java.sql.Time;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
@@ -1150,5 +1153,17 @@ public final class DateUtil {
     /** e.g. convert 1,75 to 01:45 */
     public static String toTimeFormat(double hours) {
     	return DateFormat.getTimeInstance().format(getTime((int) hours, (int) ((hours - (int)hours) * 60)));
+    }
+
+    public static LocalDate toLocalDate(String iso8601) {
+        return LocalDate.parse(iso8601);
+    }
+
+    public static LocalDateTime toLocalDateTime(String iso8601) {
+        return LocalDateTime.parse(iso8601);
+    }
+
+    public static LocalTime toLocalTime(String iso8601) {
+        return LocalTime.parse(iso8601);
     }
 }

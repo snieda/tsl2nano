@@ -30,6 +30,6 @@ public @interface Expect {
 	int resultIndex() default -1;
 	/** if method is not static, this are the parameter types for the constructor */
 	Class[] constructTypes() default {};
-	/** if method is not static, this are the parameters for the constructor */
+	/** if method is not static, this are the parameters for the constructor of base instance */
 	String[] construct() default {};
 }

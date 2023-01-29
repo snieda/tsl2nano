@@ -320,7 +320,7 @@ public class HtmlUtil {
         Element e = doc.createElement(tagName);
         if (content != null) {
             String c = content.toString();
-            if (isHtml(c)) {
+            if (isXml(c)) {
                 appendNodesFromText(e, c);
             } else if (c.matches("\\&.+[;]")) {
                 e.setNodeValue(c);
@@ -341,39 +341,11 @@ public class HtmlUtil {
      */
     public static void appendNodesFromText(Element e, String text) {
         try {
-            LOG.info("trying to parse text into html:" + text);
-            /*
-             * 1. if the text contains literals outside of its tags, they have to
-             *    be wrapped into symbolic tags.
-             * 2. if there are more than one tag, create a root tag
-             */
-            int xmlPrefixEnd = text.indexOf("?>");
-            if (xmlPrefixEnd != -1) {
-                text = text.substring(xmlPrefixEnd + 3);
-            }
-
-            final String BEG = begin(TAG_SPAN), END = end(TAG_SPAN);
-            String prefix = StringUtil.substring(text, null, "<");
-            if (!Util.isEmpty(prefix)) {
-                text = text.replace(prefix, BEG + prefix + END);
-            }
-            String postfix = StringUtil.substring(text, ">", null, true);
-            if (!Util.isEmpty(postfix)) {
-                text = text.replace(postfix, BEG + postfix + END);
-            }
-
-            text = BEG + text + END;
-
-            /*
-             * now, parse the text
-             */
-            Document d = createDocument(text);
-
+            NodeList childNodes = createNodesFromText(text).getChildNodes();
             /*
              * fill the parsed nodes into our document
              */
             Document doc = e.getOwnerDocument();
-            NodeList childNodes = d.getChildNodes();
             for (int i = 0; i < childNodes.getLength(); i++) {
                 e.appendChild(doc.adoptNode(childNodes.item(i)));
             }
@@ -381,6 +353,33 @@ public class HtmlUtil {
             //don't interrupt the html response but show the error message.
             e.setTextContent(e1.getLocalizedMessage());
         }
+    }
+
+    public static Document createNodesFromText(String text) {
+        LOG.info("trying to parse text into html:" + text);
+        /*
+         * 1. if the text contains literals outside of its tags, they have to
+         *    be wrapped into symbolic tags.
+         * 2. if there are more than one tag, create a root tag
+         */
+        int xmlPrefixEnd = text.indexOf("?>");
+        if (xmlPrefixEnd != -1) {
+            text = text.substring(xmlPrefixEnd + 3);
+        }
+
+        final String BEG = begin(TAG_SPAN), END = end(TAG_SPAN);
+        String prefix = StringUtil.substring(text, null, "<");
+        if (!Util.isEmpty(prefix)) {
+            text = text.replace(prefix, BEG + prefix + END);
+        }
+        String postfix = StringUtil.substring(text, ">", null, true);
+        if (!Util.isEmpty(postfix)) {
+            text = text.replace(postfix, BEG + postfix + END);
+        }
+
+        text = BEG + text + END;
+
+        return createDocument(text);
     }
 
     public static Document createDocument(String text) {
@@ -583,8 +582,8 @@ public class HtmlUtil {
         return "<pre>" + msg + "</pre>";
     }
 
-    public static boolean isHtml(String asString) {
-        return asString != null && (asString.contains("</") || asString.contains("/>"));
+    public static boolean isXml(String txt) {
+        return StringUtil.isXml(txt);
     }
 
     public static String cdata(String data) {

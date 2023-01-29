@@ -481,7 +481,11 @@ public class Bean<T> extends BeanDefinition<T> {
         return this;
     }
 
-    /**
+    public static Bean<?> newBean(String name, Object... constructorArgs) {
+        return newBean(BeanDefinition.getBeanDefinition(name).getClazz(), constructorArgs);
+    }
+    
+        /**
      * creates a new bean with new object instance
      * 
      * @param type object type

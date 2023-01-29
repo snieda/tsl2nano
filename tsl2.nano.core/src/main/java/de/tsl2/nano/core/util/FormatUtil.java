@@ -22,10 +22,14 @@ import java.text.Format;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Currency;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 
@@ -157,6 +161,12 @@ public class FormatUtil {
                 f = getTimeFormat(DateFormat.getDateTimeInstance(), Timestamp.class);
             } else if (Date.class.isAssignableFrom(type)) {
                 f = getCheckedFormat(DateFormat.getDateInstance());
+            } else if (LocalTime.class.isAssignableFrom(type)) {
+                f = createSimpleFormat(s -> LocalTime.parse(s));
+            } else if (LocalDate.class.isAssignableFrom(type)) {
+                f = createSimpleFormat(s -> LocalDate.parse(s));
+            } else if (LocalDateTime.class.isAssignableFrom(type)) {
+                f = createSimpleFormat(s -> LocalDateTime.parse(s));
             } else if (String.class.isAssignableFrom(type)) {
                 //the String-to-String converter is needed if empty strings are converted to nulls!
                 f = new Format() {
@@ -261,6 +271,25 @@ public class FormatUtil {
             }
         }
         return f;
+    }
+
+    public static Format createSimpleFormat(Function<String,?> func) {
+        return new Format() {
+            @Override
+            public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
+                return toAppendTo.append(obj != null ? obj.toString() : "");
+            }
+
+            @Override
+            public Object parseObject(String source, ParsePosition pos) {
+                pos.setIndex(source != null && source.length() > 0 ? source.length() : 1);
+                return Util.isEmpty(source) ? null : func.apply(source);
+            }
+            @Override
+            public String toString() {
+                return "LocalTimeFormat";
+            }
+        };
     }
 
     private static final List<String> istrue = Arrays.asList("on", "yes", "ja", "si", "oui", "1");

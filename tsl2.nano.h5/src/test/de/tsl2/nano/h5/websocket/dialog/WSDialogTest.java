@@ -34,7 +34,7 @@ public class WSDialogTest implements Serializable {
 
     @Test
     public void testDialogCreation() {
-        String expected = "<dialog id=\"wsdialog.formDialog\"><form method=\"dialog\"><h3>title</h3><p>message</p><div>my Test Field<input id=\"wsdialog.input.myTestField.id\" name=\"myTestField\" type=\"textarea\" value=\"empty\"/></div><button id=\"wsdialog.button\" name=\"myTestButton\" value=\"myTestButton\">my Test Button</button></form></dialog>";
+        String expected = "<dialog id=\"wsdialog.formDialog\" open=\"true\"><form method=\"dialog\"><h3>title</h3><p>message</p><div>my Test Field<input id=\"wsdialog.input.myTestField.id\" name=\"myTestField\" type=\"textarea\" value=\"empty\"/></div><button id=\"wsdialog.button\" name=\"myTestButton\" value=\"myTestButton\">my Test Button</button></form></dialog>";
         WSDialog dlg = createTestDialog();
         String output = dlg.toHtmlDialog();
         System.out.println(expected);
@@ -58,7 +58,7 @@ public class WSDialogTest implements Serializable {
         System.out.println(htmlDlg);
         Object expected = createThreadSimulatingAResponse(instance);
         Object response = Message.sendAndWaitForResponse(htmlDlg, ValueHolder.class);
-        assertTrue(htmlDlg.startsWith(WSDialog.PREFIX_DIALOG + "<dialog id=\"wsdialog.formDialog\"><form method=\"dialog\">"));
+        assertTrue(htmlDlg.startsWith(WSDialog.PREFIX_DIALOG + "<dialog id=\"wsdialog.formDialog\" open=\"true\"><form method=\"dialog\">"));
         assertTrue(htmlDlg.contains(instance.getValue().toString()));
         // assertEquals(expected, response);
     }
@@ -72,7 +72,7 @@ public class WSDialogTest implements Serializable {
         Object expected = createThreadSimulatingAResponse(defaultResponse);
         Object response = Message.sendAndWaitForResponse(htmlDlg, Integer.class);
         // assertEquals(expected, response);
-        assertTrue(htmlDlg.startsWith(WSDialog.PREFIX_DIALOG + "<dialog id=\"wsdialog.formDialog\"><form method=\"dialog\">"));
+        assertTrue(htmlDlg.startsWith(WSDialog.PREFIX_DIALOG + "<dialog id=\"wsdialog.formDialog\" open=\"true\"><form method=\"dialog\">"));
         assertTrue(htmlDlg.contains(String.valueOf(defaultResponse)));
         assertTrue(htmlDlg.contains("wsdialog.button"));
     }
@@ -86,7 +86,7 @@ public class WSDialogTest implements Serializable {
         boolean expected = createThreadSimulatingAResponse(true);
         Boolean response = Message.sendAndWaitForResponse(htmlDlg, Boolean.class);
         // assertEquals(expected, response);
-        assertTrue(htmlDlg.startsWith(WSDialog.PREFIX_DIALOG + "<dialog id=\"wsdialog.formDialog\"><form method=\"dialog\">"));
+        assertTrue(htmlDlg.startsWith(WSDialog.PREFIX_DIALOG + "<dialog id=\"wsdialog.formDialog\" open=\"true\"><form method=\"dialog\">"));
         assertTrue(htmlDlg.contains(String.valueOf(WSDialog.getYesNoButtons()[0].getName())));
         assertTrue(htmlDlg.contains("wsdialog.button"));
     }

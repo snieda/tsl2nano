@@ -21,6 +21,7 @@ import de.tsl2.nano.h5.HtmlUtil;
 
 /** creates a simple html5 dialog to be sent through websockets */
 public class WSDialog {
+    private static final String TAG_ROOT = "dialog";
     public static final String PREFIX_DIALOG = Message.PREFIX_DIALOG;
     static final String PREFIX_NAME = "wsdialog.";
 
@@ -29,14 +30,18 @@ public class WSDialog {
     List<WSField> fields;
     List<WSButton> buttons;
 
-    @SuppressWarnings("unchecked")
     public static String createHtmlFromBean(String title, Object beanInstance) {
+        return createHtmlFromBean(title, beanInstance, TAG_ROOT);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static String createHtmlFromBean(String title, Object beanInstance, String rootTag) {
         // TODO: embed the title
         Bean<?> b = Bean.getBean(beanInstance);
         if (!(b.getPresentationHelper() instanceof Html5Presentation)) {
             throw new IllegalStateException("The presentationhelper of given bean must be an Html5Presention!");
         }
-        Element parentDlg = createFormDialog();
+        Element parentDlg = createFormDialog(rootTag);
         Element dlg =  ((Html5Presentation) b.getPresentationHelper()).createPage(AdapterProxy.create(ISession.class), parentDlg,
                 b.getPresentable().getDescription(), true);
         return HtmlUtil.toString(dlg.getOwnerDocument(), true);
@@ -78,12 +83,15 @@ public class WSDialog {
         this.buttons.addAll(Arrays.asList(buttons));
         return this;
     }
-
     public String toHtmlDialog() {
+        return toHtmlDialog(TAG_ROOT);
+    }
+
+    public String toHtmlDialog(String rootTag) {
         if (Util.isEmpty(buttons))
             addButtons(getDefaultButtons());
 
-        Element dlg = createFormDialog();
+        Element dlg = createFormDialog(rootTag);
         HtmlUtil.appendElement(dlg, HtmlUtil.TAG_H3, HtmlUtil.content(title));
         HtmlUtil.appendElement(dlg, HtmlUtil.TAG_PARAGRAPH, HtmlUtil.content(message));
         for (WSField f : getFields()) {
@@ -100,12 +108,13 @@ public class WSDialog {
         return HtmlUtil.toString(dlg.getOwnerDocument(), true);
     }
 
-    private static Element createFormDialog() {
+    private static Element createFormDialog(String rootTag) {
         Document doc = HtmlUtil.createDocument("");
-        Element e = doc.createElement("dialog");
+        Element e = doc.createElement(rootTag);
+        e.setAttribute("open", "true");
         doc.appendChild(e);
         HtmlUtil.appendAttributes(e, HtmlUtil.ATTR_ID, PREFIX_NAME + "formDialog");
-        return HtmlUtil.appendElement(e, HtmlUtil.TAG_FORM, HtmlUtil.ATTR_METHOD, "dialog");
+        return HtmlUtil.appendElement(e, HtmlUtil.TAG_FORM, HtmlUtil.ATTR_METHOD, TAG_ROOT);
     }
 
     public String toWSMessage() {

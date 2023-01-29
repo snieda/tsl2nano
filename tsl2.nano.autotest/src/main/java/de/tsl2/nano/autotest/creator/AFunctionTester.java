@@ -171,11 +171,13 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 		return shouldFail(status.err);
 	}
 	private boolean shouldFail(Throwable error) {
-		if (getExpectFail() != null) {
+		Throwable expectedFail;
+		String emsg;
+		if ((expectedFail = getExpectFail()) != null) {
 			if (error == null)
-				fail("test should fail with " + getExpectFail() + " but has result: " + getResult());
-			else if (!getErrorMsg(getExpectFail()).contains(getErrorMsg(error).substring(0, Math.min(150, getErrorMsg(error).length()))))
-				fail("test should fail with " + getExpectFail() + " but failed with: " + error);
+				fail("test should fail with " + expectedFail + " but has result: " + getResult());
+			else if (!getErrorMsg(expectedFail).contains((emsg = getErrorMsg(error)).substring(0, Math.min(150, emsg.length()))))
+				fail("test should fail with " + expectedFail + " but failed with: " + error);
 			return true;
 		}
 		return false;

@@ -791,6 +791,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     /**
      * @return Returns the presentable.
      */
+    @Override
     public IPresentable getPresentable() {
         if (presentable == null) {
             presentable = (Presentable) ENV.get(BeanPresentationHelper.class).createPresentable();
@@ -988,15 +989,10 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      * @return bean definition, found in cache - or new beandef
      */
     public static <T> BeanDefinition<T> getBeanDefinition(String name, Class<T> type, boolean fullInitStore) {
-        volatileBean.name = name;
-        //TODO: think about using a structure through package path on file system
-        int i = virtualBeanCache.indexOf(volatileBean);
-        if (i == -1 && type != null) {//on stored name collisions
-        	volatileBean.name = type.getName().toLowerCase();
-            i = virtualBeanCache.indexOf(volatileBean);
-            if (i != -1)
-            	name = volatileBean.name;
-        }
+        int i = getIndexOf(name, type);
+        if (i != -1)
+            name = volatileBean.name;
+
         BeanDefinition<T> beandef = null;
         boolean nameCollision = false;
         if (i == -1 || (type != null && !(nameCollision=virtualBeanCache.get(i).getDeclaringClass().equals(type)))) {
@@ -1043,6 +1039,21 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             beandef = virtualBeanCache.get(i);
         }
         return beandef;
+    }
+
+    private static int getIndexOf(String name, Class type) {
+        volatileBean.name = name;
+        //TODO: think about using a structure through package path on file system
+        int i = virtualBeanCache.indexOf(volatileBean);
+        if (i == -1 && type != null) {//on stored name collisions
+        	volatileBean.name = type.getName().toLowerCase();
+            i = virtualBeanCache.indexOf(volatileBean);
+        }
+        return i;
+    }
+
+    public static final boolean isDefined(String name) {
+        return getIndexOf(name, null) != -1;
     }
 
     /**
@@ -1671,28 +1682,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         return map;
     }
 
+    @Override
     public T fromValueMap(Map<String, Object> values) {
         return fromValueMap(createInstance(), values);
-    }
-    public T fromValueMap(T instance, Map<String, Object> values) {
-        IAttribute attr;
-        for (String name : values.keySet()) {
-            attr = getAttribute(name, strict);
-            if (attr != null) {
-                Object value = values.get(name);
-                if (Util.isEmpty(value) && attr.getValue(instance) == null)
-                    continue;
-                if (Date.class.isAssignableFrom( attr.getType()) && value instanceof String && ENV.get("bean.format.date.iso8601", false))
-                    value = DateUtil.fromISO8601UTC((String)value);
-                if (attr instanceof IValueAccess)
-                    ((IValueAccess)attr).setValue(value);
-                else
-                    attr.setValue(instance, value);
-            } else {
-                LOG.warn("ignoring value of " + name + " - it is not an attribute of " + getClazz());
-            }
-        }
-        return instance;
     }
 
     /**

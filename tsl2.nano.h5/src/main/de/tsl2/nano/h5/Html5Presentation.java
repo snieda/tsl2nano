@@ -320,6 +320,34 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         super.addAdministrationActions(session, bEnv);
     }
 
+    @Override
+    public Collection<IAction> getSessionActions(ISession session) {
+        Collection<IAction> sessionActions = super.getSessionActions(session);
+        if (session != null && sessionActions.size() > 0) {
+            sessionActions.add(new SecureAction(bean.getClazz(),
+                    "RESTful",
+                    IAction.MODE_UNDEFINED,
+                    false,
+                    "icons/point_green.png") {
+                @Override
+                public Object action() throws Exception {
+                    return ENV.get("service.url", "") + ARESTDynamic.BASE_PATH;
+                }
+            });
+            sessionActions.add(new SecureAction(bean.getClazz(),
+                    "RESTfulUI",
+                    IAction.MODE_UNDEFINED,
+                    false,
+                    "icons/point_yellow.png") {
+                @Override
+                public Object action() throws Exception {
+                    return ENV.get("service.url", "") + RestUI.BASE_PATH;
+                }
+            });
+        }
+        return sessionActions;
+    }
+
     @SuppressWarnings("serial")
     @Override
     public Collection<IAction> getPageActions(ISession session) {
@@ -590,7 +618,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 	}
 
     private String getTitleWithLink(String title, ISession session) {
-    	if (session.getUserAuthorization() == null) {
+    	if (session.getUserAuthorization() == null || isXml(title)) {
     		return title;
     	} else {
 	    	String ddlName = StringUtil.substring(Persistence.current().getJarFile(), "/", ".jar", true);
@@ -600,7 +628,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     	}
 	}
 
-	private boolean useSideNav(int actionCount) {
+    private boolean useSideNav(int actionCount) {
         // use sideNav after login...
         return isAuthenticated && ENV.get("layout.sidenav", false) 
                 && actionCount > ENV.get("layout.sidenav.min.count.action", 3);
@@ -680,7 +708,18 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
     @Override
     public String buildDialog(Object title, Object model) {
-        return WSDialog.createHtmlFromBean(String.valueOf(title), model);
+        if (model instanceof String) {
+            String t = (String) model;
+            if (t.contains("/>"))
+                model = "<pre>" + model + "</pre>";
+        }
+        return embedToHtml(WSDialog.createHtmlFromBean(String.valueOf(title), model));
+    }
+
+    private String embedToHtml(String htmlContent) {
+        if (htmlContent.contains("</html>"))
+            return htmlContent;
+        return "<html><body>" + htmlContent + "</body></html>";
     }
 
     /**
@@ -712,7 +751,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 return createFormDocument(session, message.toString(), null, interactive);
             } else {
                 parent =
-                    createFormDocument(session, ENV.translate(bean.getPresentable().getLabel(), true), getIcon(bean, null), interactive);
+                    createFormDocument(session, 
+                        HtmlUtil.isXml(bean.getPresentable().getLabel()) ? bean.getPresentable().getLabel() : ENV.translate(bean.getPresentable().getLabel(),
+                        true), 
+                        getIcon(bean, null), 
+                        interactive);
             }
         }
 
@@ -820,10 +863,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     protected void addSessionValues(ISession session, Bean bean) {
         List<BeanDefinition> v = new ArrayList<>();
         //do the Object-casting trick to cast from List<Object> to List<BeanDefinition>
-        Object navigation = Arrays.asList(session.getNavigationStack());
-        v.addAll((List<BeanDefinition>) navigation);
-        v.addAll(CollectionUtil.getList(((NanoH5Session) session).getContext().get(BeanDefinition.class)));
-        addSessionValues(v, bean);
+        if (session.getNavigationStack() != null) {// -> Session as Proxy!
+            Object navigation = Arrays.asList(session.getNavigationStack());
+            v.addAll((List<BeanDefinition>) navigation);
+            v.addAll(CollectionUtil.getList(((NanoH5Session) session).getContext().get(BeanDefinition.class)));
+            addSessionValues(v, bean);
+        }
     }
 
     public static String createMessagePage(String templateName, String message, URL serviceURL) {
@@ -2495,7 +2540,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         } else {
             String strFooter = Util.asString(footer);
             shortText = strFooter;
-            if (strFooter != null && !isHtml(strFooter)) {
+            if (strFooter != null && !isXml(strFooter)) {
                 String[] split = strFooter.split("([:,=] )|[\t\n]");
                 preFooter = doc.createElement(TAG_SPAN);
                 preFooter.setAttribute(ATTR_ID, "footer");

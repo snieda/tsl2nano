@@ -499,12 +499,15 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
             Response whiteListError = checkWhiteList(requestor);
             if (whiteListError != null)
                 return whiteListError;
-            if (RESTDynamic.canRest(uri)) {
+            if (RestUI.canRest(uri)) {
             	session = getSession(header, requestor);
             	if (session != null && checkSessionTimeout(session, requestor)) {
             		addRestAuthorizationFromSession(session, uri, method, header);
             	}
-            	return new RESTDynamic().serve(uri, method, header, parms, files);
+                if (RestUI.canRestUI(uri))
+                    return new RestUI().serve(session, uri, method, header, parms, files);
+                else
+            	    return new RESTDynamic().serve(uri, method, header, parms, files);
             }
             if (method.equals("GET") && !isAdmin(uri) && !uri.endsWith("/help") && !RESTDynamic.canRest(uri)) {
                 // serve files

@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.cls.PrivateAccessor;
 
@@ -96,7 +97,7 @@ public class JSon {
     		return fromJSonNoQuotations(json);
         Map map = new LinkedHashMap<>();
         String[] split = json.substring(1, json.length() - 1).split("[\"]");
-        for (int i = 0; i < split.length-2; i+=4) {
+        for (int i = 0; i < split.length-3; i+=4) {
             map.put(split[i+1], split[i+3]);
         }
         return map;
@@ -111,5 +112,19 @@ public class JSon {
             map.put(keyValue[0], keyValue[1]);
         }
         return map;
+	}
+
+	public static <T> List<T> toList(Class<T> type, String json) {
+		LinkedList<T> list = new LinkedList<>();
+		String s;
+		// json = StringUtil.subEnclosing(json, "{", "}", false);
+		while ((s = StringUtil.subEnclosing(json, "{", "}", true)) != null) {
+			list.add( (T) BeanClass.getBeanClass(type).fromValueMap(fromJSon(s)));
+			json = StringUtil.substring(json, s, null);
+		}
+		return list;
+	}
+	public static <T> T toObject(Class<T> type, String json) {
+		return (T) BeanClass.getBeanClass(type).fromValueMap(fromJSon(json));
 	}
 }

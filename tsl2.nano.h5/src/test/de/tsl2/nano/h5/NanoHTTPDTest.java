@@ -23,8 +23,9 @@ public class NanoHTTPDTest {
 	@Test
 	public void testFileServerSmoke() {
 		System.setIn(new ByteArrayInputStream( "\n".getBytes() ));
-		NanoHTTPD.main(new String[0]);
-		HttpClient httpClient = new HttpClient("http://localhost:8080");
+		String port = "8069";
+		NanoHTTPD.main(new String[] {"-p", port});
+		HttpClient httpClient = new HttpClient("http://localhost:" + port);
 		InputStream response = httpClient.send("GET", "text/html", null);
 		System.out.println(StringUtil.fromInputStream(response));
 	}

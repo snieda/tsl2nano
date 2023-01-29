@@ -28,6 +28,7 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.util.MapUtil;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
 /**
@@ -425,13 +426,13 @@ public class Presentable implements IIPresentable, Serializable {
         //try to translate after first loading
         translatedDescription = description;
         if (description != null && description.equals(label)) {
-            String d = ENV.translate(label + Messages.POSTFIX_TOOLTIP, false);
+            String d = StringUtil.isXml(label) ? null : ENV.translate(label + Messages.POSTFIX_TOOLTIP, false);
             if (d != null && !d.startsWith(Messages.TOKEN_MSG_NOTFOUND)) {
                 translatedDescription = d;
             }
         }
         if (label != null) {
-            translatedLabel= ENV.translate(label, true);
+            translatedLabel= StringUtil.isXml(label) ? label : ENV.translate(label, true);
         }
         initialized = true;
     }

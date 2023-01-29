@@ -56,7 +56,8 @@ set MODULES=" --add-modules=ALL-SYSTEM --illegal-access=warn \
     --add-opens java.xml/javax.xml.stream.events=ALL-UNNAMED \
     --add-opens java.xml/org.w3c.dom=ALL-UNNAMED \
     --add-opens java.xml/javax.xml.namespace=ALL-UNNAMED \
-    --add-exports java.management/sun.management=ALL-UNNAMED"
+    --add-exports java.management/sun.management=ALL-UNNAMED \
+    --add-exports java.xml/com.sun.org.apache.xerces.internal.dom=ALL-UNNAMED"
 
 %JAVA% %MODULES% %SECURITY_LEAK% %IPv4% %OFFLINE% %COMPAT% %LANG% %ENCODING% %JSU_ENC% %USERDIR% %NANO_DEBUG% %AGENT% %PROXY% %PROFILER% %JAVA_OPTS% %DEBUG% %UH% %RESTART_ALL% -jar %NAME%-%VERSION%%EXTENSION%.jar %PRJ% %PORT%  %LOG%
 if not "%SILENT%"=="true" pause

@@ -364,10 +364,15 @@ public class ObjectUtil extends FieldUtil {
                     else if (value instanceof Map && (wrapperType.isInterface() || wrapperType.equals(Properties.class)) 
                             && Map.class.isAssignableFrom(wrapperType))
                         return (T) MapUtil.toMapType((Map)value, (Class<Map>)wrapperType);
-                    else if (value instanceof String && Map.class.isAssignableFrom(wrapperType)
-                    		&& JSon.isJSon((String)value)) {
-						Map jsonMap = MapUtil.fromJSon((String)value);
-						return (T) (wrapperType.isInterface() ? MapUtil.toMapType(jsonMap, (Class<Map>)wrapperType) : jsonMap);
+                    else if (value instanceof String && JSon.isJSon((String)value)) {
+                        if (Map.class.isAssignableFrom(wrapperType)) {
+                            Map jsonMap = MapUtil.fromJSon((String)value);
+                            return (T) (wrapperType.isInterface() ? MapUtil.toMapType(jsonMap, (Class<Map>)wrapperType) : jsonMap);
+                        } else if (Collection.class.isAssignableFrom(wrapperType)) {
+                            return (T) JSon.toList(ObjectUtil.getGenericInterfaceType(wrapperType, Collection.class, 0), (String)value);
+                        } else {
+                            JSon.toObject(wrapperType, (String)value);
+                        }
                     } else if (wrapperType.isArray() && value instanceof String) {
                     	return (T) MapUtil.asArray(wrapperType.getComponentType(), (String)value);
                     } else if (wrapperType.isArray() && PrimitiveUtil.isAssignableFrom(wrapperType.getComponentType(),value.getClass())) {
@@ -403,7 +408,7 @@ public class ObjectUtil extends FieldUtil {
     }
 
     @SuppressWarnings("unchecked")
-	private static <T> Class<T> getDefaultImplementation(Class<T> wrapperType) {
+	public static <T> Class<T> getDefaultImplementation(Class<T> wrapperType) {
 		return STD_IMPLEMENTATIONS.containsKey(wrapperType) ? STD_IMPLEMENTATIONS.get(wrapperType) : wrapperType;
 	}
 

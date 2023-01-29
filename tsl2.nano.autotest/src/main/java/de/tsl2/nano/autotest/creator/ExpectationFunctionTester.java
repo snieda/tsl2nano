@@ -102,7 +102,25 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 
 	@Override
 	public Object getCompareResult() {
-		return convertOnMultilineString(expect == null || getResultIndex() < 0 ? result : getParameter()[getResultIndex()]);
+		Object res =  convertOnMultilineString(expect == null || getResultIndex() < 0 || getParameter() == null || getParameter().length == 0 ? result : getParameter()[getResultIndex()]);
+		// dirty workaround on using part of parameter (not having quotations around
+		return addQuotationsOnResultParameter(res);
+	}
+	private Object addQuotationsOnResultParameter(Object res) {
+		if (getResultIndex() > -1 &&  res instanceof String) {
+			res = addQuotationsOnStringAroundBrackets((String) res);
+		} else if (getResultIndex() > -1 &&  res instanceof String[]) {
+			String[] r = (String[]) res;
+			if (r.length > 0)
+				r[0] = addQuotationsOnStringAroundBrackets(r[0]);
+		}
+		return res;
+	}
+	private String addQuotationsOnStringAroundBrackets(String r) {
+		if (!r.startsWith("{\"") && r.startsWith("{") && r.endsWith("}")) {
+			r = r.replace("{", "{\"").replace("}", "\"}");
+		}
+		return r;
 	}
 
 	@Override

@@ -3,12 +3,18 @@ package de.tsl2.nano.h5.websocket.dialog;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.tsl2.nano.core.util.MapUtil;
+
 public class WSItem implements IHtmlItem {
 
     private String tag;
     private String name;
     private Object value;
     private Map<String, Object> attributes;
+
+    public WSItem(String tag, String name, Object value, Object...attrKeyValues) {
+        this(tag, name, value, MapUtil.asMap(attrKeyValues));
+    }
 
     public WSItem(String tag, String name, Object value, Map<String, Object> attributes) {
         this.tag = tag;

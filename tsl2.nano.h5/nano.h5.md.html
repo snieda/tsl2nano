@@ -4877,7 +4877,7 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.4.10 | 09.01.2022 | FlatBeanReader extended, security fixes (log4j etc.)
  2.4.11 | 03.04.2022 | NEW: ExcelWorker, ObjectPrinter, SQLQuery, html-dialog fix ("Yes" -> true), timemout on findjars, NEW: search.mvn.org, jardownload.com, fix: page clear on submit
  2.4.12 | 18.09.2022 | NEW: SpecificationExchange, specification refactored: Workflow, ExcelWorker, (massive changes)Flow, Task, lots of conveniences extracted to util-classes, prepared to run on jdk-17, hsqldb-env refreshed for 2.7.0
- 2.5.0  | 08.01.2023 | see EnvUpdate2v5v0: refactorings: serialization of actions with primitive attributes, move incubation packages, jdk17, h2-v2+, hibernate 6, all dependencies/plugins updated
+ 2.5.0  | 12.02.2023 | NEW: HATEOAS(restui), see EnvUpdate2v5v0: refactorings: serialization of actions with primitive attributes, move incubation packages, jdk17, h2-v2+, hibernate 6, all dependencies/plugins updated
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
 
@@ -5992,7 +5992,7 @@ deploy:
 * [ ] interactive mode: ask for each first access on env properties
 * [ ] ki mode: learn best property values
 * [v] hsqldb: remove '-ifNotExists' from runServer.cmd, wrong extract on sql file (instead of anyway.sql : PUBLIC.sql)
-* [ ] Formtter refactoring to have a pool of formatters, read from configuration file
+* [ ] Formatter refactoring to have a pool of formatters, read from configuration file
 * [ ] jdk17-compile: 
     * [v] add-exports X509 now working , 
     * [v] BeanAttribute: PostConstruct raus  , 
@@ -6033,5 +6033,8 @@ deploy:
     * [v] check csrf hiddentoken and session-id
     * [x] Inline code is considered harmful, and you should avoid it. Copy all the JavaScript code and CSS to separate files and add them to the white-list.
 * [v] layout: add high contrast scheme through click on status line
-* [ ] valuerandomizer: getBestConstructor() -> Construction -> add construction of arrays
-* [ ] HATEOS: extend rest access classes to provide content relational links and css styling
+* [-] valuerandomizer: getBestConstructor() -> Construction -> add construction of arrays
+* [ ] find out coverage loss: classfinder? , test on ignore, autotests?
+* [x] HATEOAS: extend rest access classes to provide content relational links and css styling
+* [ ] HATEOAS: doku
+* [ ] h5 timesheet output-deep

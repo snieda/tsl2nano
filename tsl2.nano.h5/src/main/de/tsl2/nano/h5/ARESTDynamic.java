@@ -66,7 +66,7 @@ public abstract class ARESTDynamic<RESPONSE> {
 	}
 	
 	public static boolean canRest(String uri) {
-		return uri.contains(BASE_PATH) && ENV.get("app.rest.active", true);
+		return (uri.endsWith(BASE_PATH) || uri.contains(BASE_PATH + "/")) && ENV.get("app.rest.active", true);
 	}
 
 	RESPONSE serve(String url, String method, Map<String, String> header) {
@@ -186,7 +186,7 @@ public abstract class ARESTDynamic<RESPONSE> {
 		checkUrlEnd(url, action, "action");
 		String body = payload.get(BODY);
 		if (body == null)
-			throw new IllegalArgumentException("no 'body' found in http parameters. must be present as payload!");
+			throw new IllegalArgumentException("no body (app.rest.payload.key: '" + BODY + "') found in http parameters. must be present as payload!");
 		Status status = Status.CREATED;
 		Object result;
 		BeanDefinition def = getType(beanName);
@@ -261,7 +261,7 @@ public abstract class ARESTDynamic<RESPONSE> {
 	
 	String printEntities() {
 		StringBuilder buf = new StringBuilder(
-				  "\n-------------------- RESTDynamic available entities ------------------------------");
+				  "\n-------- RESTDynamic available entities --- (back: " + ENV.get("service.url") + "/rest)---");
 		List<Class> beanTypes = ENV.get("service.loadedBeanTypes", new LinkedList<Class>());
 		BeanDefinition<?> beanDef;
 		for (Class b : beanTypes) {
@@ -273,7 +273,7 @@ public abstract class ARESTDynamic<RESPONSE> {
 			}
 			Collection<IAction> actions = beanDef.getActions();
 			if (actions.size() > 0) {
-			buf.append("\n\tACTIONS");
+				buf.append("\n\tACTIONS");
 				for (IAction action : actions) {
 					buf.append("\n\t" + StringUtil.fixString(action.getShortDescription(), 20) + ": " + action.getLongDescription());
 				}
@@ -312,8 +312,10 @@ public abstract class ARESTDynamic<RESPONSE> {
 		return 
 				  "\n-------------------- RESTDynamic usage informations ------------------------------\n"
 				+ "\nREQUEST FORMAT: " + USAGE
+				+ "\n\t(login)             : to login into a session, open: " + ENV.get("service.url")
 				+ "\n\tentities            : metainfo as list of all available entities"
 				+ "\n\tentitiesjson        : metainfo as json of all available entities"
+				+ "\n\t/restui             : instead of 'rest' use 'restui' to do interaction with rest"
 				+ "\nGET,PUT,DELETE:"
 				+ "\n\tentity              : simple class lower name of entity to be accessed"
 				+ "\n\tattribte-or-action  : entities bean attribute name to be accessed"

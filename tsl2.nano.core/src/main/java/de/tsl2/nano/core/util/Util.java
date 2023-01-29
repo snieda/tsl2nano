@@ -15,6 +15,9 @@ import java.lang.reflect.Modifier;
 import java.security.MessageDigest;
 import java.text.Format;
 import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -79,7 +82,8 @@ public class Util {
     }
 
     public static boolean isSimpleType(Class<?> cls) {
-    	return PrimitiveUtil.isPrimitiveOrWrapper(cls) || NumberUtil.isNumber(cls) || Date.class.isAssignableFrom(cls) || String.class.isAssignableFrom(cls);
+    	return PrimitiveUtil.isPrimitiveOrWrapper(cls) || NumberUtil.isNumber(cls) || Date.class.isAssignableFrom(cls) || String.class.isAssignableFrom(cls)
+        || LocalTime.class.isAssignableFrom(cls) || LocalDate.class.isAssignableFrom(cls) || LocalDateTime.class.isAssignableFrom(cls);
     }
 
     public static boolean isDataType(Class<?> cls) {

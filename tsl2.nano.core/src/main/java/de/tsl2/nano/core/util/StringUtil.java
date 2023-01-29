@@ -1168,4 +1168,8 @@ public class StringUtil {
 		}
 		return maxLength;
 	}
+
+    public static boolean isXml(String txt) {
+        return txt != null && (txt.contains("</") || txt.contains("/>"));
+    }
 }

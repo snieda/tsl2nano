@@ -39,6 +39,8 @@
 	*   test that with: "gpg - -clearsign {my-test-file}"
 	*   upload your key to a keyserver: "sudo gpg - -keyserver http://keyserver.ubuntu.com - -send-keys ""
 	* to get a maven wrapper: "mvn -N io.takari:maven:wrapper"
+	* fastest maven build with maven daemon:
+	*	mvnd install -T 8 -pl tsl2.nano.h5 -am  -o -DskipTests -Dmaven.experimental.buildconsumer=false
 	* NOTE: on doing a deploy, the tsl2-report module has to be commented from this parent pom!
 	* NOTE: on problems with encoding: property files have to be ascii+unicode. please convert them with jdks native2ascii
 	-->
@@ -57,6 +59,7 @@
 		<properties.quiet>false</properties.quiet>
 		<simple-xml.version>2.7.1</simple-xml.version>
 		<junit4.version>4.13.2</junit4.version>
+		<h2.version>2.1.214</h2.version>
 		<jmockit.version>1.49</jmockit.version>
     </properties>
 	<inceptionYear>2012</inceptionYear>
@@ -315,7 +318,7 @@
 					<force>true</force>
 					<failOnError>false</failOnError>
 					<skip>${skipTests}</skip>
-					 <additionalparam>${javadoc.opts}</additionalparam>
+					 <doclint>${javadoc.opts}</doclint>
 				</configuration>
 				<executions>
 					<execution>

@@ -21,6 +21,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -37,6 +38,7 @@ import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.IPredicate;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
@@ -44,6 +46,7 @@ import de.tsl2.nano.core.util.AnnotationProxy;
 import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.CollectionUtil;
+import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
@@ -898,6 +901,7 @@ public class BeanClass<T> implements Serializable {
      */
     public static <T> T createInstance(Class<T> clazz, Object... args) {
         T instance = null;
+        clazz = ObjectUtil.getDefaultImplementation(clazz);
         if (clazz.isPrimitive()) {
             clazz = PrimitiveUtil.getWrapper(clazz);
         }
@@ -1318,6 +1322,31 @@ public class BeanClass<T> implements Serializable {
     public boolean hasPublicConstructor() {
 		return Arrays.stream(clazz.getConstructors()).anyMatch( c -> c.isAccessible());
 	}
+
+    public T fromValueMap(Map<String, Object> values) {
+        return fromValueMap(createInstance(), values);
+    }
+    public T fromValueMap(T instance, Map<String, Object> values) {
+        IAttribute attr;
+        for (String name : values.keySet()) {
+            attr = getAttribute(name, false);
+            if (attr != null) {
+                Object value = values.get(name);
+                if (Util.isEmpty(value) && attr.getValue(instance) == null)
+                    continue;
+                if (Date.class.isAssignableFrom( attr.getType()) && value instanceof String && ENV.get("bean.format.date.iso8601", false))
+                    value = DateUtil.fromISO8601UTC((String)value);
+                if (attr instanceof IValueAccess)
+                    ((IValueAccess)attr).setValue(value);
+                else {
+                    attr.setValue(instance, value);
+                }
+            } else {
+                LOG.warn("ignoring value of " + name + " - it is not an attribute of " + getClazz());
+            }
+        }
+        return instance;
+    }
 
 	/**
      * getPackageName

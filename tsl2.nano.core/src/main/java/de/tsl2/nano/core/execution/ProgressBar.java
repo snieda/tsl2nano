@@ -30,6 +30,9 @@ public class ProgressBar {
 
 	static final char[] CC = new char[] {' '};
 	
+	public ProgressBar() {
+		this(100);
+	}
 	public ProgressBar(int maxCount) {
 		this(maxCount, "", 30, '=', 58, 100, false);
 	}

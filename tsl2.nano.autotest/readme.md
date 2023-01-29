@@ -560,12 +560,18 @@ public class AllAutoTests {
 
 ### Start with maven
 
+To check the efficience of the autotest, start maven with:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	mvn clean install -Dtest=*AllAutoTests -Dsurefire.failIfNoSpecifiedTests=false
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 You may try several properties through starting maven.
 
 Example:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-mvn test -Dtsl2.functiontest.parallel=true -Dtsl2.functiontest.create.random.max.depth=20
+	mvn test -Dtsl2.functiontest.parallel=true -Dtsl2.functiontest.create.random.max.depth=20
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ## Problems and Solutions

@@ -53,6 +53,7 @@ import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.FormatUtil;
+import de.tsl2.nano.core.util.JSon;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -399,7 +400,8 @@ class Statistics {
 
 class ExpectationCreator {
 	private static final String PREF_WHEN = "@" + Expectations.class.getSimpleName() + "({@" + Expect.class.getSimpleName() + "( when = {";
-	private static final String PREF_THEN = "then = \"";
+	private static final String PREF_THEN = "then = \"-->";
+	private static final String POST_THEN = "<--\"";
 	private static final String PREF_CONSTRUCT = "construct = \"";
 	private static final String PREF_CONSTRUCT_TYPES = "constructTypes = \"";
 	
@@ -412,11 +414,11 @@ class ExpectationCreator {
 			then = (then != null || f.getResult() == null ? then : asString(f.getResult()));
 			String expect = "\n@" + Expectations.class.getSimpleName() + "({@" + Expect.class.getSimpleName() 
 					+ "( when = " + Util.toJson(f.getParameter()) 
-					+ " then = \"" + then + "\""
+					+ " " + PREF_THEN + then + POST_THEN
 					+ (f.construction != null && f.construction.parameter != null ? 
 							" constructTypes = " + Util.toJson(f.getConstruction().constructor.getParameterTypes())
 							+ " construct = " + Util.toJson(f.getConstruction().parameter) : "") 
-					+ "})\n"
+					+ ")})\n"
 					+ f.source + "\n\n";
 			expect = expect.replace("]}", "}");
 			return expect;
@@ -433,8 +435,7 @@ class ExpectationCreator {
 	static Expectations createExpectationFromLine(String l) {
 		String when[], then, construct[];
 		when = extractArray(l, PREF_WHEN);
-		then = StringUtil.substring(l, PREF_THEN, "\"", 0, true);
-		then = then != null && then.startsWith("{") ? StringUtil.substring(l, PREF_THEN, "}\"", 0, true) : then;
+		then = StringUtil.substring(l, PREF_THEN, POST_THEN, 0, true);
 		Class[] constructTypes = loadClasses(extractArray(l, PREF_CONSTRUCT_TYPES));
 		construct = extractArray(l, PREF_CONSTRUCT);
 		return ExpectationCreator.createExpectation(when, then, constructTypes, construct);
@@ -454,20 +455,30 @@ class ExpectationCreator {
 		String arr[] = null, all;
 		all = StringUtil.substring(l, prefix, "} ", 0, true);
 		if (!Util.isEmpty(all)) {
-			String obj;
-			do { // ugly, but the json from MapUtil creates some additional \" that we use to distinguish inner maps and arrays
-				obj = StringUtil.substring(all, ",\"{\"", "}", true, true);
-				if (obj != null) {
-					String obj1 = obj.replaceAll("\"", "");
-					all = all.replace("\"" + obj, obj1);
-				}
-			} while(obj != null);
+			all = prepareSplitOnJSonWithQuotations(all);
 			arr = all.split("\",\"");
 			for (int i = 0; i < arr.length; i++) {
-				arr[i] = arr[i].replaceAll("\"", "");
+				if (!JSon.isJSon(arr[i]) && !arr[i].contains("§§§"))
+					arr[i] = arr[i].replaceAll("\"", "");
+				else
+					arr[i] = arr[i].replaceAll("§§§", "\"");
 			}
 		}
 		return arr;
+	}
+
+	private static String prepareSplitOnJSonWithQuotations(String all) {
+		String obj;
+		do { // ugly, but the json from MapUtil creates some additional \" that we use to distinguish inner maps and arrays
+			obj = StringUtil.substring(all, ",\"{", "}\"", true, true);
+			if (!Util.isEmpty(obj)) {
+				String obj1 = obj.replaceAll("\"", "§§§");
+				if (obj.equals(obj1))
+					break;
+				all = all.replace(obj, obj1);
+			}
+		} while(!Util.isEmpty(obj));
+		return all;
 	}
 
 	static ExpectationsImpl createExpectation(String[] when, String then, Class[] constructTypes, String[] construct) {

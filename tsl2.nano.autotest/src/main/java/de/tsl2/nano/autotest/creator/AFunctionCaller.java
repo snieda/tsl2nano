@@ -10,7 +10,6 @@ import de.tsl2.nano.autotest.Construction;
 import de.tsl2.nano.autotest.ValueRandomizer;
 import de.tsl2.nano.core.IPreferences;
 import de.tsl2.nano.core.ManagedException;
-import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ConcurrentUtil;
@@ -130,8 +129,6 @@ public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
 			Class<?> cls = method.getDeclaringClass();
 			if (construction != null && construction.instance != null && cls.isAssignableFrom(construction.instance.getClass()))
 				return construction.instance;
-			else if (BeanClass.hasDefaultConstructor(cls))
-				construction = new Construction(BeanClass.createInstance(cls));
 			else {
 				construction = ValueRandomizer.constructWithRandomParameters(cls);
 			}

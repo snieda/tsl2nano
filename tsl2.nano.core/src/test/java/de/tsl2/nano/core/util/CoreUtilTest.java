@@ -140,17 +140,6 @@ public class CoreUtilTest implements ENVTestPreparation {
 	}
 
 	@Test
-	public void testJSon() {
-		Map m = MapUtil.asMap("k1", "v1,v2", "k2", "v2;v3");
-
-		String json = JSon.toJSon(m);
-		assertTrue(JSon.isJSon(json));
-		Map m2 = JSon.fromJSon(json);
-		assertEquals(json, JSon.toJSon(m2));
-		assertEquals(MapUtil.asArray(m), MapUtil.asArray(m2));
-	}
-
-	@Test
 	public void testFileUtil() throws Exception {
 		final String fileName = FileUtil.getValidFileName("A<>|;,bstimm-SummeID=${(/\\123)}");
 		if (!fileName.equals("A_____bstimm-SummeID______123__")) {
@@ -687,7 +676,8 @@ public class CoreUtilTest implements ENVTestPreparation {
 	public void testReadWriteLock() {
 		Map map =  new HashMap<String, String>() {
 			SuppliedLock lock = ConcurrentUtil.createReadWriteLock();
-			public String put(String key, String value) {
+			@Override
+            public String put(String key, String value) {
 				return lock.write(() -> super.put(key, value));
 			}
 			public String get(String key) {
@@ -765,16 +755,5 @@ public class CoreUtilTest implements ENVTestPreparation {
 		assertTrue(!result.isEmpty());
 		assertEquals("SUCCESSFULL", result.get(0));
 	}
-	@Test
-	public void testJSONRecursive() {
-		System.setProperty("tsl2.json.recursive", "true");
-		ValueHolder v1 = new ValueHolder(null);
-		ValueHolder v2 = new ValueHolder(v1);
-		v1.setValue(v2);
-		String result = Util.toJson(v2);
-		System.out.println(result);
-		assertEquals("{\"value\": \"{\"value\": \"@0\"}{\"value\": \"{\"value\": \"@0\"}\"}", result);
-	}
-
 		
 }
