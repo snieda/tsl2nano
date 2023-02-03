@@ -2,8 +2,8 @@ package de.tsl2.nano.core.log;
 
 import static de.tsl2.nano.core.util.CLI.tag;
 import static de.tsl2.nano.core.util.CLI.Color.LIGHT_RED;
-import static de.tsl2.nano.core.util.CLI.Color.YELLOW;
 import static de.tsl2.nano.core.util.CLI.Color.ORANGE;
+import static de.tsl2.nano.core.util.CLI.Color.YELLOW;
 
 import java.io.File;
 import java.io.PrintStream;
@@ -277,8 +277,10 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
         return printToConsole;
     }
     
-    public static synchronized void setPrintToConsole(boolean toStandard) {
+    public static synchronized boolean setPrintToConsole(boolean toStandard) {
+        boolean last = printToConsole;
         printToConsole = toStandard;
+        return last;
     }
     
     /** asks a system log level "tsl2.nano.log.level". not only for the logger classes but for some system.out , too. see #class {@link LogFactory} */

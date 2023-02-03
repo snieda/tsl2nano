@@ -1,6 +1,7 @@
 package de.tsl2.nano.autotest.creator;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -35,7 +36,8 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 		if (parameter == null && !status.in(StatusTyp.PARAMETER_UNDEFINED, StatusTyp.PARAMETER_ERROR)) {
 			Expect[] expectations = def.value();
 			//if generated ExpectationsImpl is used, there is only one @Expect!
-			boolean annotated = !def.getClass().getSimpleName().endsWith("Impl");
+			boolean annotated = !def.getClass().getSimpleName().endsWith("Impl")
+				&& !Proxy.isProxyClass(def.getClass());
 			if (annotated && cloneIndex >= expectations.length) {
 				status = new Status(StatusTyp.PARAMETER_UNDEFINED, "countIndex > expectations.length", null);
 				return null;
@@ -138,7 +140,7 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 	@Override
 	public void run() {
 		if (getParameter() == null) {
-			log ("no expectation with own parameters found for test number " + cloneIndex + "\n");
+			log (this + ": Parameter Error on cloneIndex: " + cloneIndex + "\n");
 			if (!status.isFatal())
 				status = new Status(StatusTyp.PARAMETER_UNDEFINED, UNDEFINED, null);
 			result = UNDEFINED;

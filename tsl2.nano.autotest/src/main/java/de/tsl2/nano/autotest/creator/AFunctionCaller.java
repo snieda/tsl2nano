@@ -99,6 +99,7 @@ public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
 			ConcurrentUtil.runWithTimeout(getID(), this, timeout * 1000);
 	}
 	protected Object run(Method method, Object... args) {
+		boolean last = LogFactory.setPrintToConsole(false);
 		logd(StringUtil.fixString(this.getClass().getSimpleName(), 25) + " invoking " + method.getDeclaringClass().getSimpleName() + "." + method.getName() + " with " + StringUtil.toString(Arrays.toString(args), 80));
 		final Object instance = getInstance(method);
 		try {
@@ -119,6 +120,7 @@ public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
 		} finally {
 //			Thread.currentThread().notifyAll(); // you should't call notifyAll() on a Thread! see Thread.join() description
 			logd(" -> " + status + "\n");
+			LogFactory.setPrintToConsole(last);
 		}
 	}
 

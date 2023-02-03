@@ -1,6 +1,7 @@
 package de.tsl2.nano.h5;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -20,6 +21,7 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.JSon;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
@@ -55,7 +57,6 @@ import de.tsl2.nano.core.util.Util;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public abstract class ARESTDynamic<RESPONSE> {
 	private static final Log LOG = LogFactory.getLog(ARESTDynamic.class);
-	static final String METHODS = "GET|PUT|DELETE|POST|OPTIONS";
 	static final String BODY = ENV.get("app.rest.payload.key", "postData");
 	public static String BASE_PATH = ENV.get("app.rest.basepath", "/rest");
 	static String USAGE = BASE_PATH + "/{entity}/{attribute-or-action}/{query}/{optional-output-attribute}/{PUT:value}";
@@ -64,7 +65,14 @@ public abstract class ARESTDynamic<RESPONSE> {
 		OK(200), CREATED(201), BAD_REQUEST(400), UNAUTHORIZED(401), FORBIDDEN(403), NOT_FOUND(404), INTERNAL_ERROR(500);
 		int s; Status(int s) { this.s = s;} public int http() {return s;}
 	}
-	
+	enum Methods {
+		GET, PUT, DELETE, POST, OPTIONS;
+		static String matchingExpression() {
+			StringBuilder buf = new StringBuilder();
+			Arrays.stream(values()).forEach(m -> buf.append("|" + m));
+			return buf.substring(1);
+		}
+	}
 	public static boolean canRest(String uri) {
 		return (uri.endsWith(BASE_PATH) || uri.contains(BASE_PATH + "/")) && ENV.get("app.rest.active", true);
 	}
@@ -150,14 +158,14 @@ public abstract class ARESTDynamic<RESPONSE> {
 					String urlEnd = StringUtil.substring(url, query, null);
 					doPut(urlEnd, output, instance);
 					if (result.length() == 0)
-						result.append("changed: ");
+						result.append("changed (id): ");
 					result.append(Bean.getBean(instance).getId() + " ");
 					break;
 				case "DELETE":
 					checkUrlEnd(url, query, "query");
 					BeanContainer.instance().delete(instance);
 					if (result.length() == 0)
-						result.append("deleted: ");
+						result.append("deleted (id): ");
 					result.append(Bean.getBean(instance).getId() + " ");
 					break;
 				default:
@@ -204,9 +212,9 @@ public abstract class ARESTDynamic<RESPONSE> {
 			result = bean.getActionByName(action).activate();
 			if (result != null && !PrimitiveUtil.isPrimitiveOrWrapper(result.getClass())) {
 				Bean<Object> resultBean = Bean.getBean(result);
-				result = action.equals("save") ? resultBean.getId() : MapUtil.toJSon(resultBean.toValueMap(new HashMap<>()));
+				result = "'" + action + "' successfull!\n\n" + JSon.toJSon(resultBean.toValueMap(null));
 			} else if (result == null) {
-				result = bean.getId();
+				result ="'" + action + "' successfull!\n\n" + JSon.toJSon(bean.toValueMap(null));
 			}
 		}
 		LOG.info("REST (POST) " + url + " --> " + StringUtil.toString(result, 80));
@@ -228,7 +236,7 @@ public abstract class ARESTDynamic<RESPONSE> {
 	}
 
 	void checkMethod(String method) {
-		ManagedException.assertion(method.matches(METHODS), "http method must match one of {0}", METHODS);
+		ManagedException.assertion(method.matches(Methods.matchingExpression()), "http method must match one of {0}", Methods.matchingExpression());
 	}
 
 	void checkUrlEnd(String url, String from, String name) {

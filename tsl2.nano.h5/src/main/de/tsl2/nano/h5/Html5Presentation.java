@@ -341,7 +341,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     "icons/point_yellow.png") {
                 @Override
                 public Object action() throws Exception {
-                    return ENV.get("service.url", "") + RestUI.BASE_PATH;
+                    return ENV.get("service.url", "") + ARestUI.BASE_PATH;
                 }
             });
         }

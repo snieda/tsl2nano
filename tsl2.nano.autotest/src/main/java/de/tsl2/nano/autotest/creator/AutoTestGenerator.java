@@ -37,8 +37,10 @@ import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 
 import de.tsl2.nano.core.IPreferences;
 import de.tsl2.nano.core.ManagedException;
@@ -70,8 +72,11 @@ import de.tsl2.nano.core.util.Util;
  * so, the generated {@link Expectations} contain values to specify the code
  * implementation as is!
  * <p/>
- * works only on methods with simple parameter and return types. 
- * if the method returns null, no expectations will be created
+ * works only on methods with simple parameter and return types.
+ * 
+ * Usage:
+ * 	call createExpectationTesters() in your junit test with @parameterized annotation.
+ * 
  * 
  * @author ts
  */
@@ -134,11 +139,7 @@ public class AutoTestGenerator {
 			else
 				methods = ClassFinder.self().find(def(FILTER, ""), Method.class, def(MODIFIER, -1), null);
 			FileUtil.writeBytes(("\nmatching methods in classpath: " + methods.size()).getBytes(), getTimedFileName() + "statistics.txt", true);
-			filterExcludes(methods);
-			filterTestClasses(methods);
-			filterSingeltons(methods);
-			filterNonInstanceable(methods);
-			FileUtil.writeBytes(("\nfiltered methods             : " + methods.size()).getBytes(), getTimedFileName() + "statistics.txt", true);
+			filterMethods(methods);
 			progress = new ProgressBar(methods.size() * duplication);
 			ArrayList<Integer> dupList = NumberUtil.numbers(duplication);
 			Util.stream(dupList, def(PARALLEL, false)).forEach( i -> 
@@ -181,25 +182,45 @@ public class AutoTestGenerator {
 				progress.setFinished();
 		}
 	}
+	private void filterMethods(List<Method> methods) {
+		int filterExcludes = filterExcludes(methods);
+		int filterTestClasses = filterTestClasses(methods);
+		int filterSingeltons = filterSingeltons(methods);
+		int filterNonInstanceable = filterNonInstanceable(methods);
+		FileUtil.writeBytes(("\nfiltered methods             : " 
+			+ methods.size() + " (" 
+			+ FILTER_EXCLUDE + "->" + filterExcludes + " " 
+			+ FILTER_TEST + "->" + filterTestClasses + " " 
+			+ FILTER_SINGELTONS + "->" + filterSingeltons + " " 
+			+ FILTER_NONINSTANCEABLES + "->" + filterNonInstanceable + " " 
+			+ ")").getBytes(), getTimedFileName() + "statistics.txt", true);
+	}
 	private void prepareFilteredWriter() throws IOException {
 		if (!getFile(0).exists() || def(CLEAN, false))
 			FileUtil.delete(fileName + "filtered.txt");
 		filteredFunctionWriter.set(FileUtil.getBAWriter(fileName + "filtered.txt"));
 	}
 
-	private static void filterExcludes(List<Method> methods) {
-		methods.removeIf(m -> m.toGenericString().matches(def(FILTER_EXCLUDE, REGEX_UNMATCH)));
+	private static int filter(List<Method> methods, Predicate<Method> myFilter) {
+		int size = methods.size();
+		methods.removeIf(myFilter);
+		return size - methods.size();
 	}
-	private static void filterTestClasses(List<Method> methods) {
-		methods.removeIf(m -> m.getDeclaringClass().getName().matches(def(FILTER_TEST, ".*(Test|IT)")));
+	private static int filterExcludes(List<Method> methods) {
+		return filter(methods, m -> m.toGenericString().matches(def(FILTER_EXCLUDE, REGEX_UNMATCH)));
 	}
-	private static void filterSingeltons(List<Method> methods) {
+	private static int filterTestClasses(List<Method> methods) {
+		return filter(methods, m -> m.getDeclaringClass().getName().matches(def(FILTER_TEST, ".*(Test|IT)")));
+	}
+	private static int filterSingeltons(List<Method> methods) {
 		if (def(FILTER_SINGELTONS, true))
-			methods.removeIf(m -> BeanClass.getBeanClass(m.getDeclaringClass()).isSingleton());
+			return filter(methods, m -> BeanClass.getBeanClass(m.getDeclaringClass()).isSingleton());
+		return 0;
 	}
-	private static void filterNonInstanceable(List<Method> methods) {
+	private static int filterNonInstanceable(List<Method> methods) {
 		if (def(FILTER_NONINSTANCEABLES, true))
-			methods.removeIf(m -> !Util.isInstanceable((m.getDeclaringClass())));
+			return filter(methods, m -> !BeanClass.isStatic(m) && !Util.isInstanceable((m.getDeclaringClass())));
+		return 0;
 	}
 	private static boolean filterErrorType(Throwable e) {
 		return ManagedException.getRootCause(e).toString().matches(def(FILTER_ERROR_TYPES, REGEX_UNMATCH));
@@ -420,7 +441,7 @@ class ExpectationCreator {
 							+ " construct = " + Util.toJson(f.getConstruction().parameter) : "") 
 					+ ")})\n"
 					+ f.source + "\n\n";
-			expect = expect.replace("]}", "}");
+			// expect = expect.replace("]}", "}");
 			return expect;
 		} catch (Exception e) {
 			f.status = new Status(StatusTyp.STORE_ERROR, null, e);
@@ -534,7 +555,7 @@ class FunctionCheck {
 			String strResult = FormatUtil.format(result);
 			Object recreatedResult = null;
 			recreatedResult = ObjectUtil.wrap(strResult, result.getClass());
-			return AFunctionTester.best(result).equals(AFunctionTester.best(recreatedResult));
+			return Objects.deepEquals(AFunctionTester.best(result), AFunctionTester.best(recreatedResult));
 		} catch (Throwable e) { //catch Throwable as it is possible that something like OutOfMemoryError occur
 			return false;
 		}

@@ -92,7 +92,7 @@ public class RESTDynamicTest {
 		Response response = new RESTDynamic().serve(url, "XXX", header(url, "XXX"), null);
 		String result = ByteUtil.toString(response.getData(), "UTF8");
 		System.out.println(result);
-		assertTrue(result.contains(RESTDynamic.METHODS));
+		assertTrue(result.contains(RESTDynamic.Methods.matchingExpression()));
 	}
 	
 	@Test
@@ -178,7 +178,8 @@ public class RESTDynamicTest {
 		assertEquals(NanoHTTPD.MIME_PLAINTEXT, response.getMimeType());
 		assertEquals("CREATED", response.getStatus().toString());
 		String result = ByteUtil.toString(response.getData(), "UTF8");
-		assertTrue(result.contains(String.valueOf(beanAddress.getId())));
+		assertEquals("'save' successfull!\n\n{\"address.city\": \"Buxdehude\",\"address.code\": \"100000\",\"address.country\": \"germany\",\"address.street\": \"Berliner Str.1\",\"address.id\": \"1\"}"
+		, result);
 	}
 
 	@Test
@@ -208,7 +209,7 @@ public class RESTDynamicTest {
 		Response response = new RESTDynamic().serve(url, "PUT", header(url, "PUT"), null);
 		assertEquals(Response.Status.OK, response.getStatus());
 		String result = ByteUtil.toString(response.getData(), "UTF8");
-		assertEquals("changed: Address", result);
+		assertEquals("changed (id): Address", result);
 	}
 	
 	@Test
@@ -218,7 +219,7 @@ public class RESTDynamicTest {
 		Response response = new RESTDynamic().serve(url, "DELETE", header(url, "DELETE"), null);
 		assertEquals(Response.Status.OK, response.getStatus());
 		String result = ByteUtil.toString(response.getData(), "UTF8");
-		assertEquals("deleted: Address", result);
+		assertEquals("deleted (id): Address", result);
 	}
 	
 }

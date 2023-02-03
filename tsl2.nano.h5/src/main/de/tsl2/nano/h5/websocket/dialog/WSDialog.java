@@ -39,7 +39,7 @@ public class WSDialog {
         // TODO: embed the title
         Bean<?> b = Bean.getBean(beanInstance);
         if (!(b.getPresentationHelper() instanceof Html5Presentation)) {
-            throw new IllegalStateException("The presentationhelper of given bean must be an Html5Presention!");
+            throw new IllegalStateException("The presentationhelper of given bean must be an Html5Presentation!");
         }
         Element parentDlg = createFormDialog(rootTag);
         Element dlg =  ((Html5Presentation) b.getPresentationHelper()).createPage(AdapterProxy.create(ISession.class), parentDlg,

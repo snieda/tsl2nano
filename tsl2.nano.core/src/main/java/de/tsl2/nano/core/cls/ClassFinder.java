@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +88,6 @@ public class ClassFinder {
 	}
 
 	private void init(ClassLoader classLoader) {
-		ClassLoader baseClassLoader = classLoader;
 		packageNames = new HashSet<>();
 		classes = new HashSet<>();
 
@@ -108,44 +106,50 @@ public class ClassFinder {
 		LOG.info("---------------------------------------------------------------------");
 	}
 
+	private ClassLoader addClasses(ClassLoader classLoader, Set<Class<?>> classes) {
+		addPrivateOracleClassLoaderClasses(classLoader, classes);
+		collectPackageClasses(classLoader, classes);
+		return classLoader.getParent();
+	}
+
 	/**
 	 * SPECIFIC IMPLEMENTATION FOR ORACLES JAVA IMPLEMENTATION!
-	 * 
-	 * @param classLoader
-	 * @return parent ClassLoader
 	 */
-	private ClassLoader addClasses(ClassLoader classLoader, Set<Class<?>> classes) {
+	@Deprecated
+	private void addPrivateOracleClassLoaderClasses(ClassLoader classLoader, Set<Class<?>> classes) {
 		try {
 			classes.addAll(
 				(Collection<? extends Class<?>>) new PrivateAccessor(classLoader).member("classes", ArrayList.class));
 		} catch(Exception ex) {
-			LOG.warn("cannot access specific private member 'classes' of classloader. this may result in problems on finding classes.");
+			LOG.warn(classLoader + ": cannot access specific private member 'classes' of classloader. this may result in problems on finding classes.");
 		}
-		collectPackageClasses(classLoader, classes);
-		return classLoader.getParent();
 	}
 	/** may be called by a java-agent using the instrumentation.getAllLoadedClass()  */
 	public static void addClasses(Class<?>[] classes) {
 		self().classes.addAll(Arrays.asList(classes));
 	}
 
-//	private void collectPackageClasses(ClassLoader classLoader) {
-//		collectPackageClasses(ClassLoader.getSystemClassLoader(), classes);
-//		while ((classLoader = collectPackageClasses(classLoader, classes)) != null)
-//			;
-//	}
+	public static void loadAllClassesInEachPackage(Class...classes) {
+		Arrays.stream(classes).forEach(c -> self().classes.addAll(getClassesInPackage(c.getPackage().getName(), Thread.currentThread().getContextClassLoader())));
+	}
 
 	ClassLoader collectPackageClasses(ClassLoader cl, Set<Class<?>> classes) {
 		Package[] packages = cl instanceof RuntimeClassloader ? ((RuntimeClassloader)cl).getPackages() : Package.getPackages();
 		LOG.debug("---------------------------------------------------------------------");
 		LOG.debug(packages.length + " Packages will be loaded on classloader " + cl);
 		LOG.debug("---------------------------------------------------------------------");
+		int size = classes.size();
+		collectPackageClasses(cl, classes, false, cl instanceof RuntimeClassloader ? ((RuntimeClassloader)cl).getPackages() : Package.getPackages());
+		// collectPackageClasses(cl, classes, cl.getDefinedPackages());
+		LOG.info(classes.size() - size + " classes scanned by ClassFinder on " + cl);
+		return cl.getParent();
+	}
+
+	private void collectPackageClasses(ClassLoader cl, Set<Class<?>> classes, boolean force, Package[] packages) {
 		for (int i = 0; i < packages.length; i++) {
-			if (!packageNames.contains(packages[i].getName()))
+			if (force || !packageNames.contains(packages[i].getName()))
 				classes.addAll(collectPackageClasses(cl, packages[i].getName(), classes));
 		}
-		LOG.info(classes.size() + " classes scanned by ClassFinder");
-		return cl.getParent();
 	}
 
 	private Collection<Class<?>> collectPackageClasses(ClassLoader cl, String pack, Set<Class<?>> classes) {
@@ -393,6 +397,7 @@ public class ClassFinder {
 	    );
 
 	    String name;
+		int count = 0;
 	    for (String classpathEntry : classPathEntries) {
 	        if (classpathEntry.endsWith(".jar")) {
 	            File jar = new File(classpathEntry);
@@ -406,6 +411,7 @@ public class ClassFinder {
 	                            classPath = classPath.replaceAll("[\\|/]", ".");
 	                            classes.add(cl.loadClass(classPath));
 	                            System.out.print(".");
+								count++;
 	                        }
 	                    }
 	                }
@@ -423,6 +429,7 @@ public class ClassFinder {
 	                        name = name.substring(0, name.length() - 6);
 	                        classes.add(Class.forName(packageName + "." + name));
                             System.out.print(".");
+							count++;
 	                    }
 	                }
 	            } catch (Exception | NoClassDefFoundError  ex) {
@@ -430,7 +437,7 @@ public class ClassFinder {
 	            }
 	        }
 	    }
-	    System.out.println("OK");
+	    System.out.println("OK (count: " + count + ")");
 	    return classes;
 	}
 

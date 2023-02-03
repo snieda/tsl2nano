@@ -546,6 +546,23 @@ Example output of http://localhost:8067/rest/address/city/B* (gives you all addr
 {"street": "Berliner Str.1","city": "Buxdehude"},{"street": "Frankfurter Strasse 376","city": "Berlin"}
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+##### HATEOAS-like interactive REST ui service
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/**
+ * Provides a ui service to interact with a static ARESTDynamic restful service.
+ * enriches responses of that restful service and creates additional dialogs to
+ * call the restful serivce with methods like PUT, POST and DELETE. Tries to 
+ * implement something like HATEOAS, providing links the possible actions in the
+ * current context.
+ * Usage: see initial help text of REST service: '/rest' or go directly to 
+ * the RestUI page: '/restui'. This will you guide further with possible links
+ * to current context.
+ * 
+ * Example: http://localhost/8067/restui.
+ */
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 ## Starting / Test
 
 ### Quick-Start
@@ -6034,7 +6051,8 @@ deploy:
     * [x] Inline code is considered harmful, and you should avoid it. Copy all the JavaScript code and CSS to separate files and add them to the white-list.
 * [v] layout: add high contrast scheme through click on status line
 * [-] valuerandomizer: getBestConstructor() -> Construction -> add construction of arrays
-* [ ] find out coverage loss: classfinder? , test on ignore, autotests?
-* [x] HATEOAS: extend rest access classes to provide content relational links and css styling
-* [ ] HATEOAS: doku
-* [ ] h5 timesheet output-deep
+* [v] find out coverage loss: classfinder? , test on ignore, autotests?
+* [v] HATEOAS: extend rest access classes to provide content relational links and css styling
+* [v] HATEOAS: doku
+* [x] HATEOAS unit tests
+* [v] h5 timesheet output-deep

@@ -37,6 +37,7 @@ public class RESTDynamic extends ARESTDynamic<NanoHTTPD.Response> {
 		return Authorization.create(user, Boolean.getBoolean("app.login.secure"));
 	}
 
+	@Override
 	public void checkAuthorization(String beanName, String actionOrAttribute, Map<String, String> header) throws IllegalAccessException {
 		if (ENV.get("app.login.administration", true))
 			return;
@@ -44,8 +45,13 @@ public class RESTDynamic extends ARESTDynamic<NanoHTTPD.Response> {
 //			throw new IllegalAccessException("not authorized");
 	}
 
+	@Override
 	Response createResponse(Status status, String message) {
-		return NanoH5.createResponse(Response.Status.lookup(status.http()), NanoHTTPD.MIME_PLAINTEXT, message);
+		return createResponse(status, NanoHTTPD.MIME_PLAINTEXT, message);
+	}
+
+	Response createResponse(Status status, String mimeType, String message) {
+		return NanoH5.createResponse(Response.Status.lookup(status.http()), mimeType, message);
 	}
 
 }

@@ -19,8 +19,8 @@ public class JSon {
 
 	public static boolean isJSon(String txt) {
     	return !txt.contains("\"")
-    			? txt.matches("\\{((\\s*\\w++\\s*)[:](\\s*[^,\\s]*?\\s*)[,]?)*\\}")//txt.matches("[{](.*[:].*[,]?)+[}]")
-    			: txt.matches("[\"]?\\{((\\s*[\"]?\\w++[\"]?\\s*)[:](\\s*[\"]?[^\"]*[\"]?\\s*)[,]?)*\\}[\"]?");
+    			? txt.matches("[{\\[]((\\s*\\w++\\s*)[:](\\s*[^,\\s]*?\\s*)[,]?)*\\}")//txt.matches("[{](.*[:].*[,]?)+[}\\]]")
+    			: txt.matches("[\"]?[{\\[]((\\s*[\"]?\\w++[\"]?\\s*)[:](\\s*[\"]?[^\"]*[\"]?\\s*)[,]?)*[}\\]][\"]?");
     }
 
     public static String toJSon(Object obj) {
@@ -41,7 +41,7 @@ public class JSon {
 	    	return toMapJson(obj, json, tree, m);
     	} else if (ByteUtil.isByteStream(obj.getClass())) {
     		tree.add(obj);
-    		return "{" + ByteUtil.toString(obj) + "}";
+    		return ByteUtil.toString(obj);
     	} else if (!(obj instanceof Map)) {
     		tree.add(obj);
     		if (obj instanceof Collection)

@@ -14,6 +14,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
@@ -1323,6 +1324,10 @@ public class BeanClass<T> implements Serializable {
 		return Arrays.stream(clazz.getConstructors()).anyMatch( c -> c.isAccessible());
 	}
 
+    public static boolean isStatic(Member member) {
+        return Modifier.isStatic(member.getModifiers());
+    }
+    
     public T fromValueMap(Map<String, Object> values) {
         return fromValueMap(createInstance(), values);
     }

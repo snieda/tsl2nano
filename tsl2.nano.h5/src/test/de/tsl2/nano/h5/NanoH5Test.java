@@ -33,7 +33,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
-
 import org.anonymous.project.Address;
 import org.anonymous.project.Charge;
 import org.junit.After;
@@ -405,7 +404,7 @@ public class NanoH5Test implements ENVTestPreparation {
         
 //        new File(DIR_TEST).delete();
 //        Files.deleteIfExists(Paths.get(DIR_TEST));
-        FileUtil.deleteRecursive(new File(DIR_TEST));
+        // FileUtil.deleteRecursive(new File(DIR_TEST));
 
         ENV.create(DIR_TEST);
         Bean.clearCache(); //needs an existing ENV
@@ -418,7 +417,7 @@ public class NanoH5Test implements ENVTestPreparation {
     @Test
     public void testTimesheet() throws Exception {
         setENVProperties();
-        // System.setProperty("nanoh5test.run.deep", "true");
+        System.setProperty("nanoh5test.run.deep", "true");
 
         Properties mapper = new Properties();
         createAndTest(new Timesheet(getServiceURL(), null) {

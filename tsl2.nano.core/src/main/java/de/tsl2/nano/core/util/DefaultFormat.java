@@ -87,7 +87,7 @@ public class DefaultFormat extends Format {
 //                    result.append(MessageFormat.format("{0}", new Object[] { obj }));
 //            }
         } else if (obj.getClass().isArray() || obj instanceof Map) {
-            result.append(StringUtil.toString(obj, 80));
+            result.append(StringUtil.toString(obj, -1));
         } else {
             //pure objects, representing there instance id --> use reflection
             CompatibilityLayer cl = ENV.isAvailable() ? ENV.get(CompatibilityLayer.class) : new CompatibilityLayer();

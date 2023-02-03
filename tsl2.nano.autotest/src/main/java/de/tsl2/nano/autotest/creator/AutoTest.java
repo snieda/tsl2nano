@@ -29,4 +29,8 @@ public enum AutoTest implements IPreferences {
 	private void set(Object value) {
 		this.value = value;
 	}
+	@Override
+	public String toString() {
+		return name() + "[" + value + "]";
+	}
 }

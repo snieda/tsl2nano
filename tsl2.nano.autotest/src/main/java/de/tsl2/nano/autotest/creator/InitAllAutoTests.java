@@ -80,10 +80,10 @@ public class InitAllAutoTests {
 	public static String matchPackage(boolean loadAllClassesInPackage, Class...classes) {
 		StringBuilder buf = new StringBuilder(".*(");
 		for (int i = 0; i < classes.length; i++) {
-			if (loadAllClassesInPackage)
-				ClassFinder.getClassesInPackage(classes[i].getPackage().getName(), null);
 			buf.append(classes[i].getPackage().getName() + (i < classes.length - 1 ? "|" : ""));
 		}
+		if (loadAllClassesInPackage)
+			ClassFinder.loadAllClassesInEachPackage(classes);
 		return buf.append(").*").toString();
 	}
 

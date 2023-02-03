@@ -160,7 +160,7 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 			logd(" -> " + status + "\n");
 			if (!Util.get(PREF_PROPS + "testneverfail", false)) {
 				if (AutoTestGenerator.progress != null && AutoTestGenerator.progress.isFinished())
-					Util.trY( () -> FileUtil.writeBytes(("\n\nTEST: " + toString() + "\n" + ManagedException.toString(e)).getBytes(), def("timedfilename", "") + "failed-tests.txt", true), false);
+					Util.trY( () -> FileUtil.writeBytes(("\n\nTEST: " + toString() + "\n" + ManagedException.toString(e)).getBytes(), def("timedfilename", "") + AutoTestGenerator.fileName + "failed-tests.txt", true), false);
 				ManagedException.forward(e);
 			} else
 				logd("ERROR (testneverfail=true): " + status);

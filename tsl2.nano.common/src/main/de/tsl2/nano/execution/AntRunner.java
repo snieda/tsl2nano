@@ -9,7 +9,6 @@
  */
 package de.tsl2.nano.execution;
 
-import java.io.File;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintStream;
@@ -40,6 +39,7 @@ import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
@@ -268,7 +268,7 @@ public class AntRunner {
         String s;
         for (int i = 0; i < fsets.length; i++) {
             FileSet fileSet = new FileSet();
-            fileSet.setDir(new File(StringUtil.substring(fsets[i], null, ":{")).getAbsoluteFile());
+            fileSet.setDir(FileUtil.userDirFile(StringUtil.substring(fsets[i], null, ":{")).getAbsoluteFile());
             s = StringUtil.substring(fsets[i], "{", "}");
             includes = s.split(",");
             fileSet.appendIncludes(includes);

@@ -598,6 +598,31 @@ In different environments, there may be problems. We try to solve some of them:
 * **Files are written outside of target or test directories**
 * -> set a breakpoint to *java.io.FileOutputStream.open()* with breakpoint-property '!path.getAbsoluteFile().contains("target/")'. Mostly, a parameter of type *PrintWriter* will invoke a call to *PrintWriter(String)* that create randomized files through the ValueRandomizer
 
+### Debuggin / looking at a selected method to be tested
+
+To debug maven surefire (the test engine) and to test only the autotests start maven with:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	mvn -Dmaven.surefire.debug test -Dtest=AllAutoTests -Dsurefire.failIfNoSpecifiedTests=false   -Dmaven.experimental.buildconsumer=false -pl tsl2.nano.autotest -am
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Before you start maven and your remote debug session on port 5005, change some parameters to constrain the tests:
+
+Example:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	class AllAutoTests
+		...
+			set(DUPLICATION, 1);
+			set(FILTER, ".*ByteUtil.convertToByteArray.*");
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Set Breakpoints in 
+* AutoStartGenerator.createExpectationTesters()
+* ExpectationCreator.createExpectationString()
+* ExpectationCreator.createExpectationFromLine()
+* AFunctionTester.createRunners()
+* AFunctionTester.testMe()
+
 ## All Together
 
 To enable all standard test features of this framework, do the following:
