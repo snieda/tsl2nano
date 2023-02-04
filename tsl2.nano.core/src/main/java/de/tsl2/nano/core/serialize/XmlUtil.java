@@ -252,10 +252,10 @@ public class XmlUtil {
                 new SimpleXmlArrayWorkaround()).read(type,
                     fileInputStream = new FileInputStream(FileUtil.userDirFile(xmlFile)));
         } catch (Exception e) {
-        	if (ENV.isAvailable())
-        		Message.ask(e.getMessage(), true); //otherwise it may not be visible on reloading all...
-        	else
-        		e.printStackTrace();
+        	if (ENV.isAvailable()) {
+        		Message.ask(ManagedException.toStringCause(e), true); //otherwise it may not be visible on reloading all...
+            } else
+        		LOG.error(e);
         	if (fileInputStream != null)
         		fileInputStream = FileUtil.close(fileInputStream, false);
             //mark the loaded xml file as corrupt
@@ -382,6 +382,7 @@ public class XmlUtil {
             }
         };
         Registry reg = new Registry() {
+            @Override
             public Converter lookup(Class type) throws Exception {
                 if (Proxy.isProxyClass(type) || InvocationHandler.class.isAssignableFrom(type)) {
                     return proxyConverter;

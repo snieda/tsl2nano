@@ -255,7 +255,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
 		Thread.currentThread().setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread t, Throwable e) {
-                if (e instanceof Message) System.err.println(e.getMessage()); else e.printStackTrace();
+                if (e instanceof Message) System.err.println(e.getMessage()); else LOG.error(e);
             }
         });
 	}
@@ -1438,7 +1438,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
 				String envXml = ENV.getConfigPath() + ENV.CONFIG_NAME + originalFileExtension;
 				Files.move(Paths.get(envXml), Paths.get(envXml + "_"));
 			} catch (IOException e) {
-				e.printStackTrace();
+                LOG.error(e);
 			}
 		}
 	}

@@ -322,28 +322,30 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
     @Override
     public Collection<IAction> getSessionActions(ISession session) {
-        Collection<IAction> sessionActions = super.getSessionActions(session);
-        if (session != null && sessionActions.size() > 0) {
-            sessionActions.add(new SecureAction(bean.getClazz(),
-                    "RESTful",
-                    IAction.MODE_UNDEFINED,
-                    false,
-                    "icons/point_green.png") {
-                @Override
-                public Object action() throws Exception {
-                    return ENV.get("service.url", "") + ARESTDynamic.BASE_PATH;
-                }
-            });
-            sessionActions.add(new SecureAction(bean.getClazz(),
-                    "RESTfulUI",
-                    IAction.MODE_UNDEFINED,
-                    false,
-                    "icons/point_yellow.png") {
-                @Override
-                public Object action() throws Exception {
-                    return ENV.get("service.url", "") + ARestUI.BASE_PATH;
-                }
-            });
+        if (sessionActions == null) {
+            sessionActions = super.getSessionActions(session);
+            if (session != null && sessionActions.size() > 0) {
+                sessionActions.add(new SecureAction(bean.getClazz(),
+                        "RESTful",
+                        IAction.MODE_UNDEFINED,
+                        false,
+                        "icons/point_green.png") {
+                    @Override
+                    public Object action() throws Exception {
+                        return ENV.get("service.url", "") + ARESTDynamic.BASE_PATH;
+                    }
+                });
+                sessionActions.add(new SecureAction(bean.getClazz(),
+                        "RESTfulUI",
+                        IAction.MODE_UNDEFINED,
+                        false,
+                        "icons/point_yellow.png") {
+                    @Override
+                    public Object action() throws Exception {
+                        return ENV.get("service.url", "") + ARestUI.BASE_PATH;
+                    }
+                });
+            }
         }
         return sessionActions;
     }

@@ -60,7 +60,7 @@ public class LogbookApplication implements INanoPlugin, IDOMDecorator {
 	public void definePersistence(Persistence persistence) {
 		persistence.setAutoddl("update");
 		persistence.setDatabase("logbook");
-		persistence.setJarFile(System.getProperty("user.dir") + "/tsl2.app.logbook" + "-2.4.11-SNAPSHOT.jar");
+		persistence.setJarFile(System.getProperty("user.dir") + "/tsl2.app.logbook" + "-2.5.0-SNAPSHOT.jar");
 	}
 
 	public void actionBeforeHandler(IAction<?> action) {
@@ -104,25 +104,29 @@ public class LogbookApplication implements INanoPlugin, IDOMDecorator {
 		/*
          * statistic queries
          */
-        String stmt = "\n-- get a statistic table from logbook entries\n" +
-              "-- user and log-category should be given...\n" +
-        	"select lg.Name as LogCategory, vt.Name as ValueType, MIN(e.value) as Minimum, MAX(e.value - e1.value) as MaxDiff, AVG(e.value) as Average, MAX(e.value) as Maximum, SUM(e.value) as Sum\r\n" + 
-        	"from Entry e \r\n" + 
-        	"  join Entry e1 on e1.TYPE_ID= e.TYPE_ID\r\n" + 
-        	"  join LogCategory lg on lg.ID = e.CATEGORY_ID\r\n" + 
-        	"  join ValueType vt on vt.ID = e.TYPE_ID\r\n" + 
-        	"where e1.date < e.date or (e1.date = e.date and e1.time < e.time)\r\n" + //TODO: thats not enough...
-        	"group by 1, 2\r\n" + 
-        	"order by 1, 2";
+        String stmt = """
+			
+			-- get a statistic table from logbook entries
+			-- user and log-category should be given...
+			select lg.Name as LogCategory, vt.Name as ValueType, MIN(e.value) as Minimum, MAX(e.value - e1.value) as MaxDiff, AVG(e.value) as Average, MAX(e.value) as Maximum, SUM(e.value) as Sum\r
+			from Entry e \r
+			  join Entry e1 on e1.TYPE_ID= e.TYPE_ID\r
+			  join LogCategory lg on lg.ID = e.CATEGORY_ID\r
+			  join ValueType vt on vt.ID = e.TYPE_ID\r
+			where e1.date < e.date or (e1.date = e.date and e1.time < e.time)\r
+			group by 1, 2\r
+			order by 1, 2""";
         QueryResult.createQueryResult("Logbook-Statistics", stmt);
         
-        stmt = "\n-- get a statistic table from logbook entries\n" +
-                "-- user and log-category should be given...\n" +
-                "select lg.Name as LogCategory, vt.Name as ValueType, e.date as Date, e.time as Time, e.value as Value\r\n" + 
-                "from Entry e \r\n" + 
-                "  join LogCategory lg on lg.ID = e.CATEGORY_ID\r\n" + 
-                "  join ValueType vt on vt.ID = e.TYPE_ID\r\n" + 
-                "order by 1, 2, 3, 4";
+        stmt = """
+			
+			-- get a statistic table from logbook entries
+			-- user and log-category should be given...
+			select lg.Name as LogCategory, vt.Name as ValueType, e.date as Date, e.time as Time, e.value as Value\r
+			from Entry e \r
+			  join LogCategory lg on lg.ID = e.CATEGORY_ID\r
+			  join ValueType vt on vt.ID = e.TYPE_ID\r
+			order by 1, 2, 3, 4""";
         		
         QueryResult.createQueryResult("Logbook-Course", stmt);
 	}

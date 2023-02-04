@@ -40,19 +40,22 @@ public class WebSecurity {
 	private static final String SESSION_ID = "session-id";
 
 	private static final String STANDARD_HEADER = 
-	  "\nReferrer-Policy: same-origin\n"
-	+ "X-XSS-Protection: 1;mode=block\n"
-	+ "X-Permitted-Cross-Domain-Policies: master-only\n"
-	+ "X-Frame-Options: sameorigin\n"
-	+ "Content-Security-Policy: default-src 'self';\n"
-	+ "X-Content-Type-Options: nosniff;\n"
-	+ "Strict-Transport-Security: maxage=31536000;\n"
-	+ "IncludeSubDomains: true;\n"
-	+ "Content-Security-Policy: script-src 'self' 'unsafe-inline' 'XnXoXnXcXe-${requestId}';\n"
-	+ "Content-Security-Policy: frame-src 'self';\n"
-	+ "Content-Security-Policy: frame-ancestors 'self';\n"
-	+ "Content-Security-Policy: form-action 'self';\n"
-	+ "Content-Security-Policy: default-src 'self' 'unsafe-inline' filesystem ${service.url} ${websocket.url};\n"; 
+	  """
+    	
+    	Referrer-Policy: same-origin
+    	X-XSS-Protection: 1;mode=block
+    	X-Permitted-Cross-Domain-Policies: master-only
+    	X-Frame-Options: sameorigin
+    	Content-Security-Policy: default-src 'self';
+    	X-Content-Type-Options: nosniff;
+    	Strict-Transport-Security: maxage=31536000;
+    	IncludeSubDomains: true;
+    	Content-Security-Policy: script-src 'self' 'unsafe-inline' 'XnXoXnXcXe-${requestId}';
+    	Content-Security-Policy: frame-src 'self';
+    	Content-Security-Policy: frame-ancestors 'self';
+    	Content-Security-Policy: form-action 'self';
+    	Content-Security-Policy: default-src 'self' 'unsafe-inline' filesystem ${service.url} ${websocket.url};
+    	"""; 
 
     public static boolean useAntiCSRFToken() {
     	return ENV.get(PREF_ANTICSRF, true);
@@ -96,8 +99,9 @@ public class WebSecurity {
 				attack = true;
 			else {
 				if (ENV.get(PREF_ANTICSRF + ".check.request", true)) {
-					if (!splitInfo[1].equals(String.valueOf(session.getWorkingObject().getId())))
-						attack = true;
+					if (session.getWorkingObject() != null) // session closed directly before
+						if (!splitInfo[1].equals(String.valueOf(session.getWorkingObject().getId())))
+							attack = true;
 				}
 			}
 		}
@@ -113,19 +117,27 @@ public class WebSecurity {
 	public void checkSession(NanoH5Session session, String method, Map<String, String> header, Map<String, String> params) {
 		if (session.isNew())
 			return;
+		Map<String, String> sessionValues = getCookieValues(header);
+
+		try {
+			checkSessionID(session, sessionValues);
+			if (session.getUserAuthorization() != null) {
+				if (useAntiCSRFTokenInHeader())
+					checkAntCSRFToken(session, sessionValues.get(CSRF_TOKEN));
+				if (method.equals("POST") && useAntiCSRFTokenInContent())
+					checkAntCSRFToken(session, params.get(CSRF_TOKEN));
+			}
+		} catch (Exception ex) {
+			session.close();
+			ManagedException.forward(ex);
+		}
+	}
+	private Map<String, String> getCookieValues(Map<String, String> header) {
 		String sessionTag = header.get(REQUEST_COOKIE);
 		String[] hs = sessionTag.split("[;]");
 		Map<String, String> sessionValues = new LinkedHashMap<>(hs.length);
 		Arrays.stream(hs).forEach(e -> MapUtil.add(sessionValues, e.trim().split("\\s*=\\s*")));
-
-		checkSessionID(session, sessionValues);
-		if (session.getUserAuthorization() != null) {
-			if (useAntiCSRFTokenInHeader())
-				checkAntCSRFToken(session, sessionValues.get(CSRF_TOKEN));
-			if (method.equals("POST") && useAntiCSRFTokenInContent())
-				checkAntCSRFToken(session, params.get(CSRF_TOKEN));
-		}
-
+		return sessionValues;
 	}
 
 	private void checkSessionID(NanoH5Session session, Map<String, String> sessionValues) {

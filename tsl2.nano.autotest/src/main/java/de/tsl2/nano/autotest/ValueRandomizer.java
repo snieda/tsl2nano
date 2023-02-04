@@ -138,7 +138,7 @@ public class ValueRandomizer {
 			else if (typeOf.isInterface())
 				n = ITestInterface.class;
 			else
-				n = String.class; // must be equal to the object creating (see below)
+				n = TypeBean.class; // must be equal to the object creating (see below)
 		} else if (Method.class.isAssignableFrom(typeOf)) {
 				n = Util.trY( () -> TypeBean.class.getMethod("getString"));
 		} else if (Field.class.isAssignableFrom(typeOf)) {
@@ -160,7 +160,7 @@ public class ValueRandomizer {
 			n = typeOf.getComponentType().isPrimitive() ? MapUtil.asArray(typeOf.getComponentType(), n)
 					: MapUtil.asArray(MapUtil.asMap(n, n), typeOf.getComponentType());
 		} else if (typeOf.equals(Object.class)) {
-			n = n.toString(); //must be equals to the type of Class (see above)
+			n = new TypeBean(n.toString()); //must be equals to the type of Class (see above)
 		} else if (!ObjectUtil.isStandardType(typeOf) && !Util.isFrameworkClass(typeOf))
 			n = typeOf.getSimpleName() + "(" + ByteUtil.hashCode(n) + ")";
 		return n;
