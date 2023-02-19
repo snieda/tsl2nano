@@ -1,6 +1,7 @@
 package de.tsl2.nano.core;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -18,6 +19,17 @@ import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.core.util.ValueHolder;
 
 public class JSonTest {
+
+    @Test
+    public void testIsJSon() {
+        String txt = "{\"id\": \"1,00\",\"name\": \"Einzug Max.Mustermann\",\"bic\": \"BICBANKXXX\",\"iban\": \"BICBANKXXX0123456789\"}, {\"id\": \"1\"}]";
+        assertTrue(JSon.isJSon(txt));
+
+        assertFalse(JSon.isJSon("{seppl=0}"));
+        assertFalse(JSon.isJSon("[{seppl=0, depp is true"));
+        assertFalse(JSon.isJSon("beanName is not a known entity!"));
+    }
+
 	@Test
 	public void testJSonMap() {
 		Map m = MapUtil.asMap("k1", "v1,v2", "k2", "v2;v3");

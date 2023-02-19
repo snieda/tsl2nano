@@ -59,16 +59,20 @@ public class Persistence implements Serializable, Cloneable {
 
     public static final String HSQLDB_DATABASE_DRIVER = "org.hsqldb.jdbc.JDBCDriver";
     public static final String HSQLDB_DATABASE_URL = "jdbc:hsqldb:hsql://localhost:9003";
+    public static final String HSQLDB_RUN_INTERNAL = "org.hsqldb.server.Server.main(-database.0 file:{2} -port {1} -silent false -trace true)";
     public static final String H2_DATABASE_DRIVER = "org.h2.Driver";
     public static final String H2_DATABASE_URL = "jdbc:h2:tcp://localhost:9092/" + DEFAULT_CATALOG;
+    public static final String H2_RUN_INTERNAL = "org.h2.tools.Server.main(-baseDir, {0}, -tcp, -tcpPort, {1}, -trace, -ifNotExists)";
+
     public static final String DERBY_DATABASE_DRIVER = "org.apache.derby.jdbc.ClientDriver";
     public static final String DERBY_DATABASE_URL = "jdbc:derby://localhost:1527/" + DEFAULT_DATABASE;
 
-    public static final String STD_LOCAL_DATABASE_DRIVER = H2_DATABASE_DRIVER;
-    public static final String STD_LOCAL_DATABASE_URL = H2_DATABASE_URL;
+    public static final String STD_LOCAL_DATABASE_DRIVER = HSQLDB_DATABASE_DRIVER;
+    public static final String STD_LOCAL_DATABASE_URL = HSQLDB_DATABASE_URL;
 
     public static final String[] STD_LOCAL_DATABASE_DRIVERS = { HSQLDB_DATABASE_DRIVER, "org.hsqldb.jdbcDriver",
         H2_DATABASE_DRIVER, DERBY_DATABASE_DRIVER };
+
 
     protected String persistenceUnit = System.getProperty(KEY_PREF + "persistenceunit", "genericPersistenceUnit");
     protected String transactionType = System.getProperty(KEY_PREF + "transactiontype", "RESOURCE_LOCAL");
@@ -79,11 +83,11 @@ public class Persistence implements Serializable, Cloneable {
     protected String connectionUrl = System.getProperty(KEY_PREF + "connectionurl", STD_LOCAL_DATABASE_URL);
     protected String connectionUserName = System.getProperty(KEY_PREF + "connectionusername", "SA");//used for persistence
     protected String connectionPassword = System.getProperty(KEY_PREF + "connectionPassword", "");
-    protected String hibernateDialect = System.getProperty(KEY_PREF + "hibernatedialect", "org.hibernate.dialect.H2Dialect");
+    protected String hibernateDialect = System.getProperty(KEY_PREF + "hibernatedialect", dialectFromStdDriver());
     protected String defaultSchema = System.getProperty(KEY_PREF + "defaultschema", DEFAULT_SCHEMA);
 //    protected String datasourceClass = "org.hsqldb.jdbc.JDBCDataSource";
-    protected String datasourceClass = System.getProperty(KEY_PREF + "datasourceclass", H2_DATABASE_DRIVER);
-    protected String port = System.getProperty(KEY_PREF + "port", "9092");//"9003";
+    protected String datasourceClass = System.getProperty(KEY_PREF + "datasourceclass", STD_LOCAL_DATABASE_DRIVER);
+    protected String port = System.getProperty(KEY_PREF + "port", STD_LOCAL_DATABASE_DRIVER.contains("h2") ? "9092" : "9003");
     protected String database = System.getProperty(KEY_PREF + "database", DEFAULT_DATABASE);
     private Persistence replication;
     transient private String auth = "SA"; //used for authentication/authorization
@@ -94,6 +98,11 @@ public class Persistence implements Serializable, Cloneable {
      * create-drop
      */
     private String autoddl = System.getProperty(KEY_PREF + "autoddl", "false");
+
+    private String dialectFromStdDriver() {
+        String name = STD_LOCAL_DATABASE_DRIVER.contains("h2") ? "H2" : "HSQL";
+        return "org.hibernate.dialect." + name + "Dialect";
+    }
 
     /**
      * constructor

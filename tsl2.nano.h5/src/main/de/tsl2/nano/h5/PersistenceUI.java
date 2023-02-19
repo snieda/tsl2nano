@@ -299,12 +299,16 @@ public class PersistenceUI {
                             	if (!Util.isEmpty(evt.newValue) && evt.getOldValue() != null) {
 	                                Object value = evt.newValue;
 	                                String url = Util.asString(value);
-	                                if (url != null) {
+	                                if (url != null && !DatabaseTool.isEmbeddedDatabase(url)) {
 	                                    String prefix = getDriverPrefix(url);
 	                                    if (!Util.isEmpty(prefix)) {
-	                                        return StringUtil.extract(url, "[:]\\d+[:/;](\\w+)");
+	                                        String newValue = StringUtil.extract(url, "[:]\\d+[:/;](\\w+)");
+                                            if (!Util.isEmpty(newValue))
+                                                return newValue;
 	                                    } else {
-	                                        return StringUtil.extract(url, "(\\w+)");
+	                                        String newValue = StringUtil.extract(url, "(\\w+)");
+                                            if (!Util.isEmpty(newValue))
+                                                return newValue;
 	                                    }
 	                                }
                             	}

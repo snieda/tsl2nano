@@ -103,15 +103,15 @@ public abstract class ARestUI<RESPONSE> {
         } else if (entity.equals(URLKEY_ENTITIESJSON)) {
             instance = JSon.toList(LinkedHashMap.class, json);
         } else {
-            BeanDefinition<?> beanDef = BeanDefinition.getBeanDefinition(entity);
-            if (JSon.isJSon(json))
+            if (JSon.isJSon(json)) {
+                BeanDefinition<?> beanDef = BeanDefinition.getBeanDefinition(entity);
                 instance = JSon.toObject(beanDef.getClazz(), json);
-            else
+            } else
                 instance = json;
         }
 
         if (instance instanceof String) {
-            instance = HtmlUtil.createNodesFromText((String) instance);
+            instance = HtmlUtil.createHtmlFromText((String) instance);
         }
         return createResponse(session, restResponse, entity, instance, method);
     }

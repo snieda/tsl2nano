@@ -33,22 +33,27 @@ creating database: ${jdbc.url}
 		</echo>
 
 		<echo file="createuser.sql">
-CREATE USER ${jdbc.username} PASSWORD '${jdbc.password}';
+CREATE USER ${jdbc.username} PASSWORD '${jdbc.password}' ADMIN;
 GRANT DBA to ${jdbc.username};
 commit;
 CREATE SCHEMA ${jdbc.scheme} AUTHORIZATION DBA;
 SET SCHEMA ${jdbc.scheme};
-GRANT ALL ON SCHEMA ${jdbc.scheme} TO ${jdbc.username};
 commit;
---SET DATABASE DEFAULT INITIAL SCHEMA ${jdbc.scheme};
-SET NON_KEYWORDS;
+GRANT ALL ON ALL TABLES IN SCHEMA PUBLIC TO ${jdbc.username};
+commit;
+SET DATABASE DEFAULT INITIAL SCHEMA ${jdbc.scheme};
+commit;
+
 -- following lines are hsqldb compatibility modes:
--- SET DATABASE SQL SYNTAX DB2 TRUE;
--- SET DATABASE SQL SYNTAX MYS TRUE;
--- SET DATABASE SQL SYNTAX MSS TRUE;
--- SET DATABASE SQL SYNTAX ORA TRUE;
--- SET DATABASE SQL SYNTAX PGS TRUE;
+SET DATABASE SQL SYNTAX DB2 TRUE;
+SET DATABASE SQL SYNTAX MYS TRUE;
+SET DATABASE SQL SYNTAX MSS TRUE;
+SET DATABASE SQL SYNTAX ORA TRUE;
+SET DATABASE SQL SYNTAX PGS TRUE;
+commit;
+
 -- following lines are h2 compatibility modes:
+SET NON_KEYWORDS;
 SET MODE LEGACY;
 --			REGULAR;
 --			STRICT;	
@@ -90,6 +95,7 @@ commit;
 			<property name="sh.sql.exclude" value="*drop*.sql"/>
 			<property name="sh.sql.exclude2" value="*init*.sql"/>
 			<property name="sh.sql.exclude3" value="createuser.sql"/>
+				<property name="sh.sql.onerror" value="continue" />
 		</ant>
 
 		<echo message="" file="init-dummy-${jdbc.database}.sql" />

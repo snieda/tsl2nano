@@ -304,7 +304,7 @@ public class DatabaseTool {
 	/* mostly H2 functions - generalized and without linking to dependencies */
 	
 	public void runDBServer() {
-		runDBServer(ENV.getConfigPath(), persistence.getPort());
+		runDBServer(ENV.getConfigPath(), persistence.getPort(), persistence.getDatabase());
 	}
 	public static void runDBServerDefault() {
 		if (getConnection(Persistence.current(), false) == null)
@@ -312,7 +312,9 @@ public class DatabaseTool {
 	}
 	/** calls h2 server directly though java...*/
 	public static void runDBServer(String... args) {
-		String cmd = ENV.get("app.database.internal.server.run.cmd", "org.h2.tools.Server.main(-baseDir, {0}, -tcp, -tcpPort, {1}, -trace, -ifNotExists)");
+		String cmd = ENV.get("app.database.internal.server.run.cmd", 
+            isH2(args[0]) ? Persistence.H2_RUN_INTERNAL
+            : Persistence.HSQLDB_RUN_INTERNAL);
 		LOG.info("running database internally: " + cmd + " <- [" + Arrays.toString(args) + "]");
 		BeanClass.callEx(cmd, args);
 	}

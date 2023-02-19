@@ -426,15 +426,19 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         try {
             Element form;
             if (model != null) {
+                Html5Presentation pres = model != null ? model.getPresentationHelper() : this;
                 //TODO: don't forget the old presentation instance
-                if (!(model.getPresentationHelper() instanceof Html5Presentation)) {
+                if ((model != null && !(model.getPresentationHelper() instanceof Html5Presentation))) {
                     model.setPresentationHelper(createHelper(model));
                 }
-                form = ((Html5Presentation) model.getPresentationHelper()).createPage(session, null,
-                    message instanceof String && !(message.toString().contains(".") && NumberUtil.isNumber(message)) 
+                form = pres.createPage(session, null,
+                    message instanceof String && !(message.toString().contains(".") && NumberUtil.isNumber(message))
+                        && !isXml(message.toString()) 
                         ? ENV.translate(message, true) : message,
                     interactive,
                     navigation);
+            } else if (message != null && isXml(message.toString())) {
+                return HtmlUtil.createMessagePage("information", message.toString());
             } else {
                 form = createPage(session, null, "Leaving Application!<br/>Restart", false, navigation);
             }
@@ -561,12 +565,14 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ATTR_STYLE,
                 style("display", "inline"));
         } else {
-            String docURL;
-            if (bean != null && ENV.class.isAssignableFrom(bean.getClazz()))
-                docURL = FileUtil.userDirFile("./").getAbsolutePath();
-            else
-                docURL = ENV.get("doc.url." + bean.getName().toLowerCase(),
-                    "doc/" + StringUtil.toFirstLower(title) + "/index.html");
+            String docURL = "UNKNOWN";
+            if (bean != null) {
+                if ( ENV.class.isAssignableFrom(bean.getClazz()))
+                    docURL = FileUtil.userDirFile("./").getAbsolutePath();
+                else
+                    docURL = ENV.get("doc.url." + bean.getName().toLowerCase(),
+                        "doc/" + StringUtil.toFirstLower(title) + "/index.html");
+            }
             if (new File(ENV.getConfigPath() + docURL).canRead() || (!docURL.contains(" ") && NetUtil.isURL(docURL))) {
                 c3 = appendElement(c3, TAG_H3, ATTR_ALIGN, ALIGN_CENTER, ATTR_STYLE,
                     style("display", "inline"));

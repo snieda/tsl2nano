@@ -356,6 +356,11 @@ public class HtmlUtil {
     }
 
     public static Document createNodesFromText(String text) {
+        text = createHtmlFromText(text);
+        return createDocument(text);
+    }
+
+    public static String createHtmlFromText(String text) {
         LOG.info("trying to parse text into html:" + text);
         /*
          * 1. if the text contains literals outside of its tags, they have to
@@ -378,8 +383,7 @@ public class HtmlUtil {
         }
 
         text = BEG + text + END;
-
-        return createDocument(text);
+        return text;
     }
 
     public static Document createDocument(String text) {

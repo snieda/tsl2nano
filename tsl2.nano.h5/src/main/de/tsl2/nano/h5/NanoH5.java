@@ -1070,6 +1070,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
     }
 
     protected void createPersistenceProvider(final Persistence persistence, PersistenceClassLoader runtimeClassloader) {
+        Message.send("loading persistence provider" + persistence.getGenerator());
         boolean useJPAPersistenceProvider = true;
         /* 
          * check, whether a real/existing jpa-persistence-provider was selected.
@@ -1113,6 +1114,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
     }
 
     protected void generateDatabaseAndEntities(final Persistence persistence, String jarName) throws ManagedException {
+        Message.send("generating database and entities: " + jarName);
         ENV.extractResource(JAR_SIMPLEXML);
         ENV.extractResource(JAR_COMMON);
         ENV.extractResource(JAR_DIRECTACCESS);
@@ -1161,6 +1163,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
 	}
 
     protected void runLocalDatabase(final Persistence persistence) {
+        Message.send("starting local database: " + persistence.getConnectionUrl());
     	if (DatabaseTool.isDBRunInternally() && isH2(persistence.getConnectionUrl())) {
     		// at this moment, only implemented for h2 (hsqldb in future!)
     		new DatabaseTool(persistence).runDBServer();
@@ -1227,7 +1230,9 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
             + persistence.getConnectionUrl());
         Properties p = new Properties();
         ENV.setProperty("app.doc.name", persistence.getDatabase());
-        
+        if (!FileUtil.userDirFile(persistence.getDatabase() + ".sql").exists() && ENV.isModeStrict())
+            throw new IllegalStateException("please provide the database script file '" + persistence.getDatabase() + ".sql' inside the environment directory");
+
         //give mda.xml the information to don't start nano.h5
         p.put("nano.h5.running", "true");
         runAntScript(p, MDA_SCRIPT, "do.all");
