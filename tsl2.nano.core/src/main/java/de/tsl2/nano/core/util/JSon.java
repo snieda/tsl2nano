@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -16,11 +17,16 @@ import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.cls.PrivateAccessor;
 
 public class JSon {
+	// final String JSON_NOQUOT = "[{\\[]((\\s*\\w++\\s*)[:](\\s*[^,\\s]*?\\s*)[,]?)*\\}";
+	private static final String JSON_EXPR = "[\"]?(?:[\\{\\[](?:(?:\\s*+[\"]?\\w++[\"]?\\s*)[:](?:\\s*+[\"]?[^\"]*+[\"]?\\s*+)[,]?)*+[\\}\\]])++[\"]?";
+
+	private static final  Pattern JSON_PATTERN = Pattern.compile(JSON_EXPR, Pattern.MULTILINE);
 
 	public static boolean isJSon(String txt) {
-    	return !txt.contains("\"")
-    			? txt.matches("[{\\[]((\\s*\\w++\\s*)[:](\\s*[^,\\s]*?\\s*)[,]?)*\\}")//txt.matches("[{](.*[:].*[,]?)+[}\\]]")
-    			: txt.matches("[\"]?[{\\[]((\\s*[\"]?\\w++[\"]?\\s*)[:](\\s*[\"]?[^\"]*[\"]?\\s*)[,]?)*[}\\]][\"]?");
+		return JSON_PATTERN.matcher(txt).find();
+    	// return !txt.contains("\"")
+    	// 		? txt.matches("[{\\[]((\\s*\\w++\\s*)[:](\\s*[^,\\s]*?\\s*)[,]?)*\\}")//txt.matches("[{](.*[:].*[,]?)+[}\\]]")
+    	// 		: txt.matches("[\\\"]?([\\{\\[]((\\s*[\\\"]?\\w++[\\\"]?\\s*)[:](\\s*[\\\"]?[^\\\"]*[\\\"]?\\s*)[,]?)*[\\}\\]])+[\\\"]?");
     }
 
     public static String toJSon(Object obj) {

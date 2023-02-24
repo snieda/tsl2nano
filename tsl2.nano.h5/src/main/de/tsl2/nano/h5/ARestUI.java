@@ -140,8 +140,10 @@ public abstract class ARestUI<RESPONSE> {
     }
 
     RESPONSE createResponse(ISession session, RESPONSE restResponse, String name, Object instance, String method) {
+        Bean model = instance instanceof String ? null : Bean.getBean(instance);
+        String msg = instance instanceof String ? instance.toString() : null;
         IPageBuilder<?, String> pageBuilder = ENV.get(IPageBuilder.class); //Bean.getBean(instance).getPresentationHelper();
-        String html = pageBuilder.build(session, null, instance, true);
+        String html = pageBuilder.build(session, model, msg, true);
         // html = pageBuilder.buildDialog(name, instance);
         return createResponse(getStatus(restResponse), MIME_HTML, html);
 	}
@@ -165,7 +167,8 @@ public abstract class ARestUI<RESPONSE> {
                     continue;
                 else if (l.contains("://")) {
                     String url = StringUtil.extract(l, "\\w{3,5}://[\\w/:\\d?&=]+");
-                    l = l.replace(url, createUrl(url, url));
+                    String urlui = url.replace(ARESTDynamic.BASE_PATH, BASE_PATH);
+                    l = l.replace(url, createUrl(url, urlui));
                 } else if (BeanDefinition.isDefined(l.trim())) {
                     l = addRESTActions(l);
                 } else {
