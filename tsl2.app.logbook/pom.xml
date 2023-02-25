@@ -15,4 +15,12 @@
 		<project.mainclass>de.my.logbook.LogbookApplication</project.mainclass>
 		<skipIntegrationTest>true</skipIntegrationTest> <!-- the real integration-test (MyNanoApplicationIntTest -> MyNanoApplicationIT)  does not connect to server -->
 	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<version>2.7.1</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 </project>
