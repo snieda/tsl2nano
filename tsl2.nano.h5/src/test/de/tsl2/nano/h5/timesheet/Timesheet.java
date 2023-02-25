@@ -377,7 +377,7 @@ public class Timesheet extends NanoH5App {
          * define an action
          */
         defineAction(ScriptUtil.class, "ant", new Class[] { String.class, String.class, Properties.class }, 
-        		new Constraint<String>(ENV.getConfigPath() + "antscripts.xml"),
+        		new Constraint<String>(ENV.getConfigPathRel() + "antscripts.xml"),
         		new Constraint<String>("help"));
         defineAction(ICSChargeImport.class, "doImportHolidays", null);
         defineAction(ICSChargeImport.class, "doImportICS", new Class[] {String.class});

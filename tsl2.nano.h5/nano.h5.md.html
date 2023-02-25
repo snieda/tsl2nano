@@ -6058,6 +6058,12 @@ deploy:
 * [v] h5 timesheet output-deep
 * [ ] autotest generates json filenames in project folder
 * [v] coverage test with ValueRandomizer Object/Class -> TypeBean instead of String
+* [ ] logfactory performance: create log string in extra thread
+* [ ] PFlow de-/serialization problem on tag name: 'val$Tasks'
+* [v] in timesheet the script engine does not load... < provide js, js-scriptengine, graal-sdk, truffle, regex, icu 
+* [ ] in timesheet (secure) the checkAuthentication() fails
+* [ ] http-client reloads all images every time instead of using ETag
+
 ### A minimum of manual integration Tests:
 
 * [v] start standalone, edit/create/delete Address entry, reload
@@ -6065,4 +6071,5 @@ deploy:
 * [v] start virgin, continue loading anyway without errors
 * [v] start standalone, copy model from ponyorm, load model without errors
 * [x] start standalone, unpack timesheet.zip from h5 target into env-dir load model without errors
+* [v] recreate standalone, copy specification.properties.csv from timesheet test
 * [v] refresh pom of tsl2.app.logbook and build without errors

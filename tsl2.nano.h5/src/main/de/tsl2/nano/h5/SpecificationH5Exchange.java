@@ -3,12 +3,22 @@ package de.tsl2.nano.h5;
 import static de.tsl2.nano.h5.NanoH5Util.LOG;
 import static de.tsl2.nano.h5.NanoH5Util.addListener;
 import static de.tsl2.nano.h5.NanoH5Util.addVirtualAttribute;
-import static de.tsl2.nano.specification.SpecificationExchange.Change.*;
-import static de.tsl2.nano.h5.NanoH5Util.*;
+import static de.tsl2.nano.h5.NanoH5Util.cover;
+import static de.tsl2.nano.h5.NanoH5Util.createCompositor;
+import static de.tsl2.nano.h5.NanoH5Util.createController;
+import static de.tsl2.nano.h5.NanoH5Util.createQuery;
+import static de.tsl2.nano.h5.NanoH5Util.createStatistic;
+import static de.tsl2.nano.h5.NanoH5Util.createUser;
+import static de.tsl2.nano.specification.SpecificationExchange.Change.addaction;
+import static de.tsl2.nano.specification.SpecificationExchange.Change.addattribute;
+import static de.tsl2.nano.specification.SpecificationExchange.Change.createcompositor;
+import static de.tsl2.nano.specification.SpecificationExchange.Change.createcontroller;
+import static de.tsl2.nano.specification.SpecificationExchange.Change.createquery;
+import static de.tsl2.nano.specification.SpecificationExchange.Change.createsheet;
+import static de.tsl2.nano.specification.SpecificationExchange.Change.createstatistics;
 
+import java.io.File;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Scanner;
@@ -29,12 +39,12 @@ import de.tsl2.nano.h5.collector.CSheet;
 import de.tsl2.nano.specification.Pool;
 import de.tsl2.nano.specification.SpecificationExchange;
 import de.tsl2.nano.specification.rules.RuledEnabler;
-import de.tsl2.nano.util.FilePath;
 
 public class SpecificationH5Exchange extends SpecificationExchange {
 	
 	private static final String DIV = "[:;,\\s]";
 
+	@Override
 	public int enrichFromSpecificationProperties() {
     	String file = FILENAME_SPEC_PROPERTIES;
 		Properties spec = ENV.getSortedProperties(file);
@@ -72,10 +82,6 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 						IAttributeDefinition attr = bean.getAttribute(StringUtil.substring(object, type + ".", "."));
 						AttributeDefinition.getAttributePropertyFromPath(k.substring(0, k.length() - 1)).setValue(v);
 						attrchanges++;
-					} else if (k.startsWith(">")) { //workflow
-						String mdfile = ENV.getConfigPath() + "/" + k.substring(1) + SpecificationExchange.EXT_MARKDOWN;
-						FilePath.write(mdfile, v.getBytes());
-						// TODO implement Workflow
 					} else {
 						if (!object.contains(".")) { // bean
 							bean = BeanDefinition.getBeanDefinition(object);
@@ -154,13 +160,13 @@ public class SpecificationH5Exchange extends SpecificationExchange {
     			Message.send(errors + " errors on import from file " + file);
     		else
             	ENV.moveBackup(file);
-    			LOG.info("<= import of " + (rules + attributes + actions + beanchanges + attrchanges) + " specification entries finished successfull"
-    					+ "\n\trules        : " + rules
-    					+ "\n\tattributes   : " + attributes
-    					+ "\n\tactions      : " + actions
-    					+ "\n\tbean changes : " + beanchanges
-    					+ "\n\tattr changes : " + attrchanges
-    					+ "\n\n");
+			LOG.info("<= import of " + (rules + attributes + actions + beanchanges + attrchanges) + " specification entries finished successfull"
+					+ "\n\trules        : " + rules
+					+ "\n\tattributes   : " + attributes
+					+ "\n\tactions      : " + actions
+					+ "\n\tbean changes : " + beanchanges
+					+ "\n\tattr changes : " + attrchanges
+					+ "\n\n");
     		changedBeans.stream().forEach(b -> b.saveDefinition());
     		FileUtil.saveProperties(Pool.getSpecificationRootDir() + file + (errors == 0 ? ".done" : ".errors"), spec);
     	}
@@ -172,7 +178,10 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 	}
 
 	protected Properties fromFlatFile(String filename, String sep) {
-		Scanner sc = Util.trY(() -> new Scanner(FileUtil.userDirFile(ENV.getConfigPath() + filename)), false);
+		File file = FileUtil.userDirFile(ENV.getConfigPath() + filename);
+		if (!file.exists())
+			return null;
+		Scanner sc = Util.trY(() -> new Scanner(file), false);
 		if (sc == null)
 			return null;
 		Properties p = MapUtil.createSortedProperties();

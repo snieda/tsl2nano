@@ -1815,7 +1815,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
 	private String translated(String value, IValueDefinition<?> attr) {
-		String k = attr.getId() + "." + value;
+		String k = (attr != null ? attr.getId() + "." : "") + value;
 		return !Util.isEmpty(value) && attr != null && Messages.hasKey(k) ? Messages.getStringOpt(k) : value;
 	}
 

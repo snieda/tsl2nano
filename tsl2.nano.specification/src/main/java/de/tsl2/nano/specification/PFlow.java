@@ -3,12 +3,15 @@ package de.tsl2.nano.specification;
 import java.io.File;
 import java.io.Serializable;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 
+import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.execution.IPRunnable;
 import de.tsl2.nano.util.Flow;
 import de.tsl2.nano.util.Flow.ITask;
@@ -26,6 +29,7 @@ public class PFlow extends Flow implements IPRunnable<Deque<ITask>, Map<String, 
 	
 	public PFlow(String name, String expression, LinkedHashMap<String, ParType> parameter) {
 		fromString(this, name, expression, DEFAULT_TASK_TYPE);
+		persist(FileUtil.userDirFile(ENV.get(Pool.class).getDirectory(this.getClass()) + name + FILE_EXT));
 	}
 	
 	public static PFlow load(File gravitoFile) {
@@ -42,12 +46,14 @@ public class PFlow extends Flow implements IPRunnable<Deque<ITask>, Map<String, 
 
 	@Override
 	public Map<String, ? extends Serializable> getParameter() {
-		throw new UnsupportedOperationException();
+		//throw new UnsupportedOperationException();
+		return new HashMap<>();
 	}
 
 	@Override
 	public Map<String, Object> checkedArguments(Map<String, Object> args, boolean strict) {
-		throw new UnsupportedOperationException();
+		//throw new UnsupportedOperationException();
+		return args;
 	}
 
 	@Override
