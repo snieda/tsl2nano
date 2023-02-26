@@ -18,6 +18,7 @@ import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.log.LogFactory;
@@ -84,6 +85,9 @@ public abstract class ARESTDynamic<RESPONSE> {
 		return serve(url, method, header, parms, null);
 	}
 	RESPONSE serve(String url, String method, Map<String, String> header, Map<String, String> parms, Map<String, String> payload) {
+		return serve(url, method, header, parms, payload, false);
+	}
+	RESPONSE serve(String url, String method, Map<String, String> header, Map<String, String> parms, Map<String, String> payload, boolean internalCall) {
 		try {
 			if (url.equals(BASE_PATH) || method.equals("OPTIONS"))
 				return createResponse(Status.OK, printManual());
@@ -91,7 +95,9 @@ public abstract class ARESTDynamic<RESPONSE> {
 				return createResponse(Status.OK, printEntities());
 			else if (url.equals(BASE_PATH + "/entitiesjson"))
 				return createResponse(Status.OK, printEntitiesJSON());
-			checkAuthentication(url, method, header);
+			
+			if (!internalCall) 
+				checkAuthentication(url, method, header);
 			checkMethod(method);
 			String beanName = get(url, BASE_PATH, "entity");
 			String actionOrAttribute = get(url, beanName, "attribute-or-action");
@@ -123,6 +129,9 @@ public abstract class ARESTDynamic<RESPONSE> {
 			String[] split = auth.split("\\s");
 			String digest = split[split.length-1];
 			StringBuilder buf = new StringBuilder();
+			ISession session = (ISession) Util.untyped(header.get("session"));
+			if (session != null)
+				buf.append(session.getId().toString());
 			for (int i = 0; i < split.length-1; i++) {
 				buf.append(split[i]);
 			}
@@ -264,7 +273,7 @@ public abstract class ARESTDynamic<RESPONSE> {
 	}
 
 	public static String createDigest(String url, String method, String args) {
-		return StringUtil.toHexString(Util.cryptoHash((method + "+" + url + "+" + args + "+" + LocalDate.now() + "+" + API_KEY).getBytes()));
+		return StringUtil.toHexString(Util.cryptoHash((method + "+" + url + "+" + "+" + LocalDate.now()  + args + "+" + API_KEY).getBytes()));
 	}
 	
 	String printEntities() {

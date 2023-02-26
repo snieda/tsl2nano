@@ -4894,7 +4894,7 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.4.10 | 09.01.2022 | FlatBeanReader extended, security fixes (log4j etc.)
  2.4.11 | 03.04.2022 | NEW: ExcelWorker, ObjectPrinter, SQLQuery, html-dialog fix ("Yes" -> true), timemout on findjars, NEW: search.mvn.org, jardownload.com, fix: page clear on submit
  2.4.12 | 18.09.2022 | NEW: SpecificationExchange, specification refactored: Workflow, ExcelWorker, (massive changes)Flow, Task, lots of conveniences extracted to util-classes, prepared to run on jdk-17, hsqldb-env refreshed for 2.7.0
- 2.5.0  | 26.02.2023 | NEW: HATEOAS(restui), see EnvUpdate2v5v0: refactorings: serialization of actions with primitive attributes, move incubation packages, jdk17, h2-v2+ -> hsqldb2.7.1, hibernate 5, all dependencies/plugins updated
+ 2.5.0  | 05.03.2023 | NEW: HATEOAS(restui), see EnvUpdate2v5v0: refactorings: serialization of actions with primitive attributes, move incubation packages, jdk17, h2-v2+ -> hsqldb2.7.1, hibernate 5, all dependencies/plugins updated
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
 
@@ -6061,8 +6061,9 @@ deploy:
 * [ ] logfactory performance: create log string in extra thread
 * [ ] PFlow de-/serialization problem on tag name: 'val$Tasks'
 * [v] in timesheet the script engine does not load... < provide js, js-scriptengine, graal-sdk, truffle, regex, icu 
-* [ ] in timesheet (secure) the checkAuthentication() fails
+* [v] in timesheet (secure) the checkAuthentication() fails
 * [ ] http-client reloads all images every time instead of using ETag
+* [ ] sometimes losing css styling (mostly after reset)
 
 ### A minimum of manual integration Tests:
 
@@ -6073,3 +6074,4 @@ deploy:
 * [x] start standalone, unpack timesheet.zip from h5 target into env-dir load model without errors
 * [v] recreate standalone, copy specification.properties.csv from timesheet test
 * [v] refresh pom of tsl2.app.logbook and build without errors
+* [ ] check with findbus/spotbugs

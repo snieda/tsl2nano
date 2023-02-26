@@ -77,16 +77,16 @@ public class DatabaseTool {
                     String scriptFile = ENV.get("app.backup.statement.file", "db-backup.sql");
                     String backupScript = ENV.get("app.backup.statement", "SCRIPT TO '<FILE>'");
                     if (backupScript != null)
-                    	BeanContainer.instance().executeStmt(backupScript.replace("<FILE>", FileUtil.getUniqueFileName(ENV.getTempPath() + scriptFile)), true, null);
+                    	Util.trY( () -> BeanContainer.instance().executeStmt(backupScript.replace("<FILE>", FileUtil.getUniqueFileName(ENV.getTempPath() + scriptFile)), true, null), false);
     			    
                     shutdownDBServer();
 //                    shutdownDatabase(); //doppelt gemoppelt hält besser ;-)
-                    String hsqldbScript = isH2() ? persistence.getDefaultSchema() + ".mv.db" : persistence.getDatabase() + ".script";
+                    String sqldbScript = isH2() ? persistence.getDefaultSchema() + ".mv.db" : persistence.getDatabase() + ".script";
                     String backupFile =
                         ENV.getTempPath() + FileUtil.getUniqueFileName(ENV.get("app.database.backup.file",
                             persistence.getDatabase()) + ".zip");
                     LOG.info("creating database backup to file " + backupFile);
-                    FileUtil.writeToZip(backupFile, hsqldbScript, FileUtil.getFileBytes(ENV.getConfigPath() + hsqldbScript, null));
+                    FileUtil.writeToZip(backupFile, sqldbScript, FileUtil.getFileBytes(ENV.getConfigPath() + sqldbScript, null));
                 }
             }
         }));
@@ -330,7 +330,7 @@ public class DatabaseTool {
 			stopDBServer(persistence.getConnectionUrl(), persistence.getConnectionPassword());
 	}
 	
-	/** calls h2 server directly though java...*/
+	/** calls h2 server directly through java...*/
 	static void stopDBServer(String... args) {
 		String cmd = ENV.get("app.database.internal.server.shutdown.cmd", "org.h2.tools.Server.shutdownTcpServer({0}, {1}, true, true)");
 		LOG.info("shutdown database server: " + cmd + "[" + args[0] + ", ***]");

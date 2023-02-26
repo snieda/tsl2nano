@@ -595,7 +595,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
     }
 
     private void addRestAuthorizationFromSession(ISession session, String uri, String method, Map<String, String> header) {
-		header.put("authorization", ARESTDynamic.createDigest(uri, method, ""));
+		header.put("authorization", ARESTDynamic.createDigest(uri, method, session.getId().toString()));
 		((Map)header).put("session", session);
 		header.put("user", ((IAuthorization)session.getUserAuthorization()).getUser().toString());
 		ConcurrentUtil.setCurrent(BeanContainer.instance(), session.getUserAuthorization());
