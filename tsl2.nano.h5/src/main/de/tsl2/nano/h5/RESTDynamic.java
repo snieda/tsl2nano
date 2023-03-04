@@ -23,7 +23,7 @@ public class RESTDynamic extends ARESTDynamic<NanoHTTPD.Response> {
 	}
 
 	private boolean preAuthenticatedSession(Map header) {
-		NanoH5Session session = (NanoH5Session) header.get("session");
+		NanoH5Session session = (NanoH5Session) header.get(H5SESSION);
 		return session != null && WebSecurity.getSessionID(header, session.getInetAddress()).equals(session.getKey());
 	}
 

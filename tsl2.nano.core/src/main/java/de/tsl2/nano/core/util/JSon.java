@@ -115,6 +115,8 @@ public class JSon {
         String[] keyValue;
         for (int i = 0; i < split.length; i++) {
         	keyValue = split[i].split("\\s*:\\s*");
+			if (keyValue.length < 2)
+				throw new IllegalArgumentException("json parsing error on: " + StringUtil.toFormattedString(keyValue, -1));
             map.put(keyValue[0], keyValue[1]);
         }
         return map;

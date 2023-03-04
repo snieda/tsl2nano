@@ -596,7 +596,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
 
     private void addRestAuthorizationFromSession(ISession session, String uri, String method, Map<String, String> header) {
 		header.put("authorization", ARESTDynamic.createDigest(uri, method, session.getId().toString()));
-		((Map)header).put("session", session);
+		((Map)header).put(ARESTDynamic.H5SESSION, session);
 		header.put("user", ((IAuthorization)session.getUserAuthorization()).getUser().toString());
 		ConcurrentUtil.setCurrent(BeanContainer.instance(), session.getUserAuthorization());
 	}
@@ -1298,6 +1298,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
     @Override
     public void reset() {
         String configPath = clear();
+        HtmlUtil.reset();
         
         ENV.reload();
         ENV.setProperty(ENV.KEY_CONFIG_PATH, configPath);
@@ -1305,7 +1306,6 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         BeanClass.callStatic("de.tsl2.nano.core.classloader.NetworkClassLoader", "resetUnresolvedClasses", ENV.getConfigPath());
         Thread.currentThread().setContextClassLoader(appstartClassloader);
 
-        HtmlUtil.tableDivStyle = null;
         createPageBuilder();
         builder = ENV.get(IPageBuilder.class);
     }

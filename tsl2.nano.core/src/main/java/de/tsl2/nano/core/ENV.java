@@ -550,7 +550,7 @@ public class ENV implements Serializable {
             	else 
             		p.put(k, v);});
         }
-        self().handleChange("*", null, null);
+        Util.trY( () -> self().handleChange("*", null, null), false);
         if (self().autopersist) {
             self().persist();
         }

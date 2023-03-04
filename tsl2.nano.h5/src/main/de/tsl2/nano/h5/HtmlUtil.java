@@ -714,5 +714,8 @@ public class HtmlUtil {
             return null;
         }
     }
-    
+
+    public static final void reset() {
+        tableDivStyle = null;
+    }
 }

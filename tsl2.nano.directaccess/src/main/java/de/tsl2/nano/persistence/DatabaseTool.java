@@ -324,10 +324,10 @@ public class DatabaseTool {
 	}
 	
 	public void shutdownDBServer() {
-		if (isEmbeddedDatabase() && !isH2())
-			shutdownDatabase();
-		else
+		if (isH2())
 			stopDBServer(persistence.getConnectionUrl(), persistence.getConnectionPassword());
+        else if (isInternalDatabase())
+			shutdownDatabase();
 	}
 	
 	/** calls h2 server directly through java...*/

@@ -62,6 +62,7 @@ public abstract class ARESTDynamic<RESPONSE> {
 	public static String BASE_PATH = ENV.get("app.rest.basepath", "/rest");
 	static String USAGE = BASE_PATH + "/{entity}/{attribute-or-action}/{query}/{optional-output-attribute}/{PUT:value}";
 	static final String API_KEY = StringUtil.toHexString(StringUtil.cryptoHash(ENV.get("app.rest.apikey", "ein23einfacherrestdynamickey!")));
+	public static final String H5SESSION = "h5session";
 	enum Status {
 		OK(200), CREATED(201), BAD_REQUEST(400), UNAUTHORIZED(401), FORBIDDEN(403), NOT_FOUND(404), INTERNAL_ERROR(500);
 		int s; Status(int s) { this.s = s;} public int http() {return s;}
@@ -129,7 +130,7 @@ public abstract class ARESTDynamic<RESPONSE> {
 			String[] split = auth.split("\\s");
 			String digest = split[split.length-1];
 			StringBuilder buf = new StringBuilder();
-			ISession session = (ISession) Util.untyped(header.get("session"));
+			ISession session = (ISession) Util.untyped(header.get(H5SESSION));
 			if (session != null)
 				buf.append(session.getId().toString());
 			for (int i = 0; i < split.length-1; i++) {

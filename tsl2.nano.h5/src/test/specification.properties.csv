@@ -54,7 +54,7 @@
 	START (OK) -> !myAction [label="§test"] \
 	!myAction (NEW) -> END
 
-charge.valueexpression={name}
+charge.valueexpression={item}:{value}
 charge.addattribute=%weekday
 charge.value.listener=%calcTime:fromtime,totime,pause
 charge.value.rulecover=%presValueColor:presentable.layoutConstraint
@@ -82,6 +82,27 @@ chargeitem.icon=icons/buy.png
 chargeitem.valueexpression={item}
 chargeitem.charge.constraint.nullable*=false
 item.valueexpression={name}
+item.icon=icons/equipment.png
+address.valueexpression={city},{street}
+address.icon=icons/home.png
+party.valueexpression={shortname}
+party.icon=icons/male.png
+chargestatus.valueexpression={name}
+chargestatus.icon=icons/yellow_pin.png
+mission.valueexpression={name}
+mission.icon=icons/yellow_pin.png
+organisation.valueexpression={name}
+organisation.icon=icons/people.png
+area.valueexpression={name}
+area.icon=icons/boss.png
+location.valueexpression={name}
+location.icon=icons/yellow_pin.png
+digial.valueexpression={name}
+digial.icon=icons/e-mail.png
+classification.valueexpression={name}
+classification.icon=icons/widget.png
+discharge.valueexpression={charge} ({date}: {value})
+discharge.icon=icons/accounting.png
 
 charge.createcompositor=item,chargeitems,chargeitem,icon
 charge.createcontroller=item,chargeitems,chargeitem,icon,value
