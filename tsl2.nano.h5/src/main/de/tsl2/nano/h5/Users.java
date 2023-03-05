@@ -50,9 +50,13 @@ public class Users {
     }
 
     public static Users load() {
+        return load(false);
+    }
+
+    public static Users load(boolean force) {
         Users userCheck = null;
         try {
-        	if (ENV.get("app.login.secure", false))
+        	if (force || ENV.get("app.login.secure", false))
         		userCheck = ENV.load(NAME_USERMAPPING, Users.class);
         } catch (Exception e) {
             LOG.error(e);
@@ -86,7 +90,7 @@ public class Users {
                 User user = new User(name, passwd);
                 // special case on secure=true -> after closing last session, the Users instance will be lost
                 if (userMapping.isEmpty())
-                    userMapping = load().userMapping;
+                    userMapping = load(true).userMapping;
                 userMapping.put(user, new CUser(dbName, dbPasswd));
                 ENV.save(NAME_USERMAPPING, this);
                 if (admin)
