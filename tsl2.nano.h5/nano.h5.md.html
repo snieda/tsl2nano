@@ -729,6 +729,16 @@ This hashcode then can be used inside the __usercheck.xml for the synthetic user
 
 ...here the synthetic auth user name was changed from default SA to MUSTER and the synthetic password was changed to the new hashcode.
 
+### Enabling SSL with TSL on http and websocket
+
+in the environment properties (environment.xml) change the following item:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   app.ssl.activate=true
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+now, you have to connect to the application through https (websockets will use internally wss).
+
 ### Authentication and SessionID
 
 The session-id is a hex presentation of a hashcode through the authorization-object.
