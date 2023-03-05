@@ -84,6 +84,9 @@ public class Users {
             if (!ENV.get("app.login.secure", false)) {
                 //not secure: add all new users
                 User user = new User(name, passwd);
+                // special case on secure=true -> after closing last session, the Users instance will be lost
+                if (userMapping.isEmpty())
+                    userMapping = load().userMapping;
                 userMapping.put(user, new CUser(dbName, dbPasswd));
                 ENV.save(NAME_USERMAPPING, this);
                 if (admin)
