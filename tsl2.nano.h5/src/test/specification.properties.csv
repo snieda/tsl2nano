@@ -39,7 +39,7 @@
 # replaced by a tab character.
 ##############################################################################
 
-%weekday=charge.getFromdate() != null ? formatter.format(charge.getFromdate()) : "";
+%weekday=charge.getFromdate() != null ? charge.getFromdate().toLocaleTimeString('de-DE', {weekday: 'short'}) : '';
 %calcTime=var from = fromtime != null ? fromtime.getTime() % 24*3600 : 0; var to = totime != null ? totime.getTime() % 24*3600 : 0; var p = pause != null ? (pause.getTime() - new Date(pause.toGMTString()).getTimezoneOffset()*60000) % 86400000 : 0; Math.round(((to - from) - p) / (3600 * 10)) / 100;
 %presValueColor=var map = new java.util.HashMap(); map.put('style', (typeof value != 'undefined' ? value : 0) > 10 ? 'color: red;' : 'color: green;'); map;
 &weekcolor= \

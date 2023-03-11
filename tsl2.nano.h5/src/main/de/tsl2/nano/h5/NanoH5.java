@@ -514,7 +514,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
                 if (!NumberUtil.isNumber(uri.substring(1)) && HtmlUtil.isURI(uri)
                     && !uri.contains(Html5Presentation.PREFIX_BEANREQUEST)) {
                     Response response = super.serve(uri, method, header, parms, files);
-                    webSec.addETag(uri, response, ENV.get("app.session.etag.timeout", "" + 24 * 3600));
+                    // webSec.addETag(uri, response, ENV.get("app.session.etag.timeout", "" + 24 * 3600));
                     webSec.addSessionHeader(null, response);
                     return response;
                 }
@@ -830,7 +830,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
     	ENV.addService(SpecificationExchange.class, h5Exchange);
 
         createAuthorization(persistence.getAuth());
-        NanoH5Util.enrichFromSpecificationProperties();
+        if (ENV.get("app.login.administration", true))
+            NanoH5Util.enrichFromSpecificationProperties();
         
         //load all beans from selected jar-file and provide them in a beancontainer
         List<Class> beanClasses = null;
@@ -867,11 +868,12 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
      * @param persistence
      * @return
      */
-    private void createAuthorization(final String userName) {
+    private IAuthorization createAuthorization(final String userName) {
         Message.send("creating authorization for " + userName);
         Authorization auth = Authorization.create(userName, ENV.get("app.login.secure", false));
         Plugins.process(INanoPlugin.class).onAuthentication(auth);
         ConcurrentUtil.setCurrent(auth);
+        return auth;
     }
 
     /**

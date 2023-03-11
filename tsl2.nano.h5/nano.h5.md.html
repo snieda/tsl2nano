@@ -1,5 +1,5 @@
 <font size="6" align="center">FullRelation Nano.H5<br/></font>
-<font size="-1">&copy; Thomas Schneider 2012-2021
+<font size="-1">&copy; Thomas Schneider 2012-2023
 <br/>
 <a href="http://sourceforge.net/projects/tsl2nano/files/1.1.0/tsl2.nano.h5.1.1.0.jar/download">Download on sourceforge</a>
 <br/>
@@ -35,11 +35,13 @@ To do a *quick-start*, go to chapter _Starting / Test_.
 
 A cool way to see the power of this tool can be seen in chapter _Online Quick-Start with a great selection of Database-Models on PonyORM_.
 
+All packages (under name *tsl2nano*) are available in maven central, sourceforge, gitlab and github.
+
 ### What does it for you?
 
 * it starts a generic application with default mechanisms and configurations to present data (->jpa) in html5
 * it provides all needed libraries for you - independent of the database and jpa-persistence tool you use
-* it creates all jpa-entities for you (of course, you can use your own!)
+* it creates all jpa-entities for you (of course, you can use your own)
 * all (jpa) entities are configured and presented in a most reasonable way - but easily to be enhanced by you
 * data is searchable and editable in a comfortable way - can be prepared to be printed and exported
 * it provides several working modes: single standalone app, network/multi-user and/or access to an application-server
@@ -81,8 +83,10 @@ A cool way to see the power of this tool can be seen in chapter _Online Quick-St
 * inject own logic in all phases of presenting through annotations
 * show complex dialogs through websockets to edit beans without leaving the current page
 * REST service for access/modification of all loaded entities
+* HATEOAS like REST UI extension
 * JSON representation (with optional recursion: "tsl2.json.recursive: true")
 * generic import mechanism of flat data (csv, etc)
+* document/specification based full configuration/extension for non-coding or low-coding
 * planned interfaces:
 	* xsd-->bean
 	* java-interface-->java-bean (mock through internal proxy)
@@ -4905,6 +4909,7 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.4.11 | 03.04.2022 | NEW: ExcelWorker, ObjectPrinter, SQLQuery, html-dialog fix ("Yes" -> true), timemout on findjars, NEW: search.mvn.org, jardownload.com, fix: page clear on submit
  2.4.12 | 18.09.2022 | NEW: SpecificationExchange, specification refactored: Workflow, ExcelWorker, (massive changes)Flow, Task, lots of conveniences extracted to util-classes, prepared to run on jdk-17, hsqldb-env refreshed for 2.7.0
  2.5.0  | 05.03.2023 | NEW: HATEOAS(restui), see EnvUpdate2v5v0: refactorings: serialization of actions with primitive attributes, move incubation packages, jdk17, h2-v2+ -> hsqldb2.7.1, hibernate 5, all dependencies/plugins updated
+ 2.5.1  | 28.05.2023 | Fix secure users loading, fix etag 304,
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
 
@@ -6068,17 +6073,17 @@ deploy:
 * [v] h5 timesheet output-deep
 * [ ] autotest generates json filenames in project folder
 * [v] coverage test with ValueRandomizer Object/Class -> TypeBean instead of String
-* [ ] logfactory performance: create log string in extra thread
+* [-] logfactory performance: create log string in extra thread
 * [ ] PFlow de-/serialization problem on tag name: 'val$Tasks'
 * [v] in timesheet the script engine does not load... < provide js, js-scriptengine, graal-sdk, truffle, regex, icu 
 * [v] in timesheet (secure) the checkAuthentication() fails
-* [ ] http-client reloads all images every time instead of using ETag
-* [ ] sometimes losing css styling (mostly after reset)
+* [v] http-client reloads all images every time instead of using ETag
+* [v] sometimes losing css styling (mostly after reset) <- css had double quotes instead of single quotes
 
 ### A minimum of manual integration Tests:
 
 * [v] start standalone, edit/create/delete Address entry, reload
-* [ ] start standalone, disable admin, enable security
+* [v] start standalone, disable admin, enable security
 * [v] start virgin, continue loading anyway without errors
 * [v] start standalone, copy model from ponyorm, load model without errors
 * [x] start standalone, unpack timesheet.zip from h5 target into env-dir load model without errors

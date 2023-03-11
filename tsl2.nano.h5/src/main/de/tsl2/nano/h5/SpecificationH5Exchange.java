@@ -158,8 +158,7 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 			}
     		if (errors > 0)
     			Message.send(errors + " errors on import from file " + file);
-    		else
-            	ENV.moveBackup(file);
+            ENV.moveBackup(file);
 			LOG.info("<= import of " + (rules + attributes + actions + beanchanges + attrchanges) + " specification entries finished successfull"
 					+ "\n\trules        : " + rules
 					+ "\n\tattributes   : " + attributes

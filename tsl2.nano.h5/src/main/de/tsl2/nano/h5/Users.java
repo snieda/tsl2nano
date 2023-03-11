@@ -20,6 +20,7 @@ import org.simpleframework.xml.ElementMap;
 
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.serviceaccess.Authorization;
@@ -125,7 +126,7 @@ public class Users {
         tries = tries == null ? 2 : tries + 1;
         userTries.put(userName, tries);
         long sleepTime = tries * tries * tries * ENV.get("app.session.loginfailure.sleep.mul.ms", 1000);
-        LOG.warn("sleep on retry: user login failed " + tries + " times, sleeping: " + sleepTime);
+        Message.send("sleep on retry: user login failed " + tries + " times, sleeping: " + sleepTime);
         ConcurrentUtil.sleep(sleepTime);
     }
 

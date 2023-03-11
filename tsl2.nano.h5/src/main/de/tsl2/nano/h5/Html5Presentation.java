@@ -329,7 +329,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         "RESTful",
                         IAction.MODE_UNDEFINED,
                         false,
-                        "icons/point_green.png") {
+                        "icons/point-green.png") {
                     @Override
                     public Object action() throws Exception {
                         return ENV.get("service.url", "") + ARESTDynamic.BASE_PATH;
@@ -339,7 +339,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         "RESTfulUI",
                         IAction.MODE_UNDEFINED,
                         false,
-                        "icons/point_yellow.png") {
+                        "icons/point-yellow.png") {
                     @Override
                     public Object action() throws Exception {
                         return ENV.get("service.url", "") + ARestUI.BASE_PATH;
@@ -1121,9 +1121,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     private void createQuickSearchPanel(Element parent, String tooltip, IAction<?> action) {
 //        parent = appendElement(parent, TAG_FORM);
         parent = appendElement(parent, TAG_DIV, ATTR_ALIGN, VAL_ALIGN_RIGHT);
+        tooltip += " (ALT+SHIFT+q)";
         Element input =
             appendElement(parent, TAG_INPUT, ATTR_ID, ID_QUICKSEARCH_FIELD, ATTR_NAME, ID_QUICKSEARCH_FIELD, ATTR_TYPE,
-                ATTR_TYPE_SEARCH, ATTR_TITLE, tooltip, ATTR_TABINDEX, ++tabIndex + "");
+                ATTR_TYPE_SEARCH, ATTR_TITLE, tooltip, ATTR_TABINDEX, /*++tabIndex*/0 + "", ATTR_ACCESSKEY, "Q");
         if (ENV.get("websocket.use.inputassist", true)) {
             appendAttributes(input, "onkeypress",
                 ENV.get("websocket.inputassist.function", "inputassist(event)"));
