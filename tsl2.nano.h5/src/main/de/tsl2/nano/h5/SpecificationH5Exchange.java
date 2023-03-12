@@ -7,7 +7,7 @@ import static de.tsl2.nano.h5.NanoH5Util.cover;
 import static de.tsl2.nano.h5.NanoH5Util.createCompositor;
 import static de.tsl2.nano.h5.NanoH5Util.createController;
 import static de.tsl2.nano.h5.NanoH5Util.createQuery;
-import static de.tsl2.nano.h5.NanoH5Util.createStatistic;
+import static de.tsl2.nano.h5.NanoH5Util.createStatistics;
 import static de.tsl2.nano.h5.NanoH5Util.createUser;
 import static de.tsl2.nano.specification.SpecificationExchange.Change.addaction;
 import static de.tsl2.nano.specification.SpecificationExchange.Change.addattribute;
@@ -43,6 +43,13 @@ import de.tsl2.nano.specification.rules.RuledEnabler;
 public class SpecificationH5Exchange extends SpecificationExchange {
 	
 	private static final String DIV = "[:;,\\s]";
+
+	@Override
+	public void saveResourceEntries(BeanDefinition bean) {
+        if (ENV.get("app.login.administration", true)) {
+			super.saveResourceEntries(bean);
+		}
+	}
 
 	@Override
 	public int enrichFromSpecificationProperties() {
@@ -95,7 +102,7 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 								bean.addAction(new SpecifiedAction<>(v, null));
 								actions++;
 							} else if (property.startsWith(createstatistics.name())) {
-								createStatistic(bean.getDeclaringClass());
+								createStatistics(bean.getDeclaringClass());
 							} else if (property.startsWith(createquery.name())) {
 								createQuery(k, v);
 							} else if (property.startsWith(createcompositor.name())) {

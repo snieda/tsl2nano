@@ -112,7 +112,11 @@ public interface NanoH5Util {
 //		return bean.addAttribute(new RuleExpression<>(bean.getClazz(), prefixedRuleName));
 	}
 
-	public static <T> Statistic<Collection<T>, T> createStatistics(Class<T> type, String iconPath) {
+	public static <T> Statistic<Collection<T>, T> createStatistics(Class<T> type) {
+        return createStatistics(type, "icons/barchart.png");
+	}
+
+    public static <T> Statistic<Collection<T>, T> createStatistics(Class<T> type, String iconPath) {
         Statistic<Collection<T>, T> statistic = new Statistic<>(type);
         statistic.getPresentable().setIcon(iconPath);
         statistic.onActivation(null).saveDefinition();
@@ -123,12 +127,6 @@ public interface NanoH5Util {
 		return QueryResult.createQueryResult(name, sqlQuery);
 	}
 	
-	public static <T> Statistic<Collection<T>, T> createStatistic(Class<T> type) {
-		Statistic<Collection<T>, T> statistic = new Statistic<>(type);
-		statistic.saveDefinition();
-		return statistic;
-	}
-
 	public static CSheet createSheet(String title, int rows, int cols) {
 		CSheet sheet = new CSheet(title, cols, rows);
 		sheet.save();

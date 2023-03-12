@@ -1124,7 +1124,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         tooltip += " (ALT+SHIFT+q)";
         Element input =
             appendElement(parent, TAG_INPUT, ATTR_ID, ID_QUICKSEARCH_FIELD, ATTR_NAME, ID_QUICKSEARCH_FIELD, ATTR_TYPE,
-                ATTR_TYPE_SEARCH, ATTR_TITLE, tooltip, ATTR_TABINDEX, /*++tabIndex*/0 + "", ATTR_ACCESSKEY, "Q");
+                ATTR_TYPE_SEARCH, ATTR_TITLE, tooltip, ATTR_TABINDEX, /*++tabIndex*/0 + "", ATTR_ACCESSKEY, "!");
         if (ENV.get("websocket.use.inputassist", true)) {
             appendAttributes(input, "onkeypress",
                 ENV.get("websocket.inputassist.function", "inputassist(event)"));

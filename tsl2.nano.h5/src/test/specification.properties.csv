@@ -55,6 +55,7 @@
 	!myAction (NEW) -> END
 
 charge.valueexpression={item}:{value}
+charge.icon=icons/clock.png
 charge.addattribute=%weekday
 charge.value.listener=%calcTime:fromtime,totime,pause
 charge.value.rulecover=%presValueColor:presentable.layoutConstraint
@@ -99,6 +100,8 @@ location.valueexpression={name}
 location.icon=icons/yellow_pin.png
 digial.valueexpression={name}
 digial.icon=icons/e-mail.png
+coordinate.valueexpression={x},{y}
+coordinate.icon=icons/blue_pin.png
 classification.valueexpression={name}
 classification.icon=icons/widget.png
 discharge.valueexpression={charge} ({date}: {value})

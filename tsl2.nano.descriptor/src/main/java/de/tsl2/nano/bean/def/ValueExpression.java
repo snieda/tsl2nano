@@ -180,12 +180,7 @@ public class ValueExpression<TYPE> implements
      */
     @Override
     public TYPE from(String toValue) {
-        if (type == null) {
-            throw ManagedException
-                .implementationError(
-                    "The conversion from string to object is only available, if the ValueExpression was created with a class type argument!",
-                    "type of value-expression '" + toString() + "' is null");
-        }
+        checkType();
         if (Util.isEmpty(toValue)) {
             return null;
         }
@@ -216,6 +211,16 @@ public class ValueExpression<TYPE> implements
         }
     }
 
+    private void checkType() {
+        if (type == null) {
+            throw ManagedException
+                .implementationError(
+                    "The conversion from string to object is only available, if the ValueExpression was created with a class type argument!",
+                    "type of value-expression '" + toString() + "' is null");
+        }
+        //ManagedException.assertion("instanceable", Util.isInstanceable(type), type);
+    }
+
     public TYPE createExampleBean(String toValue) {
         return createExampleBean(toValue, false);
     }
@@ -244,7 +249,7 @@ public class ValueExpression<TYPE> implements
                     BeanDefinition.getBeanDefinition(attr.getType()).getValueExpression().from(attributeValues[i]);
                 b.setValue(attributes[i], v);
             } else {//here we are able to directly parse the string to a value
-            	if (attributeValues[i] != null) {
+            	if (attributeValues.length > i && attributeValues[i] != null) {
 	                b.setParsedValue(
 	                    attributes[i],
 	                    attributeValues[i]
@@ -273,6 +278,7 @@ public class ValueExpression<TYPE> implements
      * @return
      */
     protected TYPE createInstance(String toValue) {
+        checkType();
         TYPE instance;
         if (type.isInterface()) {
             instance = BeanProxy.createBeanImplementation(type, null, null, Thread.currentThread().getContextClassLoader());
@@ -566,4 +572,8 @@ public class ValueExpression<TYPE> implements
 		if (attributes == null)
 			init(expression, type);
 	}
+
+    public void setType(Class<TYPE> type) {
+        this.type = type;
+    }
 }

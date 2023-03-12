@@ -710,13 +710,19 @@ public class ENV implements Serializable {
      * @return java instance
      */
     public static <T> T load(String name, Class<T> type, boolean renameOnError) {
+        File path = getEnvPath(name, type);
+        ManagedException.assertion(name, path.exists(), type);
+        if (self().get("app.configuration.persist.yaml", false)) {
+            return self().get(YamlUtil.class).load(path, type);
+        } else {
+            return self().get(XmlUtil.class).loadXml(path.getAbsolutePath(), type, renameOnError);
+        }
+    }
+
+    public static File getEnvPath(String name, Class<?> type) {
         name = StringUtil.substring(name, null, getFileExtension());
         String path = cleanpath(name);
-        if (self().get("app.configuration.persist.yaml", false)) {
-            return self().get(YamlUtil.class).load(FileUtil.userDirFile(path + getFileExtension()), type);
-        } else {
-            return self().get(XmlUtil.class).loadXml(path + getFileExtension(), type, renameOnError);
-        }
+        return FileUtil.userDirFile(path + getFileExtension());
     }
 
     private static String cleanpath(String name) {

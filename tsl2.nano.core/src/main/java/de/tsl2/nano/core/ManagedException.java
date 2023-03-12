@@ -137,6 +137,10 @@ public class ManagedException extends RuntimeException {
         return buf.toString();
     }
 
+    public static void assertion(String name, boolean assertion, Object object) {
+        assertion(assertion, "must be " + name + ": " + object);
+    }
+
     public static void assertion(boolean assertion, String message, Object...args) {
         if (!assertion) {
             throw new ManagedException(message, args);

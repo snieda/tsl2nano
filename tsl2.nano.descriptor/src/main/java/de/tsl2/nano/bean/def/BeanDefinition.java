@@ -1512,6 +1512,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      * @param uniqueTextValue converter from bean type to string
      */
     public void setValueExpression(ValueExpression<T> valueExpression) {
+        if (valueExpression != null && valueExpression.getType() == null)
+            valueExpression.setType(this.getDeclaringClass());
         this.valueExpression = valueExpression;
     }
 
