@@ -711,7 +711,7 @@ public class ENV implements Serializable {
      */
     public static <T> T load(String name, Class<T> type, boolean renameOnError) {
         File path = getEnvPath(name, type);
-        ManagedException.assertion(name, path.exists(), type);
+        ManagedException.assertion("exist", path.exists(), path);
         if (self().get("app.configuration.persist.yaml", false)) {
             return self().get(YamlUtil.class).load(path, type);
         } else {

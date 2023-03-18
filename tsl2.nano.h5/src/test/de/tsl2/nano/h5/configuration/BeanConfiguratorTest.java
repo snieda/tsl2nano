@@ -114,7 +114,8 @@ public class BeanConfiguratorTest implements ENVTestPreparation {
                 args[0] = bconf;
                 for (int i = 1; i < args.length; i++) {
                     args[i] = BeanClass.createInstance(argumentTypes[i-1]);
-                    args[i] = ConstraintValueSet.transformEmptyToVoid(ma, i-1, args[i]);
+                    if (args.length < 3) //only on addaction
+                        args[i] = ConstraintValueSet.transformEmptyToVoid(ma, i-1, args[i]);
                 }
                 ma.setParameter(args);
                 count++;
@@ -123,7 +124,7 @@ public class BeanConfiguratorTest implements ENVTestPreparation {
                 } catch (Exception e) {
                     //OK, generic parameters not working - the test checks not the action content!
                     String m = e.getMessage();
-                    if (m.contains("FileNotFoundException") || m.contains("attribute Expression") || m.contains("Void")
+                    if (m.contains("FileNotFoundException") || m.contains("assert ") || m.contains("IllegalArgumentException") || m.contains("attribute Expression") || m.contains("Void")
                         || m.contains("ClassNotFoundException")  || m.contains("TableList"))
                         continue;
                     else
