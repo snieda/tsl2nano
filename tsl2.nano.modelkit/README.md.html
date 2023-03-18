@@ -1,0 +1,200 @@
+# Introduction to the structure of ModelKit
+
+The *ModelKit* should provide a flexible and configurable way to arrange new sort mechanisms. 
+This can be done through given JSon text format files. Different Sort Groups use chains of comparators 
+and selectors defined by base definitions and functions and base facts/rules/agreements.
+
+Any configuration element can be referenced through its *name* - and all configuration items inside a configuration
+can reference all elements of its owning configuration.
+
+Different ModelKits can be provided to be actived on different times or circumstances.
+
+further informations in javadoc:
+    * ModelKit (class and ModelKitLoader.class)
+    * Group (class, constructor, sort(), groupByLimit(), insertion())
+
+## Overview
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+![Diagram for Declarative Structure](https://g.gravizo.com/svg?
+  digraph G {
+    ModelKits -> ModelKit [label="List of ModelKits on different times/circumstances"];
+    Item -> [label="items of given type to do the algorithms on"];
+    ModelKit -> {Definition; Fact; NamedComparator; Group}
+    Group -> {Fact; NamedComparator}
+    Fact -> Definition [label="uses"];
+    Func -> [label="compiled code to be done on given items (e.g. to reference an items property"];
+    Definition [label="Base Definitions, like items of special groups"];
+    }
+)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Each configuration element has properties but doesn't hold any runtime informations like lists of items to be sorted.
+
+Each *group*, as main accessible object has a sort() function and an insertion() function. these functions
+get all available items of a list, filtering them through a selector and do a sort through a chain of selectable
+comparators - or do insertions defined its properties 'step' and 'limit'.
+
+*Comparators* are selective and can have sub-comparators (chain). If it isn't selectable for the given two comparing items, 
+the owning group delegates to its next comparator. If a Comparator returns 0, the next selectable child comparator will be asked, if available.
+
+*Facts* are simple functions, returning true or false. Usable as selectors for groups and comparators.
+*Funcs* provide simple peace of code to get any result.
+*Definitions* are the base agreements without any dependencies to other configuration elements.
+
+## The StandardConfiguration
+
+At the moment, we have two configurations: Standard (Mon-Sat) and Sunday (Sun).
+To see the standard way, you can enable debug logging and will be able to see a description of the declared sort algorithm:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ModelKit(standard: every second every day between Monday and Saturday)
+		Group: topPremiumPartnerGroup (if:isTopPremiumPartner, groupBy: getPartnername/3, step:-1)
+			NamedComparator: byTopPremiumPartners [isTopPremiumPartner -> onequal:chain: []]
+			NamedComparator: byPartnerNameAndActivation [null -> onequal:chain: [byInActiveBeforeActive]]
+				NamedComparator: byInActiveBeforeActive [isActive -> onequal:chain: [activatableFirst]]
+					NamedComparator: activatableFirst [null -> onequal:chain: [byEndingFirst, byStartingFirst]]
+						NamedComparator: byEndingFirst [!isActivatableLater -> onequal:chain: []]
+						NamedComparator: byStartingFirst [null -> onequal:chain: []]
+
+		Group: premiumPartnerGroup (if:isPremiumNotTopPartner, groupBy: getPartnername/3, step:-1)
+			NamedComparator: byPartnerNameAndActivation [null -> onequal:chain: [byInActiveBeforeActive]]
+				NamedComparator: byInActiveBeforeActive [isActive -> onequal:chain: [activatableFirst]]
+					NamedComparator: activatableFirst [null -> onequal:chain: [byEndingFirst, byStartingFirst]]
+						NamedComparator: byEndingFirst [!isActivatableLater -> onequal:chain: []]
+						NamedComparator: byStartingFirst [null -> onequal:chain: []]
+
+        Group: onlinePartnerGroup (if:isOnlineNotTopPartner, groupBy: null/1, step:5)
+            NamedComparator: byPartnerNameAndActivation [null -> onequal:chain: [byInActiveBeforeActive]]
+                NamedComparator: byInActiveBeforeActive [isActive -> onequal:chain: [activatableFirst]]
+                    NamedComparator: activatableFirst [null -> onequal:chain: [byEndingFirst, byStartingFirst]]
+                        NamedComparator: byEndingFirst [!isActivatableLater -> onequal:chain: []]
+                        NamedComparator: byStartingFirst [null -> onequal:chain: []]
+            NamedComparator: byInActiveBeforeActive [isActive -> onequal:chain: [activatableFirst]]
+                NamedComparator: activatableFirst [null -> onequal:chain: [byEndingFirst, byStartingFirst]]
+                    NamedComparator: byEndingFirst [!isActivatableLater -> onequal:chain: []]
+                    NamedComparator: byStartingFirst [null -> onequal:chain: []]
+
+        Group: hiddenGroup (if:isHidden, groupBy: null/-1, step:-1)
+            NamedComparator: byPartnerNameAndActivation [null -> onequal:chain: [byInActiveBeforeActive]]
+                NamedComparator: byInActiveBeforeActive [isActive -> onequal:chain: [activatableFirst]]
+                    NamedComparator: activatableFirst [null -> onequal:chain: [byEndingFirst, byStartingFirst]]
+                        NamedComparator: byEndingFirst [!isActivatableLater -> onequal:chain: []]
+                        NamedComparator: byStartingFirst [null -> onequal:chain: []]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+On testing, a small analzing table will be printed to see duration, item count and count of calls of each configuration element.
+This may be helpfull to see, whether some elements are not selectable and result in count of calls = 0.
+But the clone negative facts should not be points of interest.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+standard sorted 27 items (time: 45 msec)
+
+ count of calls:
+
+         topPremiumPartnerOrder: 74
+         topOnlinePartnerOrder: 71
+         onlineSubgroups: 74
+         getPartnername: 9
+         isTopPremiumPartner: 41
+         isTopOnlinePartner: 58
+         isOnlinePartner: 47
+         isOnlineNotTopPartner: 47
+         isPremiumNotTopPartner: 27
+         isHidden: 27
+         isActive: 0
+         isActivatable: 33
+         isActivatableLater: 0
+         always: 0
+         !isTopPremiumPartner: 19
+         !isTopOnlinePartner: 9
+         !isOnlinePartner: 27
+         !isOnlineNotTopPartner: 0
+         !isPremiumNotTopPartner: 0
+         !isHidden: 58
+         !isActive: 0
+         !isActivatable: 0
+         !isActivatableLater: 0
+         !always: 0
+         byTopPremiumPartners: 14
+         byTopOnlinePartners: 4
+         byPartnerNameAndActivation: 21
+         byInActiveBeforeActive: 17
+         activatableFirst: 11
+         byStartingFirst: 0
+         byEndingFirst: 7
+         groupBy3Partner: 0
+         topPremiumPartnerGroup: 1
+         premiumPartnerGroup: 1
+         topOnlinePartnerGroup: 2
+         onlinePartnerGroup: 1
+         hiddenGroup: 1
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## The Sunday Configuration
+
+The sunday configuration is much easier, but holds a special case on insertion , defined by *insertionLimitFallDown*.
+Each inserted partner will be inserted next on next insertion round.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ModelKit(sunday: every second at Sunday day)
+		Group: topOnlinePartnerGroup (if:isTopOnlinePartner, groupBy: getPartnername/-1, insertion: step:-1)
+			NamedComparator: byTopOnlinePartners [isTopOnlinePartner -> onequal:chain: []]
+
+		Group: topPremiumPartnerGroup (if:isTopPremiumPartner, groupBy: getPartnername/-1, insertion: step:-1)
+			NamedComparator: byTopPremiumPartners [isTopPremiumPartner -> onequal:chain: []]
+
+		Group: insertionPartnerGroup (if:isInsertionPartner, groupBy: getPartnername/1, insertion: step:3/insertionLimitFallDown)
+			NamedComparator: byInsertionPartners [isInsertionPartner -> onequal:chain: []]
+
+		Group: allOthers (if:isAllOthers, groupBy: null/-1, insertion: step:-1)
+
+		Group: hiddenGroup (if:isHidden, groupBy: null/-1, insertion: step:-1)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+analyzing table:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sunday sorted 29 items (time: 15 msec)
+
+ count of calls:
+
+         topPremiumPartnerOrder: 90
+         topOnlinePartnerOrder: 85
+         insertionPartnerOrder: 81
+         getPartnername: 7
+         isTopPremiumPartner: 41
+         isTopOnlinePartner: 33
+         isInsertionPartner: 64
+         isAllOthers: 48
+         isHidden: 29
+         !isTopPremiumPartner: 37
+         !isTopOnlinePartner: 48
+         !isInsertionPartner: 11
+         !isAllOthers: 0
+         !isHidden: 111
+         byTopPremiumPartners: 12
+         byTopOnlinePartners: 4
+         byInsertionPartners: 6
+         topOnlinePartnerGroup: 1
+         topPremiumPartnerGroup: 1
+         insertionPartnerGroup: 2
+         allOthers: 1
+         hiddenGroup: 1
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## Dynamic Configuration through JSon
+
+The ModelKitLoader provides all mechanisms to load from, save to, and reset (singelton configuration) json files
+as configurations. To enable the mechanisms,
+remove the out-comment on the rest-service and declare the @Produces in *ModelKit#getActiveModelKitNow()* as @Default.
+
+## Facts
+
+As facts are simple functions returning a boolean value, they can be combined through and-clause with other existing facts.
+The ModelKit will clone each given fact to provide the negation, 
+that can be accessed throuth its convenience function *not()*. The facts main function implementation may be null to only
+combine existing facts with and-clause.  
+
+<style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>

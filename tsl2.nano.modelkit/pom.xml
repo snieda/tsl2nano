@@ -1,0 +1,27 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>net.sf.tsl2nano</groupId>
+    <artifactId>tsl2.nano.h5-package</artifactId>
+    <version>2.5.1-SNAPSHOT</version>
+  </parent>
+  <artifactId>tsl2.nano.modelkit</artifactId>
+  <name>TSL2 Framework ModelKit</name>
+  <description>TSL2 Framework to provide and use a structure of elements referenced by unique names - to declare a kit of logic in a json/yaml/xml text file</description>
+	<properties>
+		<module.parent>..</module.parent>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>net.sf.tsl2nano</groupId>
+			<artifactId>tsl2.nano.core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.tsl2nano</groupId>
+			<artifactId>tsl2.nano.autotest</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>
