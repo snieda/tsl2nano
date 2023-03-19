@@ -110,6 +110,7 @@
 		<module>tsl2.nano.specification</module>
 		<module>tsl2.nano.repeatable</module>
 		<module>tsl2.nano.logicstructure</module>
+		<module>tsl2.nano.modelkit</module>
 		<module>tsl2.nano.vnet</module>
 		<module>tsl2.nano.replication</module>
 		<module>tsl2.nano.serviceaccess</module>
