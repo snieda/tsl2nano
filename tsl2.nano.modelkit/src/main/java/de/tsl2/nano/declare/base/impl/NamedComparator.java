@@ -15,11 +15,11 @@ import de.tsl2.nano.modelkit.TriFunction;
  */
 public class NamedComparator<T> extends AbstractIdentified implements Comparator<T>, Selectable<List<T>> {
     @JsonIgnore
-    TriFunction<SortConfiguration, T, T, Integer> comparator;
+    TriFunction<ModelKit, T, T, Integer> comparator;
     private List<String> onEqualsThen;
     private String selectorFact;
 
-    public NamedComparator(String name, String selectorFact, TriFunction<SortConfiguration, T, T, Integer> comparator,
+    public NamedComparator(String name, String selectorFact, TriFunction<ModelKit, T, T, Integer> comparator,
         String... onEqualsThen) {
         super(name);
         this.selectorFact = selectorFact;

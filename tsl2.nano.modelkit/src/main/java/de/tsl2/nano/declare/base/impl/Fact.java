@@ -13,10 +13,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class Fact<T> extends AbstractIdentified {
     private static final String PREF_NEGATION = "!";
     @JsonIgnore
-    BiFunction<SortConfiguration, T, Boolean> rule;
+    BiFunction<ModelKit, T, Boolean> rule;
     private List<String> andFacts;
 
-    public Fact(String name, BiFunction<SortConfiguration, T, Boolean> rule, String... andFacts) {
+    public Fact(String name, BiFunction<ModelKit, T, Boolean> rule, String... andFacts) {
         super(name);
         this.rule = rule;
         this.andFacts = List.of(andFacts);

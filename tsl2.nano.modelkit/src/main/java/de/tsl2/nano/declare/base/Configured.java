@@ -2,14 +2,14 @@ package de.tsl2.nano.modelkit;
 
 import java.util.List;
 
-import de.tsl2.nano.modelkit.impl.SortConfiguration;
+import de.tsl2.nano.modelkit.impl.ModelKit;
 
 /**
  * provides a mechanism to access the base configuration.
  */
 public interface Configured {
     /** each artifact should be assigned to a configuration */
-    void setConfiguration(SortConfiguration config);
+    void setConfiguration(ModelKit config);
 
     /** get all artifacts of given type from configuration */
     <T extends Identified> List<T> get(Class<T> type);

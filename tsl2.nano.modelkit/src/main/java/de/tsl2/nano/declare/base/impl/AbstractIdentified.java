@@ -20,7 +20,7 @@ public abstract class AbstractIdentified implements Identified, Configured, Clon
 
     String name;
     @JsonIgnore
-    SortConfiguration config;
+    ModelKit config;
     @JsonIgnore
     long countOfCalls;
 
@@ -35,7 +35,7 @@ public abstract class AbstractIdentified implements Identified, Configured, Clon
 
     @Override
     public void visited(Object... explanation) {
-        if (SortConfiguration.isTestMode() && explanation.length > 0) {
+        if (ModelKit.isTestMode() && explanation.length > 0) {
             LOG.info(Arrays.asList(explanation).toString());
         }
         countOfCalls++;
@@ -66,20 +66,20 @@ public abstract class AbstractIdentified implements Identified, Configured, Clon
     }
 
     @Override
-    public void setConfiguration(SortConfiguration config) {
+    public void setConfiguration(ModelKit config) {
         this.config = config;
         validate();
     }
 
     @Override
     public <T extends Identified> T get(String name, Class<T> type) {
-        Objects.requireNonNull(config, "Please assign an instance of SortConfiguration to " + this.toString() + " before!");
+        Objects.requireNonNull(config, "Please assign an instance of ModelKit to " + this.toString() + " before!");
         return config.get(name, type);
     }
 
     @Override
     public <T extends Identified> List<T> get(Class<T> type) {
-        Objects.requireNonNull(config, "Please assign an instance of SortConfiguration to " + this.toString() + " before!");
+        Objects.requireNonNull(config, "Please assign an instance of ModelKit to " + this.toString() + " before!");
         return config.get(type);
     }
 

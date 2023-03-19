@@ -37,10 +37,10 @@ import de.tsl2.nano.modelkit.ObjectUtil;
 
 /**
  * full model kit providing all elements to sort objects through a complex configurable algorithm. a factory is provided
- * through #modelKitLoader.
+ * through #ModelKitLoader.
  */
 public class ModelKit extends AbstractIdentified {
-    private static final Logger LOG = LoggerFactory.getLogger(modelKit.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ModelKit.class);
     private static boolean testMode;
 
     Map<Class<? extends Identified>, List<? extends Identified>> env = new HashMap<>();
@@ -221,7 +221,7 @@ public class ModelKit extends AbstractIdentified {
     // @Override
     // public boolean equals(Object obj) {
     //     // TODO: not performance optimized
-    //     return super.equals(obj) && forEachElement(e -> ((modelKit)obj).checkExistence(e.getName(), e.getClass()));
+    //     return super.equals(obj) && forEachElement(e -> ((ModelKit)obj).checkExistence(e.getName(), e.getClass()));
     // }
 
     @Override
@@ -247,15 +247,15 @@ public class ModelKit extends AbstractIdentified {
     @Produces
     @Named("Configured")
     @Default
-    public static modelKit getActivemodelKitNow() {
-        return modelKitLoader.getActivemodelKit(ZonedDateTime.now());
+    public static ModelKit getActiveModelKitNow() {
+        return ModelKitLoader.getActiveModelKit(ZonedDateTime.now());
     }
 
-    public static modelKit getActivemodelKit(ZonedDateTime time) {
-        return modelKitLoader.getActivemodelKit(time);
+    public static ModelKit getActiveModelKit(ZonedDateTime time) {
+        return ModelKitLoader.getActiveModelKit(time);
     }
 
-    public static void saveAsJSon(modelKit... configs) {
+    public static void saveAsJSon(ModelKit... configs) {
         Arrays.stream(configs).forEach(c -> c.validate());
 
         // TODO: provide a list of test items
@@ -265,11 +265,11 @@ public class ModelKit extends AbstractIdentified {
         if (testMode && !warnings.isEmpty()) {
             throw new IllegalStateException("The following configuration elements were missed: " + warnings);
         }
-        modelKitLoader.saveAsJSon(configs);
+        ModelKitLoader.saveAsJSon(configs);
     }
 
     public void reset() {
-        modelKitLoader.reset();
+        ModelKitLoader.reset();
     }
 }
 
@@ -281,40 +281,40 @@ public class ModelKit extends AbstractIdentified {
  * <p/>
  * TODO: configure load/save path for cloud environment
  */
-class modelKitLoader {
+class ModelKitLoader {
     private static final String SORT_CONFIGURATION_JSON = "sort-configuration.json";
 
-    private static List<modelKit> configurations;
+    private static List<ModelKit> configurations;
 
-    private modelKitLoader() {
+    private ModelKitLoader() {
     }
 
-    static modelKit getActivemodelKit(ZonedDateTime time) {
-        return getActivemodelKit(getConfigurations(), time);
+    static ModelKit getActiveModelKit(ZonedDateTime time) {
+        return getActiveModelKit(getConfigurations(), time);
     }
 
-    static modelKit getActivemodelKit(List<modelKit> configs, ZonedDateTime time) {
+    static ModelKit getActiveModelKit(List<ModelKit> configs, ZonedDateTime time) {
         return configs.stream().filter(c -> c.isActive(time)).findFirst().orElseThrow();
     }
 
-    private static List<modelKit> getConfigurations() {
+    private static List<ModelKit> getConfigurations() {
         if (configurations == null) {
             configurations = readFromJSon();
         }
         return configurations;
     }
 
-    static List<modelKit> readFromJSon() {
+    static List<ModelKit> readFromJSon() {
         try {
             return createObjectMapper().readValue(new File(SORT_CONFIGURATION_JSON),
-                new TypeReference<List<modelKit>>() {
+                new TypeReference<List<ModelKit>>() {
                 });
         } catch (IOException e) {
             throw new IllegalArgumentException(e);
         }
     }
 
-    public static void saveAsJSon(modelKit... configs) {
+    public static void saveAsJSon(ModelKit... configs) {
         try {
             ObjectMapper mapper = createObjectMapper();
             mapper.writeValue(new File(SORT_CONFIGURATION_JSON), configs);
