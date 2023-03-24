@@ -1,9 +1,14 @@
 package de.tsl2.nano.modelkit.impl;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import de.tsl2.nano.modelkit.Identified;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * rules to check agreements. accessing definitions of its owning configuration. a name, starting with '!' will negate the rule
@@ -11,15 +16,17 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 // IMPROVE: rename to Agreement or Truth or Rule?
 public class Fact<T> extends AbstractIdentified {
-    private static final String PREF_NEGATION = "!";
+    static final String PREF_NEGATION = "!";
     @JsonIgnore
     BiFunction<ModelKit, T, Boolean> rule;
+
+	@Getter @Setter
     private List<String> andFacts;
 
     public Fact(String name, BiFunction<ModelKit, T, Boolean> rule, String... andFacts) {
         super(name);
         this.rule = rule;
-        this.andFacts = List.of(andFacts);
+        this.andFacts = Arrays.asList(andFacts);
     }
 
     @Override
@@ -27,10 +34,17 @@ public class Fact<T> extends AbstractIdentified {
         checkExistence(Fact.class, andFacts);
     }
 
+    @Override
+    public void tagNames(String parent) {
+        super.tagNames(parent);
+        tag(parent, andFacts);
+    }
+
     public boolean ask(T question) {
         visited();
+        List<Fact> facts = get(Fact.class);
         return (rule == null || ifNegate(rule.apply(config, question)))
-            && andFacts.stream().allMatch(n -> get(n, Fact.class).ask(question));
+            && andFacts.stream().allMatch(n -> Identified.get(facts, n).ask(question));
     }
 
     private boolean ifNegate(boolean result) {
@@ -41,7 +55,7 @@ public class Fact<T> extends AbstractIdentified {
         return negate(name);
     }
 
-    private static boolean negate(String factName) {
+    static boolean negate(String factName) {
         return factName.startsWith(PREF_NEGATION);
     }
 

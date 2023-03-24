@@ -1,11 +1,18 @@
 package de.tsl2.nano.modelkit.impl;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * provides a field-comparing comparator
  */
 public class AttributeComparator<T> extends NamedComparator<T> {
 
+    @Getter @Setter
     String fieldName;
+
+    AttributeComparator() {
+    }
 
     public AttributeComparator(String name, String fieldName, String selectorFact, String... onEqualsThen) {
         super(name, selectorFact, (facts, c1, c2) -> get(c1, fieldName).compareTo(get(c2, fieldName)), onEqualsThen);

@@ -1,5 +1,6 @@
 package de.tsl2.nano.modelkit;
 
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
@@ -26,5 +27,8 @@ public class ObjectUtil {
             field.setAccessible(true);
             return field.get(instance);
         });
+    }
+    public static void setValue(Class<?> type, String propertyName, Object obj, Object value) {
+        ExceptionHandler.trY(() -> new PropertyDescriptor(propertyName, type).getWriteMethod().invoke(obj, value));
     }
 }

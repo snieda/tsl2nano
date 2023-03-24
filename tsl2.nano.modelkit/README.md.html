@@ -1,7 +1,7 @@
 # Introduction to the structure of ModelKit
 
 The *ModelKit* should provide a flexible and configurable way to arrange new sort mechanisms. 
-This can be done through given JSon text format files. Different Sort Groups use chains of comparators 
+This can be done through given JSon text format files. Different Groups use chains of comparators 
 and selectors defined by base definitions and functions and base facts/rules/agreements.
 
 Any configuration element can be referenced through its *name* - and all configuration items inside a configuration
@@ -42,147 +42,13 @@ the owning group delegates to its next comparator. If a Comparator returns 0, th
 *Funcs* provide simple peace of code to get any result.
 *Definitions* are the base agreements without any dependencies to other configuration elements.
 
-## The StandardConfiguration
-
-At the moment, we have two configurations: Standard (Mon-Sat) and Sunday (Sun).
-To see the standard way, you can enable debug logging and will be able to see a description of the declared sort algorithm:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-ModelKit(standard: every second every day between Monday and Saturday)
-		Group: topPremiumPartnerGroup (if:isTopPremiumPartner, groupBy: getPartnername/3, step:-1)
-			NamedComparator: byTopPremiumPartners [isTopPremiumPartner -> onequal:chain: []]
-			NamedComparator: byPartnerNameAndActivation [null -> onequal:chain: [byInActiveBeforeActive]]
-				NamedComparator: byInActiveBeforeActive [isActive -> onequal:chain: [activatableFirst]]
-					NamedComparator: activatableFirst [null -> onequal:chain: [byEndingFirst, byStartingFirst]]
-						NamedComparator: byEndingFirst [!isActivatableLater -> onequal:chain: []]
-						NamedComparator: byStartingFirst [null -> onequal:chain: []]
-
-		Group: premiumPartnerGroup (if:isPremiumNotTopPartner, groupBy: getPartnername/3, step:-1)
-			NamedComparator: byPartnerNameAndActivation [null -> onequal:chain: [byInActiveBeforeActive]]
-				NamedComparator: byInActiveBeforeActive [isActive -> onequal:chain: [activatableFirst]]
-					NamedComparator: activatableFirst [null -> onequal:chain: [byEndingFirst, byStartingFirst]]
-						NamedComparator: byEndingFirst [!isActivatableLater -> onequal:chain: []]
-						NamedComparator: byStartingFirst [null -> onequal:chain: []]
-
-        Group: onlinePartnerGroup (if:isOnlineNotTopPartner, groupBy: null/1, step:5)
-            NamedComparator: byPartnerNameAndActivation [null -> onequal:chain: [byInActiveBeforeActive]]
-                NamedComparator: byInActiveBeforeActive [isActive -> onequal:chain: [activatableFirst]]
-                    NamedComparator: activatableFirst [null -> onequal:chain: [byEndingFirst, byStartingFirst]]
-                        NamedComparator: byEndingFirst [!isActivatableLater -> onequal:chain: []]
-                        NamedComparator: byStartingFirst [null -> onequal:chain: []]
-            NamedComparator: byInActiveBeforeActive [isActive -> onequal:chain: [activatableFirst]]
-                NamedComparator: activatableFirst [null -> onequal:chain: [byEndingFirst, byStartingFirst]]
-                    NamedComparator: byEndingFirst [!isActivatableLater -> onequal:chain: []]
-                    NamedComparator: byStartingFirst [null -> onequal:chain: []]
-
-        Group: hiddenGroup (if:isHidden, groupBy: null/-1, step:-1)
-            NamedComparator: byPartnerNameAndActivation [null -> onequal:chain: [byInActiveBeforeActive]]
-                NamedComparator: byInActiveBeforeActive [isActive -> onequal:chain: [activatableFirst]]
-                    NamedComparator: activatableFirst [null -> onequal:chain: [byEndingFirst, byStartingFirst]]
-                        NamedComparator: byEndingFirst [!isActivatableLater -> onequal:chain: []]
-                        NamedComparator: byStartingFirst [null -> onequal:chain: []]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+To see the structure before working on it, you can print a human readable information through ModelKit.describe().
 
 On testing, a small analzing table will be printed to see duration, item count and count of calls of each configuration element.
 This may be helpfull to see, whether some elements are not selectable and result in count of calls = 0.
 But the clone negative facts should not be points of interest.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-standard sorted 27 items (time: 45 msec)
-
- count of calls:
-
-         topPremiumPartnerOrder: 74
-         topOnlinePartnerOrder: 71
-         onlineSubgroups: 74
-         getPartnername: 9
-         isTopPremiumPartner: 41
-         isTopOnlinePartner: 58
-         isOnlinePartner: 47
-         isOnlineNotTopPartner: 47
-         isPremiumNotTopPartner: 27
-         isHidden: 27
-         isActive: 0
-         isActivatable: 33
-         isActivatableLater: 0
-         always: 0
-         !isTopPremiumPartner: 19
-         !isTopOnlinePartner: 9
-         !isOnlinePartner: 27
-         !isOnlineNotTopPartner: 0
-         !isPremiumNotTopPartner: 0
-         !isHidden: 58
-         !isActive: 0
-         !isActivatable: 0
-         !isActivatableLater: 0
-         !always: 0
-         byTopPremiumPartners: 14
-         byTopOnlinePartners: 4
-         byPartnerNameAndActivation: 21
-         byInActiveBeforeActive: 17
-         activatableFirst: 11
-         byStartingFirst: 0
-         byEndingFirst: 7
-         groupBy3Partner: 0
-         topPremiumPartnerGroup: 1
-         premiumPartnerGroup: 1
-         topOnlinePartnerGroup: 2
-         onlinePartnerGroup: 1
-         hiddenGroup: 1
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-## The Sunday Configuration
-
-The sunday configuration is much easier, but holds a special case on insertion , defined by *insertionLimitFallDown*.
-Each inserted partner will be inserted next on next insertion round.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-ModelKit(sunday: every second at Sunday day)
-		Group: topOnlinePartnerGroup (if:isTopOnlinePartner, groupBy: getPartnername/-1, insertion: step:-1)
-			NamedComparator: byTopOnlinePartners [isTopOnlinePartner -> onequal:chain: []]
-
-		Group: topPremiumPartnerGroup (if:isTopPremiumPartner, groupBy: getPartnername/-1, insertion: step:-1)
-			NamedComparator: byTopPremiumPartners [isTopPremiumPartner -> onequal:chain: []]
-
-		Group: insertionPartnerGroup (if:isInsertionPartner, groupBy: getPartnername/1, insertion: step:3/insertionLimitFallDown)
-			NamedComparator: byInsertionPartners [isInsertionPartner -> onequal:chain: []]
-
-		Group: allOthers (if:isAllOthers, groupBy: null/-1, insertion: step:-1)
-
-		Group: hiddenGroup (if:isHidden, groupBy: null/-1, insertion: step:-1)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-analyzing table:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sunday sorted 29 items (time: 15 msec)
-
- count of calls:
-
-         topPremiumPartnerOrder: 90
-         topOnlinePartnerOrder: 85
-         insertionPartnerOrder: 81
-         getPartnername: 7
-         isTopPremiumPartner: 41
-         isTopOnlinePartner: 33
-         isInsertionPartner: 64
-         isAllOthers: 48
-         isHidden: 29
-         !isTopPremiumPartner: 37
-         !isTopOnlinePartner: 48
-         !isInsertionPartner: 11
-         !isAllOthers: 0
-         !isHidden: 111
-         byTopPremiumPartners: 12
-         byTopOnlinePartners: 4
-         byInsertionPartners: 6
-         topOnlinePartnerGroup: 1
-         topPremiumPartnerGroup: 1
-         insertionPartnerGroup: 2
-         allOthers: 1
-         hiddenGroup: 1
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Setting logging to debug enabled, you see all available elements by its names. These are reusable in json configurations:
 
 ## Dynamic Configuration through JSon
 
@@ -190,11 +56,58 @@ The ModelKitLoader provides all mechanisms to load from, save to, and reset (sin
 as configurations. To enable the mechanisms,
 remove the out-comment on the rest-service and declare the @Produces in *ModelKit#getActiveModelKitNow()* as @Default.
 
-## Facts
+Each configuration element is able to find each other configuration element through its parent configuration. All configuration
+elements are referencable throuth its unique name.
+
+## Fact
 
 As facts are simple functions returning a boolean value, they can be combined through and-clause with other existing facts.
 The ModelKit will clone each given fact to provide the negation, 
 that can be accessed throuth its convenience function *not()*. The facts main function implementation may be null to only
 combine existing facts with and-clause.  
+
+They are used to filter groups and are used to define comparators and their selection.
+
+## Func
+
+Func are named lambda functions without any additional properties and are usable on the item objects (to be sorted) to evaluate item properties.
+
+## Definition
+
+simple values or lists, that defined some additional properties.
+
+## NamedComparator
+
+the main elements of group sorting. can have child comparators to be called on equality, and are selectable through a given fact.
+
+## Group
+
+the main elements , providing actions to be done on a list of items. they filter items through a filter, given by a fact, and use comparators 
+
+## Technical Instructions / Informations
+
+if new lambda expression or other coded functions are used, a new sort configuration factory class should be provided and registered,
+to reload the configured elements.
+
+IMPORTANT: 
+all names will be automatically tagged with a namespace (name of parent configuration). If you use names inside of lambda expressions, you
+have to tag them by yourself!
+
+Each new implemented model kit should register itself in a class static block:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+static {
+    create();
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+where the static create() method creates and declares a new hard specified model kit.
+
+The ModelKit class with its ModelKitLoader provides mechaisms to provide the hardcoded registered
+model kits (to inherit the lambda implementions from) and the dynamic loaded (json) model kits (being selected as model kit).
+
+If no json file 'modelkit.json' was found, the hard coded and registered model kits will be saved into that file.
+
+The right sort configuration is selected through a cron expression and the function *isActive().
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>

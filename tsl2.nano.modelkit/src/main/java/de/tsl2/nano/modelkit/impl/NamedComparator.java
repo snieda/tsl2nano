@@ -1,13 +1,17 @@
 package de.tsl2.nano.modelkit.impl;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import de.tsl2.nano.modelkit.Identified;
 import de.tsl2.nano.modelkit.Selectable;
 import de.tsl2.nano.modelkit.TriFunction;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * a comparator to be identified through its owning configuration. checks, if available for the current constalation and has a
@@ -16,23 +20,35 @@ import de.tsl2.nano.modelkit.TriFunction;
 public class NamedComparator<T> extends AbstractIdentified implements Comparator<T>, Selectable<List<T>> {
     @JsonIgnore
     TriFunction<ModelKit, T, T, Integer> comparator;
+    @Getter @Setter
     private List<String> onEqualsThen;
+    @Getter @Setter
     private String selectorFact;
+
+	NamedComparator() {
+    	}
 
     public NamedComparator(String name, String selectorFact, TriFunction<ModelKit, T, T, Integer> comparator,
         String... onEqualsThen) {
         super(name);
         this.selectorFact = selectorFact;
         this.comparator = comparator;
-        this.onEqualsThen = List.of(onEqualsThen);
+        this.onEqualsThen = Arrays.asList(onEqualsThen);
     }
 
     @Override
     public void validate() {
+        Objects.requireNonNull(comparator, config.name + ": main comparator is null (not registered?): " + toString());
         checkExistence(selectorFact, Fact.class);
         checkExistence(NamedComparator.class, onEqualsThen);
     }
 
+    @Override
+    public void tagNames(String parent) {
+        super.tagNames(parent);
+        selectorFact = tag(parent, selectorFact);
+        tag(parent, onEqualsThen);
+    }
     @Override
     public boolean canSelect(List<T> current) {
         if (selectorFact == null) {

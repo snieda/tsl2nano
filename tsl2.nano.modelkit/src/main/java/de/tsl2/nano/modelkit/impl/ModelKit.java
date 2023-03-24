@@ -2,11 +2,14 @@ package de.tsl2.nano.modelkit.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +17,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Produces;
 import javax.inject.Named;
@@ -30,25 +34,41 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.util.StdConverter;
 
 import de.tsl2.nano.modelkit.Configured;
+import de.tsl2.nano.modelkit.ExceptionHandler;
 import de.tsl2.nano.modelkit.Identified;
 import de.tsl2.nano.modelkit.ObjectUtil;
+import de.tsl2.nano.modelkit.impl.ModelKitLoader.JsonToMapConverter;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * full model kit providing all elements to sort objects through a complex configurable algorithm. a factory is provided
  * through #ModelKitLoader.
  */
+@ApplicationScoped
 public class ModelKit extends AbstractIdentified {
     private static final Logger LOG = LoggerFactory.getLogger(ModelKit.class);
     private static boolean testMode;
 
+    @JsonDeserialize(converter = JsonToMapConverter.class)
     Map<Class<? extends Identified>, List<? extends Identified>> env = new HashMap<>();
+
+    @Getter @Setter
     private String cron;
+    @Setter
     private String description;
 
     @JsonIgnore
     private String cronDescription;
+
+    /** constructor is used internally on injection - but we have producers */
+    ModelKit() {
+        super(null);
+    }
 
     public ModelKit(String name, String cron, String description) {
         super(name);
@@ -74,27 +94,6 @@ public class ModelKit extends AbstractIdentified {
         }
     }
 
-    /**
-     * tests against a sample list of items, load from json. checks, if all configuration elements were visisted and returns a
-     * list of messages with non visited elements.
-     */
-    public List<String> test(List<?> items) {
-        // TODO: load sample items from json
-        List<?> sortedItems = sort(items);
-        if (sortedItems.size() != items.size()) {
-            throw new IllegalStateException(
-                "The groups of this model kit are overlapping or miss some items: given items: "
-                    + items.size() + " <> sorted-items: " + sortedItems.size());
-        }
-        List<String> names = new LinkedList<>();
-        forEachElement(c -> {
-            if (((Configured) c).getVisitorCount() > 0) {
-                names.add(c.getName());
-            }
-        });
-        return names;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -106,6 +105,7 @@ public class ModelKit extends AbstractIdentified {
     private void addIdentifiedArray(Identified... parts) {
         List<Identified> list = Arrays.asList(parts);
         env.put(parts[0].getClass(), list);
+        list.stream().forEach(i -> i.tagNames(this.name));
         list.stream().forEach(i -> ((Configured) i).setConfiguration(this));
     }
 
@@ -121,7 +121,7 @@ public class ModelKit extends AbstractIdentified {
     public <I extends Identified> I get(String name, Class<I> type) {
         Objects.requireNonNull(name, "name must not be null");
         Objects.requireNonNull(type, "type must not be null");
-        return Identified.get(get(type), name);
+        return Identified.get(get(type), tag(this.name, name));
     }
 
     @Override
@@ -130,7 +130,7 @@ public class ModelKit extends AbstractIdentified {
     }
 
     public List<?> getEnum(String definitionName) {
-        return (List<?>) get(definitionName, Definition.class).getValue();
+        return (List<?>) get(tag(name, definitionName), Definition.class).getValue();
     }
 
     public <E extends AbstractIdentified> E getPrevious(E element) {
@@ -152,6 +152,9 @@ public class ModelKit extends AbstractIdentified {
     }
 
     boolean isActive(ZonedDateTime time) {
+        if (cron == null) {
+            return true;
+        }
         CronParser parser = getCronParser();
         ExecutionTime executionTime = ExecutionTime.forCron(parser.parse(cron));
         Duration timeToNextExecution = executionTime.timeToNextExecution(time).orElseThrow();
@@ -165,7 +168,7 @@ public class ModelKit extends AbstractIdentified {
 
     private String cronDescription() {
         if (cronDescription == null) {
-            cronDescription = CronDescriptor.instance().describe(getCronParser().parse(cron));
+            cronDescription = cron != null ? CronDescriptor.instance().describe(getCronParser().parse(cron)) : "active on any time!";
         }
         return cronDescription;
     }
@@ -212,7 +215,7 @@ public class ModelKit extends AbstractIdentified {
     }
 
     /** optional function to be called, if all configurations are done */
-    public void finalizeOnType(Class<?> type) {
+    void finalizeOnType(Class<?> type) {
         if (testMode || LOG.isDebugEnabled()) {
             LOG.info(describe(type));
         }
@@ -239,11 +242,18 @@ public class ModelKit extends AbstractIdentified {
         final List<T> sortedItems = new ArrayList<>(items.size());
 
         forEachGroup(type, g -> sortedItems.addAll(g.sort(items)));
+	forEachGroup(type, g -> g.insertion(sortedItems));
 
         logDebug(sortedItems, System.currentTimeMillis() - start, logDebugFields);
         return sortedItems;
     }
 
+    public void register(Class<?> type) {
+        ModelKitLoader.register(this);
+        finalizeOnType(type);
+    }
+
+    @ApplicationScoped
     @Produces
     @Named("Configured")
     @Default
@@ -257,39 +267,65 @@ public class ModelKit extends AbstractIdentified {
 
     public static void saveAsJSon(ModelKit... configs) {
         Arrays.stream(configs).forEach(c -> c.validate());
+        new ModelKitTestLoader().test();
 
-        // TODO: provide a list of test items
-        ArrayList<?> testItems = new ArrayList<>();
-        List<String> warnings = new LinkedList<>();
-        Arrays.stream(configs).forEach(c -> warnings.addAll(c.test(testItems)));
-        if (testMode && !warnings.isEmpty()) {
-            throw new IllegalStateException("The following configuration elements were missed: " + warnings);
-        }
         ModelKitLoader.saveAsJSon(configs);
     }
 
     public void reset() {
         ModelKitLoader.reset();
     }
+
+    public static void resetAndDelete() {
+        ModelKitLoader.resetAndDelete();
+    }
 }
 
 /**
- * loads all available model kits from json. at the moment, there are two configurations (generated by implementations):
- * Standard and Sunday.
+ * loads all available model kits from json
  * <p/>
  * given by current date, only one model kit will be selected.
  * <p/>
  * TODO: configure load/save path for cloud environment
  */
 class ModelKitLoader {
-    private static final String SORT_CONFIGURATION_JSON = "sort-configuration.json";
+    private static final Logger LOG = LoggerFactory.getLogger(ModelKitLoader.class);
+    private static final String MODELKIT_JSON_JSON = "modelkit.json";
 
+    /** hard coded modelkits include lambda implementations, to be reused on dynamic loaded model kits.  */
+    private static Map<String, ModelKit> registeredHardConfigurations = new LinkedHashMap<>();
+    /** loaded dynamic model kits */
     private static List<ModelKit> configurations;
 
     private ModelKitLoader() {
     }
 
-    static ModelKit getActiveModelKit(ZonedDateTime time) {
+    public static void register(ModelKit config) {
+        registeredHardConfigurations.put(config.name, config);
+    }
+
+    public static <T extends Identified> T findRegistered(String kitName, String name, Class<T> type) {
+        if (kitName.equals("*")) {
+            for (ModelKit config : registeredHardConfigurations.values()) {
+                T ref = ExceptionHandler.trY(() -> config.get(name, type), IllegalStateException.class);
+                if (ref != null) {
+                    return ref;
+                }
+            }
+            if (LOG.isDebugEnabled()) {
+                LOG.warn("no configuration item found for config: " + kitName + "/" + name);
+            }
+            return null;
+        } else {
+            ModelKit config = registeredHardConfigurations.get(kitName);
+            if (config == null && ModelKit.isTestMode()) {
+                throw new IllegalStateException("no registry entry found for configuration: " + kitName);
+            }
+            return config != null ? ExceptionHandler.trY(() -> config.get(name, type), IllegalStateException.class) : null;
+        }
+    }
+
+     static ModelKit getActiveModelKit(ZonedDateTime time) {
         return getActiveModelKit(getConfigurations(), time);
     }
 
@@ -299,14 +335,19 @@ class ModelKitLoader {
 
     private static List<ModelKit> getConfigurations() {
         if (configurations == null) {
+            if (!new File(MODELKIT_JSON_JSON).exists()) {
+                saveAsJSon(registeredHardConfigurations.values().toArray(new ModelKit[0]));
+            }
             configurations = readFromJSon();
+            configurations.forEach(c -> c.forEachElement(e -> ((Configured)e).setConfiguration(c)));
         }
         return configurations;
     }
 
     static List<ModelKit> readFromJSon() {
+        LOG.info("loading configurations from " + MODELKIT_JSON_JSON);
         try {
-            return createObjectMapper().readValue(new File(SORT_CONFIGURATION_JSON),
+            return createObjectMapper().readValue(new File(MODELKIT_JSON_JSON),
                 new TypeReference<List<ModelKit>>() {
                 });
         } catch (IOException e) {
@@ -315,16 +356,17 @@ class ModelKitLoader {
     }
 
     public static void saveAsJSon(ModelKit... configs) {
+        LOG.info("saving " + MODELKIT_JSON_JSON + " on new configuration array");
         try {
             ObjectMapper mapper = createObjectMapper();
-            mapper.writeValue(new File(SORT_CONFIGURATION_JSON), configs);
+            mapper.writeValue(new File(MODELKIT_JSON_JSON), configs);
             reset();
         } catch (Exception e) {
             throw new IllegalArgumentException(e);
         }
     }
 
-    private static ObjectMapper createObjectMapper() {
+    static ObjectMapper createObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setVisibility(mapper.getSerializationConfig().getDefaultVisibilityChecker()
             .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
@@ -337,5 +379,95 @@ class ModelKitLoader {
 
     static void reset() {
         configurations = null;
+    }
+    static void resetAndDelete() {
+        new File(MODELKIT_JSON_JSON).delete();
+        reset();
+    }
+
+    public static class JsonToMapConverter extends StdConverter<Object, Map<Class, List<Identified>>> {
+        @Override
+        public Map<Class, List<Identified>> convert(Object value) {
+            try {
+                Map<String, List> map = (Map)value;
+                Class type;
+                Map<Class, List<Identified>> newMap = new LinkedHashMap<>();
+                for (Map.Entry<String, List> e : map.entrySet()) {
+                    newMap.put(type = Class.forName(e.getKey()), createTypedList(type, e.getValue()));
+                }
+                return newMap;
+            } catch (Exception e) {
+                throw new IllegalStateException(e);
+            }
+        }
+
+        private List<Identified> createTypedList(Class type, List v) {
+            List newList = new ArrayList<>(v.size());
+            v.forEach(i -> newList.add(createIdentifiedObject(type, (Map) i)));
+            return newList;
+        }
+
+        private Object createIdentifiedObject(Class type, Map<String, Object> args) {
+            try {
+                String name = (String)args.get("name");
+                String[] path = name.split("\\.");
+
+                String kitName = path.length > 1 ? path[0] : "*";
+                kitName = kitName.startsWith("!") ? kitName.substring(1) : kitName;
+                Identified hardRegistered = findRegistered(kitName, name, type);
+                if (hardRegistered == null && ModelKit.isTestMode()) {
+                    throw new IllegalStateException(name + " (" + type.getSimpleName() + ")  was not found in any registered configuration with name: " + kitName);
+                }
+                Object obj = hardRegistered != null ? hardRegistered : type.getDeclaredConstructor().newInstance();
+                for (Map.Entry<String, Object> e : args.entrySet()) {
+                    ObjectUtil.setValue(type, e.getKey(), obj, e.getValue());
+                }
+                return obj;
+            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+                | NoSuchMethodException | SecurityException e) {
+                throw new IllegalArgumentException(e);
+            }
+        }
+    }
+}
+
+class ModelKitTestLoader {
+    private static final Logger LOG = LoggerFactory.getLogger(ModelKitTestLoader.class);
+    public void test(ModelKit...kits) {
+        List<Object> testItems = loadTestItems();
+        List<String> warnings = new LinkedList<>();
+        Arrays.stream(kits).forEach(c -> warnings.addAll(test(c, testItems)));
+        if (!warnings.isEmpty()) {
+            throw new IllegalStateException("The following configuration elements were missed: " + warnings);
+        }
+    }
+    /**
+     * tests against a sample list of items, load from json. checks, if all configuration elements were visisted and returns a
+     * list of messages with non visited elements.
+     */
+    public List<String> test(ModelKit kit, List<?> items) {
+        LOG.info("doing a sorting test on new loaded configuration '" + kit.name + "' and " + items.size() + " items");
+        List<?> sortedItems = kit.sort(items);
+        if (sortedItems.size() != items.size()) {
+            throw new IllegalStateException(
+                "The groups of this sort configuration are overlapping or miss some items: given items: "
+                    + items.size() + " <> sorted-items: " + sortedItems.size());
+        }
+        List<String> names = new LinkedList<>();
+        kit.forEachElement(c -> {
+            if (((Configured) c).getVisitorCount() > 0) {
+                names.add(c.getName());
+            }
+        });
+        return names;
+    }
+    private List<Object> loadTestItems() {
+        try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("model-validation.json")) {
+            return ModelKitLoader.createObjectMapper().readValue(in,
+                new TypeReference<List<Object>>() {
+                });
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

@@ -25,4 +25,6 @@ public interface Identified {
             .findFirst()
             .orElseThrow(() -> new IllegalStateException(name + " not found in list: " + Arrays.toString(list.toArray())));
     }
+
+    void tagNames(String parent);
 }

@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import de.tsl2.nano.modelkit.Configured;
 import de.tsl2.nano.modelkit.Identified;
+import lombok.Setter;
 
 /**
  * base implementation to provide name-identifying and access to the base configuration.
@@ -18,11 +19,15 @@ import de.tsl2.nano.modelkit.Identified;
 public abstract class AbstractIdentified implements Identified, Configured, Cloneable {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractIdentified.class);
 
+    @Setter
     String name;
     @JsonIgnore
     ModelKit config;
     @JsonIgnore
     long countOfCalls;
+
+    AbstractIdentified() {
+    }
 
     public AbstractIdentified(String name) {
         this.name = name;
@@ -69,6 +74,28 @@ public abstract class AbstractIdentified implements Identified, Configured, Clon
     public void setConfiguration(ModelKit config) {
         this.config = config;
         validate();
+    }
+
+    public void tagNames(String parent) {
+        name = tag(parent, name);
+    }
+
+    protected static final String tag(String parent, String name) {
+        if (name == null) {
+            return null;
+        } else if (parent == null) {
+            return name;
+        }
+        boolean not = Fact.negate(name);
+        String unsigned = not ? Fact.not(name) : name;
+        String path = unsigned.startsWith(parent + ".") ? unsigned : parent + "." + unsigned;
+        return not ? Fact.not(path) : path;
+    }
+
+    protected void tag(String parent, List<String> names) {
+        for (int i = 0; i < names.size(); i++) {
+            names.set(i, tag(parent, names.get(i)));
+        }
     }
 
     @Override
