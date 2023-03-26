@@ -17,7 +17,7 @@ import lombok.Setter;
  * a comparator to be identified through its owning configuration. checks, if available for the current constalation and has a
  * comparator chain on equality of compared objects.
  */
-public class NamedComparator<T> extends AbstractIdentified implements Comparator<T>, Selectable<List<T>> {
+public class Comp<T> extends AIdentified implements Comparator<T>, Selectable<List<T>> {
     @JsonIgnore
     TriFunction<ModelKit, T, T, Integer> comparator;
     @Getter @Setter
@@ -25,10 +25,10 @@ public class NamedComparator<T> extends AbstractIdentified implements Comparator
     @Getter @Setter
     private String selectorFact;
 
-	NamedComparator() {
+	Comp() {
     	}
 
-    public NamedComparator(String name, String selectorFact, TriFunction<ModelKit, T, T, Integer> comparator,
+    public Comp(String name, String selectorFact, TriFunction<ModelKit, T, T, Integer> comparator,
         String... onEqualsThen) {
         super(name);
         this.selectorFact = selectorFact;
@@ -40,7 +40,7 @@ public class NamedComparator<T> extends AbstractIdentified implements Comparator
     public void validate() {
         Objects.requireNonNull(comparator, config.name + ": main comparator is null (not registered?): " + toString());
         checkExistence(selectorFact, Fact.class);
-        checkExistence(NamedComparator.class, onEqualsThen);
+        checkExistence(Comp.class, onEqualsThen);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class NamedComparator<T> extends AbstractIdentified implements Comparator
         visited();
         int c = comparator.apply(config, o1, o2);
         if (c == 0) {
-            List<NamedComparator> comparators = get(NamedComparator.class);
+            List<Comp> comparators = get(Comp.class);
             for (String nextComparatorName : onEqualsThen) {
                 c = Identified.get(comparators, nextComparatorName).compare(o1, o2);
                 if (c != 0) {
@@ -98,7 +98,7 @@ public class NamedComparator<T> extends AbstractIdentified implements Comparator
 
     public Object describe(String prefix) {
         StringBuilder b = new StringBuilder(prefix + toString() + "\n");
-        onEqualsThen.forEach(c -> b.append(get(c, NamedComparator.class).describe(prefix + "\t")));
+        onEqualsThen.forEach(c -> b.append(get(c, Comp.class).describe(prefix + "\t")));
         return b.toString();
     }
 }

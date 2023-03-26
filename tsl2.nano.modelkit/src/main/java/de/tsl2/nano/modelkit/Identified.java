@@ -2,6 +2,7 @@ package de.tsl2.nano.modelkit;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * defines basics for name identifying.
@@ -18,7 +19,8 @@ public interface Identified {
     }
 
     static <I extends Identified> I get(List<I> list, String name) {
-
+        Objects.requireNonNull(list,
+                "configuration error: your model kit didn't declare any element with right type for name: " + name);
         // TODO: not performance optimized. use a hashmap instead...
         return list.stream()
             .filter(i -> i.getName().equals(name))

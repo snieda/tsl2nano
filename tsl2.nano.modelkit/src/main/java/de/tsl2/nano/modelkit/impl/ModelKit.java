@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -32,6 +33,7 @@ import com.cronutils.model.time.ExecutionTime;
 import com.cronutils.parser.CronParser;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -46,11 +48,12 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * full model kit providing all elements to sort objects through a complex configurable algorithm. a factory is provided
+ * full model kit providing all elements to apply a function to a list of objects. a factory is provided
  * through #ModelKitLoader.
  */
 @ApplicationScoped
-public class ModelKit extends AbstractIdentified {
+@JsonPropertyOrder({ "name", "cron", "funcName", "description" })
+public class ModelKit<T> extends AIdentified implements Function<List<T>, List<T>> {
     private static final Logger LOG = LoggerFactory.getLogger(ModelKit.class);
     private static boolean testMode;
 
@@ -62,19 +65,65 @@ public class ModelKit extends AbstractIdentified {
     @Setter
     private String description;
 
+    @Getter
+    @Setter
+    private String funcName;
+
     @JsonIgnore
     private String cronDescription;
+    @JsonIgnore
+    private static String[] logDebugFields;
 
     /** constructor is used internally on injection - but we have producers */
     ModelKit() {
         super(null);
     }
 
-    public ModelKit(String name, String cron, String description) {
+    public ModelKit(String name, String funcName, String cron, String description) {
         super(name);
         this.cron = cron;
         this.description = description;
+        this.funcName = funcName;
         validate();
+    }
+
+    @Override
+    public List<T> apply(List<T> items) {
+        if (items.isEmpty()) {
+            LOG.warn("the given list is empty - nothing to do!");
+            return items;
+        }
+        long start = System.currentTimeMillis();
+        before(items);
+        final List<T> newItemList = new ArrayList<>(items.size());
+        final List<T> passedItems = new ArrayList<>(items);
+
+        int passes = getPassCount();
+        for (int i = 0; i < passes; i++) {
+            final int ii = i; //workaround to provide a final var in enclosing lambda
+            forEachGroup(g -> newItemList.addAll(g.apply(ii, passedItems)));
+            passedItems.addAll(newItemList);
+            newItemList.clear();
+        }
+
+        after(newItemList);
+        logDebug(newItemList, System.currentTimeMillis() - start);
+        return newItemList;
+    }
+
+    private int getPassCount() {
+        return get(Group.class).stream()
+                .max((g1, g2) -> g1.getPassCount().compareTo(g2.getPassCount()))
+                .get()
+                .getPassCount();
+    }
+
+    /** to be implemented by extension */
+    protected void before(List<T> items) {
+    }
+
+    /** to be implemented by extension */
+    protected void after(List<T> items) {
     }
 
     static boolean isTestMode() {
@@ -87,8 +136,9 @@ public class ModelKit extends AbstractIdentified {
         if (env.size() > 0) {
             List<Group> groups = get(Group.class);
             Objects.checkIndex(0, groups.size());
-            if (!groups.stream().anyMatch(g -> g.comparatorNames.size() > 0)) {
-                throw new IllegalStateException("no group with comparators found. at least one group must have a comparator!");
+            if (!groups.stream().anyMatch(g -> g.getPassCount() > 0)) {
+                throw new IllegalStateException(
+                        "no group with any function found. at least one group must have a function to be applied!");
             }
             env.values().forEach(e -> e.forEach(c -> ((Configured) c).validate()));
         }
@@ -104,7 +154,7 @@ public class ModelKit extends AbstractIdentified {
 
     private void addIdentifiedArray(Identified... parts) {
         List<Identified> list = Arrays.asList(parts);
-        env.put(parts[0].getClass(), list);
+        env.put((Class<? extends Identified>) parts.getClass().getComponentType(), list);
         list.stream().forEach(i -> i.tagNames(this.name));
         list.stream().forEach(i -> ((Configured) i).setConfiguration(this));
     }
@@ -121,7 +171,11 @@ public class ModelKit extends AbstractIdentified {
     public <I extends Identified> I get(String name, Class<I> type) {
         Objects.requireNonNull(name, "name must not be null");
         Objects.requireNonNull(type, "type must not be null");
-        return Identified.get(get(type), tag(this.name, name));
+        List<I> elements = get(type);
+        Objects.requireNonNull(elements,
+                "configuration error: your model kit didn't declare any element of type " + type.getSimpleName()
+                        + " for name: " + name);
+        return Identified.get(elements, tag(this.name, name));
     }
 
     @Override
@@ -130,18 +184,18 @@ public class ModelKit extends AbstractIdentified {
     }
 
     public List<?> getEnum(String definitionName) {
-        return (List<?>) get(tag(name, definitionName), Definition.class).getValue();
+        return (List<?>) get(tag(name, definitionName), Def.class).getValue();
     }
 
-    public <E extends AbstractIdentified> E getPrevious(E element) {
+    public <E extends AIdentified> E getPrevious(E element) {
         return getAt(element, -1);
     }
 
-    public <E extends AbstractIdentified> E getNext(E element) {
+    public <E extends AIdentified> E getNext(E element) {
         return getAt(element, 1);
     }
 
-    public <E extends AbstractIdentified> E getAt(E element, int addIndex) {
+    public <E extends AIdentified> E getAt(E element, int addIndex) {
         List<E> elements = (List<E>) get(element.getClass());
         int i = elements.indexOf(element);
         return i == -1 || i + addIndex < 0 || i + addIndex >= elements.size() ? null : elements.get(i + addIndex);
@@ -174,7 +228,7 @@ public class ModelKit extends AbstractIdentified {
     }
 
     /** convenience to crawl through owned groups (the type is only for compiler generic access) */
-    public <T> void forEachGroup(Class<T> itemType, Consumer<Group<T>> c) {
+    public void forEachGroup(Consumer<Group<T>> c) {
         get(Group.class).stream().forEach(g -> c.accept(g));
     }
 
@@ -186,10 +240,10 @@ public class ModelKit extends AbstractIdentified {
         env.values().forEach(e -> e.forEach(c));
     }
 
-    public <T> String describe(Class<T> type) {
+    public <T> String describe() {
         String chapter = "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
         StringBuilder b = new StringBuilder(chapter + toString() + "\n");
-        forEachGroup(type, g -> b.append("\t" + g.describe("\t") + "\n"));
+        forEachGroup(g -> b.append("\t" + g.describe("\t") + "\n"));
         b.append(chapter);
         return b.toString();
     }
@@ -201,23 +255,24 @@ public class ModelKit extends AbstractIdentified {
         return b.toString();
     }
 
-    public static void enableDebugLog() {
+    public static void enableDebugLog(String... logDebugFields) {
+        ModelKit.logDebugFields = logDebugFields;
         testMode = true;
     }
 
-    public void logDebug(List<?> items, long duration, String... fieldNames) {
+    public void logDebug(List<?> items, long duration) {
         if (testMode || LOG.isDebugEnabled()) {
             LOG.info(
-                "\n" + name + " sorted " + items.size() + " items (time: " + duration + " msec)\n" +
+                    "\n" + name + " on " + items.size() + " items (time: " + duration + " msec)\n" +
                     describeResult() +
-                    ObjectUtil.toString(items, fieldNames));
+                            ObjectUtil.toString(items, logDebugFields));
         }
     }
 
     /** optional function to be called, if all configurations are done */
-    void finalizeOnType(Class<?> type) {
+    void finalizeOnType() {
         if (testMode || LOG.isDebugEnabled()) {
-            LOG.info(describe(type));
+            LOG.info(describe());
         }
     }
 
@@ -232,25 +287,9 @@ public class ModelKit extends AbstractIdentified {
         return getClass().getSimpleName() + "(" + name + ": " + cronDescription() + ")";
     }
 
-    public <T> List<T> sort(List<T> items, String... logDebugFields) {
-        if (items.isEmpty()) {
-            LOG.warn("the given list is empty - nothing to do!");
-            return items;
-        }
-        long start = System.currentTimeMillis();
-        Class<T> type = (Class<T>) items.iterator().next().getClass();
-        final List<T> sortedItems = new ArrayList<>(items.size());
-
-        forEachGroup(type, g -> sortedItems.addAll(g.sort(items)));
-	forEachGroup(type, g -> g.insertion(sortedItems));
-
-        logDebug(sortedItems, System.currentTimeMillis() - start, logDebugFields);
-        return sortedItems;
-    }
-
-    public void register(Class<?> type) {
+    public void register() {
         ModelKitLoader.register(this);
-        finalizeOnType(type);
+        finalizeOnType();
     }
 
     @ApplicationScoped
@@ -304,10 +343,10 @@ class ModelKitLoader {
         registeredHardConfigurations.put(config.name, config);
     }
 
-    public static <T extends Identified> T findRegistered(String kitName, String name, Class<T> type) {
+    public static <I extends Identified> I findRegistered(String kitName, String name, Class<I> type) {
         if (kitName.equals("*")) {
-            for (ModelKit config : registeredHardConfigurations.values()) {
-                T ref = ExceptionHandler.trY(() -> config.get(name, type), IllegalStateException.class);
+            for (ModelKit<?> config : registeredHardConfigurations.values()) {
+                I ref = ExceptionHandler.trY(() -> config.get(name, type), IllegalStateException.class);
                 if (ref != null) {
                     return ref;
                 }
@@ -317,7 +356,7 @@ class ModelKitLoader {
             }
             return null;
         } else {
-            ModelKit config = registeredHardConfigurations.get(kitName);
+            ModelKit<?> config = registeredHardConfigurations.get(kitName);
             if (config == null && ModelKit.isTestMode()) {
                 throw new IllegalStateException("no registry entry found for configuration: " + kitName);
             }
@@ -420,7 +459,7 @@ class ModelKitLoader {
                 }
                 Object obj = hardRegistered != null ? hardRegistered : type.getDeclaredConstructor().newInstance();
                 for (Map.Entry<String, Object> e : args.entrySet()) {
-                    ObjectUtil.setValue(type, e.getKey(), obj, e.getValue());
+                    ObjectUtil.setValue(obj, e.getKey(), e.getValue());
                 }
                 return obj;
             } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
@@ -445,7 +484,7 @@ class ModelKitTestLoader {
      * tests against a sample list of items, load from json. checks, if all configuration elements were visisted and returns a
      * list of messages with non visited elements.
      */
-    public List<String> test(ModelKit kit, List<?> items) {
+    public List<String> test(ModelKit<?> kit, List<?> items) {
         LOG.info("doing a sorting test on new loaded configuration '" + kit.name + "' and " + items.size() + " items");
         List<?> sortedItems = kit.sort(items);
         if (sortedItems.size() != items.size()) {

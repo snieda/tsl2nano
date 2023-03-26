@@ -14,8 +14,7 @@ import lombok.Setter;
  * rules to check agreements. accessing definitions of its owning configuration. a name, starting with '!' will negate the rule
  * result.
  */
-// IMPROVE: rename to Agreement or Truth or Rule?
-public class Fact<T> extends AbstractIdentified {
+public class Fact<T> extends AIdentified {
     static final String PREF_NEGATION = "!";
     @JsonIgnore
     BiFunction<ModelKit, T, Boolean> rule;

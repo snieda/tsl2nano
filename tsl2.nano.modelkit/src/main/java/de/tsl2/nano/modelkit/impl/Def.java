@@ -7,14 +7,14 @@ import lombok.Setter;
 /**
  * base definitions (values, lists, etc.) hold by the configuration and provided to fact implementations.
  */
-public class Definition<T> extends AbstractIdentified {
+public class Def<T> extends AIdentified {
     @Setter
     T value;
 
-    Definition() {
+    Def() {
     }
 
-    public Definition(String name, T value) {
+    public Def(String name, T value) {
         super(name);
         this.value = value;
     }

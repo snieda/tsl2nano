@@ -4,6 +4,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class ObjectUtil {
     private ObjectUtil() {
@@ -28,6 +29,12 @@ public class ObjectUtil {
             return field.get(instance);
         });
     }
+
+    public static void setValue(Object obj, String propertyName, Object value) {
+        Objects.requireNonNull(obj, "instance must not be null to call setter for '" + propertyName + "'");
+        setValue(obj.getClass(), propertyName, obj, value);
+    }
+
     public static void setValue(Class<?> type, String propertyName, Object obj, Object value) {
         ExceptionHandler.trY(() -> new PropertyDescriptor(propertyName, type).getWriteMethod().invoke(obj, value));
     }

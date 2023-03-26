@@ -14,22 +14,22 @@ import de.tsl2.nano.modelkit.Identified;
 import lombok.Setter;
 
 /**
- * base implementation to provide name-identifying and access to the base configuration.
+ * base implementation to provide name-identifying and access to the base configuration and all its elements.
  */
-public abstract class AbstractIdentified implements Identified, Configured, Cloneable {
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractIdentified.class);
+public abstract class AIdentified implements Identified, Configured, Cloneable {
+    private static final Logger LOG = LoggerFactory.getLogger(AIdentified.class);
 
     @Setter
     String name;
     @JsonIgnore
-    ModelKit config;
+    ModelKit<?> config;
     @JsonIgnore
     long countOfCalls;
 
-    AbstractIdentified() {
+    AIdentified() {
     }
 
-    public AbstractIdentified(String name) {
+    public AIdentified(String name) {
         this.name = name;
     }
 
@@ -99,7 +99,7 @@ public abstract class AbstractIdentified implements Identified, Configured, Clon
     }
 
     @Override
-    public <T extends Identified> T get(String name, Class<T> type) {
+    public <I extends Identified> I get(String name, Class<I> type) {
         Objects.requireNonNull(config, "Please assign an instance of ModelKit to " + this.toString() + " before!");
         return config.get(name, type);
     }

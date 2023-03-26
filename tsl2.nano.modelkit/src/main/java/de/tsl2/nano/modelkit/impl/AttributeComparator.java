@@ -6,7 +6,7 @@ import lombok.Setter;
 /**
  * provides a field-comparing comparator
  */
-public class AttributeComparator<T> extends NamedComparator<T> {
+public class AttributeComparator<T> extends Comp<T> {
 
     @Getter @Setter
     String fieldName;
