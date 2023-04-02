@@ -1,6 +1,6 @@
 # Introduction to the structure of ModelKit
 
-The *ModelKit* should provide a flexible and configurable way to arrange new sort mechanisms. 
+The *ModelKit* should provide a flexible and configurable way to do actions on a given list of items.
 This can be done through given JSon text format files. Different Groups use chains of comparators 
 and selectors defined by base definitions and functions and base facts/rules/agreements.
 
@@ -11,7 +11,7 @@ Different ModelKits can be provided to be actived on different times or circumst
 
 further informations in javadoc:
     * ModelKit (class and ModelKitLoader.class)
-    * Group (class, constructor, sort(), groupByLimit(), insertion())
+    * Group (class, constructor)
 
 ## Overview
 
@@ -29,24 +29,33 @@ further informations in javadoc:
 )
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Each configuration element has properties but doesn't hold any runtime informations like lists of items to be sorted.
+Each configuration element has properties but doesn't hold any runtime informations like lists of items to do actions
+on.
 
-Each *group*, as main accessible object has a sort() function and an insertion() function. these functions
-get all available items of a list, filtering them through a selector and do a sort through a chain of selectable
-comparators - or do insertions defined its properties 'step' and 'limit'.
+Each *group*, as main accessible object for the modelkit is a functional interface. its function will be called with a
+list of items, filtering them through a selector. it may use the provided sort through a chain of selectable
+comparators.
 
-*Comparators* are selective and can have sub-comparators (chain). If it isn't selectable for the given two comparing items, 
+*Comps* (comparators) are selective and can have sub-comparators (chain). If it isn't selectable for the given two
+comparing items,
 the owning group delegates to its next comparator. If a Comparator returns 0, the next selectable child comparator will be asked, if available.
 
 *Facts* are simple functions, returning true or false. Usable as selectors for groups and comparators.
-*Funcs* provide simple peace of code to get any result.
-*Definitions* are the base agreements without any dependencies to other configuration elements.
+*Funcs* (Functions) provide simple peace of code to get any result.
+*Defs* (Definitions) are the base agreements without any dependencies to other configuration elements.
 
 To see the structure before working on it, you can print a human readable information through ModelKit.describe().
 
+Entry point to start a given function on items is provided by the ModelKit as functional interface through a lambda
+expression, which will call the functions of each owned group. The groups provide comparators using facts, funcs and
+defs to do the comparison.
+
+All element names will be automatically extended with a namespace of its owning modelkit name!
+Example: ModelKit name: "default" -> all element names start with "default."
+
 On testing, a small analzing table will be printed to see duration, item count and count of calls of each configuration element.
-This may be helpfull to see, whether some elements are not selectable and result in count of calls = 0.
-But the clone negative facts should not be points of interest.
+This may be helpfull to see, whether some elements are not selectable and result in count of calls are =0.
+But the automat cloned negative facts should not be points of interest.
 
 Setting logging to debug enabled, you see all available elements by its names. These are reusable in json configurations:
 
@@ -56,7 +65,7 @@ The ModelKitLoader provides all mechanisms to load from, save to, and reset (sin
 as configurations. To enable the mechanisms,
 remove the out-comment on the rest-service and declare the @Produces in *ModelKit#getActiveModelKitNow()* as @Default.
 
-Each configuration element is able to find each other configuration element through its parent configuration. All configuration
+Each modelit element is able to find each other element through its parent modelkit. All modelkit
 elements are referencable throuth its unique name.
 
 ## Fact
@@ -70,23 +79,24 @@ They are used to filter groups and are used to define comparators and their sele
 
 ## Func
 
-Func are named lambda functions without any additional properties and are usable on the item objects (to be sorted) to evaluate item properties.
+Funcs are named lambda functions without any additional properties and are usable on the item objects to evaluate item
+properties.
 
-## Definition
+## Definition (Def)
 
-simple values or lists, that defined some additional properties.
+simple values or lists, that define some additional properties or agreements.
 
-## NamedComparator
+## Comparator (Comp)
 
 the main elements of group sorting. can have child comparators to be called on equality, and are selectable through a given fact.
 
 ## Group
 
-the main elements , providing actions to be done on a list of items. they filter items through a filter, given by a fact, and use comparators 
+the main elements, providing actions to be done on a list of items. they filter items through a filter, given by a fact, and use comparators 
 
 ## Technical Instructions / Informations
 
-if new lambda expression or other coded functions are used, a new sort configuration factory class should be provided and registered,
+if new lambda expression or other coded functions are used, a modelkit factory class should be provided and registered,
 to reload the configured elements.
 
 IMPORTANT: 
@@ -108,6 +118,131 @@ model kits (to inherit the lambda implementions from) and the dynamic loaded (js
 
 If no json file 'modelkit.json' was found, the hard coded and registered model kits will be saved into that file.
 
-The right sort configuration is selected through a cron expression and the function *isActive().
+The right ModelKit is selected through a cron expression and the function *isActive().
+
+To be more convenient, a json-file can use simple element type names instead of full classname. Each element class
+(implementing Idientified) registeres
+itself in a static block to the ModelKitLoader, to find the full class through its simple name.
+
+E.g.:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+public class Definition<T> extends AbstractIdentified {
+
+    static {
+    ModelKitLoader.registereElement(Definition.class);
+    }
+    ...
+    }
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## creating a ModelKit
+
+Example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package de.tsl2.nano.modelkit.sort;
+
+import java.util.Arrays;
+import java.util.List;
+
+import de.tsl2.nano.modelkit.impl.AttributeComparator;
+import de.tsl2.nano.modelkit.impl.Comp;
+import de.tsl2.nano.modelkit.impl.Def;
+import de.tsl2.nano.modelkit.impl.Fact;
+import de.tsl2.nano.modelkit.impl.Func;
+import de.tsl2.nano.modelkit.impl.Group;
+import de.tsl2.nano.modelkit.impl.ModelKit;
+
+@SuppressWarnings({ "unchecked", "rawtypes" })
+public class SortModel {
+    enum Type {
+        TYPE1, TYPE2, TYPE3
+    };
+
+    public static ModelKit create() {
+        ModelKit kit = new ModelKit("sorter", "sort", "* * * ? * FRI *", null);
+        kit.add(createDefinitions());
+        kit.add(createFuncs());
+        kit.add(createFacts());
+        kit.add(createComparators());
+        kit.add(createGroups());
+
+        kit.register();
+        return kit;
+    }
+
+    private static Def[] createDefinitions() {
+        return new Def[] {
+                new Def("groupItems", Arrays.asList(Type.class.getEnumConstants()))
+        };
+    }
+
+    private static Func[] createFuncs() {
+        return new Func[] {
+                new Func<List<Object>, List<Object>>("sort", (owner, items) -> ((Group) owner).sort(items))
+        };
+    }
+
+    private static Fact[] createFacts() {
+        return new Fact[] {
+                new Fact<Object>("isType1",
+                        (config, item) -> config.getEnum("groupItems").get(0)
+                                .equals(config.get("getType", Func.class))),
+                new Fact<Object>("isType2",
+                        (config, item) -> config.getEnum("groupItems").get(1).equals(config.get("getType", Func.class)))
+        };
+    }
+
+    private static Comp[] createComparators() {
+        return new Comp[] {
+                new AttributeComparator("byType", "type", null)
+        };
+    }
+
+    private static Group[] createGroups() {
+        return new Group[] {
+                new Group("group1", "isType1", "sort").setComparators("byType"),
+                new Group("group2", "isType2", "sort").setComparators("byType")
+        };
+    }
+
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## integrated rest service
+
+there is a rest service through jax-rs and microprofile with open-api. if the jar module is inside a web container like springboot or quarkus, you can open the swagger-ui to use this rest services
+
+## configuring the modelkit or its elements
+
+Do provide a possibility to configure and start a modelkit, you should provide it as rest service. The configuration
+shouldn't be to complex, so you should provide one of the following services to be more convenient:
+
+* send the current configurations to the requesting user
+* provide only a subset of configurations to be re-configured
+* provide a change on named elements
+* use a style sheet like on xml files with xsd to be used on xml editors with style checks
+* provide a simple html gui with comboboxes to select the right names for elements
+
+### provide a change on one named element
+
+the request could call the following methods, provided by the ModelKit:
+
+* updateConfiguration(String configName, String property, String cron)
+* updateConfigElement(String configName, String typeName, String elementAsJSon)
+
+E.g.:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    updateConfiguration("std", "cron", "* * * ? * MON-TUE *")
+
+    updateConfigElement("std", "Definition", "{\"name\": \"std.stages\", \"value\": [\"TEST\",\"INT\",\"PROD\"]}")
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## providing automatic testing on a list of items in a json file
+
+on each change of a modelkit, a validation check and a test run will be done. the test run tries to open a file with a list of items through file, given by system property: *tsl2.modelkit.test.items.json.file*.
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
+

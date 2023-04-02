@@ -11,9 +11,10 @@ import de.tsl2.nano.modelkit.impl.Func;
 import de.tsl2.nano.modelkit.impl.Group;
 import de.tsl2.nano.modelkit.impl.ModelKit;
 
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class SortModel {
     enum Type {
-        TYPE1, TYPE2, TYPE3
+        TYPE1, TYPE2
     };
 
     public static ModelKit create() {
@@ -30,23 +31,25 @@ public class SortModel {
 
     private static Def[] createDefinitions() {
         return new Def[] {
-                new Def("group1Items", Arrays.asList(Type.class.getEnumConstants()))
+                new Def("groupItems", Arrays.asList(Type.class.getEnumConstants()))
         };
     }
 
     private static Func[] createFuncs() {
         return new Func[] {
-                new Func<List<Object>, List<Object>>("sort", (owner, items) -> ((Group) owner).sort(items))
+                new Func<List<TestItem>, List<TestItem>>("sort", (owner, items) -> ((Group) owner).sort(items)),
+                new Func<TestItem, String>("getType", (owner, item) -> item.type)
         };
     }
 
     private static Fact[] createFacts() {
         return new Fact[] {
                 new Fact<Object>("isType1",
-                        (config, item) -> config.getEnum("groupItems").get(0)
-                                .equals(config.get("getType", Func.class))),
+                        (config, item) -> config.getEnum("groupItems").get(0).toString()
+                                .equals(((Func) config.get("getType", Func.class)).eval(item))),
                 new Fact<Object>("isType2",
-                        (config, item) -> config.getEnum("groupItems").get(1).equals(config.get("getType", Func.class)))
+                        (config, item) -> config.getEnum("groupItems").get(1).toString()
+                                .equals(((Func) config.get("getType", Func.class)).eval(item)))
         };
     }
 
@@ -63,4 +66,10 @@ public class SortModel {
         };
     }
 
+}
+
+class TestItem {
+    String name;
+    String type;
+    Integer value;
 }

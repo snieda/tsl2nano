@@ -10,9 +10,13 @@ import org.junit.Test;
 import de.tsl2.nano.modelkit.ExceptionHandler;
 import de.tsl2.nano.modelkit.impl.ModelKit;
 
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class ModelKitTest {
     @Test
     public void testModelKit() {
+        ModelKit.resetAndDelete();
+        System.setProperty("tsl2.modelkit.test.items.json.file", "modelkit-test-validation.json");
+        System.setProperty("tsl2.modelkit.test.item.type", TestItem.class.getName());
         ModelKit sortKit = SortModel.create();
         assertEquals(null,
                 ExceptionHandler.trY(() -> ModelKit.getActiveModelKit(ZonedDateTime.parse("2023-03-26T00:00:00Z")),
@@ -22,10 +26,4 @@ public class ModelKitTest {
                         NoSuchElementException.class));
         assertEquals(sortKit, ModelKit.getActiveModelKit(ZonedDateTime.parse("2023-03-24T00:00:00Z")));
     }
-}
-
-class TestItem {
-    String name;
-    String type;
-    Integer value;
 }

@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import de.tsl2.nano.modelkit.impl.Fact;
 
+@SuppressWarnings("unchecked")
 public interface Selectable<T> extends Configured {
     boolean canSelect(T current);
 

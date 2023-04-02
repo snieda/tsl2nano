@@ -6,6 +6,9 @@ import java.util.function.BiFunction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class Func<T, R> extends AIdentified {
+    static {
+        ModelKitLoader.registereElement(Func.class);
+    }
 
     @JsonIgnore
     private BiFunction<AIdentified, T, R> func;
@@ -20,7 +23,8 @@ public class Func<T, R> extends AIdentified {
 
     @Override
     public void validate() {
-        Objects.requireNonNull(func, config.name + ": func lambda code unavailable (not registered!) on: " + toString());
+        Objects.requireNonNull(func,
+                () -> config.name + ": func lambda code unavailable (not registered!) on: " + toString());
     }
 
     public BiFunction<AIdentified, T, R> getFunction() {
@@ -28,8 +32,12 @@ public class Func<T, R> extends AIdentified {
         return func;
     }
 
+    public R eval(T par) {
+        return eval(null, par);
+    }
+
     public R eval(AIdentified caller, T par) {
-        visited();
+        visited(par);
         return func.apply(caller, par);
     }
 }

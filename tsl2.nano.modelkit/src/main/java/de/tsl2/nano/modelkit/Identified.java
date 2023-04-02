@@ -19,13 +19,17 @@ public interface Identified {
     }
 
     static <I extends Identified> I get(List<I> list, String name) {
-        Objects.requireNonNull(list,
-                "configuration error: your model kit didn't declare any element with right type for name: " + name);
-        // TODO: not performance optimized. use a hashmap instead...
-        return list.stream()
-            .filter(i -> i.getName().equals(name))
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException(name + " not found in list: " + Arrays.toString(list.toArray())));
+        Objects.requireNonNull(list, () -> "configuration error: no element with right type for '" + name + "' found");
+        // IMPROVE: to optimize performance use a hashmap instead...
+        //          using loop instead of stream to enhance performance...
+        I e;
+        for (int i = 0; i < list.size(); i++) {
+            e = list.get(i);
+            if (e.getName().equals(name)) {
+                return e;
+            }
+        }
+        throw new IllegalStateException(name + " not found in list: " + Arrays.toString(list.toArray()));
     }
 
     void tagNames(String parent);

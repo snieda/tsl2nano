@@ -15,12 +15,19 @@ import lombok.Setter;
  * result.
  */
 public class Fact<T> extends AIdentified {
+    static {
+        ModelKitLoader.registereElement(Fact.class);
+    }
+
     static final String PREF_NEGATION = "!";
     @JsonIgnore
     BiFunction<ModelKit, T, Boolean> rule;
 
 	@Getter @Setter
     private List<String> andFacts;
+
+    Fact() {
+    }
 
     public Fact(String name, BiFunction<ModelKit, T, Boolean> rule, String... andFacts) {
         super(name);
@@ -39,8 +46,9 @@ public class Fact<T> extends AIdentified {
         tag(parent, andFacts);
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public boolean ask(T question) {
-        visited();
+        visited(question);
         List<Fact> facts = get(Fact.class);
         return (rule == null || ifNegate(rule.apply(config, question)))
             && andFacts.stream().allMatch(n -> Identified.get(facts, n).ask(question));
@@ -58,7 +66,7 @@ public class Fact<T> extends AIdentified {
         return factName.startsWith(PREF_NEGATION);
     }
 
-    public Fact setNegate() {
+    public Fact<?> setNegate() {
         name = negate() ? name.substring(1) : PREF_NEGATION + name;
         return this;
     }

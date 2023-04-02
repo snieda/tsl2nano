@@ -6,7 +6,12 @@ import lombok.Setter;
 /**
  * provides a field-comparing comparator
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class AttributeComparator<T> extends Comp<T> {
+
+    static {
+        ModelKitLoader.registereElement(AttributeComparator.class);
+    }
 
     @Getter @Setter
     String fieldName;

@@ -23,6 +23,10 @@ import lombok.Setter;
  */
 public class Group<T> extends AIdentified
         implements Comparator<T>, Selectable<T>, BiFunction<Integer, List<T>, List<T>> {
+    static {
+        ModelKitLoader.registereElement(Group.class);
+    }
+
     @Getter
     @Setter
     String selectorFact;
@@ -96,7 +100,7 @@ public class Group<T> extends AIdentified
     @Override
     public int compare(T o1, T o2) {
         int result = 0;
-        // TODO: not performance optimized
+        // IMPROVE: not performance optimized, searching each time through a list
         List<Comp> comparators = get(Comp.class);
         for (String name : compNames) {
             Comp comparator = Identified.get(comparators, name);

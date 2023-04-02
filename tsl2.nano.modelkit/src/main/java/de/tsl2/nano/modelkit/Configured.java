@@ -23,7 +23,11 @@ public interface Configured {
     /** provides a check mechanism for count of calls to each configured element */
     void visited(Object... explanation);
 
+    /** only for test purposes */
     long getVisitorCount();
+
+    /** only for test purposes */
+    String getVisitorInfo();
 
     /** helper to check for existence in configuration */
     default <T extends Identified> void checkExistence(Class<T> type, List<String> names) {

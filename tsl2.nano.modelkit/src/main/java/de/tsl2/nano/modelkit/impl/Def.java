@@ -8,6 +8,11 @@ import lombok.Setter;
  * base definitions (values, lists, etc.) hold by the configuration and provided to fact implementations.
  */
 public class Def<T> extends AIdentified {
+
+    static {
+        ModelKitLoader.registereElement(Def.class);
+    }
+
     @Setter
     T value;
 
@@ -21,7 +26,7 @@ public class Def<T> extends AIdentified {
 
     @Override
     public void validate() {
-        Objects.requireNonNull(value, config.name + ": definition is null (not registered?): " + toString());
+        Objects.requireNonNull(value, () -> config.name + ": definition is null (not registered?): " + toString());
     }
 
     public T getValue() {

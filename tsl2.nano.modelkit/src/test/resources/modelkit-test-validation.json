@@ -1,0 +1,17 @@
+[
+    {
+        "name": "my-project1",
+        "type": "TYPE1",
+        "value": "new"
+    },
+    {
+        "name": "my-project2",
+        "type": "TYPE2",
+        "value": "inprogress"
+    },
+    {
+        "name": "my-project3",
+        "type": "TYPE2",
+        "value": "finished"
+    }
+]

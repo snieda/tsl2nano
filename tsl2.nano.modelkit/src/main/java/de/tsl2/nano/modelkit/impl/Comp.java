@@ -18,6 +18,10 @@ import lombok.Setter;
  * comparator chain on equality of compared objects.
  */
 public class Comp<T> extends AIdentified implements Comparator<T>, Selectable<List<T>> {
+    static {
+        ModelKitLoader.registereElement(Comp.class);
+    }
+
     @JsonIgnore
     TriFunction<ModelKit, T, T, Integer> comparator;
     @Getter @Setter
@@ -38,7 +42,8 @@ public class Comp<T> extends AIdentified implements Comparator<T>, Selectable<Li
 
     @Override
     public void validate() {
-        Objects.requireNonNull(comparator, config.name + ": main comparator is null (not registered?): " + toString());
+        Objects.requireNonNull(comparator,
+                () -> config.name + ": main comparator is null (not registered?): " + toString());
         checkExistence(selectorFact, Fact.class);
         checkExistence(Comp.class, onEqualsThen);
     }
@@ -58,15 +63,19 @@ public class Comp<T> extends AIdentified implements Comparator<T>, Selectable<Li
     }
 
     @Override
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public int compare(T o1, T o2) {
         visited();
         int c = comparator.apply(config, o1, o2);
         if (c == 0) {
             List<Comp> comparators = get(Comp.class);
             for (String nextComparatorName : onEqualsThen) {
-                c = Identified.get(comparators, nextComparatorName).compare(o1, o2);
-                if (c != 0) {
-                    break;
+                Comp comp = Identified.get(comparators, nextComparatorName);
+                if (comp.canSelect(Arrays.asList(o1, o2))) {
+                    c = comp.compare(o1, o2);
+                    if (c != 0) {
+                        break;
+                    }
                 }
             }
         }
