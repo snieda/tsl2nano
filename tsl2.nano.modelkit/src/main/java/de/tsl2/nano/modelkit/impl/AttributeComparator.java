@@ -1,5 +1,7 @@
 package de.tsl2.nano.modelkit.impl;
 
+import java.lang.reflect.Field;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,7 +29,9 @@ public class AttributeComparator<T> extends Comp<T> {
     static final Comparable get(Object obj, String fieldName) {
         try {
             // TODO use bean property instead
-            return (Comparable<?>) obj.getClass().getField(fieldName).get(obj);
+            Field field = obj.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return (Comparable<?>) field.get(obj);
         } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
             throw new IllegalArgumentException(fieldName, e);
         }

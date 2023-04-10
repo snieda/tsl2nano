@@ -10,6 +10,7 @@
   <description>TSL2 Framework to provide and use a structure of elements referenced by unique names - to declare a kit of logic in a json/yaml/xml text file</description>
 	<properties>
 		<module.parent>..</module.parent>
+		<quarkus.version>2.16.6.Final</quarkus.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -52,6 +53,28 @@
 			<groupId>org.eclipse.microprofile.openapi</groupId>
 			<artifactId>microprofile-openapi-api</artifactId>
 			<version>3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-scheduler</artifactId>
+			<version>${quarkus.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-jackson</artifactId>
+			<version>${quarkus.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-jacoco</artifactId>
+			<version>${quarkus.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>5.2.0</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>

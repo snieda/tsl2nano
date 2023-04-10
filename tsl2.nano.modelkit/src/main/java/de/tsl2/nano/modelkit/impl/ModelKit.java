@@ -3,6 +3,7 @@ package de.tsl2.nano.modelkit.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.time.Duration;
@@ -15,6 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -44,6 +46,7 @@ import de.tsl2.nano.modelkit.ExceptionHandler;
 import de.tsl2.nano.modelkit.Identified;
 import de.tsl2.nano.modelkit.ObjectUtil;
 import de.tsl2.nano.modelkit.impl.ModelKitLoader.JsonToMapConverter;
+import io.quarkus.scheduler.Scheduled;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -104,13 +107,13 @@ public class ModelKit<T> extends AIdentified implements Function<List<T>, List<T
         for (int i = 0; i < passes; i++) {
             final int ii = i; //workaround to provide a final var in enclosing lambda
             forEachGroup(g -> newItemList.addAll(g.apply(ii, passedItems)));
-            passedItems.addAll(newItemList);
+            passedItems.retainAll(newItemList);
             newItemList.clear();
         }
 
         after(newItemList);
         logDebug(newItemList, System.currentTimeMillis() - start);
-        return newItemList;
+        return passedItems;
     }
 
     private int getPassCount() {
@@ -174,6 +177,11 @@ public class ModelKit<T> extends AIdentified implements Function<List<T>, List<T
         Objects.requireNonNull(name, "name must not be null");
         Objects.requireNonNull(type, "type must not be null");
         List<I> elements = get(type);
+        Class tt = type;
+        while (elements == null) {
+            elements = get(tt);
+            tt = tt.getSuperclass();
+        }
         Objects.requireNonNull(elements,
                 () -> "configuration error: your model kit didn't declare any element of type " + type.getSimpleName()
                         + " for name: " + name);
@@ -320,7 +328,7 @@ public class ModelKit<T> extends AIdentified implements Function<List<T>, List<T
 
     public static void saveAsJSon(ModelKit... configs) {
         Arrays.stream(configs).forEach(c -> c.validate());
-        new ModelKitTestLoader().test();
+        new ModelKitTester().test(configs);
 
         ModelKitLoader.saveAsJSon(configs);
     }
@@ -342,7 +350,7 @@ public class ModelKit<T> extends AIdentified implements Function<List<T>, List<T
 @SuppressWarnings({ "rawtypes", "unchecked" })
 class ModelKitLoader {
     private static final Logger LOG = LoggerFactory.getLogger(ModelKitLoader.class);
-    private static final String MODELKIT_JSON_JSON = "modelkit.json";
+    private static final String MODELKIT_JSON = "modelkit.json";
 
     /** hard coded modelkits include lambda implementations, to be reused on dynamic loaded model kits.  */
     private static Map<String, ModelKit> registeredHardConfigurations = new LinkedHashMap<>();
@@ -350,6 +358,8 @@ class ModelKitLoader {
     private static List<ModelKit> configurations;
     /** to find simple Class names of elements we provide all registered on reloading from json  */
     private static Map<String, Class> registeredElements = new LinkedHashMap<>();
+    /** period look for a changed json configuration file */
+    private static AtomicLong lastJsonLookupTime = new AtomicLong();
 
     private ModelKitLoader() {
     }
@@ -425,13 +435,13 @@ class ModelKitLoader {
 
     static List<ModelKit> getConfigurations() {
         if (configurations == null) {
-            loadConfigurations();
+            configurations = loadConfigurations();
         }
         return configurations;
     }
 
     private static List<ModelKit> loadConfigurations() {
-        if (!new File(MODELKIT_JSON_JSON).exists()) {
+        if (!new File(MODELKIT_JSON).exists()) {
             saveAsJSon(registeredHardConfigurations.values().toArray(new ModelKit[0]));
         }
         List<ModelKit> config = readFromJSon();
@@ -440,9 +450,10 @@ class ModelKitLoader {
     }
 
     static List<ModelKit> readFromJSon() {
-        LOG.info("loading configurations from " + MODELKIT_JSON_JSON);
+        LOG.info("loading configurations from " + MODELKIT_JSON);
+        lastJsonLookupTime.set(System.currentTimeMillis());
         try {
-            return createObjectMapper().readValue(new File(MODELKIT_JSON_JSON),
+            return createObjectMapper().readValue(new File(MODELKIT_JSON),
                 new TypeReference<List<ModelKit>>() {
                 });
         } catch (IOException e) {
@@ -453,12 +464,12 @@ class ModelKitLoader {
     public static void saveAsJSon(ModelKit... configs) {
         LOG.info("checking new configuration array");
         Arrays.stream(configs).forEach(c -> c.validate());
-        new ModelKitTestLoader().test(configs);
+        new ModelKitTester().test(configs);
 
-        LOG.info("saving " + MODELKIT_JSON_JSON + " on new configuration array");
+        LOG.info("saving " + MODELKIT_JSON + " on new configuration array");
         try {
             ObjectMapper mapper = createObjectMapper();
-            mapper.writeValue(new File(MODELKIT_JSON_JSON), configs);
+            mapper.writeValue(new File(MODELKIT_JSON), configs);
             reload();
         } catch (Exception e) {
             throw new IllegalArgumentException(e);
@@ -467,13 +478,23 @@ class ModelKitLoader {
 
     static ObjectMapper createObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
+        return customizeObjectMapper(mapper);
+    }
+
+    static ObjectMapper customizeObjectMapper(ObjectMapper mapper) {
         mapper.setVisibility(mapper.getSerializationConfig().getDefaultVisibilityChecker()
             .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
             .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
             .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
             .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
-        mapper.findAndRegisterModules();
-        return mapper;
+        return mapper.findAndRegisterModules();
+    }
+
+    @Scheduled(cron = "{modelkit.refresh.from.json.file}")
+    void scheduledRefreshFromJson() {
+        if (lastJsonLookupTime.get() > 0 && new File(MODELKIT_JSON).lastModified() > lastJsonLookupTime.get()) {
+            ModelKitLoader.reload();
+        }
     }
 
     static void reload() {
@@ -484,10 +505,13 @@ class ModelKitLoader {
         configurations = null;
     }
     static void resetAndDelete() {
-        new File(MODELKIT_JSON_JSON).delete();
+        new File(MODELKIT_JSON).delete();
         reset();
     }
 
+    /**
+     * Needed to fill the generic attribute 'env' of type LinkedHashMap. The value lists are of different types.
+     */
     public static class JsonToMapConverter extends StdConverter<Object, Map<Class, List<Identified>>> {
         @Override
         public Map<Class, List<Identified>> convert(Object value) {
@@ -534,12 +558,18 @@ class ModelKitLoader {
     }
 }
 
+/**
+ * If modelkits are configured through a service a basic test itemset (after validation) will be applied to do a simple smoke test before
+ * saving and publibishing the new kit.
+ */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-class ModelKitTestLoader {
-    private static final Logger LOG = LoggerFactory.getLogger(ModelKitTestLoader.class);
+class ModelKitTester {
+    private static final String MODELKIT_TEST_ITEMS_TYPE = "tsl2.modelkit.test.item.type";
+    private static final String MODELKIT_TEST_ITEMS_JSON_FILE = "tsl2.modelkit.test.items.json.file";
+    private static final Logger LOG = LoggerFactory.getLogger(ModelKitTester.class);
     public void test(ModelKit...kits) {
         Objects.checkIndex(0, kits.length);
-        List<Object> testItems = loadTestItems();
+        List<?> testItems = loadTestItems();
         List<String> warnings = new LinkedList<>();
         Arrays.stream(kits).forEach(c -> warnings.addAll(test(c, testItems)));
         if (!warnings.isEmpty()) {
@@ -550,12 +580,12 @@ class ModelKitTestLoader {
      * tests against a sample list of items, load from json. checks, if all configuration elements were visisted and returns a
      * list of messages with non visited elements.
      */
-    public <T> List<String> test(ModelKit<T> kit, List<T> items) {
+    <T> List<String> test(ModelKit<T> kit, List<T> items) {
         LOG.info("doing a sorting test on new loaded configuration '" + kit.name + "' and " + items.size() + " items");
         List<?> sortedItems = kit.apply(items);
         if (sortedItems.size() != items.size()) {
             throw new IllegalStateException(
-                "The groups of this sort configuration are overlapping or miss some items: given items: "
+                    "The groups of this configuration are overlapping or miss some items: given items: "
                     + items.size() + " <> sorted-items: " + sortedItems.size());
         }
         List<String> names = new LinkedList<>();
@@ -569,24 +599,33 @@ class ModelKitTestLoader {
         return names;
     }
 
-    private List<Object> loadTestItems() {
-        String testItemsFile = System.getProperty("tsl2.modelkit.test.items.json.file");
-        String testItemTypeName = System.getProperty("tsl2.modelkit.test.items.type");
-        if (testItemsFile == null || testItemTypeName == null)
+    static List<?> loadTestItems() {
+        String testItemsFile = System.getProperty(MODELKIT_TEST_ITEMS_JSON_FILE);
+        String testItemTypeName = System.getProperty(MODELKIT_TEST_ITEMS_TYPE);
+        if (testItemsFile == null || testItemTypeName == null) {
+            LOG.warn(
+                    "no test items provided! please provide the system properties '%s' and '%s' to check new model kit configurations",
+                    MODELKIT_TEST_ITEMS_TYPE, MODELKIT_TEST_ITEMS_JSON_FILE);
             return new LinkedList<>();
+        }
         // Objects.requireNonNull(testItemsFile,
         //         "please provide a system property for 'tsl2.modelkit.test.items.json.file'");
         // Objects.requireNonNull(testItemTypeName,
         //         "please provide a system property for 'tsl2.modelkit.test.items.type'");
         Class<?> type = ExceptionHandler.trY(() -> Class.forName(testItemTypeName));
+        return loadTestItems(type, testItemsFile);
+    }
+
+    static <T> List<T> loadTestItems(Class<T> type, String testItemsFile) {
+        Class arrayType = Array.newInstance(type, 0).getClass();
         try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(testItemsFile)) {
-            return ModelKitLoader.createObjectMapper().readValue(in,
+            return Arrays.asList(ModelKitLoader.createObjectMapper().readValue(in,
                     new TypeReference<>() {
                         @Override
                         public Type getType() {
-                            return type;
+                            return arrayType;
                         }
-                });
+                    }));
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }

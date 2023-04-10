@@ -2,16 +2,16 @@
     {
         "name": "my-project1",
         "type": "TYPE1",
-        "value": "new"
+        "value": 0
     },
     {
         "name": "my-project2",
         "type": "TYPE2",
-        "value": "inprogress"
+        "value": 1
     },
     {
         "name": "my-project3",
         "type": "TYPE2",
-        "value": "finished"
+        "value": 2
     }
 ]

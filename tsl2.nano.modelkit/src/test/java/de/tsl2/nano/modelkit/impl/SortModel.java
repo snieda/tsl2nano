@@ -1,15 +1,7 @@
-package de.tsl2.nano.modelkit.sort;
+package de.tsl2.nano.modelkit.impl;
 
 import java.util.Arrays;
 import java.util.List;
-
-import de.tsl2.nano.modelkit.impl.AttributeComparator;
-import de.tsl2.nano.modelkit.impl.Comp;
-import de.tsl2.nano.modelkit.impl.Def;
-import de.tsl2.nano.modelkit.impl.Fact;
-import de.tsl2.nano.modelkit.impl.Func;
-import de.tsl2.nano.modelkit.impl.Group;
-import de.tsl2.nano.modelkit.impl.ModelKit;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class SortModel {
@@ -18,7 +10,19 @@ public class SortModel {
     };
 
     public static ModelKit create() {
-        ModelKit kit = new ModelKit("sorter", "sort", "* * * ? * FRI *", null);
+        ModelKit kit = new ModelKit("sorter", "sort", "* * * ? * MON-FRI *", null);
+        kit.add(createDefinitions());
+        kit.add(createFuncs());
+        kit.add(createFacts());
+        kit.add(createComparators());
+        kit.add(createGroups());
+
+        kit.register();
+        return kit;
+    }
+
+    public static ModelKit create2() {
+        ModelKit kit = new ModelKit("sorter2", "sort", "* * * ? * SAT-SUN *", null);
         kit.add(createDefinitions());
         kit.add(createFuncs());
         kit.add(createFacts());
@@ -66,10 +70,7 @@ public class SortModel {
         };
     }
 
-}
-
-class TestItem {
-    String name;
-    String type;
-    Integer value;
+    public static Object getTestItemFieldnames() {
+        return new String[] { "name", "type", "value" };
+    }
 }

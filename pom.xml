@@ -11,7 +11,7 @@
 	<url>https://sourceforge.net/projects/tsl2nano/</url>
 	<!--
 	This is a multi module project
-	* please use maven 3.8.7 as this is used currently in tsl2.nano.jarresolver
+	* please use maven 3.8.8 as this is used currently in tsl2.nano.jarresolver
 	* to start only a submodule-build: "mvn -pl tsl2.nano.core"
 	* if multimodule version changes: start "mvn -N versions:update-child-modules -DgenerateBackupPoms=false -DnewVersion=2.3.3-SNAPSHOT" to assign the child modules
 	* to do a fast complete build: "mvn -amd -DskipTest -o install"

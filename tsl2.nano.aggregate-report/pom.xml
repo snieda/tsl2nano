@@ -168,6 +168,11 @@
 		</dependency>
 		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>
+			<artifactId>tsl2.nano.modelkit</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>tsl2.nano.repeatable</artifactId>
 			<version>${project.version}</version>
 		</dependency>
