@@ -4909,7 +4909,7 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.4.11 | 03.04.2022 | NEW: ExcelWorker, ObjectPrinter, SQLQuery, html-dialog fix ("Yes" -> true), timemout on findjars, NEW: search.mvn.org, jardownload.com, fix: page clear on submit
  2.4.12 | 18.09.2022 | NEW: SpecificationExchange, specification refactored: Workflow, ExcelWorker, (massive changes)Flow, Task, lots of conveniences extracted to util-classes, prepared to run on jdk-17, hsqldb-env refreshed for 2.7.0
  2.5.0  | 05.03.2023 | NEW: HATEOAS(restui), see EnvUpdate2v5v0: refactorings: serialization of actions with primitive attributes, move incubation packages, jdk17, h2-v2+ -> hsqldb2.7.1, hibernate 5, all dependencies/plugins updated
- 2.5.1  | 28.05.2023 | Fix secure users loading, fix etag 304,
+2.5.1 | 28.05.2023 | Fix secure users loading, fix etag 304, NEW module: modelkit
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
 
@@ -6091,3 +6091,10 @@ deploy:
 * [v] recreate standalone, copy specification.properties.csv from timesheet test
 * [v] refresh pom of tsl2.app.logbook and build without errors
 * [ ] check with findbus/spotbugs
+
+### modelkit
+
+* -> to be a minimalistic language/machine
+* [ ] loop(func) until(fact)
+* [ ] valueOf(item)
+* [ ] integrate specification: action, rule, rulescript
