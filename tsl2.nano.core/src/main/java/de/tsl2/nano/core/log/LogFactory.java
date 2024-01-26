@@ -494,6 +494,10 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
         return BitUtil.hasBit(instance().statesToLog, state);
     }
 
+    public static void log(String message, Object... objects) {
+        log(String.format(message, objects));
+    }
+
     /**
      * simple delegate to {@link #log(Class, State, Object, Throwable)}
      */

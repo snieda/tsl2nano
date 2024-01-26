@@ -426,7 +426,8 @@
 	                        </target>
 	                    </configuration>
 	                </execution>
-						<execution>
+          <execution>
+            <id>echoproperties</id>
 							<phase>test-compile</phase>
 							<goals>
 								<goal>run</goal>

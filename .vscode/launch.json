@@ -47,7 +47,6 @@
             "type": "java",
             "name": "Debug (Attach MAVEN Surefire on 5005)",
             "request": "attach",
-            "projectName": "tsl2.nano.h5",
             "hostName": "localhost",
             "port": 5005
         },
