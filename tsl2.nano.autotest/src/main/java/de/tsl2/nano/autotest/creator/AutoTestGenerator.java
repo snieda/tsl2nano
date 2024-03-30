@@ -42,6 +42,7 @@ import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
+import de.tsl2.nano.autotest.ValueRandomizer;
 import de.tsl2.nano.core.IPreferences;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -397,6 +398,7 @@ public class AutoTestGenerator {
 				+ "\n\tloaded unsuccessful   : " + load_unsuccessful
 				+ "\n\ttotally loaded        : " + testers.size() + " (load-rate: " + (testers.size() / (float)dup) / (float)methods_loaded + ", total-rate: " 
 												 + (testers.size() / dup) / (float)ClassFinder.self().getLoadedMethodCount()  + ")"
+				+ "\n\n" + ValueRandomizer.getDependencyInjector();
 				;
 		AFunctionTester.log(p + s +p);
 		FileUtil.writeBytes((p + s + p).getBytes(), getTimedFileName() + "statistics.txt", true);

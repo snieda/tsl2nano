@@ -112,7 +112,7 @@ class ObjectPrinter {
 	private String leftDelimiter;
 	private String rightDelimiter;
 	private int[] colsizes;
-	int MAX_WIDTH = Integer.valueOf(System.getProperty("fscdimport.printer.maxwidth", "60"));
+	int MAX_WIDTH = Integer.valueOf(System.getProperty("tsl2.nano.printer.maxwidth", "60"));
 
 	public ObjectPrinter(Object[][] rows) {
 		this(null, rows, null);

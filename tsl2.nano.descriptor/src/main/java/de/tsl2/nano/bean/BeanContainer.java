@@ -81,7 +81,7 @@ public class BeanContainer implements IBeanContainer {
      * @return singelton instance
      */
     public static final BeanContainer instance() {
-        assert self != null : "beancontainer not initialized! call initServiceActions(...) before!";
+        assert self() != null : "beancontainer not initialized! call initServiceActions(...) before!";
         return self();
     }
     

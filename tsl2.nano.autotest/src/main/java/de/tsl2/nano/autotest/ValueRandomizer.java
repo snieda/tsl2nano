@@ -11,10 +11,13 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.net.URI;
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,11 +34,13 @@ import de.tsl2.nano.autotest.creator.AFunctionCaller;
 import de.tsl2.nano.autotest.creator.AutoTest;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.util.AdapterProxy;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.DateUtil;
+import de.tsl2.nano.core.util.DependencyInjector;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.MapUtil;
@@ -66,6 +71,7 @@ import de.tsl2.nano.core.util.Util;
  */
 public class ValueRandomizer {
 	private static final ValueSets valueSets = new ValueSets();
+	private static DependencyInjector di = new DependencyInjector();
 
 	private ValueRandomizer() {
 	}
@@ -75,19 +81,27 @@ public class ValueRandomizer {
 	}
 	
 	public static <T> T fillRandom(T obj, boolean zeroNumber, final int depth) {
+		if (!checkMaxDepth(depth + 1)) {
+			return obj;
+		}
 		PrivateAccessor<?> acc = new PrivateAccessor<>(obj);
 		Field[] fields = acc.findMembers(PrivateAccessor::notStaticAndNotFinal);
-		Arrays.stream(fields).forEach(f -> acc.set(f.getName(), createRandomValue(f.getType(), zeroNumber, depth+1)));
+		Arrays.stream(fields)
+				.filter(f -> acc.member(f.getName()) == null)
+				.forEach(f -> acc.set(f.getName(), createRandomValue(f.getType(), zeroNumber, depth)));
 		return obj;
 	}
 
 	public static Object createRandomProxy(Class<?> interfaze, boolean zeroNumber) {
 		return createRandomProxy(interfaze, zeroNumber, 0);
 	}
-	public static Object createRandomProxy(Class<?> interfaze, boolean zeroNumber, final int depth) {
+
+	public static <V> V createRandomProxy(Class<V> interfaze, boolean zeroNumber, final int depth) {
 		Map<String, Class> types = AdapterProxy.getValueTypes(interfaze);
 		Map<String, Object> values = new HashMap<>();
-		types.forEach( (n, t) -> values.put(n, createRandomValue(t, zeroNumber, depth+1)));
+		types.forEach(
+				(n, t) -> values.put(n, t.equals(interfaze) ? null
+						: createRandomValue(t, zeroNumber, depth)));
 		return AdapterProxy.create(interfaze, values);
 	}
 	
@@ -99,34 +113,61 @@ public class ValueRandomizer {
 		return createRandomValue(typeOf, zeroNumber, 0);
 	}
 	protected static <V> V createRandomValue(Class<V> typeOf, boolean zeroNumber, int depth) {
+		if (!checkMaxDepth(++depth)) {
+			System.out.print(">");
+			return null;
+		}
 		Object n;
-		if (!Util.isEmpty(AFunctionCaller.def(AutoTest.VALUESET_GROUP, ValueSets.DEFAULT)) && valueSets.hasValueSet(typeOf)) {
-			n = valueSets.fromValueSet(typeOf);
-		} else {
-			n = zeroNumber && (typeOf.isPrimitive() || NumberUtil.isNumber(typeOf)) 
-					&& (!PrimitiveUtil.isAssignableFrom(char.class, typeOf) || AFunctionCaller.def(AutoTest.ALLOW_SINGLE_CHAR_ZERO, false))
-					&& (!PrimitiveUtil.isAssignableFrom(byte.class, typeOf)  || AFunctionCaller.def(AutoTest.ALLOW_SINGLE_BYTE_ZERO, false))
-					? 0d : createRandomNumber(typeOf);
-		}
-		// avoid writing files into the project folder (and not into target)
-		if (File.class.isAssignableFrom(typeOf) 
-			|| Path.class.isAssignableFrom(typeOf) 
-			|| String.class.isAssignableFrom(typeOf)
-			|| Closeable.class.isAssignableFrom(typeOf)) {
-			n = FileUtil.userDirFile(StringUtil.toBase64(n)).getAbsolutePath();
-		} else if (NumberUtil.isNumber(n)) {
-			n = convert(n, typeOf, zeroNumber, depth);
-		}
+		V value = null;
 		try {
-			return ObjectUtil.wrap(n, typeOf);
+			if (!Util.isEmpty(AFunctionCaller.def(AutoTest.VALUESET_GROUP, ValueSets.DEFAULT))
+					&& valueSets.hasValueSet(typeOf)) {
+				n = valueSets.fromValueSet(typeOf);
+			} else {
+				n = zeroNumber && (typeOf.isPrimitive() || NumberUtil.isNumber(typeOf))
+						&& (!PrimitiveUtil.isAssignableFrom(char.class, typeOf)
+								|| AFunctionCaller.def(AutoTest.ALLOW_SINGLE_CHAR_ZERO, false))
+						&& (!PrimitiveUtil.isAssignableFrom(byte.class, typeOf)
+								|| AFunctionCaller.def(AutoTest.ALLOW_SINGLE_BYTE_ZERO, false))
+										? 0d
+										: createRandomNumber(typeOf);
+			}
+			// avoid writing files into the project folder (and not into target)
+			if (File.class.isAssignableFrom(typeOf)
+					|| Path.class.isAssignableFrom(typeOf)
+					|| String.class.isAssignableFrom(typeOf)
+					|| Closeable.class.isAssignableFrom(typeOf)) {
+				n = FileUtil.userDirFile(StringUtil.toBase64(n)).getAbsolutePath();
+			} else if (NumberUtil.isNumber(n)) {
+				n = convert(n, typeOf, zeroNumber, depth);
+			}
+			value = ObjectUtil.wrap(n, typeOf);
 		} catch (Exception e) {
-			if (checkMaxDepth(depth) && ObjectUtil.isInstanceable(typeOf)) {
-				return constructWithRandomParameters(typeOf, ++depth).instance;
+			// here we try it without randomized values but directly creating a default instance
+			if (ObjectUtil.isInstanceable(typeOf)) {
+				value = constructWithRandomParameters(typeOf, zeroNumber, depth).instance;
+			} else if (typeOf.isInterface()) {
+				value = createRandomProxy(typeOf, zeroNumber, depth);
 			} else {
 				ManagedException.forward(e);
-				return null;
 			}
 		}
+		try {
+			di.inject(value);
+			injectTestBeanAttributes(value, zeroNumber, depth);
+		} catch (Exception e) {
+			// Ok, we cannot inject - but the value is already created, so its not a problem....
+		}
+		return value;
+	}
+
+	private static <V> void injectTestBeanAttributes(V value, boolean zeroNumber, int depth) {
+		if (!checkMaxDepth(depth + 7) || !Boolean.getBoolean("tsl2nano.autotest.inject.beanattributes")) {
+			return;
+		}
+		List<IAttribute> attrs = BeanClass.getBeanClass(value.getClass()).getAttributes(true);
+		attrs.stream().filter(a -> a.getValue(value) == null)
+				.forEach(a -> a.setValue(value, createRandomValue(a.getType(), zeroNumber, depth)));
 	}
 
 	private static Object convert(Object n, Class typeOf, boolean zeroNumber, int depth) {
@@ -139,6 +180,16 @@ public class ValueRandomizer {
 				n = ITestInterface.class;
 			else
 				n = TypeBean.class; // must be equal to the object creating (see below)
+		} else if (URI.class.isAssignableFrom(typeOf)) {
+			n = URI.create("http://localhost");
+		} else if (URL.class.isAssignableFrom(typeOf)) {
+			n = Util.trY(() -> URI.create("http://localhost").toURL());
+		} else if (typeOf.isEnum()) {
+			if (n instanceof Number) {
+				n = typeOf.getEnumConstants()[((Number) n).intValue()];
+			} else {
+				throw new IllegalArgumentException(typeOf + " -> " + n);
+			}
 		} else if (Method.class.isAssignableFrom(typeOf)) {
 				n = Util.trY( () -> TypeBean.class.getMethod("getString"));
 		} else if (Field.class.isAssignableFrom(typeOf)) {
@@ -161,8 +212,9 @@ public class ValueRandomizer {
 					: MapUtil.asArray(MapUtil.asMap(n, n), typeOf.getComponentType());
 		} else if (typeOf.equals(Object.class)) {
 			n = new TypeBean(n.toString()); //must be equals to the type of Class (see above)
-		} else if (!ObjectUtil.isStandardType(typeOf) && !Util.isFrameworkClass(typeOf))
+		} else if (!ObjectUtil.isStandardType(typeOf) && !Util.isFrameworkClass(typeOf)) {
 			n = typeOf.getSimpleName() + "(" + ByteUtil.hashCode(n) + ")";
+		}
 		return n;
 	}
 
@@ -171,16 +223,20 @@ public class ValueRandomizer {
 	}
 
 	public static <V> Construction<V> constructWithRandomParameters(Class<V> typeOf)  {
-		return constructWithRandomParameters(typeOf, 0);
+		return constructWithRandomParameters(typeOf, false, 0);
 	}
 	@SuppressWarnings({ "unchecked" })
-	static <V> Construction<V> constructWithRandomParameters(Class<V> typeOf, int depth)  {
+	static <V> Construction<V> constructWithRandomParameters(Class<V> typeOf, boolean zeroNumber, int depth) {
 		try {
 			Constructor<?> constructor;
 			Object[] parameters;
-			if (hasFileConstructor(typeOf)) {
+			if (typeOf.isArray()) {
+				Object array = Array.newInstance(typeOf.getComponentType(), 1);
+				Array.set(array, 0, createRandomValue(typeOf.getComponentType(), zeroNumber, depth));
+				return new Construction(array);
+			} else if (hasFileConstructor(typeOf)) {
 				constructor = (Constructor<?>) Util.trY( () -> typeOf.getConstructor(File.class));
-				parameters = new Object[] {FileUtil.userDirFile(createRandomValue(String.class))};
+				parameters = new Object[] { FileUtil.userDirFile(createRandomValue(String.class, zeroNumber, depth)) };
 			} else {
 				constructor = getBestConstructor(typeOf);
 				if (constructor == null)
@@ -189,9 +245,11 @@ public class ValueRandomizer {
 					throw new IllegalStateException("max depth reached on recursion. there is a cycle in parameter instantiation: " + typeOf);
 				parameters = provideRandomizedObjects(depth, 1, constructor.getParameterTypes());
 			}
+			constructor.setAccessible(true);
 			V instance = (V) constructor.newInstance(parameters);
+			di.inject(instance);
 			if (constructor.getParameterCount() == 0 && Boolean.getBoolean(AutoTest.PREFIX_FUNCTIONTEST + "fillinstance"))
-				instance = fillRandom(instance, false, ++depth);
+				instance = fillRandom(instance, zeroNumber, depth);
 			return new Construction(instance, constructor, parameters);
 		} catch (Exception e) {
 			ManagedException.forward(e);
@@ -208,13 +266,13 @@ public class ValueRandomizer {
 }
 
 	private static <T> Constructor<T> getBestConstructor(Class<T> typeOf) {
-		Constructor<T>[] cs = (Constructor<T>[]) typeOf.getConstructors();
+		Constructor<T>[] cs = (Constructor<T>[]) typeOf.getDeclaredConstructors();
 		for (int i = 0; i < cs.length; i++) {
 			if (cs[i].getParameterTypes().length == 1)
 				return cs[i];
 		}
 		if (BeanClass.hasDefaultConstructor(typeOf))
-			return Util.trY( () -> typeOf.getConstructor(new Class[0]));
+			return Util.trY(() -> typeOf.getDeclaredConstructor(new Class[0]));
 		return cs.length > 0 ? cs[0] : null;
 	}
 
@@ -278,6 +336,15 @@ public class ValueRandomizer {
 	
 	public static final void reset() {
 		valueSets.clear();
+		di.reset();
+	}
+
+	public static DependencyInjector getDependencyInjector() {
+		return di;
+	}
+
+	public static void setDependencyInjector(DependencyInjector di_) {
+		di = di_;
 	}
 }
 @SuppressWarnings({"rawtypes", "unchecked"})

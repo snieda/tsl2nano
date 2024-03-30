@@ -23,7 +23,7 @@ import de.tsl2.nano.autotest.ValueRandomizer;
  * @author Thomas Schneider
  */
 @RunWith(Parameterized.class)
-public class CurrentStatePreservationTest {
+public class CurrentStatePreservationTest extends ADefaultAutoTester {
 	AFunctionTester<?> tester;
 
 	public CurrentStatePreservationTest(AFunctionTester tester) {

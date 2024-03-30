@@ -41,6 +41,7 @@ import de.tsl2.nano.bean.BeanFindParameters;
 import de.tsl2.nano.bean.BeanProxy;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IAttributeDef;
+import de.tsl2.nano.bean.IBeanContainer;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
@@ -111,6 +112,7 @@ public class BeanContainerUtil {
         final IGenericService service = ServiceFactory.instance().getService(IGenericService.class);
         ENV.addService(IGenericService.class, service);
         initGenericServices(_impl, () -> service);
+        ENV.addService(IBeanContainer.class, BeanContainer.instance());
     }
 
     public static <I extends BeanContainerUtil> void initGenericServices(I _impl, Supplier<IGenericService> service) {

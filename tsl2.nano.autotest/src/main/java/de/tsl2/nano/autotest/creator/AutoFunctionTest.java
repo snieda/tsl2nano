@@ -23,7 +23,7 @@ import de.tsl2.nano.core.IPreferences;
  */
 @RunWith(Parameterized.class)
 @FunctionTester({InverseFunctionTester.class, ExpectationFunctionTester.class})
-public class AutoFunctionTest {
+public class AutoFunctionTest extends ADefaultAutoTester {
 	AFunctionTester<?> tester;
 
 	public AutoFunctionTest(AFunctionTester tester) {

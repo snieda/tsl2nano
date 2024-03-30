@@ -32,7 +32,7 @@ import de.tsl2.nano.core.cls.ClassFinder;
  * @author Thomas Schneider
  */
 @RunWith(Parameterized.class)
-public class InitAllAutoTests {
+public class InitAllAutoTests extends ADefaultAutoTester {
 
 	@Parameters
 	public static Collection<?> parameters() {

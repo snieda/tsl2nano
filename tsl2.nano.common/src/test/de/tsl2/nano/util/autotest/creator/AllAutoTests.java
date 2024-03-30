@@ -16,19 +16,22 @@ import de.tsl2.nano.fi.FIDate;
 import de.tsl2.nano.plugin.Plugin;
 import de.tsl2.nano.scanner.FieldReader;
 import de.tsl2.nano.util.FuzzyFinder;
+import de.tsl2.nano.util.MarkdownLog;
 
 @RunWith(Suite.class)
+// @Execution(SAME_THREAD)
 @SuiteClasses({InitAllAutoTests.class, AutoFunctionTest.class, CurrentStatePreservationTest.class})
 public class AllAutoTests {
 	public static void init() {
-		System.setProperty("tsl2.functiontest.filter", matchPackage( 
-				CommonAction.class
-				, With.class
-				, VolatileResult.class
-				, FIDate.class
-				, Plugin.class
-				, FieldReader.class
-				, FuzzyFinder.class ));
+		// set(PARALLEL, false);
+		System.setProperty("tsl2.functiontest.filter", matchPackage(MarkdownLog.class
+		, CommonAction.class
+		, With.class
+		, VolatileResult.class
+		, FIDate.class
+		, Plugin.class
+		, FieldReader.class
+		, FuzzyFinder.class ));
 		System.setProperty("tsl2.functiontest.filter.exclude", ".*[.]Mail.*");
 	}
 }

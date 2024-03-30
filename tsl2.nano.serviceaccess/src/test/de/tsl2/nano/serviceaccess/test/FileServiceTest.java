@@ -17,7 +17,6 @@ import javax.security.auth.Subject;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.resource.fs.FsConnectionFactory;
@@ -34,7 +33,7 @@ import mockit.Mock;
 import mockit.MockUp;
 import mockit.Mocked;
 import mockit.Tested;
-import mockit.integration.junit4.JMockit;
+// import mockit.integration.junit4.JMockit;
 
 /**
  * Tests for FileService
@@ -44,7 +43,7 @@ import mockit.integration.junit4.JMockit;
  * @author Thomas Schneider
  * @version $Revision$
  */
-@RunWith(JMockit.class)
+// @RunWith(JMockit.class) // since 1.39 out of function
 public class FileServiceTest extends BaseServiceTest {
 	@Tested FileServiceBean fileServiceBean;
 	@Injectable FsConnectionFactory fsConnectionFactory;

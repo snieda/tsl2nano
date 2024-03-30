@@ -929,8 +929,7 @@ public class BeanClass<T> implements Serializable {
             } else {
                 try {
                     Constructor<T> constructor = clazz.getConstructor(new Class[0]);
-                    constructor.setAccessible(true);
-                    instance = constructor.newInstance();
+                    instance = Util.withAccessAquired(constructor, () -> constructor.newInstance());
                     // instance = (T) clazz.newInstance();
                 } catch (final Exception e) {
                     // ok, try it on declared constructors
@@ -1143,6 +1142,11 @@ public class BeanClass<T> implements Serializable {
             return false;
         }
     }
+
+    public static Field[] fieldsOf(Class cls) {
+        return fieldsOf(cls, null);
+    }
+
     /**
      * collects recursive all fields of this class and all of its super classes
      * 

@@ -30,4 +30,6 @@
             	]
         }
     ],
-    "java.test.defaultConfig": "jmockitConfig"}
+	"java.test.defaultConfig": "jmockitConfig",
+	"java.compile.nullAnalysis.mode": "automatic"
+}

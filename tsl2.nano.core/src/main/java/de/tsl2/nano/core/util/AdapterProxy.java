@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.tsl2.nano.core.cls.BeanAttribute;
+import de.tsl2.nano.core.cls.PrimitiveUtil;
 
 /**
  * generic adapter to be usable as base class for interface implementations. get/put any values in a map.
@@ -54,9 +55,12 @@ public class AdapterProxy implements InvocationHandler {
         	return toProxyString(proxy);
         if (BeanAttribute.isGetterMethod(method)) {
             Object v = values.get(BeanAttribute.getName(method));
+            if (v == null) {
+                v = values.get(method.getName());
+            }
             if ((v instanceof Object[]) && !Object[].class.isAssignableFrom(method.getReturnType()) )
                 return findReturnValue(method, (Object[]) v, args);
-            if (v != null && method.getReturnType().isAssignableFrom(v.getClass()))
+            if (v != null && PrimitiveUtil.isAssignableFrom(method.getReturnType(), v.getClass()))
                 return v;
         }
         return method.getDefaultValue() != null ? method.getDefaultValue() : method.getReturnType().isPrimitive() ? getDefaultValue(method.getReturnType()): null;

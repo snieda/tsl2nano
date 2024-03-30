@@ -154,7 +154,7 @@ public class ClassFinder {
 
 	private Collection<Class<?>> collectPackageClasses(ClassLoader cl, String pack, Set<Class<?>> classes) {
 		if (LOG.isDebugEnabled())
-			System.out.print("\n" + pack + ": ");
+			System.out.print(pack + ": ");
 		int i = 0;
 		try {
 			Enumeration<URL> upackages = cl.getResources(pack.replace('.', '/'));

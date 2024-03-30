@@ -10,6 +10,7 @@
 package de.tsl2.nano.core.util;
 
 import java.io.Serializable;
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
 import java.security.MessageDigest;
@@ -566,4 +567,16 @@ public class Util {
 				? (boolean) value 
 				: value != null && (!PrimitiveUtil.isDefaultValue(value) || Boolean.getBoolean(value.toString()) || FormatUtil.isTrue(value.toString()));
 	}
+
+    public static <A extends AccessibleObject, R> R withAccessAquired(A accessible, SupplierEx<R> callBack) {
+        boolean lastAccessValue = accessible.isAccessible();
+        try {
+            accessible.setAccessible(true);
+            return callBack.get();
+        } catch (Exception ex) {
+            return (R) ManagedException.forward(ex);
+        } finally {
+            accessible.setAccessible(lastAccessValue);
+        }
+    }
 }
