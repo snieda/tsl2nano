@@ -3,7 +3,7 @@
   <parent>
     <groupId>net.sf.tsl2nano</groupId>
     <artifactId>tsl2.nano.h5-package</artifactId>
-    <version>2.5.1</version>
+    <version>2.5.2-SNAPSHOT</version>
   </parent>
   <artifactId>tsl2.nano.replication</artifactId>
   <name>TSL2 Database/XML Replication</name>
@@ -12,7 +12,7 @@
 		<module.parent>..</module.parent>
 		<!-- this argline normally is in surefire-configuration - but there it would create a collision with jacoco  -->
 		<jmockit.javaagent>-javaagent:${settings.localRepository}/org/jmockit/jmockit/${jmockit.version}/jmockit-${jmockit.version}.jar</jmockit.javaagent>
-        <argLine> ${surefire.argLine} ${jmockit.javaagent} ${tsl2.argline.options}</argLine>
+        <!-- <argLine>${surefire.argLine} ${jmockit.javaagent} ${tsl2.argline.options}</argLine> -->
 	</properties>
 	<build>
 		<plugins>

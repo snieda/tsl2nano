@@ -4,15 +4,21 @@
 	  <parent>
 	    <groupId>net.sf.tsl2nano</groupId>
 	    <artifactId>tsl2.nano.h5-package</artifactId>
-	    <version>2.5.1</version>
+	    <version>2.5.2-SNAPSHOT</version>
 	  </parent>
 	<artifactId>tsl2.nano.serviceaccess</artifactId>
 	<name>TSL2 JEE Service Access</name>
 	<description>TSL2 JEE Service Access (Generic Services for Entity Access, JEE File-System-Connector, Generic Featuring, Job-Scheduling, BeanContainer, Batch, Comfortable Bean Query Definitions, JAAS, Authentification, Authorization, )</description>
 	<properties>
 		<module.parent>..</module.parent>
+		<settings.localRepository>${user.home}/.m2/repository</settings.localRepository>
+		<!-- <jmockit.groupId>com.github.hazendaz.jmockit</jmockit.groupId>
+		<jmockit.version>1.52.0</jmockit.version>
+		<jmockit.javaagent>-javaagent:${settings.localRepository}/com/github/hazendaz/jmockit/${jmockit.version}/jmockit-${jmockit.version}.jar</jmockit.javaagent> -->
+		<jmockit.groupId>org.jmockit</jmockit.groupId>
 		<jmockit.version>1.39</jmockit.version>
-		<argLine>${tsl2.argline.options} -javaagent:${settings.localRepository}/org/jmockit/jmockit/${jmockit.version}/jmockit-${jmockit.version}.jar</argLine>
+		<jmockit.javaagent>-javaagent:${settings.localRepository}/org/jmockit/jmockit/${jmockit.version}/jmockit-${jmockit.version}.jar</jmockit.javaagent>
+		<argLine>${tsl2.argline.options}</argLine>
 	</properties>
 	<build>
 		<sourceDirectory>src/main</sourceDirectory>
@@ -84,10 +90,30 @@
 		    <type>pom</type>
 			<scope>test</scope>
 		</dependency>
+		<!-- in cause of BaseServiceTest in src/main/java we need out of scope test -->
 		<dependency>
-		    <groupId>org.jmockit</groupId>
-		    <artifactId>jmockit</artifactId>
-		    <version>${jmockit.version}</version>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit4.version}</version>
+		</dependency>
+    <!-- JaCoCo runtime must be in classpath for offline mode -->
+    <!-- <dependency>
+		<groupId>org.jacoco</groupId>
+		<artifactId>org.jacoco.agent</artifactId>
+		<classifier>runtime</classifier>
+		<version>${jacoco.version}</version>
+		<scope>test</scope>
+	  </dependency> -->
+  
+		  <!-- <dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>5.10.2</version>
+		</dependency> -->
+		<dependency>
+			<groupId>${jmockit.groupId}</groupId>
+			<artifactId>jmockit</artifactId>
+			<version>${jmockit.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
