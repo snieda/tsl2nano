@@ -70,7 +70,7 @@ public class EntityReplication {
 		Util.assert_(src != null || dest != null, "at least one persistence-unit-name must be given!");
 	}
 
-	private ClassLoader definePersitenceXmlPath() {
+	private ClassLoader definePersistenceXmlPath() {
 		if (System.getProperty("persistencexml.path") != null)
 			persistenceXmlPath = System.getProperty("persistencexml.path");
 		if (persistenceXmlPath != null) {
@@ -84,30 +84,32 @@ public class EntityReplication {
 		long start = System.currentTimeMillis();
 		if (threadScope) {
 			ULog.log("creating EntityManager for '" + punit + "' in new thread scope...", false);
-			Thread thread = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					ClassLoader cl = definePersitenceXmlPath();
+			runAndJoinInThread(() -> {
+				ClassLoader cl = definePersistenceXmlPath();
 					Properties pers = new Properties();
 //					pers.setProperty("hibernate.current_session_context_class", "thread");
 //					pers.setProperty("hibernate.connection.pool_size", "10");
-					tmp = createEntityManager(punit, cl, pers);
-				}
+				tmp = createEntityManager(punit, cl, pers);
 			});
-			thread.start();
-			try {
-				thread.join();
-			} catch (Exception e) {
-				log("ERROR on creating entitymanager: ", e);
-				throw new IllegalStateException(e);
-			}
 		} else {
 			createEntityManager(punit, null, new Properties());
 		}
 		ULog.log((System.currentTimeMillis() - start) + " ms");
 		return tmp.get();
 	}
-	
+
+	public Thread runAndJoinInThread(Runnable runnable) {
+		Thread thread = new Thread(runnable);
+		thread.start();
+		try {
+			thread.join();
+		} catch (Exception e) {
+			log("ERROR on creating entitymanager: ", e);
+			throw new IllegalStateException(e);
+		}
+		return thread;
+	}
+
 	private AtomicReference<EntityManager> createEntityManager(String punit, ClassLoader cl, Properties pers) {
 		ULog.log("creating EntityManager for '" + punit + "...", false);
 		EntityManagerFactory entityManagerFactory = null;
@@ -159,7 +161,7 @@ public class EntityReplication {
 		return entities;
 	}
 	
-	private Object[] getWellTypedIds(EntityManager em, Class<?> entityClass, Object[] ids) {
+	Object[] getWellTypedIds(EntityManager em, Class<?> entityClass, Object[] ids) {
 		Class<?> idType = em.getMetamodel().entity(entityClass).getIdType().getJavaType();
 		if (idType != null && !String.class.isAssignableFrom(idType)) {
 			Object[] ids_ = new Object[ids.length];
@@ -356,19 +358,25 @@ public class EntityReplication {
 		}
 		String pers1 = args[0];
 		String pers2 = args[1];
-        String call;
+		String cls = args[2];
+		Object[] ids = Arrays.copyOfRange(args, 3, args.length);
+		if (ids.length == 1 && ids[0].getClass().equals(String.class))
+			ids = ((String) ids[0]).split("[,;| ]");
+
+		createEntityReplication(pers1, pers2, cls, Util.getProperty("on.start.call", null, null), ids);
+	}
+
+	private static EntityReplication createEntityReplication(String pers1, String pers2, String clsName,
+			String callOnStart, Object[] ids) {
         EntityReplication repl = null;
 		try {
-	        if ((call = Util.getProperty("on.start.call", null, null)) != null)
-	                Util.invoke(call);
+			if (callOnStart != null)
+				Util.invoke(callOnStart);
 			repl = new EntityReplication(pers1, pers2);
-			Class cls = Thread.currentThread().getContextClassLoader().loadClass(args[2]);
+			Class cls = Thread.currentThread().getContextClassLoader().loadClass(clsName);
 			boolean useHibernateReplication = Util.getProperty("use.hibernate.replication", Boolean.class);
 			Util.assert_(pers2 != PERS_JNDI, "persistence-unit-2 must not be " + PERS_JNDI);
-			
-			Object[] ids = Arrays.copyOfRange(args, 3, args.length);
-			if (ids.length == 1 && ids[0].getClass().equals(String.class))
-				ids = ((String)ids[0]).split("[,;| ]");
+
 			log("starting replication with:" 
 					+ "\n\tpersistence-unit-1: " + pers1
 					+ "\n\tpersistence-unit-2: " + pers2
@@ -409,6 +417,7 @@ public class EntityReplication {
                         System.console().readLine("Please press ENTER to shutdown Java VM: ");
         }
 		}
+		return repl;
 	}
 
 	private static Consumer<?> evalTransformer() {

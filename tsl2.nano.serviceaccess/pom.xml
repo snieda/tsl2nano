@@ -15,10 +15,10 @@
 		<!-- <jmockit.groupId>com.github.hazendaz.jmockit</jmockit.groupId>
 		<jmockit.version>1.52.0</jmockit.version>
 		<jmockit.javaagent>-javaagent:${settings.localRepository}/com/github/hazendaz/jmockit/${jmockit.version}/jmockit-${jmockit.version}.jar</jmockit.javaagent> -->
-		<jmockit.groupId>org.jmockit</jmockit.groupId>
+		<!-- <jmockit.groupId>org.jmockit</jmockit.groupId>
 		<jmockit.version>1.39</jmockit.version>
 		<jmockit.javaagent>-javaagent:${settings.localRepository}/org/jmockit/jmockit/${jmockit.version}/jmockit-${jmockit.version}.jar</jmockit.javaagent>
-		<argLine>${tsl2.argline.options}</argLine>
+		<argLine>${tsl2.argline.options}</argLine> -->
 	</properties>
 	<build>
 		<sourceDirectory>src/main</sourceDirectory>
@@ -110,16 +110,22 @@
 			<artifactId>junit-jupiter-engine</artifactId>
 			<version>5.10.2</version>
 		</dependency> -->
-		<dependency>
+		<!-- <dependency> since jdk17 jmockit not compatible to jacoco
 			<groupId>${jmockit.groupId}</groupId>
 			<artifactId>jmockit</artifactId>
 			<version>${jmockit.version}</version>
 			<scope>test</scope>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>tsl2.nano.autotest</artifactId>
 			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>5.10.0</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

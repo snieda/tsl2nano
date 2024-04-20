@@ -9,6 +9,9 @@
  */
 package de.tsl2.nano.serviceaccess.test;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.nio.charset.MalformedInputException;
 
@@ -17,6 +20,12 @@ import javax.security.auth.Subject;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.resource.fs.FsConnectionFactory;
@@ -27,13 +36,6 @@ import de.tsl2.nano.service.util.FileServiceBean;
 import de.tsl2.nano.service.util.IFileService;
 //import sun.io.MalformedInputException;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
-import mockit.Expectations;
-import mockit.Injectable;
-import mockit.Mock;
-import mockit.MockUp;
-import mockit.Mocked;
-import mockit.Tested;
-// import mockit.integration.junit4.JMockit;
 
 /**
  * Tests for FileService
@@ -43,18 +45,23 @@ import mockit.Tested;
  * @author Thomas Schneider
  * @version $Revision$
  */
-// @RunWith(JMockit.class) // since 1.39 out of function
+@RunWith(MockitoJUnitRunner.class) // since 1.39 out of function, since jdk17 jmockit not compatible to jacoco
 public class FileServiceTest extends BaseServiceTest {
-	@Tested FileServiceBean fileServiceBean;
-	@Injectable FsConnectionFactory fsConnectionFactory;
+    @Spy
+    FileServiceBean fileServiceBean;
+    @InjectMocks
+    FsConnectionFactory fsConnectionFactory;
 	
-	@Injectable Subject subject;
+    @InjectMocks
+    Subject subject;
 	
-	@Tested(fullyInitialized = true) 
-	@Injectable FsConnectionRequestInfo info;
+    @Spy
+    @InjectMocks
+    FsConnectionRequestInfo info;
 	
-	@Tested(fullyInitialized = true) 
-	@Injectable FsManagedConnection fsManagedConnection;
+    @Spy
+    @InjectMocks
+    FsManagedConnection fsManagedConnection;
 	
     @BeforeClass
     public static void setUp() {
@@ -62,29 +69,17 @@ public class FileServiceTest extends BaseServiceTest {
     }
 
 	private void createMockUps() {
-		new MockUp<FsManagedConnection>() {
-        	@Mock public void $init(@Mocked Subject subject, @Tested FsConnectionRequestInfo info) {
-        		info.setRootDirPath("./");
-        	}
-        	@Mock
-        	public boolean isUseAbsoluteFilePath(String rootDirPath) {
-        		return false;
-        	}
-        	@Mock
-        	public boolean isUseAbsoluteFilePath() {
-        		return false;
-        	}
-		};
+        try (MockedStatic<FsManagedConnection> mockedStatic = Mockito.mockStatic(FsManagedConnection.class)) {
+            mockedStatic.when(() -> FsManagedConnection.isUseAbsoluteFilePath(any())).thenReturn(false);
+        }
+        when(info.getRootDirPath()).thenReturn("./");
+        when(fsManagedConnection.isUseAbsoluteFilePath(any())).thenReturn(false);
 	}
 
     @Ignore
     @Test
     public void testStandardMode() throws Exception {
-    	info.setRootDirPath("./");
-		new Expectations() {{
-			info.getRootDirPath(); result = "./";
-			fsManagedConnection.isUseAbsoluteFilePath(); result = false;
-		}};
+        info.setRootDirPath("./");
         createMockUps();
         final String testFile = "fileservice-testfile.txt";
         final String testFileContent = "Dies ist eine Testdatei\nmit drei Zeilen\n";

@@ -39,7 +39,7 @@ import de.tsl2.nano.serviceaccess.ServiceProxy;
 public class AllAutoTests {
 
 	public static void init() {
-		ConfigBeanContainer.initAuthAndLocalBeanContainer();
+		// ConfigBeanContainer.initAuthAndLocalBeanContainer();
 
 		System.setProperty("tsl2.functiontest.filter",
 				matchPackage(FsConnection.class, ServiceUtil.class, ServiceFactory.class, GenericServiceBean.class));

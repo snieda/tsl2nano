@@ -32,7 +32,7 @@ import de.tsl2.nano.core.cls.ClassFinder;
  * @author Thomas Schneider
  */
 @RunWith(Parameterized.class)
-public class InitAllAutoTests extends ADefaultAutoTester {
+public class InitAllAutoTests/* extends ADefaultAutoTester*/ {
 
 	@Parameters
 	public static Collection<?> parameters() {
@@ -43,6 +43,7 @@ public class InitAllAutoTests extends ADefaultAutoTester {
 		System.setProperty("tsl2.nano.logfactory.off", "true");
 		System.setProperty("tsl2.nano.test", "true");
 		System.setProperty("tsl2.json.recursive", "false");
+		System.setProperty(AutoTest.PREFIX_FUNCTIONTEST + "fillinstance", "true");
 //		System.setProperty("tsl2.functiontest.testneverfail", "true");
 		if (BaseTest.isExternalCIPlatform())
 			System.setProperty("tsl2.functiontest.donttest", "true");
