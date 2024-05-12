@@ -130,8 +130,8 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 	}
 
 	public void testMe() {
+		long start = System.currentTimeMillis();
 		try {
-			long start = System.currentTimeMillis();
 			runWithTimeout();
 			checkFail();
 			if (def(AutoTest.FILTER_NULLRESULTS, false))
@@ -149,8 +149,10 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 		} catch (Exception | AssertionError e) {
 			boolean shouldFailError = false;
 			try {
-				if (shouldFail(e))
+				if (shouldFail(e)) {
+					status = new Status(StatusTyp.TESTED, (System.currentTimeMillis() - start) / 1000 + " sec", e);
 					return;
+				}
 			} catch (Exception | AssertionError e1) {
 				status = new Status(StatusTyp.TEST_FAILED, e1.toString(), e1);
 				shouldFailError = true;

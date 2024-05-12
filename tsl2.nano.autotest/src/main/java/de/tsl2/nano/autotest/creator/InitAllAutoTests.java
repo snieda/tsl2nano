@@ -1,5 +1,8 @@
 package de.tsl2.nano.autotest.creator;
 
+import static de.tsl2.nano.autotest.creator.AutoTest.PARALLEL;
+
+import java.lang.reflect.Method;
 import java.security.Permission;
 import java.util.Arrays;
 import java.util.Collection;
@@ -14,6 +17,7 @@ import de.tsl2.nano.autotest.BaseTest;
 import de.tsl2.nano.core.IPreferences;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.ClassFinder;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * This parameterized test class is a workaround on test suites having parameterized tests that have to be initialized from outside.<p/>
@@ -45,6 +49,7 @@ public class InitAllAutoTests/* extends ADefaultAutoTester*/ {
 		System.setProperty("tsl2.json.recursive", "false");
 		System.setProperty(AutoTest.PREFIX_FUNCTIONTEST + "fillinstance", "true");
 //		System.setProperty("tsl2.functiontest.testneverfail", "true");
+set(PARALLEL, true);
 		if (BaseTest.isExternalCIPlatform())
 			System.setProperty("tsl2.functiontest.donttest", "true");
 		
@@ -86,6 +91,11 @@ public class InitAllAutoTests/* extends ADefaultAutoTester*/ {
 		if (loadAllClassesInPackage)
 			ClassFinder.loadAllClassesInEachPackage(classes);
 		return buf.append(").*").toString();
+	}
+
+	public static String matchMethod(Class<?> cls, String name, Class<?>... parameterTypes) {
+		Method m = Util.trY(() -> cls.getMethod(name, parameterTypes));
+		return ".*" + m.getDeclaringClass().getName() + "." + m.getName() + ".*";
 	}
 
 	public static void forbidSystemExit() {

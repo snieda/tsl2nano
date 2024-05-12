@@ -1,5 +1,6 @@
 package de.tsl2.nano.autotest.creator;
 
+import static de.tsl2.nano.autotest.creator.AutoTest.PARALLEL;
 import static de.tsl2.nano.autotest.creator.AutoTest.TIMEOUT;
 
 import java.lang.reflect.Method;
@@ -93,7 +94,7 @@ public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
 	
 	public void runWithTimeout() {
 		int timeout = def(TIMEOUT, int.class);
-		if (timeout == -1)
+		if (timeout == -1 || !def(PARALLEL, false))
 			run(); 
 		else 
 			ConcurrentUtil.runWithTimeout(getID(), this, timeout * 1000);

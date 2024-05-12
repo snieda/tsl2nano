@@ -133,14 +133,7 @@ public class AutoTestGenerator {
 		try {
 			printStartParameters();
 			FileUtil.delete(fileName + "initialization-error.txt");
-			prepareFilteredWriter();
-			List<Method> methods;
-			if (def(FAST_CLASSSCAN, true))
-				methods = ClassFinder.self().findMethods(def(FILTER, ""), def(MODIFIER, -1), null);
-			else
-				methods = ClassFinder.self().find(def(FILTER, ""), Method.class, def(MODIFIER, -1), null);
-			FileUtil.writeBytes(("\nmatching methods in classpath: " + methods.size()).getBytes(), getTimedFileName() + "statistics.txt", true);
-			filterMethods(methods);
+			List<Method> methods = getMethods();
 			progress = new ProgressBar(methods.size() * duplication);
 			ArrayList<Integer> dupList = NumberUtil.numbers(duplication);
 			Util.stream(dupList, def(PARALLEL, false)).forEach( i -> 
@@ -182,6 +175,20 @@ public class AutoTestGenerator {
 			if (progress != null)
 				progress.setFinished();
 		}
+	}
+
+	private List<Method> getMethods() throws IOException {
+		prepareFilteredWriter();
+		List<Method> methods;
+		if (def(FAST_CLASSSCAN, true)) {
+			methods = ClassFinder.self().findMethods(def(FILTER, ""), def(MODIFIER, -1), null);
+		} else {
+			methods = ClassFinder.self().find(def(FILTER, ""), Method.class, def(MODIFIER, -1), null);
+		}
+		FileUtil.writeBytes(("\nmatching methods in classpath: " + methods.size()).getBytes(),
+				getTimedFileName() + "statistics.txt", true);
+		filterMethods(methods);
+		return methods;
 	}
 	private void filterMethods(List<Method> methods) {
 		int filterExcludes = filterExcludes(methods);
@@ -343,7 +350,7 @@ public class AutoTestGenerator {
 			if (exp == null) {
 				exp = ExpectationCreator.createExpectationFromLine(l);
 			} else {
-				if (l.matches("\\w+.*\\(.*\\)")) {
+				if (l.matches("\\w+.*\\(.*\\)(\\s+throws.+)?")) {
 					method = ExpectationCreator.extractMethod(l);
 					progress.increase(method != null ? " " + method.getDeclaringClass().getSimpleName() + "." + method.getName() : " ...");
 					if (method != null)
@@ -425,8 +432,8 @@ class ExpectationCreator {
 	private static final String PREF_WHEN = "@" + Expectations.class.getSimpleName() + "({@" + Expect.class.getSimpleName() + "( when = {";
 	private static final String PREF_THEN = "then = \"-->";
 	private static final String POST_THEN = "<--\"";
-	private static final String PREF_CONSTRUCT = "construct = \"";
-	private static final String PREF_CONSTRUCT_TYPES = "constructTypes = \"";
+	private static final String PREF_CONSTRUCT = "construct = {";
+	private static final String PREF_CONSTRUCT_TYPES = "constructTypes = {";
 	
 	static String createExpectationString(AFunctionCaller f, String then) {
 		try {
@@ -469,7 +476,7 @@ class ExpectationCreator {
 			return null;
 		Class[] types = new Class[typenames.length];
 		for (int i = 0; i < typenames.length; i++) {
-			types[i] = BeanClass.load(typenames[i]);
+			types[i] = BeanClass.load(StringUtil.trim(typenames[i], "\"{}"));
 		}
 		return types;
 	}
@@ -477,12 +484,15 @@ class ExpectationCreator {
 	private static String[] extractArray(String l, String prefix) {
 		String arr[] = null, all;
 		all = StringUtil.substring(l, prefix, "} ", 0, true);
+		if (all == null) {
+			all = StringUtil.substring(l, prefix, "})", 0, true);
+		}
 		if (!Util.isEmpty(all)) {
 			all = prepareSplitOnJSonWithQuotations(all);
 			arr = all.split("\",\"");
 			for (int i = 0; i < arr.length; i++) {
 				if (!JSon.isJSon(arr[i]) && !arr[i].contains("§§§"))
-					arr[i] = arr[i].replaceAll("\"", "");
+					arr[i] = StringUtil.trim(arr[i].replaceAll("\"", ""), "{}");
 				else
 					arr[i] = arr[i].replaceAll("§§§", "\"");
 			}

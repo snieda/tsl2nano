@@ -17,8 +17,8 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 	private static final String UNDEFINED = "UNDEFINED";
 	private Expect expect;
 
-	public ExpectationFunctionTester(Method source, Expectations externalExpecations) {
-		this(0, source, externalExpecations);
+	public ExpectationFunctionTester(Method source, Expectations externalExpectations) {
+		this(0, source, externalExpectations);
 	}
 	public ExpectationFunctionTester(int iteration, Method source, Expectations externalExpecations) {
 		super(iteration, source);
@@ -75,12 +75,18 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 	@Override
 	protected Object getInstance(Method method) {
 		if (construction == null && !Util.isEmpty(expect.construct())) {
-			construction = new Construction(null);
-			construction.parameter = createParameterFromStringArr(expect.constructTypes(), expect.construct());
-			construction.instance = BeanClass.createInstance(source.getDeclaringClass(), parameter);
-			return construction.instance;
+			try {
+				construction = new Construction(null);
+				construction.parameter = createParameterFromStringArr(expect.constructTypes(), expect.construct());
+				construction.instance = BeanClass.createInstance(source.getDeclaringClass(), parameter);
+				return construction.instance;
+			} catch (Exception e) {
+				return super.getInstance(method);
+			}
+		} else {
+			// no informations about construction loaded! -> static or default constructor
+			return super.getInstance(method);
 		}
-		return super.getInstance(method);
 	}
 	
 	@Override

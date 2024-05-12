@@ -88,7 +88,8 @@ public class ValueRandomizer {
 		Field[] fields = acc.findMembers(PrivateAccessor::notStaticAndNotFinal);
 		Arrays.stream(fields)
 				.filter(f -> acc.member(f.getName()) == null)
-				.forEach(f -> acc.set(f.getName(), createRandomValue(f.getType(), zeroNumber, depth)));
+				.forEach(f -> Util.trY(() -> acc.set(f.getName(), createRandomValue(f.getType(), zeroNumber, depth)),
+						false));
 		return obj;
 	}
 
@@ -145,11 +146,17 @@ public class ValueRandomizer {
 		} catch (Exception e) {
 			// here we try it without randomized values but directly creating a default instance
 			if (ObjectUtil.isInstanceable(typeOf)) {
-				value = constructWithRandomParameters(typeOf, zeroNumber, depth).instance;
+				try {
+					value = constructWithRandomParameters(typeOf, zeroNumber, depth).instance;
+				} catch (Exception ex) {
+					return null;
+				}
 			} else if (typeOf.isInterface()) {
 				value = createRandomProxy(typeOf, zeroNumber, depth);
 			} else {
-				ManagedException.forward(e);
+				// ManagedException.forward(e);
+				// Ok, we can't create an object, so we test with null value
+				return null;
 			}
 		}
 		try {
@@ -238,6 +245,7 @@ public class ValueRandomizer {
 				constructor = (Constructor<?>) Util.trY( () -> typeOf.getConstructor(File.class));
 				parameters = new Object[] { FileUtil.userDirFile(createRandomValue(String.class, zeroNumber, depth)) };
 			} else {
+				//TODO: perhaps, we should loop over all constructors until we can create the instance...
 				constructor = getBestConstructor(typeOf);
 				if (constructor == null)
 					throw new RuntimeException(typeOf + " is not constructable!");
@@ -247,9 +255,14 @@ public class ValueRandomizer {
 			}
 			constructor.setAccessible(true);
 			V instance = (V) constructor.newInstance(parameters);
-			di.inject(instance);
-			if (constructor.getParameterCount() == 0 && Boolean.getBoolean(AutoTest.PREFIX_FUNCTIONTEST + "fillinstance"))
-				instance = fillRandom(instance, zeroNumber, depth);
+			try {
+				di.inject(instance);
+				if (constructor.getParameterCount() == 0
+						&& Boolean.getBoolean(AutoTest.PREFIX_FUNCTIONTEST + "fillinstance"))
+					instance = fillRandom(instance, zeroNumber, depth);
+			} catch (Exception ex) {
+				//Ok, we do not inject in cause of problems
+			}
 			return new Construction(instance, constructor, parameters);
 		} catch (Exception e) {
 			ManagedException.forward(e);

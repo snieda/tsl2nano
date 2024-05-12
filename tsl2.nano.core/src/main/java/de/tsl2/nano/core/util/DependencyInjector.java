@@ -233,7 +233,7 @@ public class DependencyInjector {
         return Util.toString(this.getClass(), "\n\tinjecting-annotations: " + this.injectorAnnotations,
                 "\n\tproducer-annotation  : " + this.producerAnnotations + " (producers found: "
                         + (producers != null ? producers.size() : 0) + ")",
-                "\n\tinstanceCreator      :" + this.instanceCreator,
+                "\n\tinstanceCreator      : " + this.instanceCreator,
                 "\n\tinjectables          : " + injectables);
     }
 }
