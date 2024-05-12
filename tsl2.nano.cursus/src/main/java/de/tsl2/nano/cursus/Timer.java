@@ -33,16 +33,20 @@ public class Timer implements Serializable {
 	transient Calendar current;
 
 	public Timer() {
+		this(null, null);
 	}
 
 	public Timer(Date from, Date until) {
-		this(from, until, 0, 0);
+		this(from, until, Calendar.DAY_OF_YEAR, 1);
 	}
 
 	public Timer(Date from, Date until, int stepType, int stepLength, Integer... stepExceptions) {
-		this.from = Util.value(from, new Date(Long.MIN_VALUE));
-		this.until = Util.value(until, new Date(Long.MAX_VALUE));
+		this.from = Util.value(from, DateUtil.MIN_STD_DATE);
+		this.until = Util.value(until, DateUtil.MAX_STD_DATE);
 		this.stepType = stepType;
+		if (stepLength <= 0) {
+			throw new IllegalArgumentException("stepLength must be greater than 0");
+		}
 		this.stepLength = stepLength;
 		this.stepExceptions = new ArrayList<>(Arrays.asList(stepExceptions));
 		preparePeriod();
@@ -50,8 +54,8 @@ public class Timer implements Serializable {
 
 	private void preparePeriod() {
 		if (current == null) {
-			from = Util.value(from, new Date(Long.MIN_VALUE));
-			until = Util.value(until, new Date(Long.MAX_VALUE));
+			from = Util.value(from, DateUtil.MIN_STD_DATE);
+			until = Util.value(until, DateUtil.MAX_STD_DATE);
 			current = Calendar.getInstance();
 			reset();
 		}

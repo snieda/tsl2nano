@@ -1,5 +1,12 @@
 package de.tsl2.nano.core.util;
 
+import static de.tsl2.nano.core.util.CLI.NC;
+import static de.tsl2.nano.core.util.CLI.tag;
+import static de.tsl2.nano.core.util.CLI.Color.BLUE;
+import static de.tsl2.nano.core.util.CLI.Color.GREEN;
+import static de.tsl2.nano.core.util.CLI.Color.LIGHT_BLUE;
+import static de.tsl2.nano.core.util.CLI.Color.RED;
+import static de.tsl2.nano.core.util.CLI.Color.YELLOW;
 import static de.tsl2.nano.core.util.StringUtil.substring;
 import static de.tsl2.nano.core.util.StringUtil.toFormattedString;
 
@@ -15,8 +22,7 @@ import java.util.Properties;
 import java.util.TreeMap;
 
 import de.tsl2.nano.core.cls.BeanClass;
-import static de.tsl2.nano.core.util.CLI.*;
-import static de.tsl2.nano.core.util.CLI.Color.*;
+import de.tsl2.nano.core.util.CLI.Color;
 
 /**
  * some simple helpers on java main methods...for a full-featured solution, see
@@ -83,7 +89,9 @@ public class MainUtil {
             if (!argNames.contains(name)) {
                 logn(WARN + "undescribed argument: " + tag(name, Color.GREEN));
             }
-            p.put(prefix + name, value);
+            if (value != null) {
+                p.put(prefix + name, value);
+            }
         }
 
         List<String> mandatoryArgs = new ArrayList<>(Arrays.asList(mainArgNames));

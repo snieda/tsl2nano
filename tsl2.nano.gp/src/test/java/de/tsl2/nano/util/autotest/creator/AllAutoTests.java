@@ -16,5 +16,6 @@ import de.tsl2.nano.gp.EvolutionalAlgorithm;
 public class AllAutoTests {
 	public static void init() {
 		System.setProperty("tsl2.functiontest.filter", matchPackage(EvolutionalAlgorithm.class));
+		// set(FILTER, matchMethod(EvolutionalAlgorithm.class, "fitnessFunction", List.class));
 	}
 }

@@ -19,6 +19,6 @@ import de.tsl2.nano.cursus.persistence.EConsilium;
 public class AllAutoTests {
 	public static void init() {
 		set(FILTER, matchPackage(Consilium.class, EConsilium.class));
-		// set(AutoTest.FILTER_EXCLUDE, StringUtil.matchingOneOf(XXXXX.class.getSimpleName(), YYYY.class.getSimpleName()));
+		// set(AutoTest.FILTER_EXCLUDE, StringUtil.matchingOneOf(Timer.class.getSimpleName() + ".(runThrough|next).*"));
 	}
 }

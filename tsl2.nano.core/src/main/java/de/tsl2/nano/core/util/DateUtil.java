@@ -56,6 +56,9 @@ public final class DateUtil {
     public static Date MIN_DATE = getDate(0, 0, 0);
     public static Date MAX_DATE = getDate(9999, -1, -1);
 
+    public static Date MIN_STD_DATE = getDate(1970, 0, 0);
+    public static Date MAX_STD_DATE = getDate(2100, -1, -1);
+
     /** 4 quarters beginnings without year */
     public static Date Q1 = getDate(9999, 1, 1);
     public static Date Q2 = getDate(9999, 4, 1);
