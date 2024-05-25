@@ -1,7 +1,12 @@
 package de.tsl2.nano.autotest.creator;
 
+import static de.tsl2.nano.autotest.creator.AFunctionCaller.def;
+import static de.tsl2.nano.autotest.creator.AutoTest.APPROVED;
+import static de.tsl2.nano.autotest.creator.AutoTest.FILENAME;
 import static de.tsl2.nano.autotest.creator.AutoTest.PARALLEL;
+import static de.tsl2.nano.autotest.creator.AutoTest.TIMEOUT;
 
+import java.io.File;
 import java.lang.reflect.Method;
 import java.security.Permission;
 import java.util.Arrays;
@@ -17,6 +22,8 @@ import de.tsl2.nano.autotest.BaseTest;
 import de.tsl2.nano.core.IPreferences;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.ClassFinder;
+import de.tsl2.nano.core.util.FilePath;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
 /**
@@ -43,22 +50,27 @@ public class InitAllAutoTests/* extends ADefaultAutoTester*/ {
 		IPreferences.reset();
 		// the string.set uses german city names
 		Locale.setDefault(Locale.GERMANY);
-		
+		set(PARALLEL, true);
+		// set(DUPLICATION, 10);
+		set(TIMEOUT, 60);
 		System.setProperty("tsl2.nano.logfactory.off", "true");
 		System.setProperty("tsl2.nano.test", "true");
 		System.setProperty("tsl2.json.recursive", "false");
-		System.setProperty(AutoTest.PREFIX_FUNCTIONTEST + "fillinstance", "true");
-//		System.setProperty("tsl2.functiontest.testneverfail", "true");
-set(PARALLEL, true);
-		if (BaseTest.isExternalCIPlatform())
+		System.setProperty(AutoTest.PREFIX_FUNCTIONTEST + "fillinstance", "false");
+		// System.setProperty("tsl2nano.autotest.inject.beanattributes", "true");
+		//		System.setProperty("tsl2.functiontest.testneverfail", "true");
+		boolean approved = copyApprovedExpectionFiles();
+		set(APPROVED, approved);
+		if (!approved && BaseTest.isExternalCIPlatform())
 			System.setProperty("tsl2.functiontest.donttest", "true");
 		
 		if (Boolean.getBoolean("tsl2.functiontest.donttest"))
 			return Arrays.asList();
-		
-		BaseTest.useTargetDir();
+
 		if (Boolean.getBoolean("tsl2.functiontest.forbidSystemExit"))
 			forbidSystemExit();
+
+		BaseTest.useTargetDir();
 		BeanClass.callStatic("de.tsl2.nano.util.autotest.creator.AllAutoTests", "init");
 		return Arrays.asList();
 	}
@@ -119,5 +131,14 @@ set(PARALLEL, true);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	static boolean copyApprovedExpectionFiles() {
+		String autotest_path = StringUtil.substring(def(FILENAME, String.class), null, "/", true);
+		String approved_expectation_files = "target/test-classes/" + autotest_path;
+		if (new File(approved_expectation_files).exists()) {
+			return FilePath.copy((approved_expectation_files), "target/" + autotest_path) > 0;
+		}
+		return false;
 	}
 }

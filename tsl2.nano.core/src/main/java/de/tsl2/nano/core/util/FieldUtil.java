@@ -2,15 +2,23 @@ package de.tsl2.nano.core.util;
 
 import java.io.PrintStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.function.Predicate;
 
 public class FieldUtil extends ByteUtil {
-	
+
+	static final Predicate<Field> SERIALIZEABLE = f -> !f.isSynthetic()
+			&& !Modifier.isStatic(f.getModifiers())
+			&& !Modifier.isTransient(f.getModifiers())
+			&& !Modifier.isVolatile(f.getModifiers())
+			&& !Modifier.isFinal(f.getModifiers());
+
 	public static Object[][] toObjectArrays(final Collection<?> list, String... attributes) {
 		Object[][] rows = new Object[list.size()][];
 		if (list.size() > 0 && (attributes == null || attributes.length == 0))
@@ -31,6 +39,11 @@ public class FieldUtil extends ByteUtil {
 		return foreach((f, b) -> b.append(f.getName() + "=" + getValue(obj, f) + ","), new StringBuilder(), obj, attributes).toString();
 	}
 
+	public static Map<String, Object> toSerializingMap(Object obj) {
+		return foreach((f, m) -> m.put(f.getName(), getValue(obj, f)), new LinkedHashMap<String, Object>(), obj, false,
+				getFieldNames(obj.getClass(), SERIALIZEABLE));
+	}
+
 	public static Map<String, Object> toMap(final Object obj, String... attributes) {
 		return foreach((f, m) -> m.put(f.getName(), getValue(obj, f)), new LinkedHashMap<String, Object>(), obj, attributes);
 	}
@@ -41,7 +54,7 @@ public class FieldUtil extends ByteUtil {
 
 	public static Object getValue(Object obj, Field f) {
 		try {
-			return f.get(obj);
+			return Util.withAccessAquired(f, () -> f.get(obj));
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
@@ -57,12 +70,17 @@ public class FieldUtil extends ByteUtil {
 
 	public static <Container, Result> Container foreach(BiConsumer<Field, Container> callback, Container container,
 			Object obj, String... attributes) {
+		return foreach(callback, container, obj, true, attributes);
+	}
+
+	public static <Container, Result> Container foreach(BiConsumer<Field, Container> callback, Container container,
+			Object obj, boolean onNullUseAllAttributes, String... attributes) {
 		Class<? extends Object> cls = obj.getClass();
-		if (attributes == null || attributes.length == 0)
+		if ((attributes == null || attributes.length == 0) && onNullUseAllAttributes)
 			attributes = getFieldNames(cls);
 		for (int i = 0; i < attributes.length; i++) {
 			try {
-				callback.accept(cls.getDeclaredField(attributes[i].toLowerCase()), container);
+				callback.accept(cls.getDeclaredField(attributes[i]), container);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
@@ -71,9 +89,12 @@ public class FieldUtil extends ByteUtil {
 	}
 
 	public static String[] getFieldNames(Class<? extends Object> cls) {
+		return getFieldNames(cls, f -> !f.isSynthetic());
+	}
 
+	public static String[] getFieldNames(Class<? extends Object> cls, Predicate<Field> filter) {
 		return Arrays.stream(cls.getDeclaredFields())
-			.filter(f -> !f.isSynthetic())
+				.filter(f -> filter.test(f))
             .map(f -> f.getName())
             .sorted()
             .toArray(String[]::new);

@@ -13,6 +13,7 @@ import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DateUtil;
+import de.tsl2.nano.core.util.FilePath;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
@@ -21,7 +22,6 @@ import de.tsl2.nano.specification.documentconsumer.FileImportConsumer;
 import de.tsl2.nano.specification.documentconsumer.SimpleDocumentTag;
 import de.tsl2.nano.specification.documentconsumer.SpecificationExchangeConsumer;
 import de.tsl2.nano.specification.documentconsumer.WorkflowConsumer;
-import de.tsl2.nano.util.FilePath;
 
 /**
  * reads a document like a markdown text, delegates the work through registered workers on tags to work on the content between the chapters.

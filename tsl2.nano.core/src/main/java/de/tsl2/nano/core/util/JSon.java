@@ -1,9 +1,8 @@
 package de.tsl2.nano.core.util;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,7 +13,6 @@ import java.util.regex.Pattern;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
-import de.tsl2.nano.core.cls.PrivateAccessor;
 
 public class JSon {
 	// final String JSON_NOQUOT = "[{\\[]((\\s*\\w++\\s*)[:](\\s*[^,\\s]*?\\s*)[,]?)*\\}";
@@ -33,18 +31,24 @@ public class JSon {
     	return toJSon(obj, new StringBuilder(), new LinkedList<>());
     }
     static String toJSon(Object obj, StringBuilder json, List tree) {
+		if (Util.isJavaInternal(obj.getClass())) {
+			return "";
+		}
     	if (tree.contains(obj))
     		obj = "@" + tree.indexOf(obj);
-    	if (Class.class.isAssignableFrom(obj.getClass())) {
-    		return "{" + obj.getClass().getName() + "}";
-    	} else if (Proxy.isProxyClass(obj.getClass()) && Proxy.getInvocationHandler(obj) instanceof AdapterProxy) {
+		if (obj instanceof Class) {
+			return "{" + ((Class) obj).getName() + "}";
+		} else if (obj instanceof Method) {
+			return "{" + ((Method) obj).toGenericString() + "}";
+		} else if (Proxy.isProxyClass(obj.getClass()) && Proxy.getInvocationHandler(obj) instanceof AdapterProxy) {
     		return toMapJson(obj, json, tree, ((AdapterProxy)Proxy.getInvocationHandler(obj)).values());
     	} else if (ObjectUtil.isSingleValueType(obj.getClass())) {
     		if (ObjectUtil.isSimpleType(obj.getClass()))
     			return FormatUtil.format(obj);
-	    	Map<String, Object> m = new HashMap<>();
-	    	new PrivateAccessor<>(obj).setUseDefiningClass(true).forEachMember( (n, v) -> m.put(n, v));
-	    	return toMapJson(obj, json, tree, m);
+			return toMapJson(obj, json, tree, FieldUtil.toSerializingMap(obj));
+		} else if (obj.getClass().isArray() && obj.getClass().getComponentType().isPrimitive()) {
+			tree.add(obj);
+			return PrimitiveUtil.toArrayString(obj);
     	} else if (ByteUtil.isByteStream(obj.getClass())) {
     		tree.add(obj);
     		return ByteUtil.toString(obj);
@@ -55,9 +59,12 @@ public class JSon {
     		Object[] orr = ((Object[])obj);
     		Object[] arr = /*orr instanceof Object[] || orr instanceof String[] ? orr : */new String[orr.length];
     		for (int i = 0; i < arr.length; i++) {
-				arr[i] = Util.isSimpleType(orr[i].getClass()) ? FormatUtil.format(orr[i]) : toJSon(orr[i], json, tree);
+				if (orr[i] != null) {
+					arr[i] = Util.isSimpleType(orr[i].getClass()) ? FormatUtil.format(orr[i])
+							: toJSon(orr[i], json, tree);
+				}
 			}
-    		return "{" + StringUtil.concatWrap("\"{0}\"".toCharArray(), arr).replace("\"\"", "\",\"") + "}";
+			return "[" + StringUtil.concatWrap("\"{0}\"".toCharArray(), arr).replace("\"\"", "\",\"") + "]";
     	} else
     		return toMapJson(obj, json, tree, (Map) obj);
     }
@@ -80,16 +87,16 @@ public class JSon {
                 continue;
             else if (tree.contains(v))
             	v = "@" + tree.indexOf(v);
-            else if (v.getClass().isArray()) {
-                tree.add(v);
-            	if (v.getClass().getComponentType().isPrimitive())
-            		v = PrimitiveUtil.toArrayString(v);
-            	else
-            		v = Arrays.toString((Object[])v);
-            } else if (!Util.isInstanceable(v.getClass()) || json.length() > Runtime.getRuntime().freeMemory() / 16 ) //avoid OutOfMemoryError
-        		v = v.toString();
+			// else if (v.getClass().isArray()) {
+			//     tree.add(v);
+			// 	if (v.getClass().getComponentType().isPrimitive())
+			// 		v = PrimitiveUtil.toArrayString(v);
+			// 	else
+			// 		v = Arrays.toString((Object[])v);
+			// } else if (!Util.isInstanceable(v.getClass()) || json.length() > Runtime.getRuntime().freeMemory() / 16 ) //avoid OutOfMemoryError
+			// 	v = v.toString();
             json.append("\"" + k + "\": \""); // we have to split the appending to have the strings in the right order!
-            json.append(ENV.get("tsl2.json.recursive", false) ? toJSon(v, json, tree) : v);
+			json.append(ENV.get("tsl2.json.recursive", true) ? toJSon(v, json, tree) : v);
             json.append("\",");
         }
         if (json.length() > 1 && json.charAt(json.length() - 1) == ',')

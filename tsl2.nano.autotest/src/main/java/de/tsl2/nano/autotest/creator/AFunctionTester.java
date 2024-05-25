@@ -176,10 +176,18 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 		Throwable expectedFail;
 		String emsg;
 		if ((expectedFail = getExpectFail()) != null) {
+			/*
+			 * on exptected             : "IllegalArgumentException: argument type mismatch"
+			 * the end test results with: "IllegalArgumentException: ClassCastException@<HASHVALUE>"
+			 *  -> same Callstack, same Problem, but there are diffent MethodAccessor Implementations envolved:
+			 *     1. NativeMethodAccessorImpl
+			 *     2. GeneratedMethodAccessor1
+			 * don't know why, but as the methods are not invoked, the test can/should fail!
+			 */
 			if (error == null)
-				fail("test should fail with " + expectedFail + " but has result: " + getResult());
+				fail("test should fail with:\n\t" + expectedFail + "\nbut has result:\n\t" + getResult());
 			else if (!getErrorMsg(expectedFail).contains((emsg = getErrorMsg(error)).substring(0, Math.min(150, emsg.length()))))
-				fail("test should fail with " + expectedFail + " but failed with: " + error);
+				fail("test should fail with:\n\t" + expectedFail + " but failed with:\n\t" + error);
 			return true;
 		}
 		return false;

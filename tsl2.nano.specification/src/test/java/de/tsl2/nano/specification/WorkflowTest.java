@@ -16,12 +16,12 @@ import de.tsl2.nano.autotest.TypeBean;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
+import de.tsl2.nano.core.util.FilePath;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.specification.actions.Action;
 import de.tsl2.nano.specification.rules.Rule;
 import de.tsl2.nano.specification.rules.RuleDecisionTable;
 import de.tsl2.nano.specification.rules.RuleScript;
-import de.tsl2.nano.util.FilePath;
 
 public class WorkflowTest implements ENVTestPreparation{
 	@Before

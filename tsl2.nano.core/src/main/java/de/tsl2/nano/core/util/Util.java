@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.security.MessageDigest;
 import java.text.Format;
 import java.text.ParseException;
@@ -80,6 +81,10 @@ public class Util {
      */
     public static boolean isJavaType(Class<?> cls) {
         return cls.getPackage() != null && cls.getPackage().getName().startsWith("java");
+    }
+
+    public static boolean isJavaInternal(Class<?> cls) {
+        return cls.getPackage() != null && cls.getPackage().getName().startsWith("jdk.internal");
     }
 
     public static boolean isSimpleType(Class<?> cls) {
@@ -164,9 +169,18 @@ public class Util {
      */
     @SuppressWarnings("rawtypes")
     public static final boolean isEmpty(Object obj) {
-        return isEmpty(obj, false) || obj == UnboundAccessor.NULL || (obj.getClass().isArray() && Array.getLength(obj) == 0)
-            || ((obj instanceof Collection) && ((Collection) obj).isEmpty())
-            || ((obj instanceof Map) && ((Map) obj).isEmpty());
+        if (obj == null || obj == UnboundAccessor.NULL)
+            return true;
+        else if (obj.getClass().isArray())
+            return Array.getLength(obj) == 0;
+        else if (obj instanceof Collection)
+            return ((Collection) obj).isEmpty();
+        else if (obj instanceof Map)
+            return ((Map) obj).isEmpty();
+        else if (Proxy.isProxyClass(obj.getClass()) && (Proxy.getInvocationHandler(obj) instanceof AdapterProxy))
+            return ((AdapterProxy) Proxy.getInvocationHandler(obj)).values().isEmpty();
+        else
+            return isEmpty(obj, false);
     }
 
     /**

@@ -42,6 +42,19 @@ public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
 	public static final <T> T def(AutoTest pref, T value) {
 		return IPreferences.get(pref, value);
 	}
+
+	public static final String defs(AutoTest pref) {
+		return def(pref, String.class);
+	}
+
+	public static final boolean defb(AutoTest pref) {
+		return def(pref, boolean.class);
+	}
+
+	public static final int defn(AutoTest pref) {
+		return def(pref, int.class);
+	}
+
 	public static final <T> T def(AutoTest pref, Class<T> type) {
 		return IPreferences.get(pref, type);
 	}
@@ -59,7 +72,7 @@ public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
 	}
 
 	protected Object[] getParameter() {
-		if (parameter == null)
+		if (parameter == null && !status.isFatal())
 			try {
 				parameter = createStartParameter(source.getParameterTypes());
 			} catch (Exception e) {
@@ -88,8 +101,14 @@ public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
 
 	@Override
 	public void run() {
-		run(source, getParameter());
-		status = result != null ? Status.OK : Status.NULL_RESULT;
+		ADefaultAutoTester defaultAutoTester = new ADefaultAutoTester();
+		try {
+			defaultAutoTester.setUp();
+			run(source, getParameter());
+			status = result != null ? Status.OK : Status.NULL_RESULT;
+		} finally {
+			defaultAutoTester.tearDown();
+		}
 	}
 	
 	public void runWithTimeout() {
@@ -133,7 +152,11 @@ public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
 			if (construction != null && construction.instance != null && cls.isAssignableFrom(construction.instance.getClass()))
 				return construction.instance;
 			else {
-				construction = ValueRandomizer.constructWithRandomParameters(cls);
+				if (!status.isFatal()) {
+					construction = ValueRandomizer.constructWithRandomParameters(cls);
+				} else {
+					throw status.err;
+				}
 			}
 		} catch(Throwable ex) {
 			status = new Status(StatusTyp.INSTANCE_ERROR, ex.toString(), ex);
@@ -189,7 +212,8 @@ public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
 enum StatusTyp {
 	NEW(0), FUNC_SYNTHETIC(1), FUNC_WITHOUT_INTPUT(1), FUNC_WITHOUT_OUTPUT(1), FUNC_COMPLEX_INPUT(1)
 	, PARAMETER_UNDEFINED(-9), PARAMETER_ERROR(-9), INITIALIZED(2), INSTANCE_ERROR(-9)
-	, NULL_RESULT(1), EXECUTION_ERROR(-1), OK(2), STORE_ERROR(-1), TEST_FAILED(-3), TESTED(4);
+	, NULL_RESULT(1), TYPECONVERSION_CHECK_FAIL(1), EXECUTION_ERROR(-1), OK(2), STORE_ERROR(-1), TEST_FAILED(-3),
+	TESTED(4);
 	int level; //to categorize a state
 	StatusTyp(int level) {this.level = level;};
 }
@@ -206,6 +230,7 @@ class Status {
 	static final Status FUNC_WITHOUT_INPUT = new Status(StatusTyp.FUNC_WITHOUT_INTPUT);
 	static final Status FUNC_COMPLEX_INPUT = new Status(StatusTyp.FUNC_COMPLEX_INPUT);
 	static final Status FUNC_WITHOUT_OUTPUT = new Status(StatusTyp.FUNC_WITHOUT_OUTPUT);
+	static final Status TYPECONVERSION_CHECK_FAIL = new Status(StatusTyp.TYPECONVERSION_CHECK_FAIL);
 
 	public Status(StatusTyp typ) {
 		this(typ, null, null);

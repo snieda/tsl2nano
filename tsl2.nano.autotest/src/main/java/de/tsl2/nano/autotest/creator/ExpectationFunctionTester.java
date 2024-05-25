@@ -78,7 +78,7 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 			try {
 				construction = new Construction(null);
 				construction.parameter = createParameterFromStringArr(expect.constructTypes(), expect.construct());
-				construction.instance = BeanClass.createInstance(source.getDeclaringClass(), parameter);
+				construction.instance = BeanClass.createInstance(source.getDeclaringClass(), construction.parameter);
 				return construction.instance;
 			} catch (Exception e) {
 				return super.getInstance(method);
@@ -152,8 +152,7 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 			result = UNDEFINED;
 			return;
 		}
-		result = run(source, parameter);
-		status = result != null ? Status.OK : Status.NULL_RESULT;
+		super.run();
 	}
 	@Override
 	public int hashCode() {

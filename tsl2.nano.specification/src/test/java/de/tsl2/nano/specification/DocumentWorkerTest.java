@@ -9,8 +9,8 @@ import org.junit.Test;
 
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.ENVTestPreparation;
+import de.tsl2.nano.core.util.FilePath;
 import de.tsl2.nano.core.util.FileUtil;
-import de.tsl2.nano.util.FilePath;
 
 public class DocumentWorkerTest implements ENVTestPreparation {
 	boolean specCalled = false;

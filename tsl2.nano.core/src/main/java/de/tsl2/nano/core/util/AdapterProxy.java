@@ -73,7 +73,8 @@ public class AdapterProxy implements InvocationHandler {
 		else {
 			try {
 				toStringRecursion = true;
-				return "{\"" + proxy.getClass().getInterfaces()[0].getSimpleName() + "(" + proxy.getClass().getSimpleName() + ")\":" + getClass().getSimpleName() + ")" 
+                return "{\"" + proxy.getClass().getInterfaces()[0].getSimpleName() + "("
+                        + proxy.getClass().getSimpleName() + ":" + getClass().getSimpleName() + ")\""
 						+ ": " + MapUtil.toJSon(values) + "}";
 			} finally {
 				toStringRecursion = false;

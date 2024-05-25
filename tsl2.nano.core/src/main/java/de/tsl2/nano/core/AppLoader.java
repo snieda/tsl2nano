@@ -198,6 +198,9 @@ public class AppLoader {
                 + "\n"
                 + "#############################################################\n");
 
+            if (mainclass == null) {
+                throw new IllegalArgumentException("Please provide a mainclass through args|manifest|config-file");
+            }
             //TODO: should be removed after resolving access problems
             noSecurity();
             useUTF8();

@@ -16,6 +16,7 @@ import org.junit.runners.Suite.SuiteClasses;
 import de.tsl2.nano.autotest.ValueRandomizer;
 import de.tsl2.nano.autotest.creator.ADefaultAutoTester;
 import de.tsl2.nano.autotest.creator.AutoFunctionTest;
+import de.tsl2.nano.autotest.creator.AutoTest;
 import de.tsl2.nano.autotest.creator.CurrentStatePreservationTest;
 import de.tsl2.nano.autotest.creator.InitAllAutoTests;
 import de.tsl2.nano.bean.BeanContainer;
@@ -25,10 +26,14 @@ import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.DependencyInjector;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.resource.fs.FsConnection;
+import de.tsl2.nano.service.feature.FeatureProxy;
+import de.tsl2.nano.service.schedule.JobScheduleServiceBean;
 import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.service.util.GenericServiceBean;
 import de.tsl2.nano.service.util.IGenericService;
+import de.tsl2.nano.service.util.ServiceRunner;
 import de.tsl2.nano.service.util.ServiceUtil;
+import de.tsl2.nano.service.util.batch.CachingBatchloader;
 import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.IAuthorization;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
@@ -39,12 +44,16 @@ import de.tsl2.nano.serviceaccess.ServiceProxy;
 public class AllAutoTests {
 
 	public static void init() {
-		// ConfigBeanContainer.initAuthAndLocalBeanContainer();
+		ConfigBeanContainer.initAuthAndLocalBeanContainer();
 
 		System.setProperty("tsl2.functiontest.filter",
-				matchPackage(FsConnection.class, ServiceUtil.class, ServiceFactory.class, GenericServiceBean.class));
+				matchPackage(FsConnection.class, ServiceUtil.class, ServiceFactory.class, GenericServiceBean.class,
+						JobScheduleServiceBean.class, FeatureProxy.class, CachingBatchloader.class,
+						ServiceRunner.class));
 		System.setProperty("tsl2.functiontest.filter.exclude", ".*(FsManagedConnection.setLogWriter|FsManagedConnectionFactory.setLogWriter|PrintWriter|DefaultService.getSubject).*");
-		System.setProperty(ADefaultAutoTester.KEY_AUTOTEST_INITMOCKITO, "false");
+		System.setProperty(AutoTest.PREFIX_FUNCTIONTEST + "fillinstance", "true");
+		System.setProperty("tsl2nano.autotest.inject.beanattributes", "true");
+		System.setProperty(ADefaultAutoTester.KEY_AUTOTEST_INITMOCKITO, "true");
 		System.setProperty(DependencyInjector.KEY_INJECTORANNOTATIONS,
 				StringUtil.trim(Arrays.toString(ADefaultAutoTester.DEFAULT_MOCK_CLASSNAMES), "{}[]"));
 

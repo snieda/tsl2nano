@@ -45,7 +45,7 @@ import de.tsl2.nano.core.log.LogFactory;
  * @author Tom
  * @version $Revision$ 
  */
-public class ObjectUtil extends FieldUtil {
+public class ObjectUtil extends MethodUtil {
     private static final Log LOG = LogFactory.getLog(ObjectUtil.class);
     private static final List<String> STD_TYPE_PKGS;
 
@@ -180,7 +180,7 @@ public class ObjectUtil extends FieldUtil {
         //on array types, the package is null!
         String p = type.getPackage() != null ? type.getPackage().getName() : type.getClass().getName();
         p = StringUtil.extract(p, "\\w+[.]\\w+");
-        return type.isInterface() || STD_TYPE_PKGS.contains(p);
+        return type.isInterface() && STD_TYPE_PKGS.contains(p);
     }
 
     /**
@@ -348,9 +348,12 @@ public class ObjectUtil extends FieldUtil {
             if (value != null && !PrimitiveUtil.isAssignableFrom(wrapperType, value.getClass())) {
             	if (wrapperType.isInterface() || Modifier.isAbstract(wrapperType.getModifiers()))
             		wrapperType = getDefaultImplementation(wrapperType);
-                if (Class.class.isAssignableFrom(wrapperType))
+                if (Class.class.isAssignableFrom(wrapperType)) {
                     return (T) BeanClass.load(StringUtil.substring(StringUtil.substring(value.toString(), "class ", "@"), "{", "}"));
-                else {
+                } else if (Method.class.isAssignableFrom(wrapperType)) {
+                    return (T) MethodUtil.fromGenericString(
+                            StringUtil.substring(StringUtil.substring(value.toString(), "method ", "@"), "{", "}"));
+                } else {
                 	if (value instanceof CharSequence && CharSequence.class.isAssignableFrom(wrapperType))
                 		return String.class.isAssignableFrom(wrapperType) ? (T) value.toString() : BeanClass.createInstance(wrapperType, value);
                     if (PrimitiveUtil.isPrimitiveOrWrapper(wrapperType))
@@ -362,9 +365,17 @@ public class ObjectUtil extends FieldUtil {
                     else if (Collection.class.isAssignableFrom(wrapperType))
                         return (T )new ListSet(value);
                     else if (value instanceof Map && (wrapperType.isInterface() || wrapperType.equals(Properties.class)) 
-                            && Map.class.isAssignableFrom(wrapperType))
+                            && Map.class.isAssignableFrom(wrapperType)) {
                         return (T) MapUtil.toMapType((Map)value, (Class<Map>)wrapperType);
-                    else if (value instanceof String && JSon.isJSon((String)value)) {
+                    } else if (wrapperType.isArray() && value instanceof String) {
+                        return (T) MapUtil.asArray(wrapperType.getComponentType(), (String) value);
+                    } else if (wrapperType.isArray()
+                            && PrimitiveUtil.isAssignableFrom(wrapperType.getComponentType(), value.getClass())) {
+                        return (T) MapUtil.asArray(wrapperType.getComponentType(), value);
+                    } else if (wrapperType.isArray() && isInstanceable(wrapperType.getComponentType())) {
+                        return (T) MapUtil.asArray(wrapperType.getComponentType(),
+                                BeanClass.createInstance(wrapperType.getComponentType(), value));
+                    } else if (value instanceof String && JSon.isJSon((String) value)) {
                         if (Map.class.isAssignableFrom(wrapperType)) {
                             Map jsonMap = MapUtil.fromJSon((String)value);
                             return (T) (wrapperType.isInterface() ? MapUtil.toMapType(jsonMap, (Class<Map>)wrapperType) : jsonMap);
@@ -373,12 +384,6 @@ public class ObjectUtil extends FieldUtil {
                         } else {
                             JSon.toObject(wrapperType, (String)value);
                         }
-                    } else if (wrapperType.isArray() && value instanceof String) {
-                    	return (T) MapUtil.asArray(wrapperType.getComponentType(), (String)value);
-                    } else if (wrapperType.isArray() && PrimitiveUtil.isAssignableFrom(wrapperType.getComponentType(),value.getClass())) {
-                    	return (T) MapUtil.asArray(wrapperType.getComponentType(), value);
-                    } else if (wrapperType.isArray() && isInstanceable(wrapperType.getComponentType())) {
-                    	return (T) MapUtil.asArray(wrapperType.getComponentType(), BeanClass.createInstance(wrapperType.getComponentType(), value));
 					} else if (hasValueOfMethod(wrapperType, value))
                     	return (T) BeanClass.call(wrapperType, "valueOf", true, value);
 					else if (wrapperType.isEnum() && value instanceof Number)

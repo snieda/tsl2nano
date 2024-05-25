@@ -18,6 +18,7 @@ import static de.tsl2.nano.autotest.creator.AutoTest.FILTER_TEST;
 import static de.tsl2.nano.autotest.creator.AutoTest.FILTER_UNSUCCESSFUL;
 import static de.tsl2.nano.autotest.creator.AutoTest.FILTER_VOID_PARAMETER;
 import static de.tsl2.nano.autotest.creator.AutoTest.FILTER_VOID_RETURN;
+import static de.tsl2.nano.autotest.creator.AutoTest.MAX_LINE_LENGTH;
 import static de.tsl2.nano.autotest.creator.AutoTest.MODIFIER;
 import static de.tsl2.nano.autotest.creator.AutoTest.PARALLEL;
 import static de.tsl2.nano.autotest.creator.AutoTest.PRECHECK_TWICE;
@@ -83,7 +84,7 @@ import de.tsl2.nano.core.util.Util;
  */
 public class AutoTestGenerator {
 	private static final String REGEX_UNMATCH = "XXXXXXXX";
-	static String fileName = def(FILENAME, "generated/generated-autotests-");
+	static String fileName = def(FILENAME, String.class).replace("autotest/", "");
 	int methods_loaded = 0;
 	int count = 0;
 	int fails = 0;
@@ -261,7 +262,7 @@ public class AutoTestGenerator {
 	private void writeExpectation(AFunctionCaller f, AtomicReference<BufferedWriter> writer) {
 		Thread.currentThread().setUncaughtExceptionHandler(uncaughtExceptionHandler );
 		try {
-			log("writeExpectation", progress);
+			log("writeExpectation: " + f.getFunctionDescription(), progress);
 			String then = null;
 			try {
 				if (f.source.isSynthetic() || f.source.isBridge() || f.source.getName().startsWith("$")) // -> e.g. $jacocoInit() -> javaagent code enhancing
@@ -299,7 +300,8 @@ public class AutoTestGenerator {
 					}
 				}
 			}
-			if (f.getResult() != null && !FunctionCheck.checkTypeConversion(f.getResult())) {
+			if (f.getResult() != null && def(FILTER_UNSUCCESSFUL, false)
+					&& !FunctionCheck.checkTypeConversion(f.getResult())) {
 				writeFilteredFunctionCall(f);
 				filter_typeconversions++;
 				return;
@@ -327,7 +329,12 @@ public class AutoTestGenerator {
 	}
 
 	private void writeFilteredFunctionCall(AFunctionCaller f) {
-		writeFilteredFunctionCall(f.toString() + "\n");
+		String fct = f.toString();
+		if (fct.length() > def(MAX_LINE_LENGTH, Integer.class)) {
+			log(f.getFunctionDescription() + " with to long parameter json string: " + fct.length());
+			fct = fct.substring(0, def(MAX_LINE_LENGTH, Integer.class)) + "...";
+		}
+		writeFilteredFunctionCall(fct + "\n");
 	}
 	private void writeFilteredFunctionCall(String call) {
 		Util.trY(() -> filteredFunctionWriter.get().append(call), false);
@@ -352,7 +359,9 @@ public class AutoTestGenerator {
 			} else {
 				if (l.matches("\\w+.*\\(.*\\)(\\s+throws.+)?")) {
 					method = ExpectationCreator.extractMethod(l);
-					progress.increase(method != null ? " " + method.getDeclaringClass().getSimpleName() + "." + method.getName() : " ...");
+					progress.increase(" " + iteration + ": " + method != null
+							? " " + method.getDeclaringClass().getSimpleName() + "." + method.getName()
+							: " ...");
 					if (method != null)
 						expTesters.add(new ExpectationFunctionTester(iteration, method, exp));
 					else
@@ -398,6 +407,7 @@ public class AutoTestGenerator {
 				+ "\n\tfiltered nulls        : " + filter_nullresults
 				+ "\n\tmax duration          : " + (maxDurationFct != null ? maxDurationFct.duration + " msec\t\t<- "  + maxDurationFct.cloneIndex + ":" + maxDurationFct.getFunctionDescription() : "")
 				+ "\n\tmax mem usage         : " + (maxMemUsageFct != null ? ByteUtil.amount(maxMemUsageFct.memusage) + "\t\t\t<- " + maxMemUsageFct.cloneIndex + ":" + maxMemUsageFct.getFunctionDescription() : "")
+				+ "\n\tuncaught exceptions   : " + uncaughtExceptionHandler.getExceptions().size()
 				+ groupByState
 				+ "\nLOADING PROCESS:"
 				+ "\n\tfiltered unsuccessful : " + filter_unsuccessful
@@ -406,7 +416,6 @@ public class AutoTestGenerator {
 				+ "\n\ttotally loaded        : " + testers.size() + " (load-rate: " + (testers.size() / (float)dup) / (float)methods_loaded + ", total-rate: " 
 												 + (testers.size() / dup) / (float)ClassFinder.self().getLoadedMethodCount()  + ")"
 				+ "\n\n" + ValueRandomizer.getDependencyInjector();
-				;
 		AFunctionTester.log(p + s +p);
 		FileUtil.writeBytes((p + s + p).getBytes(), getTimedFileName() + "statistics.txt", true);
 	}
@@ -429,7 +438,8 @@ class Statistics {
 }
 
 class ExpectationCreator {
-	private static final String PREF_WHEN = "@" + Expectations.class.getSimpleName() + "({@" + Expect.class.getSimpleName() + "( when = {";
+	private static final String PREF_WHEN = "@" + Expectations.class.getSimpleName() + "({@"
+			+ Expect.class.getSimpleName() + "( when = [";
 	private static final String PREF_THEN = "then = \"-->";
 	private static final String POST_THEN = "<--\"";
 	private static final String PREF_CONSTRUCT = "construct = {";
@@ -447,7 +457,8 @@ class ExpectationCreator {
 					+ " " + PREF_THEN + then + POST_THEN
 					+ (f.construction != null && f.construction.parameter != null ? 
 							" constructTypes = " + Util.toJson(f.getConstruction().constructor.getParameterTypes())
-							+ " construct = " + Util.toJson(f.getConstruction().parameter) : "") 
+									+ " construct = " + Util.toJson(prepareParameter(f.getConstruction().parameter))
+							: "")
 					+ ")})\n"
 					+ f.source + "\n\n";
 			// expect = expect.replace("]}", "}");
@@ -456,6 +467,15 @@ class ExpectationCreator {
 			f.status = new Status(StatusTyp.STORE_ERROR, null, e);
 			return null;
 		}
+	}
+
+	private static Object[] prepareParameter(Object[] parameter) {
+		for (int i = 0; i < parameter.length; i++) {
+			if (parameter[i] instanceof Class) {
+				parameter[i] = ((Class) parameter[i]).getName();
+			}
+		}
+		return parameter;
 	}
 
 	private static String asString(Object obj) {
@@ -483,7 +503,7 @@ class ExpectationCreator {
 
 	private static String[] extractArray(String l, String prefix) {
 		String arr[] = null, all;
-		all = StringUtil.substring(l, prefix, "} ", 0, true);
+		all = StringUtil.substring(l, prefix, "] ", 0, true);
 		if (all == null) {
 			all = StringUtil.substring(l, prefix, "})", 0, true);
 		}

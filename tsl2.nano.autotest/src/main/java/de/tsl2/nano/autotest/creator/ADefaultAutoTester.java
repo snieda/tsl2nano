@@ -6,9 +6,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
 import org.mockito.MockitoAnnotations;
 
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.Util;
 
 public class ADefaultAutoTester {
@@ -25,10 +26,24 @@ public class ADefaultAutoTester {
             "javax.ws.rs.client.Client"
     };
 
-    @Before
+    // @Before  <- setUp() is explicitly called on each AFuctionCaller.run()
     public void setUp() {
-        if (Boolean.getBoolean(System.getProperty(KEY_AUTOTEST_INITMOCKITO, "true"))) {
+        if (Boolean.getBoolean(System.getProperty(KEY_AUTOTEST_INITMOCKITO, "false"))) {
             provideDefaultMocks(this);
+        }
+        try {
+            BeanClass.callStatic("de.tsl2.nano.util.autotest.creator.AllAutoTests", "before");
+        } catch (ManagedException e) {
+            // Ok, not available
+        }
+    }
+
+    // @After <- tearDown is explicitly called on each AFuctionCaller.run()
+    public void tearDown() {
+        try {
+            BeanClass.callStatic("de.tsl2.nano.util.autotest.creator.AllAutoTests", "after");
+        } catch (ManagedException e) {
+            // Ok, not available
         }
     }
 

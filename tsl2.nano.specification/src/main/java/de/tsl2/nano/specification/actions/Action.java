@@ -16,8 +16,7 @@ import java.util.Map;
 import org.simpleframework.xml.Attribute;
 
 import de.tsl2.nano.core.cls.BeanClass;
-import de.tsl2.nano.core.cls.PrivateAccessor;
-import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.MethodUtil;
 import de.tsl2.nano.specification.AbstractRunnable;
 import de.tsl2.nano.specification.ParType;
 
@@ -72,10 +71,7 @@ public class Action<T> extends AbstractRunnable<T> {
      * @return 
      */
     public static Method getMethod(String method) {
-        String clsName = StringUtil.substring(method, null, ".", true);
-        String methodName = StringUtil.substring(method, ".", null, true);
-        Class<?> cls = BeanClass.load(clsName);
-        return PrivateAccessor.findMethod(cls, methodName, null).iterator().next();
+        return MethodUtil.fromGenericString(method);
     }
     
     /**

@@ -36,7 +36,7 @@ public class AutoFunctionTest extends ADefaultAutoTester {
 	}
 
 	@AfterClass
-	public static void tearDown() {
+	public static void tearDownClass() {
 		ValueRandomizer.reset();
 		IPreferences.reset();
 	}

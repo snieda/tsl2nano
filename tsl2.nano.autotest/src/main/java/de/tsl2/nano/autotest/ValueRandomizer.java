@@ -16,9 +16,12 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
+import java.text.Format;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 
 import de.tsl2.nano.autotest.creator.AFunctionCaller;
 import de.tsl2.nano.autotest.creator.AutoTest;
@@ -40,6 +44,7 @@ import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.util.AdapterProxy;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.DateUtil;
+import de.tsl2.nano.core.util.DefaultFormat;
 import de.tsl2.nano.core.util.DependencyInjector;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.ListSet;
@@ -98,10 +103,13 @@ public class ValueRandomizer {
 	}
 
 	public static <V> V createRandomProxy(Class<V> interfaze, boolean zeroNumber, final int depth) {
+		if (!checkMaxDepth(depth + 1)) {
+			return null;
+		}
 		Map<String, Class> types = AdapterProxy.getValueTypes(interfaze);
 		Map<String, Object> values = new HashMap<>();
 		types.forEach(
-				(n, t) -> values.put(n, t.equals(interfaze) ? null
+				(n, t) -> values.put(n, t.isAssignableFrom(interfaze) || interfaze.isAssignableFrom(interfaze) ? null
 						: createRandomValue(t, zeroNumber, depth)));
 		return AdapterProxy.create(interfaze, values);
 	}
@@ -159,11 +167,13 @@ public class ValueRandomizer {
 				return null;
 			}
 		}
-		try {
-			di.inject(value);
-			injectTestBeanAttributes(value, zeroNumber, depth);
-		} catch (Exception e) {
-			// Ok, we cannot inject - but the value is already created, so its not a problem....
+		if (Boolean.getBoolean("tsl2nano.autotest.inject.beanattributes")) {
+			try {
+				di.inject(value);
+				injectTestBeanAttributes(value, zeroNumber, depth);
+			} catch (Exception e) {
+				// Ok, we cannot inject - but the value is already created, so its not a problem....
+			}
 		}
 		return value;
 	}
@@ -178,6 +188,9 @@ public class ValueRandomizer {
 	}
 
 	private static Object convert(Object n, Class typeOf, boolean zeroNumber, int depth) {
+		if (typeOf.isAssignableFrom(n.getClass())) {
+			return n;
+		}
 		if (BeanClass.hasConstructor(typeOf, long.class))
 			n = ((Number) n).longValue(); // -> Date
 		else if (typeOf.equals(Class.class)) {
@@ -191,12 +204,18 @@ public class ValueRandomizer {
 			n = URI.create("http://localhost");
 		} else if (URL.class.isAssignableFrom(typeOf)) {
 			n = Util.trY(() -> URI.create("http://localhost").toURL());
+		} else if (InetAddress.class.isAssignableFrom(typeOf)) {
+			n = Util.trY(() -> InetAddress.getLocalHost());
+		} else if (InetSocketAddress.class.isAssignableFrom(typeOf)) {
+			n = Util.trY(() -> InetSocketAddress.createUnresolved("localhost", 0));
 		} else if (typeOf.isEnum()) {
 			if (n instanceof Number) {
 				n = typeOf.getEnumConstants()[((Number) n).intValue()];
 			} else {
 				throw new IllegalArgumentException(typeOf + " -> " + n);
 			}
+		} else if (Format.class.isAssignableFrom(typeOf)) {
+			n = new DefaultFormat();
 		} else if (Method.class.isAssignableFrom(typeOf)) {
 				n = Util.trY( () -> TypeBean.class.getMethod("getString"));
 		} else if (Field.class.isAssignableFrom(typeOf)) {
@@ -245,7 +264,6 @@ public class ValueRandomizer {
 				constructor = (Constructor<?>) Util.trY( () -> typeOf.getConstructor(File.class));
 				parameters = new Object[] { FileUtil.userDirFile(createRandomValue(String.class, zeroNumber, depth)) };
 			} else {
-				//TODO: perhaps, we should loop over all constructors until we can create the instance...
 				constructor = getBestConstructor(typeOf);
 				if (constructor == null)
 					throw new RuntimeException(typeOf + " is not constructable!");
@@ -256,7 +274,9 @@ public class ValueRandomizer {
 			constructor.setAccessible(true);
 			V instance = (V) constructor.newInstance(parameters);
 			try {
-				di.inject(instance);
+				if (Boolean.getBoolean("tsl2nano.autotest.inject.beanattributes")) {
+					di.inject(instance);
+				}
 				if (constructor.getParameterCount() == 0
 						&& Boolean.getBoolean(AutoTest.PREFIX_FUNCTIONTEST + "fillinstance"))
 					instance = fillRandom(instance, zeroNumber, depth);
@@ -280,13 +300,36 @@ public class ValueRandomizer {
 
 	private static <T> Constructor<T> getBestConstructor(Class<T> typeOf) {
 		Constructor<T>[] cs = (Constructor<T>[]) typeOf.getDeclaredConstructors();
+		BiFunction<Constructor, Integer, Boolean> lowerParLength = (c, i) -> 0 < c.getParameterTypes().length
+				&& c.getParameterTypes().length < i;
+		int bestLength = Integer.MAX_VALUE;
+		int selection = -1;
 		for (int i = 0; i < cs.length; i++) {
-			if (cs[i].getParameterTypes().length == 1)
-				return cs[i];
+			if (lowerParLength.apply(cs[i], bestLength) && hasSimpleTypes(cs[i].getParameterTypes())) {
+				selection = i;
+				bestLength = cs[i].getParameterTypes().length;
+			}
 		}
-		if (BeanClass.hasDefaultConstructor(typeOf))
-			return Util.trY(() -> typeOf.getDeclaredConstructor(new Class[0]));
-		return cs.length > 0 ? cs[0] : null;
+		if (selection == -1) {
+			for (int i = 0; i < cs.length; i++) {
+				if (lowerParLength.apply(cs[i], bestLength)) {
+					selection = i;
+					bestLength = cs[i].getParameterTypes().length;
+				}
+			}
+			if (selection == -1) {
+				if (BeanClass.hasDefaultConstructor(typeOf)) {
+					return Util.trY(() -> typeOf.getDeclaredConstructor(new Class[0]));
+				}
+			} else {
+				selection = 0;
+			}
+		}
+		return cs.length > selection ? cs[selection] : null;
+	}
+
+	private static boolean hasSimpleTypes(Class<?>[] parameterTypes) {
+		return Arrays.stream(parameterTypes).allMatch(t -> Util.isSimpleType(t));
 	}
 
 	protected static <V> Object createRandomNumber(Class<V> typeOf) {
@@ -391,7 +434,7 @@ class ValueSets extends HashMap<Class, List<String>> {
 	}
 	private <V> void loadValueSet(Class<V> typeOf, String prefix) {
 		String file = valueSetFilename(typeOf);
-		System.out.print("loading valueset '" + file + "' ...");
+		System.out.print("loading valueset '" + file + "' with prefix '" + prefix + "'...");
 		String content = new String(FileUtil.getFileBytes(file, null));
 		content = content.replaceFirst("[#].*\n", "");
 		String[] names = content.split("[\n]");
@@ -404,6 +447,7 @@ class ValueSets extends HashMap<Class, List<String>> {
 	private Object avoidCollision(Object result, Class typeOf, int depth) {
 		if (!AFunctionCaller.def(AutoTest.VALUESET_AVOID_COLLISION, boolean.class) || PrimitiveUtil.isPrimitiveOrWrapper(typeOf))
 			return result;
+		// TODO: improve performance by avoiding reload
 		List<String> valueSet = get(typeOf);
 		valueSet.remove(result);
 		if (Util.isEmpty(valueSet)) {

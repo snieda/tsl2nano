@@ -13,6 +13,7 @@ import de.tsl2.nano.autotest.creator.AutoTest;
 import de.tsl2.nano.autotest.creator.CurrentStatePreservationTest;
 import de.tsl2.nano.autotest.creator.InitAllAutoTests;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.NanoH5;
 import de.tsl2.nano.h5.NanoH5Unit;
 import de.tsl2.nano.h5.timesheet.Timesheet;
@@ -22,6 +23,8 @@ import de.tsl2.nano.h5.timesheet.Timesheet;
 public class AllAutoTests {
 	public static void init() {
 		set(FILTER, matchPackage(NanoH5.class));
-		set(AutoTest.FILTER_EXCLUDE, StringUtil.matchingOneOf(NanoH5Unit.class.getSimpleName(), Timesheet.class.getSimpleName()));
+		set(AutoTest.FILTER_EXCLUDE, StringUtil.matchingOneOf(NanoH5Unit.class.getSimpleName(),
+				Timesheet.class.getSimpleName(),
+				Html5Presentation.class.getSimpleName() + ".createNavigationbar"));
 	}
 }

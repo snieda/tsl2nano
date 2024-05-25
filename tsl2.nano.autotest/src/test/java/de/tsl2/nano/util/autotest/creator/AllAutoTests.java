@@ -4,7 +4,6 @@ import static de.tsl2.nano.autotest.creator.AutoTest.DUPLICATION;
 import static de.tsl2.nano.autotest.creator.AutoTest.FILTER;
 import static de.tsl2.nano.autotest.creator.AutoTest.FILTER_EXCLUDE;
 import static de.tsl2.nano.autotest.creator.AutoTest.MODIFIER;
-import static de.tsl2.nano.autotest.creator.AutoTest.TIMEOUT;
 import static de.tsl2.nano.autotest.creator.InitAllAutoTests.matchPackage;
 import static de.tsl2.nano.autotest.creator.InitAllAutoTests.set;
 
@@ -24,6 +23,7 @@ public class AllAutoTests {
 	public static void init() {
 		System.setProperty("tsl2nano.offline", "true");
 		set(DUPLICATION, 10);
+		// set(PARALLEL, false);
 //		set(TIMEOUT, -1);
 		set(MODIFIER, -1); // public: 1
 		set(FILTER_EXCLUDE, StringUtil.matchingOneOf("ENVTestPreparation","ENV.delete","getFileOutput",
@@ -34,5 +34,6 @@ public class AllAutoTests {
 				"AnnotationProxy.setAnnotationValues", "Message.send", "PrivateAccessor.findMembers", "ValueSet", "Mail", "FieldUtil.foreach",
 				"ConcurrentUtil.waitFor"));
 		set(FILTER, matchPackage(Main.class));
+		// set(FILTER, matchMethod(BeanAttribute.class, "getGenericType", Method.class, int.class));
 	}
 }

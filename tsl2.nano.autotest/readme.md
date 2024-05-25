@@ -1,12 +1,12 @@
 # Automatic Unit Test Creation
 
-Thomas Schneider 04/2021
+Thomas Schneider 04/2021-2024
 
 ## Overview
 
-maven artifact: *net.sf.tsl2nano:tsl2.nano.autotest:2.4.7*
+maven artifact: *net.sf.tsl2nano:tsl2.nano.autotest:2.5.2*
 
-This is a java unit test generation framework to do automated tests for you. If you don't want to know, how it works and only want to check, if it works for you, go to the last chapter *All together*
+This is a java unit test generation framework to create automated tests for you. If you don't want to know, how it works and only want to check, if it works for you, go to the last chapter *All together*
 
 ![unittest-result.png](doc/unittest-result.png)
 
@@ -27,16 +27,34 @@ callable methods and tries to run them with randomized values. The result will b
 
 It is up to you to copy/paste the generated annotations to the methods in your source code then the annotations would be found be the *AutoFunctionTest*. But only if you like ;-)
 
-Using this autotest library on my tsl2 framwork with 30 maven modules and about 260.000 instructions I pushed my code coverage from 62% to 72% - and I found with that some bugs to be fixed :-)
+Using this autotest library on the tsl2 framwork with 30 maven modules and about 260.000 instructions we pushed the code coverage from 62% to 72% - and found with that some bugs to be fixed :-)
+Using only the tests from autotest on that framework, that coverage grows from zero to 50 percent or more.
 
-So, it is a solution to provide generated and reusable junit tests to enhance your tested code coverage - and to analyze the current state of a new or old software.
+So, it is a solution to provide generated and reusable junit tests to enhance your tested code coverage - and to analyze (or hold/document) the current state of a new or old software.
 
 Additionally, there are the following Implementations:
 
-* _ValueRandomizer_ : is able to create random values of any java type
-* _TypeBean_        : example implementation of a java bean holding all java types as bean attributes
-* _BaseTest_        : base class for own unit tests providing expectations and textcomparisons (ignoring defined blocks of temporary text)
-* _TextComparison_  : provides text comparisons with ignoring of defined regular expression blocks
+* _ValueRandomizer_  : is able to create random values of any java type
+* _TypeBean_         : example implementation of a java bean holding all java types as bean attributes
+* _BaseTest_         : base class for own unit tests providing expectations and textcomparisons (ignoring defined blocks of temporary text)
+* _TextComparison_   : provides text comparisons with ignoring of defined regular expression blocks
+* DependencyInjector : provides an injection mechanism to fill members after instance creation and before test method invocation
+* ADefaultAutoTester : base of the autotest Test-Classes to provide test framework integration like mockito
+
+### An Overview
+
+TODO: use 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+AllAutoTests -> {InitAllAutoTests, AutoFunctionTest, CurrentStatePreservationTest}
+InitAllAutoTests -> {AllAutoTests.init}
+AutoFunctionTest -> {InverseFunctionTester, ExpectationFunctionTester, Parameters}
+InverseFunctionTester -> "calls all functions having annotation @InverseFunction"
+ExpectationFunctionTester -> "calls all functions having annotation @Expectation"
+Parameters -> "gets result of AutoTestGenerator.createExpectationTesters()"
+AutoTestGenerator -> "creates AFunctionCaller for each method to test"
+AFunctionCaller -> "uses ValueRandomizer to create instance construction and method arguments"
+CurrentStatePreservationTest -> "uses AFunctionTester for each method with expectation to test"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Constraints: What does it not
 
@@ -49,13 +67,49 @@ Examples:
 * your method returns the count of cached objects -> that will vary on each call
 * your method returns something dependent on current system time, memory usage or file system state
 
+### What the Generator and the AutoFunctionTest do
+
+The *AutoTestGenerator* does the following steps:
+
+* perhaps, delete some files from last run
+* evaluate all methods in classpath (using ClassFinder) through given filter
+* filter methods, that does not match the configured requirements (synthetic/local/anonymous or complex types)
+* go through all remaining methods and:
+	* duplicate the methods to be run for different random arguments
+	* create instance (of declaring class) with random constructor arguments
+	* perhaps inject instances through DependencyInjector and/or *fillInstance*
+	* create random method arguments
+	* call AllAutoTests.before() if available
+	* call the method and store the resulting exception or return value
+	* call AllAutoTests.after() if available
+	* filter methods with hard errors
+	* create a @Expection annotation (when...->then...)
+* use the @Exception annotation files and:
+	* try to recreate the instance of declaring class
+	* perhaps inject instances through DependencyInjector and/or *fillInstance*
+	* try to recreate the method arguments
+	* call AllAutoTests.before() if available
+	* start the method and compare the result with the expectation
+	* call AllAutoTests.after() if available
+	* filter methods having different results on same call
+	* twice: start the method (with before and after) and compare the result with the expectation again
+	* twice: filter methods having different results on same call
+	* save text file with @Expection annotation (when...->then...)
+* save a generation/test statistic
+* load all expectations from file and return them as result
+
+Now, the *AutoFunctionTest* starts all the returned tests with expectations:
+	* run the remaining expectations  (with before and after) as real parameterized unit tests
+
+NOTE:
+* A problem can be a different environment between first method starts and the restart through a junit environment. You'll see that e.g. in different MethodAccessor implementations (NativeMethodAccessorImp: IllegalArgument: argument type mismacht <-> GeneratedMethodAccessor1: IllegalArgument: ClassCastException)
+* using the *DependencyInjection* or *fillInstance* may result in unpredictable instances on same test
+
 ### Todos and Ideas
 
-* enhance reading/writing of multiline @Expectation blocks (current: replace '\r' and '\n' with ' 'o
 * extra check *boundary conditions* to test on minimum and maximum values
-* enhance @Expect with with annotation for boundaries
+* enhance @Expect with "with" annotation for boundaries
 * interpret java bean validation annotations for value boundaries
-* avoid MalformedInputException
 
 ## Code Review
 
@@ -66,12 +120,14 @@ At the moment, we have two features with their tester implementations:
 * InverseFunction -> InverseFunctionTester
 * Expectations    -> ExpectationsTester
 
-The *AutoTestGenerator* is able to generate unit tests for all methods in your classpath. Tests the state as is.
+The *AutoTestGenerator* is able to generate unit tests for all methods in your classpath. It tests the state as is.
 
 Two parametrized Unit Tests provide the real unit tests:
 
 * *AutoFunctionTest*: will test all annotations of type _Expectation_ and _InverseFunction_
 * CurrentStatePreservationTest*: uses *AutoTestGenerator* to create Expectation Tests for all found methods
+
+Both Test classes extend the *ADefaultAutoTester* (providing mechanisms like *before*, *after* initializing e.g. test-frameworks like mockito)
 
 ## Usage of Test Annotations
 
@@ -85,7 +141,7 @@ The annotations are packed into the tsl2nano core jar. So, you need a maven depe
 	<dependency>
 		<groupId>net.sf.tsl2nano</groupId>
 		<artifactId>tsl2.nano.core</artifactId>
-		<version>2.4.7</version>
+		<version>2.5.2</version>
 		<scope>test</scope>
 	</dependency>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -96,7 +152,7 @@ the test framework *tsl2.nano.autotest*:
 	<dependency>
 		<groupId>net.sf.tsl2nano</groupId>
 		<artifactId>tsl2.nano.autotest</artifactId>
-		<version>2.4.7</version>
+		<version>2.5.2</version>
 		<scope>test</scope>
 	</dependency>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -272,6 +328,112 @@ example of using text comparison with ignore expressions:
           BaseTest.REGEX_DATE_DE, BaseTest.XXX,
           BaseTest.REGEX_TIME_DE, BaseTest.XXX,
           ));
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+### ADefaultAutoTester
+
+As base of the autotest Testclasses it tries to call your AllAutoTests class methods *before* and *after on each test - if existing. It provides the possibility to mock objects with mockito.
+
+Full Example (from tsl2.nano.serviceaccess):
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package de.tsl2.nano.util.autotest.creator;
+
+import static de.tsl2.nano.autotest.creator.InitAllAutoTests.matchPackage;
+
+import java.lang.reflect.Proxy;
+import java.util.Arrays;
+
+import javax.annotation.Resource;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+
+import de.tsl2.nano.autotest.ValueRandomizer;
+import de.tsl2.nano.autotest.creator.ADefaultAutoTester;
+import de.tsl2.nano.autotest.creator.AutoFunctionTest;
+import de.tsl2.nano.autotest.creator.CurrentStatePreservationTest;
+import de.tsl2.nano.autotest.creator.InitAllAutoTests;
+import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.bean.BeanProxy;
+import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.util.ConcurrentUtil;
+import de.tsl2.nano.core.util.DependencyInjector;
+import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.resource.fs.FsConnection;
+import de.tsl2.nano.service.feature.FeatureProxy;
+import de.tsl2.nano.service.schedule.JobScheduleServiceBean;
+import de.tsl2.nano.service.util.BeanContainerUtil;
+import de.tsl2.nano.service.util.GenericServiceBean;
+import de.tsl2.nano.service.util.IGenericService;
+import de.tsl2.nano.service.util.ServiceRunner;
+import de.tsl2.nano.service.util.ServiceUtil;
+import de.tsl2.nano.service.util.batch.CachingBatchloader;
+import de.tsl2.nano.serviceaccess.Authorization;
+import de.tsl2.nano.serviceaccess.IAuthorization;
+import de.tsl2.nano.serviceaccess.ServiceFactory;
+import de.tsl2.nano.serviceaccess.ServiceProxy;
+
+@RunWith(Suite.class)
+@SuiteClasses({InitAllAutoTests.class, AutoFunctionTest.class, CurrentStatePreservationTest.class})
+public class AllAutoTests {
+
+	public static void init() {
+		// ConfigBeanContainer.initAuthAndLocalBeanContainer();
+
+		System.setProperty("tsl2.functiontest.filter",
+				matchPackage(FsConnection.class, ServiceUtil.class, ServiceFactory.class, GenericServiceBean.class,
+						JobScheduleServiceBean.class, FeatureProxy.class, CachingBatchloader.class,
+						ServiceRunner.class));
+		System.setProperty("tsl2.functiontest.filter.exclude", ".*(FsManagedConnection.setLogWriter|FsManagedConnectionFactory.setLogWriter|PrintWriter|DefaultService.getSubject).*");
+		System.setProperty(ADefaultAutoTester.KEY_AUTOTEST_INITMOCKITO, "true");
+		System.setProperty(DependencyInjector.KEY_INJECTORANNOTATIONS,
+				StringUtil.trim(Arrays.toString(ADefaultAutoTester.DEFAULT_MOCK_CLASSNAMES), "{}[]"));
+
+		ValueRandomizer.setDependencyInjector(new DependencyInjector(
+				Arrays.asList(Resource.class, PersistenceContext.class, jakarta.persistence.PersistenceContext.class),
+				Arrays.asList(DependencyInjector.Producer.class), null));
+	}
+}
+
+//copy of ConfigBeanContainer in directacccess
+class ConfigBeanContainer {
+	public static EntityManager initAuthAndLocalBeanContainer() {
+		return initProxyBeanContainer(initUserAuth());
+	}
+
+	public static EntityManager initProxyBeanContainer(Authorization auth) {
+		BeanContainerUtil.initEmptyProxyServices();
+		BeanContainerUtil.initProxyServiceFactory();
+		ServiceFactory.instance().setSubject(auth.getSubject());
+		ConcurrentUtil.setCurrent(BeanContainer.instance());
+		return ENV.addService(EntityManager.class, BeanProxy.createBeanImplementation(EntityManager.class));
+	}
+
+	public static Authorization initUserAuth() {
+		Authorization auth = Authorization.create("SA", false);
+		ENV.addService(IAuthorization.class, auth);
+		ConcurrentUtil.setCurrent(auth);
+		return auth;
+	}
+
+	/**
+	 * use that only, if you called initProxyBeanContainer() before!
+	 */
+	public static IGenericService getGenServiceProxy() {
+		return (IGenericService) ((ServiceProxy) Proxy.getInvocationHandler(ServiceFactory.getGenService()))
+				.delegationProxy();
+	}
+
+	public static void simpleReturnExampleItself() {
+		BeanProxy.doReturnWhen(getGenServiceProxy(), (m, a) -> Arrays.asList(a[0]), "findByExample");
+		BeanProxy.doReturnWhen(getGenServiceProxy(), (m, a) -> Arrays.asList(a[0]), "findByExampleLike");
+		BeanProxy.doReturnWhen(getGenServiceProxy(), (m, a) -> Arrays.asList(a[0]), "findBetween");
+	}
+}
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ## Usage of AutoTestGenerator and CurrentStatePreservationTest
@@ -466,6 +628,21 @@ public class InitAllAutoTests {
 
 The simplest way to use this framework is to use the *as is* unit tests by *CurrentStatePreservationTest*. But you can try to check for simple errors/exceptions on running the test in your IDE (like eclipse) in debug mode and activating standard java exception breakpoints.
 
+You should set the filter in your AllAutoTests class to match only the function, you want to debug. And you should disable parallel invocation:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+import static de.tsl2.nano.autotest.creator.AutoTest.*;
+import static de.tsl2.nano.autotest.creator.InitAllAutoTests.*;
+...
+public class AllAutoTests {
+	public static void init() {
+...
+		set(PARALLEL, false);
+		set(FILTER, matchMethod(XmlUtil.class, "xpath", String.class, String.class));
+	}
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Stopping on these exception breakpoints, you can check, if it is an error inside your method. Using this test framework, I found some unexpected calls to my methods, so I fixed them.
 
 Two files are written, to let you see, what was done:
@@ -566,6 +743,13 @@ To check the efficience of the autotest, start maven with:
 	mvn clean install -Dtest=*AllAutoTests -Dsurefire.failIfNoSpecifiedTests=false
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+or
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	mvn clean install -fn -Dtest=*AllAutoTests
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
 You may try several properties through starting maven.
 
 Example:
@@ -579,18 +763,18 @@ Example:
 In different environments, there may be problems. We try to solve some of them:
 
 * **java.lang.ClassNotFoundException: org.junit.runner.manipulation.Filter**
-	* -> Did you store you file really in the src/test/java path (perhaps you put it into main?)
+	* -> Did you store your file really in the src/test/java path (perhaps you put it into main?)
 	* -> Eclipse Problem. Add the junit library manually to your test classpath
 * **java.lang.ArrayStoreException: sun.reflect.annotation.TypeNotPresentExceptionProxy**
-	* -> Did you store you file really in the src/test/java path (perhaps you put it into main?)
+	* -> Did you store your file really in the src/test/java path (perhaps you put it into main?)
 * **No Classes were found**
 	* -> Please set the filter in the manner *".*" + AnyClassToTest.class.getPackage().getName() + ".*"* - so your *AnyClassToTest* is loaded with all imports directly on start
 * **I cannot see exception stacktraces**
 	* -> start your jvm with parameter -XX:-OmitStackTraceInFastThrow
 * **AllAutoTests hangs until an timeout**
 	* use JVisualVM to open the hanging process in FeatureTab **Sampler**. Hit **CPU Samples** and open the callstack tree of  *main* thread completely. Perhaps you can see an endless or blocking loop (like Scanner.hasNextLine(), Semaphore.tryAquire(), etc.) in your code under test.
-	* Perhaps it is waiting on an InputStream (Pipe etc)
-	* If your function does a loop or allocation dependent on given int or long parameter, add an *assert* to stop on big numbers
+	* Perhaps it is waiting on an InputStream (Pipe etc) or a Thread
+	* If your function does a loop or allocation dependent on given int or long parameter, add an *assert* to stop on big numbers (generated on ValueRandomizer)
 * **AllAutoTests stops with an timeout - started with maven surefire**
 	* -> increase the surefire properties *surefire.exitTimeout* or *surefire.timeout*
 * **AllAutoTests ends always with test failures or errors**
@@ -598,7 +782,7 @@ In different environments, there may be problems. We try to solve some of them:
 * **Files are written outside of target or test directories**
 * -> set a breakpoint to *java.io.FileOutputStream.open()* with breakpoint-property '!path.getAbsoluteFile().contains("target/")'. Mostly, a parameter of type *PrintWriter* will invoke a call to *PrintWriter(String)* that create randomized files through the ValueRandomizer
 
-### Debuggin / looking at a selected method to be tested
+### Debugging / looking at a selected method to be tested
 
 To debug maven surefire (the test engine) and to test only the autotests start maven with:
 
@@ -613,15 +797,20 @@ Example:
 	class AllAutoTests
 		...
 			set(DUPLICATION, 1);
+			set(PARALLEL, false);
 			set(FILTER, ".*ByteUtil.convertToByteArray.*");
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Set Breakpoints in 
+Set Breakpoints in catch-blocks and in: 
 * AutoStartGenerator.createExpectationTesters()
 * ExpectationCreator.createExpectationString()
 * ExpectationCreator.createExpectationFromLine()
 * AFunctionTester.createRunners()
 * AFunctionTester.testMe()
+
+## Restarting with different parameters to compare results
+
+There is a script *run-autotests.sh* to run only autotests through maven, copying the results to a backup folder and comparing the final results.
 
 ## All Together
 
@@ -643,6 +832,39 @@ public class AllAutoTests {
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+or with more constraints:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package de.tsl2.nano.util.autotest.creator;
+
+import static de.tsl2.nano.autotest.creator.AutoTest.*;
+import static de.tsl2.nano.autotest.creator.InitAllAutoTests.*;
+
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+
+import de.tsl2.nano.autotest.creator.AutoFunctionTest;
+import de.tsl2.nano.autotest.creator.CurrentStatePreservationTest;
+import de.tsl2.nano.autotest.creator.InitAllAutoTests;
+import de.tsl2.nano.core.serialize.XmlUtil;
+import de.tsl2.nano.core.util.StringUtil;
+
+@RunWith(Suite.class)
+@SuiteClasses({InitAllAutoTests.class, AutoFunctionTest.class, CurrentStatePreservationTest.class})
+public class AllAutoTests {
+	public static void init() {
+		System.setProperty("tsl2nano.offline", "true");
+		set(DUPLICATION, 10);
+//		set(PARALLEL, false);
+		set(MODIFIER, -1); // public: 1
+		set(FILTER_EXCLUDE, StringUtil.matchingOneOf("MyClassnameToFilter","MyOtherClassname.myMethodnameToFilter"));
+		// set(FILTER, matchPackage(AnyClassToTest.class));
+		set(FILTER, matchMethod(AnyClassToTest.class, "myMethodToDebug", String.class, String.class));
+	}
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 * The class must be exactly : *de.tsl2.nano.util.autotest.creator.AllAutoTests* inside your *src/test/java* folder
 * The first Suite class has to be *InitAllAutoTests.class* to start the init() method before all
 * The method must be exactly: *public static void init()*
@@ -655,3 +877,11 @@ This static class name and init method name are used as workaround to the proble
 
 ** NOTE II **:
 If the test doesn't work, have a look at chapter *Problems and Solutions*
+
+### Finalizing / Approving the generated tests for further use
+
+To reuse a generated test set, you have two possibilities:
+
+* copy the ful Exception annotations (@Excpetion{...}) to the target methods
+* copy the folder 'autotest/generated' to your 'src/test/resources' folder ( -> src/test/resources/autotest/generated).
+	** the framework will copy this files on start to the folder 'target/autotest/generated' without overriding existing files 
