@@ -1343,8 +1343,14 @@ public class BeanClass<T> implements Serializable {
                 Object value = values.get(name);
                 if (Util.isEmpty(value) && attr.getValue(instance) == null)
                     continue;
-                if (Date.class.isAssignableFrom( attr.getType()) && value instanceof String && ENV.get("bean.format.date.iso8601", false))
+                if (Date.class.isAssignableFrom(attr.getType()) && value instanceof String
+                        && ENV.get("bean.format.date.iso8601", false)) {
                     value = DateUtil.fromISO8601UTC((String)value);
+                } else if (value instanceof Map && !Map.class.isAssignableFrom(attr.getType())) {
+                    value = BeanClass.getBeanClass(attr.getType()).fromValueMap((Map) value);
+                } else if (!attr.getType().isAssignableFrom(value.getClass())) {
+                    value = ObjectUtil.wrap(value, attr.getType());
+                }
                 if (attr instanceof IValueAccess)
                     ((IValueAccess)attr).setValue(value);
                 else {

@@ -2,6 +2,7 @@ package de.tsl2.nano.core;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -26,7 +27,7 @@ import de.tsl2.nano.core.util.StringUtil;
 public class Messages {
     private static final String BUNDLE_NAME = "de.tsl2.nano.core.messages"; //$NON-NLS-1$
 
-    private static List<ResourceBundle> BUNDLE_LIST = new ArrayList<ResourceBundle>();
+    private static List<ResourceBundle> BUNDLE_LIST = Collections.synchronizedList(new ArrayList<ResourceBundle>());
     static {
         BUNDLE_LIST.add(ResourceBundle.getBundle(BUNDLE_NAME));
     }

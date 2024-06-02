@@ -7,6 +7,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -109,7 +110,7 @@ public class ValueRandomizer {
 		Map<String, Class> types = AdapterProxy.getValueTypes(interfaze);
 		Map<String, Object> values = new HashMap<>();
 		types.forEach(
-				(n, t) -> values.put(n, t.isAssignableFrom(interfaze) || interfaze.isAssignableFrom(interfaze) ? null
+				(n, t) -> values.put(n, t.isAssignableFrom(interfaze) || interfaze.isAssignableFrom(t) ? null
 						: createRandomValue(t, zeroNumber, depth)));
 		return AdapterProxy.create(interfaze, values);
 	}
@@ -292,6 +293,7 @@ public class ValueRandomizer {
 
 	private static boolean hasFileConstructor(Class<?> typeOf) {
 		String fileConstructorNames = System.getProperty(AutoTest.PREFIX_FUNCTIONTEST + "fileconstructor.classes", 
+				FileWriter.class.getName() + ", " +
 			PrintWriter.class.getName() + ", " + 
 			PrintStream.class.getName());
 		List<String> fileConstructorClasses = Arrays.asList(fileConstructorNames.split("\\s*[,;]\\s*"));

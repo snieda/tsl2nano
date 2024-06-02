@@ -232,9 +232,12 @@ public class ConcurrentUtil {
      */
     public static final boolean stopOrInterrupt(String threadName) {
         ThreadGroup tg = Thread.currentThread().getThreadGroup();
+        if (tg == null) {
+            return false;
+        }
         Thread allThreads[] = new Thread[tg.activeCount()];
-        tg.enumerate(allThreads);
-        for (int i = 0; i < allThreads.length; i++) {
+        int count = tg.enumerate(allThreads);
+        for (int i = 0; i < count; i++) {
             if (allThreads[i].getName().equals(threadName)) {
                 LOG.debug("interrupting thread " + threadName);
                 allThreads[i].interrupt();

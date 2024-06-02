@@ -32,7 +32,7 @@ public class AllAutoTests {
 				"Profiler","NumberUtil.numbers","StringUtil.fixString","CollectionUtil.copyOfRange",
 				"Profiler.workLoop","NumberUtil.fixLengthNumber","DateUtil.getWorkdayCount", "ByteUtil.getPipe", "IPreferences", "CPUState",
 				"AnnotationProxy.setAnnotationValues", "Message.send", "PrivateAccessor.findMembers", "ValueSet", "Mail", "FieldUtil.foreach",
-				"ConcurrentUtil.waitFor"));
+				"ConcurrentUtil.waitFor", "SystemUtil.isNestedApplicationStart"));
 		set(FILTER, matchPackage(Main.class));
 		// set(FILTER, matchMethod(BeanAttribute.class, "getGenericType", Method.class, int.class));
 	}

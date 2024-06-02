@@ -5,7 +5,6 @@ import static de.tsl2.nano.autotest.creator.AutoTest.TIMEOUT;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
 
 import de.tsl2.nano.autotest.Construction;
 import de.tsl2.nano.autotest.ValueRandomizer;
@@ -15,7 +14,6 @@ import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.FileUtil;
-import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
 public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
@@ -120,7 +118,7 @@ public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
 	}
 	protected Object run(Method method, Object... args) {
 		boolean last = LogFactory.setPrintToConsole(false);
-		logd(StringUtil.fixString(this.getClass().getSimpleName(), 25) + " invoking " + method.getDeclaringClass().getSimpleName() + "." + method.getName() + " with " + StringUtil.toString(Arrays.toString(args), 80));
+		logd("invoking: " + method.toGenericString());
 		final Object instance = getInstance(method);
 		try {
 			long start = System.currentTimeMillis();

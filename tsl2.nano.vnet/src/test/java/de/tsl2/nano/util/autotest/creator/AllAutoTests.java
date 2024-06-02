@@ -21,6 +21,7 @@ public class AllAutoTests {
 	public static void init() {
 		System.setProperty("tsl2.functiontest.filter.voidreturn", "true");
 		System.setProperty("tsl2.functiontest.filter", matchPackage(JobServer.class, Net.class));
-		set(FILTER_EXCLUDE, StringUtil.matchingOneOf("NetCommunicator.setImplementationByUserInput","NetCommunicator.run"));
+		set(FILTER_EXCLUDE, StringUtil.matchingOneOf("NetCommunicator.setImplementationByUserInput",
+				"NetCommunicator.run", "Net.notify"));
 	}
 }

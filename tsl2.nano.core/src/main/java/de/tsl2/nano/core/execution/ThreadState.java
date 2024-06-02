@@ -51,7 +51,7 @@ public class ThreadState {
             if (lastThreadTime == null)
                 lastThreadTime = cpuTime;
             double load = (cpuTime - lastThreadTime / (double) (System.nanoTime() - time));
-            info = jmxThread.getThreadInfo(threadIds[i]).toString();
+            info = String.valueOf(jmxThread.getThreadInfo(threadIds[i]));
             display.add((float) load + "% " + info.substring(0, info.length() - 1));
             lastTimes.put(threadIds[i], cpuTime);
         }

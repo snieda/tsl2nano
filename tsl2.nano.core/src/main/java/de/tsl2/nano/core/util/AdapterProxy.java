@@ -49,7 +49,10 @@ public class AdapterProxy implements InvocationHandler {
             Object v = values.get(method.getName());
             if (v != null && method.getReturnType().isAssignableFrom(v.getClass()))
                 return v;
-            if (!BeanAttribute.isGetterMethod(method))
+            else if (method.getName().equals("equals") && method.getReturnType().equals(boolean.class)
+                    && method.getParameterCount() == 1 && args.length == 1)
+                return args[0] == proxy;
+            else if (!BeanAttribute.isGetterMethod(method) && !method.getDeclaringClass().equals(Object.class))
                 values.put(BeanAttribute.getNameFromSetter(method), args.length == 1 ? args[0] : args);
         } else if (method.getName().equals("toString"))
         	return toProxyString(proxy);

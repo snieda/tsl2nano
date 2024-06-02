@@ -28,7 +28,8 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 	public ExpectationFunctionTester(Method source) {
 		super(source);
 		def = source.getAnnotation(Expectations.class);
-		logd("\t" + source.getDeclaringClass().getSimpleName() + ": " + source.getName() + " -> " + Arrays.toString(def.value()) + "\n");
+		logd("\t" + source.getDeclaringClass().getSimpleName() + ": " + source.getName() + " -> "
+				+ StringUtil.toString(Arrays.toString(def.value()), 120) + "\n");
 	}
 
 	@Override
@@ -146,7 +147,7 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 	@Override
 	public void run() {
 		if (getParameter() == null) {
-			log (this + ": Parameter Error on cloneIndex: " + cloneIndex + "\n");
+			log(this.getFunctionDescription() + ": Parameter Error on cloneIndex: " + cloneIndex + "\n");
 			if (!status.isFatal())
 				status = new Status(StatusTyp.PARAMETER_UNDEFINED, UNDEFINED, null);
 			result = UNDEFINED;

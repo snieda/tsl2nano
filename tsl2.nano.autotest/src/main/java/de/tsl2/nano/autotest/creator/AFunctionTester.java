@@ -145,7 +145,7 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 				assertEquals(toString(), o1, o2);
 			}
 			status = new Status(StatusTyp.TESTED, (System.currentTimeMillis() - start) / 1000 + " sec", null);
-			logd(this + "\n");
+			logd(cloneIndex + ": " + getFunctionDescription() + "\n");
 		} catch (Exception | AssertionError e) {
 			boolean shouldFailError = false;
 			try {

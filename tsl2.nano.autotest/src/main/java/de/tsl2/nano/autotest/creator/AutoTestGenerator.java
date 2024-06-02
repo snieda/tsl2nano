@@ -40,6 +40,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
@@ -85,17 +86,17 @@ import de.tsl2.nano.core.util.Util;
 public class AutoTestGenerator {
 	private static final String REGEX_UNMATCH = "XXXXXXXX";
 	static String fileName = def(FILENAME, String.class).replace("autotest/", "");
-	int methods_loaded = 0;
-	int count = 0;
-	int fails = 0;
-	int nullresults = 0;
-	int load_method_error = 0;
-	int load_unsuccessful = 0;
-	int filter_typeconversions = 0;
-	int filter_errors = 0;
-	int filter_unsuccessful = 0;
-	int filter_nullresults = 0;
-	int filter_complextypes = 0;
+	AtomicInteger methods_loaded = new AtomicInteger();
+	List<Integer> counts = Collections.synchronizedList(new ArrayList<>(def(DUPLICATION, int.class)));
+	AtomicInteger fails = new AtomicInteger();
+	AtomicInteger nullresults = new AtomicInteger();
+	AtomicInteger load_method_error = new AtomicInteger();
+	AtomicInteger load_unsuccessful = new AtomicInteger();
+	AtomicInteger filter_typeconversions = new AtomicInteger();
+	AtomicInteger filter_errors = new AtomicInteger();
+	AtomicInteger filter_unsuccessful = new AtomicInteger();
+	AtomicInteger filter_nullresults = new AtomicInteger();
+	AtomicInteger filter_complextypes = new AtomicInteger();
 	private Statistics statistics = new Statistics();
 	
 	private AtomicReference<BufferedWriter> filteredFunctionWriter = new AtomicReference<BufferedWriter>();
@@ -130,6 +131,8 @@ public class AutoTestGenerator {
 		start = System.currentTimeMillis();
 		def("timefilename", getTimedFileName()); //provide timed file name for other instances
 		int duplication = def(DUPLICATION, 10);
+		for (int i = 0; i < duplication; i++)
+			counts.add(0);
 		Collection<AFunctionTester> testers = Collections.synchronizedList(new LinkedList<>());
 		try {
 			printStartParameters();
@@ -137,22 +140,20 @@ public class AutoTestGenerator {
 			List<Method> methods = getMethods();
 			progress = new ProgressBar(methods.size() * duplication);
 			ArrayList<Integer> dupList = NumberUtil.numbers(duplication);
-			Util.stream(dupList, def(PARALLEL, false)).forEach( i -> 
-			{
+			Util.stream(dupList, def(PARALLEL, false)).forEach(i -> {
 				Thread.currentThread().setUncaughtExceptionHandler(uncaughtExceptionHandler );
 				if (!getFile(i).exists() || def(CLEAN, false)) {
 					generateExpectations(i, methods);
 				}
 			});
-			Util.stream(dupList, def(PARALLEL, false)).forEach( i -> 
-			{
+			Util.stream(dupList, def(PARALLEL, false)).forEach(i -> {
 				Thread.currentThread().setUncaughtExceptionHandler(uncaughtExceptionHandler );
-				if (getFile(i).exists() || count > 0)
+				if (getFile(i).exists() || counts.get(i) > 0)
 					testers.addAll(readExpectations(i));
 				
 			});
 			if (def(FILTER_UNSUCCESSFUL, true))
-				load_unsuccessful = FunctionCheck.filterFailingTest(testers, fileName);
+				load_unsuccessful.addAndGet(FunctionCheck.filterFailingTest(testers, fileName));
 			return testers;
 		} catch (Throwable e) {
 			Util.trY( () -> ManagedException.writeError(e, fileName + "initialization-error.txt"), false);
@@ -238,8 +239,7 @@ public class AutoTestGenerator {
 		LogFactory.setPrintToConsole(false);
 		String p = "\n" + StringUtil.fixString(79, '~') + "\n";
 		try (BufferedWriter writer = FileUtil.getBAWriter(getFile(iteration).getPath())) {
-			count = 0;
-			methods_loaded = methods.size();
+			methods_loaded.set(methods.size());
 			log(p + "calling " + methods.size() + " methods to create expectations -> " + getFile(iteration) + p);
 			AtomicReference<BufferedWriter> refWriter = new AtomicReference<>(writer);
 			Util.stream(methods, def(PARALLEL, false)).forEach(m -> writeExpectation(new AFunctionCaller(iteration, m), refWriter));
@@ -249,9 +249,9 @@ public class AutoTestGenerator {
 			if (filteredFunctionWriter != null)
 				Util.trY( () ->filteredFunctionWriter.get().flush(), false);
 			ConcurrentUtil.sleep(200);
-			if (count > 0)
-				log(new String(FileUtil.getFileBytes(getFile(iteration).getPath(), null)));
-			log(p + count + " expectations written into '" + getFile(iteration) + p);
+			// if (count > 0)
+			// 	log(new String(FileUtil.getFileBytes(getFile(iteration).getPath(), null)));
+			log(p + counts.get(iteration) + " expectations written into '" + getFile(iteration) + p);
 		}
 	}
 
@@ -262,7 +262,7 @@ public class AutoTestGenerator {
 	private void writeExpectation(AFunctionCaller f, AtomicReference<BufferedWriter> writer) {
 		Thread.currentThread().setUncaughtExceptionHandler(uncaughtExceptionHandler );
 		try {
-			log("writeExpectation: " + f.getFunctionDescription(), progress);
+			log("writeExpectation: " + f.cloneIndex + ": " + f.getFunctionDescription(), progress);
 			String then = null;
 			try {
 				if (f.source.isSynthetic() || f.source.isBridge() || f.source.getName().startsWith("$")) // -> e.g. $jacocoInit() -> javaagent code enhancing
@@ -276,23 +276,23 @@ public class AutoTestGenerator {
 			
 				if (f.status.isRefused()) {
 					writeFilteredFunctionCall(f);
-					filter_complextypes++;
+					filter_complextypes.incrementAndGet();
 					return;
 				}
 				f.runWithTimeout();
 			} catch (Exception | AssertionError e) {
 				if (f.status.in(StatusTyp.NEW) || f.status.isFatal() || def(FILTER_FAILING, false) || filterErrorType(e)) {
 					writeFilteredFunctionCall(f);
-					filter_errors++;
+					filter_errors.incrementAndGet();
 					return;
 				}
-				fails++;
+				fails.incrementAndGet();
 				then = "fail(" + AFunctionTester.getErrorMsg(e) + ")";
 			}
 			if (then == null) {
 				if (f.getResult() == null) {
 					if (def(FILTER_NULLRESULTS, false)) {
-						filter_nullresults++;
+						filter_nullresults.incrementAndGet();
 						writeFilteredFunctionCall(f);
 						return;
 					} else {
@@ -303,23 +303,23 @@ public class AutoTestGenerator {
 			if (f.getResult() != null && def(FILTER_UNSUCCESSFUL, false)
 					&& !FunctionCheck.checkTypeConversion(f.getResult())) {
 				writeFilteredFunctionCall(f);
-				filter_typeconversions++;
+				filter_typeconversions.incrementAndGet();
 				return;
 			}
 			String expect = ExpectationCreator.createExpectationString(f, then);
 			if (expect == null) {
 				writeFilteredFunctionCall(f);
-				filter_typeconversions++;
+				filter_typeconversions.incrementAndGet();
 				return;
 			}
 			Status testStatus;
 			if (def(FILTER_UNSUCCESSFUL, true) && (testStatus = FunctionCheck.checkTestSuccessful(f, expect)) != null) {
 				f.status = testStatus;
 				writeFilteredFunctionCall("STATUS: " + f.status + expect);
-				filter_unsuccessful++;
+				filter_unsuccessful.incrementAndGet();
 				return;
 			}
-			count++;
+			counts.set(f.cloneIndex, counts.get(f.cloneIndex) + 1);
 			maxDurationFct = maxDurationFct == null || maxDurationFct.duration < f.duration ? f : maxDurationFct; 
 			maxMemUsageFct = maxMemUsageFct == null || maxMemUsageFct.memusage < f.memusage ? f : maxMemUsageFct; 
 			Util.trY(() -> writer.get().append(expect));
@@ -344,15 +344,16 @@ public class AutoTestGenerator {
 	}
 	
 	Collection<ExpectationFunctionTester> readExpectations(int iteration, File file) {
-		log("\nREADING " + count + " EXPECTATIONS FROM " + file.getPath() + "...\n");
+		log("\nREADING " + counts.get(iteration) + " EXPECTATIONS FROM " + file.getPath() + "...\n");
 		LinkedHashSet<ExpectationFunctionTester> expTesters = new LinkedHashSet<>();
 		Scanner sc = Util.trY( () ->new Scanner(file));
-		ProgressBar progress = new ProgressBar((int) (count > 0 ? count : file.length() / 450));
+		ProgressBar progress = new ProgressBar(
+				(int) (counts.get(iteration) > 0 ? counts.get(iteration) : file.length() / 1000));
 		Expectations exp = null;
 		Method method = null;
 		while (sc.hasNextLine()) {
 			String l = sc.nextLine();
-			if (exp == null && !l.startsWith("@") )
+			if (l.trim().length() == 0 || (exp == null && !l.startsWith("@")))
 				continue;
 			if (exp == null) {
 				exp = ExpectationCreator.createExpectationFromLine(l);
@@ -364,11 +365,9 @@ public class AutoTestGenerator {
 							: " ...");
 					if (method != null)
 						expTesters.add(new ExpectationFunctionTester(iteration, method, exp));
-					else
-						load_method_error++;
 				} else {
-					load_method_error++;
-					log("ERROR: method-format for " + exp + " -> " + l + "\n");
+					load_method_error.incrementAndGet();
+					log("ERROR: method-format for " + StringUtil.toString(exp, 120) + " -> " + l + "\n");
 				}
 				exp = null;
 			}
@@ -391,29 +390,33 @@ public class AutoTestGenerator {
 	private void printStatistics(int iterations, Collection<AFunctionTester> testers, String groupByState) {
 		String p = "\n" + StringUtil.fixString(79, '=') + "\n";
 		Integer dup = def(DUPLICATION, 10);
+		int count = counts.stream().reduce(0, Integer::sum);
 		String s = AutoTestGenerator.class.getSimpleName() + " created " + count + " expectations in file pattern: '" + fileName + "...'"
 				+ "\n\tend time              : " + DateUtil.getFormattedDateTime(new Date()) + "\tduration: " + DateUtil.getFormattedTime(System.currentTimeMillis() - start)
 				+ "\n\ttestneverfail         : " + def(TESTNEVERFAIL, false)
 				+ "\n\tclassfinder cls/mthds : " + ClassFinder.self().getLoadedClassCount() + " / " + ClassFinder.self().getLoadedMethodCount()
-				+ "\n\tmethods loaded        : " + methods_loaded + "\t(rate: " + methods_loaded / (float)ClassFinder.self().getLoadedMethodCount() + ")"
-				+ "\n\tduplications          : " + dup + "\t(methods loaded * duplications: " + methods_loaded * dup + ")"
+				+ "\n\tmethods loaded        : " + methods_loaded.get() + "\t(rate: "
+				+ methods_loaded.get() / (float) ClassFinder.self().getLoadedMethodCount() + ")"
+				+ "\n\tduplications          : " + dup + "\t(methods loaded * duplications: "
+				+ methods_loaded.get() * dup + ")"
 				+ "\nGENERATION PROCESS:"
-				+ "\n\tcreated with fail     : " + fails
-				+ "\n\tcreated with null     : " + nullresults
+				+ "\n\tcreated with fail     : " + fails.get()
+				+ "\n\tcreated with null     : " + nullresults.get()
 				+ "\n\tcreated totally       : " + count
-				+ "\n\tfiltered type error   : " + filter_typeconversions
-				+ "\n\tfiltered complex types: " + filter_complextypes
-				+ "\n\tfiltered errors       : " + filter_errors
-				+ "\n\tfiltered nulls        : " + filter_nullresults
+				+ "\n\tfiltered type error   : " + filter_typeconversions.get()
+				+ "\n\tfiltered complex types: " + filter_complextypes.get()
+				+ "\n\tfiltered errors       : " + filter_errors.get()
+				+ "\n\tfiltered nulls        : " + filter_nullresults.get()
 				+ "\n\tmax duration          : " + (maxDurationFct != null ? maxDurationFct.duration + " msec\t\t<- "  + maxDurationFct.cloneIndex + ":" + maxDurationFct.getFunctionDescription() : "")
 				+ "\n\tmax mem usage         : " + (maxMemUsageFct != null ? ByteUtil.amount(maxMemUsageFct.memusage) + "\t\t\t<- " + maxMemUsageFct.cloneIndex + ":" + maxMemUsageFct.getFunctionDescription() : "")
 				+ "\n\tuncaught exceptions   : " + uncaughtExceptionHandler.getExceptions().size()
 				+ groupByState
-				+ "\nLOADING PROCESS:"
-				+ "\n\tfiltered unsuccessful : " + filter_unsuccessful
-				+ "\n\tload errors           : " + load_method_error
-				+ "\n\tloaded unsuccessful   : " + load_unsuccessful
-				+ "\n\ttotally loaded        : " + testers.size() + " (load-rate: " + (testers.size() / (float)dup) / (float)methods_loaded + ", total-rate: " 
+				+ "\nLOADING PROCESS (Unit Testing):"
+				+ "\n\tfiltered unsuccessful : " + filter_unsuccessful.get()
+				+ "\n\tload errors           : " + load_method_error.get()
+				+ "\n\tloaded unsuccessful   : " + load_unsuccessful.get()
+				+ "\n\ttotally loaded/tested : " + testers.size() + " (load-rate: "
+				+ (testers.size() / (float) dup) / (float) methods_loaded.get() + ", total-rate: "
 												 + (testers.size() / dup) / (float)ClassFinder.self().getLoadedMethodCount()  + ")"
 				+ "\n\n" + ValueRandomizer.getDependencyInjector();
 		AFunctionTester.log(p + s +p);
@@ -459,9 +462,7 @@ class ExpectationCreator {
 							" constructTypes = " + Util.toJson(f.getConstruction().constructor.getParameterTypes())
 									+ " construct = " + Util.toJson(prepareParameter(f.getConstruction().parameter))
 							: "")
-					+ ")})\n"
-					+ f.source + "\n\n";
-			// expect = expect.replace("]}", "}");
+					+ "\n" + f.source + "\n";
 			return expect;
 		} catch (Exception e) {
 			f.status = new Status(StatusTyp.STORE_ERROR, null, e);
