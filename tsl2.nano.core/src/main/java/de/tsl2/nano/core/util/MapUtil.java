@@ -246,7 +246,7 @@ public class MapUtil {
     	return JSon.toJSon(map);
     }
     public static Map fromJSon(String json) {
-    	return JSon.fromJSon(json);
+        return (Map) JSon.fromJSon(json);
     }
 
     /**

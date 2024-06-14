@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.core.util;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -194,6 +195,10 @@ public class ObjectUtil extends MethodUtil {
             || isByteStream(type));
     }
 
+    public static boolean isAbstract(Class<?> type) {
+        return Modifier.isAbstract(type.getModifiers());
+    }
+
     /**
      * if all fields are null, the bean is empty
      * 
@@ -329,7 +334,7 @@ public class ObjectUtil extends MethodUtil {
         return (T) new PrivateAccessor<T>(src).call("clone", null);
     }
 
-    // TODO: very old style -> encapsulate into a pool of formatters/wrappers/converters
+    // TODO: old style -> encapsulate into a pool of formatters/wrappers/converters
     /**
      * sometimes the value is easily convertable to the desired type, like String-->File etc. respects primitives and
      * wrapperType {@link Class}.
@@ -346,7 +351,7 @@ public class ObjectUtil extends MethodUtil {
         // check, if constructor for value is available in wrapper type
         try {
             if (value != null && !PrimitiveUtil.isAssignableFrom(wrapperType, value.getClass())) {
-            	if (wrapperType.isInterface() || Modifier.isAbstract(wrapperType.getModifiers()))
+                if (wrapperType.isInterface() || isAbstract(wrapperType))
             		wrapperType = getDefaultImplementation(wrapperType);
                 if (Class.class.isAssignableFrom(wrapperType)) {
                     return (T) BeanClass.load(StringUtil.substring(StringUtil.substring(value.toString(), "class ", "@"), "{", "}"));
@@ -358,17 +363,18 @@ public class ObjectUtil extends MethodUtil {
                 		return String.class.isAssignableFrom(wrapperType) ? (T) value.toString() : BeanClass.createInstance(wrapperType, value);
                     if (PrimitiveUtil.isPrimitiveOrWrapper(wrapperType))
                         return PrimitiveUtil.convert(value, wrapperType);
-                    else if (ByteUtil.isByteStream(wrapperType) && (value instanceof byte[]))
-                        return ByteUtil.toByteStream((byte[])value, wrapperType);
-                    else if (ByteUtil.isByteStream(value.getClass()) && byte[].class.isAssignableFrom(wrapperType))
-                        return (T) ByteUtil.getBytes(value);
+                    else if (ByteUtil.isByteStream(wrapperType))
+                        return ByteUtil.toByteStream(ByteUtil.getBytes(value), wrapperType);
                     else if (Collection.class.isAssignableFrom(wrapperType))
                         return (T )new ListSet(value);
                     else if (value instanceof Map && (wrapperType.isInterface() || wrapperType.equals(Properties.class)) 
                             && Map.class.isAssignableFrom(wrapperType)) {
                         return (T) MapUtil.toMapType((Map)value, (Class<Map>)wrapperType);
                     } else if (wrapperType.isArray() && value instanceof String) {
-                        return (T) MapUtil.asArray(wrapperType.getComponentType(), (String) value);
+                        if (JSon.isJSon(value.toString()))
+                            return (T) JSon.toArray(wrapperType.getComponentType(), value.toString());
+                        else
+                            return (T) MapUtil.asArray(wrapperType.getComponentType(), (String) value);
                     } else if (wrapperType.isArray()
                             && PrimitiveUtil.isAssignableFrom(wrapperType.getComponentType(), value.getClass())) {
                         return (T) MapUtil.asArray(wrapperType.getComponentType(), value);
@@ -381,6 +387,8 @@ public class ObjectUtil extends MethodUtil {
                             return (T) (wrapperType.isInterface() ? MapUtil.toMapType(jsonMap, (Class<Map>)wrapperType) : jsonMap);
                         } else if (Collection.class.isAssignableFrom(wrapperType)) {
                             return (T) JSon.toList(ObjectUtil.getGenericInterfaceType(wrapperType, Collection.class, 0), (String)value);
+                        } else if (wrapperType.isInterface()) {
+                            return (T) AdapterProxy.create(wrapperType, MapUtil.fromJSon((String) value));
                         } else {
                             JSon.toObject(wrapperType, (String)value);
                         }
@@ -393,9 +401,7 @@ public class ObjectUtil extends MethodUtil {
 					else if (String.class.isAssignableFrom(wrapperType) && isSimpleType(value.getClass()))
 						return (T) FormatUtil.getDefaultFormat(value, true);
 					else if (wrapperType.isInterface() && value instanceof Map)
-						return (T) AdapterProxy.create(wrapperType, (Map)value);
-					else if (wrapperType.isInterface() && value instanceof String && JSon.isJSon((String) value))
-						return (T) AdapterProxy.create(wrapperType, MapUtil.fromJSon((String)value));
+                        return (T) AdapterProxy.create(wrapperType, (Map) value);
                     else if (isInstanceable(wrapperType)/* && BeanClass.hasConstructor(wrapperType, value.getClass())*/)
 						try {
 							return BeanClass.createInstance(wrapperType, value);
@@ -410,6 +416,15 @@ public class ObjectUtil extends MethodUtil {
             ManagedException.forward(e);
         }
         return (T) value;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Object fromListOfWrappers(Class primitiveType, List list) {
+        Object array = Array.newInstance(primitiveType, list.size());
+        for (int i = 0; i < list.size(); i++) {
+            Array.set(array, i, wrap(list.get(i), primitiveType));
+        }
+        return array;
     }
 
     @SuppressWarnings("unchecked")
@@ -505,7 +520,7 @@ public class ObjectUtil extends MethodUtil {
 		return null;
 	}
 
-	public static Object loadClass(String clsName) {
+    public static Class<?> loadClass(String clsName) {
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		try {
 			return clsName.contains(".") || clsName.startsWith("[") ? loader.getClass().forName(clsName)

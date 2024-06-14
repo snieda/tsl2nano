@@ -350,8 +350,14 @@ public class ByteUtil extends Util {
      * @return stream read into a string
      */
     public static final String toString(InputStream stream, String encoding) {
-        return String
-            .valueOf(FileUtil.getFileData(stream, encoding != null ? encoding : get("file.encoding", "UTF-8")));
+        if (stream instanceof PipedInputStream)
+            return stream.toString(); // a PipedInputStream may wait for the connected output blocking the thread
+        else
+            return String.valueOf(FileUtil.getFileData(
+                    stream,
+                    encoding != null
+                            ? encoding
+                            : get("file.encoding", "UTF-8")));
     }
 
  

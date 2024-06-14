@@ -16,5 +16,6 @@ import de.tsl2.nano.maven.generator.GeneratorMojo;
 public class AllAutoTests {
 	public static void init() {
 		System.setProperty("tsl2.functiontest.filter", matchPackage(GeneratorMojo.class));
+		// set(FILTER, matchMethod(GeneratorMojo.class, "execute"));
 	}
 }

@@ -2,6 +2,7 @@ package de.tsl2.nano.autotest.creator;
 
 import static de.tsl2.nano.autotest.creator.AFunctionCaller.def;
 import static de.tsl2.nano.autotest.creator.AutoTest.APPROVED;
+import static de.tsl2.nano.autotest.creator.AutoTest.CHECK_TYPECONVERSION;
 import static de.tsl2.nano.autotest.creator.AutoTest.DUPLICATION;
 import static de.tsl2.nano.autotest.creator.AutoTest.FILENAME;
 import static de.tsl2.nano.autotest.creator.AutoTest.PARALLEL;
@@ -54,6 +55,7 @@ public class InitAllAutoTests/* extends ADefaultAutoTester*/ {
 		set(PARALLEL, true);
 		set(DUPLICATION, 10);
 		set(TIMEOUT, 60); // set to -1 to work sequential (not parallel) inside the tests
+		set(CHECK_TYPECONVERSION, false);
 		System.setProperty("tsl2.nano.logfactory.off", "true");
 		System.setProperty("tsl2.nano.test", "true");
 		System.setProperty("tsl2.json.recursive", "true");

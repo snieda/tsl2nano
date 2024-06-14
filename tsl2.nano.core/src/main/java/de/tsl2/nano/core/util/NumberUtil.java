@@ -333,7 +333,8 @@ public class NumberUtil extends BitUtil {
             || int.class.isAssignableFrom(type)
             || long.class.isAssignableFrom(type)
             || float.class.isAssignableFrom(type)
-            || double.class.isAssignableFrom(type);
+                || double.class.isAssignableFrom(type)
+                || byte.class.isAssignableFrom(type);
     }
 
     public static boolean isInteger(Class<?> type) {

@@ -408,6 +408,10 @@ public class PrimitiveUtil {
 		Number max = (Number) getMaximumValue(type);
 		return (int) Math.log10(max.doubleValue()) + 1;
 	}
+
+    public static boolean isBoolean(Object obj) {
+        return obj instanceof Boolean || boolean.class.isAssignableFrom(obj.getClass());
+    }
 }
 
 class SimpleClassComparator implements Comparator<Class> {

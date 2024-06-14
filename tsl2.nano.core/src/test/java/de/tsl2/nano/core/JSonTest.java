@@ -1,18 +1,20 @@
 package de.tsl2.nano.core;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IValueAccess;
 import de.tsl2.nano.core.util.AdapterProxy;
 import de.tsl2.nano.core.util.JSon;
@@ -24,7 +26,16 @@ public class JSonTest {
 
     @Test
     public void testIsJSon() {
+        assertTrue(JSon.isJSon("{}"));
+        assertTrue(JSon.isJSon("[]"));
+        assertTrue(JSon.isJSon("[0,1]"));
+        assertTrue(JSon.isJSon("{\"a\": 0}"));
+        // assertTrue(JSon.isJSon("[\"v1\", 1]"));
+
         String txt = "{\"id\": \"1,00\",\"name\": \"Einzug Max.Mustermann\",\"bic\": \"BICBANKXXX\",\"iban\": \"BICBANKXXX0123456789\"}, {\"id\": \"1\"}]";
+        assertTrue(JSon.isJSon(txt));
+
+        txt = "{\"name\": \"test\", \"value\": 72.68648043493326, \"active\": true, \"stream\": [0,1,2,3,4,5,6,7,8,9]}";
         assertTrue(JSon.isJSon(txt));
 
         assertFalse(JSon.isJSon("{seppl=0}"));
@@ -38,7 +49,7 @@ public class JSonTest {
 
 		String json = JSon.toJSon(m);
 		assertTrue(JSon.isJSon(json));
-		Map m2 = JSon.fromJSon(json);
+        Map m2 = (Map) JSon.fromJSon(json);
 		assertEquals(json, JSon.toJSon(m2));
 		assertEquals(MapUtil.asArray(m), MapUtil.asArray(m2));
 	}
@@ -52,10 +63,16 @@ public class JSonTest {
 
         String json = JSon.toJSon(m);
         assertTrue(JSon.isJSon(json));
-        Map m2 = JSon.fromJSon(json);
+        Map m2 = (Map) JSon.fromJSon(json);
         assertEquals(json, JSon.toJSon(m2));
         // TODO: check, why assertEquals() not working
         // assertEquals(MapUtil.asArray(m), MapUtil.asArray(m2));
+    }
+
+    @Test
+    public void testJSONReference() {
+        String json = "{\"cause\": \"@0\",\"detailMessage\": 63.7721618630485}";
+        JSon.toObject(Exception.class, json);
     }
 
     @Test
@@ -81,27 +98,68 @@ public class JSonTest {
 
     @Test
     public void testJsonObject() {
-        TypeBean t = new TypeBean("test", 1, null/*Arrays.asList(new TypeBean("sub", 2, null))*/);
+        TypeBean t = new TypeBean(1, "test", 1.1, null/*Arrays.asList(new TypeBean("sub", 2, null))*/);
+        TypeBean c = JSon.toObject(TypeBean.class, JSon.toJSon(t));
+        assertEquals(t, c);
+    }
+
+    @Test
+    public void testJsonValues() {
+        TypeBean t = new TypeBean(1, "test", 1.1, Arrays.asList(new TypeBean(2, "sub", 2.2, null)));
         TypeBean c = JSon.toObject(TypeBean.class,JSon.toJSon(t));
         assertEquals(t, c);
     }
 
-    @Ignore
+    @Test
+    public void testListSplitting() {
+        String json = "[{de.tsl2.nano.autotest.TypeBean},1,\"test\",[\"30,14111020445995\",\"30,14111020445995\"]]";
+        String[] expectedSplit = new String[] { "{de.tsl2.nano.autotest.TypeBean}", "1", "test",
+                "[\"30,14111020445995\",\"30,14111020445995\"]" };
+        assertArrayEquals(expectedSplit, JSon.splitArray(json));
+    }
+
+    @Test
+    public void testJSonSimpleList() {
+        List<TypeBean> list = Arrays.asList(new TypeBean(1, "test", 1.1, null), new TypeBean(1, "sub", 2.2, null));
+        String json = JSon.toJSon(list);
+        List mList = (List) JSon.fromJSon(json);
+        for (int i = 0; i < mList.size(); i++) {
+            mList.set(i, BeanClass.getBeanClass(TypeBean.class).fromValueMap((Map) mList.get(i)));
+        }
+        assertEquals(list, mList);
+    }
+
+    @Test
+    public void testJsonEmptyList() {
+        String jSon = JSon.toJSon(new ArrayList<>(0));
+        assertEquals(0, ((List) JSon.fromJSon(jSon)).size());
+    }
+
     @Test
     public void testJsonList() {
-        List<TypeBean> list = Arrays.asList(new TypeBean("test", 1.0, null), new TypeBean("sub", 2.0, null));
+        List<TypeBean> list = Arrays.asList(new TypeBean(1, "test", 1.1, null), new TypeBean(2, "sub", 2.2, null));
         List<TypeBean> list2 = JSon.toList(TypeBean.class, JSon.toJSon(list));
         assertEquals(list, list2);
     }
+
+    @Test
+    public void testJsonArray() {
+        TypeBean[] arr = new TypeBean[] { new TypeBean(1, "test", 1.1, null), new TypeBean(2, "sub", 2.2, null) };
+        assertArrayEquals(arr, (TypeBean[]) JSon.toArray(TypeBean.class, JSon.toJSon(arr)));
+    }
 }
+
 class TypeBean {
+    int index;
     String name;
     double value;
     Collection<TypeBean> connections;
     
     public TypeBean() {
     }
-    public TypeBean(String name, double value, Collection<TypeBean> connections) {
+
+    public TypeBean(int index, String name, double value, Collection<TypeBean> connections) {
+        this.index = index;
         this.name = name;
         this.value = value;
         this.connections = connections;
@@ -128,7 +186,8 @@ class TypeBean {
     }
     @Override
     public String toString() {
-        return "TypeBean [name=" + name + ", value=" + value + ", connections=" + connections + "]";
+        return "TypeBean [index=" + index + ", name=" + name + ", value=" + value + ", connections=" + connections
+                + "]";
     }
     public String getName() {
         return name;
@@ -147,5 +206,13 @@ class TypeBean {
     }
     public void setConnections(Collection<TypeBean> connections) {
         this.connections = connections;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
     }
 }

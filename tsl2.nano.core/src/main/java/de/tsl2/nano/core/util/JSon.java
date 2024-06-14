@@ -1,12 +1,15 @@
 package de.tsl2.nano.core.util;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -21,12 +24,17 @@ import de.tsl2.nano.core.log.LogFactory;
 public class JSon {
 
 	/** this expression is only a basic pattern - if matching, it may be - nevertheless - invalid! */
-	private static final String JSON_EXPR = "[\"]?(?:[\\{\\[](?:(?:\\s*+[\"]?\\w++[\"]?\\s*)[:,](?:\\s*+[\"]?[^\"]*+[\"]?\\s*+)[,]?)*+[\\}\\]])++[\"]?";
+	private static final String JSON_EXPR0 = "((\\[[^\\}]{3,})?\\{s*[^\\}\\{]{3,}?:.*\\}([^\\{]+\\])?)";
+	private static final String JSON_EXPR1 = "[\"]?(?:[\\{\\[](?:(?:\\s*+[\"]?\\w++[\"]?\\s*)[:,](?:\\s*+[\"]?[^\"]*+[\"]?\\s*+)[,]?)*+[\\}\\]])++[\"]?";
+	private static final String JSON_EXPR_STREAM = "\\[([-+.\\d]+([,]\\s*)?)*+\\]";
 
-	private static final  Pattern JSON_PATTERN = Pattern.compile(JSON_EXPR, Pattern.MULTILINE);
+	private static final Pattern JSON_PATTERN0 = Pattern.compile(JSON_EXPR0, Pattern.MULTILINE);
+	private static final Pattern JSON_PATTERN1 = Pattern.compile(JSON_EXPR1, Pattern.MULTILINE);
+	private static final Pattern JSON_PATTERN_STREAM = Pattern.compile(JSON_EXPR_STREAM, Pattern.MULTILINE);
 
 	public static boolean isJSon(String txt) {
-		return JSON_PATTERN.matcher(txt).find();
+		return JSON_PATTERN0.matcher(txt).find() || JSON_PATTERN1.matcher(txt).find()
+				|| JSON_PATTERN_STREAM.matcher(txt).find();
     }
 
     public static String toJSon(Object obj) {
@@ -43,9 +51,13 @@ public class JSon {
 			tree.addRef(obj, () -> toMapJson(obj, json, tree,
 					((AdapterProxy) Proxy.getInvocationHandler(obj)).values()));
     	} else if (ObjectUtil.isSingleValueType(obj.getClass())) {
-    		if (ObjectUtil.isSimpleType(obj.getClass()))
-				json.append("\"" + FormatUtil.format(obj) + "\"");
-			else
+			if (ObjectUtil.isSimpleType(obj.getClass())) {
+				boolean isNumberOrBoolean = NumberUtil.isNumber(obj) || PrimitiveUtil.isBoolean(obj);
+				String value = PrimitiveUtil.isPrimitiveOrWrapper(obj.getClass()) ? String.valueOf(obj)
+						: FormatUtil.format(obj);
+				String quot = !isNumberOrBoolean || value.contains(",") ? "\"" : "";
+				json.append(quot + value + quot);
+			} else
 				tree.addRef(obj, () -> toMapJson(obj, json, tree, FieldUtil.toSerializingMap(obj)));
 		} else if (obj.getClass().isArray() && obj.getClass().getComponentType().isPrimitive()) {
 			tree.addRef(obj, () -> json.append(PrimitiveUtil.toArrayString(obj)));
@@ -72,7 +84,8 @@ public class JSon {
 				json.append(",");
 			}
 		}
-		json.deleteCharAt(json.length() - 1);
+		if (orr.length > 0)
+			json.deleteCharAt(json.length() - 1);
 		json.append("]");
 		// json.append("[" + StringUtil.concatWrap("\"{0}\"".toCharArray(), arr).replace("\"\"", "\",\"") + "]");
 	}
@@ -110,40 +123,64 @@ public class JSon {
 		return json;
     }
 
-    public static Map fromJSon(String json) {
-		return (Map) fromJSon_(json, new TreeInfo());
+	/**
+	 * 
+	 * @return either a list or a map
+	 */
+	public static Object fromJSon(String json) {
+		return fromJSon_(json, new TreeInfo());
 	}
 
 	public static Object fromJSon_(String json, TreeInfo tree) {
-    	if (!json.contains("\""))
-    		return fromJSonNoQuotations(json);
 		if (isJSonList(json))
 			return fromJSonList(String.class, json, tree);
-        Map map = new LinkedHashMap<>();
-		String[] attrs = json.substring(1, json.length() - 1).split("[,]\\s*[\"](?=[^\\{\\[\\]]*[:,])");
+		Map map = (Map) tree.addRef(new SelfReferencingMap());
+		String[] attrs = StringUtil.splitUnnested(json.substring(1, json.length() - 1), ","); //.split("[,]\\s*[\"](?=[^\\{\\[\\]]*[:,])");
 		String[] kv = new String[2];
 		for (int i = 0; i < attrs.length; i++) {
-			// kv = attrs[i].split("(?:^[^:]+)([:])");
 			kv[0] = trim(StringUtil.substring(attrs[i], null, ":"));
-			kv[1] = trim(StringUtil.substring(attrs[i], ":", null));
+			kv[1] = StringUtil.substring(attrs[i], ":", null).trim();
+			if (kv[1].equals("null")) {
+				map.put(kv[0], null);
+			} else if (kv[1].matches("[.\\w-+\\d,]+")) {
+				Object value;
+				if (kv[1].equals(Boolean.toString(true)) || kv[1].equals(Boolean.toString(false)))
+					value = Boolean.valueOf(kv[1]);
+				else /*if (kv[1].contains(",") ||  kv[1].contains())*/ {
+					value = Util.trY(() -> NumberFormat.getInstance(Locale.US).parse(kv[1]));
+				}
+				map.put(kv[0], value);
+			} else {
+				kv[1] = trim(kv[1]);
 			map.put(trim(kv[0]),
 					isJSon(kv[1])
 							? tree.addRef(fromJSon_(kv[1], tree))
 							: tree.getReference(kv[1]));
-        }
+		}
+	}
         return map;
     }
 
 	static <T> List<T> fromJSonList(Class<T> type, String json, TreeInfo tree) {
-		String[] attrs = json.substring(1, json.length() - 1).split("[,]\\s*[\"]?(?![^\\{\\[]*[:,])");
+		String[] attrs = splitArray(json);
 		List<T> list = new ArrayList<>(attrs.length);
 		for (int i = 0; i < attrs.length; i++) {
-			attrs[i] = trim(attrs[i]);
 			list.add((T) (isJSon(attrs[i])
 					? tree.addRef(fromJSon_(attrs[i], tree))
 					: tree.getReference(attrs[i])));
 		}
 		return list;
+	}
+
+	public static String[] splitArray(String json) {
+		assert json.startsWith("[") && json.endsWith("]");
+		// NOTE: with regex splitting it is casi not possibible, see both regex
+		// String regex = "[,]\\s*[\"]?(?![^\\{\\[]*[:,])"; // "(?<=[\\]\\}]?\\s?)[,](?=\\s*[\\[\\{])"
+		String[] split = StringUtil.splitUnnested(json.substring(1, json.length() - 1), ",");
+		for (int i = 0; i < split.length; i++) {
+			split[i] = trim(split[i]);
+		}
+		return split;
 	}
 
 	static boolean isJSonList(String json) {
@@ -154,31 +191,19 @@ public class JSon {
 		return StringUtil.trim(s, " \"");
 	}
 
-	@Deprecated // standard fromJSon should do the job now
-	private static Map fromJSonNoQuotations(String json) {
-        Map map = new LinkedHashMap<>();
-        String[] split = json.substring(1, json.length() - 1).split("[,]");
-        String[] keyValue;
-        for (int i = 0; i < split.length; i++) {
-        	keyValue = split[i].split("\\s*:\\s*");
-			if (keyValue.length < 2)
-				throw new IllegalArgumentException("json parsing error on: " + StringUtil.toFormattedString(keyValue, -1));
-            map.put(keyValue[0], keyValue[1]);
-        }
-        return map;
+	public static <T> List<T> toList(Class<T> type, String json) {
+		List list = (List) fromJSon(json);
+		return BeanClass.fillList(type, list);
 	}
 
-	public static <T> List<T> toList(Class<T> type, String json) {
-		LinkedList<T> list = new LinkedList<>();
-		String s;
-		while ((s = StringUtil.subEnclosing(json, "{", "}", true)) != null) {
-			list.add((T) toObject(type, s));
-			json = StringUtil.substring(json, s, null);
-		}
-		return list;
+	public static Object toArray(Class type, String json) {
+		List list = JSon.toList(type, json);
+		return type.isPrimitive() ? ObjectUtil.fromListOfWrappers(type, list)
+				: list.toArray((Object[]) Array.newInstance(type, 0));
 	}
+
 	public static <T> T toObject(Class<T> type, String json) {
-		return (T) BeanClass.getBeanClass(type).fromValueMap(fromJSon(json));
+		return (T) BeanClass.getBeanClass(type).fromValueMap((Map<String, Object>) fromJSon(json));
 	}
 }
 
@@ -258,4 +283,18 @@ class TreeInfo {
 		return false;
 	}
 
+}
+
+class SelfReferencingMap extends LinkedHashMap<String, Object> {
+	final int hashCode = new Object().hashCode();
+
+	@Override
+	public int hashCode() {
+		return hashCode;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		return hashCode() == o.hashCode();
+	}
 }

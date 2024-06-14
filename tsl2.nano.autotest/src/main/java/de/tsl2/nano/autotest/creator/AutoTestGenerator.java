@@ -1,6 +1,7 @@
 package de.tsl2.nano.autotest.creator;
 
 import static de.tsl2.nano.autotest.creator.AFunctionCaller.def;
+import static de.tsl2.nano.autotest.creator.AutoTest.CHECK_TYPECONVERSION;
 import static de.tsl2.nano.autotest.creator.AutoTest.CLEAN;
 import static de.tsl2.nano.autotest.creator.AutoTest.DONTTEST;
 import static de.tsl2.nano.autotest.creator.AutoTest.DUPLICATION;
@@ -23,6 +24,7 @@ import static de.tsl2.nano.autotest.creator.AutoTest.MODIFIER;
 import static de.tsl2.nano.autotest.creator.AutoTest.PARALLEL;
 import static de.tsl2.nano.autotest.creator.AutoTest.PRECHECK_TWICE;
 import static de.tsl2.nano.autotest.creator.AutoTest.TESTNEVERFAIL;
+import static org.junit.Assert.assertArrayEquals;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -49,7 +51,6 @@ import de.tsl2.nano.core.IPreferences;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.ClassFinder;
-import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.exception.ExceptionHandler;
 import de.tsl2.nano.core.execution.ProgressBar;
 import de.tsl2.nano.core.log.LogFactory;
@@ -300,7 +301,7 @@ public class AutoTestGenerator {
 					}
 				}
 			}
-			if (f.getResult() != null && def(FILTER_UNSUCCESSFUL, false)
+			if (f.getResult() != null && def(CHECK_TYPECONVERSION, false)
 					&& !FunctionCheck.checkTypeConversion(f.getResult())) {
 				writeFilteredFunctionCall(f);
 				filter_typeconversions.incrementAndGet();
@@ -360,9 +361,9 @@ public class AutoTestGenerator {
 			} else {
 				if (l.matches("\\w+.*\\(.*\\)(\\s+throws.+)?")) {
 					method = ExpectationCreator.extractMethod(l);
-					progress.increase(" " + iteration + ": " + method != null
+					progress.increase(" " + iteration + ": " + (method != null
 							? " " + method.getDeclaringClass().getSimpleName() + "." + method.getName()
-							: " ...");
+							: " ..."));
 					if (method != null)
 						expTesters.add(new ExpectationFunctionTester(iteration, method, exp));
 				} else {
@@ -416,8 +417,8 @@ public class AutoTestGenerator {
 				+ "\n\tload errors           : " + load_method_error.get()
 				+ "\n\tloaded unsuccessful   : " + load_unsuccessful.get()
 				+ "\n\ttotally loaded/tested : " + testers.size() + " (load-rate: "
-				+ (testers.size() / (float) dup) / (float) methods_loaded.get() + ", total-rate: "
-												 + (testers.size() / dup) / (float)ClassFinder.self().getLoadedMethodCount()  + ")"
+				+ (testers.size() / (float) (dup + 1)) / (float) methods_loaded.get() + ", total-rate: "
+				+ (testers.size() / (dup + 1)) / (float) ClassFinder.self().getLoadedMethodCount() + ")"
 				+ "\n\n" + ValueRandomizer.getDependencyInjector();
 		AFunctionTester.log(p + s +p);
 		FileUtil.writeBytes((p + s + p).getBytes(), getTimedFileName() + "statistics.txt", true);
@@ -445,8 +446,8 @@ class ExpectationCreator {
 			+ Expect.class.getSimpleName() + "( when = [";
 	private static final String PREF_THEN = "then = \"-->";
 	private static final String POST_THEN = "<--\"";
-	private static final String PREF_CONSTRUCT = "construct = {";
-	private static final String PREF_CONSTRUCT_TYPES = "constructTypes = {";
+	private static final String PREF_CONSTRUCT = "construct = [";
+	private static final String PREF_CONSTRUCT_TYPES = "constructTypes = [";
 	
 	static String createExpectationString(AFunctionCaller f, String then) {
 		try {
@@ -462,7 +463,7 @@ class ExpectationCreator {
 							" constructTypes = " + Util.toJson(f.getConstruction().constructor.getParameterTypes())
 									+ " construct = " + Util.toJson(prepareParameter(f.getConstruction().parameter))
 							: "")
-					+ "\n" + f.source + "\n";
+					+ ")})\n" + f.source + "\n";
 			return expect;
 		} catch (Exception e) {
 			f.status = new Status(StatusTyp.STORE_ERROR, null, e);
@@ -497,7 +498,7 @@ class ExpectationCreator {
 			return null;
 		Class[] types = new Class[typenames.length];
 		for (int i = 0; i < typenames.length; i++) {
-			types[i] = BeanClass.load(StringUtil.trim(typenames[i], "\"{}"));
+			types[i] = ObjectUtil.loadClass(StringUtil.trim(typenames[i], "\"{}"));
 		}
 		return types;
 	}
@@ -505,34 +506,7 @@ class ExpectationCreator {
 	private static String[] extractArray(String l, String prefix) {
 		String arr[] = null, all;
 		all = StringUtil.substring(l, prefix, "] ", 0, true);
-		if (all == null) {
-			all = StringUtil.substring(l, prefix, "})", 0, true);
-		}
-		if (!Util.isEmpty(all)) {
-			all = prepareSplitOnJSonWithQuotations(all);
-			arr = all.split("\",\"");
-			for (int i = 0; i < arr.length; i++) {
-				if (!JSon.isJSon(arr[i]) && !arr[i].contains("§§§"))
-					arr[i] = StringUtil.trim(arr[i].replaceAll("\"", ""), "{}");
-				else
-					arr[i] = arr[i].replaceAll("§§§", "\"");
-			}
-		}
-		return arr;
-	}
-
-	private static String prepareSplitOnJSonWithQuotations(String all) {
-		String obj;
-		do { // ugly, but the json from MapUtil creates some additional \" that we use to distinguish inner maps and arrays
-			obj = StringUtil.substring(all, ",\"{", "}\"", true, true);
-			if (!Util.isEmpty(obj)) {
-				String obj1 = obj.replaceAll("\"", "§§§");
-				if (obj.equals(obj1))
-					break;
-				all = all.replace(obj, obj1);
-			}
-		} while(!Util.isEmpty(obj));
-		return all;
+		return all != null ? JSon.splitArray("[" + all + "]") : null;
 	}
 
 	static ExpectationsImpl createExpectation(String[] when, String then, Class[] constructTypes, String[] construct) {
@@ -560,9 +534,7 @@ class ExpectationCreator {
 		for (int i = 0; i < types.length; i++) {
 			types[i] = pars[i].contains("[]") 
 					? BeanClass.loadArrayClass(pars[i]) 
-					: pars[i].contains(".")
-						? BeanClass.load(pars[i]) 
-						: PrimitiveUtil.getPrimitiveClass(pars[i]);
+					: ObjectUtil.loadClass(pars[i]);
 		}
 		return types;
 	}
@@ -573,13 +545,33 @@ class FunctionCheck {
 		ExpectationFunctionTester tester = null;
 		try {
 			tester = new ExpectationFunctionTester(t.cloneIndex, t.source, ExpectationCreator.createExpectationFromLine(expect));
+			if (def(CHECK_TYPECONVERSION, false))
+				checkExpectationLoading(t, tester);
 			tester.testMe();
 			if (def(PRECHECK_TWICE, true))
 				tester.testMe(); //do it twice, sometimes a value changes the first time. would be better to do the initial run() twice!
 			t.status = tester.status;
 			return null;
 		} catch (Exception | AssertionError e) {
-			return tester != null ? tester.status : new Status(StatusTyp.TEST_FAILED, null, e);
+			return tester != null ? tester.status
+					: new Status(StatusTyp.PARSING_ERROR, "tester couldn't be created in cause of parsing problems", e);
+		}
+	}
+
+	private static void checkExpectationLoading(AFunctionCaller t, ExpectationFunctionTester tester) {
+		try {
+			if (t.getConstruction() != null && tester.getConstruction() != null)
+				assertArrayEquals(t.getConstruction().parameter, tester.getConstruction().parameter);
+		} catch (Exception e) {
+			tester.status = new Status(StatusTyp.TYPECONVERSION_CHECK_FAIL, "expectation instance construction failed",
+					e);
+		}
+
+		try {
+			if (t.getParameter() != null)
+				assertArrayEquals(t.getParameter(), tester.getParameter());
+		} catch (Exception e) {
+			tester.status = new Status(StatusTyp.TYPECONVERSION_CHECK_FAIL, "loading expectation failed", e);
 		}
 	}
 

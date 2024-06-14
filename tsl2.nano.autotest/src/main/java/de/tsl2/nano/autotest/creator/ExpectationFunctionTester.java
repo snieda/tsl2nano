@@ -34,7 +34,8 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 
 	@Override
 	protected Object[] getParameter() {
-		if (parameter == null && !status.in(StatusTyp.PARAMETER_UNDEFINED, StatusTyp.PARAMETER_ERROR)) {
+		if (parameter == null && (status == null
+				|| !status.in(StatusTyp.PARAMETER_UNDEFINED, StatusTyp.PARAMETER_ERROR))) {
 			Expect[] expectations = def.value();
 			//if generated ExpectationsImpl is used, there is only one @Expect!
 			boolean annotated = !def.getClass().getSimpleName().endsWith("Impl")
@@ -139,8 +140,9 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 	
 	private Throwable createFailException(String then) {
 		String cls = StringUtil.substring(then, "fail(", ":");
-		String msg = StringUtil.substring(then, cls + ": ", null);
-		msg = msg.substring(0, msg.length() - 1);
+		cls = StringUtil.trim(cls, " ()");
+		String msg = StringUtil.substring(then, cls + (then.contains(": ") ? ": " : ""), null);
+		msg = msg != null && msg.length() > 0 ? msg.substring(0, msg.length() - 1) : null;
 		return BeanClass.createInstance(cls, msg);
 	}
 	

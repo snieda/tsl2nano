@@ -10,6 +10,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.lang.reflect.Array;
@@ -148,10 +152,19 @@ public class ValueRandomizer {
 					|| String.class.isAssignableFrom(typeOf)
 					|| Closeable.class.isAssignableFrom(typeOf)) {
 				n = FileUtil.userDirFile(StringUtil.toBase64(n)).getAbsolutePath();
+
+				if (Reader.class.isAssignableFrom(typeOf)) {
+					n = new StringReader(n.toString());
+				} else if (Writer.class.isAssignableFrom(typeOf)) {
+					StringWriter writer = new StringWriter();
+					writer.write(n.toString());
+					n = writer;
+				}
 			} else if (NumberUtil.isNumber(n)) {
 				n = convert(n, typeOf, zeroNumber, depth);
 			}
 			value = ObjectUtil.wrap(n, typeOf);
+			value = constructDefaultWithoutSpecificValueOrNull(typeOf, value);
 		} catch (Exception e) {
 			// here we try it without randomized values but directly creating a default instance
 			if (ObjectUtil.isInstanceable(typeOf)) {
@@ -175,6 +188,16 @@ public class ValueRandomizer {
 			} catch (Exception e) {
 				// Ok, we cannot inject - but the value is already created, so its not a problem....
 			}
+		}
+		return value;
+	}
+
+	private static <V> V constructDefaultWithoutSpecificValueOrNull(Class<V> typeOf, V value) {
+		if (value != null && !PrimitiveUtil.isAssignableFrom(typeOf, value.getClass())) {
+			if (!Util.isAbstract(typeOf) && BeanClass.getBeanClass(typeOf).hasDefaultConstructor(false))
+				value = BeanClass.getBeanClass(typeOf).createInstance();
+			else // TODO: perhaps we could search an implementation through ClassFinder
+				value = null;
 		}
 		return value;
 	}

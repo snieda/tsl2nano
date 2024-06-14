@@ -775,10 +775,12 @@ In different environments, there may be problems. We try to solve some of them:
 	* use JVisualVM to open the hanging process in FeatureTab **Sampler**. Hit **CPU Samples** and open the callstack tree of  *main* thread completely. Perhaps you can see an endless or blocking loop (like Scanner.hasNextLine(), Semaphore.tryAquire(), etc.) in your code under test.
 	* Perhaps it is waiting on an InputStream (Pipe etc) or a Thread
 	* If your function does a loop or allocation dependent on given int or long parameter, add an *assert* to stop on big numbers (generated on ValueRandomizer)
-* **AllAutoTests stops with an timeout - started with maven surefire**
+* **AllAutoTests stops with a timeout - started with maven surefire**
 	* -> increase the surefire properties *surefire.exitTimeout* or *surefire.timeout*
 * **AllAutoTests ends always with test failures or errors**
-	* -> try to evaluate the classes and methods causing these errors. set system properties in your AllAutoTests class like:  *parallel=false*, *modifier=7* (->public), *filter.exclude=..my-class-and-or-methodnames* *filter.complextypes=true*, *filter.voidparameter=true*, *filter.voidreturn=true*
+	* -> try to evaluate the classes and methods causing these errors. set system properties (with prefix: tsl2.functiontest.) in your AllAutoTests class like:  *parallel=false*, *timeout=-1*, *modifier=7* (->public), *filter.exclude=..my-class-and-or-methodnames* *filter.complextypes=true*, *filter.voidparameter=true*, *filter.voidreturn=true*
+	* -> find yout which method results in test-error, then:
+		* edit the class AllAutoTests of your project and add "System.setProperty("tsl2.functiontest.filter.exclude", "(.*my.package.MyClass.myMethodname.*|my.package2.MyClass2.myMethodname2 .*)");" or more convenient: "set(FILTER_EXCLUDE, StringUtil.matchingOneOf(my.package.MyClass.myMethodname, my.package2.MyClass2.myMethodname2);"
 * **Files are written outside of target or test directories**
 * -> set a breakpoint to *java.io.FileOutputStream.open()* with breakpoint-property '!path.getAbsoluteFile().contains("target/")'. Mostly, a parameter of type *PrintWriter* will invoke a call to *PrintWriter(String)* that create randomized files through the ValueRandomizer
 

@@ -799,6 +799,36 @@ public class StringUtil {
         return result;
     }
 
+    /** @return splitted src with given regEx that is not found inside of doublequotes */
+    public static final String[] splitOutsideOfQuotations(String src, String regEx) {
+        return src.split(regEx + "(?=(?:(?:(?:[^\"\\]++|\\.)*+\"){2})*+(?:[^\"\\]++|\\.)*+$)");
+    }
+
+    /**@param txt source string to split
+     * @param splitter character set. splits for any character in the character set 
+     * @return splitted string - but respecting double-quotes and brackets */
+    public static String[] splitUnnested(String txt, String splitter) {
+        List<String> lsplit = new LinkedList<>();
+        String open = "<{[(", close = ")]}>";
+        int begin = 0;
+        String s;
+        boolean inQuotes = false;
+        int brackets = 0;
+        for (int i = 0; i < txt.length(); i++) {
+            s = String.valueOf(txt.charAt(i));
+            if (splitter.contains(s) && !inQuotes && brackets < 1) {
+                lsplit.add(txt.substring(begin, i));
+                begin = i + 1;
+            } else {
+                inQuotes = (s.equals("\"") && !inQuotes) || (!s.equals("\"") && inQuotes);
+                brackets = open.contains(s) ? ++brackets : close.contains(s) && brackets > 0 ? --brackets : brackets;
+            }
+        }
+        if (begin < txt.length())
+            lsplit.add(txt.substring(begin));
+        return lsplit.toArray(new String[0]);
+    }
+
     public static final String[] splitWordBinding(String word) {
         return word.split("[-./]");
     }
