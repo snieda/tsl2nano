@@ -1,12 +1,3 @@
-/*
- * File: $HeadURL$
- * Id  : $Id$
- * 
- * created by: Tom
- * created on: 31.03.2017
- * 
- * Copyright: (c) Thomas Schneider 2017, all rights reserved
- */
 package de.tsl2.nano.autotest.creator;
 
 import static de.tsl2.nano.autotest.creator.AFunctionCaller.def;
@@ -369,7 +360,7 @@ public class AutoTestGenerator {
 			if (exp == null) {
 				exp = ExpectationCreator.createExpectationFromLine(l);
 			} else {
-				if (l.matches(MethodUtil.REGEX_METHOD_EXPRESSION)) {
+				if (l.matches(MethodUtil.REGEX_FULL_METHOD_EXPRESSION)) {
 					method = ExpectationCreator.extractMethod(l);
 					progress.increase(" " + iteration + ": " + (method != null
 							? " " + method.getDeclaringClass().getSimpleName() + "." + method.getName()

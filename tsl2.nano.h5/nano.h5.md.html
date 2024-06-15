@@ -67,6 +67,7 @@ All packages (under name *tsl2nano*) are available in maven central, sourceforge
 * pure jpa - jpa-annotations are read to resolve attribute-presentation
 * independent of a special o/r mapper. all o/r mappers supporting javax.persistence with an EntityManager are usable.
 * simple database replication on user-loaded data - offline working possible
+* database/json/xml replication through entity replication (using hibernate.replicate)
 * full key-navigation (shortcuts)
 * framework designs interfaces and provides extendable implementations
 * useable as standalone or web-service (with offline access), can connect to application-server or works standalone.
@@ -79,6 +80,7 @@ All packages (under name *tsl2nano*) are available in maven central, sourceforge
 * secure connection over https and wss (_app.ssl.activate=true)
 * supporting yaml on environment and bean configurations.
 * update mechanism
+* own simple JSon de-/serializer implementation
 * injecting own logic on the forms html dom document
 * inject own logic in all phases of presenting through annotations
 * show complex dialogs through websockets to edit beans without leaving the current page
@@ -6118,9 +6120,9 @@ deploy:
 * [ ] provide simple pki
 * [ ] snakeyaml -> jackson
 * [ ] simple-xml -> jackson
-* [ ] JSon de-/serialization -> YAML (own implementation)
-* [ ] autotest: mock all filtered or error classes
-** why PARAMETER_ERROR on type Class? (number -> Class should create TestBean.class in convert())
+* [ ] JSon de-/serialization -> YAML/Xml (own implementation)
+* [x] autotest: mock all filtered or error classes
+** [v] why PARAMETER_ERROR on type Class? (number -> Class should create TestBean.class in convert())
 ** junit test suite not working with junit5 jupiter dependency
-** ValueRandomizer: ObjectUtil.defaultImplementations
-** Expecation: constructTypes, construct not working
+** [ ] ValueRandomizer: ObjectUtil.defaultImplementations
+** [v] Expecation: constructTypes, construct not working

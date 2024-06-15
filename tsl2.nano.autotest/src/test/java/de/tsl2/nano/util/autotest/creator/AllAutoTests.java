@@ -29,8 +29,9 @@ public class AllAutoTests {
 				"SystemUtil.executeRegisteredLinuxBrowser","SystemUtil.softExitOnCurrentThreadGroup",
 				"ThreadState.top","LogFactory","ConcurrentUtil.getCaller","ConcurrentUtil.sleep",
 				"Profiler","NumberUtil.numbers","StringUtil.fixString","CollectionUtil.copyOfRange",
-				"Profiler.workLoop","NumberUtil.fixLengthNumber","DateUtil.getWorkdayCount", "ByteUtil.getPipe", "IPreferences", "CPUState",
-				"AnnotationProxy.setAnnotationValues", "Message.send", "PrivateAccessor.findMembers", "ValueSet", "Mail", "FieldUtil.foreach",
+				"Profiler.workLoop", "NumberUtil.fixLengthNumber", "DateUtil.setNoTimeOffset",
+				"DateUtil.setUTCTimeZone", "ByteUtil.getPipe", "IPreferences", "CPUState",
+						"AnnotationProxy.setAnnotationValues", "Message.send", "PrivateAccessor.findMembers", "ValueSet", "Mail", "FieldUtil.foreach",
 				"ConcurrentUtil.waitFor", "SystemUtil.isNestedApplicationStart"));
 		set(FILTER, matchPackage(Main.class));
 		// set(FILTER, matchMethod(Crypt.class, "decrypt", CharSequence.class, String.class, String.class));

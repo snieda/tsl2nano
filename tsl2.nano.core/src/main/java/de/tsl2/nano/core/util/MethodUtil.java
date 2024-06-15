@@ -7,7 +7,8 @@ import de.tsl2.nano.core.cls.PrivateAccessor;
 
 public class MethodUtil extends FieldUtil {
 
-    private static final String REGEX_METHOD_EXPRESSION = "(?:\\w+\\.)*\\w+\\(.*\\)";
+    public static final String REGEX_METHOD_EXPRESSION = "(?:\\w+\\.)*\\w+\\(.*\\)";
+    public static final String REGEX_FULL_METHOD_EXPRESSION = ".*" + REGEX_METHOD_EXPRESSION + "(\\s+throws.+)?";
 
     public static Method fromGenericString(String genericMethodString) {
         String extracted = StringUtil.extract(genericMethodString, REGEX_METHOD_EXPRESSION);

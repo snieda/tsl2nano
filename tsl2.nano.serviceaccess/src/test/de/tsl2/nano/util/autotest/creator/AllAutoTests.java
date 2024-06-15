@@ -1,5 +1,6 @@
 package de.tsl2.nano.util.autotest.creator;
 
+import static de.tsl2.nano.autotest.creator.AutoTest.PREFIX_FUNCTIONTEST;
 import static de.tsl2.nano.autotest.creator.InitAllAutoTests.matchPackage;
 
 import java.lang.reflect.Proxy;
@@ -52,7 +53,7 @@ public class AllAutoTests {
 						ServiceRunner.class));
 		System.setProperty("tsl2.functiontest.filter.exclude", ".*(FsManagedConnection.setLogWriter|FsManagedConnectionFactory.setLogWriter|PrintWriter|DefaultService.getSubject).*");
 		System.setProperty(AutoTest.PREFIX_FUNCTIONTEST + "fillinstance", "true");
-		System.setProperty("tsl2nano.autotest.inject.beanattributes", "true");
+		System.setProperty(PREFIX_FUNCTIONTEST + "inject.beanattributes", "true");
 		System.setProperty(ADefaultAutoTester.KEY_AUTOTEST_INITMOCKITO, "true");
 		System.setProperty(DependencyInjector.KEY_INJECTORANNOTATIONS,
 				StringUtil.trim(Arrays.toString(ADefaultAutoTester.DEFAULT_MOCK_CLASSNAMES), "{}[]"));

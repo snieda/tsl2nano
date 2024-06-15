@@ -489,6 +489,37 @@ public class Util {
         return defaultValue;
     }
 
+    public static String getSystemPropertyApplicationBasePath() {
+        return System.getProperty(FRAMEWORK_PACKAGE);
+    }
+
+    /**
+     * sets a application systemproperty base path, that will be used on each {@link #get(String, Object)} and {@link #set(String, Object)}.
+     * @param basePath system wide application base path
+     */
+    public static void setSystemPropertyApplicationBasePath(String basePath) {
+        System.setProperty(FRAMEWORK_PACKAGE, basePath);
+    }
+
+    /**
+     * convenience to set a system property - but using {@link #getSystemPropertyApplicationBasePath()} as basepath. given value will be converted to a string using {@link #toString()}
+     * @param <T>
+     * @param name system property name (if #setSystemPropertyApplicationBasePath was called before, this will be used as prefix)
+     * @param value value.toString() to be set as system property
+     * @return given value
+     */
+    public static <T> T set(String name, T value) {
+        return set(name, false, value);
+    }
+
+    public static <T> T set(String name, boolean absolutePath, T value) {
+        name = !absolutePath && getSystemPropertyApplicationBasePath() != null
+                ? getSystemPropertyApplicationBasePath() + name
+                : name;
+        System.setProperty(name, value != null ? value.toString() : null);
+        return value;
+    }
+
     /**
      * workaround for java compiler (mostly not for the jit-compiler) to uncheck generic types to be castable to another
      * generic. It does the same like casting to Object.
