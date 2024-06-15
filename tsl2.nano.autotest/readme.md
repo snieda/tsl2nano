@@ -84,7 +84,7 @@ The *AutoTestGenerator* does the following steps:
 	* call AllAutoTests.after() if available
 	* filter methods with hard errors
 	* create a @Expection annotation (when...->then...)
-* use the @Exception annotation files and:
+* use the @Expectation annotation files and:
 	* try to recreate the instance of declaring class
 	* perhaps inject instances through DependencyInjector and/or *fillInstance*
 	* try to recreate the method arguments
@@ -781,6 +781,7 @@ In different environments, there may be problems. We try to solve some of them:
 	* -> try to evaluate the classes and methods causing these errors. set system properties (with prefix: tsl2.functiontest.) in your AllAutoTests class like:  *parallel=false*, *timeout=-1*, *modifier=7* (->public), *filter.exclude=..my-class-and-or-methodnames* *filter.complextypes=true*, *filter.voidparameter=true*, *filter.voidreturn=true*
 	* -> find yout which method results in test-error, then:
 		* edit the class AllAutoTests of your project and add "System.setProperty("tsl2.functiontest.filter.exclude", "(.*my.package.MyClass.myMethodname.*|my.package2.MyClass2.myMethodname2 .*)");" or more convenient: "set(FILTER_EXCLUDE, StringUtil.matchingOneOf(my.package.MyClass.myMethodname, my.package2.MyClass2.myMethodname2);"
+	* -> if you are using the approved autotest files (copied into your "src/test/resources"), you can 'out-comment' the failing Expectations with '#' on line start
 * **Files are written outside of target or test directories**
 * -> set a breakpoint to *java.io.FileOutputStream.open()* with breakpoint-property '!path.getAbsoluteFile().contains("target/")'. Mostly, a parameter of type *PrintWriter* will invoke a call to *PrintWriter(String)* that create randomized files through the ValueRandomizer
 
@@ -884,6 +885,14 @@ If the test doesn't work, have a look at chapter *Problems and Solutions*
 
 To reuse a generated test set, you have two possibilities:
 
-* copy the ful Exception annotations (@Excpetion{...}) to the target methods
-* copy the folder 'autotest/generated' to your 'src/test/resources' folder ( -> src/test/resources/autotest/generated).
+* copy the full Expectation annotations (@Expectation{...}) to the target methods
+* copy the target folder 'autotest/generated' to your 'src/test/resources' folder ( -> src/test/resources/autotest/generated).
 	** the framework will copy this files on start to the folder 'target/autotest/generated' without overriding existing files 
+	** you can disable the use of the approved expectation files by setting the system property "tsl2.functiontest.ignore.approved" to "true"
+	** you can ignore single expectation annotations by 'out-commenting' the lines of your approved expectation files with '#' 
+
+to generate only the autotests, you can start:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+mvn -fn clean install -Dtest=AllAutoTests
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -1,3 +1,12 @@
+/*
+ * File: $HeadURL$
+ * Id  : $Id$
+ * 
+ * created by: Tom
+ * created on: 31.03.2017
+ * 
+ * Copyright: (c) Thomas Schneider 2017, all rights reserved
+ */
 package de.tsl2.nano.core.util;
 
 import java.lang.reflect.Array;
@@ -275,7 +284,7 @@ class TreeInfo {
 	}
 
 	public boolean hasMaxRecursionReached(Object obj) {
-		int maxRecursion = Util.get("tsl2.json.maxRecursion", 20);
+		int maxRecursion = Util.get("tsl2.json.recursion.max", 20);
 		if (recursion > maxRecursion || Util.isJavaInternal(obj.getClass())) {
 			LOG.warn("ignoring creation of json on '" + obj.getClass() + "' (recursion: " + recursion + ")");
 			return true;

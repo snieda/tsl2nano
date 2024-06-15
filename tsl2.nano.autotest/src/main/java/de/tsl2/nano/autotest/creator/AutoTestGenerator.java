@@ -1,3 +1,12 @@
+/*
+ * File: $HeadURL$
+ * Id  : $Id$
+ * 
+ * created by: Tom
+ * created on: 31.03.2017
+ * 
+ * Copyright: (c) Thomas Schneider 2017, all rights reserved
+ */
 package de.tsl2.nano.autotest.creator;
 
 import static de.tsl2.nano.autotest.creator.AFunctionCaller.def;
@@ -60,6 +69,7 @@ import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.FormatUtil;
 import de.tsl2.nano.core.util.JSon;
+import de.tsl2.nano.core.util.MethodUtil;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -353,13 +363,13 @@ public class AutoTestGenerator {
 		Expectations exp = null;
 		Method method = null;
 		while (sc.hasNextLine()) {
-			String l = sc.nextLine();
-			if (l.trim().length() == 0 || (exp == null && !l.startsWith("@")))
+			String l = sc.nextLine().trim();
+			if (l.length() == 0 || l.startsWith("#") || (exp == null && !l.startsWith("@")))
 				continue;
 			if (exp == null) {
 				exp = ExpectationCreator.createExpectationFromLine(l);
 			} else {
-				if (l.matches("\\w+.*\\(.*\\)(\\s+throws.+)?")) {
+				if (l.matches(MethodUtil.REGEX_METHOD_EXPRESSION)) {
 					method = ExpectationCreator.extractMethod(l);
 					progress.increase(" " + iteration + ": " + (method != null
 							? " " + method.getDeclaringClass().getSimpleName() + "." + method.getName()

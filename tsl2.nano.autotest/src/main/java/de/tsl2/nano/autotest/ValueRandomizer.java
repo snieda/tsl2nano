@@ -1,5 +1,12 @@
+/*
+ * created by: Tom
+ * created on: 31.03.2017
+ * 
+ * Copyright: (c) Thomas Schneider 2017, all rights reserved
+ */
 package de.tsl2.nano.autotest;
 
+import static de.tsl2.nano.autotest.creator.AutoTest.PREFIX_FUNCTIONTEST;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.TYPE;
@@ -181,7 +188,7 @@ public class ValueRandomizer {
 				return null;
 			}
 		}
-		if (Boolean.getBoolean("tsl2nano.autotest.inject.beanattributes")) {
+		if (Boolean.getBoolean(PREFIX_FUNCTIONTEST + "inject.beanattributes")) {
 			try {
 				di.inject(value);
 				injectTestBeanAttributes(value, zeroNumber, depth);
@@ -203,7 +210,7 @@ public class ValueRandomizer {
 	}
 
 	private static <V> void injectTestBeanAttributes(V value, boolean zeroNumber, int depth) {
-		if (!checkMaxDepth(depth + 7) || !Boolean.getBoolean("tsl2nano.autotest.inject.beanattributes")) {
+		if (!checkMaxDepth(depth + 7) || !Boolean.getBoolean(PREFIX_FUNCTIONTEST + "inject.beanattributes")) {
 			return;
 		}
 		List<IAttribute> attrs = BeanClass.getBeanClass(value.getClass()).getAttributes(true);
@@ -298,7 +305,7 @@ public class ValueRandomizer {
 			constructor.setAccessible(true);
 			V instance = (V) constructor.newInstance(parameters);
 			try {
-				if (Boolean.getBoolean("tsl2nano.autotest.inject.beanattributes")) {
+				if (Boolean.getBoolean(PREFIX_FUNCTIONTEST + "inject.beanattributes")) {
 					di.inject(instance);
 				}
 				if (constructor.getParameterCount() == 0

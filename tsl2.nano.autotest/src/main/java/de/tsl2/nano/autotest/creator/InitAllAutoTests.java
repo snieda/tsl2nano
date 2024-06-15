@@ -6,6 +6,7 @@ import static de.tsl2.nano.autotest.creator.AutoTest.CHECK_TYPECONVERSION;
 import static de.tsl2.nano.autotest.creator.AutoTest.DUPLICATION;
 import static de.tsl2.nano.autotest.creator.AutoTest.FILENAME;
 import static de.tsl2.nano.autotest.creator.AutoTest.PARALLEL;
+import static de.tsl2.nano.autotest.creator.AutoTest.PREFIX_FUNCTIONTEST;
 import static de.tsl2.nano.autotest.creator.AutoTest.TIMEOUT;
 
 import java.io.File;
@@ -59,10 +60,11 @@ public class InitAllAutoTests/* extends ADefaultAutoTester*/ {
 		System.setProperty("tsl2.nano.logfactory.off", "true");
 		System.setProperty("tsl2.nano.test", "true");
 		System.setProperty("tsl2.json.recursive", "true");
-		System.setProperty(AutoTest.PREFIX_FUNCTIONTEST + "fillinstance", "false");
-		System.setProperty("tsl2nano.autotest.inject.beanattributes", "false");
-		//		System.setProperty("tsl2.functiontest.testneverfail", "true");
-		boolean approved = copyApprovedExpectionFiles();
+		Util.set(PREFIX_FUNCTIONTEST + "fillinstance", false);
+		Util.set(PREFIX_FUNCTIONTEST + "inject.beanattributes", false);
+		//		System.setProperty("testneverfail", "true");
+		boolean approved = Util.get(PREFIX_FUNCTIONTEST + "ignore.approved", false) ? false
+				: copyApprovedExpectionFiles();
 		set(APPROVED, approved);
 		if (!approved && BaseTest.isExternalCIPlatform())
 			System.setProperty("tsl2.functiontest.donttest", "true");
