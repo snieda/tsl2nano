@@ -243,10 +243,10 @@ public class MapUtil {
     }
 
     public static String toJSon(Map map) {
-    	return JSon.toJSon(map);
+        return new JSon().serialize(map);
     }
     public static Map fromJSon(String json) {
-        return (Map) JSon.fromJSon(json);
+        return (Map) new JSon().toStructure(json);
     }
 
     /**

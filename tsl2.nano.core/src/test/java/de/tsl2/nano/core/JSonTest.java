@@ -22,35 +22,38 @@ import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.core.util.ValueHolder;
 
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class JSonTest {
 
     @Test
     public void testIsJSon() {
-        assertTrue(JSon.isJSon("{}"));
-        assertTrue(JSon.isJSon("[]"));
-        assertTrue(JSon.isJSon("[0,1]"));
-        assertTrue(JSon.isJSon("{\"a\": 0}"));
+        JSon jSon = new JSon();
+        assertTrue(jSon.isParseable("{}"));
+        assertTrue(jSon.isParseable("[]"));
+        assertTrue(jSon.isParseable("[0,1]"));
+        assertTrue(jSon.isParseable("{\"a\": 0}"));
         // assertTrue(JSon.isJSon("[\"v1\", 1]"));
 
         String txt = "{\"id\": \"1,00\",\"name\": \"Einzug Max.Mustermann\",\"bic\": \"BICBANKXXX\",\"iban\": \"BICBANKXXX0123456789\"}, {\"id\": \"1\"}]";
-        assertTrue(JSon.isJSon(txt));
+        assertTrue(jSon.isParseable(txt));
 
         txt = "{\"name\": \"test\", \"value\": 72.68648043493326, \"active\": true, \"stream\": [0,1,2,3,4,5,6,7,8,9]}";
-        assertTrue(JSon.isJSon(txt));
+        assertTrue(jSon.isParseable(txt));
 
-        assertFalse(JSon.isJSon("{seppl=0}"));
-        assertFalse(JSon.isJSon("[{seppl=0, depp is true"));
-        assertFalse(JSon.isJSon("beanName is not a known entity!"));
+        assertFalse(jSon.isParseable(""));
+        assertFalse(jSon.isParseable("{seppl=0}"));
+        assertFalse(jSon.isParseable("[{seppl=0, depp is true"));
+        assertFalse(jSon.isParseable("beanName is not a known entity!"));
     }
 
 	@Test
 	public void testJSonMap() {
 		Map m = MapUtil.asMap("k1", "v1,v2", "k2", "v2;v3");
 
-		String json = JSon.toJSon(m);
-		assertTrue(JSon.isJSon(json));
-        Map m2 = (Map) JSon.fromJSon(json);
-		assertEquals(json, JSon.toJSon(m2));
+        String json = new JSon().serialize(m);
+        assertTrue(new JSon().isParseable(json));
+        Map m2 = (Map) new JSon().toStructure(json);
+        assertEquals(json, new JSon().serialize(m2));
 		assertEquals(MapUtil.asArray(m), MapUtil.asArray(m2));
 	}
 
@@ -61,18 +64,18 @@ public class JSonTest {
         List<String> list1 = Arrays.asList("v1", "v2");
         Map m = MapUtil.asMap("k1", list1, "k2", "\"v2\";v3", "k3", value1, "k4", value2);
 
-        String json = JSon.toJSon(m);
-        assertTrue(JSon.isJSon(json));
-        Map m2 = (Map) JSon.fromJSon(json);
-        assertEquals(json, JSon.toJSon(m2));
-        // TODO: check, why assertEquals() not working
+        String json = new JSon().serialize(m);
+        assertTrue(new JSon().isParseable(json));
+        Map m2 = (Map) new JSon().toStructure(json);
+        assertEquals(json, new JSon().serialize(m2));
+        // TODO: check, why assertEquals() not is working
         // assertEquals(MapUtil.asArray(m), MapUtil.asArray(m2));
     }
 
     @Test
     public void testJSONReference() {
         String json = "{\"cause\": \"@0\",\"detailMessage\": 63.7721618630485}";
-        JSon.toObject(Exception.class, json);
+        new JSon().toObject(Exception.class, json);
     }
 
     @Test
@@ -99,14 +102,14 @@ public class JSonTest {
     @Test
     public void testJsonObject() {
         TypeBean t = new TypeBean(1, "test", 1.1, null/*Arrays.asList(new TypeBean("sub", 2, null))*/);
-        TypeBean c = JSon.toObject(TypeBean.class, JSon.toJSon(t));
+        TypeBean c = new JSon().toObject(TypeBean.class, new JSon().serialize(t));
         assertEquals(t, c);
     }
 
     @Test
     public void testJsonValues() {
         TypeBean t = new TypeBean(1, "test", 1.1, Arrays.asList(new TypeBean(2, "sub", 2.2, null)));
-        TypeBean c = JSon.toObject(TypeBean.class,JSon.toJSon(t));
+        TypeBean c = new JSon().toObject(TypeBean.class, new JSon().serialize(t));
         assertEquals(t, c);
     }
 
@@ -115,14 +118,14 @@ public class JSonTest {
         String json = "[{de.tsl2.nano.autotest.TypeBean},1,\"test\",[\"30,14111020445995\",\"30,14111020445995\"]]";
         String[] expectedSplit = new String[] { "{de.tsl2.nano.autotest.TypeBean}", "1", "test",
                 "[\"30,14111020445995\",\"30,14111020445995\"]" };
-        assertArrayEquals(expectedSplit, JSon.splitArray(json));
+        assertArrayEquals(expectedSplit, new JSon().splitArray(json));
     }
 
     @Test
     public void testJSonSimpleList() {
         List<TypeBean> list = Arrays.asList(new TypeBean(1, "test", 1.1, null), new TypeBean(1, "sub", 2.2, null));
-        String json = JSon.toJSon(list);
-        List mList = (List) JSon.fromJSon(json);
+        String json = new JSon().serialize(list);
+        List mList = (List) new JSon().toStructure(json);
         for (int i = 0; i < mList.size(); i++) {
             mList.set(i, BeanClass.getBeanClass(TypeBean.class).fromValueMap((Map) mList.get(i)));
         }
@@ -131,24 +134,23 @@ public class JSonTest {
 
     @Test
     public void testJsonEmptyList() {
-        String jSon = JSon.toJSon(new ArrayList<>(0));
-        assertEquals(0, ((List) JSon.fromJSon(jSon)).size());
+        String jSon = new JSon().serialize(new ArrayList<>(0));
+        assertEquals(0, ((List) new JSon().toStructure(jSon)).size());
     }
 
     @Test
     public void testJsonList() {
         List<TypeBean> list = Arrays.asList(new TypeBean(1, "test", 1.1, null), new TypeBean(2, "sub", 2.2, null));
-        List<TypeBean> list2 = JSon.toList(TypeBean.class, JSon.toJSon(list));
+        List<TypeBean> list2 = new JSon().toList(TypeBean.class, new JSon().serialize(list));
         assertEquals(list, list2);
     }
 
     @Test
     public void testJsonArray() {
         TypeBean[] arr = new TypeBean[] { new TypeBean(1, "test", 1.1, null), new TypeBean(2, "sub", 2.2, null) };
-        assertArrayEquals(arr, (TypeBean[]) JSon.toArray(TypeBean.class, JSon.toJSon(arr)));
+        assertArrayEquals(arr, (TypeBean[]) new JSon().toArray(TypeBean.class, new JSon().serialize(arr)));
     }
 }
-
 class TypeBean {
     int index;
     String name;

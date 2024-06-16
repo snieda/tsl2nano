@@ -507,7 +507,7 @@ class ExpectationCreator {
 	private static String[] extractArray(String l, String prefix) {
 		String arr[] = null, all;
 		all = StringUtil.substring(l, prefix, "] ", 0, true);
-		return all != null ? JSon.splitArray("[" + all + "]") : null;
+		return all != null ? new JSon().splitArray("[" + all + "]") : null;
 	}
 
 	static ExpectationsImpl createExpectation(String[] when, String then, Class[] constructTypes, String[] construct) {

@@ -372,7 +372,7 @@ public class ObjectUtil extends MethodUtil {
                         return (T) MapUtil.toMapType((Map)value, (Class<Map>)wrapperType);
                     } else if (wrapperType.isArray() && value instanceof String) {
                         if (JSon.isJSon(value.toString()))
-                            return (T) JSon.toArray(wrapperType.getComponentType(), value.toString());
+                            return (T) new JSon().toArray(wrapperType.getComponentType(), value.toString());
                         else
                             return (T) MapUtil.asArray(wrapperType.getComponentType(), (String) value);
                     } else if (wrapperType.isArray()
@@ -386,11 +386,13 @@ public class ObjectUtil extends MethodUtil {
                             Map jsonMap = MapUtil.fromJSon((String)value);
                             return (T) (wrapperType.isInterface() ? MapUtil.toMapType(jsonMap, (Class<Map>)wrapperType) : jsonMap);
                         } else if (Collection.class.isAssignableFrom(wrapperType)) {
-                            return (T) JSon.toList(ObjectUtil.getGenericInterfaceType(wrapperType, Collection.class, 0), (String)value);
+                            return (T) new JSon().toList(
+                                    ObjectUtil.getGenericInterfaceType(wrapperType, Collection.class, 0),
+                                    (String) value);
                         } else if (wrapperType.isInterface()) {
                             return (T) AdapterProxy.create(wrapperType, MapUtil.fromJSon((String) value));
                         } else {
-                            JSon.toObject(wrapperType, (String)value);
+                            new JSon().toObject(wrapperType, (String) value);
                         }
 					} else if (hasValueOfMethod(wrapperType, value))
                     	return (T) BeanClass.call(wrapperType, "valueOf", true, value);

@@ -807,7 +807,7 @@ public class StringUtil {
     /**@param txt source string to split
      * @param splitter character set. splits for any character in the character set 
      * @return splitted string - but respecting double-quotes and brackets */
-    public static String[] splitUnnested(String txt, String splitter) {
+    public static String[] splitUnnested_(CharSequence txt, String splitter) {
         List<String> lsplit = new LinkedList<>();
         String open = "<{[(", close = ")]}>";
         int begin = 0;
@@ -817,7 +817,7 @@ public class StringUtil {
         for (int i = 0; i < txt.length(); i++) {
             s = String.valueOf(txt.charAt(i));
             if (splitter.contains(s) && !inQuotes && brackets < 1) {
-                lsplit.add(txt.substring(begin, i));
+                lsplit.add(txt.subSequence(begin, i).toString());
                 begin = i + 1;
             } else {
                 inQuotes = (s.equals("\"") && !inQuotes) || (!s.equals("\"") && inQuotes);
@@ -825,7 +825,63 @@ public class StringUtil {
             }
         }
         if (begin < txt.length())
-            lsplit.add(txt.substring(begin));
+            lsplit.add(txt.subSequence(begin, txt.length()).toString());
+        return lsplit.toArray(new String[0]);
+    }
+
+    /**@param txt source string to split
+     * @param splitter character set. splits for any character in the character set 
+     * @return splitted string - but respecting double-quotes and brackets */
+    public static String[] splitUnnested(CharSequence txt, String splitter) {
+        List<String> lsplit = new LinkedList<>();
+        List<String> open = Arrays.asList("<", "{", "[", "(");
+        List<String> close = Arrays.asList("</", "}", "]", ")");
+        int begin = 0;
+        String s;
+        boolean inQuotes = false;
+        int brackets = 0;
+        for (int i = 0; i < txt.length(); i++) {
+            s = String.valueOf(txt.charAt(i));
+            if (splitter.contains(s) && !inQuotes && brackets < 1) {
+                lsplit.add(txt.subSequence(begin, i).toString());
+                begin = i + 1;
+            } else {
+                inQuotes = (s.equals("\"") && !inQuotes) || (!s.equals("\"") && inQuotes);
+                if (!inQuotes)
+                    brackets = open.contains(s) || i < txt.length() - 1 && open.contains(txt.subSequence(i, i + 2))
+                            ? ++brackets
+                            : (close.contains(s) || i < txt.length() - 1 && close.contains(txt.subSequence(i, i + 2)))
+                                    && brackets > 0
+                                            ? --brackets
+                                            : brackets;
+            }
+        }
+        if (begin < txt.length())
+            lsplit.add(txt.subSequence(begin, txt.length()).toString());
+        return lsplit.toArray(new String[0]);
+    }
+
+    public static String[] splitChildren(CharSequence txt, String splitExpr, String openExpr, String closeExpr) {
+        Pattern open = Pattern.compile(openExpr, Pattern.MULTILINE);
+        Pattern close = Pattern.compile(closeExpr, Pattern.MULTILINE);
+        List<String> lsplit = new LinkedList<>();
+        int begin = 0;
+        String s;
+        boolean inQuotes = false;
+        int brackets = 0;
+        for (int i = 0; i < txt.length(); i++) {
+            s = String.valueOf(txt.charAt(i));
+            if (splitExpr.contains(s) && !inQuotes && brackets < 1) {
+                lsplit.add(txt.subSequence(begin, i).toString());
+                begin = i + 1;
+            } else {
+                inQuotes = (s.equals("\"") && !inQuotes) || (!s.equals("\"") && inQuotes);
+                brackets = openExpr.contains(s) ? ++brackets
+                        : closeExpr.contains(s) && brackets > 0 ? --brackets : brackets;
+            }
+        }
+        if (begin < txt.length())
+            lsplit.add(txt.subSequence(begin, txt.length()).toString());
         return lsplit.toArray(new String[0]);
     }
 

@@ -222,9 +222,9 @@ public abstract class ARESTDynamic<RESPONSE> {
 			result = bean.getActionByName(action).activate();
 			if (result != null && !PrimitiveUtil.isPrimitiveOrWrapper(result.getClass())) {
 				Bean<Object> resultBean = Bean.getBean(result);
-				result = "'" + action + "' successfull!\n\n" + JSon.toJSon(resultBean.toValueMap(null));
+				result = "'" + action + "' successfull!\n\n" + new JSon().serialize(resultBean.toValueMap(null));
 			} else if (result == null) {
-				result ="'" + action + "' successfull!\n\n" + JSon.toJSon(bean.toValueMap(null));
+				result = "'" + action + "' successfull!\n\n" + new JSon().serialize(bean.toValueMap(null));
 			}
 		}
 		LOG.info("REST (POST) " + url + " --> " + StringUtil.toString(result, 80));

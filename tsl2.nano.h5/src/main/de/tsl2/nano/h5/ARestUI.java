@@ -101,11 +101,11 @@ public abstract class ARestUI<RESPONSE> {
         } else if (entity.equals(URLKEY_ENTITIES)) {
             instance = json;
         } else if (entity.equals(URLKEY_ENTITIESJSON)) {
-            instance = JSon.toList(LinkedHashMap.class, json);
+            instance = new JSon().toList(LinkedHashMap.class, json);
         } else {
             if (JSon.isJSon(json)) {
                 BeanDefinition<?> beanDef = BeanDefinition.getBeanDefinition(entity);
-                instance = JSon.toObject(beanDef.getClazz(), json);
+                instance = new JSon().toObject(beanDef.getClazz(), json);
             } else
                 instance = json;
         }
@@ -118,7 +118,7 @@ public abstract class ARestUI<RESPONSE> {
     private RESPONSE provideInputDialog(ISession session, String url, String message) {
         String name = StringUtil.substring(url, BASE_PATH + "/", "/");
         Map values = Bean.newBean(name).toValueMap(null);
-        String html = createInputMask(session, url, name, JSon.toJSon(values), message);
+        String html = createInputMask(session, url, name, new JSon().serialize(values), message);
         return createResponse(Status.OK, MIME_HTML, html);
     }
     private boolean isChangeAction(String url) {

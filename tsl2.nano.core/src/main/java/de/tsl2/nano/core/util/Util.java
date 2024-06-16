@@ -565,7 +565,7 @@ public class Util {
     }
     
     public static String toJson(Object obj) {
-    	return JSon.toJSon(obj);
+        return new JSon().serialize(obj);
     }
 
     public static ClassLoader getContextClassLoader() {
