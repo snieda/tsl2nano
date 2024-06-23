@@ -1,4 +1,4 @@
-package de.tsl2.nano.core;
+package de.tsl2.nano.core.util.parser;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -17,7 +18,6 @@ import org.junit.Test;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IValueAccess;
 import de.tsl2.nano.core.util.AdapterProxy;
-import de.tsl2.nano.core.util.JSon;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.core.util.ValueHolder;
@@ -46,27 +46,28 @@ public class JSonTest {
         assertFalse(jSon.isParseable("beanName is not a known entity!"));
     }
 
-	@Test
-	public void testJSonMap() {
-		Map m = MapUtil.asMap("k1", "v1,v2", "k2", "v2;v3");
+    @Test
+    public void testJSonMap() {
+        Map m = MapUtil.asMap("k1", "v1,v2", "k2", "v2;v3");
 
         String json = new JSon().serialize(m);
         assertTrue(new JSon().isParseable(json));
         Map m2 = (Map) new JSon().toStructure(json);
         assertEquals(json, new JSon().serialize(m2));
-		assertEquals(MapUtil.asArray(m), MapUtil.asArray(m2));
-	}
+        assertEquals(MapUtil.asArray(m), MapUtil.asArray(m2));
+    }
 
-	@Test
+    @Test
     public void testJSonMapDeep() {
         ValueHolder value1 = new ValueHolder(Arrays.asList("v4", "v5"));
         ValueHolder value2 = new ValueHolder(value1);
         List<String> list1 = Arrays.asList("v1", "v2");
-        Map m = MapUtil.asMap("k1", list1, "k2", "\"v2\";v3", "k3", value1, "k4", value2);
+        Map m = MapUtil.asMap("k1", list1, "k2", "(\"v2\";v3)", "k3", value1, "k4", value2);
 
         String json = new JSon().serialize(m);
         assertTrue(new JSon().isParseable(json));
         Map m2 = (Map) new JSon().toStructure(json);
+        // assertEquals(m, m2);
         assertEquals(json, new JSon().serialize(m2));
         // TODO: check, why assertEquals() not is working
         // assertEquals(MapUtil.asArray(m), MapUtil.asArray(m2));
@@ -85,7 +86,7 @@ public class JSonTest {
         v1.setValue(v2);
         String result = Util.toJson(v2);
         System.out.println(result);
-        assertEquals("{\"value\": {\"value\": {\"value\": {\"value\": \"@0\"}}}}", result);
+        assertEquals("{\"value\": {\"value\": \"@0\"}}", result);
     }
 
     @Test
@@ -96,8 +97,8 @@ public class JSonTest {
 
         String result = Util.toJson(proxy2);
         System.out.println(result);
-        assertEquals("{\"value\": {\"value\": {\"value\": {\"value\": \"@0\"}}}}", result);
-	}
+        assertEquals("{\"value\": {\"value\": \"@0\"}}", result);
+    }
 
     @Test
     public void testJsonObject() {
@@ -150,13 +151,38 @@ public class JSonTest {
         TypeBean[] arr = new TypeBean[] { new TypeBean(1, "test", 1.1, null), new TypeBean(2, "sub", 2.2, null) };
         assertArrayEquals(arr, (TypeBean[]) new JSon().toArray(TypeBean.class, new JSon().serialize(arr)));
     }
+
+    @Test
+    public void testSerialization() {
+        testRoundtrip(new JSon(), null);
+    }
+
+    static <S extends StructParser.ASerializer> void testRoundtrip(S s, String expected) {
+        TypeBean o1 = new TypeBean(1, "test1", 1.1, new LinkedList<>());
+        TypeBean o2 = new TypeBean(2, "test2", 2.2, new LinkedList(Arrays.asList(o1)));
+        o2.connections.add(o2); // -> recursion
+
+        if (expected != null)
+            assertEquals(expected, s.serialize(o2));
+        else
+            expected = s.serialize(o2);
+        System.out.println("Serialized:\n" + expected);
+
+        // final String finalExpected = expected; // on printing to console, the self referencing of maps will result in a stackoverflow
+        // System.out.println("Structure:\n" + Util.trY(() -> s.toStructure(finalExpected), false));
+
+        TypeBean deserialized = s.toObject(TypeBean.class, expected);
+        assertEquals(expected, s.serialize(deserialized));
+    }
+
 }
+
 class TypeBean {
     int index;
     String name;
     double value;
     Collection<TypeBean> connections;
-    
+
     public TypeBean() {
     }
 
@@ -166,10 +192,12 @@ class TypeBean {
         this.value = value;
         this.connections = connections;
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(name, value, connections);
     }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -184,28 +212,36 @@ class TypeBean {
         TypeBean other = (TypeBean) obj;
         return Objects.equals(name, other.name)
                 && Double.doubleToLongBits(value) == Double.doubleToLongBits(other.value)
-                && (connections == null && other.connections == null) || connections == null || connections.containsAll(other.connections);
+                && (connections == null && other.connections == null)
+                || connections != null && other.connections != null && connections.containsAll(other.connections);
     }
+
     @Override
     public String toString() {
         return "TypeBean [index=" + index + ", name=" + name + ", value=" + value + ", connections=" + connections
                 + "]";
     }
+
     public String getName() {
         return name;
     }
+
     public void setName(String name) {
         this.name = name;
     }
+
     public double getValue() {
         return value;
     }
+
     public void setValue(double value) {
         this.value = value;
     }
+
     public Collection<TypeBean> getConnections() {
         return connections;
     }
+
     public void setConnections(Collection<TypeBean> connections) {
         this.connections = connections;
     }

@@ -59,12 +59,12 @@ import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.FormatUtil;
-import de.tsl2.nano.core.util.JSon;
 import de.tsl2.nano.core.util.MethodUtil;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.core.util.parser.JSon;
 
 /**
  * generates and prints {@link Expectations} annotations on all methods, fitting
@@ -505,8 +505,7 @@ class ExpectationCreator {
 	}
 
 	private static String[] extractArray(String l, String prefix) {
-		String arr[] = null, all;
-		all = StringUtil.substring(l, prefix, "] ", 0, true);
+		String all = StringUtil.substring(l, prefix, "] ", 0, true);
 		return all != null ? new JSon().splitArray("[" + all + "]") : null;
 	}
 

@@ -35,6 +35,7 @@ import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.cls.UnboundAccessor;
 import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.parser.JSon;
 
 /**
  * utils for general purpose on simple objects.

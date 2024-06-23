@@ -62,6 +62,8 @@ import de.tsl2.nano.core.util.Util;
 @Default(value = DefaultType.FIELD, required = false)
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class BeanClass<T> implements Serializable {
+    public static final String KEY_REF = "REF";
+
     /** serialVersionUID */
     private static final long serialVersionUID = 8387513854853569951L;
 
@@ -1337,11 +1339,20 @@ public class BeanClass<T> implements Serializable {
         return fromValueMap(createInstance(), values);
     }
 
+    public T fromValueMap(Map<String, Object> values, Map<Map, Object> selfReferences) {
+        Object v;
+        if (values.size() == 1 && (v = values.get(KEY_REF)) != null && selfReferences.containsKey(v)) {
+            return (T) selfReferences.get(v);
+        }
+        return fromValueMap(createInstance(), values, selfReferences);
+    }
+
     public T fromValueMap(T instance, Map<String, Object> values) {
         return fromValueMap(instance, values, new HashMap<>());
     }
 
-    public T fromValueMap(T instance, Map<String, Object> values, Map<Map, Object> references) {
+    T fromValueMap(T instance, Map<String, Object> values, Map<Map, Object> references) {
+        references.put(values, instance);
         IAttribute attr;
         for (String name : values.keySet()) {
             attr = getAttribute(name, false);
@@ -1369,7 +1380,7 @@ public class BeanClass<T> implements Serializable {
                 if (attr instanceof IValueAccess)
                     ((IValueAccess)attr).setValue(value);
                 else {
-                    fillRecursiveList(attr, value);
+                    fillRecursiveList(attr, value, references);
                     attr.setValue(instance, value);
                 }
             } else {
@@ -1379,21 +1390,27 @@ public class BeanClass<T> implements Serializable {
         return instance;
     }
 
-    private void fillRecursiveList(IAttribute attr, Object value) {
+    private void fillRecursiveList(IAttribute attr, Object value, Map<Map, Object> references) {
         if (!(value instanceof List))
             return;
         Class<?> gtype = BeanAttribute.getGenericType(attr.getAccessMethod(), 0);
         if (gtype == null || gtype.equals(Object.class))
             return;
-        fillList(gtype, (List) value);
+        fillList(gtype, (List) value, references);
     }
 
     public static <T> List<T> fillList(Class<T> type, List listOfMaps) {
+        return fillList(type, listOfMaps, new HashMap<>());
+    }
+
+    private static <T> List<T> fillList(Class<T> type, List listOfMaps, Map<Map, Object> references) {
         Object item;
         for (int i = 0; i < listOfMaps.size(); i++) {
             item = listOfMaps.get(i);
-            if (item instanceof Map)
-                listOfMaps.set(i, BeanClass.getBeanClass(type).fromValueMap((Map<String, Object>) item));
+            if (item instanceof Map) {
+                listOfMaps.set(i, references.containsKey(item) ? references.get(item)
+                        : BeanClass.getBeanClass(type).fromValueMap((Map<String, Object>) item, references));
+            }
         }
         return listOfMaps;
     }

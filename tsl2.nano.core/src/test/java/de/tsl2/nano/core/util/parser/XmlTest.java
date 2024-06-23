@@ -1,16 +1,13 @@
-package de.tsl2.nano.core;
+package de.tsl2.nano.core.util.parser;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 
 import org.junit.Test;
 
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.core.util.Xml;
 
 public class XmlTest {
 
@@ -100,15 +97,10 @@ public class XmlTest {
 
     @Test
     public void testSerialization() {
-        TypeBean o1 = new TypeBean(1, "test1", 1.1, null);
-        TypeBean o2 = new TypeBean(2, "test2", 2.2, Arrays.asList(o1));
-        String expected = createXmlString();
-        assertEquals(expected, new Xml().serialize(o2));
-        TypeBean deserialized = new Xml().toObject(TypeBean.class, expected);
-        assertEquals(expected, new Xml().serialize(deserialized));
+        JSonTest.testRoundtrip(new Xml(), new Xml().createInitialStringBuilder() + createXmlString());
     }
 
     private String createXmlString() {
-        return "<TypeBean><connections><index>1</index> <name>test1</name> <value>1.1</value></connections> <index>2</index> <name>test2</name> <value>2.2</value></TypeBean>";
+        return "<TypeBean><connections><TypeBean><index>1</index> <name>test1</name> <value>1.1</value></TypeBean> <TypeBean>@0</TypeBean></connections> <index>2</index> <name>test2</name> <value>2.2</value></TypeBean>";
     }
 }

@@ -22,13 +22,11 @@ public class ValueHolder<T> implements IValueAccess<T> {
 
 	@Override
 	public Class<T> getType() {
-		// TODO Auto-generated method stub
-		return null;
+		return value != null ? (Class<T>) value.getClass() : null;
 	}
 
 	@Override
 	public EventController changeHandler() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	

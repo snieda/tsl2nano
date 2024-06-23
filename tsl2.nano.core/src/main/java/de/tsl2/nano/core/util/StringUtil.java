@@ -44,7 +44,7 @@ import de.tsl2.nano.core.Messages;
  * 
  */
 @SuppressWarnings("rawtypes")
-public class StringUtil {
+public class StringUtil extends Strings {
     private static final int MAX_TRIES = 80;
 	/** variable (like ant-variables) matching expression. e.g.: ${myvar} */
     public static final String VAR_REGEXP = "\\$\\{[\\w._-]+\\}";
@@ -55,7 +55,7 @@ public class StringUtil {
      * @see #substring(String, String, String, int)
      */
     @Expectations({@Expect(when = {"something.. <content>..some other", "<", ">"}, then = "content")})
-    public static String substring(String data, String from, String to) {
+    public static String substring(CharSequence data, String from, String to) {
         return substring(data, from, to, 0);
     }
 
@@ -68,42 +68,43 @@ public class StringUtil {
      */
     // TODO: the expectations should have a then() = "<content>" (enclosing!) but doesn't!
     @Expectations({@Expect(when = {"something.. <content>..some other", "<", ">", "false"}, then = "content")})
-    public static String subEnclosing(String data, String from, String to, boolean constrain) {
+    public static String subEnclosing(CharSequence data, String from, String to, boolean constrain) {
         if (from == null && to == null) {
-            return constrain ? null : data;
+            return constrain ? null : data.toString();
         } else if (from == null) {
             return substring(data, from, to, true, true);
         } else if (to == null) {
             return substring(data, from, to, 0, true);
         } else {
-            int iFrom = data.indexOf(from);
-            int iTo = data.lastIndexOf(to);
+            int iFrom = indexOf(data, from);
+            int iTo = lastIndexOf(data, to);
             if (constrain && iFrom == -1 || iTo == -1) {
                 return null;
             } else {
-                return data.substring(iFrom != -1 ? iFrom + from.length() : 0, iTo != -1 ? iTo : data.length());
+                return data.subSequence(iFrom != -1 ? iFrom + from.length() : 0, iTo != -1 ? iTo : data.length())
+                        .toString();
             }
         }
     }
 
     /** delegates to {@link #substring(String, String, String, int)} interpreting from and to as regurlar expressions. */
-    public static String subRegex(String data, String from, String to, int start) {
+    public static String subRegex(CharSequence data, String from, String to, int start) {
     	return substring(data, 
-    			from != null ? extract(data.substring(start), from) : null, 
-    			to   != null ? extract(data.substring(start), to) : null, 
+                from != null ? extract(data.subSequence(start, data.length()), from) : null,
+                to != null ? extract(data.subSequence(start, data.length()), to) : null,
     					start);
     }
 
     /** delegates to {@link #substring(String, String, String, int)} interpreting fromRegex as regurlar expressions. */
-    public static String subRegexFrom(String data, String fromRegex, String to, int start) {
+    public static String subRegexFrom(CharSequence data, String fromRegex, String to, int start) {
     	return substring(data, 
-    			fromRegex != null ? extract(data.substring(start), fromRegex) : null, to, start);
+                fromRegex != null ? extract(data.subSequence(start, data.length()), fromRegex) : null, to, start);
     }
 
     /** delegates to {@link #substring(String, String, String, int)} interpreting toRegex as regurlar expressions. */
-    public static String subRegexTo(String data, String from, String toRegex, int start) {
+    public static String subRegexTo(CharSequence data, String from, String toRegex, int start) {
     	return substring(data, 
-    			from, toRegex != null ? extract(data.substring(start), toRegex) : null, start);
+                from, toRegex != null ? extract(data.subSequence(start, data.length()), toRegex) : null, start);
     }
 
     /**
@@ -119,8 +120,8 @@ public class StringUtil {
      * @param last whether it searches with lastIndexOf(to).
      * @return
      */
-    public static String substring(String data, String from, String to, boolean last, boolean constrain) {
-        int i = !last ? 0 : from != null ? data.lastIndexOf(from) : to != null ? data.lastIndexOf(to) : 0;
+    public static String substring(CharSequence data, String from, String to, boolean last, boolean constrain) {
+        int i = !last ? 0 : from != null ? lastIndexOf(data, from) : to != null ? lastIndexOf(data, to) : 0;
         if (i < 0 && constrain) {
             return null;
         }
@@ -129,15 +130,19 @@ public class StringUtil {
             return substring(data, from, to, i, constrain);
         } else {
             // if 'last' is used for 'to', we return directly the substring
-            return data.substring(0, i);
+            return data.subSequence(0, i).toString();
         }
     }
 
     /**
      * delegates to {@link #substring(String, String, String, int, boolean)} with constrain = false
      */
-    public static String substring(String data, String from, String to, int start) {
+    public static String substring(CharSequence data, String from, String to, int start) {
         return substring(data, from, to, start, false);
+    }
+
+    public static String substring(CharSequence data, String from, String to, int start, boolean constrain) {
+        return substring(data, from, to, start, false, constrain);
     }
 
     /**
@@ -150,32 +155,33 @@ public class StringUtil {
      * @param constrain if true, null will be returned if @from or @to couldn't be found
      * @return extracted substring
      */
-    public static String substring(String data, String from, String to, int start, boolean constrain) {
+    public static String substring(CharSequence data, String from, String to, int start, boolean lastTo,
+            boolean constrain) {
         if (from == null && to == null) {
-            return constrain ? null : data;
+            return constrain ? null : data.toString();
         }
         if (from == null) {
-            final int i = data.indexOf(to, start);
+            final int i = lastTo ? indexOf(data, to, lastTo) : indexOf(data, to, start);
             if (i < 0) {
                 if (constrain) {
                     return null;
                 } else {
-                    return data.substring(start);
+                    return data.subSequence(start, data.length()).toString();
                 }
             }
-            return data.substring(start, i);
+            return data.subSequence(start, i).toString();
         } else if (to == null) {
-            final int i = data.indexOf(from, start);
+            final int i = indexOf(data, from, start);
             if (i < 0) {
                 if (constrain) {
                     return null;
                 } else {
-                    return data.substring(start);
+                    return data.subSequence(start, data.length()).toString();
                 }
             }
-            return data.substring(i + from.length());
+            return data.subSequence(i + from.length(), data.length()).toString();
         } else {
-            int i = data.indexOf(from, start);
+            int i = indexOf(data, from, start);
             if (i < 0) {
                 if (constrain) {
                     return null;
@@ -183,99 +189,88 @@ public class StringUtil {
                 from = "";//-->length = 0
                 i = start;
             }
-            int j = data.indexOf(to, i + (from.length() > 0 ? from.length() : 1));
+            int j = lastTo ? indexOf(data, to, lastTo) : indexOf(data, to, i + (from.length() > 0 ? from.length() : 1));
             if (j < 0) {
                 if (constrain) {
                     return null;
                 }
                 j = data.length();
             }
-            return data.substring(i + from.length(), j);
+            return data.subSequence(i + from.length(), j).toString();
         }
     }
 
     /**
-     * @see #substring(StringBuilder, String, String, int)
-     */
-    @Expectations({@Expect(when = {"something.. <content>..some other", "<", ">"}, then = "content")})
-    public static String substring(StringBuilder data, String from, String to) {
-        return substring(data, from, to, 0);
-    }
+    //  * @see #substring(StringBuilder, String, String, int)
+    //  */
+    // @Expectations({@Expect(when = {"something.. <content>..some other", "<", ">"}, then = "content")})
+    // public static String substring(StringBuilder data, String from, String to) {
+    //     return substring(data, from, to, 0);
+    // }
 
-    /**
-     * TODO: replace substring(String,...) extracts from from (exclusive) to to, beginning at index start. doesn't
-     * consider encapsulating (no regexp!).
-     * 
-     * @param data text
-     * @param from start-string
-     * @param to end-string
-     * @param start index
-     * @return extracted substring
-     */
-    public static String substring(StringBuilder data, String from, String to, int start) {
-        /*
-         * TODO:
-         * as it doesn't exist any sufficient interface for String, StringBuilder, StringBuffer,
-         * we do the instance checking here - avoiding to implement the algorithm twice.
-         */
-        if (from == null) {
-            final int i = data.indexOf(to, start);
-            if (i < 0) {
-                return data.substring(start);
-            }
-            return data.substring(start, i);
-        } else if (to == null) {
-            final int i = data.indexOf(from, start);
-            if (i < 0) {
-                return data.substring(start);
-            }
-            return data.substring(i + from.length());
-        } else {
-            int i = data.indexOf(from, start);
-            if (i < 0) {
-                from = "";//-->length = 0
-                i = start;
-            }
-            int j = data.indexOf(to, i + from.length() + 1);
-            if (j < 0) {
-                j = data.length();
-            }
-            return data.substring(i + from.length(), j);
-        }
-    }
-
-    /**
-     * delegates to {@link #trim(StringBuilder, char)} walking through given characters in string (note: character-order
-     * is important!)
-     */
-    // TODO: not a real trim(): each character will be 'trimmed' only once!
-    @Expectations({@Expect(when = {" .<content>. ", " .<>"}, then = "content")})
-    public static String trim(String src, String charactersToTrim) {
-        char[] carr = charactersToTrim.toCharArray();
-        StringBuilder sb = new StringBuilder(src);
-        for (int i = 0; i < carr.length; i++) {
-            trim(sb, carr[i]);
-        }
-        return sb.toString();
-    }
+    // /**
+    //  * TODO: replace substring(String,...) extracts from from (exclusive) to to, beginning at index start. doesn't
+    //  * consider encapsulating (no regexp!).
+    //  * 
+    //  * @param data text
+    //  * @param from start-string
+    //  * @param to end-string
+    //  * @param start index
+    //  * @return extracted substring
+    //  */
+    // public static String substring(StringBuilder data, String from, String to, int start) {
+    //     /*
+    //      * TODO:
+    //      * as it doesn't exist any sufficient interface for String, StringBuilder, StringBuffer,
+    //      * we do the instance checking here - avoiding to implement the algorithm twice.
+    //      */
+    //     if (from == null) {
+    //         final int i = data.indexOf(to, start);
+    //         if (i < 0) {
+    //             return data.substring(start);
+    //         }
+    //         return data.substring(start, i);
+    //     } else if (to == null) {
+    //         final int i = data.indexOf(from, start);
+    //         if (i < 0) {
+    //             return data.substring(start);
+    //         }
+    //         return data.substring(i + from.length());
+    //     } else {
+    //         int i = data.indexOf(from, start);
+    //         if (i < 0) {
+    //             from = "";//-->length = 0
+    //             i = start;
+    //         }
+    //         int j = data.indexOf(to, i + from.length() + 1);
+    //         if (j < 0) {
+    //             j = data.length();
+    //         }
+    //         return data.substring(i + from.length(), j);
+    //     }
+    // }
 
     /**
      * trims given character left/right for source string
      * 
-     * @param src source to trim
+     * @param s source to trim
      * @param c character to be trimmed
      */
-    public static void trim(StringBuilder src, char c) {
+    @SuppressWarnings("unchecked")
+    @Expectations({ @Expect(when = { " .<content>. ", " .<>" }, then = "content") })
+    public static <S extends CharSequence> S trim(S s, String c) {
         int i = 0;
+        CharSequence sb = s instanceof String ? new StringBuilder(s) : s;
         //from start
-        while (i < src.length() && src.charAt(i) == c) {
-            src.deleteCharAt(i++);
+        while (i < sb.length() && c.indexOf(sb.charAt(i)) != -1) {
+            deleteCharAt(sb, 0);
         }
         //at the end
-        i = src.length();
-        while (i > 0 && src.charAt(--i) == c) {
-            src.deleteCharAt(i);
+        i = sb.length();
+        while (i > 0 && c.indexOf(sb.charAt(--i)) != -1) {
+            deleteCharAt(sb, i);
         }
+        return s instanceof String ? (S) sb.toString() : s;
     }
 
 //    @Expectations({@Expect(when = {"something.. <content>..some other", "<content>", "[new]"}, then = "something.. [new]..some other")})
@@ -322,28 +317,6 @@ public class StringUtil {
         return result.toString();
     }
 
-    /**
-     * @param src StringBuffer in cause of Matcher only working on StringBuffer directly
-     * @param regex regular expression
-     * @param replacement replacement
-     * @return count of findings
-     */
-    // TODO: wrong replacement, see @Expect -> otherther
-//    @Expectations({@Expect(when = {"something.. <content>..some other", "<content>", "[new]"}, resultIndex = 0, then = "something.. [new]..some other")})
-    public static int replaceAll(StringBuilder src, String regex, String replacement) {
-    	int count = 0;
-        Matcher matcher = Pattern.compile(regex).matcher(src);
-        StringBuffer sb = new StringBuffer();
-        while (matcher.find()) {
-            matcher.appendReplacement(sb, replacement);
-            count++;
-        }
-        matcher.appendTail(sb);
-        src.setLength(0);
-        src.append(sb);
-        return count;
-    }
-    
     public static String toStringCut(Object obj, int len) {
     	String s = String.valueOf(obj);
     	return s.length() > len ? s.substring(0, Math.min(s.length(), len)) : s;
@@ -547,7 +520,7 @@ public class StringUtil {
     	String f = extract(src.substring(start), regex);
     	return src.indexOf(f, start);
     }
-    
+
     /**
      * extracts all expressions found. On StringBuilder/StringBuffer the regexp was replaced with "".
      * 
@@ -722,7 +695,7 @@ public class StringUtil {
      * 
      * </pre>
      */
-    public static final String[] splitFix(String source, boolean regex, String...splitter) {
+    public static final String[] splitFix(CharSequence source, boolean regex, String... splitter) {
     	final String REG_MARKER = Util.get("tsl2nano.string.split.regex.marker", "^");
     	final String IGN_MARKER = Util.get("tsl2nano.string.split.regex.marker", "°");
     	String[] s = new String[splitter.length + 1];
@@ -735,7 +708,7 @@ public class StringUtil {
 				regexTo = regex && (split.startsWith(REG_MARKER) || split.endsWith(REG_MARKER));
 				if (regexTo)
 					split = split.replace(REG_MARKER, "");
-				ignore = StringUtil.substring(split, IGN_MARKER, IGN_MARKER, false, true);
+                ignore = substring(split, IGN_MARKER, IGN_MARKER, false, true);
 				if (ignore != null) {
 					split = split.replace(IGN_MARKER + ignore + IGN_MARKER, "");
 				}
@@ -749,7 +722,7 @@ public class StringUtil {
 				throw new IllegalStateException("split " + i + ":'" + split + "'not found!");
 			s[i] = ignore == null ? last.trim() : last.trim().replace(ignore, "");
 			ll = ignore == null ? last + split : last.replace(ignore, "") + split;
-			pos = source.indexOf(last, pos);
+            pos = indexOf(source, last, pos);
 			if (pos < 0)
 				throw new IllegalStateException("'" + last + "' on split: '" + split + "' + not found in data:" + source );
 			if (i == 1 && lastpos == pos)
@@ -760,7 +733,8 @@ public class StringUtil {
     	return s;
     }
 
-	private static String substringEx(String source, String ll, String split, int pos, boolean regexFrom, boolean regexTo) {
+    private static String substringEx(CharSequence source, String ll, String split, int pos, boolean regexFrom,
+            boolean regexTo) {
 		return regexFrom && regexTo 
 				? subRegex(source, ll, split, pos)
 				: regexFrom
@@ -807,53 +781,23 @@ public class StringUtil {
     /**@param txt source string to split
      * @param splitter character set. splits for any character in the character set 
      * @return splitted string - but respecting double-quotes and brackets */
-    public static String[] splitUnnested_(CharSequence txt, String splitter) {
-        List<String> lsplit = new LinkedList<>();
-        String open = "<{[(", close = ")]}>";
-        int begin = 0;
-        String s;
-        boolean inQuotes = false;
-        int brackets = 0;
-        for (int i = 0; i < txt.length(); i++) {
-            s = String.valueOf(txt.charAt(i));
-            if (splitter.contains(s) && !inQuotes && brackets < 1) {
-                lsplit.add(txt.subSequence(begin, i).toString());
-                begin = i + 1;
-            } else {
-                inQuotes = (s.equals("\"") && !inQuotes) || (!s.equals("\"") && inQuotes);
-                brackets = open.contains(s) ? ++brackets : close.contains(s) && brackets > 0 ? --brackets : brackets;
-            }
-        }
-        if (begin < txt.length())
-            lsplit.add(txt.subSequence(begin, txt.length()).toString());
-        return lsplit.toArray(new String[0]);
-    }
-
-    /**@param txt source string to split
-     * @param splitter character set. splits for any character in the character set 
-     * @return splitted string - but respecting double-quotes and brackets */
     public static String[] splitUnnested(CharSequence txt, String splitter) {
         List<String> lsplit = new LinkedList<>();
-        List<String> open = Arrays.asList("<", "{", "[", "(");
-        List<String> close = Arrays.asList("</", "}", "]", ")");
+        String open = "<{[(", close = ")]}/";
         int begin = 0;
-        String s;
+        char c;
         boolean inQuotes = false;
         int brackets = 0;
         for (int i = 0; i < txt.length(); i++) {
-            s = String.valueOf(txt.charAt(i));
-            if (splitter.contains(s) && !inQuotes && brackets < 1) {
+            c = txt.charAt(i);
+            if (splitter.indexOf(c) != -1 && !inQuotes && brackets < 1) {
                 lsplit.add(txt.subSequence(begin, i).toString());
                 begin = i + 1;
             } else {
-                inQuotes = (s.equals("\"") && !inQuotes) || (!s.equals("\"") && inQuotes);
+                inQuotes = (c == '\"' && !inQuotes) || (c != '\"' && inQuotes);
                 if (!inQuotes)
-                    brackets = open.contains(s) || i < txt.length() - 1 && open.contains(txt.subSequence(i, i + 2))
-                            ? ++brackets
-                            : (close.contains(s) || i < txt.length() - 1 && close.contains(txt.subSequence(i, i + 2)))
-                                    && brackets > 0
-                                            ? --brackets
-                                            : brackets;
+                    brackets = open.indexOf(c) != -1 ? ++brackets
+                            : close.indexOf(c) != -1 && brackets > 0 ? --brackets : brackets;
             }
         }
         if (begin < txt.length())
@@ -861,28 +805,90 @@ public class StringUtil {
         return lsplit.toArray(new String[0]);
     }
 
-    public static String[] splitChildren(CharSequence txt, String splitExpr, String openExpr, String closeExpr) {
-        Pattern open = Pattern.compile(openExpr, Pattern.MULTILINE);
-        Pattern close = Pattern.compile(closeExpr, Pattern.MULTILINE);
+    public static String[] splitStructure(CharSequence s, String openRegEx, String closeRegEx) {
+        return splitStructure(s, openRegEx, closeRegEx, "\\w+", 0, false);
+    }
+
+    /**
+     * splits a given string to an array of siblings in the structure
+     * @param s source string to be splitted into a list of sibling tags
+     * @param openRegEx open tag regular expression
+     * @param closeRegEx close tag regular expression (the string ${open} will be replaced by the found open string)
+     * @param nameRegEx regular expression to extract the name from open or close tag
+     * @return splitted string - respecting double-quotes */
+    public static String[] splitStructure(CharSequence s, String openRegEx, String closeRegEx, String nameRegEx,
+            int start, boolean includeRoot) {
         List<String> lsplit = new LinkedList<>();
-        int begin = 0;
-        String s;
-        boolean inQuotes = false;
-        int brackets = 0;
-        for (int i = 0; i < txt.length(); i++) {
-            s = String.valueOf(txt.charAt(i));
-            if (splitExpr.contains(s) && !inQuotes && brackets < 1) {
-                lsplit.add(txt.subSequence(begin, i).toString());
-                begin = i + 1;
-            } else {
-                inQuotes = (s.equals("\"") && !inQuotes) || (!s.equals("\"") && inQuotes);
-                brackets = openExpr.contains(s) ? ++brackets
-                        : closeExpr.contains(s) && brackets > 0 ? --brackets : brackets;
+        String open, close, closeRegExName, name;
+        boolean inQuotes;
+        int i = start, c = 0;
+
+        while (!Util.isEmpty(open = extract(s, openRegEx, null, i))) {
+            i = indexOf(s, open, i);
+            inQuotes = countChar(s.subSequence(0, i), '\"') % 2 == 1;
+            if (inQuotes) {
+                i = indexOf(substring(s, i + 1), "\"");
+                if (i == -1)
+                    throw new IllegalStateException("unclosed quotations");
+                continue;
             }
+            name = extract(open, nameRegEx);
+            closeRegExName = closeRegEx.replace("${open}", name);
+            close = extract(s, closeRegExName, null, i);
+            c = i + open.length() - 1;
+            do { // are we inside a nested closing tag? (e.g. <a> <a></a> </a>)
+                c = indexOf(s, close, ++c);
+                if (c == -1)
+                    throw new IllegalStateException("unclosed tag " + open + " at index " + i);
+            } while (countFindings(s.subSequence(i + open.length(), c), name) % 2 == 1);
+            lsplit.add(s.subSequence(i, c + close.length()).toString());
+            i = c + close.length();
         }
-        if (begin < txt.length())
-            lsplit.add(txt.subSequence(begin, txt.length()).toString());
         return lsplit.toArray(new String[0]);
+    }
+
+    /**
+     * provides extracting a child structure of given data, using "from" from start index, replacing the 
+     * property "${from}" inside the "to" parameter to find the last occurency of that manipulated to string.
+     * 
+     * Example:
+     * usable for structures like xml, getting all child tags
+     * 
+     * extractChildren("<a><c1><d>content</d></c1><c2>p1</c2></a>", "<\\w+>", "</\\w+>")
+     * should return: 
+     *  0: <c1><d>content</d></c1>
+     *  1: <c2>p1</c2>
+     * 
+     * NOTE: not performance optimized!
+     * 
+     * @param data source data as implementation of CharSequence like String StringBuilder and StringBuffer
+     * @param from regular expression to be found from given start index
+     * @param to regular expression (the string ${from} will be replaced by the found from string) to find the last occurrency of to
+     * @param start start index in given data
+     * @return splitted substrings between from and to
+     */
+    public static String[] splitStructure_(CharSequence data, String from, String to, int start, boolean includeRoot) {
+        CharSequence sub = extractSubstring(data, from, to, start, includeRoot);
+        LinkedList<String> split = new LinkedList<String>();
+        String c;
+        while (!Util.isEmpty(c = extractSubstring(sub, from, to, 0, true))) {
+            split.add(c);
+            sub = substring(sub, c, null);
+        }
+        return split.toArray(new String[0]);
+    }
+
+    public static String extractSubstring(CharSequence data, String from, String to, int start, boolean include) {
+        from = from != null ? extract(data.subSequence(start, data.length()), from) : null;
+        if (to != null) {
+            if (from != null) {
+                String fromTagName = extract(from, "\\w+");
+                to = to.replace("${open}", fromTagName);
+            }
+            to = extract(data.subSequence(start, data.length()), to);
+        }
+        return (include && from != null ? from : "") + substring(data, from, to, start, true, false)
+                + (include && to != null ? to : "");
     }
 
     public static final String[] splitWordBinding(String word) {
@@ -1208,18 +1214,23 @@ public class StringUtil {
     	c.accept(pw);
     	return sw.toString();
     }
-    public static int countFindings(String data, String search) {
+
+    public static int countFindings(CharSequence data, String search) {
     	int c = 0;
     	int i, last = 0;
     	int ll = search.length();
 		do {
-    		i = data.indexOf(search, last);
+            i = indexOf(data, search, last);
     		if (i == -1)
     			break;
     		last = i + ll;
     		++c;
     	} while (true);
 		return c;
+    }
+
+    public static final long countChar(CharSequence s, char c) {
+        return s.codePoints().filter(ch -> ch == c).count();
     }
 
     /**
@@ -1257,5 +1268,103 @@ public class StringUtil {
 
     public static boolean isXml(String txt) {
         return txt != null && (txt.contains("</") || txt.contains("/>"));
+    }
+}
+
+/*
+ * workaround on jdk missing a real base for string manipulations. String, StringBuffer and StringBuilder have only the interface CharSequence, missing some important declarations.
+ * provide indexOf, substring, setLength, replaceAll for String, StringBuilder, StringBuffer
+  * NOTE: StringBuffer and StringBuilder extend AbstractStringBuilder and implement Appendable. But AbstractStringBuilder is not visible!
+*/
+class Strings {
+
+    public static final String substring(CharSequence s, int start) {
+        return s.subSequence(start, s.length()).toString();
+    }
+
+    public static final int indexOf(CharSequence s, String sub) {
+        return indexOf(s, sub, false);
+    }
+
+    public static final int indexOf(CharSequence s, String sub, boolean lastIndex) {
+        return lastIndex ? lastIndexOf(s, sub) : indexOf(s, sub, 0);
+    }
+
+    public static final int indexOf(CharSequence s, String sub, int start) {
+        if (s instanceof String)
+            return ((String) s).indexOf(sub, start);
+        else if (s instanceof StringBuilder)
+            return ((StringBuilder) s).indexOf(sub, start);
+        else if (s instanceof StringBuffer)
+            return ((StringBuffer) s).indexOf(sub, start);
+        else
+            throw new UnsupportedOperationException();
+    }
+
+    public static final int lastIndexOf(CharSequence s, String sub) {
+        return lastIndexOf(s, sub, s.length());
+    }
+
+    public static final int lastIndexOf(CharSequence s, String sub, int start) {
+        if (s instanceof String)
+            return ((String) s).lastIndexOf(sub, start);
+        else if (s instanceof StringBuilder)
+            return ((StringBuilder) s).lastIndexOf(sub, start);
+        else if (s instanceof StringBuffer)
+            return ((StringBuffer) s).lastIndexOf(sub, start);
+        else
+            throw new UnsupportedOperationException();
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <S extends CharSequence> S replaceAll(S s, String regex, String replacement) {
+        if (s instanceof String)
+            return (S) ((String) s).replaceAll(regex, replacement);
+        else if (s instanceof Appendable) {
+            replaceAll((Appendable) s, regex, replacement);
+            return s;
+        } else
+            throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @param s StringBuffer or StringBuilder
+     * @param regex regular expression
+     * @param replacement replacement
+     * @return count of findings
+     */
+    // TODO: wrong replacement, see @Expect -> otherther
+    //    @Expectations({@Expect(when = {"something.. <content>..some other", "<content>", "[new]"}, resultIndex = 0, then = "something.. [new]..some other")})
+    public static int replaceAll(Appendable s, String regex, String replacement) {
+        assert s instanceof CharSequence;
+        int count = 0;
+        Matcher matcher = Pattern.compile(regex).matcher((CharSequence) s);
+        StringBuffer sb = new StringBuffer();
+        while (matcher.find()) {
+            matcher.appendReplacement(sb, replacement);
+            count++;
+        }
+        matcher.appendTail(sb);
+        setLength((CharSequence) s, 0);
+        Util.trY(() -> s.append(sb));
+        return count;
+    }
+
+    public static void setLength(CharSequence s, int length) {
+        if (s instanceof StringBuilder)
+            ((StringBuilder) s).setLength(length);
+        else if (s instanceof StringBuffer)
+            ((StringBuffer) s).setLength(length);
+        else
+            throw new UnsupportedOperationException();
+    }
+
+    public static void deleteCharAt(CharSequence s, int i) {
+        if (s instanceof StringBuilder)
+            ((StringBuilder) s).deleteCharAt(i);
+        else if (s instanceof StringBuffer)
+            ((StringBuffer) s).deleteCharAt(i);
+        else
+            throw new UnsupportedOperationException();
     }
 }

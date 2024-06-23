@@ -39,6 +39,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.util.parser.JSon;
 
 /**
  * utilities for maps.

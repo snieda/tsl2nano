@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2017, all rights reserved
  */
-package de.tsl2.nano.core.util;
+package de.tsl2.nano.core.util.parser;
 
 import java.util.regex.Pattern;
 
@@ -40,7 +40,8 @@ public class JSon extends StructParser.ASerializer {
 	}
 
 	public String arrClose(TreeInfo tree) {
-		tree.path.removeLast();
+		if (tree != null && !tree.refPath.isEmpty())
+			tree.refPath.removeLast();
 		return "]";
 	}
 
@@ -56,14 +57,8 @@ public class JSon extends StructParser.ASerializer {
 		return "\"" + k + "\": ";
 	}
 
-	public boolean isList(CharSequence s) {
+	public boolean isList(CharSequence s, TreeInfo tree) {
 		return s.length() > 1 && s.charAt(0) == '[' && s.charAt(s.length() - 1) == ']';
 	}
 
-	public String[] getKeyValue(String attr) {
-		String[] kv = new String[2];
-		kv[0] = trim(StringUtil.substring(attr, null, ":"));
-		kv[1] = StringUtil.substring(attr, ":", null).trim();
-		return kv;
-	}
 }
