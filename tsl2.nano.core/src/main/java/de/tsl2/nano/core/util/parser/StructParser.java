@@ -3,6 +3,7 @@ package de.tsl2.nano.core.util.parser;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.text.Format;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,7 +16,9 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.AdapterProxy;
@@ -31,13 +34,14 @@ import de.tsl2.nano.core.util.Util;
 /**
  * structure definitions to provide a parser and a serializer.
  * contains abstract default implementations to be used for implementations of JSon/Yaml/Xml serializers. 
- * Is able to work on recursve references.
+ * Is able to work on recursve references, interfaces and proxies.
  * 
  * all methods will be called providing the current treeinfo - but on the parsing 
  * through {@link #toString()} some string evaluation methods will provide null as treeinfo!
  * 
- * NOTE I : see Structure class of logicstructure
- * NOTE II: the base implemenation is not performance optimized. the charsequence will be splitted into copied substrings!
+ * NOTE I  : see Structure class of logicstructure
+ * NOTE II : the base implemenation is not performance optimized. the charsequence will be splitted into copied substrings!
+ * NOTE III: Warning: serialization inspects field values, deserialization inspects bean attributes (getter/setter)
  */
 public interface StructParser {
     /** @return whether this implementation is able to parse the sequence */
@@ -267,7 +271,7 @@ public interface StructParser {
                     tree.callOnPath(nameOf(object), obj, tree.isReference(obj),
                             () -> result.append(encloseValue(obj, tree)));
                 } else
-                    tree.addRef(obj, () -> serializeMapObject(obj, result, tree, FieldUtil.toSerializingMap(obj)));
+                    tree.addRef(obj, () -> serializeMapObject(obj, result, tree, getValueMap(obj)));
             } else if (obj.getClass().isArray() && obj.getClass().getComponentType().isPrimitive()) {
                 tree.addRef(obj, () -> result.append(PrimitiveUtil.toArrayString(obj)));
             } else if (ByteUtil.isByteStream(obj.getClass())) {
@@ -278,6 +282,31 @@ public interface StructParser {
             } else
                 tree.addRef(obj, () -> serializeMapObject(obj, result, tree, (Map) obj));
             return result;
+        }
+
+        Map<String, Object> getValueMap(final Object obj) {
+            //TODO: here get the map out of fields, but on deserialization we get them from bean getters/setters
+            return remapByAnnotations(obj, FieldUtil.toSerializingMap(obj));
+        }
+
+        private Map<String, Object> remapByAnnotations(Object obj, Map<String, Object> values) {
+            SerialClass ann = obj.getClass().getAnnotation(SerialClass.class);
+            String[] attributeOrder = ann != null && ann.attributeOrder() != null ? ann.attributeOrder()
+                    : values.keySet().toArray(new String[0]);
+            BeanClass<Object> bc = BeanClass.getBeanClass(obj);
+            Map<String, Object> map = new LinkedHashMap<>();
+            Format format;
+            for (String name : attributeOrder) {
+                IAttribute attr = bc.getAttribute(name);
+                Serial serial = BeanAttribute.serial(attr, false);
+                name = serial.name() != null ? serial.name() : name;
+                format = serial.formatter() != null
+                        ? BeanClass.getBeanClass(serial.formatter()).createInstance()
+                        : null;
+                if (!serial.ignore())
+                    map.put(name, format != null ? format.format(values.get(name)) : values.get(name));
+            }
+            return map;
         }
 
         void serializeArray(StringBuilder result, TreeInfo tree, Object[] orr) {

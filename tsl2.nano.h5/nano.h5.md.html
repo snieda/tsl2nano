@@ -6120,11 +6120,15 @@ deploy:
 * [ ] provide simple pki
 * [ ] snakeyaml -> jackson
 * [ ] simple-xml -> jackson
-* [ ] JSon de-/serialization -> YAML/Xml (own implementation)
+* [v] JSon de-/serialization -> YAML/Xml (own implementation)
+** [ ] de-/serializing with automatically knowing the structure type (json/yaml/xml)
+** [v] annotations for de-/serialization
 * [x] autotest: mock all filtered or error classes
 ** [v] why PARAMETER_ERROR on type Class? (number -> Class should create TestBean.class in convert())
 ** junit test suite not working with junit5 jupiter dependency
 ** [ ] ValueRandomizer: ObjectUtil.defaultImplementations
-** [v] Expecation: constructTypes, construct not working
+** [v] Expectation: constructTypes, construct not working
+* [v] StringUtil with CharSequence implementations for String, StringBuilder, StringBuffer (-> StringUtil.Strings,
+CharSequenceEx)
 * [ ] create proxied String extension (StringEx, CharSquenceEx) to provide a super type for String, StringBuilder and
 StringBuffer

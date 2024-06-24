@@ -51,6 +51,7 @@ import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.core.util.parser.Serial;
 
 /**
  * used to constrain a pojo class to its bean class properties.
@@ -346,7 +347,7 @@ public class BeanClass<T> implements Serializable {
     public IAttribute getAttribute(Class type) {
         List<IAttribute> attrs = getAttributes();
         for (IAttribute a : attrs) {
-            if (type.isAssignableFrom(a.getType())) {
+            if (type.isAssignableFrom(typeOf(a))) {
                 return a;
             }
         }
@@ -530,7 +531,7 @@ public class BeanClass<T> implements Serializable {
         if (a == null) {
             return null;
         }
-        BeanClass bc = BeanClass.getBeanClass(a);
+        BeanClass bc = getBeanClass(a);
         Object[] values = new Object[memberNames.length];
         for (int i = 0; i < memberNames.length; i++) {
             values[i] = bc.callMethod(a, memberNames[i]);
@@ -670,23 +671,23 @@ public class BeanClass<T> implements Serializable {
     }
 
     public static Object callStatic(String type, String staticMethodName, Object... args) {
-        return BeanClass.createBeanClass(type).callMethod(null, staticMethodName, null, false, args);
+        return createBeanClass(type).callMethod(null, staticMethodName, null, false, args);
     }
 
     public static Object call(Class<?> type, String staticMethodName, boolean usePrimitives, Object... args) {
-        return BeanClass.getBeanClass(type).callMethod(null, staticMethodName, null, usePrimitives, args);
+        return getBeanClass(type).callMethod(null, staticMethodName, null, usePrimitives, args);
     }
 
     public static Object callStatic(String type, String staticMethodName, boolean usePrimitives, Object... args) {
-        return BeanClass.getBeanClass(load(type)).callMethod(null, staticMethodName, null, usePrimitives, args);
+        return getBeanClass(load(type)).callMethod(null, staticMethodName, null, usePrimitives, args);
     }
 
     public static Object call(Class<?> type, String staticMethodName, Class[] par, Object... args) {
-        return BeanClass.getBeanClass(type).callMethod(null, staticMethodName, par, args);
+        return getBeanClass(type).callMethod(null, staticMethodName, par, args);
     }
 
     public static Object call(Object instance, String methodName) {
-        return BeanClass.getBeanClass(instance.getClass()).callMethod(instance, methodName, new Class[0]);
+        return getBeanClass(instance.getClass()).callMethod(instance, methodName, new Class[0]);
     }
 
     /**
@@ -694,7 +695,7 @@ public class BeanClass<T> implements Serializable {
      * instance must not be null!
      */
     public static Object call(Object instance, String methodName, Class[] par, Object... args) {
-        return BeanClass.getBeanClass(instance.getClass()).callMethod(instance, methodName, par, args);
+        return getBeanClass(instance.getClass()).callMethod(instance, methodName, par, args);
     }
 
     public Object callMethod(Object instance, String methodName, Class[] par, Object... args) {
@@ -804,7 +805,7 @@ public class BeanClass<T> implements Serializable {
         if (attributePath.length == 1) {
             return attr;
         }
-        return new BeanClass(attr.getType()).getAttributePath(CollectionUtil.copyOfRange(attributePath, 1));
+        return new BeanClass(typeOf(attr)).getAttributePath(CollectionUtil.copyOfRange(attributePath, 1));
     }
 
     /**
@@ -1002,7 +1003,7 @@ public class BeanClass<T> implements Serializable {
      */
     public static BeanClass createBeanClass(String className, ClassLoader classLoader) {
         Class clazz = load(className, classLoader);
-        return BeanClass.getBeanClass(clazz);
+        return getBeanClass(clazz);
     }
 
     public static String arrayClassName(String className) {
@@ -1053,7 +1054,7 @@ public class BeanClass<T> implements Serializable {
      * destination attributes having a setter.
      */
     public static <D> D copyValues(Object src, D dest, boolean onlyDestAttributes) {
-        final BeanClass destClass = BeanClass.getBeanClass(dest.getClass(), false);
+        final BeanClass destClass = getBeanClass(dest.getClass(), false);
         String[] attributeNames = destClass.getAttributeNames(true);
         return copyValues(src, dest, attributeNames);
     }
@@ -1087,7 +1088,7 @@ public class BeanClass<T> implements Serializable {
             String... attributeNames) {
         int copied = 0;
         if (attributeNames.length == 0) {
-            final BeanClass srcClass = BeanClass.getBeanClass(src.getClass(), false);
+            final BeanClass srcClass = getBeanClass(src.getClass(), false);
             attributeNames = srcClass.getAttributeNames();
         }
         if (LOG.isTraceEnabled()) {
@@ -1353,29 +1354,32 @@ public class BeanClass<T> implements Serializable {
 
     T fromValueMap(T instance, Map<String, Object> values, Map<Map, Object> references) {
         references.put(values, instance);
-        IAttribute attr;
         for (String name : values.keySet()) {
-            attr = getAttribute(name, false);
+            final IAttribute attr = getAttribute(name, false);
             if (attr != null) {
+                final Serial serial = BeanAttribute.serial(attr, true);
                 Object value = values.get(name);
                 if (Util.isEmpty(value) && attr.getValue(instance) == null)
                     continue;
-                if (Date.class.isAssignableFrom(attr.getType()) && value instanceof String
+                else if (serial != null && serial.formatter() != null && value instanceof String) {
+                    String sValue = (String) value;
+                    Util.trY(() -> attr.setValue(instance, createInstance(serial.formatter()).parseObject(sValue)));
+                } else if (Date.class.isAssignableFrom(typeOf(attr)) && value instanceof String
                         && ENV.get("bean.format.date.iso8601", false)) {
                     value = DateUtil.fromISO8601UTC((String)value);
-                } else if (value instanceof Map && !Map.class.isAssignableFrom(attr.getType())) {
+                } else if (value instanceof Map && !Map.class.isAssignableFrom(typeOf(attr))) {
                     if (value == values) {// avoid stackoverflow
                         value = null;
                     } else if (references.containsKey(value)) {
                         value = references.get(value);
                     } else {
                         references.put((Map) value, null);
-                        Object v = BeanClass.getBeanClass(attr.getType()).fromValueMap((Map) value, references);
+                        Object v = getBeanClass(typeOf(attr)).fromValueMap((Map) value, references);
                         references.put((Map) value, v);
                         value = v;
                     }
-                } else if (value != null && !attr.getType().isAssignableFrom(value.getClass())) {
-                    value = ObjectUtil.wrap(value, attr.getType());
+                } else if (value != null && !typeOf(attr).isAssignableFrom(value.getClass())) {
+                    value = ObjectUtil.wrap(value, typeOf(attr));
                 }
                 if (attr instanceof IValueAccess)
                     ((IValueAccess)attr).setValue(value);
@@ -1390,10 +1394,16 @@ public class BeanClass<T> implements Serializable {
         return instance;
     }
 
+    private Class typeOf(IAttribute attr) {
+        Serial serial = BeanAttribute.serial(attr, true);
+        return serial != null && serial.type() != null ? serial.type() : attr.getType();
+    }
+
     private void fillRecursiveList(IAttribute attr, Object value, Map<Map, Object> references) {
         if (!(value instanceof List))
             return;
-        Class<?> gtype = BeanAttribute.getGenericType(attr.getAccessMethod(), 0);
+        Class<?> serialType = BeanAttribute.serial(attr, true).type();
+        Class<?> gtype = serialType != null ? serialType : BeanAttribute.getGenericType(attr.getAccessMethod(), 0);
         if (gtype == null || gtype.equals(Object.class))
             return;
         fillList(gtype, (List) value, references);
@@ -1409,7 +1419,7 @@ public class BeanClass<T> implements Serializable {
             item = listOfMaps.get(i);
             if (item instanceof Map) {
                 listOfMaps.set(i, references.containsKey(item) ? references.get(item)
-                        : BeanClass.getBeanClass(type).fromValueMap((Map<String, Object>) item, references));
+                        : getBeanClass(type).fromValueMap((Map<String, Object>) item, references));
             }
         }
         return listOfMaps;

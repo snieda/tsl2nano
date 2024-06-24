@@ -12,6 +12,7 @@ package de.tsl2.nano.core.util;
 import java.io.Serializable;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.security.MessageDigest;
@@ -26,6 +27,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
@@ -624,5 +626,15 @@ public class Util {
         } finally {
             accessible.setAccessible(lastAccessValue);
         }
+    }
+
+    /** provide a simple dynamic proxy holding some mocks. the first mock, that return a value (!= null) will be used */
+    @SuppressWarnings("unchecked")
+    public static <R, T> T proxy(Class<T> interfaze, BiFunction<Method, Object[], R>... mocks) {
+        return (T) Proxy.newProxyInstance(getContextClassLoader(), new Class[] { interfaze },
+                (p, m, args) -> mocks == null ? null
+                        : Arrays.stream(mocks).filter(mock -> mock.apply(m, args) != null).findFirst()
+                                .orElseGet(() -> (x, y) -> null)
+                                .apply(m, args));
     }
 }

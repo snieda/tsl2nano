@@ -32,6 +32,8 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.AnnotationProxy;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.core.util.parser.Serial;
 
 /**
  * used by the class {@link BeanClass} to represent its bean attributes. The bean attributes are handled through its
@@ -77,6 +79,9 @@ public class BeanAttribute<T> implements IAttribute<T> {
     public static final String REGEXP_ATTR_NAME = "[a-z][a-zA-Z0-9_]*";
 
     private static final Log LOG = LogFactory.getLog(BeanAttribute.class);
+
+    private static Serial EMPTY_SERIAL_PROXY = Util.proxy(Serial.class,
+            (m, args) -> m.getReturnType().isPrimitive() ? PrimitiveUtil.getDefaultValue(m.getReturnType()) : null);
 
     /**
      * @return see {@link #getBeanAttribute(Class, String, boolean)} with throwException=true
@@ -665,6 +670,11 @@ public class BeanAttribute<T> implements IAttribute<T> {
         return ObjectUtil.wrap(value, getType());
     }
 
+    public static final Serial serial(IAttribute attr, boolean setter) {
+        Method m = setter ? getBeanAttribute(attr.getAccessMethod()).writeAccessMethod : attr.getAccessMethod();
+        Serial serial = m != null ? m.getAnnotation(Serial.class) : null;
+        return serial != null ? serial : EMPTY_SERIAL_PROXY;
+    }
 //    private void readObjectNoData() throws ObjectStreamException {
 //
 //    }
