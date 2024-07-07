@@ -50,14 +50,16 @@ public class TextComparison {
         Assert.assertEquals(formDiff, exptected, result);
     }
     
-    public static void prepareForComparison(StringBuilder expected, StringBuilder result, Map<String, String> replacements) {
+    public static void prepareForComparison(StringBuilder expected, StringBuilder result,
+            Map<String, String> replacements) {
         Set<String> keys = replacements.keySet();
         int ignored = 0;
         for (String regex : keys) {
-          StringUtil.replaceAll(expected, regex, replacements.get(regex));
-          ignored += StringUtil.replaceAll(result, regex, replacements.get(regex));
-      }
-        System.out.println("preparedForComparison with " + replacements.size() + " replacements: ignored " + ignored + " positions");
+            StringUtil.replaceAll(expected, regex, replacements.get(regex));
+            ignored += StringUtil.replaceAll_(result, regex, replacements.get(regex));
+        }
+        System.out.println("preparedForComparison with " + replacements.size() + " replacements: ignored " + ignored
+                + " positions");
     }
     
     public static Map<String, String> getDiffs(String text1, String text2) {

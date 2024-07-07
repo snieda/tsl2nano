@@ -1321,7 +1321,7 @@ class Strings {
         if (s instanceof String)
             return (S) ((String) s).replaceAll(regex, replacement);
         else if (s instanceof Appendable) {
-            replaceAll((Appendable) s, regex, replacement);
+            replaceAll_((Appendable) s, regex, replacement);
             return s;
         } else
             throw new UnsupportedOperationException();
@@ -1335,7 +1335,7 @@ class Strings {
      */
     // TODO: wrong replacement, see @Expect -> otherther
     //    @Expectations({@Expect(when = {"something.. <content>..some other", "<content>", "[new]"}, resultIndex = 0, then = "something.. [new]..some other")})
-    public static int replaceAll(Appendable s, String regex, String replacement) {
+    public static int replaceAll_(Appendable s, String regex, String replacement) {
         assert s instanceof CharSequence;
         int count = 0;
         Matcher matcher = Pattern.compile(regex).matcher((CharSequence) s);

@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.function.Predicate;
 
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Attribute;
@@ -48,10 +50,12 @@ import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.CollectionUtil;
 import de.tsl2.nano.core.util.DateUtil;
+import de.tsl2.nano.core.util.FieldUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.core.util.parser.Serial;
+import de.tsl2.nano.core.util.parser.StructParser.ASerializer;
 
 /**
  * used to constrain a pojo class to its bean class properties.
@@ -63,7 +67,6 @@ import de.tsl2.nano.core.util.parser.Serial;
 @Default(value = DefaultType.FIELD, required = false)
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class BeanClass<T> implements Serializable {
-    public static final String KEY_REF = "REF";
 
     /** serialVersionUID */
     private static final long serialVersionUID = 8387513854853569951L;
@@ -141,33 +144,15 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
-     * getFieldNames
-     * 
      * @param type field type
      * @return all field names of class hierarchy that are of the given type.
      */
     public String[] getFieldNames(Class<?> type, boolean staticOnly) {
-        Set<String> names = new LinkedHashSet<String>();
-        Field[] fields = clazz.getFields();
-        for (int i = 0; i < fields.length; i++) {
-            if (type.isAssignableFrom(fields[i].getType())
-                    && (!staticOnly || Modifier.isStatic(fields[i].getModifiers()))) {
-                names.add(fields[i].getName());
-            }
-        }
-        fields = clazz.getDeclaredFields();
-        for (int i = 0; i < fields.length; i++) {
-            if (type.isAssignableFrom(fields[i].getType())
-                    && (!staticOnly || Modifier.isStatic(fields[i].getModifiers()))) {
-                names.add(fields[i].getName());
-            }
-        }
-        return names.toArray(new String[0]);
+        return FieldUtil.getFieldNamesInHierarchy(type,
+                f -> type.isAssignableFrom(f.getType()) && (!staticOnly || Modifier.isStatic(f.getModifiers())));
     }
 
     /**
-     * getFieldNames
-     * 
      * @param type return type
      * @return all method names of class hierarchy that return of the given type.
      */
@@ -347,7 +332,7 @@ public class BeanClass<T> implements Serializable {
     public IAttribute getAttribute(Class type) {
         List<IAttribute> attrs = getAttributes();
         for (IAttribute a : attrs) {
-            if (type.isAssignableFrom(typeOf(a))) {
+            if (type.isAssignableFrom(BeanMap.typeOf(a))) {
                 return a;
             }
         }
@@ -569,8 +554,7 @@ public class BeanClass<T> implements Serializable {
             try {
                 return getField(instance, fieldName, true);
             } catch (Exception e1) {
-                ManagedException.forward(e1);
-                return null;
+                return ManagedException.forward(e1);
             }
         }
     }
@@ -588,8 +572,7 @@ public class BeanClass<T> implements Serializable {
             field.setAccessible(true);
             return field.get(instance);
         } catch (Exception e) {
-            ManagedException.forward(e, declared);
-            return null;
+            return ManagedException.forward(e, declared);
         }
     }
     
@@ -805,7 +788,7 @@ public class BeanClass<T> implements Serializable {
         if (attributePath.length == 1) {
             return attr;
         }
-        return new BeanClass(typeOf(attr)).getAttributePath(CollectionUtil.copyOfRange(attributePath, 1));
+        return new BeanClass(BeanMap.typeOf(attr)).getAttributePath(CollectionUtil.copyOfRange(attributePath, 1));
     }
 
     /**
@@ -943,7 +926,8 @@ public class BeanClass<T> implements Serializable {
                             instance = constructor.newInstance();
                         }
                     } catch (final Exception e1) {
-                        ManagedException.forward(e1);
+                        LOG.error("couldn't instantiate " + clazz + " with args: " + Arrays.toString(args));
+                        ManagedException.forward(e1, false);
                     }
                 }
             }
@@ -965,7 +949,7 @@ public class BeanClass<T> implements Serializable {
                             instance = (T) constructors[i].newInstance(args);
                             break;
                         } catch (final Exception e) {
-                            ManagedException.forward(e);
+                            ManagedException.forward(e, false);
                         }
                     }
                 }
@@ -981,7 +965,7 @@ public class BeanClass<T> implements Serializable {
 
     private static boolean numbers(Object[] args) {
         for (int i = 0; i < args.length; i++) {
-            if (args[i] == null || !Number.class.isAssignableFrom(args[i].getClass()))
+            if (args[i] == null || !PrimitiveUtil.isAssignableFrom(Number.class, args[i].getClass()))
                 return false;
         }
         return true;
@@ -1081,7 +1065,7 @@ public class BeanClass<T> implements Serializable {
      *                         existing destination-values with null.
      * @param onlyIfDestIsNull if true, the source values will not overwrite
      *                         existing destination-values.
-     * @param attributeNames   (optional) fixed attribute names
+     * @param attributeNames   (optional) fix attribute names
      * @return destination object
      */
     public static <D> D copyValues(Object src, D dest, boolean onlyIfNotNull, boolean onlyIfDestIsNull,
@@ -1335,95 +1319,6 @@ public class BeanClass<T> implements Serializable {
     public static boolean isStatic(Member member) {
         return Modifier.isStatic(member.getModifiers());
     }
-    
-    public T fromValueMap(Map<String, Object> values) {
-        return fromValueMap(createInstance(), values);
-    }
-
-    public T fromValueMap(Map<String, Object> values, Map<Map, Object> selfReferences) {
-        Object v;
-        if (values.size() == 1 && (v = values.get(KEY_REF)) != null && selfReferences.containsKey(v)) {
-            return (T) selfReferences.get(v);
-        }
-        return fromValueMap(createInstance(), values, selfReferences);
-    }
-
-    public T fromValueMap(T instance, Map<String, Object> values) {
-        return fromValueMap(instance, values, new HashMap<>());
-    }
-
-    T fromValueMap(T instance, Map<String, Object> values, Map<Map, Object> references) {
-        references.put(values, instance);
-        for (String name : values.keySet()) {
-            final IAttribute attr = getAttribute(name, false);
-            if (attr != null) {
-                final Serial serial = BeanAttribute.serial(attr, true);
-                Object value = values.get(name);
-                if (Util.isEmpty(value) && attr.getValue(instance) == null)
-                    continue;
-                else if (serial != null && serial.formatter() != null && value instanceof String) {
-                    String sValue = (String) value;
-                    Util.trY(() -> attr.setValue(instance, createInstance(serial.formatter()).parseObject(sValue)));
-                } else if (Date.class.isAssignableFrom(typeOf(attr)) && value instanceof String
-                        && ENV.get("bean.format.date.iso8601", false)) {
-                    value = DateUtil.fromISO8601UTC((String)value);
-                } else if (value instanceof Map && !Map.class.isAssignableFrom(typeOf(attr))) {
-                    if (value == values) {// avoid stackoverflow
-                        value = null;
-                    } else if (references.containsKey(value)) {
-                        value = references.get(value);
-                    } else {
-                        references.put((Map) value, null);
-                        Object v = getBeanClass(typeOf(attr)).fromValueMap((Map) value, references);
-                        references.put((Map) value, v);
-                        value = v;
-                    }
-                } else if (value != null && !typeOf(attr).isAssignableFrom(value.getClass())) {
-                    value = ObjectUtil.wrap(value, typeOf(attr));
-                }
-                if (attr instanceof IValueAccess)
-                    ((IValueAccess)attr).setValue(value);
-                else {
-                    fillRecursiveList(attr, value, references);
-                    attr.setValue(instance, value);
-                }
-            } else {
-                LOG.warn("ignoring value of " + name + " - it is not an attribute of " + getClazz());
-            }
-        }
-        return instance;
-    }
-
-    private Class typeOf(IAttribute attr) {
-        Serial serial = BeanAttribute.serial(attr, true);
-        return serial != null && serial.type() != null ? serial.type() : attr.getType();
-    }
-
-    private void fillRecursiveList(IAttribute attr, Object value, Map<Map, Object> references) {
-        if (!(value instanceof List))
-            return;
-        Class<?> serialType = BeanAttribute.serial(attr, true).type();
-        Class<?> gtype = serialType != null ? serialType : BeanAttribute.getGenericType(attr.getAccessMethod(), 0);
-        if (gtype == null || gtype.equals(Object.class))
-            return;
-        fillList(gtype, (List) value, references);
-    }
-
-    public static <T> List<T> fillList(Class<T> type, List listOfMaps) {
-        return fillList(type, listOfMaps, new HashMap<>());
-    }
-
-    private static <T> List<T> fillList(Class<T> type, List listOfMaps, Map<Map, Object> references) {
-        Object item;
-        for (int i = 0; i < listOfMaps.size(); i++) {
-            item = listOfMaps.get(i);
-            if (item instanceof Map) {
-                listOfMaps.set(i, references.containsKey(item) ? references.get(item)
-                        : getBeanClass(type).fromValueMap((Map<String, Object>) item, references));
-            }
-        }
-        return listOfMaps;
-    }
 
     /**
      * getPackageName
@@ -1444,10 +1339,132 @@ public class BeanClass<T> implements Serializable {
         return CachedBeanClass.clear();
     }
 
+    public BeanMap map() {
+        return new BeanMap();
+    }
+
     @Override
     public String toString() {
         return Util.toString(this.getClass(), clazz);
     }
+
+    public class BeanMap {
+        public static final String KEY_REF = "REF";
+
+        public T fromValueMap(Map<String, Object> values) {
+        return fromValueMap(createInstance(), values);
+    }
+
+    public T fromValueMap(Map<String, Object> values, Map<Map, Object> selfReferences) {
+        Object v;
+        if (values.size() == 1 && (v = values.get(KEY_REF)) != null && selfReferences.containsKey(v)) {
+            return (T) selfReferences.get(v);
+        }
+        return fromValueMap(createInstance(), values, selfReferences);
+    }
+
+    public T fromValueMap(T instance, Map<String, Object> values) {
+        return fromValueMap(instance, values, new HashMap<>());
+    }
+
+    T fromValueMap(T instance, Map<String, Object> values, Map<Map, Object> references) {
+        references.put(values, instance);
+        for (String name : values.keySet()) {
+            final IAttribute attr = getAttribute(name, false);
+            if (attr != null && attr.hasWriteAccess()) {
+                final Serial serial = ASerializer.Proprietizer.serial(attr, true);
+                Object value = values.get(name);
+                if (Util.isEmpty(value) && attr.getValue(instance) == null)
+                    continue;
+                else if (serial != null && serial.formatter() != null && value instanceof String) {
+                    String sValue = (String) value;
+                    Util.trY(() -> attr.setValue(instance, createInstance(serial.formatter()).parseObject(sValue)));
+                } else if (Date.class.isAssignableFrom(typeOf(attr)) && value instanceof String
+                        && ENV.get("bean.format.date.iso8601", false)) {
+                    value = DateUtil.fromISO8601UTC((String) value);
+                } else if (value instanceof Map && !Map.class.isAssignableFrom(typeOf(attr))) {
+                    if (value == values) {// avoid stackoverflow
+                        value = null;
+                    } else if (references.containsKey(value)) {
+                        value = references.get(value);
+                    } else {
+                        references.put((Map) value, null);
+                        Object v = getBeanClass(typeOf(attr)).map().fromValueMap((Map) value, references);
+                        references.put((Map) value, v);
+                        value = v;
+                    }
+                } else if (value != null && !typeOf(attr).isAssignableFrom(value.getClass())) {
+                    value = ObjectUtil.wrap(value, typeOf(attr));
+                }
+                if (attr instanceof IValueAccess)
+                    ((IValueAccess) attr).setValue(value);
+                else {
+                    fillRecursiveList(attr, value, references);
+                    attr.setValue(instance, value);
+                }
+            } else {
+                LOG.warn("ignoring value of " + name + " - it is not an attribute of " + getClazz());
+            }
+        }
+        return instance;
+    }
+
+    static Class typeOf(IAttribute attr) {
+        Serial serial = ASerializer.Proprietizer.serial(attr, true);
+        return serial != null && serial.type() != null ? serial.type() : attr.getType();
+    }
+
+    private void fillRecursiveList(IAttribute attr, Object value, Map<Map, Object> references) {
+        if (!(value instanceof List))
+            return;
+        Class<?> serialType = ASerializer.Proprietizer.serial(attr, true).type();
+        Class<?> gtype = serialType != null ? serialType : BeanAttribute.getGenericType(attr.getAccessMethod(), 0);
+        if (gtype == null || gtype.equals(Object.class))
+            return;
+        fillList(gtype, (List) value, references);
+    }
+
+    public static <T> List<T> fillList(Class<T> type, List listOfMaps) {
+        return fillList(type, listOfMaps, new HashMap<>());
+    }
+
+    private static <T> List<T> fillList(Class<T> type, List listOfMaps, Map<Map, Object> references) {
+        Object item;
+        for (int i = 0; i < listOfMaps.size(); i++) {
+            item = listOfMaps.get(i);
+            if (item instanceof Map) {
+                listOfMaps.set(i, references.containsKey(item) ? references.get(item)
+                        : getBeanClass(type).map().fromValueMap((Map<String, Object>) item, references));
+            }
+        }
+        return listOfMaps;
+    }
+
+    public static Map<String, Object> toValueMap(Object instance) {
+        return toValueMap(instance, "", a -> true);
+    }
+
+    public static Map<String, Object> toValueMap(Object instance, String keyPrefix, Predicate<IAttribute> filter) {
+        List<IAttribute> attributes = getBeanClass(instance.getClass()).getAttributes();
+        final Map<String, Object> map = new LinkedHashMap<String, Object>(attributes.size());
+        attributes.stream()
+                .filter(filter)
+                .forEachOrdered(a -> map.put(keyPrefix + a.getName(), Util.trY(() -> getValue(instance, a), false)));
+        return map;
+    }
+
+    private static Object getValue(Object instance, IAttribute attr) {
+        if (attr instanceof IValueAccess)
+            return ((IValueAccess) attr).getValue();
+        else {
+            Object value = attr.getValue(instance);
+            if (ENV.get("bean.format.date.iso8601", false) && value instanceof Date) {
+                value = DateUtil.toISO8601UTC((Date) value);
+            }
+            return value;
+        }
+    }
+}
 
 }
 

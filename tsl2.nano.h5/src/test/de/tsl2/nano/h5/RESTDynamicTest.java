@@ -178,7 +178,8 @@ public class RESTDynamicTest {
 		assertEquals(NanoHTTPD.MIME_PLAINTEXT, response.getMimeType());
 		assertEquals("CREATED", response.getStatus().toString());
 		String result = ByteUtil.toString(response.getData(), "UTF8");
-		assertEquals("'save' successfull!\n\n{\"address.city\": \"Buxdehude\",\"address.code\": \"100000\",\"address.country\": \"germany\",\"address.street\": \"Berliner Str.1\",\"address.id\": \"1\"}"
+		assertEquals(
+				"'save' successfull!\n\n{\"address.city\": \"Buxdehude\",\"address.code\": 100000,\"address.country\": \"germany\",\"address.street\": \"Berliner Str.1\",\"address.id\": 1}"
 		, result);
 	}
 

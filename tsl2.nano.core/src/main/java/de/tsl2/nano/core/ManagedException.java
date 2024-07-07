@@ -33,6 +33,7 @@ import de.tsl2.nano.core.util.Util;
  * @author TS 28.01.2009
  * @version $Revision$
  */
+@SuppressWarnings("unchecked")
 public class ManagedException extends RuntimeException {
     private static final long serialVersionUID = 1L;
     private static final String MESSAGE_FORWARDED = "tsl2nano.forwarded";
@@ -217,7 +218,7 @@ public class ManagedException extends RuntimeException {
     }
     /**lets trY with standard exception handling. with escalate=false or warnOnly Exceptions given, 
      * only a WARN message will be printed on that exception  */
-    public static <T> T trY(SupplierEx<T> callback, boolean escalate, Exception...warnOnly) {
+    public static <T> T trY(SupplierEx<T> callback, boolean escalate, Class<? extends Exception>... warnOnly) {
         try {
             return callback.get();
         } catch(Exception ex) {
@@ -225,13 +226,13 @@ public class ManagedException extends RuntimeException {
         }
     }
 
-	private static Object handleException(boolean escalate, Throwable ex, Exception... warnOnly) {
+    private static Object handleException(boolean escalate, Throwable ex, Class<? extends Exception>... warnOnly) {
 		LOG.warn(ex.getMessage());
 		return !escalate || Arrays.asList(warnOnly).contains(ex.getClass())? null : forward(ex, true);
 	}
 
     /**use this throwable-catch only, if you know what you are doing  */
-    public static <T> T trYError(SupplierEx<T> callback, boolean escalate, Exception...warnOnly) {
+    public static <T> T trYError(SupplierEx<T> callback, boolean escalate, Class<? extends Exception>... warnOnly) {
         try {
             return callback.get();
         } catch(Throwable ex) {
@@ -243,7 +244,7 @@ public class ManagedException extends RuntimeException {
         return trY(callback, true);
     }
     /**let the trY to the standard exception handling  */
-    public static <T> T trY(SupplierExVoid<T> callback, boolean escalate, Exception...warnOnly) {
+    public static <T> T trY(SupplierExVoid<T> callback, boolean escalate, Class<? extends Exception>... warnOnly) {
         try {
             return callback.get();
         } catch(Exception ex) {

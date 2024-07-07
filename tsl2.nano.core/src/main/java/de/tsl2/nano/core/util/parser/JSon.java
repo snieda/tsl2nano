@@ -36,13 +36,13 @@ public class JSon extends StructParser.ASerializer {
 	}
 
 	public String arrOpen(TreeInfo tree) {
-		return "[";
+		return !tree.current().isStream() ? "[" : "";
 	}
 
 	public String arrClose(TreeInfo tree) {
 		if (tree != null && !tree.refPath.isEmpty())
 			tree.refPath.removeLast();
-		return "]";
+		return !tree.current().isStream() ? "]" : "";
 	}
 
 	public String tagOpen(TreeInfo tree) {

@@ -26,6 +26,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.sql.Blob;
 import java.util.Arrays;
+import java.util.Collection;
 
 import javax.sql.rowset.serial.SerialBlob;
 
@@ -37,6 +38,7 @@ import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.parser.JSon;
 
 /**
  * some utils for byte-arrays
@@ -116,12 +118,17 @@ public class ByteUtil extends Util {
      * @return bytes of the current object
      */
     public static byte[] getBytes(Object o) {
+        if (o instanceof Collection)
+            o = PrimitiveUtil.toArray(((Collection) o).stream(), byte.class, ((Collection) o).size());
         if (o instanceof byte[])
             return (byte[]) o;
         if (o instanceof Byte[])
             return serialize(o);
         else if (o instanceof String)
-            return ((String) o).getBytes();
+            if (JSon.isJSon((CharSequence) o))
+                return (byte[]) new JSon().toArray(byte.class, (CharSequence) o);
+            else
+                return ((String) o).getBytes();
         else if (o instanceof ByteBuffer)
             return ((ByteBuffer) o).array();
         else if (o instanceof InputStream)

@@ -14,6 +14,8 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 
@@ -123,6 +125,13 @@ public class PrimitiveUtil {
 		return BeanClass.load("[" + str.substring(0, 1).toUpperCase());
 	}
 	
+    public static Object toArray(Stream stream, Class componentType, int length) {
+        Object arr = Array.newInstance(componentType, length);
+        AtomicInteger i = new AtomicInteger();
+        stream.forEach(item -> Array.set(arr, i.getAndIncrement(), convert(item, componentType)));
+        return arr;
+    }
+
 	public static String toArrayString(Object primitiveArray) {
 		assert isPrimitiveArray(primitiveArray);
 		if (primitiveArray instanceof boolean[])
@@ -332,9 +341,14 @@ public class PrimitiveUtil {
 	        else if (isAssignableFrom(String.class, value.getClass()))
 	        	if (isAssignableFrom(Character.class, conversionType))
 	        		value = value.hashCode();
-	        	else if (!Util.isEmpty(value, true))
-	        		value = FormatUtil.parse(Double.class, (String)value);//Double.valueOf((String) value);
-	        	else
+                else if (!Util.isEmpty(value, true)) {
+                    Object p = FormatUtil.parse(Double.class, (String) value);//Double.valueOf((String) value);
+                    if (p == null)
+                        throw new IllegalArgumentException(
+                                "value \"" + value + "\" cannot be converted to " + conversionType);
+                    else
+                        value = p;
+                } else
 	        		throw new IllegalArgumentException(value + " can't be converted to " + conversionType);
 	        else
 	        	throw new IllegalArgumentException(value + " can't be converted to " + conversionType);

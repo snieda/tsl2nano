@@ -96,11 +96,21 @@ public class XmlTest {
     }
 
     @Test
+    public void testSerializationTagOnlyFalse() {
+        StructParserTest.testRoundtrip(new Xml(false),
+                new Xml().createInitialStringBuilder() + createXmlStringWithAttributes(), false);
+    }
+
+    private String createXmlStringWithAttributes() {
+        return "<TypeBean index=\"2\"  name=\"test2\"  value=\"2.2\" ><connections><TypeBean index=\"1\"  name=\"test1\"  value=\"1.1\" ><byteStream>[49, 50, 51]</byteStream> <intStream>[1, 2, 3]</intStream></TypeBean> <TypeBean>@0</TypeBean></connections></TypeBean>";
+    }
+
+    @Test
     public void testSerialization() {
-        JSonTest.testRoundtrip(new Xml(), new Xml().createInitialStringBuilder() + createXmlString());
+        StructParserTest.testRoundtrip(new Xml(true), new Xml().createInitialStringBuilder() + createXmlString());
     }
 
     private String createXmlString() {
-        return "<TypeBean><connections><TypeBean><index>1</index> <name>test1</name> <value>1.1</value></TypeBean> <TypeBean>@0</TypeBean></connections> <index>2</index> <name>test2</name> <value>2.2</value></TypeBean>";
+        return "<TypeBean><index>2</index> <name>test2</name> <value>2.2</value> <connections><TypeBean><index>1</index> <name>test1</name> <value>1.1</value> <byteStream>[49, 50, 51]</byteStream> <intStream>[1, 2, 3]</intStream></TypeBean> <TypeBean>@0</TypeBean></connections></TypeBean>";
     }
 }

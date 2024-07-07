@@ -8,14 +8,26 @@ import de.tsl2.nano.core.util.StringUtil;
 /** 
  * simple xml serializer and parser/objectmapper not providing attributes - only tags! useful for data-structures.
  * constraints of this implemenation:
- *   1. no properties/attributes, only tags
+ *   1. serializatiion is possible with tags and properties/attributes, but deserializing only on tags!
  *   2. lists of lists are not supported. (a list cannot directly contain another list)
+ *   3. no xml/schema validation
 */
 public class Xml extends StructParser.ASerializer {
     private static final String REGEX_OPENTAG = "<\\w+>";
     private static final String REGEX_CLOSETAG = "</${open}>";
     private static final String XML_EXPR = "\\s*(?:<\\?xml.*\\?>)?(?:<\\w+.*\\/?>(?:.*<\\/\\w+>)*)+\\s*";
     private static final Pattern XML_PATTERN = Pattern.compile(XML_EXPR, Pattern.MULTILINE);
+    /** (default: true), if false, simple types like numbers, dates, strings will be presented as attributes/properties */
+    private boolean tagsOnly = true;
+
+    public Xml() {
+    }
+
+    /** @param tagsOnly: @see #tagsOnly */
+    public Xml(boolean tagsOnly) {
+        this.tagsOnly = tagsOnly;
+
+    }
 
     @Override
     public boolean isParseable(CharSequence s) {
@@ -41,7 +53,7 @@ public class Xml extends StructParser.ASerializer {
         //   2. n (n != 1) equal typed children => probability very high to be a list
         //   3. 1 child                         => probability high to be a list
 
-        return (tree == null || (!tree.isRoot() && !tree.path.getLast().isArray)) && onlySiblings(s);
+        return (!tree.isRoot() && !tree.current().isArray()) && onlySiblings(s);
     }
 
     private boolean onlySiblings(CharSequence s) {
@@ -59,7 +71,9 @@ public class Xml extends StructParser.ASerializer {
 
     @Override
     public String tagOpen(TreeInfo tree) {
-        return "<" + tree.currentName() + ">";
+        return (tree.consumeTagOpenUnfinished() ? ">" : "") + "<"
+                + tree.currentName()
+                + (tagsOnly || tree.isReference(tree.current().value) ? ">" : "");
     }
 
     @Override
@@ -69,14 +83,13 @@ public class Xml extends StructParser.ASerializer {
 
     @Override
     public String arrOpen(TreeInfo tree) {
-        return tree != null ? "<" + tree.currentName() + ">" : "";
+        return (tree.consumeTagOpenUnfinished() ? ">" : "") + "<" + tree.currentName() + ">";
     }
 
     @Override
     public String arrClose(TreeInfo tree) {
-        if (tree != null)
             tree.refPath.removeLast();
-        return tree != null ? "</" + tree.currentName() + ">" : "";
+            return "</" + tree.currentName() + ">";
     }
 
     @Override
@@ -86,7 +99,13 @@ public class Xml extends StructParser.ASerializer {
 
     @Override
     public Object encloseValue(Object obj, TreeInfo tree) {
-        return tagOpen(tree) + obj + tagClose(tree);
+        if (!tagsOnly && isSimpleType(obj) && !tree.isReference(obj)) {
+            tree.setTagOpenUnfinished(true);
+            return " " + tree.currentName() + "=\"" + obj + "\"";
+        } else {
+            tree.consumeTagOpenUnfinished();
+            return tagOpen(tree) + obj + tagClose(tree);
+        }
     }
 
     @Override
@@ -125,7 +144,8 @@ public class Xml extends StructParser.ASerializer {
     public String[] splitArray(CharSequence s, TreeInfo tree, int start, boolean includeRoot) {
         String[] kv;
         if (tree != null && tree.isReference((kv = getKeyValue(s))[1]))
-            return new String[] { "<" + BeanClass.KEY_REF + ">" + kv[1] + "</" + BeanClass.KEY_REF + ">" };
+            return new String[] {
+                    "<" + BeanClass.BeanMap.KEY_REF + ">" + kv[1] + "</" + BeanClass.BeanMap.KEY_REF + ">" };
         else
             return StringUtil.splitStructure(s, REGEX_OPENTAG, REGEX_CLOSETAG, "\\w+", start, includeRoot);
     }

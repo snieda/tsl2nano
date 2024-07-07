@@ -12,6 +12,7 @@ import javax.persistence.TemporalType;
 import de.tsl2.nano.bean.annotation.Attributes;
 import de.tsl2.nano.bean.annotation.Presentable;
 import de.tsl2.nano.bean.annotation.ValueExpression;
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.cursus.Timer;
 import de.tsl2.nano.service.util.IPersistable;
 
@@ -33,6 +34,10 @@ public class ETimer extends Timer implements IPersistable<String> {
 
 	public ETimer(Date from, Date until) {
 		super(from, until);
+	}
+
+	static ETimer from(Timer t) {
+		return BeanClass.copy(t, new ETimer());
 	}
 
 	@Override

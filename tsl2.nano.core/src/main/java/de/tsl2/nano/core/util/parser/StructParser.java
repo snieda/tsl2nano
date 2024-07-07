@@ -1,6 +1,8 @@
 package de.tsl2.nano.core.util.parser;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.text.Format;
@@ -36,6 +38,7 @@ import de.tsl2.nano.core.util.Util;
  * contains abstract default implementations to be used for implementations of JSon/Yaml/Xml serializers. 
  * Is able to work on recursve references, interfaces and proxies.
  * 
+ * It evaluates the Annotations {@link Serial} and {@link SerialClass} to special behaviour on classes and attributes.
  * all methods will be called providing the current treeinfo - but on the parsing 
  * through {@link #toString()} some string evaluation methods will provide null as treeinfo!
  * 
@@ -124,7 +127,7 @@ public interface StructParser {
 
     /** base implementation of splitting the sequence to into structure elements */
     default String[] splitArray(CharSequence s) {
-        return splitArray(s, null);
+        return splitArray(s, new TreeInfo("root"));
     }
 
     /** splits the sequence into an array of sequences using {@link #div()} and {@link #trim(String)} */
@@ -187,7 +190,7 @@ public interface StructParser {
          */
         public Object toStructure(CharSequence s) {
             s = removeCommentsAndEmptyLines(s);
-            return toStructure(s, new TreeInfo().increaseRecursion(TreeInfo.KEY_ROOT, s));
+            return toStructure(s, new TreeInfo(s));
         }
 
         public Object toStructure(CharSequence s, TreeInfo tree) {
@@ -223,7 +226,7 @@ public interface StructParser {
         }
 
         <T> List<T> toStructList(Class<T> type, CharSequence s, TreeInfo tree) {
-            tree.path.getLast().isArray = true;
+            tree.path.getLast().setIsArray(true);
             String[] attrs = splitArray(s, tree);
             List<T> list = new ArrayList<>(attrs.length);
             for (int i = 0; i < attrs.length; i++) {
@@ -260,9 +263,9 @@ public interface StructParser {
             final Object obj = tree.contains(object) ? tree.getReferenceKey(object)
                     : isSimpleType(object) ? object : tree.addRef(object);
             if (obj instanceof Class) {
-                result.append(tagOpen(tree) + ((Class) obj).getName() + tagClose(tree));
+                createTag(result, tree, ((Class) obj).getName());
             } else if (obj instanceof Method) {
-                result.append(tagOpen(tree) + ((Method) obj).toGenericString() + tagClose(tree));
+                createTag(result, tree, ((Method) obj).toGenericString());
             } else if (Proxy.isProxyClass(obj.getClass()) && Proxy.getInvocationHandler(obj) instanceof AdapterProxy) {
                 tree.addRef(obj, () -> serializeMapObject(obj, result, tree,
                         ((AdapterProxy) Proxy.getInvocationHandler(obj)).values()));
@@ -271,11 +274,11 @@ public interface StructParser {
                     tree.callOnPath(nameOf(object), obj, tree.isReference(obj),
                             () -> result.append(encloseValue(obj, tree)));
                 } else
-                    tree.addRef(obj, () -> serializeMapObject(obj, result, tree, getValueMap(obj)));
+                    tree.addRef(obj, () -> serializeMapObject(obj, result, tree, getValueMap(obj, tree)));
             } else if (obj.getClass().isArray() && obj.getClass().getComponentType().isPrimitive()) {
-                tree.addRef(obj, () -> result.append(PrimitiveUtil.toArrayString(obj)));
+                tree.addRef(obj, () -> createArray(result, tree, PrimitiveUtil.toArrayString(obj)));
             } else if (ByteUtil.isByteStream(obj.getClass())) {
-                tree.addRef(obj, () -> result.append(ByteUtil.toString(obj)));
+                tree.addRef(obj, () -> createArray(result, tree, ByteUtil.toString(obj)));
             } else if (!(obj instanceof Map)) {
                 tree.addRef(obj, () -> serializeArray(result, tree,
                         obj instanceof Collection ? ((Collection) obj).toArray() : (Object[]) obj));
@@ -284,28 +287,59 @@ public interface StructParser {
             return result;
         }
 
-        Map<String, Object> getValueMap(final Object obj) {
-            //TODO: here get the map out of fields, but on deserialization we get them from bean getters/setters
-            return remapByAnnotations(obj, FieldUtil.toSerializingMap(obj));
+        private Object createArray(StringBuilder result, TreeInfo tree, String content) {
+            return result.append(arrOpen(tree) + content + arrClose(tree));
         }
 
-        private Map<String, Object> remapByAnnotations(Object obj, Map<String, Object> values) {
+        private StringBuilder createTag(StringBuilder result, TreeInfo tree, final String content) {
+            return result.append(tagOpen(tree) + encloseValue(content, tree) + tagClose(tree));
+        }
+
+        Map<String, Object> getValueMap(final Object obj, TreeInfo tree) {
+            return remapByAnnotations(obj, tree);
+        }
+
+        private Map<String, Object> remapByAnnotations(Object obj, TreeInfo tree) {
             SerialClass ann = obj.getClass().getAnnotation(SerialClass.class);
+            if (tree.useFieldsOnly == null)
+                tree.useFieldsOnly = ann != null ? ann.useFields() : false;
+            Map<String, Object> values = ann != null && ann.useFields() ? FieldUtil.toSerializingMap(obj)
+                    : BeanClass.BeanMap.toValueMap(obj);
             String[] attributeOrder = ann != null && ann.attributeOrder() != null ? ann.attributeOrder()
                     : values.keySet().toArray(new String[0]);
-            BeanClass<Object> bc = BeanClass.getBeanClass(obj);
             Map<String, Object> map = new LinkedHashMap<>();
             Format format;
             for (String name : attributeOrder) {
-                IAttribute attr = bc.getAttribute(name);
-                Serial serial = BeanAttribute.serial(attr, false);
+                Serial serial = Proprietizer.serial(obj.getClass(), name, false,
+                        tree.useFieldsOnly || (ann != null && ann.useFields()));
                 name = serial.name() != null ? serial.name() : name;
                 format = serial.formatter() != null
-                        ? BeanClass.getBeanClass(serial.formatter()).createInstance()
+                        ? Util.trY(() -> BeanClass.getBeanClass(serial.formatter()).createInstance(), false,
+                                InstantiationException.class)
                         : null;
-                if (!serial.ignore())
-                    map.put(name, format != null ? format.format(values.get(name)) : values.get(name));
+                Object v = values.get(name);
+                if (!serial.ignore() && v != null) {
+                    if (serial.embedItems()) {
+                        embedItems(map, v, format);
+                    } else
+                        map.put(name, format != null ? format.format(v) : v);
+                }
             }
+            return map;
+        }
+
+        private void embedItems(Map<String, Object> map, Object object, Format format) {
+            Map<String, Object> items = object instanceof List ? toMap((List<?>) object)
+                    : FieldUtil.toSerializingMap(object);
+            for (String name : items.keySet()) {
+                Object v = items.get(name);
+                map.put(name, format != null ? format.format(v) : v);
+            }
+        }
+
+        private Map<String, Object> toMap(List<?> list) {
+            LinkedHashMap<String, Object> map = new LinkedHashMap<>(list.size());
+            list.forEach(i -> map.put(i.getClass().getSimpleName(), i));
             return map;
         }
 
@@ -365,7 +399,7 @@ public interface StructParser {
 
         public <T> List<T> toList(Class<T> type, CharSequence s) {
             List list = (List) toStructure(s);
-            return BeanClass.fillList(type, list);
+            return BeanClass.BeanMap.fillList(type, list);
         }
 
         public Object toArray(Class type, CharSequence s) {
@@ -375,7 +409,50 @@ public interface StructParser {
         }
 
         public <T> T toObject(Class<T> type, CharSequence s) {
-            return (T) BeanClass.getBeanClass(type).fromValueMap((Map<String, Object>) toStructure(s));
+            return (T) BeanClass.getBeanClass(type).map().fromValueMap((Map<String, Object>) toStructure(s));
+        }
+
+        public static class Proprietizer {
+            private static Serial EMPTY_SERIAL_PROXY = Util.proxy(Serial.class,
+                    (m, args) -> m.getReturnType().isPrimitive() ? PrimitiveUtil.getDefaultValue(m.getReturnType())
+                            : null);
+
+            public static final Serial serial(Class<?> cls, String name, boolean setter) {
+                return serial(cls, name, setter, null);
+            }
+
+            public static final Serial serial(IAttribute<?> attr, boolean setter) {
+                return serial(attr.getType(), attr.getName(), setter, null);
+            }
+
+            public static final Serial serial(Class<?> cls, String name, boolean setter, Boolean fieldsOnly) {
+                return Util.value(getAnnotation(cls, name, setter, Serial.class, fieldsOnly), EMPTY_SERIAL_PROXY);
+            }
+
+            public static final <A extends Annotation> A getAnnotation(Class<?> cls, String name, boolean setter,
+                    Class<A> annotationType, Boolean fieldsOnly) {
+                if (fieldsOnly == null) {
+                    SerialClass annClass = cls.getAnnotation(SerialClass.class);
+                    fieldsOnly = annClass != null ? annClass.useFields() : false;
+                }
+                A ann = null;
+                if (!fieldsOnly) {
+                    BeanAttribute<?> attr = BeanAttribute.getBeanAttribute(cls, name, false);
+                    if (attr != null) {
+                        Method m = setter
+                                ? BeanAttribute.getBeanAttribute(attr.getAccessMethod()).getWriteAccessMethod()
+                                : attr.getAccessMethod();
+                        if (m != null)
+                            ann = m.getAnnotation(annotationType);
+                    }
+                }
+                if (ann == null) {
+                    Field field = Util.trY(() -> FieldUtil.getField(cls, name), false);
+                    if (field != null)
+                        ann = field.getAnnotation(annotationType);
+                }
+                return ann;
+            }
         }
     }
 }
@@ -396,7 +473,18 @@ class TreeInfo {
     /** stored references */
     List refs = new LinkedList<>();
     int recursion;
+    /** whether to evaluate class fields instead of bean class attributes throuth their getters/setters */
+    public Boolean useFieldsOnly;
+    /** whether tag was opened to embed simple attributes - that has to be finished to add child tags into it (see Xml) */
+    private boolean tagOpenUnfinished;
 
+    TreeInfo() {
+    }
+
+    TreeInfo(Object root) {
+        increaseRecursion(KEY_ROOT, root);
+
+    }
     Object get(int index) {
         return refs.get(index);
     }
@@ -415,7 +503,11 @@ class TreeInfo {
     }
 
     public Item getParent() {
-        return path.size() > 1 ? path.get(path.size() - 2) : null;
+        return path.size() > 1 ? path.get(path.size() - 2) : Item.EMPTY_ITEM;
+    }
+
+    Item current() {
+        return path.size() > 0 ? path.getLast() : Item.EMPTY_ITEM;
     }
 
     String currentName() {
@@ -492,10 +584,28 @@ class TreeInfo {
         return false;
     }
 
+    public boolean consumeTagOpenUnfinished() {
+        boolean last = tagOpenUnfinished;
+        tagOpenUnfinished = false;
+        return last;
+    }
+
+    public void setTagOpenUnfinished(boolean tagOpenUnfishished) {
+        this.tagOpenUnfinished = tagOpenUnfishished;
+    }
+
     class Item {
         String key;
         Object value;
-        boolean isArray; // save the state, given by the implementation - only for performance aspects
+        private Boolean isArray; // save the state, given by the implementation - only for performance aspects
+        private Boolean isStream; // bytestreams and any primitive arrays
+
+        static final Item EMPTY_ITEM;
+        static {
+            EMPTY_ITEM = new TreeInfo().new Item("EMPTY", "EMPTY");
+            EMPTY_ITEM.isArray = false;
+            EMPTY_ITEM.isStream = false;
+        }
 
         public Item(Object k, Object v) {
             this.key = String.valueOf(k);
@@ -503,8 +613,22 @@ class TreeInfo {
         }
 
         boolean isArray() {
-            return isArray || value.getClass().isArray() || value instanceof Iterable;
+            if (isArray == null)
+                isArray = value.getClass().isArray() || value instanceof Iterable;
+            return isArray;
         }
+
+        public void setIsArray(Boolean isArray) {
+            this.isArray = isArray;
+        }
+
+        boolean isStream() {
+            if (isStream == null)
+                isStream = ByteUtil.isByteStream(value.getClass())
+                        || value.getClass().isArray() && value.getClass().getComponentType().isPrimitive();
+            return isStream;
+        }
+
     }
 
     public boolean isRoot() {

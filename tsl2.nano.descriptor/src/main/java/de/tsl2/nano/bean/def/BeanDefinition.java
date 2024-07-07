@@ -1684,9 +1684,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         return map;
     }
 
-    @Override
     public T fromValueMap(Map<String, Object> values) {
-        return fromValueMap(createInstance(), values);
+        return map().fromValueMap(createInstance(), values);
     }
 
     /**

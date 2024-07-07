@@ -7,7 +7,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
@@ -88,6 +90,19 @@ public class FieldUtil extends ByteUtil {
 		return container;
 	}
 
+	public static Field getField(Class<?> cls, String name) throws NoSuchFieldException {
+		try {
+			return cls.getDeclaredField(name);
+		} catch (NoSuchFieldException e) {
+			if (cls.getSuperclass() != null) {
+				return getField(cls.getSuperclass(), name);
+			} else if (cls.isMemberClass()) {
+				return getField(cls.getDeclaringClass(), name);
+			}
+			throw e;
+		}
+	}
+
 	public static String[] getFieldNames(Class<? extends Object> cls) {
 		return getFieldNames(cls, f -> !f.isSynthetic());
 	}
@@ -98,6 +113,17 @@ public class FieldUtil extends ByteUtil {
             .map(f -> f.getName())
             .sorted()
             .toArray(String[]::new);
+	}
+
+	/** @return all field names of class hierarchy that are of the given type */
+	public static String[] getFieldNamesInHierarchy(Class<?> cls, Predicate<Field> filter) {
+		Set<Field> fields = new LinkedHashSet<>(Arrays.asList(cls.getDeclaredFields()));
+		fields.addAll(Arrays.asList(cls.getFields()));
+		return fields.stream()
+				.filter(f -> filter.test(f))
+				.map(f -> f.getName())
+				.sorted()
+				.toArray(String[]::new);
 	}
 
 	public static <T> T print(T result) {
@@ -189,14 +215,14 @@ class ObjectPrinter {
 				for (int c = 0; c < colsizes.length; c++) {
 					cell = String.valueOf(rows[r][c]);
 					spacer = cell.equals(SLINE) ? SLINE : " ";
-					ps.append(leftDelimiter + spacer + filterreturn(fixwith(cell, colsizes[c], fillchar)));
+					ps.append(leftDelimiter + spacer + filterRET(fixwith(cell, colsizes[c], fillchar)));
 				}
 				ps.append(rightDelimiter);
 			}
 		}
 	}
 
-	private String filterreturn(String txt) {
+	private String filterRET(String txt) {
 		return txt.replace('\r', SPACE).replace('\n', SPACE);
 	}
 

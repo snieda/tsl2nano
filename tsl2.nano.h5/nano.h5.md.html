@@ -4913,9 +4913,9 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.4.12 | 18.09.2022 | NEW: SpecificationExchange, specification refactored: Workflow, ExcelWorker, (massive changes)Flow, Task, lots of conveniences extracted to util-classes, prepared to run on jdk-17, hsqldb-env refreshed for 2.7.0
  2.5.0  | 05.03.2023 | NEW: HATEOAS(restui), see EnvUpdate2v5v0: refactorings: serialization of actions with primitive attributes, move incubation packages, jdk17, h2-v2+ -> hsqldb2.7.1, hibernate 5, all dependencies/plugins updated
  2.5.1  | 04.06.2023 | Fix secure users loading, fix etag 304, NEW module: modelkit
-2.5.2 | 28.04.2023 | jmockit -> mockitor (serviceacces, replication), complete json de-/serializing, enhancing autotest,
-cursus: fix package: tsl2.nano
--> de.tsl2.nano
+2.5.2 | 28.04.2023 | jmockit -> mockitor (serviceacces, replication), complete json, yaml, xml de-/serializing,
+enhancing autotest,
+cursus: fix package: tsl2.nano->de.tsl2.nano , many fixes/enhancings on object creation, stringutil
 ------- | ---- | -----------
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
@@ -6122,7 +6122,7 @@ deploy:
 * [ ] simple-xml -> jackson
 * [v] JSon de-/serialization -> YAML/Xml (own implementation)
 ** [ ] de-/serializing with automatically knowing the structure type (json/yaml/xml)
-** [v] annotations for de-/serialization
+** [x] annotations for de-/serialization
 * [x] autotest: mock all filtered or error classes
 ** [v] why PARAMETER_ERROR on type Class? (number -> Class should create TestBean.class in convert())
 ** junit test suite not working with junit5 jupiter dependency

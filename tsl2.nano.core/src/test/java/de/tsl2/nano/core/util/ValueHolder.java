@@ -5,7 +5,9 @@ import de.tsl2.nano.core.messaging.EventController;
 
 public class ValueHolder<T> implements IValueAccess<T> {
 	T value;
-	
+
+	ValueHolder() {
+	}
 	public ValueHolder(T value) {
 		this.value = value;
 	}

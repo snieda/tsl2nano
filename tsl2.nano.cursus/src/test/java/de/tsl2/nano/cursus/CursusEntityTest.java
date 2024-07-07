@@ -183,7 +183,7 @@ public class CursusEntityTest implements Serializable /* only for the inner-clas
 		accessAttributes(new EExsecutio(), 7);
 		accessAttributes(new EObsidio(), 5);
 		accessAttributes(new EMutatio(), 5);
-		accessAttributes(new ERes(), 5);
+		accessAttributes(new ERes(), 6);
 		accessAttributes(new ETimer(), 6);
 		accessAttributes(new EGrex(), 3);
 		//    	TODO: accessAttributes(new ERuleEffectus(), 5);

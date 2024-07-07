@@ -341,7 +341,7 @@ public class ObjectUtil extends MethodUtil {
      * wrapperType {@link Class}.
      * 
      * @param value to be wrapped into an instance of wrapperType.
-     * @param wrapperType having a constructor with parameter value.getClass()
+     * @param wType having a constructor with parameter value.getClass()
      * @return wrapped instance or value itself
      */
     @SuppressWarnings("unchecked")
@@ -352,67 +352,78 @@ public class ObjectUtil extends MethodUtil {
         // check, if constructor for value is available in wrapper type
         try {
             if (value != null && !PrimitiveUtil.isAssignableFrom(wrapperType, value.getClass())) {
-                if (wrapperType.isInterface() || isAbstract(wrapperType))
-            		wrapperType = getDefaultImplementation(wrapperType);
-                if (Class.class.isAssignableFrom(wrapperType)) {
+                final Class<T> wType = wrapperType.isInterface() || isAbstract(wrapperType)
+                        ? getDefaultImplementation(wrapperType)
+                        : wrapperType;
+
+                if (Class.class.isAssignableFrom(wType)) {
                     return (T) BeanClass.load(StringUtil.substring(StringUtil.substring(value.toString(), "class ", "@"), "{", "}"));
-                } else if (Method.class.isAssignableFrom(wrapperType)) {
+                } else if (Method.class.isAssignableFrom(wType)) {
                     return (T) MethodUtil.fromGenericString(
                             StringUtil.substring(StringUtil.substring(value.toString(), "method ", "@"), "{", "}"));
                 } else {
-                	if (value instanceof CharSequence && CharSequence.class.isAssignableFrom(wrapperType))
-                		return String.class.isAssignableFrom(wrapperType) ? (T) value.toString() : BeanClass.createInstance(wrapperType, value);
-                    if (PrimitiveUtil.isPrimitiveOrWrapper(wrapperType))
-                        return PrimitiveUtil.convert(value, wrapperType);
-                    else if (ByteUtil.isByteStream(wrapperType))
-                        return ByteUtil.toByteStream(ByteUtil.getBytes(value), wrapperType);
-                    else if (Collection.class.isAssignableFrom(wrapperType))
+                    if (value instanceof CharSequence && CharSequence.class.isAssignableFrom(wType))
+                        return String.class.isAssignableFrom(wType) ? (T) value.toString()
+                                : BeanClass.createInstance(wType, value);
+                    if (PrimitiveUtil.isPrimitiveOrWrapper(wType))
+                        return PrimitiveUtil.convert(value, wType);
+                    else if (ByteUtil.isByteStream(wType))
+                        return ByteUtil.toByteStream(ByteUtil.getBytes(value), wType);
+                    else if (Collection.class.isAssignableFrom(wType))
                         return (T )new ListSet(value);
-                    else if (value instanceof Map && (wrapperType.isInterface() || wrapperType.equals(Properties.class)) 
-                            && Map.class.isAssignableFrom(wrapperType)) {
-                        return (T) MapUtil.toMapType((Map)value, (Class<Map>)wrapperType);
-                    } else if (wrapperType.isArray() && value instanceof String) {
-                        if (JSon.isJSon(value.toString()))
-                            return (T) new JSon().toArray(wrapperType.getComponentType(), value.toString());
+                    else if (value instanceof Collection && wType.isArray())
+                        if (wType.getComponentType().isPrimitive())
+                            // return (T) ((Collection) value).stream().map(i -> wrap(i, wType.getComponentType())).toArray();
+                            return (T) PrimitiveUtil.toArray(((Collection) value).stream(), wType.getComponentType(),
+                                    ((Collection) value).size());
                         else
-                            return (T) MapUtil.asArray(wrapperType.getComponentType(), (String) value);
-                    } else if (wrapperType.isArray()
-                            && PrimitiveUtil.isAssignableFrom(wrapperType.getComponentType(), value.getClass())) {
-                        return (T) MapUtil.asArray(wrapperType.getComponentType(), value);
-                    } else if (wrapperType.isArray() && isInstanceable(wrapperType.getComponentType())) {
-                        return (T) MapUtil.asArray(wrapperType.getComponentType(),
-                                BeanClass.createInstance(wrapperType.getComponentType(), value));
+                            return (T) ((Collection) value)
+                                    .toArray((Object[]) Array.newInstance(wType.getComponentType(), 0));
+                    else if (value instanceof Map && (wType.isInterface() || wType.equals(Properties.class))
+                            && Map.class.isAssignableFrom(wType)) {
+                        return (T) MapUtil.toMapType((Map) value, (Class<Map>) wType);
+                    } else if (wType.isArray() && value instanceof String) {
+                        if (JSon.isJSon(value.toString()))
+                            return (T) new JSon().toArray(wType.getComponentType(), value.toString());
+                        else
+                            return (T) MapUtil.asArray(wType.getComponentType(), (String) value);
+                    } else if (wType.isArray()
+                            && PrimitiveUtil.isAssignableFrom(wType.getComponentType(), value.getClass())) {
+                        return (T) MapUtil.asArray(wType.getComponentType(), value);
+                    } else if (wType.isArray() && isInstanceable(wType.getComponentType())) {
+                        return (T) MapUtil.asArray(wType.getComponentType(),
+                                BeanClass.createInstance(wType.getComponentType(), value));
                     } else if (value instanceof String && JSon.isJSon((String) value)) {
-                        if (Map.class.isAssignableFrom(wrapperType)) {
+                        if (Map.class.isAssignableFrom(wType)) {
                             Map jsonMap = MapUtil.fromJSon((String)value);
-                            return (T) (wrapperType.isInterface() ? MapUtil.toMapType(jsonMap, (Class<Map>)wrapperType) : jsonMap);
-                        } else if (Collection.class.isAssignableFrom(wrapperType)) {
+                            return (T) (wType.isInterface() ? MapUtil.toMapType(jsonMap, (Class<Map>) wType) : jsonMap);
+                        } else if (Collection.class.isAssignableFrom(wType)) {
                             return (T) new JSon().toList(
-                                    ObjectUtil.getGenericInterfaceType(wrapperType, Collection.class, 0),
+                                    ObjectUtil.getGenericInterfaceType(wType, Collection.class, 0),
                                     (String) value);
-                        } else if (wrapperType.isInterface()) {
-                            return (T) AdapterProxy.create(wrapperType, MapUtil.fromJSon((String) value));
+                        } else if (wType.isInterface()) {
+                            return (T) AdapterProxy.create(wType, MapUtil.fromJSon((String) value));
                         } else {
-                            new JSon().toObject(wrapperType, (String) value);
+                            new JSon().toObject(wType, (String) value);
                         }
-					} else if (hasValueOfMethod(wrapperType, value))
-                    	return (T) BeanClass.call(wrapperType, "valueOf", true, value);
-					else if (wrapperType.isEnum() && value instanceof Number)
-						return (T) wrapperType.getEnumConstants()[((Number)value).intValue()];
-					else if (value instanceof String && isSimpleType(wrapperType))
-						return FormatUtil.parse(wrapperType, (String)value);
-					else if (String.class.isAssignableFrom(wrapperType) && isSimpleType(value.getClass()))
+                    } else if (hasValueOfMethod(wType, value))
+                        return (T) BeanClass.call(wType, "valueOf", true, value);
+                    else if (wType.isEnum() && value instanceof Number)
+                        return (T) wType.getEnumConstants()[((Number) value).intValue()];
+                    else if (value instanceof String && isSimpleType(wType))
+                        return FormatUtil.parse(wType, (String) value);
+                    else if (String.class.isAssignableFrom(wType) && isSimpleType(value.getClass()))
 						return (T) FormatUtil.getDefaultFormat(value, true);
-					else if (wrapperType.isInterface() && value instanceof Map)
-                        return (T) AdapterProxy.create(wrapperType, (Map) value);
-                    else if (isInstanceable(wrapperType)/* && BeanClass.hasConstructor(wrapperType, value.getClass())*/)
+                    else if (wType.isInterface() && value instanceof Map)
+                        return (T) AdapterProxy.create(wType, (Map) value);
+                    else if (isInstanceable(wType)/* && BeanClass.hasConstructor(wrapperType, value.getClass())*/)
 						try {
-							return BeanClass.createInstance(wrapperType, value);
+                            return BeanClass.createInstance(wType, value);
 						} catch (Exception e) {
-							return BeanClass.createInstance(wrapperType, value.toString());
+                            return BeanClass.createInstance(wType, value.toString());
 						}
 					else
-                        LOG.warn("unknown wrapping of " + value.getClass() + value.hashCode() + " to " + wrapperType);
+                        LOG.warn("unknown wrapping of " + value.getClass() + value.hashCode() + " to " + wType);
                 }
             }
         } catch (Exception e) {

@@ -586,15 +586,16 @@ public class Util {
     public static <T> T trY(SupplierEx<T> callback) {
         return trY(callback, true);
     }
-    public static <T> T trY(SupplierEx<T> callback, boolean escalate) {
-        return ManagedException.trY(callback, escalate);
+
+    public static <T> T trY(SupplierEx<T> callback, boolean escalate, Class<? extends Exception>... warnOnly) {
+        return ManagedException.trY(callback, escalate, warnOnly);
     }
     public static <T> T trY(SupplierExVoid<T> callback) {
     	return trY(callback, true);
     }
     /**let the trY to the standard exception handling  */
-    public static <T> T trY(SupplierExVoid<T> callback, boolean escalate) {
-        return ManagedException.trY(callback, escalate);
+    public static <T> T trY(SupplierExVoid<T> callback, boolean escalate, Class<? extends Exception>... warnOnly) {
+        return ManagedException.trY(callback, escalate, warnOnly);
     }
 	public static final void assert_(boolean assertion, String message, Object... args) {
 		if (!assertion && !Boolean.getBoolean("tsl2.nano.disable.assertion"))

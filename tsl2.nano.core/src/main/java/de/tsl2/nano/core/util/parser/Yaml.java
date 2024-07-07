@@ -16,8 +16,6 @@ public class Yaml extends StructParser.ASerializer {
     private static final String YAML_EXPR = "\\s*(?:-\\s)?\\w+:\\s?\"?.*\"?";
     private static final Pattern YAML_PATTERN = Pattern.compile(YAML_EXPR, Pattern.MULTILINE);
 
-    JSon json = new JSon();
-
     @Override
     public boolean isParseable(CharSequence s) {
         return YAML_PATTERN.matcher(s).find();
@@ -29,7 +27,7 @@ public class Yaml extends StructParser.ASerializer {
     }
     @Override
     public boolean isList(CharSequence s, TreeInfo tree) {
-        if (tree.isRoot() || tree.path.getLast().isArray)
+        if (tree.isRoot() || tree.current().isArray())
             return false;
         String[] children = getChildren(s, tree); // -> poor performance
         return children.length == 0
@@ -55,7 +53,7 @@ public class Yaml extends StructParser.ASerializer {
     }
 
     public String arrOpen(TreeInfo tree) {
-        return "\n";
+        return !tree.current().isStream() ? "\n" : "";
     }
 
     @Override
@@ -93,13 +91,13 @@ public class Yaml extends StructParser.ASerializer {
 
     @Override
     public String[] getChildren(CharSequence s, TreeInfo tree) {
-        return getChildren(s, tree, tree != null && !tree.path.isEmpty() && tree.path.getLast().isArray);
+        return getChildren(s, tree, tree != null && tree.current().isArray());
     }
 
     public String[] getChildren(CharSequence s, TreeInfo tree, boolean excluding) {
         String v = tree != null ? StringUtil.trim((getKeyValue(s))[1], " \t\n\"") : null;
         if (v != null && tree.isReference(v)) {
-            return new String[] { indent(tree) + arrElementIdentifier(tree) + BeanClass.KEY_REF + ": " + v };
+            return new String[] { indent(tree) + arrElementIdentifier(tree) + BeanClass.BeanMap.KEY_REF + ": " + v };
         } else {
         LinkedList<StringBuffer> children = new LinkedList<>();
         try (Scanner sc = new Scanner(s.toString())) {
@@ -122,7 +120,7 @@ public class Yaml extends StructParser.ASerializer {
                     item.append(l + "\n");
             }
         }
-        if (children.size() == 0 && !tree.path.getLast().isArray)
+        if (children.size() == 0 && !tree.current().isArray())
             LOG.error("unexptected empty content of \"" + s);
         return children.stream().map(c -> c.toString()).toArray(String[]::new);
     }

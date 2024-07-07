@@ -100,11 +100,13 @@ public class EConsilium extends Consilium implements IPersistable<String> {
 	@OneToOne
 	@JoinColumn
 	public ETimer getTimer() {
-		return (ETimer) super.getTimer();
+		return super.getTimer() != null && !(super.getTimer() instanceof ETimer)
+				? setTimer(ETimer.from(super.getTimer()))
+				: (ETimer) super.getTimer();
 	}
 
-	public void setTimer(ETimer timer) {
-		this.timer = timer;
+	public ETimer setTimer(ETimer timer) {
+		return (ETimer) (this.timer = timer);
 	}
 
 	@SuppressWarnings("unchecked")

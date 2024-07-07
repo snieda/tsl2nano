@@ -19,8 +19,9 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.CollectionUtil;
+import de.tsl2.nano.core.util.FieldUtil;
+import de.tsl2.nano.core.util.MethodUtil;
 import de.tsl2.nano.core.util.Util;
 
 /**
@@ -76,16 +77,7 @@ public class PrivateAccessor<T> extends UnboundAccessor<T> {
 
     @Override
     protected Field getField(Class cls, String name) throws NoSuchFieldException {
-        try {
-            return cls.getDeclaredField(name);
-        } catch (NoSuchFieldException e) {
-            if (cls.getSuperclass() != null) {
-                return getField(cls.getSuperclass(), name);
-            } else if (cls.isMemberClass()) {
-                return getField(cls.getDeclaringClass(), name);
-            }
-            throw e;
-        }
+        return FieldUtil.getField(cls, name);
     }
 
     @Override
@@ -94,15 +86,7 @@ public class PrivateAccessor<T> extends UnboundAccessor<T> {
     }
 
     protected Method getMethod(Class<?> cls, String name, Class[] par) {
-        try {
-            return cls.getDeclaredMethod(name, par);
-        } catch (NoSuchMethodException e) {
-            if (cls.getSuperclass() != null) {
-                return getMethod(cls.getSuperclass(), name, par);
-            }
-            ManagedException.forward(e);
-            return null;
-        }
+        return MethodUtil.getMethod(cls, name, par);
     }
 
     /**

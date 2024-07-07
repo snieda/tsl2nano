@@ -20,20 +20,22 @@ public class YamlTest {
 
     @Test
     public void testSerialization() {
-        JSonTest.testRoundtrip(new Yaml(), getExpected());
+        StructParserTest.testRoundtrip(new Yaml(), getExpected());
     }
 
     private String getExpected() {
         String expected = "TypeBean:\n" + //
+                "\tindex: 2\n" + //
+                "\tname: \"test2\"\n" + //
+                "\tvalue: 2.2\n" + //
                 "\tconnections: \n" + //
                 "\t\t- TypeBean:\n" + //
                 "\t\t\tindex: 1\n" + //
                 "\t\t\tname: \"test1\"\n" + //
                 "\t\t\tvalue: 1.1\n" + //
-                "\t\t- TypeBean: \"@0\"\n" + //
-                "\tindex: 2\n" + //
-                "\tname: \"test2\"\n" + //
-                "\tvalue: 2.2";
+                "\t\t\tbyteStream: [49, 50, 51]\n" + //
+                "\t\t\tintStream: [1, 2, 3]\n" + //
+                "\t\t- TypeBean: \"@0\"";
         return expected;
     }
 

@@ -37,16 +37,16 @@ public class Timer implements Serializable {
 	}
 
 	public Timer(Date from, Date until) {
-		this(from, until, Calendar.DAY_OF_YEAR, 1);
+		this(from, until, Calendar.DAY_OF_YEAR, 0);
 	}
 
 	public Timer(Date from, Date until, int stepType, int stepLength, Integer... stepExceptions) {
 		this.from = Util.value(from, DateUtil.MIN_STD_DATE);
 		this.until = Util.value(until, DateUtil.MAX_STD_DATE);
 		this.stepType = stepType;
-		if (stepLength <= 0) {
-			throw new IllegalArgumentException("stepLength must be greater than 0");
-		}
+		// if (stepLength <= 0) {
+		// 	throw new IllegalArgumentException("stepLength must be greater than 0");
+		// }
 		this.stepLength = stepLength;
 		this.stepExceptions = new ArrayList<>(Arrays.asList(stepExceptions));
 		preparePeriod();

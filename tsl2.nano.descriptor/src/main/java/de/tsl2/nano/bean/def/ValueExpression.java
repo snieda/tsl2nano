@@ -521,7 +521,7 @@ public class ValueExpression<TYPE> implements
 
     @Override
     public String getExpressionPattern() {
-        throw new UnsupportedOperationException();
+        return null;
     }
 
     @Override

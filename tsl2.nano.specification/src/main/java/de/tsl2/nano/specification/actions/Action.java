@@ -48,7 +48,7 @@ public class Action<T> extends AbstractRunnable<T> {
     public Action(String name, Class<?> declaringClass, String operation, LinkedHashMap<String, ParType> parameter) {
         super(name, operation, parameter);
         this.declaringClass = declaringClass;
-        createParameter(getMethod(declaringClass.getName() + "." + operation));
+        createParameter(getMethod(declaringClass.getName() + "." + operation + "()"));
     }
 
     public Action(String method) {
@@ -71,6 +71,7 @@ public class Action<T> extends AbstractRunnable<T> {
      * @return 
      */
     public static Method getMethod(String method) {
+        method = !method.contains("(") ? method + "()" : method;
         return MethodUtil.fromGenericString(method);
     }
     
