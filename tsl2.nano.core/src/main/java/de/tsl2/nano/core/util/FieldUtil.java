@@ -1,8 +1,16 @@
+/*
+ * created by: Tom
+ * created on: 31.03.2017
+ * 
+ * Copyright: (c) Thomas Schneider 2017, all rights reserved
+ */
 package de.tsl2.nano.core.util;
 
 import java.io.PrintStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -11,15 +19,40 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 public class FieldUtil extends ByteUtil {
 
-	static final Predicate<Field> SERIALIZEABLE = f -> !f.isSynthetic()
-			&& !Modifier.isStatic(f.getModifiers())
-			&& !Modifier.isTransient(f.getModifiers())
-			&& !Modifier.isVolatile(f.getModifiers())
-			&& !Modifier.isFinal(f.getModifiers());
+	public static final Predicate<Member> MODIFIABLE_MEMBER = m -> !m.isSynthetic()
+			&& !Modifier.isStatic(m.getModifiers())
+			&& !Modifier.isTransient(m.getModifiers())
+			&& !Modifier.isVolatile(m.getModifiers())
+			&& !Modifier.isFinal(m.getModifiers());
+
+	public static final BiPredicate<Member, Integer> WITH_MODIFIER = (member,
+			modifier) -> (modifier == -1 || (member.getModifiers() & modifier) != 0);
+
+	public static Class<?> getExplicitType(Field field) {
+		if (field.getType().equals(Class.class)) {
+			Class<?> gType = getGenericType(field);
+			return gType.equals(Object.class) ? field.getType() : gType;
+		} else {
+			return field.getType();
+		}
+	}
+
+	public static Class<?> getGenericType(Field field) {
+		return getGenericType(field, 0);
+	}
+
+	public static Class<?> getGenericType(Field field, int typePos) {
+		Object genType = field.getGenericType();
+		if (genType instanceof ParameterizedType) {
+			genType = ((ParameterizedType) genType).getActualTypeArguments()[typePos];
+		}
+		return genType instanceof Class ? (Class<?>) genType : Object.class;
+	}
 
 	public static Object[][] toObjectArrays(final Collection<?> list, String... attributes) {
 		Object[][] rows = new Object[list.size()][];
@@ -42,8 +75,12 @@ public class FieldUtil extends ByteUtil {
 	}
 
 	public static Map<String, Object> toSerializingMap(Object obj) {
+		return toMap(obj, MODIFIABLE_MEMBER);
+	}
+
+	public static Map<String, Object> toMap(Object obj, Predicate<Member> filter) {
 		return foreach((f, m) -> m.put(f.getName(), getValue(obj, f)), new LinkedHashMap<String, Object>(), obj, false,
-				getFieldNames(obj.getClass(), SERIALIZEABLE));
+				getFieldNames(obj.getClass(), filter));
 	}
 
 	public static Map<String, Object> toMap(final Object obj, String... attributes) {
@@ -107,7 +144,7 @@ public class FieldUtil extends ByteUtil {
 		return getFieldNames(cls, f -> !f.isSynthetic());
 	}
 
-	public static String[] getFieldNames(Class<? extends Object> cls, Predicate<Field> filter) {
+	public static String[] getFieldNames(Class<? extends Object> cls, Predicate<Member> filter) {
 		return Arrays.stream(cls.getDeclaredFields())
 				.filter(f -> filter.test(f))
             .map(f -> f.getName())
@@ -116,7 +153,7 @@ public class FieldUtil extends ByteUtil {
 	}
 
 	/** @return all field names of class hierarchy that are of the given type */
-	public static String[] getFieldNamesInHierarchy(Class<?> cls, Predicate<Field> filter) {
+	public static String[] getFieldNamesInHierarchy(Class<?> cls, Predicate<Member> filter) {
 		Set<Field> fields = new LinkedHashSet<>(Arrays.asList(cls.getDeclaredFields()));
 		fields.addAll(Arrays.asList(cls.getFields()));
 		return fields.stream()

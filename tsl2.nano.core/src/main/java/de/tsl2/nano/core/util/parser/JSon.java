@@ -22,6 +22,13 @@ public class JSon extends StructParser.ASerializer {
 	private static final Pattern JSON_PATTERN1 = Pattern.compile(JSON_EXPR1, Pattern.MULTILINE);
 	private static final Pattern JSON_PATTERN_STREAM = Pattern.compile(JSON_EXPR_STREAM, Pattern.MULTILINE);
 
+	public JSon() {
+	}
+
+	public JSon(SerialClass s) {
+		super(s);
+	}
+
 	public boolean isParseable(CharSequence txt) {
 		return isJSon(txt);
 	}

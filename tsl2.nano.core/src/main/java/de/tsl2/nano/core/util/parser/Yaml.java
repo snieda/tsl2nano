@@ -1,3 +1,9 @@
+/*
+ * created by: Tom
+ * created on: 06.04.2024
+ * 
+ * Copyright: (c) Thomas Schneider 2024, all rights reserved
+ */
 package de.tsl2.nano.core.util.parser;
 
 import java.util.Arrays;
@@ -15,6 +21,13 @@ import de.tsl2.nano.core.util.StringUtil;
 public class Yaml extends StructParser.ASerializer {
     private static final String YAML_EXPR = "\\s*(?:-\\s)?\\w+:\\s?\"?.*\"?";
     private static final Pattern YAML_PATTERN = Pattern.compile(YAML_EXPR, Pattern.MULTILINE);
+
+    public Yaml() {
+    }
+
+    public Yaml(SerialClass s) {
+        super(s);
+    }
 
     @Override
     public boolean isParseable(CharSequence s) {

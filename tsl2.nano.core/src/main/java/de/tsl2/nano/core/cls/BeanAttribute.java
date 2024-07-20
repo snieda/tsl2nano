@@ -1,7 +1,5 @@
 /*
- * SVN-INFO: $Id: BeanAttribute.java,v 1.0 07.12.2008 18:19:11 15:03:02 ts Exp $ 
- * 
- * Copyright © 2002-2008 Thomas Schneider
+ * Copyright © 2002-2024 Thomas Schneider
  * Alle Rechte vorbehalten.
  * Weiterverbreitung, Benutzung, Vervielfältigung oder Offenlegung,
  * auch auszugsweise, nur mit Genehmigung.
@@ -12,9 +10,9 @@ package de.tsl2.nano.core.cls;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
 import java.util.Map;
 
 //import javax.annotation.PostConstruct;
@@ -170,16 +168,6 @@ public class BeanAttribute<T> implements IAttribute<T> {
         }
     }
 
-    /**
-     * for internal use only!
-     * 
-     * @return getter method of current attribute
-     */
-    @Override
-    public Method getAccessMethod() {
-        return readAccessMethod;
-    }
-
     public static final boolean isGetterMethod(Method method) {
         return (method.getName().startsWith(PREFIX_READ_ACCESS)
             || method.getName().startsWith(PREFIX_BOOLEAN_READ_ACCESS))
@@ -293,12 +281,36 @@ public class BeanAttribute<T> implements IAttribute<T> {
     @SuppressWarnings("unchecked")
     public T getValue(Object beanInstance) {
         try {
+            if (ENV.isModeStrict()) {
+                if (!ObjectUtil.isObject(beanInstance))
+                    throw new IllegalArgumentException("not a real object instance: " + beanInstance);
+                if (readAccessMethod.getParameterTypes().length > 0)
+                    throw new IllegalAccessException("not a bean getter method: " + this);
+                if (!readAccessMethod.getDeclaringClass().isAssignableFrom(beanInstance.getClass()))
+                    throw new IllegalArgumentException("not instanceof methods '" + readAccessMethod.toGenericString()
+                            + "' declaring class" + beanInstance.getClass());
+                if (leadsToFatalJVM_GetMethodParameters(readAccessMethod))
+                    return null;
+            }
             readAccessMethod.setAccessible(true);
+            // to find out the fatal error in JVM_GetMethodParameters+0xa8
+            // System.out.println(readAccessMethod.toGenericString() + " ===> " + beanInstance.getClass());
             return (T) readAccessMethod.invoke(beanInstance, EMPTY_ARG);
-        } catch (final Exception e) {
+        } catch (final Throwable e) {
             ManagedException.forward(e);
             return null;
         }
+    }
+
+    private static boolean leadsToFatalJVM_GetMethodParameters(Method accessMethod) {
+        // public java.lang.reflect.AnnotatedType[] java.lang.reflect.Executable.getAnnotatedExceptionTypes() ===> class java.lang.reflect.Constructor
+        if (accessMethod.getName().equals("getAnnotatedExceptionTypes")
+                && Executable.class.equals(accessMethod.getDeclaringClass())) {
+            LOG.warn("calling " + accessMethod.toGenericString()
+                    + " may lead to fatal error in JVM_GetMethodParameters");
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -379,13 +391,34 @@ public class BeanAttribute<T> implements IAttribute<T> {
     @Override
     @SuppressWarnings("unchecked")
     public Class<T> getType() {
+        Method m = getAccessMethod();
+        return (Class<T>) (isGetterMethod(m) ? m.getReturnType() : m.getParameterTypes()[0]);
+    }
+
+    @Override
+    public Method getAccessMethod() {
         if (readAccessMethod == null) {
             if (writeAccessMethod == null)
                 initDeserialization();
             else
-                return (Class<T>) writeAccessMethod.getParameterTypes()[0];
+                return writeAccessMethod;
         }
-        return (Class<T>) readAccessMethod.getReturnType();
+        return readAccessMethod;
+    }
+
+    public Class<T> getExplicitType() {
+        return getExplicitType(this);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <R> Class<R> getExplicitType(IAttribute<R> attr) {
+        Class<R> type = attr.getType();
+        if (type.equals(Class.class)) {
+            Class<?> gType = MethodUtil.getGenericType(attr.getAccessMethod(), 0);
+            return gType.equals(Object.class) ? type : (Class<R>) gType;
+        } else {
+            return type;
+        }
     }
 
     /**
@@ -394,7 +427,7 @@ public class BeanAttribute<T> implements IAttribute<T> {
      * @return generic type of attribute, or Object.class
      */
     public Class<?> getGenericType() {
-        return getGenericType(readAccessMethod, 0);
+        return MethodUtil.getGenericType(readAccessMethod, 0);
     }
 
     /**
@@ -403,20 +436,7 @@ public class BeanAttribute<T> implements IAttribute<T> {
      * @return generic type of attribute, or Object.class
      */
     public Class<?> getGenericType(int typePos) {
-        return getGenericType(readAccessMethod, typePos);
-    }
-
-    /**
-     * tries to get the generic type. if not defined, Object.class will be returned
-     * 
-     * @return generic type of attribute, or Object.class
-     */
-    public static Class<?> getGenericType(Method method, int typePos) {
-        Object genType = method.getGenericReturnType();
-        if (genType instanceof ParameterizedType) {
-            genType = ((ParameterizedType) genType).getActualTypeArguments()[typePos];
-        }
-        return genType instanceof Class ? (Class<?>) genType : Object.class;
+        return MethodUtil.getGenericType(readAccessMethod, typePos);
     }
 
     /**

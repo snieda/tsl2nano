@@ -1,7 +1,5 @@
 /*
- * SVN-INFO: $Id: BeanClass.java,v 1.0 07.12.2008 11:36:00 15:03:02 ts Exp $ 
- * 
- * Copyright © 2002-2008 Thomas Schneider
+ * Copyright © 2002-2024 Thomas Schneider
  * Alle Rechte vorbehalten.
  * Weiterverbreitung, Benutzung, Vervielfältigung oder Offenlegung,
  * auch auszugsweise, nur mit Genehmigung.
@@ -51,6 +49,7 @@ import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.CollectionUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FieldUtil;
+import de.tsl2.nano.core.util.MethodUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
@@ -149,7 +148,8 @@ public class BeanClass<T> implements Serializable {
      */
     public String[] getFieldNames(Class<?> type, boolean staticOnly) {
         return FieldUtil.getFieldNamesInHierarchy(type,
-                f -> type.isAssignableFrom(f.getType()) && (!staticOnly || Modifier.isStatic(f.getModifiers())));
+                f -> type.isAssignableFrom(((Field) f).getType())
+                        && (!staticOnly || Modifier.isStatic(f.getModifiers())));
     }
 
     /**
@@ -956,7 +956,7 @@ public class BeanClass<T> implements Serializable {
             }
             if (instance == null) {
                 throw ManagedException.implementationError(
-                        "BeanClass could not create the desired instance of type " + clazz, Arrays.toString(args),
+                        "BeanClass could not create the desired instance of " + clazz, Arrays.toString(args),
                         (Object[]) constructors);
             }
         }
@@ -1352,15 +1352,25 @@ public class BeanClass<T> implements Serializable {
         public static final String KEY_REF = "REF";
 
         public T fromValueMap(Map<String, Object> values) {
-        return fromValueMap(createInstance(), values);
-    }
+            return fromValueMap(createInstanceFromValueMap(values), values);
+        }
+
+        private T createInstanceFromValueMap(Map<String, Object> values) {
+            if (hasDefaultConstructor(false)) {
+                return createInstance();
+            } else if (values.size() == 1) {
+                if (clazz.equals(Class.class) || clazz.equals(Method.class))
+                    return (T) ObjectUtil.wrap(values, clazz);
+            }
+            return createInstance(values.values().toArray());
+        }
 
     public T fromValueMap(Map<String, Object> values, Map<Map, Object> selfReferences) {
         Object v;
         if (values.size() == 1 && (v = values.get(KEY_REF)) != null && selfReferences.containsKey(v)) {
             return (T) selfReferences.get(v);
         }
-        return fromValueMap(createInstance(), values, selfReferences);
+        return fromValueMap(createInstanceFromValueMap(values), values, selfReferences);
     }
 
     public T fromValueMap(T instance, Map<String, Object> values) {
@@ -1376,7 +1386,8 @@ public class BeanClass<T> implements Serializable {
                 Object value = values.get(name);
                 if (Util.isEmpty(value) && attr.getValue(instance) == null)
                     continue;
-                else if (serial != null && serial.formatter() != null && value instanceof String) {
+                else if (serial != null && serial.formatter() != null
+                        && ObjectUtil.isInstanceable(serial.formatter().getClass()) && value instanceof String) {
                     String sValue = (String) value;
                     Util.trY(() -> attr.setValue(instance, createInstance(serial.formatter()).parseObject(sValue)));
                 } else if (Date.class.isAssignableFrom(typeOf(attr)) && value instanceof String
@@ -1418,7 +1429,7 @@ public class BeanClass<T> implements Serializable {
         if (!(value instanceof List))
             return;
         Class<?> serialType = ASerializer.Proprietizer.serial(attr, true).type();
-        Class<?> gtype = serialType != null ? serialType : BeanAttribute.getGenericType(attr.getAccessMethod(), 0);
+        Class<?> gtype = serialType != null ? serialType : MethodUtil.getGenericType(attr.getAccessMethod(), 0);
         if (gtype == null || gtype.equals(Object.class))
             return;
         fillList(gtype, (List) value, references);

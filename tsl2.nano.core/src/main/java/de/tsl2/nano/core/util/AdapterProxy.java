@@ -110,8 +110,8 @@ public class AdapterProxy implements InvocationHandler {
     	Method[] methods = CollectionUtil.concat(interfaze.getMethods(), interfaze.getDeclaredMethods());
     	Map<String,Class> map = new HashMap<>();
     	for (int i = 0; i < methods.length; i++) {
-			if (!void.class.isAssignableFrom(methods[i].getReturnType()))
-				map.put(methods[i].getName(), methods[i].getReturnType());
+            if (!void.class.isAssignableFrom(MethodUtil.getExplicitType(methods[i])))
+                map.put(methods[i].getName(), MethodUtil.getExplicitType(methods[i]));
 		}
     	return map;
     }

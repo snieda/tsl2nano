@@ -60,6 +60,7 @@ import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.CLI;
 import de.tsl2.nano.core.util.DelegationHandler;
 import de.tsl2.nano.core.util.FormatUtil;
+import de.tsl2.nano.core.util.MethodUtil;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -552,7 +553,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     }
 
     protected Class<T> getGenericType(int pos) {
-        return (Class<T>) (getAccessMethod() != null ? BeanAttribute.getGenericType(getAccessMethod(), pos)
+        return (Class<T>) (getAccessMethod() != null ? MethodUtil.getGenericType(getAccessMethod(), pos)
             : Object.class);
     }
 

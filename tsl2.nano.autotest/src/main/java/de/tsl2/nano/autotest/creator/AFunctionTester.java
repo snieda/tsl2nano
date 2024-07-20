@@ -186,7 +186,10 @@ public abstract class AFunctionTester<A extends Annotation> extends AFunctionCal
 			 */
 			if (error == null)
 				fail("test should fail with:\n\t" + expectedFail + "\nbut has result:\n\t" + getResult());
-			else if (!getErrorMsg(expectedFail).contains((emsg = getErrorMsg(error)).substring(0, Math.min(150, emsg.length()))))
+			else if (!getErrorMsg(error)
+					.contains((emsg = getErrorMsg(expectedFail)).substring(0, Math.min(50, emsg.length())))
+					&& !getErrorMsg(expectedFail)
+							.contains((emsg = getErrorMsg(error)).substring(0, Math.min(50, emsg.length()))))
 				fail("test should fail with:\n\t" + expectedFail + " but failed with:\n\t" + error);
 			return true;
 		}

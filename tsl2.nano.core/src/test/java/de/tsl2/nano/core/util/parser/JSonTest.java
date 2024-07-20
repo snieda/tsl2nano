@@ -93,8 +93,8 @@ public class JSonTest {
         String result = Util.toJson(v2);
         System.out.println(result);
         assertEquals(
-                "{\"type\": {\"de.tsl2.nano.core.util.ValueHolder\"},\"value\": {\"type\": \"@1\",\"value\": \"@0\"}}",
-                result);
+                "{\"type\": {\"name\": \"de.tsl2.nano.core.util.ValueHolder\"},\"value\": {\"type\": {\"name\": \"de.tsl2.nano.core.util.ValueHolder\"},\"value\": \"@0\"}}",
+                        result);
     }
 
     @Test

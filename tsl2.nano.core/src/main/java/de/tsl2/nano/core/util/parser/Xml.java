@@ -1,8 +1,16 @@
+/*
+ * created by: Tom
+ * created on: 06.04.2024
+ * 
+ * Copyright: (c) Thomas Schneider 2024, all rights reserved
+ */
 package de.tsl2.nano.core.util.parser;
 
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
 /** 
@@ -12,6 +20,7 @@ import de.tsl2.nano.core.util.StringUtil;
  *   2. lists of lists are not supported. (a list cannot directly contain another list)
  *   3. no xml/schema validation
 */
+@SuppressWarnings("unchecked")
 public class Xml extends StructParser.ASerializer {
     private static final String REGEX_OPENTAG = "<\\w+>";
     private static final String REGEX_CLOSETAG = "</${open}>";
@@ -20,7 +29,19 @@ public class Xml extends StructParser.ASerializer {
     /** (default: true), if false, simple types like numbers, dates, strings will be presented as attributes/properties */
     private boolean tagsOnly = true;
 
+    private static final Map<String, String> ESCAPINGS;
+    static {
+        ESCAPINGS = MapUtil.asMap("&", "&amp;", "<", "&lt;",
+                ">", "&gt;",
+                "\"", "&quot;",
+                "'", "&apos;");
+    }
+
     public Xml() {
+    }
+
+    public Xml(SerialClass s) {
+        super(s);
     }
 
     /** @param tagsOnly: @see #tagsOnly */
@@ -39,6 +60,10 @@ public class Xml extends StructParser.ASerializer {
         return "\\s*<(!--|[?]).*(--|[?])>";
     }
 
+    @Override
+    public Map<String, String> escapingTable() {
+        return ESCAPINGS;
+    }
     @Override
     StringBuilder createInitialStringBuilder() {
         return new StringBuilder(

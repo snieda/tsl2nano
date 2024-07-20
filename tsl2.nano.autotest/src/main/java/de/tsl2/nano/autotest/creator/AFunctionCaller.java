@@ -114,7 +114,7 @@ public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
 		if (timeout == -1 || !def(PARALLEL, false))
 			run(); 
 		else 
-			ConcurrentUtil.runWithTimeout(getID(), this, timeout * 1000);
+			ConcurrentUtil.runWithTimeout(cloneIndex + ": " + getFunctionDescription(), this, timeout * 1000);
 	}
 	protected Object run(Method method, Object... args) {
 		boolean last = LogFactory.setPrintToConsole(false);

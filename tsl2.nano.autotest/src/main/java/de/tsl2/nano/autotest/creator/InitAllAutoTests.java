@@ -115,6 +115,10 @@ public class InitAllAutoTests/* extends ADefaultAutoTester*/ {
 		return ".*" + m.getDeclaringClass().getName() + "." + m.getName() + ".*";
 	}
 
+	public static String methods(Class<?> cls, String methodNameExpression) {
+		return cls.getSimpleName() + (methodNameExpression != null ? ".(?:" + methodNameExpression + ")" : "");
+	}
+
 	public static void forbidSystemExit() {
 		try {
 			System.setSecurityManager(new SecurityManager() {
@@ -145,5 +149,11 @@ public class InitAllAutoTests/* extends ADefaultAutoTester*/ {
 			return FilePath.copy((approved_expectation_files), "target/" + autotest_path) > 0;
 		}
 		return false;
+	}
+
+	public static void setSequentialForDebugging() {
+		set(DUPLICATION, 1);
+		set(PARALLEL, false);
+		set(TIMEOUT, -1);
 	}
 }

@@ -1,7 +1,7 @@
 /*
  * 
  * 
- * Copyright ï¿½ 2002-2008 Thomas Schneider
+ * Copyright (c) 2002-2024 Thomas Schneider
  * Alle Rechte vorbehalten.
  * Weiterverbreitung, Benutzung, Vervielfältigung oder Offenlegung,
  * auch auszugsweise, nur mit Genehmigung.
@@ -87,12 +87,19 @@ public class StringUtil extends Strings {
         }
     }
 
-    /** delegates to {@link #substring(String, String, String, int)} interpreting from and to as regurlar expressions. */
     public static String subRegex(CharSequence data, String from, String to, int start) {
+        return subRegex(data, from, to, start, false, false);
+    }
+
+    /** delegates to {@link #substring(String, String, String, int)} interpreting from and to as regurlar expressions. */
+    public static String subRegex(CharSequence data, String from, String to, int start, boolean lastTo,
+            boolean constrain) {
     	return substring(data, 
                 from != null ? extract(data.subSequence(start, data.length()), from) : null,
                 to != null ? extract(data.subSequence(start, data.length()), to) : null,
-    					start);
+                start,
+                lastTo,
+                constrain);
     }
 
     /** delegates to {@link #substring(String, String, String, int)} interpreting fromRegex as regurlar expressions. */
@@ -1314,6 +1321,11 @@ class Strings {
             return ((StringBuffer) s).lastIndexOf(sub, start);
         else
             throw new UnsupportedOperationException();
+    }
+
+    public static <S extends CharSequence> S replaceAll(S s, Map<String, String> table) {
+        table.entrySet().stream().forEach(e -> StringUtil.replaceAll(s, e.getKey(), e.getValue()));
+        return s;
     }
 
     @SuppressWarnings("unchecked")

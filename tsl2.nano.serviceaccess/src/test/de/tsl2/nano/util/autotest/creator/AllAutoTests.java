@@ -51,7 +51,8 @@ public class AllAutoTests {
 				matchPackage(FsConnection.class, ServiceUtil.class, ServiceFactory.class, GenericServiceBean.class,
 						JobScheduleServiceBean.class, FeatureProxy.class, CachingBatchloader.class,
 						ServiceRunner.class));
-		System.setProperty("tsl2.functiontest.filter.exclude", ".*(FsManagedConnection.setLogWriter|FsManagedConnectionFactory.setLogWriter|PrintWriter|DefaultService.getSubject).*");
+		System.setProperty("tsl2.functiontest.filter.exclude",
+				".*(FsManagedConnection.setLogWriter|FsManagedConnectionFactory.setLogWriter|PrintWriter|DefaultService.getSubject|reset|clear|disposeAllScheduledJobs).*");
 		System.setProperty(AutoTest.PREFIX_FUNCTIONTEST + "fillinstance", "true");
 		System.setProperty(PREFIX_FUNCTIONTEST + "inject.beanattributes", "true");
 		System.setProperty(ADefaultAutoTester.KEY_AUTOTEST_INITMOCKITO, "true");
@@ -66,14 +67,11 @@ public class AllAutoTests {
 
 //copy of ConfigBeanContainer in directacccess
 class ConfigBeanContainer {
-	public static EntityManager initAuthAndLocalBeanContainer() {
-		return initProxyBeanContainer(initUserAuth());
-	}
 
-	public static EntityManager initProxyBeanContainer(Authorization auth) {
+	public static EntityManager initAuthAndLocalBeanContainer() {
 		BeanContainerUtil.initEmptyProxyServices();
 		BeanContainerUtil.initProxyServiceFactory();
-		ServiceFactory.instance().setSubject(auth.getSubject());
+		ServiceFactory.instance().setSubject(initUserAuth().getSubject());
 		ConcurrentUtil.setCurrent(BeanContainer.instance());
 		return ENV.addService(EntityManager.class, BeanProxy.createBeanImplementation(EntityManager.class));
 	}

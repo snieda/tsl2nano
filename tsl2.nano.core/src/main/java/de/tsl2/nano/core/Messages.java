@@ -104,6 +104,7 @@ public class Messages {
      * @return key-value found in the first registered bundle or null if not found.
      */
     public static String find(String key) {
+        synchronized (BUNDLE_LIST) {
         for (final ResourceBundle bundle : BUNDLE_LIST) {
             try {
                 return bundle.getString(key);
@@ -111,6 +112,7 @@ public class Messages {
 //                LOG.trace("resource key not found: " + key);
             }
         }
+    }
         return null;
     }
 

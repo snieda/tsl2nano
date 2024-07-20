@@ -235,7 +235,7 @@ public class ObjectUtil extends MethodUtil {
      * that interface.
      * 
      * @param cls object type
-     * @param interfaze interface to search a generic type for.
+     * @param interfaze interface to search a generic type for (if null, getGenericSuperClass() will be used)
      * @return generic type for interfaze
      */
     public static Class<?> getGenericInterfaceType(Class cls, Class interfaze, int pos) {
@@ -357,10 +357,24 @@ public class ObjectUtil extends MethodUtil {
                         : wrapperType;
 
                 if (Class.class.isAssignableFrom(wType)) {
-                    return (T) BeanClass.load(StringUtil.substring(StringUtil.substring(value.toString(), "class ", "@"), "{", "}"));
+                    return (T) BeanClass.load(
+                            StringUtil.subRegex(value.toString(), "(class |name\"?\\s*[=:]\s*\"?)", "(@|\"|\\})", 0,
+                                    true, false));
+                    // StringUtil.substring(
+                    //         StringUtil.substring(StringUtil.substring(
+                    //                 StringUtil.substring(value.toString(), "class ", "@"), "name\":", "}"),
+                    //                 "name=", "}"),
+                    //         "\"", "\""));
                 } else if (Method.class.isAssignableFrom(wType)) {
                     return (T) MethodUtil.fromGenericString(
-                            StringUtil.substring(StringUtil.substring(value.toString(), "method ", "@"), "{", "}"));
+                            StringUtil.subRegex(value.toString(), "(method |name\"?\\s*[=:]\s*\"?)", "(@|\"|\\})", 0,
+                                    true, false));
+                    // StringUtil.substring(StringUtil.substring(
+                    //         StringUtil.substring(StringUtil.substring(value.toString(), "method ", "@"),
+                    //                 "name\":",
+                    //                 "\"}"),
+                    //         "name=", "}"),
+                    //         "\"", "\""));
                 } else {
                     if (value instanceof CharSequence && CharSequence.class.isAssignableFrom(wType))
                         return String.class.isAssignableFrom(wType) ? (T) value.toString()
@@ -543,4 +557,8 @@ public class ObjectUtil extends MethodUtil {
             throw new RuntimeException(e);
 		}
 	}
+
+    public static boolean isObject(Object o) {
+        return o != null && !o.getClass().isArray() && !o.getClass().isPrimitive();
+    }
 }

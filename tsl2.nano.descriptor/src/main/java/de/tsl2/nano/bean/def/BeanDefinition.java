@@ -26,6 +26,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 
@@ -177,7 +178,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      * @param beanClass
      */
     public BeanDefinition(Class<T> beanClass) {
-        super((Class<T>) (ENV.get("beandef.ignore.anonymous.fields", true) ? getDefiningClass(beanClass)
+        super((Class<T>) (ENV.get("beandef.ignore.anonymous.fields", true)
+                ? getDefiningClass(Objects.requireNonNull(beanClass))
             : beanClass));
         name = beanClass == UNDEFINED.getClass() ? /*"undefined"*/StringUtil.STR_ANY : super.getName();
     }

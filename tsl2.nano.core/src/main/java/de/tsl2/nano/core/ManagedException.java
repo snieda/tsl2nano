@@ -231,15 +231,6 @@ public class ManagedException extends RuntimeException {
 		return !escalate || Arrays.asList(warnOnly).contains(ex.getClass())? null : forward(ex, true);
 	}
 
-    /**use this throwable-catch only, if you know what you are doing  */
-    public static <T> T trYError(SupplierEx<T> callback, boolean escalate, Class<? extends Exception>... warnOnly) {
-        try {
-            return callback.get();
-        } catch(Throwable ex) {
-        	return (T) handleException(escalate, ex, warnOnly);
-        }
-    }
-
     public static <T> T trY(SupplierExVoid<T> callback) {
         return trY(callback, true);
     }

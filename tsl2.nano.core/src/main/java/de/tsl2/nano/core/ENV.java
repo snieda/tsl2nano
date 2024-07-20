@@ -234,7 +234,13 @@ public class ENV implements Serializable {
 //        else // clean version
 //        	throw new IllegalStateException("no environment available. please call ENV.create(...) before!");
         if (self == null) { //dirty version: used in cause of lots of testcases and legacy applications
-            create(System.getProperty(KEY_CONFIG_PATH, System.getProperty("user.dir").replace('\\', '/')));
+            System.out.println("WARN: NO ENV was created before. creating a default instance");
+            self = create(System.getProperty(KEY_CONFIG_PATH, System.getProperty("user.dir").replace('\\', '/')));
+            selfThread.set(self);
+        } else if (isTestMode() && self.properties == null || self.services == null) {
+            System.out.println("WARN: NO ENV was created before. creating a default instance");
+            self = create(System.getProperty(KEY_CONFIG_PATH, System.getProperty("user.dir").replace('\\', '/')));
+            selfThread.set(self);
         }
         return self;
     }
@@ -1230,7 +1236,7 @@ public class ENV implements Serializable {
      * @param item item to be logged
      */
     public static void warn(Object caller, Object item) {
-        logger(caller.getClass()).warn(item);
+        logger(caller instanceof Class ? caller : caller.getClass()).warn(item);
     }
 
     /**

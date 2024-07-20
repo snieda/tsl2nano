@@ -49,6 +49,7 @@ import java.util.function.BiFunction;
 import de.tsl2.nano.autotest.creator.AFunctionCaller;
 import de.tsl2.nano.autotest.creator.AutoTest;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
@@ -58,6 +59,7 @@ import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.DefaultFormat;
 import de.tsl2.nano.core.util.DependencyInjector;
+import de.tsl2.nano.core.util.FieldUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.MapUtil;
@@ -86,6 +88,7 @@ import de.tsl2.nano.core.util.Util;
  * 
  * @author Thomas Schneider
  */
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class ValueRandomizer {
 	private static final ValueSets valueSets = new ValueSets();
 	private static DependencyInjector di = new DependencyInjector();
@@ -105,7 +108,8 @@ public class ValueRandomizer {
 		Field[] fields = acc.findMembers(PrivateAccessor::notStaticAndNotFinal);
 		Arrays.stream(fields)
 				.filter(f -> acc.member(f.getName()) == null)
-				.forEach(f -> Util.trY(() -> acc.set(f.getName(), createRandomValue(f.getType(), zeroNumber, depth)),
+				.forEach(f -> Util.trY(
+								() -> acc.set(f.getName(), createRandomValue(FieldUtil.getExplicitType(f), zeroNumber, depth)),
 						false));
 		return obj;
 	}
@@ -134,6 +138,10 @@ public class ValueRandomizer {
 		return createRandomValue(typeOf, zeroNumber, 0);
 	}
 	protected static <V> V createRandomValue(Class<V> typeOf, boolean zeroNumber, int depth) {
+		Class<V> genericType = (Class<V>) ObjectUtil.getGenericType(typeOf);
+		typeOf = !Iterable.class.isAssignableFrom(typeOf) && genericType != null && !genericType.equals(Object.class)
+				? genericType
+				: typeOf;
 		if (!checkMaxDepth(++depth)) {
 			System.out.print(">");
 			return null;
@@ -215,7 +223,7 @@ public class ValueRandomizer {
 		}
 		List<IAttribute> attrs = BeanClass.getBeanClass(value.getClass()).getAttributes(true);
 		attrs.stream().filter(a -> a.getValue(value) == null)
-				.forEach(a -> a.setValue(value, createRandomValue(a.getType(), zeroNumber, depth)));
+				.forEach(a -> a.setValue(value, createRandomValue(BeanAttribute.getExplicitType(a), zeroNumber, depth)));
 	}
 
 	private static Object convert(Object n, Class typeOf, boolean zeroNumber, int depth) {
@@ -282,7 +290,6 @@ public class ValueRandomizer {
 	public static <V> Construction<V> constructWithRandomParameters(Class<V> typeOf)  {
 		return constructWithRandomParameters(typeOf, false, 0);
 	}
-	@SuppressWarnings({ "unchecked" })
 	static <V> Construction<V> constructWithRandomParameters(Class<V> typeOf, boolean zeroNumber, int depth) {
 		try {
 			Constructor<?> constructor;
@@ -300,7 +307,7 @@ public class ValueRandomizer {
 					throw new RuntimeException(typeOf + " is not constructable!");
 				else if (constructor.getParameterCount() > 0 && !checkMaxDepth(depth))
 					throw new IllegalStateException("max depth reached on recursion. there is a cycle in parameter instantiation: " + typeOf);
-				parameters = provideRandomizedObjects(depth, 1, constructor.getParameterTypes());
+				parameters = provideRandomizedObjects(depth, 1, getParameterTypes(constructor));
 			}
 			constructor.setAccessible(true);
 			V instance = (V) constructor.newInstance(parameters);
@@ -319,6 +326,15 @@ public class ValueRandomizer {
 			ManagedException.forward(e);
 			return null;
 		}
+	}
+
+	private static Class<?>[] getParameterTypes(Constructor<?> c) {
+		// TODO implement getting parameterTypes including Generic Type info
+		// Class pars[] = new Class[c.getParameterCount()];
+		// for (int i = 0; i < c.getParameterCount(); i++) {
+		// 	pars[i] = c.getParameters()[i].getType()
+		// }
+		return c.getParameterTypes();
 	}
 
 	private static boolean hasFileConstructor(Class<?> typeOf) {
@@ -389,7 +405,6 @@ public class ValueRandomizer {
 	public static Object[] provideRandomizedObjects(int countPerType, Class... types) {
 		return provideRandomizedObjects(0, countPerType, types);
 	}
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static Object[] provideRandomizedObjects(int depth, int countPerType, Class... types) {
 		boolean zero = countPerType == 0;
 		countPerType = countPerType < 1 ? 1 : countPerType; 

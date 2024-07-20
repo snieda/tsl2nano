@@ -164,7 +164,7 @@ public class ServiceLocator {
 
         T s = (T) services.get(name);
 
-        if (s == null) {
+        if (s == null && context != null) {
             s = (T) lookup(name);
             services.put(name, s);
         }

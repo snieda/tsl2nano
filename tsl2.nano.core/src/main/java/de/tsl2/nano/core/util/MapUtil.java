@@ -31,13 +31,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.stream.Collectors;
 
 //import de.tsl2.nano.bean.BeanUtil;
 //import de.tsl2.nano.bean.def.Bean;
 //import de.tsl2.nano.collection.MapEntrySet;
 //import de.tsl2.nano.collection.NamedValue;
 import de.tsl2.nano.core.ManagedException;
-import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.parser.JSon;
 
@@ -140,7 +140,7 @@ public class MapUtil {
         Class<V> type;
         try {
             Method m = Map.class.getMethod("values", new Class[0]);
-            type = (Class<V>) BeanAttribute.getGenericType(m, 0);
+            type = (Class<V>) MethodUtil.getGenericType(m, 0);
         } catch (Exception e) {
             type = (Class<V>) Object.class;
         }
@@ -397,4 +397,8 @@ public class MapUtil {
 			p.put(sp[0], sp[1]);
 		}
 	}
+
+    public static <K, V> Map<V, K> swapKeysAndValues(Map<K, V> map) {
+        return map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+    }
 }

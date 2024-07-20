@@ -355,7 +355,8 @@ public class ClassFinder {
 	public Map<Double, Method> fuzzyFindMethods(Class cls, String filter, int modifier,
 			Class<? extends Annotation> annotation) {
 		Map<Double, Method> map = createFuzzyMap(Method.class);
-		Method[] methods = Modifier.isPublic(modifier) ? ManagedException.trYError( () -> cls.getMethods(), false) : ManagedException.trYError( () -> cls.getDeclaredMethods(), false);
+		Method[] methods = Modifier.isPublic(modifier) ? ManagedException.trY(() -> cls.getMethods(), false)
+				: ManagedException.trY(() -> cls.getDeclaredMethods(), false);
 		if (methods == null) // on ClassLoader Problems, the getMethod() may throw ClassNotFoundException -> NoClassDefError if any type is not loadable
 			return map; // there was an error, but we don't want to stop the workflow as this is only a fuzzy finder...
 		double match;

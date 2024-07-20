@@ -1,3 +1,9 @@
+/*
+ * created by: Tom
+ * created on: 31.03.2017
+ * 
+ * Copyright: (c) Thomas Schneider 2017, all rights reserved
+ */
 package de.tsl2.nano.autotest.creator;
 
 import static de.tsl2.nano.autotest.creator.AFunctionCaller.def;
@@ -245,7 +251,7 @@ public class AutoTestGenerator {
 			log(p + "calling " + methods.size() + " methods to create expectations -> " + getFile(iteration) + p);
 			AtomicReference<BufferedWriter> refWriter = new AtomicReference<>(writer);
 			Util.stream(methods, def(PARALLEL, false)).forEach(m -> writeExpectation(new AFunctionCaller(iteration, m), refWriter));
-		} catch (IOException e1) {
+		} catch (Exception e1) {
 			ManagedException.forward(e1);
 		} finally {
 			if (filteredFunctionWriter != null)
@@ -331,10 +337,18 @@ public class AutoTestGenerator {
 	}
 
 	private void writeFilteredFunctionCall(AFunctionCaller f) {
-		String fct = f.toString();
-		if (fct.length() > def(MAX_LINE_LENGTH, Integer.class)) {
-			log(f.getFunctionDescription() + " with to long parameter json string: " + fct.length());
-			fct = fct.substring(0, def(MAX_LINE_LENGTH, Integer.class)) + "...";
+		String fct;
+		try {
+			fct = f.getFunctionDescription();
+			if (fct.length() > def(MAX_LINE_LENGTH, Integer.class)) {
+				log(f.getFunctionDescription() + " with to long parameter json string: " + fct.length());
+				fct = fct.substring(0, def(MAX_LINE_LENGTH, Integer.class)) + "...";
+			}
+		} catch (Throwable e) {
+			e.printStackTrace();
+			fct = f.cloneIndex + ":" + f.getFunctionDescription()
+					+ " caused error on AFunctionCaller.toString() on writingFilterFunctinoCall(): " + e.getMessage();
+
 		}
 		writeFilteredFunctionCall(fct + "\n");
 	}
@@ -446,9 +460,12 @@ class ExpectationCreator {
 	private static final String PREF_WHEN = "@" + Expectations.class.getSimpleName() + "({@"
 			+ Expect.class.getSimpleName() + "( when = [";
 	private static final String PREF_THEN = "then = \"-->";
+	private static final String POST_WHEN = "] " + PREF_THEN;
 	private static final String POST_THEN = "<--\"";
-	private static final String PREF_CONSTRUCT = "construct = [";
 	private static final String PREF_CONSTRUCT_TYPES = "constructTypes = [";
+	private static final String PREF_CONSTRUCT = "construct = [";
+	private static final String POST_CONSTRUCT_TYPES = "] " + PREF_CONSTRUCT;
+	private static final String POST_END = "])}";
 	
 	static String createExpectationString(AFunctionCaller f, String then) {
 		try {
@@ -487,10 +504,10 @@ class ExpectationCreator {
 
 	static Expectations createExpectationFromLine(String l) {
 		String when[], then, construct[];
-		when = extractArray(l, PREF_WHEN);
+		when = extractArray(l, PREF_WHEN, POST_WHEN);
 		then = StringUtil.substring(l, PREF_THEN, POST_THEN, 0, true);
-		Class[] constructTypes = loadClasses(extractArray(l, PREF_CONSTRUCT_TYPES));
-		construct = extractArray(l, PREF_CONSTRUCT);
+		Class[] constructTypes = loadClasses(extractArray(l, PREF_CONSTRUCT_TYPES, POST_CONSTRUCT_TYPES));
+		construct = extractArray(l, PREF_CONSTRUCT, POST_END);
 		return ExpectationCreator.createExpectation(when, then, constructTypes, construct);
 	}
 
@@ -504,8 +521,8 @@ class ExpectationCreator {
 		return types;
 	}
 
-	private static String[] extractArray(String l, String prefix) {
-		String all = StringUtil.substring(l, prefix, "] ", 0, true);
+	private static String[] extractArray(String l, String prefix, String postfix) {
+		String all = StringUtil.substring(l, prefix, postfix, 0, true);
 		return all != null ? new JSon().splitArray("[" + all + "]") : null;
 	}
 

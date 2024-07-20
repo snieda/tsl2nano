@@ -69,7 +69,7 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 	private Object[] createParameterFromStringArr(Class[] types, String[] strValues) {
 		Object[] pars = new Object[types.length];
 		for (int i = 0; i < types.length; i++) {
-			pars[i] = ObjectUtil.wrap(strValues[i], types[i]);
+			pars[i] = strValues != null && i < strValues.length ? ObjectUtil.wrap(strValues[i], types[i]) : null;
 		}
 		return pars;
 	}
@@ -149,7 +149,9 @@ public class ExpectationFunctionTester extends AFunctionTester<Expectations> {
 	@Override
 	public void run() {
 		if (getParameter() == null) {
-			log(this.getFunctionDescription() + ": Parameter Error on cloneIndex: " + cloneIndex + "\n");
+
+			log(this.getFunctionDescription() + ": Parameter Error on cloneIndex: " + cloneIndex + " -> status: "
+					+ status + "\n");
 			if (!status.isFatal())
 				status = new Status(StatusTyp.PARAMETER_UNDEFINED, UNDEFINED, null);
 			result = UNDEFINED;

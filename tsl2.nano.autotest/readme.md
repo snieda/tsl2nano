@@ -48,8 +48,8 @@ TODO: use
 AllAutoTests -> {InitAllAutoTests, AutoFunctionTest, CurrentStatePreservationTest}
 InitAllAutoTests -> {AllAutoTests.init}
 AutoFunctionTest -> {InverseFunctionTester, ExpectationFunctionTester, Parameters}
-InverseFunctionTester -> "calls all functions having annotation @InverseFunction"
-ExpectationFunctionTester -> "calls all functions having annotation @Expectation"
+InverseFunctionTester -> "does the real unit test on @InverseFunction (as extension AFunctionTester)"
+ExpectationFunctionTester -> "does the real unit test on @Expectation (as extension AFunctionTester)"
 Parameters -> "gets result of AutoTestGenerator.createExpectationTesters()"
 AutoTestGenerator -> "creates AFunctionCaller for each method to test"
 AFunctionCaller -> "uses ValueRandomizer to create instance construction and method arguments"
@@ -66,6 +66,10 @@ Examples:
 
 * your method returns the count of cached objects -> that will vary on each call
 * your method returns something dependent on current system time, memory usage or file system state
+
+If your method expects number parameters, the random value for that may be huge, so the depending test may allocate a lot of bytes or sleep to long. Use the value sets to constrain the value range.
+
+Mostly you will start the tests in parallel. You should filter methods that clear/reset/stop any system relevant properties/actions
 
 ### What the Generator and the AutoFunctionTest do
 

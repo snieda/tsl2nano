@@ -1,6 +1,14 @@
+/*
+ * created by: Tom
+ * created on: 06.04.2024
+ * 
+ * Copyright: (c) Thomas Schneider 2024, all rights reserved
+ */
 package de.tsl2.nano.core.util.parser;
 
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -27,6 +35,7 @@ import de.tsl2.nano.core.util.AdapterProxy;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.FieldUtil;
 import de.tsl2.nano.core.util.FormatUtil;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -42,9 +51,11 @@ import de.tsl2.nano.core.util.Util;
  * all methods will be called providing the current treeinfo - but on the parsing 
  * through {@link #toString()} some string evaluation methods will provide null as treeinfo!
  * 
+ * On de-serializing the objects will be instantiated through default constructors or, if not available through a constructor 
+ * with all values/fields/attributes provided by the json construct.
+ * 
  * NOTE I  : see Structure class of logicstructure
  * NOTE II : the base implemenation is not performance optimized. the charsequence will be splitted into copied substrings!
- * NOTE III: Warning: serialization inspects field values, deserialization inspects bean attributes (getter/setter)
  */
 public interface StructParser {
     /** @return whether this implementation is able to parse the sequence */
@@ -78,29 +89,16 @@ public interface StructParser {
     /** @return separator between tags or properties */
     String div();
 
-    /** enclose the property key with quotations and add a separation to the value like '=' or ':' */
-    public String encloseKey(Object k, TreeInfo tree);
-
-    /** enclose value - @see {@link #encloseKey(Object, TreeInfo)} */
-    default Object encloseValue(Object obj, TreeInfo tree) {
-        boolean isNumberOrBoolean = NumberUtil.isNumber(obj) || PrimitiveUtil.isBoolean(obj);
-        String value = PrimitiveUtil.isPrimitiveOrWrapper(obj.getClass()) ? String.valueOf(obj)
-                : FormatUtil.format(obj);
-        String quot = !isNumberOrBoolean || value.contains(div()) ? quot() : "";
-        return quot + value + quot;
-    }
-
-    /** @return the implementors quotation characters. default: [\"]. used to enclose keys or strings */
-    default String quot() {
-        return "\"";
-    }
-
     /** @return charsequence without comments. depends on {@link #commentExpression()} */
     CharSequence removeCommentsAndEmptyLines(CharSequence s);
 
     /** @return the implementors comment expression, may return null, if no comments are defined */
     default String commentExpression() {
         return null;
+    }
+
+    default Map<String, String> escapingTable() {
+        return MapUtil.asMap("\"", "\\\"");
     }
 
     /** @return child elements of splitted string s */
@@ -115,9 +113,17 @@ public interface StructParser {
     /** @return a structure of of Maps or/and Lists */
     Object toStructure(CharSequence s);
 
-    /** @return whether to handle an object as simple property and not as object (e.g. on numbers, dates, strings and booleans) */
+    /** @return whether to handle an instance as simple property and not as object (e.g. on numbers, dates, strings and booleans) */
     default boolean isSimpleType(final Object obj) {
-        return ObjectUtil.isSimpleType(obj.getClass());
+        return obj == null || ObjectUtil.isSimpleType(obj.getClass())
+                || obj instanceof AnnotatedElement // this are reflection types calling native methods -> may result in fatal errors on reflecting values of their properties
+                || obj instanceof Enum
+                || obj.getClass().getPackageName().startsWith("java.net");
+    }
+
+    /** @return the implementors quotation characters. default: [\"]. used to enclose keys or strings */
+    default String quot() {
+        return "\"";
     }
 
     /** trims keys and values e.g. on spaces and quotations */
@@ -159,6 +165,11 @@ public interface StructParser {
         /** @return deserialized primitive array - not supported by all structures/implementations (like xml) */
         Object toArray(Class<?> type, CharSequence s);
 
+        /** enclose the property key with quotations and add a separation to the value like '=' or ':' */
+        public String encloseKey(Object k, TreeInfo tree);
+
+        /** enclose value - @see {@link #encloseKey(Object, TreeInfo)} */
+        Object encloseValue(Object obj, TreeInfo tree);
     }
 
     /**
@@ -169,6 +180,29 @@ public interface StructParser {
         static final Log LOG = LogFactory.getLog(TreeInfo.class);
 
         private static final String REG_SIMPLE_VALUE = "[.\\w-+\\d,]+";
+
+        private Map<String, String> swappedEscapings;
+
+        protected SerialClass properties;
+
+        protected AStructParser() {
+        }
+
+        protected AStructParser(SerialClass s) {
+            this.properties = s;
+
+        }
+
+        protected CharSequence unescape(CharSequence s) {
+            return StringUtil.replaceAll(s, swappedEscapings());
+        }
+
+        private Map<String, String> swappedEscapings() {
+            if (swappedEscapings == null) {
+                swappedEscapings = MapUtil.swapKeysAndValues(escapingTable());
+            }
+            return swappedEscapings;
+        }
 
         @Override
         public String[] getKeyValue(CharSequence attr) {
@@ -190,7 +224,7 @@ public interface StructParser {
          */
         public Object toStructure(CharSequence s) {
             s = removeCommentsAndEmptyLines(s);
-            return toStructure(s, new TreeInfo(s));
+            return toStructure(s, new TreeInfo(s, properties));
         }
 
         public Object toStructure(CharSequence s, TreeInfo tree) {
@@ -200,7 +234,7 @@ public interface StructParser {
             String[] children = getChildren(s, tree);
             for (int i = 0; i < children.length; i++) {
                 String[] kv = getKeyValue(children[i]);
-                String v = trim(kv[1]);
+                String v = unescape(trim(kv[1])).toString();
                 if (v.equals("null")) {
                     map.put(kv[0], null);
                 } else if (v.matches(REG_SIMPLE_VALUE)) {
@@ -250,9 +284,17 @@ public interface StructParser {
      * base implementations and helpers
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public abstract class ASerializer extends AStructParser {
+    public abstract class ASerializer extends AStructParser implements Serializer {
+
+        ASerializer() {
+        }
+
+        ASerializer(SerialClass s) {
+            super(s);
+        }
+
         public String serialize(Object obj) {
-            return serialize(obj, createInitialStringBuilder(), new TreeInfo()).toString();
+            return serialize(obj, createInitialStringBuilder(), new TreeInfo(null, properties)).toString();
         }
 
         StringBuilder createInitialStringBuilder() {
@@ -262,10 +304,14 @@ public interface StructParser {
         StringBuilder serialize(final Object object, StringBuilder result, TreeInfo tree) {
             final Object obj = tree.contains(object) ? tree.getReferenceKey(object)
                     : isSimpleType(object) ? object : tree.addRef(object);
-            if (obj instanceof Class) {
-                createTag(result, tree, ((Class) obj).getName());
+            // TODO: should we remove the object from refs (added above)?
+            if (tree.serializablesOnly != null && tree.serializablesOnly && !(object instanceof Serializable))
+                return result;
+            // TODO: can we remove the special Class/Method implementations in cause of being now simpleTypes?
+            else if (obj instanceof Class) {
+                createTag(result, tree, "name", ((Class) obj).getName());
             } else if (obj instanceof Method) {
-                createTag(result, tree, ((Method) obj).toGenericString());
+                createTag(result, tree, "name", ((Method) obj).toGenericString());
             } else if (Proxy.isProxyClass(obj.getClass()) && Proxy.getInvocationHandler(obj) instanceof AdapterProxy) {
                 tree.addRef(obj, () -> serializeMapObject(obj, result, tree,
                         ((AdapterProxy) Proxy.getInvocationHandler(obj)).values()));
@@ -287,12 +333,21 @@ public interface StructParser {
             return result;
         }
 
+        @Override
+        public Object encloseValue(Object obj, TreeInfo tree) {
+            boolean isNumberOrBoolean = NumberUtil.isNumber(obj) || PrimitiveUtil.isBoolean(obj);
+            String value = PrimitiveUtil.isPrimitiveOrWrapper(obj.getClass()) ? String.valueOf(obj)
+                    : FormatUtil.format(obj);
+            String quot = !isNumberOrBoolean || value.contains(div()) ? quot() : "";
+            return quot + escape(value) + quot;
+        }
+
         private Object createArray(StringBuilder result, TreeInfo tree, String content) {
             return result.append(arrOpen(tree) + content + arrClose(tree));
         }
 
-        private StringBuilder createTag(StringBuilder result, TreeInfo tree, final String content) {
-            return result.append(tagOpen(tree) + encloseValue(content, tree) + tagClose(tree));
+        private StringBuilder createTag(StringBuilder result, TreeInfo tree, String key, final String content) {
+            return result.append(tagOpen(tree) + encloseKey(key, tree) + encloseValue(content, tree) + tagClose(tree));
         }
 
         Map<String, Object> getValueMap(final Object obj, TreeInfo tree) {
@@ -301,19 +356,24 @@ public interface StructParser {
 
         private Map<String, Object> remapByAnnotations(Object obj, TreeInfo tree) {
             SerialClass ann = obj.getClass().getAnnotation(SerialClass.class);
-            if (tree.useFieldsOnly == null)
-                tree.useFieldsOnly = ann != null ? ann.useFields() : false;
-            Map<String, Object> values = ann != null && ann.useFields() ? FieldUtil.toSerializingMap(obj)
-                    : BeanClass.BeanMap.toValueMap(obj);
+            if (ann != null)
+                tree.initOnce(ann);
+            Map<String, Object> values = ann != null && ann.useFields()
+                    ? FieldUtil.toMap(obj,
+                            m -> FieldUtil.MODIFIABLE_MEMBER.test(m)
+                                    && FieldUtil.WITH_MODIFIER.test(m, ann.havingModifiers()))
+                    : BeanClass.BeanMap.toValueMap(obj, "", m -> ann != null
+                            ? FieldUtil.WITH_MODIFIER.test(m.getAccessMethod(), ann.havingModifiers())
+                            : true);
             String[] attributeOrder = ann != null && ann.attributeOrder() != null ? ann.attributeOrder()
                     : values.keySet().toArray(new String[0]);
             Map<String, Object> map = new LinkedHashMap<>();
             Format format;
             for (String name : attributeOrder) {
                 Serial serial = Proprietizer.serial(obj.getClass(), name, false,
-                        tree.useFieldsOnly || (ann != null && ann.useFields()));
+                        (tree.useFieldsOnly != null && tree.useFieldsOnly) || (ann != null && ann.useFields()));
                 name = serial.name() != null ? serial.name() : name;
-                format = serial.formatter() != null
+                format = serial.formatter() != null && ObjectUtil.isInstanceable(serial.formatter())
                         ? Util.trY(() -> BeanClass.getBeanClass(serial.formatter()).createInstance(), false,
                                 InstantiationException.class)
                         : null;
@@ -326,6 +386,10 @@ public interface StructParser {
                 }
             }
             return map;
+        }
+
+        public CharSequence escape(CharSequence s) {
+            return StringUtil.replaceAll(s, escapingTable());
         }
 
         private void embedItems(Map<String, Object> map, Object object, Format format) {
@@ -355,7 +419,8 @@ public interface StructParser {
                     result.append(div());
                 }
             }
-            if (orr.length > 0)
+            if (orr.length > 0 && result.length() > 1
+                    && (div().isEmpty() || result.charAt(result.length() - 1) == div().charAt(0)))
                 result.deleteCharAt(result.length() - 1);
             result.append(arrClose(tree));
         }
@@ -473,8 +538,10 @@ class TreeInfo {
     /** stored references */
     List refs = new LinkedList<>();
     int recursion;
+    public Boolean serializablesOnly;
     /** whether to evaluate class fields instead of bean class attributes throuth their getters/setters */
     public Boolean useFieldsOnly;
+    Integer havingModifiers;
     /** whether tag was opened to embed simple attributes - that has to be finished to add child tags into it (see Xml) */
     private boolean tagOpenUnfinished;
 
@@ -482,9 +549,26 @@ class TreeInfo {
     }
 
     TreeInfo(Object root) {
-        increaseRecursion(KEY_ROOT, root);
-
+        this(root, null);
     }
+
+    public TreeInfo(Object root, SerialClass s) {
+        if (root != null)
+            increaseRecursion(KEY_ROOT, root);
+        if (s != null) {
+            initOnce(s);
+        }
+    }
+
+    void initOnce(SerialClass s) {
+        if (useFieldsOnly == null)
+            useFieldsOnly = s.useFields();
+        if (serializablesOnly == null)
+            serializablesOnly = s.implementingSerializable();
+        if (havingModifiers == null)
+            havingModifiers = s.havingModifiers();
+    }
+
     Object get(int index) {
         return refs.get(index);
     }
@@ -516,8 +600,14 @@ class TreeInfo {
 
     Object getReference(String value) {
         if (isReference(value)) {
-            String sindex = StringUtil.extract(value, "\\d+");
-            return get(Integer.valueOf(sindex));
+            Integer index = Integer.valueOf(StringUtil.extract(value, "\\d+"));
+            if (index >= refs.size()) {
+                String msg = IndexOutOfBoundsException.class.getSimpleName() + ": " + value
+                        + " --> ref index >  size of references:" + refs.size();
+                LOG.error(msg);
+                return msg;
+            } else
+                return get(index);
         } else {
             return value;
         }
