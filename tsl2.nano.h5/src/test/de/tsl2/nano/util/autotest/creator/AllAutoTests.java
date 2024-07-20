@@ -17,6 +17,7 @@ import de.tsl2.nano.autotest.creator.InitAllAutoTests;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.NanoH5;
+import de.tsl2.nano.h5.NanoH5IT;
 import de.tsl2.nano.h5.NanoH5Unit;
 import de.tsl2.nano.h5.NanoH5Util;
 import de.tsl2.nano.h5.RuleCover;
@@ -36,6 +37,7 @@ public class AllAutoTests {
 			Timesheet.class.getSimpleName(),
 			methods(RuleCover.class, "cover"),
 			methods(NanoH5Util.class, "createCompositor"),
+			methods(NanoH5IT.class, "testNano"),
 			methods(SpecificationH5Exchange.class, "enrichFromSpecificationProperties"),
 			methods(Html5Presentation.class, "createNavigationbar|reset"),
 			methods(NanoWebSocketServer.class, "stop")));

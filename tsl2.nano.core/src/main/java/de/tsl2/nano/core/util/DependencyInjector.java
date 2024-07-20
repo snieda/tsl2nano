@@ -1,3 +1,9 @@
+/*
+ * created by: Tom
+ * created on: 06.04.2024
+ * 
+ * Copyright: (c) Thomas Schneider 2024, all rights reserved
+ */
 package de.tsl2.nano.core.util;
 
 import java.lang.annotation.ElementType;
