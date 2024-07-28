@@ -1020,13 +1020,12 @@ public class BeanClass<T> implements Serializable {
      * @return loaded class
      */
     public static Class load(String className, ClassLoader classloader, boolean logException) {
-        // TODO: use ObjectUtil.loadClass()
         if (classloader == null) {
             classloader = Util.getContextClassLoader();
         }
         try {
             LOG.debug("loading class " + className + " through classloader " + classloader);
-            return classloader.loadClass(className);
+            return ObjectUtil.loadClass(className, classloader);
         } catch (Exception e) {
             ManagedException.forward(e, logException);
             return null;

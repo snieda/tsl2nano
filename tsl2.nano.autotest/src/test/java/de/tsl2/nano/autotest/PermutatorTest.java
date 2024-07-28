@@ -9,9 +9,11 @@ import java.util.function.Supplier;
 
 import org.junit.Test;
 
+import de.tsl2.nano.core.util.StringUtil;
+
 public class PermutatorTest {
     @Test
-    void testPermutatorSearchingItems() throws Exception {
+    public void testPermutatorSearchingItems() throws Exception {
 
         List<Item> items = Arrays.asList(new Item(), new Item(), new Item());
         List<Item> items3 = items.subList(0, 3);
@@ -48,6 +50,22 @@ public class PermutatorTest {
         while ((c = p.next()) != null) {
             System.out.println(Arrays.toString(c));
         }
+    }
+
+    @Test
+    public void test() {
+        checkRegEx("\\w+");
+        checkRegEx("\\w{3}\\d{3}");
+        checkRegEx("(https?|s?ftp|file)//(\\w+/)*\\w+");
+        checkRegEx(StringUtil.VAR_REGEXP);
+        checkRegEx("\\[[A-Z]{3}\s*[0-9]{3}\\];");
+    }
+
+    private void checkRegEx(String regex) {
+        long t = System.currentTimeMillis();
+        System.out.print(regex);
+        String gen = ValueRandomizer.createFromRegEx(regex, 6, 10, 1000000);
+        System.out.println("(millis:" + (System.currentTimeMillis() - t) + ") -> " + gen);
     }
 
 }

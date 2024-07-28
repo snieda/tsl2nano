@@ -21,7 +21,7 @@ import de.tsl2.nano.core.util.StringUtil;
 public class AllAutoTests {
 	public static void init() {
 		System.setProperty("tsl2nano.offline", "true");
-		// setSequentialForDebugging();
+		// setSequentialForDebugging(null);
 		set(MODIFIER, -1); // public: 1
 		set(FILTER_EXCLUDE, StringUtil.matchingOneOf("ENVTestPreparation","ENV.delete","getFileOutput",
 				"SystemUtil.executeRegisteredLinuxBrowser","SystemUtil.softExitOnCurrentThreadGroup",

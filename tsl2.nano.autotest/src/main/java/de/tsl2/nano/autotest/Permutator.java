@@ -33,7 +33,7 @@ import java.util.stream.Stream;
             System.out.println(Arrays.toString(c));
         }
  *
- * 2. deletate the whole process to the permutator
+ * 2. delegate the whole process to the permutator
  *  Example:
  *  Permutator.run("item-search",
     (() -> TimedRunner.runAt(currentTestTimeString, () -> TestController.search(items3))),
@@ -47,7 +47,7 @@ import java.util.stream.Stream;
             (c, v) -> c.setAvailable((int) v), allNumbers,
             (c, v) -> c.setHidden((Boolean) v), trueFalse));
  */
-class Permutator {
+public class Permutator {
     private static final int PROGRESS_STEPS = Integer.getInteger("permutator.progress.steps", 1000);
     int[] maxItemsPerField;
     int[] currentFieldValues;
@@ -175,6 +175,6 @@ class ValueSet {
     }
 
     public static Integer[] getNumbers(int i, int j) {
-        return (Integer[]) IntStream.range(i, j).boxed().toArray();
+        return (Integer[]) IntStream.range(i, j).boxed().toArray(Integer[]::new);
     }
 }

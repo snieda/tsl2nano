@@ -45,6 +45,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 import de.tsl2.nano.autotest.creator.AFunctionCaller;
 import de.tsl2.nano.autotest.creator.AutoTest;
@@ -139,7 +141,9 @@ public class ValueRandomizer {
 	}
 	protected static <V> V createRandomValue(Class<V> typeOf, boolean zeroNumber, int depth) {
 		Class<V> genericType = (Class<V>) ObjectUtil.getGenericType(typeOf);
-		typeOf = !Iterable.class.isAssignableFrom(typeOf) && genericType != null && !genericType.equals(Object.class)
+		typeOf = !Iterable.class.isAssignableFrom(typeOf) && 
+                !Iterable.class.isAssignableFrom(typeOf) && 
+                genericType != null && !genericType.equals(Object.class)
 				? genericType
 				: typeOf;
 		if (!checkMaxDepth(++depth)) {
@@ -262,10 +266,16 @@ public class ValueRandomizer {
 		} else if (typeOf.equals(ClassLoader.class))
 			n = Thread.currentThread().getContextClassLoader(); // TODO: create randomly
 		else if (Collection.class.isAssignableFrom(typeOf))
+			// if (ObjectUtil.getGenericType(typeOf) != null)
+			// 	n = new ListSet<>(ObjectUtil.wrap(n, ObjectUtil.getGenericType(typeOf)));
+			// else
 			n = new ListSet<>(n);
 		else if (Properties.class.isAssignableFrom(typeOf))
 			n = MapUtil.asProperties(StringUtil.toBase64(n).replace('=', 'X'), n.toString());
 		else if (Map.class.isAssignableFrom(typeOf))
+			// if (ObjectUtil.getGenericType(typeOf, 1) != null)
+			// 	n = MapUtil.asMap(n.toString(), ObjectUtil.wrap(n, ObjectUtil.getGenericType(typeOf, 1)));
+			// else
 			n = MapUtil.asMap(StringUtil.toBase64(n).replace('=', 'X'), n);
 		else if (ByteUtil.isByteStream(typeOf))
 			n = ByteUtil.toByteStream(new byte[] {((Number) n).byteValue()}, typeOf);
@@ -449,6 +459,43 @@ public class ValueRandomizer {
 	public static void setDependencyInjector(DependencyInjector di_) {
 		di = di_;
 	}
+
+	// public static String createFromRegEx(String regex, int minLength, int maxLength, int maxIterations) {
+	// 	String[] s = regex.split("[*?+]|[{]\\d+[}]");
+	// 	StringBuilder buf = new StringBuilder();
+	// 	for (int i = 0; i < s.length; i++) {
+	// 		buf.append(createFromRegEx_(s[i], 1, maxLength, maxIterations));
+	// 	}
+	// 	return buf.toString();
+	// }
+
+	public static String createFromRegEx(String regex, int minLength, int maxLength, int maxIterations) {
+		Pattern pattern = Pattern.compile(regex);
+		return generateString(minLength, maxLength, maxIterations,
+				s -> pattern.matcher(s).find(s.length() - 1) || pattern.matcher(s).lookingAt());
+	}
+
+	public static String generateString(int minLength, int maxLength, int maxIterations,
+			Predicate<CharSequence> checker) {
+		StringBuilder match = new StringBuilder(StringUtil.fixString(' ', minLength));
+		int i = 0;
+		char c;
+		boolean matched = false;
+		while (!matched && i++ < maxIterations && match.length() <= maxLength) {
+			c = (char) (int) (Math.random() * 256);
+			if (minLength > 0) {
+				match.setCharAt((int) (Math.random() * minLength), c);
+			} else {
+				match.append(c);
+			}
+			if (!(matched = checker.test(match)))
+				match.setLength(Math.max(minLength, match.length() - 1));
+		}
+		// if (match.length() == 0 || !checker.test(match))
+		// 	throw new IllegalStateException("couldn't generate a string for: " + checker);
+		return match.toString();
+	}
+
 }
 @SuppressWarnings({"rawtypes", "unchecked"})
 class ValueSets extends HashMap<Class, List<String>> {
@@ -521,6 +568,7 @@ class ValueSets extends HashMap<Class, List<String>> {
 		String name = AFunctionCaller.def(AutoTest.VALUESET_GROUP, DEFAULT);
 		return (name.equals(DEFAULT) ? "" : name + "-") + typeOf.getSimpleName().toLowerCase() + ".set";
 	}
+
 }
 
 @Retention(RUNTIME)

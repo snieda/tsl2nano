@@ -516,7 +516,7 @@ class ExpectationCreator {
 			return null;
 		Class[] types = new Class[typenames.length];
 		for (int i = 0; i < typenames.length; i++) {
-			types[i] = ObjectUtil.loadClass(StringUtil.trim(typenames[i], "\"{}"));
+			types[i] = ObjectUtil.wrap(typenames[i], Class.class);
 		}
 		return types;
 	}

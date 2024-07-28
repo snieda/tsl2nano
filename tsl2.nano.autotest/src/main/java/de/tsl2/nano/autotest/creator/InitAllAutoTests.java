@@ -3,8 +3,10 @@ package de.tsl2.nano.autotest.creator;
 import static de.tsl2.nano.autotest.creator.AFunctionCaller.def;
 import static de.tsl2.nano.autotest.creator.AutoTest.APPROVED;
 import static de.tsl2.nano.autotest.creator.AutoTest.CHECK_TYPECONVERSION;
+import static de.tsl2.nano.autotest.creator.AutoTest.CLEAN;
 import static de.tsl2.nano.autotest.creator.AutoTest.DUPLICATION;
 import static de.tsl2.nano.autotest.creator.AutoTest.FILENAME;
+import static de.tsl2.nano.autotest.creator.AutoTest.FILTER;
 import static de.tsl2.nano.autotest.creator.AutoTest.PARALLEL;
 import static de.tsl2.nano.autotest.creator.AutoTest.PREFIX_FUNCTIONTEST;
 import static de.tsl2.nano.autotest.creator.AutoTest.TIMEOUT;
@@ -151,9 +153,13 @@ public class InitAllAutoTests/* extends ADefaultAutoTester*/ {
 		return false;
 	}
 
-	public static void setSequentialForDebugging() {
+	public static void setSequentialForDebugging(String thisMethodOnly) {
+		set(CLEAN, true);
 		set(DUPLICATION, 1);
 		set(PARALLEL, false);
 		set(TIMEOUT, -1);
+		if (thisMethodOnly != null) {
+			set(FILTER, StringUtil.matchingOneOf(thisMethodOnly));
+		}
 	}
 }

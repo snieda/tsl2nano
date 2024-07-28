@@ -289,6 +289,10 @@ public class ObjectUtil extends MethodUtil {
         }
     }
 
+    public static Class<?> getGenericType(Class<?> clazz) {
+        return getGenericType(clazz, 0);
+    }
+
     /**
      * @deprecated: use {@link #getGenericInterfaceType(Object, Class)} instead getGenericType
      * 
@@ -296,18 +300,18 @@ public class ObjectUtil extends MethodUtil {
      * @return first generic type of given class - or null
      * @throws ClassCastException, if type arguments not castable to Class
      */
-    public static Class<?> getGenericType(Class<?> clazz) {
+    public static Class<?> getGenericType(Class<?> clazz, int pos) {
         try {
             Type genericType = clazz.getGenericSuperclass();
             //try to get the type through the first defined generic interface
             if (genericType == null) {
-                if (clazz.getGenericInterfaces().length > 0) {
-                    genericType = clazz.getGenericInterfaces()[0];
+                if (clazz.getGenericInterfaces().length > pos) {
+                    genericType = clazz.getGenericInterfaces()[pos];
                 } else {
                     return null;
                 }
             }
-            return getGeneric(genericType, 0);
+            return getGeneric(genericType, pos);
         } catch (Exception e) {
             LOG.warn(e.toString());
             return null;
@@ -549,7 +553,10 @@ public class ObjectUtil extends MethodUtil {
 	}
 
     public static Class<?> loadClass(String clsName) {
-		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        return loadClass(clsName, Thread.currentThread().getContextClassLoader());
+    }
+
+    public static Class<?> loadClass(String clsName, ClassLoader loader) {
 		try {
 			return clsName.contains(".") || clsName.startsWith("[") ? loader.getClass().forName(clsName)
 			        : PrimitiveUtil.getPrimitiveClass(clsName);
