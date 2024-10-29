@@ -93,6 +93,7 @@ td, th, .td, .th {
    	display: table-cell;
    	padding: 3px 10px;
    	border: 1px; 
+    width: 100%;
 } 
 tr:nth-child(even), .tr:nth-child(even) {
   background-color: var(--table-bg-even-color);
@@ -199,7 +200,7 @@ dialog {
 }
 button {
     display: inline-block;
-    border-radius: 3px;
+    border-radius: 15px;
     border: var(--border);
     font-size: 0.9rem;
     padding: 0.4rem 0.8em;
@@ -211,6 +212,20 @@ button {
     margin: 0 0.1rem;
     text-align: center;
 }
+button::before {
+  background-color: initial;
+  background-image: linear-gradient(#fff 0, rgba(255, 255, 255, 0) 100%);
+  border-radius: 20px;
+  content: "";
+  height: 50%;
+  left: 4%;
+  opacity: .5;
+  position: relative;
+  top: 0;
+  transition: all .3s;
+  width: 92%;
+}
+
 a{
     display: inline-block;
     border-radius: 0px;
@@ -234,6 +249,7 @@ button:hover,a:hover, button:focus,a:focus {
     color: var(--font-color);
     background: var(--button-bg-hover);
     cursor: pointer;
+    transform: scale(1.05);
 }
 dialog::backdrop{
     position: fixed;
@@ -254,7 +270,8 @@ tr, .tr {
 td, th, .td, .th {
    	display: table-cell;
    	padding: 3px 10px;
-   	border: 1px; 
+   	border: 1px;
+    width: 100%;
 }
 .beancollectorsearchrow {
 	display: none;
@@ -283,6 +300,9 @@ button, input, #field§quicksearch, .actionpanel {
 .sidenav {padding-top: 15px;}
 .sidenav a {font-size: 18px;}
 .sidenav button {font-size: 18px; width: 100%}
+nav {
+    display: none;
+}
 }
 
 body{

@@ -563,7 +563,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ATTR_CLASS,
                 "title",
                 ATTR_STYLE,
-                style("display", "inline"));
+                    style("display", "grid"));
         } else {
             String docURL = "UNKNOWN";
             if (bean != null) {
@@ -575,11 +575,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             }
             if (new File(ENV.getConfigPath() + docURL).canRead() || (!docURL.contains(" ") && NetUtil.isURL(docURL))) {
                 c3 = appendElement(c3, TAG_H3, ATTR_ALIGN, ALIGN_CENTER, ATTR_STYLE,
-                    style("display", "inline"));
+                        style("display", "flex"));
                 appendElement(c3, TAG_LINK, content(title), ATTR_HREF, ENV.getConfigPath() + docURL, ATTR_CLASS, "title");
             } else {
                 c3 = appendElement(c3, TAG_H3, content(getTitleWithLink(title, session)), ATTR_ID, "title", ATTR_ALIGN, ALIGN_CENTER, ATTR_STYLE,
-                    style("display", "inline"));
+                        style("display", "flex"));
             }
         }
         if (interactive && bean != null) {
@@ -2043,9 +2043,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         ATTR_STYLE,
                         getTextAlignmentAsStyle(p.getStyle()),
                         ATTR_SIZE, /* 'width' doesn't work, so we set the displaying char-size */
-                        width,
+                                ENV.get("field.input.fixsize", true) ? "-1" : width,
                         ATTR_WIDTH,
-                        width,
+                                ENV.get("field.input.fixsize", true) ? "-1" : width,
                         ATTR_MIN,
                         StringUtil.toString(beanValue.getConstraint().getMinimum()),
                         ATTR_MAX,
