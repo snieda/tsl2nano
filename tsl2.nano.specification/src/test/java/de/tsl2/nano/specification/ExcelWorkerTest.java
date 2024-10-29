@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.specification.ExcelWorker;
 
 public class ExcelWorkerTest {
 	static int policiert = 0;

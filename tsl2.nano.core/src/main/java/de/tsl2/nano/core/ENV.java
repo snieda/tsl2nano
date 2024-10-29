@@ -45,8 +45,6 @@ import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.core.classloader.LibClassLoader;
 import de.tsl2.nano.core.classloader.NetworkClassLoader;
-//import de.tsl2.nano.collection.PersistableSingelton;
-//import de.tsl2.nano.collection.PersistentCache;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.exception.ExceptionHandler;
 import de.tsl2.nano.core.exception.Message;
@@ -103,7 +101,8 @@ public class ENV implements Serializable {
     private static final long serialVersionUID = 5988200267214868670L;
 
     public static final String PATH_TEMP = "temp/";
-    private static ENV self;
+    // workaround on new threads that should inherit the ENV from last creation -> thread unsafe
+    private static ENV lastCreated;
     private static ThreadLocal<ENV> selfThread = new ThreadLocal<ENV>();
     
     @SuppressWarnings("rawtypes")
@@ -149,7 +148,7 @@ public class ENV implements Serializable {
      * @return environment name - equal to the name of the configuration directory, defined in {@link #getConfigPath()}.
      */
     public static String getName() {
-        String path = self.getConfigPath().replace(File.separator, DEF_PATHSEPRATOR);
+        String path = self().getConfigPath().replace(File.separator, DEF_PATHSEPRATOR);
         if (path.lastIndexOf(DEF_PATHSEPRATOR) == path.length() - 1) {
             path = path.substring(0, path.length() - 1);
         }
@@ -201,16 +200,17 @@ public class ENV implements Serializable {
     public static synchronized <T> T get(Class<T> service) {
         T serviceImpl = (T) services().get(service);
         if (serviceImpl == null) {
+            ENV self = self();
             debug(self, "no service found for " + service);
             debug(self, "available services:\n" + StringUtil.toFormattedString(services(), 500, true));
             String path = getConfigPath(service) + getFileExtension();
             if (new File(path).canRead()) {
-                self().info("loading service from " + path);
-                serviceImpl = self().addService(service, self().get(XmlUtil.class).loadXml(path, service));
+                self.info("loading service from " + path);
+                serviceImpl = self.addService(service, self.get(XmlUtil.class).loadXml(path, service));
             } else if (!service.isInterface()
                 && BeanClass.hasDefaultConstructor(service, !Util.isFrameworkClass(service))) {
-                self().info("trying to create service " + service + " through default construction");
-                serviceImpl = self().addService(BeanClass.createInstance(service));
+                self.info("trying to create service " + service + " through default construction");
+                serviceImpl = self.addService(BeanClass.createInstance(service));
                 if (serviceImpl instanceof Serializable) {
                     get(XmlUtil.class).saveXml(path, serviceImpl);
                 }
@@ -225,27 +225,28 @@ public class ENV implements Serializable {
      * @return true, if environment was already created
      */
     public final static boolean isAvailable() {
+        ENV self = selfThread.get() != null ? selfThread.get() : lastCreated; // the lastCreated is a workaround...
         return self != null && self.properties != null && self.services != null;
     }
 
     protected final static ENV self() {
-        if (selfThread.get() != null)
-        		return selfThread.get();
-//        else // clean version
-//        	throw new IllegalStateException("no environment available. please call ENV.create(...) before!");
-        if (self == null) { //dirty version: used in cause of lots of testcases and legacy applications
+        if (selfThread.get() != null) {
+            return selfThread.get();
+        } else if (lastCreated != null) {
+            selfThread.set(lastCreated);
+            return lastCreated;
+        } else if (lastCreated == null || lastCreated.properties == null || lastCreated.services == null) {
             System.out.println("WARN: NO ENV was created before. creating a default instance");
-            self = create(System.getProperty(KEY_CONFIG_PATH, System.getProperty("user.dir").replace('\\', '/')));
-            selfThread.set(self);
-        } else if (isTestMode() && self.properties == null || self.services == null) {
-            System.out.println("WARN: NO ENV was created before. creating a default instance");
-            self = create(System.getProperty(KEY_CONFIG_PATH, System.getProperty("user.dir").replace('\\', '/')));
-            selfThread.set(self);
-        }
-        return self;
+            lastCreated = create(
+                    System.getProperty(KEY_CONFIG_PATH, System.getProperty("user.dir").replace('\\', '/')));
+            selfThread.set(lastCreated);
+            return lastCreated;
+        } else // will never be reached ;-) - unclean
+            throw new IllegalStateException("no environment available. please call ENV.create(...) before!");
     }
 
     public static ENV create(String dir) {
+        ENV self;
         FileUtil.userDirFile(dir).mkdirs();
         dir = dir.endsWith("/") ? dir : dir + "/";
         String name = dir + StringUtil.substring(dir, PREFIX_ENVNAME, "/");
@@ -322,7 +323,7 @@ public class ENV implements Serializable {
 //        BeanUtil.addStandardTypePackages("de.tsl2.nano.bean.def");
 //        self.persist();
         LogFactory.log("==> ENV " + name + " created successful!");
-        return self;
+        return lastCreated = self;
     }
 
     private void update(File configFile, String buildInfo) {
@@ -408,7 +409,7 @@ public class ENV implements Serializable {
 //        PersistableSingelton.clearCache();
 //        PersistentCache.clearCache();
         selfThread.set(null);
-        self = null;
+        lastCreated = null;
     }
 
     /**
@@ -629,7 +630,9 @@ public class ENV implements Serializable {
      * @return formatted object
      */
     public static String format(Object obj) {
-        return self != null && self.services != null ? ((Format) services().getOrDefault(Format.class, new DefaultFormat())).format(obj) : new DefaultFormat().format(obj);
+        return self() != null && self().services != null
+                ? ((Format) services().getOrDefault(Format.class, new DefaultFormat())).format(obj)
+                : new DefaultFormat().format(obj);
     }
 
     /**
@@ -677,7 +680,7 @@ public class ENV implements Serializable {
      * @return
      */
     public static String getTempPathRel() {
-        self.getTempPath(); // -> mkdir()
+        self().getTempPath(); // -> mkdir()
         return getConfigPathRel() + PATH_TEMP;
     }
 

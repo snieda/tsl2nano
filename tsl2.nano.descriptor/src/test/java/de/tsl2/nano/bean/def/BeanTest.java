@@ -27,8 +27,8 @@ import org.apache.commons.logging.Log;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.Ignore;
+import org.junit.Test;
 
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
@@ -547,7 +547,7 @@ public class BeanTest implements ENVTestPreparation {
         o.setBigDecimal(new BigDecimal("10"));
         o.setDate(new Date());
         o.setImmutableBoolean(true);
-        o.setPrimitiveChar('1');
+        o.setPrimitiveChar('/'); // using a number will fail!
         
         String json = BeanUtil.toJSON(o);
         System.out.println(json);

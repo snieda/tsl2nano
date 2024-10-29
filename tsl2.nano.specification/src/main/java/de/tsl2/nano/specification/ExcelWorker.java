@@ -283,9 +283,11 @@ class Worker implements Runnable {
 	}
 
 	private Object runSQL(String cmd) {
-		IRunnable<Object, String> query = BeanClass.createInstance("de.tsl2.nano.persistence.SQLQuery", PERSISTENCEUNIT);
-		if (!Boolean.getBoolean(DRYRUN))
+		if (!Boolean.getBoolean(DRYRUN)) {
+			IRunnable<Object, String> query = BeanClass.createInstance("de.tsl2.nano.persistence.SQLQuery",
+					PERSISTENCEUNIT);
 			return query.run(cmd, actionParameter);
+		}
 		return "<-- DRYRUN";
 	}
 

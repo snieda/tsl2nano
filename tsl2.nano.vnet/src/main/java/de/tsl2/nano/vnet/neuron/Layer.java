@@ -7,6 +7,7 @@ import java.util.Map;
 import de.tsl2.nano.core.util.ValueSet;
 import de.tsl2.nano.structure.IConnection;
 import de.tsl2.nano.vnet.Net;
+import de.tsl2.nano.vnet.Node;
 
 /**
  * layer properties to be used by each neuron
@@ -59,7 +60,11 @@ public class Layer extends ValueSet<Layer.Parameter, Float> {
 	}
 	
 	public void notifyNeighbours(VNeuron n, float signal) {
-		List<IConnection<VNeuron,Float>> connections = net.getNode(n).getConnections();
+		Node<VNeuron, Float> node = net.getNode(n);
+		if (node == null) {
+			throw new IllegalArgumentException("neuron not found n: " + n);
+		}
+		List<IConnection<VNeuron, Float>> connections = node.getConnections();
 		//TODO: use parallel event handling
 		connections.forEach(c -> c.getDestination().getCore().feedSignal(c.getDescriptor() * signal));
 	}
@@ -67,8 +72,8 @@ public class Layer extends ValueSet<Layer.Parameter, Float> {
 	public static Layer getDefault(Net net) {
 		if (defaultLayer == null) {
 			defaultLayer = new Layer(net, "DEFAULT", 
-					def(Parameter.Fv, 1.1f), 
-					def(Parameter.Ft, 1.0f), 
+					def(Parameter.Fv, 1.2f),
+							def(Parameter.Ft, 1.0f), 
 					def(Parameter.Tv, 1.1f), 
 					def(Parameter.Tt, 1.0f), 
 					def(Parameter.To, 0.5f), 

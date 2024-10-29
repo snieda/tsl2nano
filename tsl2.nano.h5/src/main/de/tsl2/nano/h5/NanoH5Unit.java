@@ -47,6 +47,7 @@ import de.tsl2.nano.serviceaccess.Authorization;
 public abstract class NanoH5Unit implements ENVTestPreparation {
 
     protected static final int DEFAULT_H2_PORT = 9092;
+    protected static final int DEFAULT_HSQLDB_PORT = 9003;
 	protected static final String BTN_LOGIN_OK = PersistenceUI.ACTION_LOGIN_OK;
     protected static final String BTN_RESET = ".reset";
     protected static final String BTN_DELETE = ".delete";
@@ -72,7 +73,7 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
     }
 
     protected int dbPort() {
-    	return DEFAULT_H2_PORT;
+    	return DEFAULT_HSQLDB_PORT;
     }
     
     public void setUp() {

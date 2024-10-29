@@ -570,6 +570,17 @@ Example output of http://localhost:8067/rest/address/city/B* (gives you all addr
  */
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+### The BeanContainer as Data layer
+
+The BeanContainer provides data metadata and its access permissions. It provides the data through initialized actions
+like findBetween, etc.
+The serviceaccess and directaccess modules implement genericservices to be used by this actions on a database and o/r
+mapper.
+
+To initialize the BeanContainer to get its data from other data-layers you have to provide actions that get their data
+from e.g. rest-service calls.
+To do so, have a look at BeanContainer.initEmtpyServiceActions(...) to have a simple expample.
+
 ## Starting / Test
 
 ### Quick-Start
@@ -4915,7 +4926,7 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.5.1  | 04.06.2023 | Fix secure users loading, fix etag 304, NEW module: modelkit
 2.5.2 | 28.04.2023 | dependency updates, jmockit -> mockito (serviceacces, replication), complete json, yaml, xml
 de-/serializing,enhancing autotest,cursus: fix package: tsl2.nano->de.tsl2.nano , beanattribute respecting generic type,
-many fixes/enhancings on object creation, stringutil
+many fixes/enhancings on object creation, stringutil, ENV static self removed
 ------- | ---- | -----------
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
@@ -6135,3 +6146,5 @@ CharSequenceEx)
 StringBuffer
 * [v] json/yaml/xml: escape + unescape
 * [v] structparser : method, class -> attribute: name
+
+* [ ] specification has a reflective reference to SqlQuery of directaccess

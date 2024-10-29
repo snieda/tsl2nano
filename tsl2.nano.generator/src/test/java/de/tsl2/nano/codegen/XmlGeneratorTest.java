@@ -58,7 +58,7 @@ public class XmlGeneratorTest implements ENVTestPreparation {
 
     @Test
     public void testXmlGeneration() throws Exception {
-        String file = BASE_DIR_GENERATOR + "pom.xml";
+        String file = /*BASE_DIR_GENERATOR + */"pom.xml";
         ACodeGenerator.main(new String[] { XmlGenerator.class.getName(), file, "codegen/schema.vm", "//dependency" });
         //TODO: check file creation!
     }

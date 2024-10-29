@@ -167,12 +167,16 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
                 }
             }
             ConcurrentUtil.startDaemon("tsl2-logger-" + self.outputFile, self);
-            Runtime.getRuntime().addShutdownHook(Executors.defaultThreadFactory().newThread(new Runnable() {
-                @Override
-                public void run() {
+            try {
+                Runtime.getRuntime().addShutdownHook(Executors.defaultThreadFactory().newThread(new Runnable() {
+                    @Override
+                    public void run() {
                         self.logMessages();
-                }
-            }));
+                    }
+                }));
+            } catch (IllegalStateException ex) {
+                System.out.println(ex.toString());
+            }
         	} finally {
         		isPreparing.set(false);
         		System.out.println("<== Logfactory is READY!");

@@ -72,6 +72,7 @@ public interface ENVTestPreparation {
 	}
 
 	default String getTestEnv() {
+		System.setProperty(ENV.KEY_TESTMODE, "true");
 		String name = StringUtil.substring(this.getClass().getSimpleName(), null, "Test") + "-" + DateUtil.getFormattedTimeStamp() + "/";
 		return TEST_DIR + StringUtil.toFirstLower(name);
 	}

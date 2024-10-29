@@ -234,12 +234,22 @@ public class ManagedException extends RuntimeException {
     public static <T> T trY(SupplierExVoid<T> callback) {
         return trY(callback, true);
     }
-    /**let the trY to the standard exception handling  */
+
+    /**let the trY do the standard exception handling  */
     public static <T> T trY(SupplierExVoid<T> callback, boolean escalate, Class<? extends Exception>... warnOnly) {
         try {
             return callback.get();
         } catch(Exception ex) {
         	return (T) handleException(escalate, ex, warnOnly);
+        }
+    }
+
+    /** only for internal use, tests and PoCs - use it only if you know what you do */
+    public static <T> T trYError(SupplierExVoid<T> callback, boolean escalate, Class<? extends Exception>... warnOnly) {
+        try {
+            return callback.get();
+        } catch (Throwable ex) {
+            return (T) handleException(escalate, ex, warnOnly);
         }
     }
 

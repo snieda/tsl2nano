@@ -52,9 +52,12 @@
         },
         {
             "type": "java",
-            "name": "Debug tsl2.common (MAVEN on 8000)",
+            "name": "Debug tsl2.h5 (MAVEN on 8000)",
             "request": "attach",
-            "projectName": "tsl2.nano.h5",
+            "projectName": "tsl2.nano.h5-package",
+            "sourcePaths": [
+                "/home/ts/workspace/tsl2nano-code/tsl2.nano.generator/src/main/java"
+            ],
             "hostName": "localhost",
             "port": 8000
         },

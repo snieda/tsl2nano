@@ -6,7 +6,7 @@ BLOCK: Anlegen
 BLOCK: Beitrag ändern (!:BEITRAGSANPASSUNG:SQL:insert into chronik values(?1, ?2 ):!)
 02	BEITRAGSANPASSUNG	2020-03-01
 
-!:Beitragsfreistellung:CMD:src/resources/test-script.sh:!
+!:Beitragsfreistellung:CMD:src/test/resources/test-script.sh:!
 
 01	Beitragsfreistellung	2020-04-01	2020-06-01
 
