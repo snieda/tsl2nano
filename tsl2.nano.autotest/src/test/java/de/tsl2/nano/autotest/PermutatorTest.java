@@ -53,7 +53,7 @@ public class PermutatorTest {
     }
 
     @Test
-    public void test() {
+    public void testRegExGeneration() {
         checkRegEx("\\w+");
         checkRegEx("\\w{3}\\d{3}");
         checkRegEx("(https?|s?ftp|file)//(\\w+/)*\\w+");
@@ -63,8 +63,8 @@ public class PermutatorTest {
 
     private void checkRegEx(String regex) {
         long t = System.currentTimeMillis();
-        System.out.print(regex);
-        String gen = ValueRandomizer.createFromRegEx(regex, 6, 10, 1000000);
+        System.out.println(regex);
+        String gen = ValueRandomizer.createFromRegEx(regex, 6, 10, 10000000);
         System.out.println("(millis:" + (System.currentTimeMillis() - t) + ") -> " + gen);
     }
 
