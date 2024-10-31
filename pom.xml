@@ -235,6 +235,7 @@
       			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.5.1</version> <!-- when I remove the version, tests in h5 fail - what the fuck... -->
 				<configuration>
 					<argLine>${surefire.argLine} ${argLine}</argLine>
 					<testFailureIgnore>${surefire.testFailureIgnore}</testFailureIgnore>
@@ -249,6 +250,7 @@
    			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>3.5.1</version><!-- when I remove the version, tests in h5 fail - what the fuck... -->
 				<configuration>
 					<!-- <skipITs>true</skipITs> -->
 					<forkCount>${forkCount}</forkCount>
@@ -393,7 +395,7 @@
 			<plugin>
 				<groupId>org.sonatype.plugins</groupId>
 				<artifactId>nexus-staging-maven-plugin</artifactId>
-				<version>1.6.14</version>
+				<version>1.6.13</version>
 				<extensions>true</extensions>
 				<configuration>
 					<serverId>ossrh</serverId>

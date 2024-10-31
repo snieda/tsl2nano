@@ -68,6 +68,7 @@ body {
     transition: background-color .5s;
 }
 .table .fieldpanel {
+
        display: table;
        margin: 0 auto;
       color: var(--font-color);
@@ -103,6 +104,15 @@ tr:nth-child(odd), .tr:nth-child(odd) {
 }
 tr:hover, .tr:hover {
   background-color: var(--table-bg-color);
+}
+
+.beanfieldlabel {
+    width: fit-content;
+    min-width: 50px;
+}
+input {
+    min-width: 100px;
+    border-radius: 4px;
 }
 
 .fade-out {
@@ -200,13 +210,13 @@ dialog {
 }
 button {
     display: inline-block;
-    border-radius: 15px;
+    border-radius: 8px;
     border: var(--border);
     font-size: 0.9rem;
     padding: 0.4rem 0.8em;
     opacity: 0.7;
     background: var(--button-bg-color);
-    border-bottom: 1px solid #0099ff;
+    border-bottom: 2px solid #0099ff;
     color: var(--font-color);
     font-weight: bold;
     margin: 0 0.1rem;
@@ -264,6 +274,9 @@ dialog::backdrop{
   user-scalable: no;
 }
 @media only screen and (max-width: ${layout.tablewrap.width}px) {
+table, .table {
+    border-radius: 8px;
+}
 tr, .tr {
    	display: flex; flex-wrap: wrap; 
 } 
@@ -283,6 +296,16 @@ td, th, .td, .th {
     text-shadow: var(--text-shadow);
 	font-size: 1.4em; 
 }
+.beanfieldlabel {
+    width: fit-content;
+    min-width: 50px;
+}
+input {
+    min-width: 80px;
+    border-radius: 4px;
+    width: 100%;
+}
+
 
 @media only screen and (max-width: 480px) {
 thead, .thead {
@@ -295,6 +318,7 @@ td, th, .td, .th {
    	width: 100%;
 }
 button, input, #field§quicksearch, .actionpanel {
+    min-width: 50px;
 	width: 100%;
 }
 .sidenav {padding-top: 15px;}
