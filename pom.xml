@@ -62,6 +62,10 @@
 		<h2.version>2.1.214</h2.version>
 		<jmockit.version>1.49</jmockit.version>
 		<jacoco.version>0.8.12</jacoco.version>
+		<hibernate-jpa-2.1-ap.version>1.0.2.Final</hibernate-jpa-2.1-ap.version>
+		<jakarta.persistence-api.version>3.2.0</jakarta.persistence-api.version>
+		<jboss-jee-apis-version>2.0.0.Final</jboss-jee-apis-version>
+
     </properties>
 	<inceptionYear>2012</inceptionYear>
 	<licenses>

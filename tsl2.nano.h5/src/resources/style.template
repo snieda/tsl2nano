@@ -94,7 +94,7 @@ td, th, .td, .th {
    	display: table-cell;
    	padding: 3px 10px;
    	border: 1px; 
-    width: 100%;
+    /*width: 100%;*/
 } 
 tr:nth-child(even), .tr:nth-child(even) {
   background-color: var(--table-bg-even-color);
@@ -210,6 +210,7 @@ dialog {
 }
 button {
     display: inline-block;
+    background-image: linear-gradient(#30A1DC, #0060C0);
     border-radius: 8px;
     border: var(--border);
     font-size: 0.9rem;
@@ -221,19 +222,6 @@ button {
     font-weight: bold;
     margin: 0 0.1rem;
     text-align: center;
-}
-button::before {
-  background-color: initial;
-  background-image: linear-gradient(#fff 0, rgba(255, 255, 255, 0) 100%);
-  border-radius: 20px;
-  content: "";
-  height: 50%;
-  left: 4%;
-  opacity: .5;
-  position: relative;
-  top: 0;
-  transition: all .3s;
-  width: 92%;
 }
 
 a{

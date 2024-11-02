@@ -1019,13 +1019,14 @@ public class BeanClass<T> implements Serializable {
      *                    be used.
      * @return loaded class
      */
-    public static Class load(String className, ClassLoader classloader, boolean logException) {
+    public static Class load(String clsName, ClassLoader classloader, boolean logException) {
         if (classloader == null) {
             classloader = Util.getContextClassLoader();
         }
         try {
-            LOG.debug("loading class " + className + " through classloader " + classloader);
-            return ObjectUtil.loadClass(className, classloader);
+            LOG.debug("loading class " + clsName + " through classloader " + classloader);
+            return clsName.contains(".") || clsName.startsWith("[") ? classloader.loadClass(clsName)
+                    : PrimitiveUtil.getPrimitiveClass(clsName);
         } catch (Exception e) {
             ManagedException.forward(e, logException);
             return null;

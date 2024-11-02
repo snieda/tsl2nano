@@ -211,6 +211,8 @@ public class AppLoader {
             FileUtil.userDirFile(environment).mkdirs();
             NetworkClassLoader networkClassLoader = provideClassloader(environment);
 
+            LOG.info("trying to load mainClass: " + mainclass + " through: "
+                    + Thread.currentThread().getContextClassLoader());
             BeanClass<?> bc = BeanClass.createBeanClass(mainclass);
 
             /*
