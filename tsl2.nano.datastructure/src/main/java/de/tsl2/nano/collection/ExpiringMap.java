@@ -181,7 +181,7 @@ public class ExpiringMap<K, V> extends LinkedHashMap<K, V> {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     void refreshCapacity() {
-        // the capacity() method from Hashtable is implementation specific. other VMs may not have that method
+        // WARN: the capacity() method from Hashtable is implementation specific. other VMs may not have that method
         try {
         capacity = (Integer) new PrivateAccessor(this).call("capacity", Integer.class);
         } catch(Exception ex) {

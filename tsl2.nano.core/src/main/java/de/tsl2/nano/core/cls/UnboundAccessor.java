@@ -401,7 +401,7 @@ public class UnboundAccessor<T> {
             methodCache.put(useParInMethodID ? getMethodID(name, par) : name, m);
             return m;
         } catch (Exception e) {
-            ManagedException.forward(e);
+            ManagedException.forward(e, false);
             return null;
         }
     }
