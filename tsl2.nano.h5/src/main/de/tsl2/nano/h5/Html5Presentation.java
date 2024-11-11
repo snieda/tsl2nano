@@ -2016,7 +2016,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 String type = getType(beanValue);
                 String width = Presentable.asText(p.getWidth());
                 if (width == null) {
-                    width = ENV.get("field.input.size", "50");
+                    width = ENV.get("field.input.size", "10");
                 } else if (p.getWidth() == IPresentable.UNUSABLE) {
                     width = null;
                 }
@@ -2068,7 +2068,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
                 if (multiLineText) {
                     appendAttributes(input, ATTR_ROWS, p.layout("rows", "5"), ATTR_COLS,
-                        p.layout("cols", ENV.get("field.input.size", "50")),
+                        p.layout("cols", ENV.get("field.input.size", "10")),
                         enable("wrap", p.layout("wrap", true)));
                     input.setTextContent(beanValue.getValueText());
                 }
@@ -2531,8 +2531,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Element table = createGrid(body, "Status", "page.footer.table", 0);
 
         //fallback: setting style from environment-properties
-        appendAttributes((Element) table.getParentNode(), ATTR_STYLE,
-            ENV.get("layout.footer.grid.style", "background-image: url(icons/spe.jpg);"));
+        // appendAttributes((Element) table.getParentNode(), ATTR_STYLE,
+        //     ENV.get("layout.footer.grid.style", "background-image: url(icons/spe.jpg);"));
 
         String shortText;
         Element expandableFooter;

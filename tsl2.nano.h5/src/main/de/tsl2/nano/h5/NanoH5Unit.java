@@ -1,7 +1,5 @@
 package de.tsl2.nano.h5;
 
-import static org.junit.Assert.fail;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -173,7 +171,7 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
             ManagedException.forward(e);
         }
         if (page == null)
-            fail("web client can't get first page on " + serviceURL
+            throw new AssertionError("web client can't get first page on " + serviceURL
                 + "Please stop any running NanoH5 application on this port!");
         return page;
     }

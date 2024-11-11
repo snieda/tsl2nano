@@ -379,6 +379,9 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
     private void onStandaloneExtractJars() {
         final String JAR_JPA_API = ENV.get("app.standalone.zip.file.check", "hibernate-jpa-2.1-api-1.0.2.Final.jar");
         if (FileUtil.hasResource(ZIP_STANDALONE) && !new File(ENV.getConfigPath() + JAR_JPA_API).exists()) {
+            LOG.info("setting tsl2nano to offfline modus...");
+            ENV.setProperty("tsl2nano.offline", true);
+            System.setProperty("tsl2nano.offline", "true");
             LOG.info("extracting " + ZIP_STANDALONE + " and " + JAR_JPA_API);
             ENV.extractResource(JAR_JPA_API, true, false);
             FileUtil.extractNestedZip(ZIP_STANDALONE, ENV.getConfigPath(), null);

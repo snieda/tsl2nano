@@ -22,9 +22,9 @@ import java.util.jar.Attributes;
 import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.CLI;
+import de.tsl2.nano.core.util.CLI.Color;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.core.util.CLI.Color;
 
 /**
  * Usable to structure e.g. command line arguments. Use an instanceof Argumentator or simply call
@@ -375,11 +375,11 @@ public class Argumentator {
     }
     
 	public static void addExportsFromManifest() {
-		addVMModuleFromManifest("Add-Exports", s -> jdk.internal.module.Modules.addExports(ModuleLayer.boot().findModule(s[0]).orElseThrow(), s[1]));
+		addVMModuleFromManifest("Add-Exports", s -> jdk.internal.module.Modules.addExportsToAllUnnamed(ModuleLayer.boot().findModule(s[0]).orElseThrow(), s[1]));
 	}
-//	public static void addOpensFromManifest() {
-//		addVMModuleFromManifest("Add-Opens", s -> jdk.internal.module.Modules.addOpens(ModuleLayer.boot().findModule(s[0]).orElseThrow(), s[1]));
-//	}
+	public static void addOpensFromManifest() {
+		addVMModuleFromManifest("Add-Opens", s -> jdk.internal.module.Modules.addOpensToAllUnnamed(ModuleLayer.boot().findModule(s[0]).orElseThrow(), s[1]));
+	}
 	public static void addVMModuleFromManifest(String manifestKey, Consumer<String[]> vmModuleAction) {
 		String exports = readManifest().getValue(manifestKey);
 		if (exports != null) {

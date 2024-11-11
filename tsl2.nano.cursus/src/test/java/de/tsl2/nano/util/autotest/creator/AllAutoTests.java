@@ -9,9 +9,12 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 import de.tsl2.nano.autotest.creator.AutoFunctionTest;
+import de.tsl2.nano.autotest.creator.AutoTest;
 import de.tsl2.nano.autotest.creator.CurrentStatePreservationTest;
 import de.tsl2.nano.autotest.creator.InitAllAutoTests;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.cursus.Consilium;
+import de.tsl2.nano.cursus.Timer;
 import de.tsl2.nano.cursus.persistence.EConsilium;
 
 @RunWith(Suite.class)
@@ -19,6 +22,6 @@ import de.tsl2.nano.cursus.persistence.EConsilium;
 public class AllAutoTests {
 	public static void init() {
 		set(FILTER, matchPackage(Consilium.class, EConsilium.class));
-		// set(AutoTest.FILTER_EXCLUDE, StringUtil.matchingOneOf(Timer.class.getSimpleName() + ".(runThrough|next).*"));
+		set(AutoTest.FILTER_EXCLUDE, StringUtil.matchingOneOf(Timer.class.getSimpleName() + ".(runThrough|next).*"));
 	}
 }

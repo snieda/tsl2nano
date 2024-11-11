@@ -524,6 +524,8 @@ public class ENV implements Serializable {
         if (self().autopersist) {
             self().persist();
         }
+        // if (value != null && Util.isSimpleType(value.getClass()))
+        //     System.setProperty(key, value.toString());
         self().handleChange(key, oldValue, value); 
     }
 

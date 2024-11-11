@@ -31,7 +31,7 @@ public class AllAutoTests {
 				"DateUtil.setUTCTimeZone", "ByteUtil.getPipe", "IPreferences", "CPUState",
 						"AnnotationProxy.setAnnotationValues", "Message.send", "PrivateAccessor.findMembers", "ValueSet", "Mail", "FieldUtil.foreach",
 				"ConcurrentUtil.waitFor", "SystemUtil.isNestedApplicationStart", "FileUtil.readBytes",
-				"FieldUtil.getFieldNamesInHierarchy", "ObjectUtil.isEmpty"));
+				"FieldUtil.getFieldNamesInHierarchy", "ObjectUtil.isEmpty", "ValueRandomizer.createFromRegEx*"));
 		set(FILTER, matchPackage(Main.class));
 		// set(FILTER, matchMethod(Crypt.class, "decrypt", CharSequence.class, String.class, String.class));
 	}
