@@ -139,7 +139,7 @@ span > input[type="search"] {
 .tooltip { 
     display: none; 
     position: relative;
-    top: 0
+    top: 0;
     left: 0;
     z-index: 99;
     border: 1px solid #333;
@@ -164,8 +164,8 @@ i:hover + p {
     padding-top: 60px;
 }
 
-.sidenav a, .^ {
-    #padding: 8px 8px 8px 32px;
+.sidenav a, .panelaction {
+    padding: 8px 8px 8px 32px;
     text-decoration: none;
     display: block;
     transition: 0.3s;
@@ -355,7 +355,7 @@ nav li:hover > ul, li:focus > ul, li:active > ul {
 }
 
 @media only screen and (max-width: ${layout.tablewrap.width}px) {
-table, .table {
+table, .table, .message {
     border-radius: 8px;
 }
 tr, .tr {

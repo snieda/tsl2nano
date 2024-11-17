@@ -1337,7 +1337,7 @@ public class BeanPresentationHelper<T> {
                 "icons/equipment.png") {
                 @Override
                 public Object action() throws Exception {
-                    Bean<?> bEnv = Bean.getBean(BeanClass.getStatic(ENV.class, "self"));
+                    Bean<?> bEnv = Bean.getBean(BeanClass.getStatic(ENV.class, "lastCreated"));
                     addAdministrationActions(session, bEnv);
                     return bEnv;
                 }

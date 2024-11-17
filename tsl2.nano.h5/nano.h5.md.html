@@ -4924,7 +4924,7 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.4.12 | 18.09.2022 | NEW: SpecificationExchange, specification refactored: Workflow, ExcelWorker, (massive changes)Flow, Task, lots of conveniences extracted to util-classes, prepared to run on jdk-17, hsqldb-env refreshed for 2.7.0
  2.5.0  | 05.03.2023 | NEW: HATEOAS(restui), see EnvUpdate2v5v0: refactorings: serialization of actions with primitive attributes, move incubation packages, jdk17, h2-v2+ -> hsqldb2.7.1, hibernate 5, all dependencies/plugins updated
  2.5.1  | 04.06.2023 | Fix secure users loading, fix etag 304, NEW module: modelkit
-2.5.2 | 28.04.2023 | dependency updates, jmockit -> mockito (serviceacces, replication), complete json, yaml, xml
+2.5.2 | 24.11.2024 | dependency updates, h5 stylings enhanced, jmockit -> mockito (serviceacces, replication), complete json, yaml, xml
 de-/serializing,enhancing autotest,cursus: fix package: tsl2.nano->de.tsl2.nano , beanattribute respecting generic type,
 many fixes/enhancings on object creation, stringutil, ENV static self removed
 ------- | ---- | -----------
@@ -6147,7 +6147,8 @@ StringBuffer
 * [v] json/yaml/xml: escape + unescape
 * [v] structparser : method, class -> attribute: name
 
-* [ ] specification has a reflective reference to SqlQuery of directaccess
-* [ ] Problem: ClassNotFound NanoH5Unit (NanoH5IT -> NanoH5Unit)
-   * [ ] NanoH5Unit in src/main/java -> in target/classes and distribution jar directly
-      * [ ] -> dependency to junit4, htmlunit
+* [v] specification has a reflective reference to SqlQuery of directaccess
+* [v] Problem: ClassNotFound NanoH5Unit (NanoH5IT -> NanoH5Unit)
+   * [v] NanoH5Unit in src/main/java -> in target/classes and distribution jar directly
+      * [v] -> dependency to junit4, htmlunit
+* [ ] generate beans from json-scheme or json

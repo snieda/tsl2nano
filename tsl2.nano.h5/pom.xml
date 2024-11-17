@@ -32,30 +32,30 @@
 		<build.debug>${maven.compiler.debug}</build.debug>
 		<surefire.testFailureIgnore>false</surefire.testFailureIgnore>
 		<maven.test.failure.ignore>false</maven.test.failure.ignore>
-		<add-opens-unnamed>
-java.base/java.lang=ALL-UNNAMED
-java.base/java.util=ALL-UNNAMED
-java.base/java.text=ALL-UNNAMED
-java.base/java.time.format=ALL-UNNAMED
-java.base/java.lang.reflect=ALL-UNNAMED
-java.base/sun.reflect.annotation=ALL-UNNAMED
-java.base/sun.security.x509=ALL-UNNAMED
-java.base/javax.security.auth=ALL-UNNAMED
-java.base/java.io=ALL-UNNAMED
-java.base/sun.nio.ch=ALL-UNNAMED
-java.base/java.net=ALL-UNNAMED
-java.base/sun.security.ssl=ALL-UNNAMED
-jdk.unsupported/jdk.internal.module=ALL-UNNAMED
-java.xml/javax.xml.stream.events=ALL-UNNAMED
-java.xml/org.w3c.dom=ALL-UNNAMED
-java.xml/javax.xml.namespace=ALL-UNNAMED
-jdk.management/com.sun.management.internal=ALL-UNNAMED
-java.management/sun.management=ALL-UNNAMED
+		<!-- add-opens: the spaces at line-starts are important! -->
+		<add-opens-unnamed> java.base/java.lang=ALL-UNNAMED 
+ java.base/java.util=ALL-UNNAMED
+ java.base/java.text=ALL-UNNAMED
+ java.base/java.time.format=ALL-UNNAMED
+ java.base/java.lang.reflect=ALL-UNNAMED
+ java.base/sun.reflect.annotation=ALL-UNNAMED
+ java.base/sun.security.x509=ALL-UNNAMED
+ java.base/javax.security.auth=ALL-UNNAMED
+ java.base/java.io=ALL-UNNAMED
+ java.base/sun.nio.ch=ALL-UNNAMED
+ java.base/java.net=ALL-UNNAMED
+ java.base/sun.security.ssl=ALL-UNNAMED
+ jdk.unsupported/jdk.internal.module=ALL-UNNAMED
+ java.xml/javax.xml.stream.events=ALL-UNNAMED
+ java.xml/org.w3c.dom=ALL-UNNAMED
+ java.xml/javax.xml.namespace=ALL-UNNAMED
+ jdk.management/com.sun.management.internal=ALL-UNNAMED
+ java.management/sun.management=ALL-UNNAMED
 		</add-opens-unnamed>
 		<!-- WARN: add-exports only on compile scope otherwise jar file will be corrupt -->
 		<add-export-unnamed>
-java.base/sun.security.x509=ALL-UNNAMED
-java.management/sun.management=ALL-UNNAMED
+ java.base/sun.security.x509=ALL-UNNAMED
+ java.management/sun.management=ALL-UNNAMED
 		</add-export-unnamed>
 	</properties>
 	<build>
@@ -257,10 +257,10 @@ java.management/sun.management=ALL-UNNAMED
 									<Application-redirect>/download</Application-redirect>
 									<Permissions>all-permissions</Permissions>
                                     <Add-Modules>ALL-SYSTEM</Add-Modules>
-                                    <!-- <Add-Opens>
+                                    <Add-Opens>
 										${add-opens-unnamed}
 									</Add-Opens>
-                                    <Add-Exports>
+                                    <!-- <Add-Exports>
 										${add-export-unnamed}
                                     </Add-Exports> -->
 								</manifestEntries>
@@ -289,10 +289,10 @@ java.management/sun.management=ALL-UNNAMED
 									<Application-Source>${application.source}</Application-Source>
 									<Application-redirect>/download</Application-redirect>
 									<Permissions>all-permissions</Permissions>
-                                    <!-- <Add-Opens>
+                                    <Add-Opens>
 										${add-opens-unnamed}
 									</Add-Opens>
-                                    <Add-Exports>
+                                    <!-- <Add-Exports>
 										${add-export-unnamed}
                                     </Add-Exports> -->
 								</manifestEntries>
@@ -321,10 +321,10 @@ java.management/sun.management=ALL-UNNAMED
 									<Application-Source>${application.source}</Application-Source>
 									<Application-redirect>/download</Application-redirect>
 									<Permissions>all-permissions</Permissions>
-                                    <!-- <Add-Opens>
+                                    <Add-Opens>
 										${add-opens-unnamed}
 									</Add-Opens>
-                                    <Add-Exports>
+                                    <!-- <Add-Exports>
 										${add-export-unnamed}
                                     </Add-Exports> -->
 								</manifestEntries>
@@ -353,10 +353,10 @@ java.management/sun.management=ALL-UNNAMED
 									<Application-Source>${application.source}</Application-Source>
 									<Application-redirect>/download</Application-redirect>
 									<Permissions>all-permissions</Permissions>
-                                    <!-- <Add-Opens>
+                                    <Add-Opens>
 										${add-opens-unnamed}
 									</Add-Opens>
-                                    <Add-Exports>
+                                    <!-- <Add-Exports>
 										${add-export-unnamed}
                                     </Add-Exports> -->
 								</manifestEntries>
@@ -420,10 +420,10 @@ java.management/sun.management=ALL-UNNAMED
 									<Application-Source>${application.source}</Application-Source>
 									<Application-redirect>/download</Application-redirect>
 									<Permissions>all-permissions</Permissions>
-                                    <!-- <Add-Opens>
+                                    <Add-Opens>
 										${add-opens-unnamed}
 									</Add-Opens>
-                                    <Add-Exports>
+                                    <!-- <Add-Exports>
 										${add-export-unnamed}
                                     </Add-Exports> -->
 								</manifestEntries>
