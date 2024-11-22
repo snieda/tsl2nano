@@ -159,6 +159,8 @@ public class FormatUtil {
                 f = getTimeFormat(DateFormat.getTimeInstance(), Time.class);
             } else if (Timestamp.class.isAssignableFrom(type)) {
                 f = getTimeFormat(DateFormat.getDateTimeInstance(), Timestamp.class);
+            } else if (java.sql.Date.class.isAssignableFrom(type)) {
+                f = createSimpleFormat(s -> java.sql.Date.valueOf(s));
             } else if (Date.class.isAssignableFrom(type)) {
                 f = getCheckedFormat(DateFormat.getDateInstance());
             } else if (LocalTime.class.isAssignableFrom(type)) {

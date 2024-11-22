@@ -426,12 +426,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         try {
             Element form;
             if (model != null) {
-                Html5Presentation pres = model != null ? model.getPresentationHelper() : this;
+                BeanPresentationHelper pres = model != null ? model.getPresentationHelper() : this;
                 //TODO: don't forget the old presentation instance
                 if ((model != null && !(model.getPresentationHelper() instanceof Html5Presentation))) {
                     model.setPresentationHelper(createHelper(model));
+                    pres = model.getPresentationHelper();
                 }
-                form = pres.createPage(session, null,
+                form = ((Html5Presentation)pres).createPage(session, null,
                     message instanceof String && !(message.toString().contains(".") && NumberUtil.isNumber(message))
                         && !isXml(message.toString()) 
                         ? ENV.translate(message, true) : message,

@@ -67,12 +67,29 @@ html[data-theme='dark-contrast'] {
     --border: 1 px;
 }
 
+html[data-theme='dark-picture'] {
+    --font-family: 'Comic Sans MS', 'serif';
+    --font-color: white;
+    --disabled-color: lightgray;
+    --label-color: lightgray;
+    --text-shadow: none;
+    --bg-color: url('icons/blue-planets.jpg');
+    --button-bg-color: #0055AA;
+    --button-bg-hover: gray;
+    --table-bg-color: transparent;
+    --table-bg-even-color: rgba(96,96,96,.6);
+    --table-bg-odd-color: transparent;
+    --border: 1 px;
+}
+
+
 /* will be assigned as tag style under the html header */
 body {
     font-family: var(--font-family);
     transition: background-color .5s;
     color: var(--font-color);
 }
+
 .table .fieldpanel {
 
        display: table;
@@ -125,6 +142,8 @@ input {
     min-width: 100px;
     border-radius: 4px;
     width: 100%;
+    border: var(--border);
+    border-bottom: 2px solid black;
 }
 span > input[type="search"] {
     min-width: 30px;
@@ -221,7 +240,7 @@ i:hover + p {
     padding-bottom: 6;
 }
 th > button {
-    width: 100%;
+    width: 80%;
 }
 input[type="search"] {
     width: auto;
@@ -332,7 +351,7 @@ nav li > ul li{
     display: block !important;
 }
 
-nav  li > ul li button {
+nav  li > ul li button:not(.selector) {
     color: var(--font-color);
     text-shadow: var(--text-shadow);
     display: block;
@@ -384,7 +403,7 @@ thead, .thead {
 input {
     min-width: 60px;
     border-radius: 4px;
-    width: 100%;
+    width: 80%;
 }
 
 }
@@ -393,13 +412,17 @@ input {
 thead, .thead {
 	display: none;
 }
-tr, .tr {
+tr:not(#field\.panel *), .tr:not(#field\.panel *) {
    	width: 100%;
     border-radius: 18px;
     padding: 0px 6px;
 } 
 td, th, .td, .th {
     padding: 8px 8px;
+   	width: 100%;
+}
+#field\.panel td, #field\.panel th, #field\.panel .td, #field\.panel .th {
+    padding: 2px 2px;
    	width: 100%;
 }
 button, input, #field§quicksearch, .actionpanel {

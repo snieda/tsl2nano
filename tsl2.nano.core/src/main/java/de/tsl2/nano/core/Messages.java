@@ -13,7 +13,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -278,8 +277,7 @@ public class Messages {
         for (int i = 0; i < BUNDLE_LIST.size(); i++) {
             LOG.info("reloading resourcebundle " + BUNDLE_LIST.get(i));
             BUNDLE_LIST.set(i,
-                ResourceBundle.getBundle((String) new PrivateAccessor<ResourceBundle>(BUNDLE_LIST.get(i))
-                    .member("name")));
+                ResourceBundle.getBundle(BUNDLE_LIST.get(i).getBaseBundleName()));
         }
     }
 

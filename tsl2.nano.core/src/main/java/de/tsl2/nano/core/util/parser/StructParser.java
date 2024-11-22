@@ -736,7 +736,7 @@ class TreeInfo {
 }
 
 /**
- * avoid endless toString() or hashCod() calls inside the standard Map implemenations (going through the content)
+ * avoid endless toString() or hashCode() calls inside the standard Map implementations (going through the content)
  */
 class SelfReferencingMap extends LinkedHashMap<String, Object> {
     final int hashCode = new Object().hashCode();

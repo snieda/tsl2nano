@@ -643,6 +643,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
 //            stop();
 //            main(null);
 //        }
+        unescape(parms);
         convertIDs(parms);
         Object responseObject = null;
         if (parms.containsKey(IAction.CANCELED)) {
@@ -659,7 +660,9 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
             }
             return IAction.CANCELED;
         }
-        refreshValues(nav.current(), parms);
+
+        // if (isSubmitAssign(parms, true)) // - with this constraint, the current input is lost on going to sub items
+            refreshValues(nav.current(), parms);
         
         requestId = createRequestID();
         
@@ -937,6 +940,13 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
         }
     }
 
+    private void unescape(Map<String, String> parms) {
+        Set<String> keys = parms.keySet();
+        for (String k : keys) {
+            parms.put(k, HtmlUtil.Unescape.un((parms.get(k))));
+        }
+    }
+
     /**
      * context parameters will be evaluated from context beans. these beans may have references to other beans. so the
      * context beans have to be in the right order.
@@ -1030,7 +1040,15 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
     }
 
     protected boolean isReturn(Map<String, String> parms) {
-        return isCanceled(parms) || parms.containsKey(BTN_ASSIGN) || parms.containsKey(BTN_SUBMIT);
+        return isCanceled(parms) || isSubmitAssign(parms);
+    }
+
+    protected boolean isSubmitAssign(Map<String, String> parms) {
+        return isSubmitAssign(parms, false);
+    }
+    protected boolean isSubmitAssign(Map<String, String> parms, boolean any) {
+        return parms.containsKey(BTN_ASSIGN) || parms.containsKey(BTN_SUBMIT) 
+        || (any && parms.keySet().stream().anyMatch(k -> k.endsWith(".save") || k.endsWith(".assign")));
     }
 
     protected <T> boolean isNewAction(Map<String, String> parms, BeanCollector<?, T> model) {

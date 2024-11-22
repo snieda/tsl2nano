@@ -12,6 +12,8 @@ package de.tsl2.nano.h5;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -38,6 +40,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.CollectionUtil;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
@@ -373,11 +376,11 @@ public class HtmlUtil {
         }
 
         final String BEG = begin(TAG_SPAN), END = end(TAG_SPAN);
-        String prefix = StringUtil.substring(text, null, "<");
+        String prefix = StringUtil.subRegex(text, null, "<\\w+>");
         if (!Util.isEmpty(prefix)) {
             text = text.replace(prefix, BEG + prefix + END);
         }
-        String postfix = StringUtil.substring(text, ">", null, true);
+        String postfix = StringUtil.subRegex(text, "</\\w+>", null, 0, true, false);
         if (!Util.isEmpty(postfix)) {
             text = text.replace(postfix, BEG + postfix + END);
         }
@@ -583,7 +586,7 @@ public class HtmlUtil {
     }
 
     public static String createMessage(String msg) {
-        return "<pre>" + msg + "</pre>";
+        return msg.contains("\n") ? "<pre>" + msg + "</pre>" : msg;
     }
 
     public static boolean isXml(String txt) {
@@ -717,5 +720,17 @@ public class HtmlUtil {
 
     public static final void reset() {
         tableDivStyle = null;
+    }
+
+    public static class Unescape {
+        @SuppressWarnings("unchecked")
+        static Map<String, String> esc = MapUtil.asMap("&lt;", "<", "&gt;", ">", "&amp;", "&", "&quot;", "\"", "&apos;", "'");
+        public static String un(String s) {
+            if (s == null)
+                return null;
+            AtomicReference<String> ref = new AtomicReference<>(s);
+            esc.entrySet().stream().forEach( e -> ref.set(ref.get().replace(e.getKey(), e.getValue())));
+            return ref.get();
+        }
     }
 }

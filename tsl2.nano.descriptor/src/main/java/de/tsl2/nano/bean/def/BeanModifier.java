@@ -14,6 +14,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.core.util.parser.JSon;
 import de.tsl2.nano.format.RegExpFormat;
 
 public class BeanModifier {
@@ -35,7 +36,9 @@ public class BeanModifier {
         }
     }
 
-    public void refreshValues(BeanDefinition beandef, Map<String, String> parms) {
+    @SuppressWarnings("rawtypes")
+    public boolean refreshValues(BeanDefinition beandef, Map<String, String> parms) {
+        boolean changed = false;
         checkSecurity(beandef, parms);
         convertDates(parms);
         LOG.info("refreshing current bean values");
@@ -63,14 +66,17 @@ public class BeanModifier {
                         String oldString = bv.getValueText();
                         String newString = parms.get(p);
                         
-                        if (oldString == null || !oldString.equals(newString)) {
+                        if (oldString == null || !oldString.equals(newString) && !isOnlyMapAsString(bv, newString)) {
                             vmodel.setParsedValue(p, newString);
+                            changed = true;
                         } else {
-                            LOG.debug("ignoring unchanged attribute " + vmodel.getAttribute(p));
+                            LOG.debug("ignoring unchanged/non-serializable attribute " + vmodel.getAttribute(p));
                         }
                     } catch (Exception e) {
                         exceptions.add(e);
                     }
+                } else {
+                    LOG.trace("not an attribute '" + p + "' -> ignoring");
                 }
             }
             /*
@@ -84,6 +90,13 @@ public class BeanModifier {
                 throw new ManagedException(buf.toString(), exceptions.iterator().next());
             }
         }
+        return changed;
+    }
+
+    /** WORKAROUND: the string representation of a map cannot be re-mapped through MapExpressionFormat using JSon. 
+     * So, each single value of a map should be assigned in its own dialog */
+    boolean isOnlyMapAsString(BeanValue bv, String newString) {
+        return Map.class.isAssignableFrom(bv.getType()) && (!JSon.isJSon(newString) || newString.matches(".*[=](\\w+[.])+\\w+[@]\\w+.*"));
     }
 
     public static void checkSecurity(Map<String, String> parms) {

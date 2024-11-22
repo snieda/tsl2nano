@@ -57,7 +57,6 @@ public class MapExpressionFormat<T> extends ValueExpressionFormat<T> {
     /**
      * {@inheritDoc}
      */
-    @SuppressWarnings("unchecked")
     @Override
     public Object parseObject(String source, ParsePosition pos) {
         pos.setIndex(pos.getIndex() + 1);

@@ -17,10 +17,11 @@ public class JSon extends StructParser.ASerializer {
 	private static final String JSON_EXPR0 = "((\\[[^\\}]{3,})?\\{s*[^\\}\\{]{3,}?:.*\\}([^\\{]+\\])?)";
 	private static final String JSON_EXPR1 = "[\"]?(?:[\\{\\[](?:(?:\\s*+[\"]?\\w++[\"]?\\s*)[:,](?:\\s*+[\"]?[^\"]*+[\"]?\\s*+)[,]?)*+[\\}\\]])++[\"]?";
 	private static final String JSON_EXPR_STREAM = "\\[([-+.\\d]+([,]\\s*)?)*+\\]";
-
+	private static final String NO_JSON = "[^,:\\[]+\\s*\\{.*\\}";
 	private static final Pattern JSON_PATTERN0 = Pattern.compile(JSON_EXPR0, Pattern.MULTILINE);
 	private static final Pattern JSON_PATTERN1 = Pattern.compile(JSON_EXPR1, Pattern.MULTILINE);
 	private static final Pattern JSON_PATTERN_STREAM = Pattern.compile(JSON_EXPR_STREAM, Pattern.MULTILINE);
+	static final Pattern NO_JSON_PATTERN = Pattern.compile(NO_JSON, Pattern.MULTILINE);
 
 	public JSon() {
 	}
@@ -34,7 +35,7 @@ public class JSon extends StructParser.ASerializer {
 	}
 
 	public static final boolean isJSon(CharSequence txt) {
-		return JSON_PATTERN0.matcher(txt).find() || JSON_PATTERN1.matcher(txt).find()
+		return !NO_JSON_PATTERN.matcher(txt).find() && JSON_PATTERN0.matcher(txt).find() || JSON_PATTERN1.matcher(txt).find()
 				|| JSON_PATTERN_STREAM.matcher(txt).find();
 	}
 

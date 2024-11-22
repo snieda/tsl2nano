@@ -424,14 +424,14 @@ public class ObjectUtil extends MethodUtil {
                         } else {
                             new JSon().toObject(wType, (String) value);
                         }
-                    } else if (hasValueOfMethod(wType, value))
-                        return (T) BeanClass.call(wType, "valueOf", true, value);
-                    else if (wType.isEnum() && value instanceof Number)
+                    } else if (wType.isEnum() && value instanceof Number)
                         return (T) wType.getEnumConstants()[((Number) value).intValue()];
                     else if (value instanceof String && isSimpleType(wType))
                         return FormatUtil.parse(wType, (String) value);
                     else if (String.class.isAssignableFrom(wType) && isSimpleType(value.getClass()))
-						return (T) FormatUtil.getDefaultFormat(value, true);
+						return (T) FormatUtil.getDefaultFormat(value, true).format(value);
+                    else if (hasValueOfMethod(wType, value))
+                        return (T) BeanClass.call(wType, "valueOf", true, value);
                     else if (wType.isInterface() && value instanceof Map)
                         return (T) AdapterProxy.create(wType, (Map) value);
                     else if (isInstanceable(wType)/* && BeanClass.hasConstructor(wrapperType, value.getClass())*/)

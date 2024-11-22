@@ -87,6 +87,11 @@ public class StringUtil extends Strings {
         }
     }
 
+    public static String subRegex(CharSequence data, String from, String to) {
+        return subRegex(data, from, to, 0, false, false);
+    }
+
+
     public static String subRegex(CharSequence data, String from, String to, int start) {
         return subRegex(data, from, to, start, false, false);
     }

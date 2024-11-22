@@ -36,7 +36,7 @@ public class RestUITest {
         Map<String, String> parms = new HashMap<>();
         
         // TODO: implement test with read expected
-        String expected = "<html><body background=icons/spe.jpg><div style=\"border: 2px solid; float: middle; text-align: center; color: red; font-weight: bold;\">information</div><pre><span><span>not allowed!</span></span></pre></body></html>";
+        String expected = "<html><body background=icons/spe.jpg><div id=information class=message style=\"border: 2px solid; float: middle; text-align: center; color: red; font-weight: bold;\">information</div><span><span>not allowed!</span></span></body></html>";
 
         String response = new MyRestUI().serve(BeanProxy.createBeanImplementation(ISession.class), url, method, new HashMap<>(), parms, null);
         assertEquals(expected, response);

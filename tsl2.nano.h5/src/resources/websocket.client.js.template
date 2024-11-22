@@ -375,7 +375,7 @@ function toggleOnClick() {
 }
 
 function setTheme(next) {
-	const themes = ['dark', 'light', 'dark-contrast', 'light-contrast'];
+	const themes = ['dark', 'light', 'dark-contrast', 'light-contrast', 'dark-picture'];
     var currentTheme = document.documentElement.getAttribute("data-theme");
 	if (currentTheme === null)
 		currentTheme = localStorage.getItem('data-theme');

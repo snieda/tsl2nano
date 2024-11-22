@@ -40,7 +40,13 @@ public class JSonTest {
         assertFalse(jSon.isParseable(""));
         assertFalse(jSon.isParseable("{seppl=0}"));
         assertFalse(jSon.isParseable("[{seppl=0, depp is true"));
+        assertFalse(jSon.isParseable("[{seppl=0}, depp is true]"));
         assertFalse(jSon.isParseable("beanName is not a known entity!"));
+        assertFalse(jSon.isParseable("{interface de.tsl2.nano.bean.IBeanContainer=de.tsl2.nano.bean.BeanContainer@7c70315, class de.tsl2.nano.bean.def.BeanPresentationHelper=Html5Presentation(null)}"));
+        
+        String css = "{   display: table-row-group; }thead, .thead {   display: table-header-group;   background-color: var(--table-bg-color);   font-weight: bold; };";
+        assertFalse(jSon.isParseable(css));
+        assertTrue(JSon.NO_JSON_PATTERN.matcher(css).find());
     }
 
     @Test
@@ -118,7 +124,9 @@ public class JSonTest {
     @Test
     public void testJsonValues() {
         TypeBean t = new TypeBean(1, "test", 1.1, Arrays.asList(new TypeBean(2, "sub", 2.2, null)));
-        TypeBean c = new JSon().toObject(TypeBean.class, new JSon().serialize(t));
+        String serializedJson = new JSon().serialize(t);
+        assertTrue(JSon.isJSon(serializedJson));
+        TypeBean c = new JSon().toObject(TypeBean.class, serializedJson);
         assertEquals(t, c);
     }
 
