@@ -5,6 +5,7 @@
     --label-color: blue;
     --text-shadow: 1px 2px 2px black;
     --bg-color: radial-gradient(#9999FF, #000000);
+    --bg-input-panel: url('icons/spe.jpg');
     --button-bg-color: #0055AA;
     --button-bg-hover: black;
     --table-bg-color: rgba(247,247,247,.5);
@@ -19,6 +20,7 @@ html[data-theme='light'] {
     --label-color: blue;
     --text-shadow: none;
     --bg-color: radial-gradient(#FFFFFF, #BBBBBB);
+    --bg-input-panel: url('icons/spe.jpg');
     --button-bg-color: lightgray;
     --button-bg-hover: white;
     --table-bg-color: rgba(247,247,247,.8);
@@ -31,6 +33,7 @@ html[data-theme='dark'] {
     --label-color: lightblue;
     --text-shadow: 1px 2px 2px black;
     --bg-color: radial-gradient(#9999FF, #000000);
+    --bg-input-panel: url('icons/spe.jpg');
     --button-bg-color: #0055AA;
     --button-bg-hover: black;
     --table-bg-color: rgba(247,247,247,.5);
@@ -44,6 +47,7 @@ html[data-theme='light-contrast'] {
     --label-color: darkblue;
     --text-shadow: none;
     --bg-color: white;
+    --bg-input-panel: url('icons/spe.jpg');
     --button-bg-color: lightgray;
     --button-bg-hover: white;
     --table-bg-color: transparent;
@@ -59,6 +63,7 @@ html[data-theme='dark-contrast'] {
     --label-color: lightgray;
     --text-shadow: none;
     --bg-color: black;
+    --bg-input-panel: url('icons/spe.jpg');
     --button-bg-color: #0055AA;
     --button-bg-hover: gray;
     --table-bg-color: transparent;
@@ -71,9 +76,10 @@ html[data-theme='dark-picture'] {
     --font-family: 'Comic Sans MS', 'serif';
     --font-color: white;
     --disabled-color: lightgray;
-    --label-color: lightgray;
+    --label-color: white;
     --text-shadow: none;
     --bg-color: url('icons/blue-planets.jpg');
+    --bg-input-panel: transparent;
     --button-bg-color: #0055AA;
     --button-bg-hover: gray;
     --table-bg-color: transparent;
@@ -144,6 +150,7 @@ input {
     width: 100%;
     border: var(--border);
     border-bottom: 2px solid black;
+    padding-bottom: 2px;
 }
 span > input[type="search"] {
     min-width: 30px;
@@ -380,6 +387,15 @@ table, .table, .message {
 tr, .tr {
    	display: flex; flex-wrap: wrap; 
 } 
+tr:nth-child(even), .tr:nth-child(even) {
+    border: var(--border);
+    padding-bottom: 10px;
+}
+tr:nth-child(odd), .tr:nth-child(odd) {
+    border: var(--border);
+    border-radius: 4px;
+    padding-bottom: 10px;
+}
 td, th, .td, .th {
    	display: table-cell;
    	padding: 3px 10px;
@@ -398,12 +414,14 @@ thead, .thead {
 .beanfieldlabel {
     width: fit-content;
     min-width: 50px;
-	color: var(--label-font-color);
+	color: var(--label-color);
+    padding: 0px 10px;
 }
 input {
     min-width: 60px;
     border-radius: 4px;
     width: 80%;
+    font-size: 14px;
 }
 
 }
@@ -422,7 +440,7 @@ td, th, .td, .th {
    	width: 100%;
 }
 #field\.panel td, #field\.panel th, #field\.panel .td, #field\.panel .th {
-    padding: 2px 2px;
+    padding: 0px 2px;
    	width: 100%;
 }
 button, input, #field§quicksearch, .actionpanel {
@@ -460,6 +478,7 @@ nav {
         --label-color: lightgray;
         --text-shadow: 1px 2px 2px black;
         --bg-color: radial-gradient(#9999FF, #000000);
+        --bg-input-panel: url('icons/spe.jpg');
         --button-bg-color: #0055AA;
         --button-bg-hover: black;
         --table-bg-color: rgba(247,247,247,.5);
@@ -474,6 +493,7 @@ nav {
         --label-color: darkblue;
         --text-shadow: none;
         --bg-color: radial-gradient(#FFFFFF, #BBBBBB);
+        --bg-input-panel: url('icons/spe.jpg');
         --button-bg-color: lightgray;
         --button-bg-hover: white;
         --table-bg-color: rgba(247,247,247,.8);

@@ -995,7 +995,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     + VAL_ROUNDCORNER);
         } else {
             appendAttributes((Element) panel.getParentNode(), "class", "fieldpanel", ATTR_STYLE,
-                ENV.get("layout.panel.style", "background-image: url(icons/spe.jpg);") + VAL_ROUNDCORNER);
+                ENV.get("layout.panel.style", "background: var(--bg-input-panel);") + VAL_ROUNDCORNER);
         }
         //set layout and constraints into the grid
         addAttributes((Element) panel.getParentNode(), p, true);
@@ -2194,7 +2194,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ATTR_WIDTH,
                 ENV.get("layout.attribute.label.width", "250"), ATTR_STYLE, style(STYLE_FONT_COLOR,
                     (String) BeanUtil.valueOf(asString(p.getForeground()),
-                        ENV.get("layout.attribute.label.color", "#0000cc"))),
+                        ENV.get("layout.attribute.label.color", "var(--label-color)"))),
                 enableFlag(ATTR_HIDDEN, !p.isVisible()),
                 enableFlag(ATTR_REQUIRED, !beanValue.nullable() && !isGeneratedValue(beanValue))));
             if (p.getIcon() != null) {
