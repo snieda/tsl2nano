@@ -1380,7 +1380,7 @@ createuser=MUSTER:mypasswd:SA::true
 If the skilled workers prefer to fill excel sheets instead of a properties file, a tabbed simple file (to be imported to excel like applications) is provided , too.
 
 
-TODO: instead of a properties or a excel like tabbed file a markdown file is on our todo list. this would be the best way to work with a full specification document, showing workflows etc. through gravidot inside the docu
+NOTE: instead of a properties or a excel like tabbed file a markdown file can be used through the DocmentWorker. This would be the best way to work with a full specification document, showing workflows etc. through gravidot inside the documentation
 
 ### Using specified Workflows
 
@@ -1478,7 +1478,7 @@ would be read to go through the flow. This will be done *now*. But you could sch
 
 ### Using specified ExcelWorkers
 
-ExcelWorkers are defined inside a tab-spaced flat text file, that can be exported from an excel-sheet. 
+ExcelWorkers are defined inside a tab-spaced flat text file (ending with '.csv'), that can be exported from an excel-sheet. 
 Inside the header lines, actions can be defined. All other lines hold the ID to a data element, an action name with parameter to be executed for this data element.
 
 The advantage is, a skilled worker is able to do specific actions on specific data to generate new data or something like a history. The initial idea
@@ -1541,7 +1541,7 @@ A programatic simple example:
 	assertEquals(2, policiert);
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-### A full markdown specification document
+### DocumentWorker: A full markdown specification document
 
 The specification exchange puts almost all specification elements together. A markdown specification document provides one step more:
 
@@ -6152,3 +6152,5 @@ StringBuffer
    * [v] NanoH5Unit in src/main/java -> in target/classes and distribution jar directly
       * [v] -> dependency to junit4, htmlunit
 * [ ] generate beans from json-scheme or json
+* [ ] test/use documentworker (started on createBeanCollectors())
+* [ ] test/use specification-exchange

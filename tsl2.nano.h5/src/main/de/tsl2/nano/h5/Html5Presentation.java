@@ -1038,7 +1038,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     private Element createExpandable(Element parent, String title, boolean open) {
-    	return createExpandable(parent, title, open, "color: #6666FF;");
+    	return createExpandable(parent, title, open, "color: var(--label-color);");
     }
     private Element createExpandable(Element parent, String title, boolean open, String style) {
         parent = appendElement(parent, TAG_EXP_DETAILS, enable(ATTR_EXP_OPEN, open));

@@ -30,7 +30,7 @@ html[data-theme='light'] {
 html[data-theme='dark'] {
     --font-color: white;
     --disabled-color: lightgray;
-    --label-color: lightblue;
+    --label-color: darkblue;
     --text-shadow: 1px 2px 2px black;
     --bg-color: radial-gradient(#9999FF, #000000);
     --bg-input-panel: url('icons/spe.jpg');
@@ -60,7 +60,7 @@ html[data-theme='dark-contrast'] {
     --font-family: 'Comic Sans MS', 'serif';
     --font-color: white;
     --disabled-color: lightgray;
-    --label-color: lightgray;
+    --label-color: white;
     --text-shadow: none;
     --bg-color: black;
     --bg-input-panel: url('icons/spe.jpg');
@@ -134,7 +134,13 @@ tr:nth-child(odd), .tr:nth-child(odd) {
 tr:hover, .tr:hover {
   background-color: var(--table-bg-color);
 }
-
+#page\.header\.table h3, #title, .title {
+    margin-block-start: 8px;
+    margin-block-end: 0px;
+}
+#page\.header\.table td, #page\.header\.table td {
+    width: auto;
+}
 .beanfieldlabel {
     color: var(--label-color);
     width: fit-content;
