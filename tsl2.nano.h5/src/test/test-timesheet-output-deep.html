@@ -18,7 +18,7 @@ setTheme(false);
  * websocket client implementation.
  */
 var socket = new WebSocket(
-		'wss://' + window.document.location.hostname + ':36385');
+		'wss://' + window.document.location.hostname + ':40543');
 console.log('websocket created:' + socket);
 
 socket.onopen = function() {
@@ -406,7 +406,7 @@ function setTheme(next) {
 <table border="0" frame="box" id="page.header.table" sortable="" width="100%">
 <tbody>
 <tr style="background: transparent;">
-<td content="T" onclick="toggleOnClick()"><a href="https://sourceforge.net/p/tsl2nano/wiki/"><img src="icons/beanex-logo-micro.jpg" title="Framework Version: tsl2.nano.h5-2.5.2-SNAPSHOT-2438-23-11-2024 10:33-d"></a></td><td>
+<td content="T" onclick="toggleOnClick()"><a href="https://sourceforge.net/p/tsl2nano/wiki/"><img src="icons/beanex-logo-micro.jpg" title="Framework Version: tsl2.nano.h5-2.5.2-SNAPSHOT-2438-23-11-2024 10:41-d"></a></td><td>
 <form action="?" method="post" style="display: inline; ">
 <div>
 <nav>
@@ -452,10 +452,10 @@ function setTheme(next) {
 <button accesskey="j" class="panelactionsimple" formnovalidate="" formtarget="_self" id="statusinfoliste.json" name="statusinfoliste.json" onclick="fade(this)" style="" title="Json (ALT+j)" type="submit">Json<img src="icons/view.png"></button>
 </li>
 <li>
-<button accesskey="&quot;" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="statusinfoliste.document" name="statusinfoliste.document" onclick="fade(this)" style="" title="exporting (see environment.properties, variable names are starting and ending with &sect;&sect;) to: target/test/.nanoh5.timesheet/statusinfo.rtf (ALT+&quot;)" type="submit">Dokument<img src="icons/images_all.png"></button>
+<button accesskey="&quot;" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="statusinfoliste.document" name="statusinfoliste.document" onclick="fade(this)" style="" title="exporting (see environment.properties, variable names are starting and ending with &sect;&sect;) to: .nanoh5.timesheet/statusinfo.rtf (ALT+&quot;)" type="submit">Dokument<img src="icons/images_all.png"></button>
 </li>
 <li>
-<button accesskey="h" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="statusinfoliste.help" name="statusinfoliste.help" onclick="fade(this)" style="" title="target/test/.nanoh5.timesheet/doc/statusinfo.help.html or target/test/.nanoh5.timesheet/doc/statusinfo.help.pdf (ALT+h)" type="submit">Hilfe<img src="icons/trust_unknown.png"></button>
+<button accesskey="h" class="panelactionsimple" formnovalidate="" formtarget="_self" id="statusinfoliste.help" name="statusinfoliste.help" onclick="fade(this)" style="" title="target/test/.nanoh5.timesheet/doc/statusinfo.help.html or target/test/.nanoh5.timesheet/doc/statusinfo.help.pdf (ALT+h)" type="submit">Hilfe<img src="icons/trust_unknown.png"></button>
 </li>
 </ul>
 </li>
@@ -481,7 +481,7 @@ function setTheme(next) {
 <tr>
 <td class="beanfieldlabel" id="statusInfo.message.label" style="color: var(--label-color); " width="250">Message</td><td>
 <table>
-<input align="start" autofocus="autofocus" class="beanfieldinput" disabled id="statusInfo.message" max="" maxlength="2147483647" min="" name="message" pattern="[\x00-\xFF &euro;]{0,5000}" readonly size="-1" style="background-color: rgba(247,247,247,.5);" tabindex="1" title="statusInfo.message" type="text" value="test.workflow finished with status: OK{startedAt: 2024-11-23 11:37:07.181, endedAt: 2024-11-23 11:37:16.767}" width="-1">
+<input align="start" autofocus="autofocus" class="beanfieldinput" disabled id="statusInfo.message" max="" maxlength="2147483647" min="" name="message" pattern="[\x00-\xFF &euro;]{0,5000}" readonly size="-1" style="background-color: rgba(247,247,247,.5);" tabindex="1" title="statusInfo.message" type="text" value="test.workflow finished with status: OK{startedAt: 2024-11-23 11:44:13.135, endedAt: 2024-11-23 11:44:23.795}" width="-1">
 </table>
 </td>
 </tr>
