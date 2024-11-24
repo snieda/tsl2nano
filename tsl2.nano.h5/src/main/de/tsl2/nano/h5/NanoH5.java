@@ -892,7 +892,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
      */
     protected BeanDefinition<?> createBeanCollectors(List<Class> beanClasses) {
     	File docWorkerFile = new File(ENV.getConfigPath() + "specification-documentworker.md.html");
-    	if (docWorkerFile.exists()) {
+    	if (docWorkerFile.exists() && ENV.get("app.login.administration", true))
+        {
 	    		if (Message.ask("Run Specification Documentworker on file " + docWorkerFile + "?", true)) {
 			    	ENV.addService(new DocumentWorker());
 			    	ENV.get(DocumentWorker.class).consume(docWorkerFile.getAbsolutePath());

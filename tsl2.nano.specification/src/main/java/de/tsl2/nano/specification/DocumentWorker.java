@@ -1,6 +1,8 @@
 package de.tsl2.nano.specification;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.function.Consumer;
@@ -86,7 +88,7 @@ in markdown: a markdown table
  * @author Thomas Schneider
  */
 public class DocumentWorker {
-	private static final String LINK = "\\s+\\[.*\\]\\(.*\\)";
+	private static final String LINK = "\\s+[!]?\\[.*\\]\\(.*\\)";
 
 	private static final Log LOG = LogFactory.getLog(DocumentWorker.class);
 	
@@ -104,7 +106,8 @@ public class DocumentWorker {
 			preInitProperties();
 		}
 		File tagDirFile = new File(tagDir);
-		tagDirFile.delete();
+		if (tagDirFile.exists())
+			FileUtil.deleteRecursive(tagDirFile);
 		tagDirFile.mkdirs();
 	}
 
@@ -169,11 +172,13 @@ public class DocumentWorker {
 		Consumer<File> worker;
 		if ((worker = ENV.get(workerType)) == null)
 			BeanClass.createInstance(workerType);
+		// a defined documentconsumer implementation will run on that 
 		worker.accept(new File(tagfile));
 	}
 
 	protected String writeLastChapter(int line, String tag, StringBuilder content) {
 		String tagfile = tagDir + "/" + tag + "-" + line;
+		Util.trY( () -> Files.deleteIfExists(Path.of(tagfile)));
 		return FilePath.write(tagfile, content.toString().getBytes()).toAbsolutePath().toString();
 	}
 

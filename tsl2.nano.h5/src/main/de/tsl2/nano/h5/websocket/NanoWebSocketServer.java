@@ -14,6 +14,7 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -298,5 +299,15 @@ public class NanoWebSocketServer extends WebSocketServer {
     public void stop() throws InterruptedException {
     	super.stop();
     	session = null;
+    }
+
+    @Override
+    public Collection<WebSocket> getConnections() {
+        try {
+            return super.getConnections();
+        } catch (Exception e) {
+            LOG.error("websocket connection problem", e);
+            return new LinkedList<>();
+        }
     }
 }

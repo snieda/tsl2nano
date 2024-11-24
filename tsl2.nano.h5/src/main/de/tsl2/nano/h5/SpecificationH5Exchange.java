@@ -40,6 +40,7 @@ import de.tsl2.nano.specification.Pool;
 import de.tsl2.nano.specification.SpecificationExchange;
 import de.tsl2.nano.specification.rules.RuledEnabler;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class SpecificationH5Exchange extends SpecificationExchange {
 	
 	private static final String DIV = "[:;,\\s]";
