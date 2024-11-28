@@ -644,13 +644,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     private Element createMetaAndBody(ISession session, Element html, String title, boolean interactive) {
-        appendElement(html, TAG_STYLE,
-            content(
-                ENV.get("app.frame.style", CSS_BACKGROUND_FADING_KEYFRAMES + tableDivStyles())));
         appendAttributes(html, "manifest", ENV.get("html5.manifest.file", "tsl2nano-appcache.mf"));
         Element head = appendElement(html, TAG_HEAD, ATTR_TITLE, "Nano-H5 Application: " + title);
+        appendElement(head, TAG_STYLE,
+            content(
+                ENV.get("app.frame.style", CSS_BACKGROUND_FADING_KEYFRAMES + templateStyles())));
 
-        appendElement(head, "meta", "name", "author", "content", "tsl2.nano.h5 (by Thomas Schneider/2012-2020)");
+        appendElement(head, "meta", "name", "author", "content", "tsl2.nano.h5 (by Thomas Schneider/2012-2025)");
         appendElement(head, "meta", "name", "viewport", "content",
             "width=device-width, height=device-height, initial-scale=1");
 //        appendElement(head, "link", "rel", "stylesheet", "href", "css/style.css");

@@ -5,7 +5,9 @@ import static de.tsl2.nano.h5.ARESTDynamic.Methods.GET;
 import static de.tsl2.nano.h5.ARESTDynamic.Methods.POST;
 import static de.tsl2.nano.h5.ARESTDynamic.Methods.PUT;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -143,7 +145,7 @@ public abstract class ARestUI<RESPONSE> {
         Bean model = instance instanceof String ? null : Bean.getBean(instance);
         String msg = instance instanceof String ? instance.toString() : null;
         IPageBuilder<?, String> pageBuilder = ENV.get(IPageBuilder.class); //Bean.getBean(instance).getPresentationHelper();
-        String html = pageBuilder.build(session, model, msg, true);
+        String html = model == null && msg.contains("</html>") ? msg : pageBuilder.build(session, model, msg, true);
         // html = pageBuilder.buildDialog(name, instance);
         return createResponse(getStatus(restResponse), MIME_HTML, html);
 	}
@@ -159,13 +161,14 @@ public abstract class ARestUI<RESPONSE> {
             Map<String, String> payload);
 
 	private String enrichtTextToHtml(String data) {
-        StringBuilder enriched = new StringBuilder(data.length() * 2);
+        Page page = createPage(data);
         try (Scanner sc = new Scanner(data);) {
             while (sc.hasNextLine()) {
                 String l = sc.nextLine();
                 if (l.trim().length() == 0)
                     continue;
-                else if (l.contains("://")) {
+                page.tag("tr").tag("td");
+                if (l.contains("://")) {
                     String url = StringUtil.extract(l, "\\w{3,5}://[\\w/:\\d?&=]+");
                     String urlui = url.replace(ARESTDynamic.BASE_PATH, BASE_PATH);
                     l = l.replace(url, createUrl(url, urlui));
@@ -175,10 +178,20 @@ public abstract class ARestUI<RESPONSE> {
                     l = appendUrl(l, l.contains(BASE_PATH) ? BASE_PATH : l.contains(URLKEY_ENTITIESJSON) ? URLKEY_ENTITIESJSON : URLKEY_ENTITIES);
                     l = appendAttributeUrl(l);
                 }
-                enriched.append("<br/>" + l);
+                page.add(l).up().up();
             }
         }
-        return HtmlUtil.createMessage(enriched.toString());
+        return HtmlUtil.createMessage(page.toString());
+    }
+    private Page createPage(String data) {
+        Page page = new Page("restui", data.length() * 2);
+        page.tag("html", Page.attr("manifest", ENV.get("html5.manifest.file", "")))
+            .tag("head")
+            .tag("style").add(HtmlUtil.templateStyles())
+            .up().up()
+            .tag("body")
+            .tag("table");
+        return page;
     }
     private String addRESTActions(String l) {
         String ll = l.trim();
@@ -189,10 +202,10 @@ public abstract class ARestUI<RESPONSE> {
             + ")";
     }
     private String createUrl(Object name, String link) {
-        return "<a href=\"" + link + "\">" + name + "</a>";
+        return "<a id=\"" + name + "\" class=\"restui\" href=\"" + link + "\">" + name + "</a>";
     }
     private String appendAttributeUrl(String l) {
-        return l.replaceAll("(\\w+)([.])(\\w+)", "<a href=\"" + getServicePath("") + "$1/$3/*\">$1$2$3</a>");
+        return l.replaceAll("(\\w+)([.])(\\w+)", "<a id=\"attribute\" class=\"restui\" href=\"" + getServicePath("") + "$1/$3/*\">$1$2$3</a>");
     }
     private String appendUrl(String l, String name) {
         return l.replace(name, createUrl(name, getServicePath(name)));
@@ -232,5 +245,81 @@ public abstract class ARestUI<RESPONSE> {
 
     private String getEntity(String url) {
         return StringUtil.substring(url, BASE_PATH + "/", "/", true, true);
+    }
+}
+class Page {
+    String name;
+    StringBuilder content;
+    int cur;
+    String tagOpen, tagClose, tagEnd;
+
+    LinkedList<Tag> stack = new LinkedList<>();
+
+    public Page(String name, int length) {
+        this(name, "<", ">", "</", length);
+    }
+
+    public Page(String name, String tagOpen, String tagClose, String tagEnd, int length) {
+        this.name = name;
+        content = new StringBuilder(length * 2);
+        this.tagOpen = tagOpen;
+        this.tagClose = tagClose;
+        this.tagEnd = tagEnd;
+    }
+    Page add(String part) {
+        return add(cur, part);
+    }
+    Page add(int pos, String part) {
+        cur = pos == -1 ? content.length() : pos;
+        content.insert(cur, part);
+        cur += part.length();
+        return this;
+    }
+
+    Page tag(String tag, String...attributes) {
+        return tag(cur, tag, attributes);
+    }
+
+    Page tag(int pos, String tag, String...attributes) {
+        StringBuilder attrs = new StringBuilder(pageAttributes());
+        Arrays.stream(attributes).forEach(a -> attrs.append(a));
+        add(pos, tagOpen + tag + attrs + tagClose);
+        int inside = cur;
+        add(tagEnd + tag + tagClose);
+        cur = inside;
+        stack.add(new Tag(tag, inside));
+        return this;
+    }
+
+    String pageAttributes() {
+        return attr("class", name);
+    }
+
+    static String attr(String name, String value) {
+        return " " + name + "=\"" + value + "\"";
+    }
+
+    Page up() {
+        Tag tag = stack.removeLast();
+        String strTag = tagEnd + tag.name + tagClose;
+        int i = content.indexOf(strTag, cur);
+        if (i < 0)
+            throw new IllegalStateException("cannot find close tag for: " + tag.name);
+        cur = i + strTag.length();
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        return content.toString();
+    }
+
+    class Tag {
+        String name;
+        int pos;
+        public Tag(String name, int pos) {
+            this.name = name;
+            this.pos = pos;
+        }
     }
 }

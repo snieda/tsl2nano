@@ -94,6 +94,7 @@ body {
     font-family: var(--font-family);
     transition: background-color .5s;
     color: var(--font-color);
+    background: var(--bg-color);
 }
 
 .table .fieldpanel {
@@ -158,7 +159,7 @@ input {
     border-bottom: 2px solid black;
     padding-bottom: 2px;
 }
-span > input[type="search"] {
+span > input[type='search'] {
     min-width: 30px;
     width: 100%;
 }
@@ -255,10 +256,10 @@ i:hover + p {
 th > button {
     width: 80%;
 }
-input[type="search"] {
+input[type='search'] {
     width: auto;
 }
-input[type="checkbox"] {
+input[type='checkbox'] {
     min-width: auto;
     width: auto;
 }
@@ -456,10 +457,10 @@ button, input, #field§quicksearch, .actionpanel {
 #field§quicksearch {
     width: 100%;
 }
-input[type="search"] {
+input[type='search'] {
     width: 100%;
 }
-input[type="checkbox"] {
+input[type='checkbox'] {
     width: 28px;
     height: 28px;
     float: right;

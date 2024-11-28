@@ -666,7 +666,7 @@ public class HtmlUtil {
         }
     }
 
-    public static String tableDivStyles() {
+    public static String templateStyles() {
         if (tableDivStyle == null) {
             InputStream stream = ENV.getResource("style.template");
             tableDivStyle = StringUtil.removeFormatChars(String.valueOf(FileUtil.getFileData(stream, "UTF-8")));
