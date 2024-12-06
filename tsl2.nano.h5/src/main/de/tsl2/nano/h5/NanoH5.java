@@ -562,16 +562,9 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
                 if (checkSessionTimeout(session, requestor) 
                 	&& session.response != null && method.equals("GET") && parms.size() < 2/* contains 'QUERY_STRING = null' */
                     && (uri.length() < 2 || header.get("referer") == null) || (isDoubleClickDelay(session) && session.response != null)) {
-                    LOG.debug("reloading cached page...");
-                    try {
-                        session.response.getData().reset();
-                        if (!session.cacheReloaded) {
-                            session.cacheReloaded = true;
-                            return webSec.addSessionHeader(session, new Response(Status.OK, "text/html", session.response.getData(), -1));
-                        }
-                    } catch (IOException e) {
-                        LOG.error(e);
-                    }
+                        Response result = reloadSessionPage(session);
+                        if (result != null)
+                            return result;
                 }
             }
     //        //workaround to avoid doing a cached request twice
@@ -582,7 +575,11 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
             else {
                 if (ex instanceof Exception) {
                     Message.send(ex);//don't let the server go down on any exception
-            	    return createResponse(Status.BAD_REQUEST, MIME_HTML, ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : "Bad Request");
+                    Response result = reloadSessionPage(session);
+                    if (result != null)
+                        return result;
+                    else
+            	        return createResponse(Status.BAD_REQUEST, MIME_HTML, ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : "Bad Request");
                 }
                 else
                     return createResponse(Status.INTERNAL_ERROR, MIME_HTML, "Internal Server Error");
@@ -591,6 +588,20 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         requests++;
         session.startTime = startTime;
         return session.serve(uri, method, header, parms, files);
+    }
+
+    Response reloadSessionPage(NanoH5Session session) {
+        LOG.debug("reloading cached page...");
+        try {
+            session.response.getData().reset();
+            if (!session.cacheReloaded) {
+                session.cacheReloaded = true;
+                return webSec.addSessionHeader(session, new Response(Status.OK, "text/html", session.response.getData(), -1));
+            }
+        } catch (IOException e) {
+            LOG.error(e);
+        }
+        return null;
     }
 
 	private Response checkWhiteList(InetAddress requestor) {

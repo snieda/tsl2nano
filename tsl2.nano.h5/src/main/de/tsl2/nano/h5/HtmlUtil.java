@@ -581,7 +581,7 @@ public class HtmlUtil {
     }
 
     public static String createMessagePage(String title, String msg) {
-        return "<html><body background=icons/spe.jpg><div id=" + title + " class=message style=\"border: 2px solid; float: middle; text-align: center; color: red; font-weight: bold;\">"
+        return "<html><head><style>" + templateStyles() + "</style></head><body><div id=" + title + " class=message style=\"border: 2px solid; float: middle; text-align: center; color: red; font-weight: bold;\">"
             + title + "</div>" + createMessage(msg) + "</body></html>";
     }
 

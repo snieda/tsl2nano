@@ -4,12 +4,16 @@ import static de.tsl2.nano.h5.ARESTDynamic.Methods.DELETE;
 import static de.tsl2.nano.h5.ARESTDynamic.Methods.GET;
 import static de.tsl2.nano.h5.ARESTDynamic.Methods.POST;
 import static de.tsl2.nano.h5.ARESTDynamic.Methods.PUT;
+import static de.tsl2.nano.h5.NanoH5Util.LOG;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.function.Supplier;
 
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.def.Bean;
@@ -18,6 +22,7 @@ import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ISession;
+import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.core.util.parser.JSon;
@@ -134,7 +139,7 @@ public abstract class ARestUI<RESPONSE> {
     private RESPONSE createResponse(ISession session, String url, RESPONSE restResponse, String method) {
         String data = getData(restResponse);
         if (!JSon.isJSon(data)) {
-            data = enrichtTextToHtml(data);
+            data = enrichtTextToHtml(url, data);
         }
         String entity = getEntity(url);
         entity = Util.isEmpty(entity) ? BASE_PATH : entity;
@@ -160,25 +165,33 @@ public abstract class ARestUI<RESPONSE> {
     abstract protected RESPONSE callRestService(String url, String method, Map<String, String> header, Map<String, String> parms,
             Map<String, String> payload);
 
-	private String enrichtTextToHtml(String data) {
+	private String enrichtTextToHtml(String pageUrl, String data) {
         Page page = createPage(data);
         try (Scanner sc = new Scanner(data);) {
             while (sc.hasNextLine()) {
                 String l = sc.nextLine();
                 if (l.trim().length() == 0)
                     continue;
-                page.tag("tr").tag("td");
                 if (l.contains("://")) {
                     String url = StringUtil.extract(l, "\\w{3,5}://[\\w/:\\d?&=]+");
                     String urlui = url.replace(ARESTDynamic.BASE_PATH, BASE_PATH);
                     l = l.replace(url, createUrl(url, urlui));
                 } else if (BeanDefinition.isDefined(l.trim())) {
+                    page.up( () -> page.isCurrent("tr"));
+                    page.tag("tr");
                     l = addRESTActions(l);
                 } else {
+                    page.tag("tr", () -> !page.isCurrent("tr"));
                     l = appendUrl(l, l.contains(BASE_PATH) ? BASE_PATH : l.contains(URLKEY_ENTITIESJSON) ? URLKEY_ENTITIESJSON : URLKEY_ENTITIES);
                     l = appendAttributeUrl(l);
+                    // page.up();
                 }
-                page.add(l).up().up();
+                page.tag("tr", () -> !page.isCurrent("tr"));
+                if (pageUrl.endsWith("restui")) {
+                    page.add(l).add("</br>");
+                } else {
+                    page.tag("td").add(l).up();
+                }
             }
         }
         return HtmlUtil.createMessage(page.toString());
@@ -189,7 +202,7 @@ public abstract class ARestUI<RESPONSE> {
             .tag("head")
             .tag("style").add(HtmlUtil.templateStyles())
             .up().up()
-            .tag("body")
+            .tag("body", Page.attr("id", "page"))
             .tag("table");
         return page;
     }
@@ -247,6 +260,10 @@ public abstract class ARestUI<RESPONSE> {
         return StringUtil.substring(url, BASE_PATH + "/", "/", true, true);
     }
 }
+/** 
+ * simple convenience to create structured content like xml/html without having to think about closing tags and positioning
+ * constraint: provides only straight forward positioning 
+ */
 class Page {
     String name;
     StringBuilder content;
@@ -276,6 +293,10 @@ class Page {
         return this;
     }
 
+    Page tag(String tag, Supplier<Boolean> if_, String...attributes) {
+        return if_.get() ? tag(tag, attributes) : this;
+    }
+
     Page tag(String tag, String...attributes) {
         return tag(cur, tag, attributes);
     }
@@ -299,6 +320,19 @@ class Page {
         return " " + name + "=\"" + value + "\"";
     }
 
+    Page up(String to) {
+        // did not find any performant solution on streams
+        int indexOfToTag = stack.lastIndexOf(new Tag(to, -1));
+        if (indexOfToTag < 0)
+            throw new IllegalArgumentException("cannot go up in path until: '" + to + "' current path is:" + stack);
+        stack = (LinkedList)stack.subList(0, indexOfToTag);
+        LOG.debug("stack changed to sublist: " + stack);
+        return this;
+    }
+    Page up(Supplier<Boolean> if_) {
+        return if_.get() ? up(): this;
+    }
+
     Page up() {
         Tag tag = stack.removeLast();
         String strTag = tagEnd + tag.name + tagClose;
@@ -307,6 +341,22 @@ class Page {
             throw new IllegalStateException("cannot find close tag for: " + tag.name);
         cur = i + strTag.length();
         return this;
+    }
+
+    public List<Tag> path() {
+        return Collections.unmodifiableList(stack);
+    }
+
+    boolean isCurrent(String tagName) {
+        return currentTag().name.equals(tagName);
+    }
+
+    public Tag currentTag() {
+        return stack.getLast();
+    }
+
+    public String info() {
+        return ObjectUtil.toString(this, "name", "cur", "stack", "content");
     }
 
     @Override
@@ -320,6 +370,14 @@ class Page {
         public Tag(String name, int pos) {
             this.name = name;
             this.pos = pos;
+        }
+        @Override
+        public boolean equals(Object obj) {
+            return obj != null && ((Tag)obj).name.equals(name);
+        }
+        @Override
+        public String toString() {
+            return ObjectUtil.toString(this, "name", "pos");
         }
     }
 }

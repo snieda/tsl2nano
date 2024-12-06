@@ -88,6 +88,10 @@ html[data-theme='dark-picture'] {
     --border: 1 px;
 }
 
+::selection, ::-moz-selection { /* Code for Firefox */
+    color: var(--font-color);
+    background: var(--bg-color);
+}
 
 /* will be assigned as tag style under the html header */
 body {
@@ -97,7 +101,7 @@ body {
     background: var(--bg-color);
 }
 
-.table .fieldpanel {
+table, .table .fieldpanel {
 
        display: table;
        margin: 0 auto;
@@ -175,8 +179,9 @@ span > input[type='search'] {
     top: 0;
     left: 0;
     z-index: 99;
-    border: 1px solid #333;
-    background: #eee;
+    border: var(--border);
+    color: var(--font-color);
+    background: -var(--bg-color);
     width: 300px;
     text-align: left;
 }
