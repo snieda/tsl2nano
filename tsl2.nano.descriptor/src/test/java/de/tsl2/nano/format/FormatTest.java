@@ -3,8 +3,10 @@ package de.tsl2.nano.format;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.sql.Time;
 import java.text.Format;
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.Currency;
 import java.util.Date;
 import java.util.Locale;
@@ -25,11 +27,12 @@ public class FormatTest {
 
 	@Before
 	public void setUp() {
-    	Locale.setDefault(Locale.GERMANY);
+		Locale.setDefault(Locale.GERMANY);
 	}
 	@Test
 	public void testSimpleDateFormat() throws Exception {
 		Format df = RegExpFormat.createDateRegExp();
+		df.format(new Date(System.currentTimeMillis()));
 		String valid[] = { "0", "1", "2", "3", "01", "10", "11", "21", "30", "31", "01.", "01.0", "31.", "31.0", "31.1",
 				"31.01", "31.12", "31.12.", "31.12.1", "31.12.2", "22.11.20", "23.09.200", "13.10.2000" };
 		Date d;
@@ -52,6 +55,47 @@ public class FormatTest {
 				}
 			} catch (ManagedException ex) {
 				// ok, parsing should fail
+			}
+		}
+	}
+
+	@Test
+	public void testTimeFormat() throws ParseException {
+		RegExpFormat df = RegExpFormat.createTimeRegExp();
+		df.format(new Time(System.currentTimeMillis()));
+		String valid[] = {"0", "1:", "1:1", "1:01:00", "00", "00:", "00:0", "00:00", "00:00:", "00:00:0", "00:00:00"};
+		Time d;
+		for (String t : valid) {
+			d = (Time) df.parseObject(t);
+			if (d == null) {
+				fail("parsing '" + t + "' should not fail!");
+			}
+		}
+		String invalid[] = { "P", "1:1:" };
+		for (int i = 0; i < invalid.length; i++) {
+			try {
+				System.out.println("parsing invalid value '" + invalid[i] + "'");
+				d = (Time) df.parseObject(invalid[i]);
+				if (d != null) {
+					fail("parsing '" + invalid[i] + "' should fail!");
+				}
+			} catch (ManagedException ex) {
+				// ok, parsing should fail
+			}
+		}
+	}
+
+	@Test
+	public void testTimeFormat_us() throws ParseException {
+		Locale.setDefault(Locale.US);
+		RegExpFormat df = RegExpFormat.createTimeRegExp();
+		df.format(new Time(System.currentTimeMillis()));
+		String valid[] = {"0", "1", "1:", "12:", "1:10", "1:33:", "1:33:33", "1:33:33 AM"};
+		Time d;
+		for (String t : valid) {
+			d = (Time) df.parseObject(t);
+			if (d == null) {
+				fail("parsing '" + t + "' should not fail!");
 			}
 		}
 	}
