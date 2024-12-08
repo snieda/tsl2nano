@@ -83,6 +83,7 @@ public class HtmlUtil {
     public static final String ATTR_CLASS = "class";
     public static final String ATTR_NAME = "name";
     public static final String ATTR_VALUE = "value";
+    public static final String ATTR_LANG = "lang";
     public static final String ATTR_PATTERN = "pattern";
     public static final String ATTR_DISABLED = "disabled";
     public static final String ATTR_READONLY = "readonly";

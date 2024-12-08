@@ -45,6 +45,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -2039,8 +2040,6 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         "beanfieldinput",
                         ATTR_NAME,
                         beanValue.getName(),
-                        ATTR_PATTERN,
-                        regexpFormat != null ? regexpFormat.getPattern() : ENV.get("field.pattern.regexp", ".*"),
                         ATTR_STYLE,
                         getTextAlignmentAsStyle(p.getStyle()),
                         ATTR_SIZE, /* 'width' doesn't work, so we set the displaying char-size */
@@ -2067,6 +2066,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                             !interactive || !p.getEnabler().isActive() || beanValue.composition()),
                         enableFlag(ATTR_REQUIRED, !beanValue.nullable() && !beanValue.generatedValue()));
 
+                if (ENV.get("html.force.lang.and.pattern", true)) {
+                    appendAttributes(input, 
+                        ATTR_LANG,
+                        Locale.getDefault().toString(),
+                        ATTR_PATTERN,
+                        regexpFormat != null ? regexpFormat.getPattern() : ENV.get("field.pattern.regexp", ".*"));
+                }
                 if (multiLineText) {
                     appendAttributes(input, ATTR_ROWS, p.layout("rows", "5"), ATTR_COLS,
                         p.layout("cols", ENV.get("field.input.size", "10")),

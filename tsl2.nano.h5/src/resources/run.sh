@@ -39,7 +39,7 @@ EXTENSION="-standalone"
 [ $EXTENSION != "-virgin" ] && OFFLINE=-Dtsl2nano.offline=true
 #UH=-Denv.user.home=true
 #USERDIR=-Duser.dir=$PRJ
-#LLANG=-Duser.country=FR -Duser.language=fr -Duser.language.format=fr
+#LLANG="-Duser.country=US -Duser.language=us -Duser.language.format=us"
 #COMPAT=-Djava.locale.providers=COMPAT,CLDR # use locale formats of JDK8
 ENCODING=-Dfile.encoding=UTF-8
 JSU_ENC=-Dsun.jnu.encoding=UTF-8
@@ -76,8 +76,8 @@ MODULES=" --add-modules=ALL-SYSTEM --illegal-access=warn \
     --add-opens java.xml/javax.xml.namespace=ALL-UNNAMED \
     --add-opens java.base/java.nio.charset=ALL-UNNAMED \
     --add-exports java.management/sun.management=ALL-UNNAMED \
-    --add-exports java.xml/com.sun.org.apache.xerces.internal.dom=ALL-UNNAMED" \
-    --add-exports jdk.unsupported/jdk.internal.module=ALL-UNNAMED
+    --add-exports java.xml/com.sun.org.apache.xerces.internal.dom=ALL-UNNAMED \
+    --add-exports jdk.unsupported/jdk.internal.module=ALL-UNNAMED"
 
 java $MODULES $SECURITY_LEAK $IPv4 $OFFLINE $UH $COMPAT $LLANG $ENCODING $JSU_ENC $USERDIR $NANO_DEBUG $AGENT $PROXY  $DEBUG \
 	$UH $HPROF_CPU $HPROF_HEAP $PROFILER $NO_DB_CHECK $NOSTARTPAGE $INTERNAL_DB $TSL_SERVICE \

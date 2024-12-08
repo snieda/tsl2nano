@@ -130,7 +130,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
     public static final String FORMAT_DATE_DE = "[0-3]\\d\\.[0-1]\\d(\\.([1-2]\\d\\d\\d)?)?";
     public static final String FORMAT_TIME = "[0-2]\\d\\:[0-5]\\d(\\:[0-5]\\d)?";
     public static final String FORMAT_TIME_EN = "\\d?\\d\\:[0-5]\\d(\\:[0-5]\\d)?(\\s[AP]M)?";
-    public static final String FORMAT_DATETIME = FORMAT_DATE_SQL + "([,;|/]?\\s" + FORMAT_TIME_EN + ")?";
+    public static final String FORMAT_DATETIME = FORMAT_DATE_SQL + "([,;|/]?\\s" + FORMAT_TIME + ")?";
     public static final String FORMAT_DATETIME_DE = FORMAT_DATE_DE + "([,;|/]?\\s" + FORMAT_TIME + ")?";
     public static final String FORMAT_NAME_ALPHA_DE = "[a-zA-ZäöüÄÖÜß]+";
     public static final String FORMAT_NAME_ALPHA_EXT_DE = FORMAT_NAME_ALPHA_DE + PATTERN_SINGLE_BYTE_SPACE;
