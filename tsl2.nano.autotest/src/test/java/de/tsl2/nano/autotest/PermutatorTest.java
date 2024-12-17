@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 
 import org.junit.Test;
 
+import de.tsl2.nano.core.util.RegExUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
 public class PermutatorTest {
@@ -64,7 +65,7 @@ public class PermutatorTest {
     private void checkRegEx(String regex) {
         long t = System.currentTimeMillis();
         System.out.println(regex);
-        String gen = ValueRandomizer.createFromRegEx(regex, 6, 10, 10000000);
+        String gen = RegExUtil.createFromRegEx(regex, 6, 10, 10000000);
         System.out.println("(millis:" + (System.currentTimeMillis() - t) + ") -> " + gen);
     }
 

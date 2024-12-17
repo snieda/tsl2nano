@@ -9,6 +9,10 @@
  */
 package de.tsl2.nano.core.util;
 
+import java.util.Scanner;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
+
 /**
  * some helpers on regular expressions
  * 
@@ -53,4 +57,87 @@ public class RegExUtil {
         buf.replace(buf.length() - 1, buf.length(), ")");
         return buf.toString();
     }
+
+    public static String createSimpleRegEx(String template) {
+        return template
+            .replaceAll("([:.?,!*+\\-\\|$<>\\}\\{\\]\\[\\)\\(])", "[$1]")
+            .replaceAll("[a-zA-Z]", "\\\\w")
+            .replaceAll("\\d", "\\\\d")
+            .replaceAll("\\s", "\\\\s");
+    }
+
+	public static String createFromRegEx(String regex, int minLength, int maxLength, int maxIterations) {
+		if (!regex.matches(".*\\(\\?[=<!].*")) {//lookahead or lookbehind
+			StringBuilder buf = new StringBuilder();
+			Pattern pattern = Pattern.compile("(\\\\[^dwWsS])|(.+?([*?+]|([{]\\d+[}]))|.+)");
+			try (Scanner sc = new Scanner(regex)) {
+				sc.findAll(pattern)
+						.forEach(p -> buf.append(createFromRegExPart(p.group(), 1, maxLength, maxIterations)));
+			}
+			return buf.toString();
+		} else {
+			return createFromRegExPart(regex, minLength, maxLength, maxIterations);
+		}
+	}
+
+	public static String createFromRegExPart(String regex, int minLength, int maxLength, int maxIterations) {
+		regex = cleanUpUnClosedBrackets(regex);
+		String slen = StringUtil.extract(regex, "(\\d+)\\}");
+		minLength = (int) (slen.length() > 0 ? Integer.parseInt(slen) : minLength);
+		Pattern pattern = Pattern.compile(regex);
+		CharSequence init = regex.replaceAll("[^\\\\][\\\\*+?\\}\\{\\]\\[]", "");
+				init = new StringBuilder(((String) init).replaceAll("[\\\\]([\\\\*+?\\}\\{\\]\\[])", "$1"));
+		System.out
+				.print(String.format("\tgenerating with (regex: '%s', init: %s, minlen: %d, maxlen: %d, maxiter: %d) ",
+						regex, init,
+						init.length(), maxLength, maxIterations));
+		return generateString((StringBuilder) init, minLength, maxLength, maxIterations,
+				s -> pattern.matcher(s).find(s.length() - 1) || pattern.matcher(s).lookingAt());
+	}
+
+	private static String cleanUpUnClosedBrackets(String regex) {
+		long open = StringUtil.countChar(regex, '(');
+		long close = StringUtil.countChar(regex, ')');
+		if (open != close) {
+			if (open > close) {
+				regex = regex.replaceFirst("[(]", "");
+			} else {
+				int l = regex.lastIndexOf(")");
+				StringBuilder buf = new StringBuilder(regex);
+				buf.replace(l, l+1, "");
+				regex = buf.toString();
+			}
+		} else if (open == 1 && close == 1 && regex.indexOf('(') > regex.indexOf(')')) {
+			regex = regex.replaceAll("[()]", "");
+		}
+		return regex;
+	}
+
+	public static String generateString(StringBuilder init, int minLength, int maxLength, int maxIterations,
+					Predicate<CharSequence> checker) {
+		StringBuilder match = new StringBuilder(StringUtil.fixString(init != null ? init : " ", minLength));
+		int i = 0;
+		char c;
+		boolean matched = false;
+		while (!matched && i++ < maxIterations && match.length() <= maxLength) {
+			if (!(matched = checker.test(match)))
+				match.setLength(Math.max(minLength, match.length() - 1));
+			else
+				break;
+
+			c = (char) (int) (32 + Math.random() * 95);
+			if (c == 127)
+				c++; // -> EUR
+			if (minLength > 0) {
+				match.setCharAt((int) (Math.random() * minLength), c);
+			} else {
+				match.append(c);
+			}
+		}
+		// if (match.length() == 0 || !checker.test(match))
+		// 	throw new IllegalStateException("couldn't generate a string for: " + checker);
+		String s = match.toString();
+		System.out.println(" -> '" + s + "' checker match: " + checker.test(s));
+		return s;
+	}
 }

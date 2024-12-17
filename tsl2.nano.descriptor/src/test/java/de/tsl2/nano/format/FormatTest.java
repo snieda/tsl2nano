@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.sql.Time;
+import java.text.DateFormat;
 import java.text.Format;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -29,6 +30,17 @@ public class FormatTest {
 	public void setUp() {
 		Locale.setDefault(Locale.GERMANY);
 	}
+	@Test
+	public void testDateFormatLang() throws ParseException {
+		Locale.setDefault(Locale.UK);
+		String dateMask = RegExpFormat.createDateMask();
+		DateFormat.getDateInstance().parse(dateMask);
+		RegExpFormat regex = RegExpFormat.createDateTimeRegExp();
+		System.out.println(dateMask + " => " + regex);
+		// smoke test:
+		regex.format(new Date());
+	}
+
 	@Test
 	public void testSimpleDateFormat() throws Exception {
 		Format df = RegExpFormat.createDateRegExp();

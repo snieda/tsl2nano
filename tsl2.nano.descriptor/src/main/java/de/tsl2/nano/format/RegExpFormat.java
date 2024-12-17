@@ -53,6 +53,7 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FormatUtil;
 import de.tsl2.nano.core.util.MapUtil;
+import de.tsl2.nano.core.util.RegExUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.currency.CurrencyUtil;
@@ -127,11 +128,13 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
 
     // TODO how to get the date format from locale? 
     public static final String FORMAT_DATE_SQL = "[1-2]\\d\\d\\d\\-[0-1]\\d\\-[0-3]\\d";
+    public static final String FORMAT_DATE_EN = "[1-2]\\d\\d\\d\\ [A-Z]{3} [0-3]\\d";
     public static final String FORMAT_DATE_DE = "[0-3]\\d\\.[0-1]\\d(\\.([1-2]\\d\\d\\d)?)?";
     public static final String FORMAT_TIME = "[0-2]\\d\\:[0-5]\\d(\\:[0-5]\\d)?";
     public static final String FORMAT_TIME_EN = "\\d?\\d\\:[0-5]\\d(\\:[0-5]\\d)?(\\s[AP]M)?";
-    public static final String FORMAT_DATETIME = FORMAT_DATE_SQL + "([,;|/]?\\s" + FORMAT_TIME + ")?";
-    public static final String FORMAT_DATETIME_DE = FORMAT_DATE_DE + "([,;|/]?\\s" + FORMAT_TIME + ")?";
+    public static final String FORMAT_DATETIME = FORMAT_DATE_SQL + "([,;|\\/]?\\s" + FORMAT_TIME + ")?";
+    public static final String FORMAT_DATETIME_DE = FORMAT_DATE_DE + "([,;|\\/]?\\s" + FORMAT_TIME + ")?";
+    public static final String FORMAT_DATETIME_EN = FORMAT_DATE_EN + "([,;|\\/]?\\s" + FORMAT_TIME + ")?";
     public static final String FORMAT_NAME_ALPHA_DE = "[a-zA-ZäöüÄÖÜß]+";
     public static final String FORMAT_NAME_ALPHA_EXT_DE = FORMAT_NAME_ALPHA_DE + PATTERN_SINGLE_BYTE_SPACE;
     public static final String FORMAT_NAME_ALPHA = "[a-zA-Z]*";
@@ -149,9 +152,9 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
             /*
              * standard german and english date format mask
              */
-            systemInitMap.put(FORMAT_DATE_DE, DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.GERMANY).format(getInitialDate()));
-            systemInitMap.put(DEPRECATED_FORMAT_DATE_DE, DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.GERMANY).format(getInitialDate()));
-            systemInitMap.put(FORMAT_DATE_SQL, DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.ENGLISH).format(getInitialDate()));
+            systemInitMap.put(FORMAT_DATE_DE, createDateMask(Locale.GERMANY));
+            systemInitMap.put(DEPRECATED_FORMAT_DATE_DE, createDateMask(Locale.GERMANY));
+            systemInitMap.put(FORMAT_DATE_SQL, createDateMask(Locale.ENGLISH));
             /*
              * on german dates with month-day 31, the standard-initmask '01.01.CURRENTYEAR' does not work.
              * example: input: 31.1 and mask: 01.01.2011 ==> 31.11.2011 ==> error
@@ -165,27 +168,42 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
              * standard time
              */
             systemInitMap.put(FORMAT_TIME, "00:00:00");
-            systemInitMap.put(FORMAT_TIME_EN, "0:00:00 PM");
+            systemInitMap.put(FORMAT_TIME_EN, "0:00:00 AM");
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     static String getDateFormatExpression() {
-        return isGermanLocale() ? FORMAT_DATE_DE : FORMAT_DATE_SQL;
+        return isGermanLocale() ? FORMAT_DATE_DE : RegExUtil.createSimpleRegEx(createDateMask());
     }
 
     static String getTimeFormatExpression() {
-        return isGermanLocale() ? FORMAT_TIME : FORMAT_TIME_EN;
+        return isGermanLocale() ? FORMAT_TIME : RegExUtil.createSimpleRegEx(createDateMask(DateFormat.getTimeInstance()));
     }
 
     static String getDateTimeFormatExpression() {
-        return isGermanLocale() ? FORMAT_DATETIME_DE : FORMAT_DATETIME;
+        return isGermanLocale() ? FORMAT_DATETIME_DE : RegExUtil.createSimpleRegEx(createDateMask(DateFormat.getDateTimeInstance()));
     }
 
     static boolean isGermanLocale() {
         return Locale.getDefault().equals(Locale.GERMANY);
     }
+    static String createDateMask() {
+        return createDateMask(Locale.getDefault());
+    }
+
+    static String createDateMask(Locale loc) {
+        return createDateMask(DateFormat.getDateInstance(DateFormat.MEDIUM, loc));
+    }
+
+    static String createDateMask(DateFormat df) {
+        String s = df.format(getInitialDate());
+        // on some formats, single numbers on month or days are allowed
+        s = s.replaceAll("(^|[^\\d])(\\d)([^\\d]|$)", "$10$2$3");
+        return s;
+    }
+
     static Date getInitialDate() {
 //        return new Date();
         /*
@@ -383,7 +401,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
         if (matches) {
             return toAppendTo.append(matcher.group());
         } else {
-            throw new ManagedException("tsl2nano.regexpfailure", new Object[] { o, pattern });
+            throw new ManagedException("tsl2nano.regexpfailure", new Object[] { o, compiledPattern.pattern() });
         }
     }
 
@@ -668,7 +686,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
      */
     public static RegExpFormat createDateRegExp() {
         RegExpFormat regExp = new RegExpFormat(getDateFormatExpression(),
-            DateFormat.getDateInstance().format(getInitialDate()),
+            createDateMask(),
             10,
             0,
             new GenericParser(Date.class));
@@ -699,8 +717,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
      * @return regexp for a german date-time
      */
     public static RegExpFormat createDateTimeRegExp() {
-        RegExpFormat regExp = new RegExpFormat(getDateTimeFormatExpression(), DateFormat.getDateTimeInstance()
-            .format(getInitialDate()), 19, 0, new GenericParser(Timestamp.class));
+        RegExpFormat regExp = new RegExpFormat(getDateTimeFormatExpression(), createDateMask(DateFormat.getDateTimeInstance()), 19, 0, new GenericParser(Timestamp.class));
         return regExp;
     }
 
@@ -824,9 +841,11 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
         if (initmask != null) {
             newText = prefixInit(newText, initmask);
             int ti = 0;
+            char c, mc;
             for (int i = 0; i < initmask.length(); i++) {
-                final String mc = initmask.substring(i, i + 1);
-                if (FORMAT_CHARACTERS.contains(mc) && (newText.length() <= ti || newText.charAt(ti) != mc.charAt(0))) {
+                c = newText.charAt(ti);
+                mc = initmask.charAt(i);
+                if (FORMAT_CHARACTERS.contains(String.valueOf(mc)) && (newText.length() <= ti || c != mc)) {
                     textWithCaretJump.append(mc);
                     continue;
                 } else if (newText.length() <= ti) {
@@ -834,7 +853,14 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
                     break;
                 }
 
-                textWithCaretJump.append(newText.charAt(ti));
+                textWithCaretJump.append(c);
+                // forward initmask to format char of new text
+                if (FORMAT_CHARACTERS.contains(String.valueOf(c)) ) {
+                    int ii = initmask.indexOf(c, i);
+                    if (ii != -1 && ii > i) {
+                        i = ii - 1;
+                    }
+                }
                 ti++;
             }
         } else {
