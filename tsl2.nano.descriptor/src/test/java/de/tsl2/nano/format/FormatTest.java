@@ -32,11 +32,19 @@ public class FormatTest {
 	}
 	@Test
 	public void testDateFormatLang() throws ParseException {
-		Locale.setDefault(Locale.UK);
-		String dateMask = RegExpFormat.createDateMask();
+		checkRegEx(Locale.GERMANY);
+		checkRegEx(Locale.FRANCE);
+		checkRegEx(Locale.ITALY);
+		checkRegEx(Locale.UK);
+		checkRegEx(Locale.forLanguageTag("ES"));
+		// checkRegEx(Locale.US); //TODO: problem on time starting with one number 
+	}
+	private void checkRegEx(Locale loc) throws ParseException {
+		Locale.setDefault(loc);
+		String dateMask = RegExpFormat.createDateMask(DateFormat.getDateTimeInstance());
 		DateFormat.getDateInstance().parse(dateMask);
 		RegExpFormat regex = RegExpFormat.createDateTimeRegExp();
-		System.out.println(dateMask + " => " + regex);
+		System.out.println(loc + ": " + dateMask + " => " + regex);
 		// smoke test:
 		regex.format(new Date());
 	}

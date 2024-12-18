@@ -61,7 +61,7 @@ public class RegExUtil {
     public static String createSimpleRegEx(String template) {
         return template
             .replaceAll("([:.?,!*+\\-\\|$<>\\}\\{\\]\\[\\)\\(])", "[$1]")
-            .replaceAll("[a-zA-Z]", "\\\\w")
+            .replaceAll("[a-zA-Z\\p{L}]", ".")
             .replaceAll("\\d", "\\\\d")
             .replaceAll("\\s", "\\\\s");
     }
