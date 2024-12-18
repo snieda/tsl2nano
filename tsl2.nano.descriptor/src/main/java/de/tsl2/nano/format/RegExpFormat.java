@@ -175,15 +175,15 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
     }
 
     static String getDateFormatExpression() {
-        return isGermanLocale() ? FORMAT_DATE_DE : RegExUtil.createSimpleRegEx(createDateMask());
+        return isGermanLocale() ? FORMAT_DATE_DE : RegExUtil.createSimpleRegEx(createDateMask(), true);
     }
 
     static String getTimeFormatExpression() {
-        return isGermanLocale() ? FORMAT_TIME : RegExUtil.createSimpleRegEx(createDateMask(DateFormat.getTimeInstance()));
+        return isGermanLocale() ? FORMAT_TIME : RegExUtil.createSimpleRegEx(createDateMask(DateFormat.getTimeInstance()), true);
     }
 
     static String getDateTimeFormatExpression() {
-        return isGermanLocale() ? FORMAT_DATETIME_DE : RegExUtil.createSimpleRegEx(createDateMask(DateFormat.getDateTimeInstance()));
+        return isGermanLocale() ? FORMAT_DATETIME_DE : RegExUtil.createSimpleRegEx(createDateMask(DateFormat.getDateTimeInstance()), true);
     }
 
     static boolean isGermanLocale() {
@@ -858,7 +858,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
                 if (FORMAT_CHARACTERS.contains(String.valueOf(c)) ) {
                     int ii = initmask.indexOf(c, i);
                     if (ii != -1 && ii > i) {
-                        i = ii - 1;
+                        i = ii;
                     }
                 }
                 ti++;

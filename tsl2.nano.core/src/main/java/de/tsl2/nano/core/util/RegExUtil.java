@@ -57,10 +57,20 @@ public class RegExUtil {
         buf.replace(buf.length() - 1, buf.length(), ")");
         return buf.toString();
     }
-
     public static String createSimpleRegEx(String template) {
+        return createSimpleRegEx(template, false);
+    }
+
+    /**
+     * 
+     * @param template example string to generate the regular expression for
+     * @param softOnSeparation if true, before each separation character (non-letter, non-digit, non-space) the character before is optional.
+     * 
+     * @return generated simple regular expression
+     */
+    public static String createSimpleRegEx(String template, boolean softOnSeparation) {
         return template
-            .replaceAll("([:.?,!*+\\-\\|$<>\\}\\{\\]\\[\\)\\(])", "[$1]")
+            .replaceAll("([:.?,!*+\\-\\|$<>\\}\\{\\]\\[\\)\\(])", (softOnSeparation ? "?" : "") + "[$1]")
             .replaceAll("[a-zA-Z\\p{L}]", ".")
             .replaceAll("\\d", "\\\\d")
             .replaceAll("\\s", "\\\\s");
