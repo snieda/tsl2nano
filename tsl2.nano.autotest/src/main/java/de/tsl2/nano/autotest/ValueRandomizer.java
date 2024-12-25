@@ -34,16 +34,13 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.text.Format;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 
 import de.tsl2.nano.autotest.creator.AFunctionCaller;
@@ -458,79 +455,7 @@ public class ValueRandomizer {
 		di = di_;
 	}
 }
-@SuppressWarnings({"rawtypes", "unchecked"})
-class ValueSets extends HashMap<Class, List<String>> {
-	
-	private static final String MINMAX = "<->";
-	static final String DEFAULT = "default";
-	static AtomicInteger counter = new AtomicInteger(0);
 
-	<V> V fromValueSet(Class<V> typeOf) {
-		return (V) fromValueSet(Util.getSingleBaseType(typeOf), 0);
-	}
-	<V> V fromValueSet(Class<V> typeOf, int depth) {
-		if (!containsKey(typeOf) && (FileUtil.userDirFile(valueSetFilename(typeOf)).exists() || FileUtil.hasResource(valueSetFilename(typeOf)))) {
-			loadValueSet(typeOf);
-		}
-		List<String> values = get(typeOf);
-		if (isMinMax(values)) {
-			return fromValueMinMax(values.get(0), typeOf);
-		} else {
-			Object result = values.get((int)(Math.random() * values.size()));
-			result = avoidCollision(result, typeOf, depth);
-			return ObjectUtil.wrap(result, typeOf);
-		}
-	}
-	private boolean isMinMax(List<String> values) {
-		return values.size() == 1 && values.get(0).contains(MINMAX);
-	}
-	private <V> void loadValueSet(Class<V> typeOf) {
-		loadValueSet(typeOf, null);
-	}
-	private <V> void loadValueSet(Class<V> typeOf, String prefix) {
-		String file = valueSetFilename(typeOf);
-		System.out.print("loading valueset '" + file + "' with prefix '" + prefix + "'...");
-		String content = new String(FileUtil.getFileBytes(file, null));
-		content = content.replaceFirst("[#].*\n", "");
-		String[] names = content.split("[\n]");
-		if (!Util.isEmpty(prefix))
-			Arrays.stream(names).map(n -> prefix + n);
-		put(typeOf, Collections.synchronizedList(new ArrayList(Arrays.asList(names))));
-		System.out.print(names.length + " OK!\n");
-	}
-
-	private Object avoidCollision(Object result, Class typeOf, int depth) {
-		if (!AFunctionCaller.def(AutoTest.VALUESET_AVOID_COLLISION, boolean.class) || PrimitiveUtil.isPrimitiveOrWrapper(typeOf))
-			return result;
-		// TODO: improve performance by avoiding reload
-		List<String> valueSet = get(typeOf);
-		valueSet.remove(result);
-		if (Util.isEmpty(valueSet)) {
-			remove(typeOf);
-			loadValueSet(typeOf, "" + counter.addAndGet(1));
-		}
-		return result;
-	}
-
-	<V> V fromValueMinMax(String minmax, Class<V> typeOf) {
-		String typ = StringUtil.substring(minmax, null, ":", 0, true);
-		String min = StringUtil.substring(minmax, ":", MINMAX);
-		String max = StringUtil.substring(minmax, MINMAX, null);
-		double d = NumberUtil.random(Double.valueOf(min), Double.valueOf(max));
-		return ObjectUtil.wrap(typ != null ? PrimitiveUtil.convert(d, PrimitiveUtil.getPrimitiveClass(typ)): d, typeOf);
-	}
-
-	boolean hasValueSet(Class typeOf) {
-		Class t = Util.getSingleBaseType(typeOf);
-		return containsKey(t) || FileUtil.userDirFile(valueSetFilename(t)).exists() || FileUtil.hasResource(valueSetFilename(t));
-	}
-
-	private static String valueSetFilename(Class typeOf) {
-		String name = AFunctionCaller.def(AutoTest.VALUESET_GROUP, DEFAULT);
-		return (name.equals(DEFAULT) ? "" : name + "-") + typeOf.getSimpleName().toLowerCase() + ".set";
-	}
-
-}
 
 @Retention(RUNTIME)
 @Target({TYPE, METHOD, PARAMETER})

@@ -475,6 +475,10 @@ public class NetUtil {
         return isonline;
     }
 
+    public static boolean isAvailable(String url) {
+        return Util.trY( () -> get(url), false) != null;
+    }
+
     /**
      * this methods provide a free port - but no guarantee is given that this port will be opened by another task right
      * now. if you need a server-socket, call new ServerSocket(0) instead (see {@link ServerSocket#ServerSocket(int)}).

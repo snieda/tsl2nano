@@ -104,6 +104,11 @@ public class AFunctionCaller implements Runnable, Comparable<AFunctionCaller> {
 			defaultAutoTester.setUp();
 			run(source, getParameter());
 			status = result != null ? Status.OK : Status.NULL_RESULT;
+		} catch (VirtualMachineError e) {
+			e.printStackTrace();
+			log(e);
+			Util.trY( () -> FileUtil.writeBytes((this.toString() + "\nSTACKTRACE:\n" + ManagedException.toStringCause(e)).getBytes(), AutoTestGenerator.fileName + "hard-errors.txt", true), false);
+			throw e;
 		} finally {
 			defaultAutoTester.tearDown();
 		}

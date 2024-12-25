@@ -750,4 +750,9 @@ class SelfReferencingMap extends LinkedHashMap<String, Object> {
     public boolean equals(Object o) {
         return hashCode() == o.hashCode();
     }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "@" + hashCode;
+    }
 }

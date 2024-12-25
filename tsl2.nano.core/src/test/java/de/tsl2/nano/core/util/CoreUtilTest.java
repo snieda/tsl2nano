@@ -422,13 +422,13 @@ public class CoreUtilTest implements ENVTestPreparation {
 	// @Ignore("problems on loading dependency javax.json on test")
 	@Test
 	public void testNetUtilJSON() throws Exception {
-		if (!NetUtil.isOnline()) {
+		String url = "http://headers.jsontest.com/"/* "https://graph.facebook.com/search?q=java&type=post" */;
+		if (!NetUtil.isOnline() || !NetUtil.isAvailable(url)) {
 			LOG.warn("SKIPPING online tests for JSON");
 			return;
 		}
 		try {
-			JsonStructure structure = NetUtil.getRestfulJSON(
-					"http://headers.jsontest.com/"/* "https://graph.facebook.com/search?q=java&type=post" */);
+			JsonStructure structure = NetUtil.getRestfulJSON(url);
 			System.out.println(StringUtil.toString(structure, -1));
 
 			// TODO: in cause of bean dependencies commented

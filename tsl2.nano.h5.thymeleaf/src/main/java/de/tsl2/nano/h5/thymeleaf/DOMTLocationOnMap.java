@@ -31,7 +31,6 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.h5.HtmlUtil;
-import de.tsl2.nano.h5.NanoH5Session;
 import de.tsl2.nano.h5.plugin.IDOMDecorator;
 
 /**
@@ -80,10 +79,13 @@ public class DOMTLocationOnMap implements IDOMDecorator {
 
 	private static IContext createThymeleafContext(ISession<?> session, Map<String, Object> variables, boolean replaceDotWithUnderscore) {
 		HashMap<String, Object> vars = new HashMap<>(ENV.getProperties());
-		vars.putAll(((NanoH5Session)session).getContext());
+		if (session.getContext() instanceof Map)
+			vars.putAll((Map<? extends String, ? extends Object>) session.getContext());
 		Bean bean = (Bean)session.getWorkingObject();
-		vars.putAll(bean.toValueMap(null));
-		vars.put(bean.getName(), bean.getInstance());
+		if (bean != null) {
+			vars.putAll(bean.toValueMap(null));
+			vars.put(bean.getName(), bean.getInstance());
+		}
 		//WORKAROUND for thymeleaf replacement-process
 		if (replaceDotWithUnderscore) {
 			HashMap<String, Object> vcopy = new HashMap<>(vars);

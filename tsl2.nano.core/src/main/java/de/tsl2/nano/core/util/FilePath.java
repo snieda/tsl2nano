@@ -8,8 +8,10 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.CopyOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
@@ -36,13 +38,13 @@ public class FilePath {
 	}
 
 	/** copies all files in a given directory to the given target */
-	public static int copy(String dir, String target) {
+	public static int copy(String dir, String target, CopyOption...options) {
 		return recurse(dir, null, null, f -> {
 			Path targetPath = Paths.get(evaluateTargetFile(dir, f, target));
 			if (targetPath.toFile().exists()) {
 				return false;
 			}
-			Util.trY(() -> Files.copy(f, targetPath, StandardCopyOption.COPY_ATTRIBUTES));
+			Util.trY(() -> Files.copy(f, targetPath, Util.isEmpty(options) ? new CopyOption[]{StandardCopyOption.COPY_ATTRIBUTES} : options));
 			return true;
 		});
 	}
@@ -163,17 +165,20 @@ public class FilePath {
 		return Util.trY(() -> Files.readAllBytes(Paths.get(absolutePath(file))));
 	}
 
-	public static Path write(String file, byte[] bytes) {
+	public static Path write(String file, byte[] bytes, OpenOption...options) {
 		// the absolute path is used to respect changes on 'user.dir' (in tests)
-		return Util.trY(() -> Files.write(Paths.get(absolutePath(file)), bytes, CREATE, WRITE, APPEND));
+		return Util.trY(() -> Files.write(Paths.get(absolutePath(file)), bytes, Util.isEmpty(options) ? new OpenOption[]{CREATE, WRITE, APPEND} : options));
 	}
 
-	public static BufferedWriter getFileWriter(String file) {
+	public static BufferedWriter getFileWriter(String file, OpenOption...options) {
 		// the absolute path is used to respect changes on 'user.dir' (in tests)
-		return Util.trY(() -> Files.newBufferedWriter(Paths.get(absolutePath(file)), CREATE, WRITE, APPEND));
+		return Util.trY(() -> Files.newBufferedWriter(Paths.get(absolutePath(file)), Util.isEmpty(options) ? new OpenOption[]{CREATE, WRITE, APPEND} : options));
 	}
 
 	private static String absolutePath(String file) {
 		return file;//FileUtil.userDirFile(file).getAbsolutePath();
 	}
+    public static Path userDirPath(String file) {
+        return Paths.get(FileUtil.userDirFile(file).getAbsolutePath());
+    }    
 }

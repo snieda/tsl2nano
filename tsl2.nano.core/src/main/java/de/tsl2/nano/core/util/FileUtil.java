@@ -662,7 +662,6 @@ public class FileUtil {
             ManagedException.forward(ex);
         }
     }
-
     public static File userDirFile(String file) {
         //the behaviour changed since JDK11 (see https://bugs.openjdk.org/browse/JDK-8202127)
         //setting the system property for 'user.dir' does not work anymore to change the absolute path
@@ -740,6 +739,13 @@ public class FileUtil {
     public static String getValidPathName(String originName) {
         String name = originName.replaceAll("[^a-zA-Z0-9-/._]", "_");
         return name.length() > 128 ? name.substring(0, 128) : name;
+    }
+
+    public static String getFileOrResourceAsString(String fileName) {
+        if (userDirFile(fileName).exists())
+            return getFileString(fileName);
+        else
+            return NetUtil.get(fileName);
     }
 
     public static String getFileString(String fileName) {
