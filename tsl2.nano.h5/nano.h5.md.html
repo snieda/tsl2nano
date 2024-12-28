@@ -49,15 +49,17 @@ All packages (under name *tsl2nano*) are available in maven central, sourceforge
 ### Features and Technical Goals
 
 * pure model implementation + platform independence (naked objects, works on android, too).
+* can be run/served on android through termux starting the jar file
+* UI is OS/Display independent. The Html Style will adjust the look on each display
 * small, having as less as possible static dependencies to other libraries
 * using with zero code possible
 * everything has a default - all defaults are configurable (Convention over Configuration)
 * application, session and entity behaviors are configurable
 * implementation through simple java beans + optional bean presenters
-* you develop ui independent, but are able to use ui dependent extensions.
+* you develop ui independent, but you are able to use ui dependent extensions.
 * no new language to learn. knowing html5 allows to improve layout and styling.
 * navigates through given beans, showing bean-lists and bean-detail dialogs.
-* resolves all bean/entity relations to be browsed.
+* resolves all bean/entity relations to be browsed (showing assist/comboboxes to select available items).
 * navigation can be a configurable sql-property-workflow, a specification workflow  - or simply an entity browser 
 * pre-defines formatting, validation and presentation of relations
 * pure html-5 (no javascript, only html5-scripting-api for websockets)
@@ -80,7 +82,8 @@ All packages (under name *tsl2nano*) are available in maven central, sourceforge
 * secure connection over https and wss (_app.ssl.activate=true)
 * supporting yaml on environment and bean configurations.
 * update mechanism
-* own simple JSon de-/serializer implementation
+* own simple JSon/Yaml/Xml de-/serializer implementation
+* plugin system povides possiblity to change output through own implementations on all important code points
 * injecting own logic on the forms html dom document
 * inject own logic in all phases of presenting through annotations
 * show complex dialogs through websockets to edit beans without leaving the current page
@@ -111,7 +114,7 @@ It is possible to use an ejb container in an application server, but the default
 The base frameworks are grown through input of two industrial projects. the first project had to build a software fully configurable through a database. The second was a financial project.
 
 tested project-environments:
-* windows-xp, windows 7-10, windows-terminal-server, ubuntu 12-21
+* windows-xp, windows 7-10, windows-terminal-server, ubuntu 12-24
 * oracle 11-12, h2, hsqldb
 * glassfish 2.1, toplink
 * jboss-eap 6-7, hibernate 3-5
@@ -320,7 +323,7 @@ The base for the model is any JPA-provider, the presentation of entity-beans wil
 
 Nano.h5 provides mechanisms to create a full configurable application from a given database definition file (ddl).
 
-Creating an UML-Diagram with perhaps _ArgoUML_, or creating an ER-Diagram with f.e. _architect_ (or online on _ponyorm_) you may generate a ddl (database-definition) script. Nano.H5 provides an ant-script (_mda.xml_) to generate an hsqldb-database generating entity beans through hibernate-tools or openjpa (script: _reverse-eng.xml_) for the given jdbc-connection. The ant-scripts use hibernate-tools or openjpa since there are no similar possibilities on other frameworks at the moment. We prefer the reverse engineering on _openjpa_ because there are lots of options to be set.
+Creating an UML-Diagram with perhaps _ArgoUML_, or creating an ER-Diagram with f.e. _architect_ (or online on _ponyorm_ or _drawdb.app_) you may generate a ddl (database-definition) script. Nano.H5 provides an ant-script (_mda.xml_) to generate an hsqldb-database generating entity beans through hibernate-tools or openjpa (script: _reverse-eng.xml_) for the given jdbc-connection. The ant-scripts use hibernate-tools or openjpa since there are no similar possibilities on other frameworks at the moment. We prefer the reverse engineering on _openjpa_ because there are lots of options to be set.
 
 The other option would be to have an existing _beans.jar_. This could be selected on the entry- or login-page of nano-h5. If you enter an absolute path for the attribute _JarFile_ inside the _Persistence_ page, this bean-file will be used to load the entity-classes. If you enter a relative path and the given file doesn't exist, it will be generated through hibernate-tools (if hibernate is in your environment!).
 
@@ -597,7 +600,7 @@ To do so, have a look at BeanContainer.initEmtpyServiceActions(...) to have a si
 
 ### Online Quick-Start with a great selection of Database-Models on PonyORM
 
-There are some online database-model creation/using provider like PonyORM (ponyorm.com) and ERDPlus (erdplus.com). This may be a fast possibility to see different database models working in tsl2.nano.h5.
+There are some online database-model creation/using provider like PonyORM (ponyorm.com) and ERDPlus (erdplus.com) and DrawDB (drawdb.app). This may be a fast possibility to see different database models working in tsl2.nano.h5.
 
 Since most UML-model designers will generate a DDL (database definition language) script which may use a specific database dialect, we try to use HSqldb as local database server with compatibility modes switched on. See _Database Providers and Dialects_ for more informations.
 
@@ -4925,7 +4928,7 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.5.0  | 05.03.2023 | NEW: HATEOAS(restui), see EnvUpdate2v5v0: refactorings: serialization of actions with primitive attributes, move incubation packages, jdk17, h2-v2+ -> hsqldb2.7.1, hibernate 5, all dependencies/plugins updated
  2.5.1  | 04.06.2023 | Fix secure users loading, fix etag 304, NEW module: modelkit
  2.5.2  | 24.11.2024 | dependency updates, h5 stylings enhanced, jmockit -> mockito (serviceacces, replication), complete json, yaml, xml de-/serializing,enhancing autotest,cursus: fix package: tsl2.nano->de.tsl2.nano , beanattribute respecting generic type,many fixes/enhancings on object creation, stringutil, ENV static self removed
- 2.5.3  | 01.01.2025 | corrections on internationalization (generic regex creation)
+ 2.5.3  | 01.01.2025 | corrections on internationalization (generic regex creation), autotest valueset on json objects
 |------ | ---------- | -----------
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
@@ -6150,8 +6153,9 @@ StringBuffer
 * [v] Problem: ClassNotFound NanoH5Unit (NanoH5IT -> NanoH5Unit)
    * [v] NanoH5Unit in src/main/java -> in target/classes and distribution jar directly
       * [v] -> dependency to junit4, htmlunit
-* [ ] generate beans from json-scheme or json
+* [-] generate beans from json-scheme or json
+   can be done through openapi/maven and other libs. tsl2nano is able to work on rest through URLExpression/WebClient
 * [ ] test/use documentworker (started on createBeanCollectors())
 * [ ] test/use specification-exchange
 * [ ] default switch off: tsl2nano.offline=true, [message.dialog], [speech], sidenav?
-* [ ] provide mechanism to store ValueSet for any Object (e.g. org.w3c.Document, see thymeleaf)
+* [v] provide mechanism to store ValueSet for any Object (e.g. org.w3c.Document, see thymeleaf)
