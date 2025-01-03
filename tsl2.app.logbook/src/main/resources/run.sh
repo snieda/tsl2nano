@@ -9,6 +9,17 @@
 #  3. 'debug', 'test' or 'nopause' option
 ###########################################################################
 
+# generic way to include source script through BASH_SOURCE
+SRC_FILE=mainargs.sh
+DIR="${BASH_SOURCE%/*}"
+if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
+if [[ ! -f "$DIR/$SRC_FILE" ]]
+    curl https://github.com/snieda/tsl2-bash-scripts/raw/refs/heads/master/divers/mainargs.sh -o ~/.local/bin/$SRC_FILE && chmod +x $SRC_FILE
+    #(umask 755 && curl -O https://github.com/snieda/tsl2-bash-scripts/raw/refs/heads/master/divers/mainargs.sh)
+    #install -m 755 <( curl -Lf https://github.com/snieda/tsl2-bash-scripts/raw/refs/heads/master/divers/mainargs.sh) ~/.local/bin/$SRC_FILE
+fi
+. $DIR/mainargs.sh
+
 if [ "$1" == "" ] 
 	then PRJ=.nanoh5.logbook
 	else PRJ=$1
@@ -37,6 +48,8 @@ NAME=${project.artifactId}
 VERSION=${project.version}
 EXTENSION="-standalone"
 OFFLINE=-Dtsl2nano.offline=true
+#MYIP="$(ip -o route get to 8.8.8.8 | sed -n 's/.*src \([0-9.]\+\).*/\1/p')"
+#SERVICEURL="-Dservice.url=$MYIP:$PORT"
 #UH=-Denv.user.home=true
 #USERDIR=-Duser.dir=$PRJ
 #LLANG=-Duser.country=FR -Duser.language=fr
@@ -75,7 +88,7 @@ MODULES=" --add-modules=ALL-SYSTEM --illegal-access=warn \
     --add-exports java.management/sun.management=ALL-UNNAMED \
     --add-exports java.xml/com.sun.org.apache.xerces.internal.dom=ALL-UNNAMED"
 
-java $MODULES $SECURITY_LEAK $IPv4 $OFFLINE $UH $LLANG $ENCODING $JSU_ENC $USERDIR $NANO_DEBUG $AGENT $PROXY  $DEBUG \
+java $MODULES $SECURITY_LEAK $IPv4 $OFFLINE $SERVICEURL $UH $LLANG $ENCODING $JSU_ENC $USERDIR $NANO_DEBUG $AGENT $PROXY  $DEBUG \
 	$UH $HPROF_CPU $HPROF_HEAP $PROFILER $NO_DB_CHECK $NOSTARTPAGE $INTERNAL_DB $TSL_SERVICE \
 	$JAVA_OPTS $RESTART_ALL -jar $NAME-$VERSION$EXTENSION.jar $PRJ $PORT $LOG 
 #if [ not "$NOPAUSE" == "nopause" ] then 'read -p' fi

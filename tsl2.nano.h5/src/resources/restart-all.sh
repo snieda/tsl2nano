@@ -14,7 +14,7 @@ export NAME=../tsl2.nano.h5
 export VERSION=${project.version}
 export EXTENSION="-standalone"
 #export RESTART_ALL='-Dapp.login.secure=false -Dapp.login.administration=true -Dapp.login.jarfile.fileselector=false'
-
+export TSL2_PROJECTS=${TSL_PROJECTS:-$(ls -d */)}
 if [[ $1 == "help" ]]; then
 	echo "usage:=========================================================================="
 	echo "clean    : removes all backup files (tar.gz and .sik) generated with this script"
@@ -32,7 +32,7 @@ echo "refreshing backup 'tsl2nano-all-services.tar.gz'..."
 tar -uf tsl2nano-all-services.tar.gz . --exclude *.gz --exclude=*.*ar --exclude *.log --exclude *.sik --exclude *.lck --exclude *.out --exclude target --exclude dist
 
 echo "<html><body><h1>Summary of all Tsl2Nano Services</h1><ul>" > app-index.html
-for d in $(ls -d */)
+for d in $TSL2_PROJECTS
 do
 	if [[ -f $d"runasservice.sh" ]]; then
 		cd $d
@@ -42,8 +42,8 @@ do
 		mv nohup.out nohup.$(date -d "today" +"%Y%m%d%H%M").sik
 		./runasservice.sh backup
 		if [[ $1 != "stop" ]]; then
-			./runasservice.sh start &Z
-			echo "==> $d RESTARTET"
+			./runasservice.sh start &
+			echo "==> $d RESTARTED"
 		fi
 		cd ..
 	else
