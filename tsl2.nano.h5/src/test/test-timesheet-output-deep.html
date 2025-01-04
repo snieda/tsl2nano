@@ -18,7 +18,7 @@ setTheme(false);
  * websocket client implementation.
  */
 var socket = new WebSocket(
-		'wss://' + window.document.location.hostname + ':40901');
+		'wss://' + window.document.location.hostname + ':36515');
 console.log('websocket created:' + socket);
 
 socket.onopen = function() {
@@ -406,7 +406,7 @@ function setTheme(next) {
 <table border="0" frame="box" id="page.header.table" sortable="" width="100%">
 <tbody>
 <tr style="background: transparent;">
-<td content="T" onclick="toggleOnClick()"><a href="https://sourceforge.net/p/tsl2nano/wiki/"><img src="icons/beanex-logo-micro.jpg" title="Framework Version: tsl2.nano.h5-2.5.3-2438-04-01-2025 17:42-d"></a></td><td>
+<td content="T" onclick="toggleOnClick()"><a href="https://sourceforge.net/p/tsl2nano/wiki/"><img src="icons/beanex-logo-micro.jpg" title="Framework Version: tsl2.nano.h5-2.5.3-2438-04-01-2025 18:32-d"></a></td><td>
 <form action="?" method="post" style="display: inline; ">
 <div>
 <nav>
@@ -481,7 +481,7 @@ function setTheme(next) {
 <tr>
 <td class="beanfieldlabel" id="statusInfo.message.label" style="color: var(--label-color); " width="250">Message</td><td>
 <table>
-<input align="start" autofocus="autofocus" class="beanfieldinput" disabled id="statusInfo.message" lang="de_DE" max="" maxlength="2147483647" min="" name="message" pattern="[\x00-\xFF &euro;]{0,5000}" readonly size="-1" style="background-color: rgba(247,247,247,.5);" tabindex="1" title="statusInfo.message" type="text" value="test.workflow finished with status: OK{startedAt: 2025-01-04 18:44:27.033, endedAt: 2025-01-04 18:44:39.017}" width="-1">
+<input align="start" autofocus="autofocus" class="beanfieldinput" disabled id="statusInfo.message" lang="de_DE" max="" maxlength="2147483647" min="" name="message" pattern="[\x00-\xFF &euro;]{0,5000}" readonly size="-1" style="background-color: rgba(247,247,247,.5);" tabindex="1" title="statusInfo.message" type="text" value="test.workflow finished with status: OK{startedAt: 2025-01-04 19:35:07.426, endedAt: 2025-01-04 19:35:16.956}" width="-1">
 </table>
 </td>
 </tr>
