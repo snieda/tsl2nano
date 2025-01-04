@@ -350,7 +350,7 @@ public class ObjectUtil extends MethodUtil {
      */
     @SuppressWarnings("unchecked")
     public static <T> T wrap(Object value, Class<T> wrapperType) {
-        if (value != null && wrapperType.isAssignableFrom(value.getClass()))
+        if (value == null || (value != null && wrapperType.isAssignableFrom(value.getClass())))
             return (T) value;
         LOG.debug("trying to convert '" + value + "' to " + wrapperType);
         // check, if constructor for value is available in wrapper type

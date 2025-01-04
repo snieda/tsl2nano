@@ -398,7 +398,7 @@ public class StringUtil extends Strings {
     }
     public static String toFormattedString(Object o, int maxLineCount, boolean showLines, String sep) {
         maxLineCount = maxLineCount < 0 ? Integer.MAX_VALUE : maxLineCount;
-        String result;
+        String result = null;
         if (o instanceof Map) {
             o = ((Map) o).entrySet();
         }
@@ -409,8 +409,16 @@ public class StringUtil extends Strings {
             o = ((String) o).split("\r*\n", maxLineCount + 1);
         }
         if (o instanceof Object[]) {
-            final Object[] array = (Object[]) o;
-            final StringBuilder strBuilder = new StringBuilder(array.length * 50);
+            result = toFormattedString((Object[]) o, maxLineCount, showLines, sep);
+        } else {
+            result = String.valueOf(o);
+        }
+        return result;
+    }
+
+    static String toFormattedString(Object[] array, int maxLineCount, boolean showLines, String sep) {
+        final StringBuilder strBuilder = new StringBuilder(array.length * 50);
+        try { // on proxies, we get sometimes a classcast Boolean -> String
             final int c = array.length > maxLineCount ? maxLineCount : array.length;
             for (int i = 0; i < c; i++) {
                 strBuilder.append((showLines ? " [" + i + "]: " : "") + array[i] + (i<c-1 ? sep : ""));
@@ -419,11 +427,11 @@ public class StringUtil extends Strings {
                 strBuilder.append(MessageFormat.format(Messages.getString("tsl2nano.more.elements"),
                     new Object[] { array.length - maxLineCount }));
             }
-            result = strBuilder.toString();
-        } else {
-            result = String.valueOf(o);
+            return strBuilder.toString();
+        } catch(Exception ex) {
+            System.out.println("WARN on toFormattedString: " + ex.toString());
+            return Util.isEmpty(strBuilder) ? String.valueOf(array): strBuilder.toString();
         }
-        return result;
     }
 
     /**

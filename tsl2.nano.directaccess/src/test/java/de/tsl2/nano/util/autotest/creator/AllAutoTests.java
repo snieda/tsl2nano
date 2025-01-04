@@ -50,8 +50,9 @@ public class AllAutoTests {
 			methods(RemoteServiceRunner.class, "start|getService"),
 			methods(DatabaseTool.class, "shutdown"),
 			methods(GenericLocalBeanContainer.class, "initLocalContainer"),
-				methods(BeanContainerUtil.class, "initGenericServices"),
-					methods(Replication.class, "save")));
+			methods(BeanContainerUtil.class, "initGenericServices"),
+			methods(Replication.class, "save"), 
+			methods(Persistence.class, ".*")));
 	}
 }
 
