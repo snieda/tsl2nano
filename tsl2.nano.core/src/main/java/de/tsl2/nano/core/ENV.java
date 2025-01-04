@@ -448,23 +448,17 @@ public class ENV implements Serializable {
      * @return system ENV or default value
      */
     public static final <T> T get(String key, T defaultValue) {
+        //system properties win...
     	String sysValue = System.getProperty(key);
-    	T value = null;
-    	if (sysValue != null) { //system properties win...
-    		if (defaultValue != null && !(defaultValue instanceof String)) {
-    			value = (T) ObjectUtil.wrap(sysValue, defaultValue.getClass());
-    		} else {
-    			value = (T) sysValue;
-    		}
+    	T value = (T) (sysValue != null ? sysValue : self().properties.get(key));
+        if (value == null && defaultValue != null) {
+            value = defaultValue;
+            setProperty(key, value);
+        } else if (value != null) {
+    		value = (T) (defaultValue != null ? ObjectUtil.wrap(value, defaultValue.getClass()) : value);
     		if (!self().properties.containsKey(key)) {
     			setProperty(key, value);
     		}
-    	} else {
-    		value = (T) self().properties.get(key);
-            if (value == null && defaultValue != null) {
-                value = defaultValue;
-                setProperty(key, value);
-            }
     	}
         return value;
     }
