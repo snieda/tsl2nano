@@ -11,10 +11,11 @@ echo ======================================================
 
 # activate this block and de-activate that in your projects run.sh to admin the program-version centralized
 export NAME=../tsl2.nano.h5
-export VERSION=${project.version}
-export EXTENSION="-standalone"
+export VERSION=${PROJECT_VERSION:-${project.version}}
+#export EXTENSION="-standalone"
+
 #export RESTART_ALL='-Dapp.login.secure=false -Dapp.login.administration=true -Dapp.login.jarfile.fileselector=false'
-export TSL2_PROJECTS=${TSL_PROJECTS:-$(ls -d */)}
+export TSL2_PROJECTS=${TSL2_PROJECTS:-$(ls -d */)}
 if [[ $1 == "help" ]]; then
 	echo "usage:=========================================================================="
 	echo "clean    : removes all backup files (tar.gz and .sik) generated with this script"
@@ -28,8 +29,10 @@ if [[ $1 == "clean" ]]; then
 	rm tsl2nano-all-services.tar.gz
 	find . -type f -name '*.tar.gz' -or -name '*.sik' -exec rm -I {} +
 fi
-echo "refreshing backup 'tsl2nano-all-services.tar.gz'..."
-tar -uf tsl2nano-all-services.tar.gz . --exclude *.gz --exclude=*.*ar --exclude *.log --exclude *.sik --exclude *.lck --exclude *.out --exclude target --exclude dist
+#echo "refreshing backup 'tsl2nano-all-services.tar.gz'..."
+tar -uf --exclude *.gz --exclude=*.*ar --exclude *.log --exclude *.sik --exclude *.lck --exclude *.out --exclude target --exclude dist tsl2nano-all-services.tar.gz .
+
+echo -e "RESTARTING TSL2_PROJECTS: \n$TSL2_PROJECTS\n"
 
 echo "<html><body><h1>Summary of all Tsl2Nano Services</h1><ul>" > app-index.html
 for d in $TSL2_PROJECTS

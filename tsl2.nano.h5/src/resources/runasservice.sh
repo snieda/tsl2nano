@@ -19,12 +19,12 @@ if [ "$1" == "backup" ]
 	then
 	ARCHIVE_NAME=backup-${PWD##*/}-$(date -d "today" +"%Y%m%d%H%M").tar.gz
 	echo "creating backup $ARCHIVE_NAME ..."
-	tar -czf $ARCHIVE_NAME *.sh $APPDIR .nanoh5.* --exclude=*.*ar --exclude=*.zip --exclude=temp --exclude=*.log --exclude=*.lck --exclude=target --exclude=dist
+	tar --exclude=*.*ar --exclude=*.zip --exclude=temp --exclude=*.log --exclude=*.lck --exclude=target --exclude=dist -czf $ARCHIVE_NAME *.sh $APPDIR .nanoh5.*
 	exit 0
 fi
 if [ "$1" == "stop" ]
 	then
-	APPID=$(ps -C java -o pid= -o command= | grep $APPNAME | grep -o -E "^[0-9]+" | line)
+	APPID=$(ps -C java -o pid= -o command= | grep $APPNAME | grep -o -E "^[0-9]+")
 	if [ "$APPID" == "" ]
 		then
 		echo "$APPNAME is not running yet..."
