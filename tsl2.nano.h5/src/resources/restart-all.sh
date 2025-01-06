@@ -10,9 +10,9 @@ echo ======================================================
 
 
 # activate this block and de-activate that in your projects run.sh to admin the program-version centralized
-export NAME=../tsl2.nano.h5
-export VERSION=${PROJECT_VERSION:-${project.version}}
-#export EXTENSION="-standalone"
+export NAME=${project.artifactId}
+export VERSION=${project.version}
+export EXTENSION="-standalone"
 
 #export RESTART_ALL='-Dapp.login.secure=false -Dapp.login.administration=true -Dapp.login.jarfile.fileselector=false'
 export TSL2_PROJECTS=${TSL2_PROJECTS:-$(ls -d */)}

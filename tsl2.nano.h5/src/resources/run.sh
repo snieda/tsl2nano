@@ -14,11 +14,11 @@ SRC_FILE=mainargs.sh
 DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 if [[ ! -f "$DIR/$SRC_FILE" ]]; then
-    curl -L https://github.com/snieda/tsl2-bash-scripts/raw/refs/heads/master/divers/mainargs.sh -o ~/.local/bin/$SRC_FILE && chmod +x .local/bin/$SRC_FILE
+    curl -L https://github.com/snieda/tsl2-bash-scripts/raw/refs/heads/master/divers/mainargs.sh -o ~/.local/bin/$SRC_FILE && chmod +x ~/.local/bin/$SRC_FILE
     #(umask 755 && curl -LO https://github.com/snieda/tsl2-bash-scripts/raw/refs/heads/master/divers/mainargs.sh)
     #install -m 755 <( curl -Lf https://github.com/snieda/tsl2-bash-scripts/raw/refs/heads/master/divers/mainargs.sh) ~/.local/bin/$SRC_FILE
 fi
-. $DIR/mainargs.sh
+. $DIR/mainargs.sh || . mainargs.sh
 
 if [ "$1" == "" ] 
 	then PRJ=.nanoh5.environment
@@ -43,13 +43,16 @@ fi
 if [ "$4" == "move" ] 
 	then mv $PRJ $PRJ + '~' 
 fi
+# workaround: maven filter is not able to replace nested variables
+NAME_=${project.artifactId}
+VERSION_=${project.version}
 
-NAME=${NAME:-${project.artifactId}}
-VERSION=${VERSION:-${project.version}}
-EXTENSION="-standalone"
+NAME=${NAME:-$NAME_}
+VERSION=${VERSION:-$VERSION_}
+(cd tsl2.nano.h5/target && ls *-standalone*.jar) && EXTENSION="-standalone"
 [ $EXTENSION != "-virgin" ] && OFFLINE=-Dtsl2nano.offline=true
-MYIP="$(ip -o route get to 8.8.8.8 | sed -n 's/.*src \([0-9.]\+\).*/\1/p')"
-SERVICEURL="-Dservice.url=$MYIP:$PORT"
+#MYIP="$(ip -o route get to 8.8.8.8 | sed -n 's/.*src \([0-9.]\+\).*/\1/p')"
+#SERVICEURL="-Dservice.url=https://$MYIP:$PORT"
 #UH=-Denv.user.home=true
 #USERDIR=-Duser.dir=$PRJ
 #LLANG="-Duser.country=US -Duser.language=us -Duser.language.format=us"
