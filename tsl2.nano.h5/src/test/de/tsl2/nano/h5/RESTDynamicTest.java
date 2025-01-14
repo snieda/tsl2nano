@@ -68,7 +68,7 @@ public class RESTDynamicTest {
 		assertTrue(RESTDynamic.canRest(url));
 		Response response = new RESTDynamic().serve(url, "GET", null, null);
 		String result = ByteUtil.toString(response.getData(), "UTF8");
-		System.out.println(result);
+		// System.out.println(result);
 		assertTrue(result.contains("RESTDynamic available entities"));
 	}
 	
@@ -79,7 +79,7 @@ public class RESTDynamicTest {
 		assertTrue(RESTDynamic.canRest(url));
 		Response response = new RESTDynamic().serve(url, "GET", null, null);
 		String result = ByteUtil.toString(response.getData(), "UTF8");
-		System.out.println(result);
+		// System.out.println(result);
 		assertTrue(result.contains("}"));
 	}
 	

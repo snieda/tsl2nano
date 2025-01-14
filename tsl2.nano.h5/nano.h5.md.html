@@ -3163,6 +3163,14 @@ UserService.authenticate(String user, String password) {
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+## Getting data from NoSQL databases or through REST calls
+
+If you don't need a connection to a relational database, you should implement the INanoPlugin interface.
+There the createBeanContainer() has to initiate the BeanContainer through a call to initServiceActions() providing actions to get the data
+from e.g. a NoSQL database or through REST services. And it has to return the list of bean/model classes.
+
+If you mix relational data and data provided by REST services, you may only use the URLExpression or WebClient on virtual bean attributes.
+
 ## Generating your Entities
 
 It is possible to generate your entity beans through a tool like hibernate-tools or openjpa. This is prepared in _Nano.H5_, for further informations see chapter _Model Driven Architecture (MDA))_.
@@ -3576,25 +3584,13 @@ Your implementation of  _INanoPlugin_ works as application inspector, changing t
  * @version $Revision$
  */
 public interface INanoPlugin extends Plugin {
-    /** do some inspections on authentication. The auth object is pre-filled */
-    void onAuthentication(IAuthorization auth);
-
     /**
      * change the default properties of the application. see 'environment.xml' for a list of all keys and their defaults
      */
     void configuration(SortedMap<Object, Object> properties, Map<Class<?>, Object> services);
 
-    /**
-     * The Html page-builder defines the creation of each response. you must return an instance of pageBuilder (null
-     * will result in errors)!
-     */
-    public <PAGE, OUTPUT, T extends IPageBuilder<PAGE, OUTPUT>> T definePresentationType(T pageBuilder);
-
-    /**
-     * for each bean type (belonging to an entity class) the default handling can be changed. the output can be found at
-     * the presentation directory
-     */
-    void defineBeanDefinition(BeanDefinition<?> beanDef);
+    /** do some inspections on authentication. The auth object is pre-filled */
+    void onAuthentication(IAuthorization auth);
 
     /**
      * before an authentication, the properties for the jpa persistence.xml will be defined. You can change these
@@ -3602,11 +3598,29 @@ public interface INanoPlugin extends Plugin {
      */
     void definePersistence(Persistence persistence);
 
+    /** do some initializings on the database. the connection-info is inside the persistence object */
+    void databaseGenerated(Persistence persistence);
+    
+    /** do some initializings on the jar-file. the jar-file-name is inside the persistence object */
+    void beansGenerated(Persistence persistence);
+    
+    /**
+     * The Html page-builder defines the creation of each response. you must return an instance of pageBuilder (null
+     * will result in errors)!
+     */
+    <PAGE, OUTPUT, T extends IPageBuilder<PAGE, OUTPUT>> T definePresentationType(T pageBuilder);
+
+    /**
+     * for each bean type (belonging to an entity class) the default handling can be changed. the output can be found at
+     * the presentation directory
+     */
+    void defineBeanDefinition(BeanDefinition<?> beanDef);
+
     /** before running the requested user interaction, you can inspect the action that will be called */
     void actionBeforeHandler(IAction<?> action);
 
     /** after running the requested user interaction, you can inspect the action that was called */
-    void actionAfterHandler(IAction<?> action);
+    default void actionAfterHandler(IAction<?> action) {}
 
     /**
      * on creating a new session, the workflow / navigation stack is defined by loading from 'workflow.xml' or if not
@@ -3622,6 +3636,40 @@ public interface INanoPlugin extends Plugin {
             Map<String, String> header,
             Map<String, String> parms,
             Map<String, String> files);
+
+    /** on each html response you are able to manipulate the dom transformed html response string */
+	default String manipulateHtmlResponse(String html) {
+		return html;
+	}
+
+	/** lets you change the response object - perhaps adding header values etc. */
+	default Response handleResponse(Response response) {
+		return response;
+	}
+
+	/** do anything on receiving a new message from a websocket client */
+	default void handleWebSocketMessage(WebSocket conn, String msg) {}
+
+	/** do anything on receiving a new message from a websocket client */
+	default void handleWebSocketMessage(WebSocket conn, ByteBuffer message) {}
+
+	/** the request has entered the session to work on. all request values were transferred to the workflow bean */
+	default void handleSessionRequest(NanoH5Session nanoH5Session, Map<String, String> parms) {}
+
+    /**
+     * @see BeanContainer.createBeanContainer()
+     * should create and register the BeanContainer by calling BeanContainer.initServiceActions(...).
+     * the BeanContainer provides all data. implement this method only, if you don't want to get the data
+     * through a relational database.
+     * e.g. getting the bean classes from an openapi implementation and the data through a rest service or a nosql database.
+     * if this method returns null, the origin method will be invoked with its  standard implementation. 
+     * returning a list of bean/model clesses, the origin method wont be called - you are responsable to create the BeanContainer.
+     * @param persistence persistence properties - only usable on relational databases
+     * @param runtimeClassloader nanoh5 classloader
+     * @return list of bean/model classes or null
+     */
+    @SuppressWarnings("rawtypes")
+    default List<Class> createBeanContainer(final Persistence persistence, PersistenceClassLoader runtimeClassloader) {return null;}
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -6163,4 +6211,8 @@ StringBuffer
 
 * [ ] provide all serverway apps local with setjdk8/2.3.2 - and pack all properties to single zips
 * [-] refactore runasservice-all.sh to use flat hierarchy (base dir and environment dirs)
-* [ ] extend run.sh to use mainargs.sh
+* [v] extend run.sh to use mainargs.sh
+* [v] working on NoSQL or only REST-calls:
+   * use runnable expression on attributes
+   * new plugin method on NanoH5.createBeanContainer() to provide/override service actions through calling BeanContainer.initServiceActions(..)
+   * BeanCollectors: plugin handler call on NanoH5.createBeanCollectors() ?

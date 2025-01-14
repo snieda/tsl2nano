@@ -936,6 +936,32 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
             Plugins.process(INanoPlugin.class).defineBeanDefinition(beanDef);
         }
 
+        provideResourceBundelWithAutoTranslation();
+
+        BeanCollector root = new BeanCollector(BeanCollector.class, types,
+            ENV.get("collector.root.mode", MODE_EDITABLE | MODE_SEARCHABLE), null);
+        root.setName(StringUtil.toFirstUpper(StringUtil
+            .substring(Persistence.current().getJarFile().replace("\\", "/"), "/", ".jar", true)));
+        
+        ((IIPresentable)root.getPresentable()).setLabel(root.getName());
+        root.setAttributeFilter("name");
+        root.setSimpleList(ENV.get("collector.root.listhorizontal", false));
+        initBeanCollectorFormatter(root);
+        //perhaps, create the first environment.xml
+        if (!ENV.isPersisted()) {
+            ENV.persist();
+            BeanDefinition.dump();
+        }
+        ENV.setAutopersist(true);
+        
+        EntityBrowser entityBrowser = ConcurrentUtil.getCurrent(EntityBrowser.class);
+        int entryPoints = 0;
+        if (entityBrowser != null)
+            entryPoints = createNavigationStartPoint(entityBrowser, root);
+        return entryPoints == 0 ? root : entityBrowser.next(null); //if entrypoints are found, root and entrypoints are push to the navigationstack
+    }
+
+    private void provideResourceBundelWithAutoTranslation() {
         /*
          * perhaps, do auto-translation if no resourcebundle present for current locale
          */
@@ -952,15 +978,9 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
                 LOG.warn("no resource bundle 'messages.properties' found in environment directory");
             }
         }
+    }
 
-        BeanCollector root = new BeanCollector(BeanCollector.class, types,
-            ENV.get("collector.root.mode", MODE_EDITABLE | MODE_SEARCHABLE), null);
-        root.setName(StringUtil.toFirstUpper(StringUtil
-            .substring(Persistence.current().getJarFile().replace("\\", "/"), "/", ".jar", true)));
-        
-        ((IIPresentable)root.getPresentable()).setLabel(root.getName());
-        root.setAttributeFilter("name");
-        root.setSimpleList(ENV.get("collector.root.listhorizontal", false));
+    private void initBeanCollectorFormatter(BeanCollector root) {
         root.getAttribute("name").setFormat(new Format() {
             /** serialVersionUID */
             private static final long serialVersionUID = 1725704131355509738L;
@@ -978,18 +998,6 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
                 return null;
             }
         });
-        //perhaps, create the first environment.xml
-        if (!ENV.isPersisted()) {
-            ENV.persist();
-            BeanDefinition.dump();
-        }
-        ENV.setAutopersist(true);
-        
-        EntityBrowser entityBrowser = ConcurrentUtil.getCurrent(EntityBrowser.class);
-        int entryPoints = 0;
-        if (entityBrowser != null)
-            entryPoints = createNavigationStartPoint(entityBrowser, root);
-        return entryPoints == 0 ? root : entityBrowser.next(null); //if entrypoints are found, root and entrypoints are push to the navigationstack
     }
 
     /**
@@ -1001,6 +1009,10 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
      */
     protected List<Class> createBeanContainer(final Persistence persistence,
             PersistenceClassLoader runtimeClassloader) {
+        List<Class> model = Plugins.process(INanoPlugin.class).createBeanContainer(persistence, runtimeClassloader);
+        if (model != null)
+            return model;
+
         Message.send("creating bean-container for " + persistence.getJarFile());
         /*
          * If a external jar-file was selected (-->absolute path), it will be copied

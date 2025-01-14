@@ -12,10 +12,12 @@ echo ======================================================
 # activate this block and de-activate that in your projects run.sh to admin the program-version centralized
 export NAME=${project.artifactId}
 export VERSION=${project.version}
-export EXTENSION="-standalone"
+#(cd tsl2.nano.h5/target && ls *-standalone*.jar) && export EXTENSION="-standalone"
+export MYIP="$(ip -o route get to 8.8.8.8 | sed -n 's/.*src \([0-9.]\+\).*/\1/p')"
 
 #export RESTART_ALL='-Dapp.login.secure=false -Dapp.login.administration=true -Dapp.login.jarfile.fileselector=false'
 export TSL2_PROJECTS=${TSL2_PROJECTS:-$(ls -d */)}
+
 if [[ $1 == "help" ]]; then
 	echo "usage:=========================================================================="
 	echo "clean    : removes all backup files (tar.gz and .sik) generated with this script"

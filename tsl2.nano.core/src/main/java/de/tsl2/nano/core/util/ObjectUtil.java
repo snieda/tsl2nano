@@ -388,7 +388,7 @@ public class ObjectUtil extends MethodUtil {
                     else if (ByteUtil.isByteStream(wType))
                         return ByteUtil.toByteStream(ByteUtil.getBytes(value), wType);
                     else if (Collection.class.isAssignableFrom(wType))
-                        return (T )new ListSet(value);
+                        return (T) (value instanceof Collection ? new ListSet((Collection)value) : new ListSet(value));
                     else if (value instanceof Collection && wType.isArray())
                         if (wType.getComponentType().isPrimitive())
                             // return (T) ((Collection) value).stream().map(i -> wrap(i, wType.getComponentType())).toArray();

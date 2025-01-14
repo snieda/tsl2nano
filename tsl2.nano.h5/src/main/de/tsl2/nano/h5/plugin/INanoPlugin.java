@@ -1,6 +1,7 @@
 package de.tsl2.nano.h5.plugin;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 
@@ -14,6 +15,7 @@ import de.tsl2.nano.h5.NanoHTTPD.Method;
 import de.tsl2.nano.h5.NanoHTTPD.Response;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.persistence.Persistence;
+import de.tsl2.nano.persistence.PersistenceClassLoader;
 import de.tsl2.nano.plugin.Plugin;
 import de.tsl2.nano.serviceaccess.IAuthorization;
 
@@ -107,4 +109,19 @@ public interface INanoPlugin extends Plugin {
 
 	/** the request has entered the session to work on. all request values were transferred to the workflow bean */
 	default void handleSessionRequest(NanoH5Session nanoH5Session, Map<String, String> parms) {}
+
+    /**
+     * @see BeanContainer.createBeanContainer()
+     * should create and register the BeanContainer by calling BeanContainer.initServiceActions(...).
+     * the BeanContainer provides all data. implement this method only, if you don't want to get the data
+     * through a relational database.
+     * e.g. getting the bean classes from an openapi implementation and the data through a rest service or a nosql database.
+     * if this method returns null, the origin method will be invoked with its  standard implementation. 
+     * returning a list of bean/model clesses, the origin method wont be called - you are responsable to create the BeanContainer.
+     * @param persistence persistence properties - only usable on relational databases
+     * @param runtimeClassloader nanoh5 classloader
+     * @return list of bean/model classes or null
+     */
+    @SuppressWarnings("rawtypes")
+    default List<Class> createBeanContainer(final Persistence persistence, PersistenceClassLoader runtimeClassloader) {return null;}
 }

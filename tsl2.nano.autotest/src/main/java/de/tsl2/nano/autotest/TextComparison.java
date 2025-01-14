@@ -31,8 +31,8 @@ public class TextComparison {
     
     public static void assertEquals(String exptected, String result, boolean ignoreWhitespace, Map<String, String> replacements) {
         if (ignoreWhitespace) {
-            exptected = exptected.replaceAll("\\s+", " ");
-            result = result.replaceAll("\\s+", " ");
+            exptected = exptected.replaceAll("[\\s\\p{Z}]+", " ");
+            result = result.replaceAll("[\\s\\p{Z}]+", " ");
         }
         StringBuilder exp = new StringBuilder(exptected);
         StringBuilder res = new StringBuilder(result);
