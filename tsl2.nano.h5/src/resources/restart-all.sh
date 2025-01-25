@@ -12,12 +12,11 @@ echo ======================================================
 # activate this block and de-activate that in your projects run.sh to admin the program-version centralized
 export NAME=${project.artifactId}
 export VERSION=${project.version}
-#(cd tsl2.nano.h5/target && ls *-standalone*.jar) && export EXTENSION="-standalone"
+#export EXTENSION="-standalone"
 export MYIP="$(ip -o route get to 8.8.8.8 | sed -n 's/.*src \([0-9.]\+\).*/\1/p')"
 
 #export RESTART_ALL='-Dapp.login.secure=false -Dapp.login.administration=true -Dapp.login.jarfile.fileselector=false'
 export TSL2_PROJECTS=${TSL2_PROJECTS:-$(ls -d */)}
-
 if [[ $1 == "help" ]]; then
 	echo "usage:=========================================================================="
 	echo "clean    : removes all backup files (tar.gz and .sik) generated with this script"
@@ -36,13 +35,51 @@ tar -uf --exclude *.gz --exclude=*.*ar --exclude *.log --exclude *.sik --exclude
 
 echo -e "RESTARTING TSL2_PROJECTS: \n$TSL2_PROJECTS\n"
 
-echo "<html><body><h1>Summary of all Tsl2Nano Services</h1><ul>" > app-index.html
+html_body=$(cat <<EOF
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content=
+        "width=device-width, initial-scale=1.0" />
+    <title>TSL2 Applications</title>
+    <style>
+        body {
+            background: radial-gradient(#9999FF, #000000);
+            text-align: center;
+            color: white;
+        }
+        h1 {
+            position: relative;
+            font-size: 8em;
+            transition: 0.5s;
+            font-family: Arial, Helvetica, sans-serif;
+            text-shadow: 0 1px 0 #ccc, 0 2px 0 #ccc,
+                0 3px 0 #ccc, 0 4px 0 #ccc,
+                0 5px 0 #ccc, 0 6px 0 #ccc,
+                0 7px 0 #ccc, 0 8px 0 #ccc,
+                0 9px 0 #ccc, 0 10px 0 #ccc,
+                0 11px 0 #ccc, 0 12px 0 #ccc,
+                0 20px 30px rgba(0, 0, 0, 0.5);
+        }
+        div {
+            font-size: 3em;
+        }
+    </style>
+</head>
+<body>
+	<h1>TSL2 Applications</h1>
+EOF
+)
+
+echo "$html_body" > app-index.html
 for d in $TSL2_PROJECTS
 do
 	if [[ -f $d"runasservice.sh" ]]; then
 		cd $d
 		./runasservice.sh stop
-		echo "<li><a href=http://$(hostname -I | cut -f1 -d ' '):$(grep -E 'PORT[=][0-9]' runasservice.sh | grep -E '[0-9]+' --only-matching)>$d</a></li>" >> ../app-index.html
+		echo "<div><a href=http://$(hostname -I | cut -f1 -d ' '):$(grep -E 'PORT[=][0-9]' runasservice.sh | grep -E '[0-9]+' --only-matching)>$d</a></div>" >> ../app-index.html
 		sleep 2
 		mv nohup.out nohup.$(date -d "today" +"%Y%m%d%H%M").sik
 		./runasservice.sh backup
@@ -55,7 +92,7 @@ do
 		echo "==> $d has no runasservice.sh --> no nanoh5 directory"
 	fi
 done
-echo "</ul></body></html>" >> app-index.html
+echo "</body></html>" >> app-index.html
 echo
 echo ------------------------------------------------------
 echo PROCESSES:
@@ -68,6 +105,8 @@ echo "PORTS:" $(ps -ef | grep java | grep -o -E "(80|90)[0-9]{2}" | sort | tr '\
 echo ======================================================
 echo RESTART SUCCESSFULL
 echo ======================================================
+
+xdg-open app-index.html
 
 read -p "start tail for all processes? [Y|n]: " dotail
 

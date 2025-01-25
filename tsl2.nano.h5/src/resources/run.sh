@@ -14,7 +14,8 @@ SRC_FILE=mainargs.sh
 DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 if [[ ! -f "$DIR/$SRC_FILE"  && ! -f "~/.local/bin/$SRC_FILE" ]]; then
-    curl -L https://github.com/snieda/tsl2-bash-scripts/raw/refs/heads/master/divers/mainargs.sh -o ~/.local/bin/$SRC_FILE && chmod +x ~/.local/bin/$SRC_FILE
+    [[ -d "~/.local/bin" ]] && BINDIR="~/.local/bin/"
+    curl -L https://github.com/snieda/tsl2-bash-scripts/raw/refs/heads/master/divers/mainargs.sh -o $BINDIR$SRC_FILE && chmod +x $BINDIR$SRC_FILE
     #(umask 755 && curl -LO https://github.com/snieda/tsl2-bash-scripts/raw/refs/heads/master/divers/mainargs.sh)
     #install -m 755 <( curl -Lf https://github.com/snieda/tsl2-bash-scripts/raw/refs/heads/master/divers/mainargs.sh) ~/.local/bin/$SRC_FILE
 fi

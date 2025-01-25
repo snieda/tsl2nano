@@ -4,6 +4,7 @@
 APPNAME=environment
 PORT=8067
 APPDIR=.nanoh5.$APPNAME
+echo "==> $0 ${PWD##*/} $@"
 if [ "$1" == "--help" ]
 	then
 	echo "usage: $0 [stop | backup | --help]"
@@ -34,6 +35,7 @@ if [ "$1" == "stop" ]
 	echo "$APPNAME stopped successfully"
 	exit 0
 fi
-nohup ./run.sh $APPDIR $PORT &
+shift
+nohup ./run.sh $APPDIR $PORT "$@" &
 # < /dev/null & tail -F $APPDIR/logfactory.log
 
