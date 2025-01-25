@@ -23,26 +23,26 @@ fi
 
 if [ "$1" == "" ] 
 	then PRJ=.nanoh5.environment
-	else PRJ=$1
+	else PRJ=$1 && shift
 fi
-if [ "$2" == "" ] 
+if [ "$1" == "" ] 
 	then PORT=8067
-	else PORT=$2
+	else PORT=$2 && shift
 fi
-if [ "$3" == "debug" ] 
-	then DEBUG="-agentlib:jdwp=transport=dt_socket,address=localhost:8787,server=y,suspend=n"
+if [ "$1" == "debug" ] 
+	then DEBUG="-agentlib:jdwp=transport=dt_socket,address=localhost:8787,server=y,suspend=n" && shift
 fi
-if [ "$3" == "ndebug" ] 
-	then NANO_DEBUG=-Dtsl2.nano.log.level=debug
+if [ "$1" == "ndebug" ] 
+	then NANO_DEBUG=-Dtsl2.nano.log.level=debug && shift
 fi
-if [ "$3" == "test" ] 
-	then NANO_TEST=-Dtsl2.nano.test=true
+if [ "$1" == "test" ] 
+	then NANO_TEST=-Dtsl2.nano.test=true && shift
 fi
-if [ "$3" == "nopause" ] 
-	then NOPAUSE=nopause
+if [ "$1" == "nopause" ] 
+	then NOPAUSE=nopause && shift
 fi
-if [ "$4" == "move" ] 
-	then mv $PRJ $PRJ + '~' 
+if [ "$1" == "move" ] 
+	then mv $PRJ $PRJ + '~' && shift
 fi
 # workaround: maven filter is not able to replace nested variables
 NAME_=${project.artifactId}
@@ -66,7 +66,7 @@ JSU_ENC=-Dsun.jnu.encoding=UTF-8
 #HPROF_CPU=-agentlib:hprof=cpu=samples
 #HPROF_HEAP=-agentlib:hprof=heap=dump
 #PROFILER="-agentpath:...visualvm_138/profiler/lib/deployed/jdk16/windows/profilerinterface.dll=...\visualvm_138\profiler\lib,5140"
-JAVA_OPTS="-Xmx512m -Djava.awt.headless=true"
+JAVA_OPTS="-Xmx512m -Djava.awt.headless=true $@"
 #LOG=">$PRJ.log"
 IPv4="-Djava.net.preferIPv4Stack=true"
 #NOSTARTPAGE=-Dapp.show.startpage=false
@@ -94,6 +94,10 @@ MODULES=" --add-modules=ALL-SYSTEM --illegal-access=warn \
     --add-exports java.management/sun.management=ALL-UNNAMED \
     --add-exports java.xml/com.sun.org.apache.xerces.internal.dom=ALL-UNNAMED \
     --add-exports jdk.unsupported/jdk.internal.module=ALL-UNNAMED"
+
+echo "starting:\n\tjava $MODULES $SECURITY_LEAK $IPv4 $OFFLINE $SERVICEURL $UH $COMPAT $LLANG $ENCODING $JSU_ENC $USERDIR $NANO_DEBUG $AGENT $PROXY  $DEBUG \
+	$UH $HPROF_CPU $HPROF_HEAP $PROFILER $NO_DB_CHECK $NOSTARTPAGE $INTERNAL_DB \
+	$JAVA_OPTS $RESTART_ALL -jar $NAME-$VERSION$EXTENSION.jar $PRJ $PORT $LOG "
 
 java $MODULES $SECURITY_LEAK $IPv4 $OFFLINE $SERVICEURL $UH $COMPAT $LLANG $ENCODING $JSU_ENC $USERDIR $NANO_DEBUG $AGENT $PROXY  $DEBUG \
 	$UH $HPROF_CPU $HPROF_HEAP $PROFILER $NO_DB_CHECK $NOSTARTPAGE $INTERNAL_DB \
