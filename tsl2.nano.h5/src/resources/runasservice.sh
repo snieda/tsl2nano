@@ -36,6 +36,6 @@ if [ "$1" == "stop" ]
 	exit 0
 fi
 shift
-nohup ./run.sh $APPDIR $PORT "$@" &
+nohup ./run.sh $APPDIR $PORT "$@"
 # < /dev/null & tail -F $APPDIR/logfactory.log
 

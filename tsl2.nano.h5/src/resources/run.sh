@@ -27,7 +27,7 @@ if [ "$1" == "" ]
 fi
 if [ "$1" == "" ] 
 	then PORT=8067
-	else PORT=$2 && shift
+	else PORT=$1 && shift
 fi
 if [ "$1" == "debug" ] 
 	then DEBUG="-agentlib:jdwp=transport=dt_socket,address=localhost:8787,server=y,suspend=n" && shift

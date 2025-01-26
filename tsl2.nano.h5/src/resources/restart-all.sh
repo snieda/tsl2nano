@@ -13,7 +13,7 @@ echo ======================================================
 export NAME=${project.artifactId}
 export VERSION=${project.version}
 #export EXTENSION="-standalone"
-export MYIP="$(ip -o route get to 8.8.8.8 | sed -n 's/.*src \([0-9.]\+\).*/\1/p')"
+export MYIP=${MYIP:-"$(ip -o route get to 8.8.8.8 | sed -n 's/.*src \([0-9.]\+\).*/\1/p')"}
 
 #export RESTART_ALL='-Dapp.login.secure=false -Dapp.login.administration=true -Dapp.login.jarfile.fileselector=false'
 export TSL2_PROJECTS=${TSL2_PROJECTS:-$(ls -d */)}
@@ -99,16 +99,18 @@ echo PROCESSES:
 echo ------------------------------------------------------
 ps -ef | grep java
 
-echo
-echo "PORTS:" $(ps -ef | grep java | grep -o -E "(80|90)[0-9]{2}" | sort | tr '\n' ' ')
+if [[ $1 != "stop" ]]; then
+	echo
+	echo "PORTS:" $(ps -ef | grep java | grep -o -E "(80|90)[0-9]{2}" | sort | tr '\n' ' ')
 
-echo ======================================================
-echo RESTART SUCCESSFULL
-echo ======================================================
+	echo ======================================================
+	echo RESTART SUCCESSFULL
+	echo ======================================================
 
-xdg-open app-index.html
+	xdg-open app-index.html
 
-read -p "start tail for all processes? [Y|n]: " dotail
+	read -p "start tail for all processes? [Y|n]: " dotail
+fi
 
 if [[ "$dotail" != "n" ]]; then
 #	for d in $(ls -d */)
