@@ -1676,6 +1676,10 @@ public class BeanPresentationHelper<T> {
                     public Object action() throws Exception {
                         return ENV.get(IPageBuilder.class).build(vsession.getValue(), bean, null, false);
                     }
+                    @Override
+                    public boolean isCreatingExternalContent() {
+                        return true;
+                    }
                 });
 
             pageActions
@@ -1683,6 +1687,10 @@ public class BeanPresentationHelper<T> {
                     @Override
                     public Object action() throws Exception {
                         return getSimpleTextualPresentation();
+                    }
+                    @Override
+                    public boolean isCreatingExternalContent() {
+                        return true;
                     }
                 });
 
@@ -1692,7 +1700,11 @@ public class BeanPresentationHelper<T> {
                 public Object action() throws Exception {
                     return Util.toJson(bean instanceof IBeanCollector ? ((IBeanCollector)bean).getCurrentData() : ((Bean)bean).instance);
                 }
-            });
+                @Override
+                public boolean isCreatingExternalContent() {
+                    return true;
+                }
+        });
 
             pageActions.add(new SecureAction(bean.getClazz(),
                 "document",

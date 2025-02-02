@@ -139,6 +139,9 @@ public interface IAction<RETURNTYPE> extends Runnable {
 
     boolean isRunning();
     
+    /** perhaps creates a new page outside of the current content (exports, prints etc.) */
+    boolean isCreatingExternalContent();
+
     /**
      * starts the given action for all items of the given collection - as first action parameter.
      * 

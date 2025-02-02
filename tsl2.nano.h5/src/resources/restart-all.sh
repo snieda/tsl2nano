@@ -8,13 +8,13 @@ echo ======================================================
 #    having the executable script 'runasservice.sh' 
 ###########################################################
 
-
 # activate this block and de-activate that in your projects run.sh to admin the program-version centralized
 export NAME=${project.artifactId}
 export VERSION=${project.version}
 #export EXTENSION="-standalone"
+[[ "$1" == "localhost" ]] && export MYIP="localhost" && shift
 export MYIP=${MYIP:-"$(ip -o route get to 8.8.8.8 | sed -n 's/.*src \([0-9.]\+\).*/\1/p')"}
-
+export OFFLINE="-Dtsl2nano.offline=true"
 #export RESTART_ALL='-Dapp.login.secure=false -Dapp.login.administration=true -Dapp.login.jarfile.fileselector=false'
 export TSL2_PROJECTS=${TSL2_PROJECTS:-$(ls -d */)}
 if [[ $1 == "help" ]]; then
@@ -34,6 +34,7 @@ fi
 tar -uf --exclude *.gz --exclude=*.*ar --exclude *.log --exclude *.sik --exclude *.lck --exclude *.out --exclude target --exclude dist tsl2nano-all-services.tar.gz .
 
 echo -e "RESTARTING TSL2_PROJECTS: \n$TSL2_PROJECTS\n"
+echo "with MYIP:$MYIP"
 
 html_body=$(cat <<EOF
 <!DOCTYPE html>
@@ -64,12 +65,20 @@ html_body=$(cat <<EOF
                 0 20px 30px rgba(0, 0, 0, 0.5);
         }
         div {
-            font-size: 3em;
+            font-size: 1.5em;
+        }
+        .flex-container { /* the display attribute set to flex creates a "flexbox" display, please see here: https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Flexible_Box_Layout/Basic_Concepts_of_Flexbox */
+            display:flex;width:100%;
+        }
+        .sidebar { /* this container is also set to flex, but here we change the flex-direction to column for the buttons to display in a column */
+            display:flex;flex-direction:column;height:100%;justify-content:left;width:30%;align-items:left; /* giving a width of 30% to the sidebar, it will fill 30% of the available space, which is 100% of the window width as defined above */ /* by setting align-items and justify-content to "center" the buttons place themselves in the middle of the sidebar */
         }
     </style>
 </head>
 <body>
 	<h1>TSL2 Applications</h1>
+    <div class="flex-container">
+	<span class="sidebar">
 EOF
 )
 
@@ -79,12 +88,12 @@ do
 	if [[ -f $d"runasservice.sh" ]]; then
 		cd $d
 		./runasservice.sh stop
-		echo "<div><a href=http://$(hostname -I | cut -f1 -d ' '):$(grep -E 'PORT[=][0-9]' runasservice.sh | grep -E '[0-9]+' --only-matching)>$d</a></div>" >> ../app-index.html
+		echo "<div><a target=app href=https://$MYIP:$(grep -E 'PORT[=][0-9]+' runasservice.sh | grep -E '[0-9]+' --only-matching)>$d</a></div>" >> ../app-index.html
 		sleep 2
 		mv nohup.out nohup.$(date -d "today" +"%Y%m%d%H%M").sik
 		./runasservice.sh backup
 		if [[ $1 != "stop" ]]; then
-			./runasservice.sh start &
+			./runasservice.sh start "-Dapp.show.startpage=false" &
 			echo "==> $d RESTARTED"
 		fi
 		cd ..
@@ -92,6 +101,7 @@ do
 		echo "==> $d has no runasservice.sh --> no nanoh5 directory"
 	fi
 done
+echo "</span><span class="flex-container"><iframe name=app width=70% height=100% /> </span></div>" >> app-index.html
 echo "</body></html>" >> app-index.html
 echo
 echo ------------------------------------------------------

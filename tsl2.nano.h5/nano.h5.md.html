@@ -719,10 +719,10 @@ If you set it to true, the synthetic user will be the user asked by the login. I
 To create a hash for a new password start the following:
  
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	java -cp tsl2.nano.h5.1.1.0-standalone.jar de.tsl2.nano.h5.User mypassword
+	java -cp tsl2.nano.h5-2.5.4.jar de.tsl2.nano.h5.User mypassword
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This hashcode then can be used inside the __usercheck.xml for the synthetic user:
+This hashcode then can be used inside the __usercheck.xml__ for the synthetic user:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 <?xml version="1.0" encoding="UTF-8"?>
@@ -4833,6 +4833,52 @@ http://publib.boulder.ibm.com/infocenter/wsdoc400/v6r0/index.jsp?topic=/com.ibm.
 
 Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_components%2Freference_jdbc_drivers.html
 
+## Migrations
+
+### Migration from 1.1.0 to 2.1.2
+
+Lots of refactorings have been done, maven has replaced ant, java 8 is used now and a new plugin mechanism was added.
+
+- Migration 1.1.0 -> 2.1.2
+	- alle environment jar-files löschen - ausser dem generierten beans jar file
+	- ClassFinder -> InputStream.readLine -> NPE <- install new jdk8 version
+	- policy file problem <- java_home to jre
+	- de.tsl2.nano.DefaultFormat -> de.tsl2.nano.core.util.DefaultFormat
+	- de.tsl2.nano.messaging.ChangeEvent -> de.tsl2.nano.core.messaging.ChangeEvent
+	- de.tsl2.nano.h5.timesheet.ActionImportHolidays in test ?
+
+## restart and stop multiple nanoh5 applications
+
+* create a new folder
+* copy the file restart-all.sh from tsl2.nano.h5/src/resources into that folders
+* download the current tsl2.nano.h5-x.x.x.jar into that folder
+* each application must have its own sub-folder
+* inside each application sub-folder there must be a run.sh and a runasservice.sh
+* change the port (and perhaps the name) in each runasservice.sh to avoid collisions
+* run ./restart-all.sh localhost without providing the applications in the network
+* run ./restart-all.sh stop to stop all applications
+* run ./restart-all.sh to provide all applications in the network (if you are secure ;-) )
+
+## how to get old nanoh5 applications run with new frameowrk version
+
+hint I: the sample applications have default password 'nanoh5'
+hint II: a script to do this is inside the resources of tsl2.nano.h5
+
+* remove *.jar files - but not the database jar file and not the database driver jar!
+* perhaps change the HibernatePersistence entry for hibernate 5 provider
+* check your application port and the database port not to have a collision to another app
+* perhaps re-create passwords with SHA-512 (see documentation) and fill them into Users.xml
+* check your [USERNAME]-permissions.xml files. At least one should have admin permissions with: <basicPermission class="de.tsl2.nano.serviceaccess.aas.principal.APermission" actions="*" name0="*"/>
+* rename environment.xml to environment.xml.old and copy a recent one into the environment folder
+* check the following environment.xml entries:
+   * change class of entry 'app.update.last' from java.util.Date to java.sql.Date
+   * ..amdin..
+   * ..secure..
+   * ..database.internal..
+* copy your background image inside the icons folder to 'blue-planets.jpg'
+* if generating of beans jar file fails: replace the DTD path in hibernate.reveng.xml to 'https://hibernate.org/dtd/hibernate-reverse-engineering-3.0.dtd'
+* on tsl2nano applications you may have to start the database manually through the script 'runServer.cmd'
+
 ## FAQ Known Problems and some Solutions
 
 * Performance going down:
@@ -4892,20 +4938,6 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
 	* -> you have changed the database structure. shutdown the h2 database before you add or change data
 * java.lang.NoSuchMethodError: org.hibernate.boot.registry.classloading.internal.ClassLoaderServiceImpl.withTccl(Lorg/hibernate/boot/registry/classloading/internal/ClassLoaderServiceImpl$Work;)Ljava/lang/Object;
   * -> version conflict for hibernate between 4 and 5. remove the hiberate 5 libraries     
-
-## Migrations
-
-### Migration from 1.1.0 to 2.1.2
-
-Lots of refactorings have been done, maven has replaced ant, java 8 is used now and a new plugin mechanism was added.
-
-- Migration 1.1.0 -> 2.1.2
-	- alle environment jar-files löschen - ausser dem generierten beans jar file
-	- ClassFinder -> InputStream.readLine -> NPE <- install new jdk8 version
-	- policy file problem <- java_home to jre
-	- de.tsl2.nano.DefaultFormat -> de.tsl2.nano.core.util.DefaultFormat
-	- de.tsl2.nano.messaging.ChangeEvent -> de.tsl2.nano.core.messaging.ChangeEvent
-	- de.tsl2.nano.h5.timesheet.ActionImportHolidays in test ?
 
  
 ## Changelog
@@ -4977,7 +5009,7 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.5.1  | 04.06.2023 | Fix secure users loading, fix etag 304, NEW module: modelkit
  2.5.2  | 24.11.2024 | dependency updates, h5 stylings enhanced, jmockit -> mockito (serviceacces, replication), complete json, yaml, xml de-/serializing,enhancing autotest,cursus: fix package: tsl2.nano->de.tsl2.nano , beanattribute respecting generic type,many fixes/enhancings on object creation, stringutil, ENV static self removed
  2.5.3  | 03.01.2025 | corrections on internationalization (generic regex creation), autotest valueset on json objects
- 2.5.4  | 02.02.2025 | run scripts refactored
+ 2.5.4  | 09.02.2025 | run scripts refactored, using formtarget=_page for exports
 |------ | ---------- | -----------
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
@@ -6216,3 +6248,4 @@ StringBuffer
    * use runnable expression on attributes
    * new plugin method on NanoH5.createBeanContainer() to provide/override service actions through calling BeanContainer.initServiceActions(..)
    * BeanCollectors: plugin handler call on NanoH5.createBeanCollectors() ?
+

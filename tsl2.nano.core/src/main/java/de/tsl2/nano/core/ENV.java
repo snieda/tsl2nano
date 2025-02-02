@@ -1107,6 +1107,8 @@ public class ENV implements Serializable {
                 throw new IllegalStateException("couldn't resolve dependencies:\n"
                     + StringUtil.toFormattedString(dependencyNames, 100, true));
         } else {
+            if (Boolean.getBoolean("tsl2nano.offline")) // don't ask several times
+                return System.setProperty("tsl2nano.offline", "false");
             throw new IllegalStateException("couldn't resolve dependencies:\n"
                 + StringUtil.toFormattedString(dependencyNames, 100, true));
         }

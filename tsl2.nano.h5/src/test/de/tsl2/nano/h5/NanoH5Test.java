@@ -358,7 +358,7 @@ public class NanoH5Test implements ENVTestPreparation {
         String destFile = "target/" + name + ".zip";
         Properties p = new Properties();
         p.put("destFile", destFile);
-        AntRunner.runTask(AntRunner.TASK_ZIP, p, FileUtil.replaceToJavaSeparator(new File(DIR_TEST).getParent()) + "/:{**/*" + name + "*/**}{timesheet.*}");
+        AntRunner.runTask(AntRunner.TASK_ZIP, p, FileUtil.replaceToJavaSeparator(new File(DIR_TEST).getParent()) + "/:{**/*" + name + "*/**}**/*.*ar");
         
         //delete the test output
 //        ConcurrentUtil.sleep(10000);

@@ -335,6 +335,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     public Object action() throws Exception {
                         return ENV.get("service.url", "") + ARESTDynamic.BASE_PATH;
                     }
+                    @Override
+                    public boolean isCreatingExternalContent() {
+                        return true;
+                    }
                 });
                 sessionActions.add(new SecureAction(bean.getClazz(),
                         "RESTfulUI",
@@ -1401,7 +1405,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             imagePath,
             a.isEnabled(),
             a.isDefault(),
-            a.getActionMode() != IAction.MODE_DLG_OK);
+            a.getActionMode() != IAction.MODE_DLG_OK,
+            a.isCreatingExternalContent());
         if (p != null)
             addAttributes(element, p, false);
         return element;
@@ -1445,7 +1450,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
             createAction(panel, BTN_ASSIGN, getCSSPanelAction(), assignLabel, assignLabel, SUBMIT, null,
                 "icons/links.png", true, true,
-                false);
+                false, false);
         }
         createCloseAction(panel);
         return panel;
@@ -1454,7 +1459,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     void createCloseAction(Element panel) {
         String closeLabel = Messages.getStringOpt("tsl2nano.close", true);
         createAction(panel, IAction.CANCELED, getCSSPanelAction(), closeLabel, closeLabel, null, null, "icons/stop.png",
-            true, false, true);
+            true, false, true, false);
     }
 
     /**
@@ -1467,7 +1472,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      */
     Element createAction(Element cell, String id, String type, String image) {
         String label = ENV.translate(id, true);
-        return createAction(cell, id, CSS_CLASS_ACTION, label, label, type, null, image, true, false, false);
+        return createAction(cell, id, CSS_CLASS_ACTION, label, label, type, null, image, true, false, false, false);
     }
 
     Element createAction(Element cell,
@@ -1480,9 +1485,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             String image,
             boolean enabled,
             boolean asDefault,
-            boolean formnovalidate) {
+            boolean formnovalidate,
+            boolean isCreatingExternalContent) {
         return createAction(cell, id, cssClass, label, tooltip, type, shortcut, image, 
-            ENV.get("layout.action.width", "-1"), enabled, asDefault, formnovalidate);
+            ENV.get("layout.action.width", "-1"), enabled, asDefault, formnovalidate, isCreatingExternalContent);
     }
 
     /**
@@ -1505,7 +1511,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             String width,
             boolean enabled,
             boolean asDefault,
-            boolean formnovalidate) {
+            boolean formnovalidate,
+            boolean isCreatingExternalContent) {
         String name = label != null ? label : tooltip;
         int isc = name.indexOf('&') + 1;
         String sc;
@@ -1536,7 +1543,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             ATTR_ACCESSKEY,
             sc,
             ATTR_FORMTARGET,
-            VAL_FRM_SELF,
+            isCreatingExternalContent ? VAL_FRM_NEWTAB : VAL_FRM_SELF,
             /*ATTR_STYLE,
             VAL_OPAC,*/
             enable(ATTR_DISABLED, !enabled),

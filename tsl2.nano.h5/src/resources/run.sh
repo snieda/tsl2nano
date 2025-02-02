@@ -51,8 +51,9 @@ VERSION_=${project.version}
 NAME=${NAME:-$NAME_}
 VERSION=${VERSION:-$VERSION_}
 (cd tsl2.nano.h5/target && ls *-standalone*.jar) && EXTENSION="-standalone"
-[ $EXTENSION != "-virgin" ] && OFFLINE=-Dtsl2nano.offline=true
+[ $EXTENSION != "-virgin" ] && OFFLINE="-Dtsl2nano.offline=true"
 #MYIP="$(ip -o route get to 8.8.8.8 | sed -n 's/.*src \([0-9.]\+\).*/\1/p')"
+[[ "$MYIP" == "" ]] && MYIP=localhost
 #SERVICEURL="-Dservice.url=https://$MYIP:$PORT"
 #UH=-Denv.user.home=true
 #USERDIR=-Duser.dir=$PRJ
