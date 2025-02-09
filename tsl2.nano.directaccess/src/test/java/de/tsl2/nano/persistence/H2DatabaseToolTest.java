@@ -4,7 +4,6 @@ import static de.tsl2.nano.persistence.H2DatabaseTool.DEFAULT_REPLACE_POSTFIX;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import de.tsl2.nano.core.util.FileUtil;
@@ -37,7 +36,7 @@ public class H2DatabaseToolTest {
         
         String[] keywords = H2DatabaseTool.KEYWORDS.split("\\|");
         for (int i = 0; i < keywords.length; i++) {
-            if (keywords[i].equals("ORDER") || keywords[i].equals("CONSTRAINT"))
+            if (keywords[i].equals("ORDER") /*|| keywords[i].equals("CONSTRAINT")*/)
                 continue;
             assertFalse("wrong replacement: " + keywords[i] + DEFAULT_REPLACE_POSTFIX, result.contains(keywords[i] + DEFAULT_REPLACE_POSTFIX));
         }

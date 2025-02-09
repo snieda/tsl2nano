@@ -31,8 +31,7 @@ if [ "$1" == "stop" ]
 		echo "$APPNAME is not running yet..."
 		exit 1
 	fi
-	kill -9 $APPID
-	echo "$APPNAME stopped successfully"
+	kill -9 $APPID && echo "$APPNAME stopped successfully" || echo "$APPID $APPNAME could not be stopped!"
 	exit 0
 fi
 shift

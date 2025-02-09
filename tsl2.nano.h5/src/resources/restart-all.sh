@@ -64,6 +64,7 @@ html_body=$(cat <<EOF
                 0 11px 0 #ccc, 0 12px 0 #ccc,
                 0 20px 30px rgba(0, 0, 0, 0.5);
         }
+        a { color: lightskyblue;}
         div {
             font-size: 1.5em;
         }
@@ -93,7 +94,7 @@ do
 		mv nohup.out nohup.$(date -d "today" +"%Y%m%d%H%M").sik
 		./runasservice.sh backup
 		if [[ $1 != "stop" ]]; then
-			./runasservice.sh start "-Dapp.show.startpage=false" &
+			./runasservice.sh start $@ "-Dapp.show.startpage=false" &
 			echo "==> $d RESTARTED"
 		fi
 		cd ..

@@ -39,6 +39,21 @@ public class FormatTest {
 		checkRegEx(Locale.forLanguageTag("ES"));
 		checkRegEx(Locale.US); //TODO: problem on time starting with one number 
 	}
+
+	// @Test //don't know the right test for that...
+	public void testDateFormatWrongDateMask() throws ParseException {
+		String dateMask = RegExpFormat.createDateMask(DateFormat.getDateTimeInstance());
+		RegExpFormat regex = RegExpFormat.createDateTimeRegExp();
+		System.out.println(Locale.getDefault() + ": " + dateMask + " => " + regex);
+
+		// if we switch to another locale, datemask and regex do not fit anymore, but the regexpformatter should  fix it
+		Locale.setDefault(Locale.US);
+		// smoke test:
+		Date d = new Date();
+		String date = regex.format(d);
+		System.out.println("\t" + DateFormat.getDateTimeInstance().format(d) + " => " + date);
+	}
+
 	private void checkRegEx(Locale loc) throws ParseException {
 		Locale.setDefault(loc);
 		String dateMask = RegExpFormat.createDateMask(DateFormat.getDateTimeInstance());

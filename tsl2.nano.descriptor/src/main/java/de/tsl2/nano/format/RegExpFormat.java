@@ -398,7 +398,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
         //third: check against the regular expression
         final Matcher matcher = compiledPattern.matcher(o);
         final boolean matches = fullMatch ? matcher.matches() : matcher.find();
-        if (matches) {
+        if (matches || ENV.get("field.format.regexp.check.ignore", false)) {
             return toAppendTo.append(matcher.group());
         } else {
             throw new ManagedException("tsl2nano.regexpfailure", new Object[] { o, compiledPattern.pattern() });
@@ -763,7 +763,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
      */
     @Override
     public String toString() {
-        return this.getClass().getSimpleName() + "[pattern: " + pattern + "]";
+        return this.getClass().getSimpleName() + "[pattern: " + pattern + ", initMask: " + getInitMask() + "]";
     }
 
     /**
@@ -847,6 +847,13 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
                 mc = initmask.charAt(i);
                 if (FORMAT_CHARACTERS.contains(String.valueOf(mc)) && (newText.length() <= ti || c != mc)) {
                     textWithCaretJump.append(mc);
+                    if (FORMAT_CHARACTERS.contains(String.valueOf(c)) && newText.length() > ti-1)
+                        ++ti; // if c is a format character , we should walk to the next c
+                    continue;
+                } else if (FORMAT_CHARACTERS.contains(String.valueOf(c)) && !initmask.contains(String.valueOf(c)) && (newText.length() > ti-1 && c != mc)) {
+                    ++ti; // fix input error not being the right format character here
+                    if (i > 0)
+                        --i;
                     continue;
                 } else if (newText.length() <= ti) {
                     //no formatting char and source end reached

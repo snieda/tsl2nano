@@ -327,6 +327,8 @@ Creating an UML-Diagram with perhaps _ArgoUML_, or creating an ER-Diagram with f
 
 The other option would be to have an existing _beans.jar_. This could be selected on the entry- or login-page of nano-h5. If you enter an absolute path for the attribute _JarFile_ inside the _Persistence_ page, this bean-file will be used to load the entity-classes. If you enter a relative path and the given file doesn't exist, it will be generated through hibernate-tools (if hibernate is in your environment!).
 
+A New way would be to use AI to get the DDL from for example ChatGPT/Gemini/Copilot. The AI is able to generate you the ER diagram, too.
+
 ##### Process Description
 
 0. perhaps create a new datamodel (use a tool like _ArgoUML_ or _architect_ to create an UML-Diagram) and export the resulting ddl-file to your new  environment directory of nano.h5. the filename must end with .sql
@@ -4862,7 +4864,7 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
 ## how to get old nanoh5 applications run with new frameowrk version
 
 hint I: the sample applications have default password 'nanoh5'
-hint II: a script to do this is inside the resources of tsl2.nano.h5
+hint II: a script (upgrade-old-tsl2-apps.sh) to do this is inside the resources of tsl2.nano.h5
 
 * remove *.jar files - but not the database jar file and not the database driver jar!
 * perhaps change the HibernatePersistence entry for hibernate 5 provider
@@ -4878,6 +4880,9 @@ hint II: a script to do this is inside the resources of tsl2.nano.h5
 * copy your background image inside the icons folder to 'blue-planets.jpg'
 * if generating of beans jar file fails: replace the DTD path in hibernate.reveng.xml to 'https://hibernate.org/dtd/hibernate-reverse-engineering-3.0.dtd'
 * on tsl2nano applications you may have to start the database manually through the script 'runServer.cmd'
+* search for all .failed or .stacktrace files inside the environement to see errors on loading
+* if the database does not start (-> connection problem) remove '-web -webDaemon' from 'runServer.cmd' script and start it manually
+* if regexp expresssions in your presentation don't work, set environment property 'field.format.regexp.check.ignore' to true.
 
 ## FAQ Known Problems and some Solutions
 
@@ -4894,6 +4899,7 @@ hint II: a script to do this is inside the resources of tsl2.nano.h5
 	* if your beans don't decapitalize names the standard way, field names not be found. E.g. a name like MYName should decapitalized like this: MYName (not mYName!, see _Introspector.decapitalize(String name)_). If your beans can't be changed, you can switch the environment property _bean.attribute.decapitalize_ to _false_.
 * Beans showing currencys with EURO can't be saved
 	* Set the character encoding of your browser's current page to *UTF-8*. E.g. in Chrome: Menu=>Tools=>Encoding
+* bean/presenter not loaded: search for .failed and .stacktrace files. analize+fix the error through the .stacktrace file and remove the .failed extension
 * no datasource for Sqlite available - apache BasicDatasource uses JavaBeans what is not usable on android
 * ORMLite (4.48) not usable through persistence.xml because no EntityManagerFactory/EntityManager implementation available
 * hsqldb 1.8 is not able to do _select max(count(color)) from Colors group by color_
@@ -6249,3 +6255,26 @@ StringBuffer
    * new plugin method on NanoH5.createBeanContainer() to provide/override service actions through calling BeanContainer.initServiceActions(..)
    * BeanCollectors: plugin handler call on NanoH5.createBeanCollectors() ?
 
+### Use old Projects as Samples
+* [-] affiliate: ok (nur mit SA, Vorsicht: spezielle Daten)
+* [v] bestellung: ok
+* [v] EM-2016: ok
+* [v] ergebnisdienst: ok
+* [-] estore: 
+   * SADMIN-permissions.xml were automatically resetted
+   * view: only two entities: Category , customer
+* [ ] exam: ok
+* [-] forum: no beans built 
+* [x] hausehalt: anyway.jar generiert -> Datenprobleme bei Anzeige
+* [v] logbook (jar: logbook-2.5.4.jar) ok
+* [v] magister: ok
+* [v] online-store: (empty) ok
+* [v] openclinica: ok
+* [-] order: no beans built
+* [x] pactum: ok
+* [v] resellers: ok
+* [-] resme: only standard anyway.jar?
+* [v] photo: ok
+* [v] skiller: ok (chaotic translation)
+* [v] store -> id skiller?
+* [x] timesheet: compositor/controller not loaded as Bean/BeanColletor

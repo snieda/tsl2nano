@@ -2127,7 +2127,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 null,
                 beanValue.hasWriteAccess(),
                 false,
-                true);
+                true,
+                false);
             appendAttributes(a, "tabindex", shortcut);
             addManyToOnePicture(cell, beanValue);
         } else {

@@ -1,0 +1,348 @@
+
+Property Name: app.show.startpage
+Default Value: false
+Description: Determines whether the application should show the start page on launch.
+
+Property Name: app.db.check.connection
+Default Value: false
+Description: Checks the database connection on application start.
+
+Property Name: app.ssl.activate
+Default Value: true
+Description: Activates SSL for secure connections.
+
+Property Name: tsl2nano.offline
+Default Value: true
+Description: Runs the application in offline mode.
+
+Property Name: session.navigation.gimmick.onemptycollector.create.newitem
+Default Value: true
+Description: Automatically creates a new item if the collector is empty.
+
+Property Name: session.navigation.gimmick.ononeitemincollector.select.first
+Default Value: true
+Description: Automatically selects the first item if only one item is present in the collector.
+
+Property Name: session.navigation.start.beandefinitions
+Default Value: "virtual.Controller (ValueType-Entry), Entry"
+Description: Defines the starting bean definitions for session navigation.
+
+Property Name: app.page.style
+Default Value: "background-image: url(icons/fenz.gif); color: white; -webkit-animation: fade 2s; -webkit-animation-fill-mode: both; -moz-animation: fade 2s; -moz-animation-fill-mode: both; -o-animation: fade 2s; -o-animation-fill-mode: both; animation: fade 2s; animation-fill-mode: both;"
+Description: Sets the style for the application page.
+
+Property Name: app.login.secure
+Default Value: true
+Description: Enables secure login for the application.
+
+Property Name: app.login.administration
+Default Value: false
+Description: Enables administration login for the application.
+
+Property Name: websocket.use
+Default Value: true
+Description: Enables the use of WebSockets for the application.
+
+Property Name: session.navigation.gimmick.onemptycollector.create.newitem
+Default Value: true
+Description: Automatically creates a new item if the collector is empty.
+
+Property Name: session.navigation.gimmick.ononeitemincollector.select.first
+Default Value: true
+Description: Automatically selects the first item if only one item is present in the collector.
+
+Property Name: session.navigation.start.beandefinitions
+Default Value: "virtual.Controller (ValueType-Entry), Entry"
+Description: Defines the starting bean definitions for session navigation.
+
+Property Name: app.page.style
+Default Value: "background-image: url(icons/fenz.gif); color: white; -webkit-animation: fade 2s; -webkit-animation-fill-mode: both; -moz-animation: fade 2s; -moz-animation-fill-mode: both; -o-animation: fade 2s; -o-animation-fill-mode: both; animation: fade 2s; animation-fill-mode: both;"
+Description: Sets the style for the application page.
+
+Property Name: app.login.secure
+Default Value: true
+Description: Enables secure login for the application.
+
+Property Name: app.login.administration
+Default Value: false
+Description: Enables administration login for the application.
+
+Property Name: websocket.use
+Default Value: true
+Description: Enables the use of WebSockets for the application.
+
+Property Name: app.ssl.activate
+Default Value: true
+Description: Activates SSL for secure connections.
+
+Property Name: tsl2nano.offline
+Default Value: true
+Description: Runs the application in offline mode.
+
+Property Name: session.navigation.gimmick.onemptycollector.create.newitem
+Default Value: true
+Description: Automatically creates a new item if the collector is empty.
+
+Property Name: session.navigation.gimmick.ononeitemincollector.select.first
+Default Value: true
+Description: Automatically selects the first item if only one item is present in the collector.
+
+Property Name: session.navigation.start.beandefinitions
+Default Value: "virtual.Controller (ValueType-Entry), Entry"
+Description: Defines the starting bean definitions for session navigation.
+
+Property Name: app.page.style
+Default Value: "background-image: url(icons/fenz.gif); color: white; -webkit-animation: fade 2s; -webkit-animation-fill-mode: both; -moz-animation: fade 2s; -moz-animation-fill-mode: both; -o-animation: fade 2s; -o-animation-fill-mode: both; animation: fade 2s; animation-fill-mode: both;"
+Description: Sets the style for the application page.
+
+Property Name: app.login.secure
+Default Value: true
+Description: Enables secure login for the application.
+
+Property Name: app.login.administration
+Default Value: false
+Description: Enables administration login for the application.
+
+Property Name: websocket.use
+Default Value: true
+Description: Enables the use of WebSockets for the application.
+
+Property Name: app.ssl.activate
+Default Value: true
+Description: Activates SSL for secure connections.
+
+Property Name: tsl2nano.offline
+Default Value: true
+Description: Runs the application in offline mode.
+
+Property Name: session.navigation.gimmick.onemptycollector.create.newitem
+Default Value: true
+Description: Automatically creates a new item if the collector is empty.
+
+Property Name: session.navigation.gimmick.ononeitemincollector.select.first
+Default Value: true
+Description: Automatically selects the first item if only one item is present in the collector.
+
+Property Name: session.navigation.start.beandefinitions
+Default Value: "virtual.Controller (ValueType-Entry), Entry"
+Description: Defines the starting bean definitions for session navigation.
+
+Property Name: app.page.style
+Default Value: "background-image: url(icons/fenz.gif); color: white; -webkit-animation: fade 2s; -webkit-animation-fill-mode: both; -moz-animation: fade 2s; -moz-animation-fill-mode: both; -o-animation: fade 2s; -o-animation-fill-mode: both; animation: fade 2s; animation-fill-mode: both;"
+Description: Sets the style for the application page.
+
+Property Name: app.login.secure
+Default Value: true
+Description: Enables secure login for the application.
+
+Property Name: app.login.administration
+Default Value: false
+Description: Enables administration login for the application.
+
+Property Name: websocket.use
+Default Value: true
+Description: Enables the use of WebSockets for the application.
+
+Property Name: app.ssl.activate
+Default Value: true
+Description: Activates SSL for secure connections.
+
+Property Name: tsl2nano.offline
+Default Value: true
+Description: Runs the application in offline mode.
+
+Property Name: session.navigation.gimmick.onemptycollector.create.newitem
+Default Value: true
+Description: Automatically creates a new item if the collector is empty.
+
+Property Name: session.navigation.gimmick.ononeitemincollector.select.first
+Default Value: true
+Description: Automatically selects the first item if only one item is present in the collector.
+
+Property Name: session.navigation.start.beandefinitions
+Default Value: "virtual.Controller (ValueType-Entry), Entry"
+Description: Defines the starting bean definitions for session navigation.
+
+Property Name: app.page.style
+Default Value: "background-image: url(icons/fenz.gif); color: white; -webkit-animation: fade 2s; -webkit-animation-fill-mode: both; -moz-animation: fade 2s; -moz-animation-fill-mode: both; -o-animation: fade 2s; -o-animation-fill-mode: both; animation: fade 2s; animation-fill-mode: both;"
+Description: Sets the style for the application page.
+
+Property Name: app.login.secure
+Default Value: true
+Description: Enables secure login for the application.
+
+Property Name: app.login.administration
+Default Value: false
+Description: Enables administration login for the application.
+
+Property Name: websocket.use
+Default Value: true
+Description: Enables the use of WebSockets for the application.
+
+Property Name: app.ssl.activate
+Default Value: true
+Description: Activates SSL for secure connections.
+
+Property Name: tsl2nano.offline
+Default Value: true
+Description: Runs the application in offline mode.
+
+Property Name: session.navigation.gimmick.onemptycollector.create.newitem
+Default Value: true
+Description: Automatically creates a new item if the collector is empty.
+
+Property Name: session.navigation.gimmick.ononeitemincollector.select.first
+Default Value: true
+Description: Automatically selects the first item if only one item is present in the collector.
+
+Property Name: session.navigation.start.beandefinitions
+Default Value: "virtual.Controller (ValueType-Entry), Entry"
+Description: Defines the starting bean definitions for session navigation.
+
+Property Name: app.page.style
+Default Value: "background-image: url(icons/fenz.gif); color: white; -webkit-animation: fade 2s; -webkit-animation-fill-mode: both; -moz-animation: fade 2s; -moz-animation-fill-mode: both; -o-animation: fade 2s; -o-animation-fill-mode: both; animation: fade 2s; animation-fill-mode: both;"
+Description: Sets the style for the application page.
+
+Property Name: app.login.secure
+Default Value: true
+Description: Enables secure login for the application.
+
+Property Name: app.login.administration
+Default Value: false
+Description: Enables administration login for the application.
+
+Property Name: websocket.use
+Default Value: true
+Description: Enables the use of WebSockets for the application.
+
+Property Name: app.ssl.activate
+Default Value: true
+Description: Activates SSL for secure connections.
+
+Property Name: tsl2nano.offline
+Default Value: true
+Description: Runs the application in offline mode.
+
+Property Name: session.navigation.gimmick.onemptycollector.create.newitem
+Default Value: true
+Description: Automatically creates a new item if the collector is empty.
+
+Property Name: session.navigation.gimmick.ononeitemincollector.select.first
+Default Value: true
+Description: Automatically selects the first item if only one item is present in the collector.
+
+Property Name: session.navigation.start.beandefinitions
+Default Value: "virtual.Controller (ValueType-Entry), Entry"
+Description: Defines the starting bean definitions for session navigation.
+
+Property Name: app.page.style
+Default Value: "background-image: url(icons/fenz.gif); color: white; -webkit-animation: fade 2s; -webkit-animation-fill-mode: both; -moz-animation: fade 2s; -moz-animation-fill-mode: both; -o-animation: fade 2s; -o-animation-fill-mode: both; animation: fade 2s; animation-fill-mode: both;"
+Description: Sets the style for the application page.
+
+Property Name: app.login.secure
+Default Value: true
+Description: Enables secure login for the application.
+
+Property Name: app.login.administration
+Default Value: false
+Description: Enables administration login for the application.
+
+Property Name: websocket.use
+Default Value: true
+Description: Enables the use of WebSockets for the application.
+
+Property Name: app.ssl.activate
+Default Value: true
+Description: Activates SSL for secure connections.
+
+Property Name: tsl2nano.offline
+Default Value: true
+Description: Runs the application in offline mode.
+
+Property Name: session.navigation.gimmick.onemptycollector.create.newitem
+Default Value: true
+Description: Automatically creates a new item if the collector is empty.
+
+Property Name: session.navigation.gimmick.ononeitemincollector.select.first
+Default Value: true
+Description: Automatically selects the first item if only one item is present in the collector.
+
+Property Name: session.navigation.start.beandefinitions
+Default Value: "virtual.Controller (ValueType-Entry), Entry"
+Description: Defines the starting bean definitions for session navigation.
+
+Property Name: app.page.style
+Default Value: "background-image: url(icons/fenz.gif); color: white; -webkit-animation: fade 2s; -webkit-animation-fill-mode: both; -moz-animation: fade 2s; -moz-animation-fill-mode: both; -o-animation: fade 2s; -o-animation-fill-mode: both; animation: fade 2s; animation-fill-mode: both;"
+Description: Sets the style for the application page.
+
+Property Name: app.login.secure
+Default Value: true
+Description: Enables secure login for the application.
+
+Property Name: app.login.administration
+Default Value: false
+Description: Enables administration login for the application.
+
+Property Name: websocket.use
+Default Value: true
+Description: Enables the use of WebSockets for the application.
+
+Property Name: app.ssl.activate
+Default Value: true
+Description: Activates SSL for secure connections.
+
+Property Name: tsl2nano.offline
+Default Value: true
+Description: Runs the application in offline mode.
+
+Property Name: session.navigation.gimmick.onemptycollector.create.newitem
+Default Value: true
+Description: Automatically creates a new item if the collector is empty.
+
+Property Name: session.navigation.gimmick.ononeitemincollector.select.first
+Default Value: true
+Description: Automatically selects the first item if only one item is present in the collector.
+
+Property Name: session.navigation.start.beandefinitions
+Default Value: "virtual.Controller (ValueType-Entry), Entry"
+Description: Defines the starting bean definitions for session navigation.
+
+Property Name: app.page.style
+Default Value: "background-image: url(icons/fenz.gif); color: white; -webkit-animation: fade 2s; -webkit-animation-fill-mode: both; -moz-animation: fade 2s; -moz-animation-fill-mode: both; -o-animation: fade 2s; -o-animation-fill-mode: both; animation: fade 2s; animation-fill-mode: both;"
+Description: Sets the style for the application page.
+
+Property Name: app.login.secure
+Default Value: true
+Description: Enables secure login for the application.
+
+Property Name: app.login.administration
+Default Value: false
+Description: Enables administration login for the application.
+
+Property Name: websocket.use
+Default Value: true
+Description: Enables the use of WebSockets for the application.
+
+Property Name: app.ssl.activate
+Default Value: true
+Description: Activates SSL for secure connections.
+
+Property Name: tsl2nano.offline
+Default Value: true
+Description: Runs the application in offline mode.
+
+Property Name: session.navigation.gimmick.onemptycollector.create.newitem
+Default Value: true
+Description: Automatically creates a new item if the collector is empty.
+
+Property Name: session.navigation.gimmick.ononeitemincollector.select.first
+Default Value: true
+Description: Automatically selects the first item if only one item is present in the collector.
+
+Property Name: session.navigation.start.beandefinitions
+Default Value: "virtual.Controller (ValueType-Entry), Entry"
+Description: Defines the starting bean definitions for session navigation.
+
+Property Name: app.page.style
+Default Value: "background-image: url(icons/fenz.gif); color: white; -webkit-animation: fade 2s; -webkit-animation-fill-mode: both; -moz-animation: fade 2s; -moz-animation-fill-mode: both; -o-animation: fade 2s; -o-animation-fill-mode: both; animation: fade 2s; animation-fill-mode: both;"
+Description: Sets the style for the application page.

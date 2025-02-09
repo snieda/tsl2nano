@@ -89,8 +89,11 @@ html[data-theme='dark-picture'] {
 }
 
 ::selection, ::-moz-selection { /* Code for Firefox */
+    font-family: var(--font-family);
+    transition: background-color .5s;
     color: var(--font-color);
     background: var(--bg-color);
+    background-size: cover;
 }
 
 /* will be assigned as tag style under the html header */
@@ -99,11 +102,10 @@ body {
     transition: background-color .5s;
     color: var(--font-color);
     background: var(--bg-color);
-    background-size=cover;
+    background-size: cover;
 }
 
 table, .table .fieldpanel {
-
        display: table;
        margin: 0 auto;
       color: var(--font-color);
