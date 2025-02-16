@@ -124,7 +124,7 @@
 			<!-- <property name="hibernate.generate_statistics" value="false"/> -->
 			<property name="hibernate.connection.autocommit" value="true"/>
 			<property name="hibernate.cache.use_structured_entries" value="true"/>
-			<property name="hibernate.cache.use_second_level_cache" value="true"/>
+			<!-- <property name="hibernate.cache.use_second_level_cache" value="true"/> -->
 		</properties>
 	</persistence-unit>
 </persistence>

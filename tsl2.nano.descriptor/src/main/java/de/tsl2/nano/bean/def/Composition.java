@@ -37,6 +37,9 @@ import de.tsl2.nano.core.util.StringUtil;
  * 
  * here the resolver is a collection.
  * 
+ * usage: 
+ *  createChildOnTarget(): create new target and connect it to the parent
+ * 
  * </pre> 
  * @author ts
  * @version $Revision$

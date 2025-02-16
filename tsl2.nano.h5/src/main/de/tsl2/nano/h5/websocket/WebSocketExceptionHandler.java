@@ -19,6 +19,7 @@ import org.java_websocket.WebSocket;
 
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanModifier;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.exception.ExceptionHandler;
@@ -80,14 +81,17 @@ public class WebSocketExceptionHandler extends ExceptionHandler implements Close
                 waitForResponse = true;
             }
 
-            Collection<WebSocket> connections = socket.getConnections();
-            for (WebSocket webSocket : connections) {
-                webSocket.send(msg != null ? msg : e.toString());
-            }
+            if (socket != null) {
+                Collection<WebSocket> connections = socket.getConnections();
+                for (WebSocket webSocket : connections) {
+                    webSocket.send(msg != null ? msg : e.toString());
+                }
 
-            if (waitForResponse) {
-                final Object obj0 = obj;
-                ConcurrentUtil.waitOn(socket.session, 4000, r -> convertAndProvide(obj0, r));
+                if (waitForResponse) {
+                    final Object obj0 = obj;
+                    long timeout = ENV.get("wsdialog.response.timeout.milliseconds", 4000l);
+                    ConcurrentUtil.waitOn(socket.session, timeout, r -> convertAndProvide(obj0, r));
+                }
             }
         } catch (Exception ex) {
             ex.printStackTrace();

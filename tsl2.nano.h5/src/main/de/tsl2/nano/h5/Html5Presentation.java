@@ -644,7 +644,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
     private boolean useSideNav(int actionCount) {
         // use sideNav after login...
-        return isAuthenticated && ENV.get("layout.sidenav", false) 
+        return isAuthenticated && ENV.getAsking("layout.sidenav", false) 
                 && actionCount > ENV.get("layout.sidenav.min.count.action", 3);
     }
 
@@ -695,8 +695,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             if (jsWebsocketTemplate == null) {
                 InputStream jsStream = ENV.getResource("websocket.client.js.template");
                 jsWebsocketTemplate = String.valueOf(FileUtil.getFileData(jsStream, "UTF-8"));
-                ENV.get("websocket.window.alert.message", true);
-                ENV.get("websocket.speak.alert.message", true);
+                ENV.getAsking("websocket.window.alert.message", true);
+                ENV.getAsking("websocket.speak.alert.message", true);
                 ENV.get("app.login.secure", false);
             }
             Element script = appendElement(parent, TAG_SCRIPT, ATTR_TYPE, ATTR_TYPE_JS, "nonce", (ENV.isTestMode() ? "1" : session.getRequestId()));
@@ -1837,7 +1837,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     private void addPicture(Element cell, Class<?> type, Object instance) {
         if (instance != null) {
             String iconFromField = BeanDefinition.getBeanDefinition(type).getPresentable().getIconFromField();
-            if (iconFromField != null) {
+            if (iconFromField != null && Bean.getBean(instance).hasAttribute(iconFromField)) {
                     createDataTag(cell, (BeanValue<?>) Bean.getBean(instance).getAttribute(iconFromField));
             }
         }

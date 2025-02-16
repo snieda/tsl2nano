@@ -12,9 +12,9 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.persistence.DatabaseTool;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.replication.EntityReplication;
-import de.tsl2.nano.replication.util.H2Util;
 
 public class Replication {
 	Collection<?> data;
@@ -55,7 +55,7 @@ public class Replication {
 		case "PUNIT2":
 			if (Persistence.current().getReplication() != null) {
 				try {
-					H2Util.startH2Datbase(Integer.parseInt(Persistence.current().getReplication().getPort()), ENV.get("app.login.administration", true));
+					DatabaseTool.runDBServer(ENV.getConfigPath(), Persistence.current().getReplication().getPort(), Persistence.current().getReplication().getDatabase());
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

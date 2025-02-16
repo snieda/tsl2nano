@@ -36,20 +36,16 @@ import de.tsl2.nano.service.util.ServiceUtil;
 public class ReplicationServiceBean extends GenericLocalServiceBean {
     private static final Log LOG = LogFactory.getLog(GenericLocalServiceBean.class);
 
-    /**
-     * constructor
-     */
     public ReplicationServiceBean() {
         this(createEntityManager("replication"));
     }
 
-    /**
-     * constructor
-     * 
-     * @param entityManager
-     */
     public ReplicationServiceBean(EntityManager entityManager) {
-        super(entityManager, false);
+        super(entityManager, ENV.getAsking("service.use.database.replication", false));
+    }
+
+    public ReplicationServiceBean(EntityManager entityManager, boolean createReplication) {
+        super(entityManager, createReplication);
     }
 
     /**
@@ -67,6 +63,7 @@ public class ReplicationServiceBean extends GenericLocalServiceBean {
         while (beans.size() > 0) {
             count = beans.size();
             Message.send("starting replication-iteration " + ++i + " to persist " + count + " beans...");
+            checkTransactionBegin();
             for (Iterator<T> it = beans.iterator(); it.hasNext();) {
                 T bean = it.next();
                 try {
@@ -77,6 +74,8 @@ public class ReplicationServiceBean extends GenericLocalServiceBean {
                 } catch (EntityNotFoundException ex) {
                 	// TODO: on both-side linked entities that cannot work - if both sides are fully loaded and no cascadetype merge/persist/all is given!
                     LOG.error(ex.toString());
+                    // rollbackIfActive();
+                    checkTransactionBegin();
                     //try to persist the not found entity first
 //                    Object d = getDependentBean(ex);
 //                    if (d != null) {
@@ -85,9 +84,12 @@ public class ReplicationServiceBean extends GenericLocalServiceBean {
 //                    }
                 } catch (Exception ex) {
                     LOG.error(ex.toString());
+                    // rollbackIfActive();
+                    checkTransactionBegin();
                     //some relations weren't saved yet - we do that hoping to find it later in the list
                 }
             }
+            checkTransactionEnd();
             if (count == beans.size()) {
                 throw new RuntimeException("replication couldn't be done on:\n" + StringUtil.toFormattedString(beans, 300, true));
             }
@@ -95,6 +97,21 @@ public class ReplicationServiceBean extends GenericLocalServiceBean {
 //        connection().getTransaction().commit();
         Message.send("replication done on " + newBeans.size() + " beans");
         return newBeans;
+    }
+
+    private void checkTransactionBegin() {
+        if (!ENV.get("service.replication.autocommit", true) && !entityManager.getTransaction().isActive())
+            entityManager.getTransaction().begin();
+    }
+
+    void rollbackIfActive() {
+        if (entityManager.getTransaction().isActive())
+            entityManager.getTransaction().rollback();
+    }
+
+    void checkTransactionEnd() {
+        if (entityManager.getTransaction().isActive() /* && !entityManager.getTransaction().getRollbackOnly()*/)
+            entityManager.getTransaction().commit();
     }
 
     /**
@@ -110,7 +127,7 @@ public class ReplicationServiceBean extends GenericLocalServiceBean {
         if (ENV.get("service.replication.autocommit", true))
             newBean = persist/*NoTransaction*/(bean);//, true, true));
         else
-            newBean = persistNoTransaction(bean, true, true);
+            newBean = persistNoTransaction(bean, false, false);
         Object pid = ServiceUtil.getId(bean);
         //on @generatedvalue jpa will always create it's own id on new items
         if (id != null && !id.equals(pid)) {

@@ -1244,6 +1244,12 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         FileUtil.saveProperties(ENV.getConfigPath() + fileName, p);
     }
 
+    public static <T> T getVirtualBeanDefinition(Class beanType, Class<T> beanDefExtensionType) {
+        return (T) loadVirtualDefinitions().stream()
+            .filter(d -> d.getClazz().equals(beanType) && beanDefExtensionType.isAssignableFrom(d.getClass()))
+            .findFirst().orElse(null);
+    }
+
     public static Collection<BeanDefinition<?>> loadVirtualDefinitions() {
     	return loadVirtualDefinitions(ENV.getFileExtension());
     }

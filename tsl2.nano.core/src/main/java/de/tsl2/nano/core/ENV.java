@@ -440,6 +440,17 @@ public class ENV implements Serializable {
         return get(key, null);
     }
 
+    /** 
+     * asks the user (if UI is available!) to set the default boolean value for the given key.
+     * if not responding (timeout 4000ms) or responding with 'Yes', default value will be used,
+     * otherwise the negation of defaultValue will be used 
+     */
+    public static final boolean getAsking(String key, boolean defaultValue) {
+        Object definedValue = get(key, null);
+        Boolean askedValue = definedValue != null ? (Boolean) definedValue : Message.ask("do you want to set the property " + key + " with default value: " + defaultValue, defaultValue);
+        return get(key, askedValue);
+    }
+
     /**
      * reads key-value from ENV.properties (stored in environment.xml). First it searches in System.properties. 
      * if not existing in ENV.properties, defaultvalue or system.property will be stored in environment.xml.
@@ -1089,6 +1100,7 @@ public class ENV implements Serializable {
             return null;
         }
         //load the dependencies through maven, if available
+        ENV.getAsking("tsl2nano.offline", true);
         if (get("classloader.usenetwork.loader", true) && NetUtil.isOnline()
             && get(CompatibilityLayer.class).isAvailable(TSL2_JARRESOLVER)) {
             Message.send("resolving dependencies: "

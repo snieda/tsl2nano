@@ -585,7 +585,10 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
      */
     @Override
     public IStatus isValid(T value) {
-        return getConstraint().checkStatus(getId(), value);
+        IStatus s = getConstraint().checkStatus(getId(), value);
+        if (status == null) // should we set the status always?
+            status = s;
+        return s;
     }
 
     /**

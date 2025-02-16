@@ -26,10 +26,6 @@ public class WSButton extends WSItem {
     public WSButton(String name, Object value, Map<String, Object> attributes) {
         super(TAG, name, value, attributes);
     }
-    @Override
-    public String getId() {
-        return DEFAULT_ID;
-    }
 
     @Override
     public boolean hasLabel() {

@@ -93,7 +93,7 @@ public class DatabaseTool {
     }
 
 	public static void shutdownDatabaseDefault() {
-		shutdownDatabase(Persistence.H2_DATABASE_URL);
+		shutdownDatabase(Persistence.STD_LOCAL_DATABASE_URL);
 	}
 	public void shutdownDatabase() {
 		shutdownDatabase(persistence.getConnectionUrl());

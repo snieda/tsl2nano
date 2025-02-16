@@ -55,16 +55,14 @@ public class Replication extends Persistence implements Runnable {
         super();
         persistenceUnit = "replication";
         transactionType = "RESOURCE_LOCAL";
-        provider = "org.hibernate.jpa.HibernatePersistenceProvider";
         connectionDriverClass = STD_LOCAL_DATABASE_DRIVER;
-        connectionUrl = "jdbc:h2:./jdbc-replication";
-        connectionUserName = "SA";
-        connectionPassword = "";
-        hibernateDialect = "org.hibernate.dialect.H2Dialect";
-        defaultSchema = DEFAULT_SCHEMA;
-        datasourceClass = STD_LOCAL_DATABASE_DRIVER;
         port = "9992";
         database = "replication";
+        connectionUrl = STD_LOCAL_DATABASE_URL.replace("9003", port);
+        connectionUserName = "SA";
+        connectionPassword = "";
+        defaultSchema = DEFAULT_SCHEMA;
+        datasourceClass = STD_LOCAL_DATABASE_DRIVER;
     }
 
     @SuppressWarnings("static-access")
@@ -100,7 +98,7 @@ public class Replication extends Persistence implements Runnable {
 
         p = prop;
 
-        if (ENV.get("service.use.database.replication", false)) {
+        if (ENV.getAsking("service.use.database.replication.autothread", true)) {
             startReplicationThread();
         }
     }

@@ -18,7 +18,7 @@ setTheme(false);
  * websocket client implementation.
  */
 var socket = new WebSocket(
-		'wss://' + window.document.location.hostname + ':41659');
+		'wss://' + window.document.location.hostname + ':43215');
 console.log('websocket created:' + socket);
 
 socket.onopen = function() {
@@ -330,19 +330,14 @@ function showDialog(htmlDlg) {
 	formDialog.showModal();
 
 	//listen to the events
-	document.getElementById('wsdialog.button').onclick = function() {
-		elements = document.getElementsByName("wsdialog.formDialog");
-		var values = value;
-		if (elements.length > 0) {
-			values += "::{";
-			for (let i = 0; i < elements.length; i++) {
-				const e = elements[i];
-				values += e.name + ":" + e.value + ",";
-			}
-			values += "}";
-		}
-		formDialog.close(values);
-	};
+	let buttons = formDialog.querySelectorAll("button");
+	[].forEach.call(buttons,button=>{
+		button.onclick = function() {
+			values = "::{" + e.name + ":" + e.value + "}";
+			formDialog.close(values);
+		};
+	});
+
 	document.getElementById('wsdialog.formDialog').addEventListener('close', function() {
 		var result = createMessage('dialog', "returnvalue", formDialog.returnValue);
 		console.log('sending dialog result: \'' + result + '\'');
@@ -406,7 +401,7 @@ function setTheme(next) {
 <table border="0" frame="box" id="page.header.table" sortable="" width="100%">
 <tbody>
 <tr style="background: transparent;">
-<td content="T" onclick="toggleOnClick()"><a href="https://sourceforge.net/p/tsl2nano/wiki/"><img src="icons/beanex-logo-micro.jpg" title="Framework Version: tsl2.nano.h5-2.5.4-SNAPSHOT-2438-09-02-2025 15:03-d"></a></td><td>
+<td content="T" onclick="toggleOnClick()"><a href="https://sourceforge.net/p/tsl2nano/wiki/"><img src="icons/beanex-logo-micro.jpg" title="Framework Version: tsl2.nano.h5-2.5.4-SNAPSHOT-2438-14-02-2025 17:10-d"></a></td><td>
 <form action="?" method="post" style="display: inline; ">
 <div>
 <nav>
@@ -452,7 +447,7 @@ function setTheme(next) {
 <button accesskey="j" class="panelactionsimple" formnovalidate="" formtarget="_blank" id="statusinfoliste.json" name="statusinfoliste.json" onclick="fade(this)" style="" title="Json (ALT+j)" type="submit">Json<img src="icons/view.png"></button>
 </li>
 <li>
-<button accesskey="&quot;" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="statusinfoliste.document" name="statusinfoliste.document" onclick="fade(this)" style="" title="exporting (see environment.properties, variable names are starting and ending with &sect;&sect;) to: target/test/.nanoh5.timesheet/statusinfo.rtf (ALT+&quot;)" type="submit">Dokument<img src="icons/images_all.png"></button>
+<button accesskey="&quot;" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="statusinfoliste.document" name="statusinfoliste.document" onclick="fade(this)" style="" title="exporting (see environment.properties, variable names are starting and ending with &sect;&sect;) to: .nanoh5.timesheet/statusinfo.rtf (ALT+&quot;)" type="submit">Dokument<img src="icons/images_all.png"></button>
 </li>
 <li>
 <button accesskey="h" class="panelactionsimple" formnovalidate="" formtarget="_self" id="statusinfoliste.help" name="statusinfoliste.help" onclick="fade(this)" style="" title="target/test/.nanoh5.timesheet/doc/statusinfo.help.html or target/test/.nanoh5.timesheet/doc/statusinfo.help.pdf (ALT+h)" type="submit">Hilfe<img src="icons/trust_unknown.png"></button>
@@ -481,21 +476,21 @@ function setTheme(next) {
 <tr>
 <td class="beanfieldlabel" id="statusInfo.message.label" style="color: var(--label-color); " width="250">Message</td><td>
 <table>
-<input align="start" autofocus="autofocus" class="beanfieldinput" disabled id="statusInfo.message" lang="de_DE" max="" maxlength="2147483647" min="" name="message" pattern="[\x00-\xFF &euro;]{0,5000}" readonly size="-1" style="background-color: rgba(247,247,247,.5);" tabindex="1" title="statusInfo.message" type="text" value="test.workflow finished with status: OK{startedAt: 2025-02-09 16:16:03.965, endedAt: 2025-02-09 16:16:15.129}" width="-1">
+<input align="start" autofocus="autofocus" class="beanfieldinput" disabled id="statusInfo.message" lang="de_DE" max="" maxlength="2147483647" min="" name="message" pattern="[\x00-\xFF &euro;]{0,5000}" readonly size="-1" style="background-color: rgba(247,247,247,.5);" tabindex="1" title="statusInfo.message" type="text" value="test.workflow finished with status: OK{startedAt: 2025-02-14 18:23:21.782, endedAt: 2025-02-14 18:23:28.045}" width="-1">
 </table>
 </td>
 </tr>
 <tr>
 <td class="beanfieldlabel" id="statusInfo.endedAt.label" style="color: var(--label-color); " width="250">Ended At</td><td>
 <table>
-<input align="start" class="beanfieldinput" disabled id="statusInfo.endedAt" lang="de_DE" max="" maxlength="2147483647" min="" name="endedAt" pattern="[0-3]\d\.[0-1]\d(\.([1-2]\d\d\d)?)?([,;|\/]?\s[0-2]\d\:[0-5]\d(\:[0-5]\d)?)?" readonly size="-1" style="background-color: rgba(247,247,247,.5);" tabindex="2" title="statusInfo.endedAt" type="date" value="2025-02-09" width="-1">
+<input align="start" class="beanfieldinput" disabled id="statusInfo.endedAt" lang="de_DE" max="" maxlength="2147483647" min="" name="endedAt" pattern="[0-3]\d\.[0-1]\d(\.([1-2]\d\d\d)?)?([,;|\/]?\s[0-2]\d\:[0-5]\d(\:[0-5]\d)?)?" readonly size="-1" style="background-color: rgba(247,247,247,.5);" tabindex="2" title="statusInfo.endedAt" type="date" value="2025-02-14" width="-1">
 </table>
 </td>
 </tr>
 <tr>
 <td class="beanfieldlabel" id="statusInfo.startedAt.label" style="color: var(--label-color); " width="250">Started At</td><td>
 <table>
-<input align="start" class="beanfieldinput" disabled id="statusInfo.startedAt" lang="de_DE" max="" maxlength="2147483647" min="" name="startedAt" pattern="[0-3]\d\.[0-1]\d(\.([1-2]\d\d\d)?)?([,;|\/]?\s[0-2]\d\:[0-5]\d(\:[0-5]\d)?)?" readonly size="-1" style="background-color: rgba(247,247,247,.5);" tabindex="3" title="statusInfo.startedAt" type="date" value="2025-02-09" width="-1">
+<input align="start" class="beanfieldinput" disabled id="statusInfo.startedAt" lang="de_DE" max="" maxlength="2147483647" min="" name="startedAt" pattern="[0-3]\d\.[0-1]\d(\.([1-2]\d\d\d)?)?([,;|\/]?\s[0-2]\d\:[0-5]\d(\:[0-5]\d)?)?" readonly size="-1" style="background-color: rgba(247,247,247,.5);" tabindex="3" title="statusInfo.startedAt" type="date" value="2025-02-14" width="-1">
 </table>
 </td>
 </tr>

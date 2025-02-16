@@ -127,7 +127,7 @@ public class NanoWebSocketServer extends WebSocketServer {
         //if we are in configuration mode, do nothing
         if (session.getWorkingObject() != null) {
             Package pck = ((BeanDefinition) session.getWorkingObject()).getDeclaringClass().getPackage();
-            if (pck.equals(BeanConfigurator.class.getPackage()) || pck.equals(BeanDefinition.class.getPackage())) {
+            if (pck.equals(BeanConfigurator.class.getPackage())) {
                 return;
             }
         }
@@ -172,8 +172,8 @@ public class NanoWebSocketServer extends WebSocketServer {
                 ConcurrentUtil.notifyWith(session, value);
                 break;
             default:
-                LOG.error("unexptected message target: " + target);
-                throw new IllegalArgumentException();
+                LOG.error("unexptected message msg: " + msg + ", target: " + target);
+                throw new IllegalArgumentException("msg: " + msg + ", target: " + target);
             }
         }
     }

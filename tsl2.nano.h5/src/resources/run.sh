@@ -51,7 +51,7 @@ VERSION_=${project.version}
 NAME=${NAME:-$NAME_}
 VERSION=${VERSION:-$VERSION_}
 EXTENSION=$( [[ -f "$NAME-$VERSION.jar" ]] || [[ -f "../$NAME-$VERSION.jar" ]] && printf '' || printf -- '-standalone' )
-[ $EXTENSION != "-virgin" ] && OFFLINE="-Dtsl2nano.offline=true"
+[[ $EXTENSION != "-virgin" ]] && OFFLINE="-Dtsl2nano.offline=true"
 #MYIP="$(ip -o route get to 8.8.8.8 | sed -n 's/.*src \([0-9.]\+\).*/\1/p')"
 [[ "$MYIP" == "" ]] && MYIP=localhost
 JARDIR=$( [[ -f "$NAME-$VERSION$EXTENSION".jar ]] && printf "" || printf "../" )

@@ -7,6 +7,7 @@ import java.io.InputStream;
 import org.junit.Before;
 import org.junit.Test;
 
+import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FilePath;
@@ -17,6 +18,7 @@ public class DocumentWorkerTest implements ENVTestPreparation {
 	@Before
 	public void setUp() {
 		ENVTestPreparation.super.setUp("specification");
+		BeanContainer.initEmtpyServiceActions();
 		
 		ENV.addService(SpecificationExchange.class, new SpecificationExchange() {
 			@Override

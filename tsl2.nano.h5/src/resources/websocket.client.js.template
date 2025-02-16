@@ -322,19 +322,14 @@ function showDialog(htmlDlg) {
 	formDialog.showModal();
 
 	//listen to the events
-	document.getElementById('wsdialog.button').onclick = function() {
-		elements = document.getElementsByName("wsdialog.formDialog");
-		var values = value;
-		if (elements.length > 0) {
-			values += "::{";
-			for (let i = 0; i < elements.length; i++) {
-				const e = elements[i];
-				values += e.name + ":" + e.value + ",";
-			}
-			values += "}";
-		}
-		formDialog.close(values);
-	};
+	let buttons = formDialog.querySelectorAll("button");
+	[].forEach.call(buttons,button=>{
+		button.onclick = function() {
+			values = "::{" + e.name + ":" + e.value + "}";
+			formDialog.close(values);
+		};
+	});
+
 	document.getElementById('wsdialog.formDialog').addEventListener('close', function() {
 		var result = createMessage('dialog', "returnvalue", formDialog.returnValue);
 		console.log('sending dialog result: \'' + result + '\'');

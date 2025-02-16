@@ -70,7 +70,7 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
     protected IGenericBaseService replication;
     protected boolean connected = true;
     protected boolean collectReplications = false;
-    //WORKAROUND
+    //WORKAROUND to use that reference (=container) in the ReplicationServiceBean
     static Tree<Object, BeanValue> tree = new Tree<Object, BeanValue>();
 
     private static final Log LOG = LogFactory.getLog(GenericReplicatingServiceBean.class);
@@ -105,7 +105,8 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
     protected static List<IGenericBaseService> createStandardReplication() {
         ReplicationServiceBean rep;
         try {
-            rep = new ReplicationServiceBean();
+            // be careful: use the explicit constructor with createReplication=false to avoid stackoverflow
+            rep = new ReplicationServiceBean(ReplicationServiceBean.createEntityManager("replication"), false);
         } catch (Exception e) {
             //Ok, continue without replication - this shouldn't break the application!
             LOG.error("couldn't create standard replication", e);
@@ -223,7 +224,7 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
                                         ConcurrentUtil.sleep(2000);
                                     }
                                     rep.clear();
-                                    container.clear();
+                                    container.clear(); tree.clear();
                                 }
                             } else {
                                 LinkedList<Object> rep = new LinkedList<Object>(result);
@@ -268,7 +269,8 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
 
     /**
      * checks recursive the given list of objects to be replicated to the given service.
-     * 
+     * <p/>TODO: sort the oneToMany objects to be persisted first!
+     *  
      * @param repService service to check the new replication objects
      * @param reps objects to be checked if already persisted
      */
@@ -326,8 +328,11 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
 //                    }
                     addReplicationEntities(repService, new ArrayList<Object>(values), container,
                         !bv.composition(), excludes);
+                    // if no CASCADINGTYPE=ALL is defined, we cannot persist that - so we remove the oneToMany items
+                    bv.setValue(new ListSet<>());
                 }
             }
+
 
             if (myAttrValues.size() > 0) {//--> performance
                 if (LOG.isDebugEnabled())

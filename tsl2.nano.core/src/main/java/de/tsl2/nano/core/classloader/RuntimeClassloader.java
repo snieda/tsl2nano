@@ -273,8 +273,9 @@ public class RuntimeClassloader extends URLClassLoader {
             }
 
             List<File> lastModifiedFile() {
+                if (!fPath.canRead())
+                    throw new IllegalStateException("unaccessible: " + fPath.getAbsolutePath());
                 File[] files = fPath.listFiles();
-                File last = null;
                 List<File> fileList = new ArrayList<File>(Arrays.asList(files));
                 if (lastFiles != null) {
                     boolean changed = fileList.removeAll(Arrays.asList(lastFiles));

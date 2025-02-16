@@ -34,7 +34,7 @@ public class Translator {
     private static final Log LOG = LogFactory.getLog(Translator.class);
     /** WorldLingo URL */
     private static final String URL_TANSLATION_TEMPL =
-        "http://www.worldlingo.com/S000.1/api?wl_srclang={0}&wl_trglang={1}&wl_password=secret&wl_mimetype=text%2Fplain&wl_data={2}";
+        "https://www.worldlingo.com/S000.1/api?wl_srclang={0}&wl_trglang={1}&wl_password=secret&wl_mimetype=text%2Fplain&wl_data={2}";
 
     //Der KEY ist mit einem google-account + projekt verbunden. Fuer dieses Projekt muss 'abrechenbar' aktiviert sein, so dass
     //Bank-Konto-Daten verügbar sein müssen :-(

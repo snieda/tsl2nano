@@ -387,7 +387,7 @@ public class Bean<T> extends BeanDefinition<T> {
         IStatus status = IStatus.STATUS_OK;
         for (final BeanValue beanValue : attributes) {
             if ((refresh && !(status = beanValue.isValid(beanValue.getValue())).ok())
-                || (!refresh && !beanValue.getStatus().ok())) {
+                || (!refresh && (beanValue.getStatus() != null && !beanValue.getStatus().ok()))) {
                 if (messages != null)
                     messages.put(beanValue, beanValue.getStatus().toString());
                 if (refresh)
@@ -497,7 +497,7 @@ public class Bean<T> extends BeanDefinition<T> {
     }
 
     public static <T> Bean<T> newBeanWithDefaults(Class<T> type) {
-        return (Bean<T>) Bean.getBean(new BeanCollector(type, 0).createItem(null));
+        return (Bean<T>) Bean.getBean(BeanCollector.getBeanCollector(type).createItem(null));
     }
 
     @Override

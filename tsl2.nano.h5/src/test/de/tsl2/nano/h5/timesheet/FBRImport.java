@@ -1,6 +1,6 @@
 package de.tsl2.nano.h5.timesheet;
 
-import static de.tsl2.nano.service.util.finder.Finder.*;
+import static de.tsl2.nano.service.util.finder.Finder.example;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -28,7 +28,7 @@ public class FBRImport implements BiConsumer<String[], Map<String, Object>>, BiF
 				ENV.get("timesheet.import.expression", "fromdate: fromtime-totime (pause^\\)\\:? ^value chargeitem comment"));
 		Collection<Charge> beans = reader.read(file);
 		Message.send("persisting " + beans.size() + " items");
-		if (BeanContainer.isInitialized())
+		if (BeanContainer.isInitialized()) 
 			beans.forEach(b -> BeanContainer.instance().save(b));
 		Message.send("finished successfull (" + beans.size() + " items imported");
 		return beans;
@@ -41,22 +41,38 @@ public class FBRImport implements BiConsumer<String[], Map<String, Object>>, BiF
 
 	@Override
 	public Bean apply(Bean b, Map<String, Object> properties) {
+		// TODO: should be done by a Compositor!
 		Message.send("importing " + b);
+		String itemName = String.valueOf(properties.get("item"));
+		Item itemEx = new Item();
+		itemEx.setName(itemName);
+		Item item = Finder.findOne(example(itemEx));
+		
+		// abstract solution through Compositor - not working yet!
+		// Compositor compositor = Compositor.getCompositor(b.getClazz());
+		// compositor.composeItem(b.getInstance(), item, null);
+
+		Chargeitem chargeitem = (Chargeitem) b.getValue("chargeitem");
+		if (chargeitem == null) {
+			chargeitem = new Chargeitem();
+		} else {
+			BeanContainer.detachEntities(chargeitem);
+		}
+		chargeitem.setItem(item);
+		// BeanContainer.createId(chargeitem);
+		chargeitem.setCharge(BigDecimal.ONE);
+		//NOTE: Charge.chargeitem must be cascdatetype.all
+		// chargeitem.getCharges().add((Charge) b.getInstance());
+		// item.getChargeitems().add(chargeitem);
+		b.setValue("chargeitem", chargeitem);
+		// Bean.getBean(chargeitem).setValue("item", item);
+
 		Map messages = new HashMap<>();
 		if (!b.isValid(messages )) {
 			Message.send(messages.toString());
 			return null;
 		}
-		String itemName = String.valueOf(properties.get("item"));
-		Item itemEx = new Item();
-		itemEx.setName(itemName);
-		Item item = Finder.findOne(example(itemEx));
-		Chargeitem chargeitem = (Chargeitem) b.getValue("chargeitem");
-		BeanContainer.createId(chargeitem);
-		chargeitem.setCharge(BigDecimal.ZERO);
-		//NOTE: Charge.chargeitem must be cascdatetype.all
-		item.getChargeitems().add(chargeitem);
-		Bean.getBean(chargeitem).setValue("item", item);
+		BeanContainer.instance().save(chargeitem);
 		return b;
 	}
 }

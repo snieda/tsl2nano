@@ -52,7 +52,7 @@ import de.tsl2.nano.specification.Pool;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
-@SuppressWarnings({ "serial", "rawtypes" })
+@SuppressWarnings({ "rawtypes" })
 public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCollector<COLLECTIONTYPE, T> {
     /** serialVersionUID */
     private static final long serialVersionUID = 1L;
@@ -80,6 +80,10 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
     protected String actionEnablerRule;
     
     private transient List<IAction> compositorActions;
+
+    public static <T> Compositor<Collection<T>, T> getCompositor(Class<T> target) {
+        return BeanDefinition.getVirtualBeanDefinition(target, Compositor.class);
+    }
 
     /**
      * constructor
@@ -225,51 +229,7 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
                 public T action() throws Exception {
                     getSelectionProvider().getValue().clear();
                     getSelectionProvider().getValue().add(preparedComposition);
-                    BeanCollector c = targetAttribute == null ? Compositor.this : BeanCollector.getBeanCollector((Class)targetType);
-                    T item = (T) c.createItem(preparedComposition);
-                    BeanContainer.initDefaults(item);
-                    if (targetAttribute == null) {
-                        setDefaultValues(item, true);
-    
-                        //fill context parameters
-                        Object[] pars = getParameter();
-                        if (pars != null)
-                            fillContext(item, pars);
-                    }
-                    BeanValue parent = (BeanValue) Bean.getBean(base).getAttribute(baseAttribute);
-                    //on manyTomany targetAttribute must not be null
-                    IAttributeDefinition<?> targetAttr = targetAttribute != null ? c.getAttribute(targetAttribute) : null;
-                    Composition comp = new Composition(parent, targetAttr);
-                    Object resolver = comp.createChildOnTarget(item);
-                    if (resolver == item) //yes we need direct instance comparing with '=='
-                        resolver = base;
-                    if (!forceUserInteraction && Bean.getBean(item).isValid(null, true)) {
-                        resolver = (T) persistResolverIfNotCascading(targetAttr, resolver);
-                        item = (T) Bean.getBean(item).save();
-                        getCurrentData().add(item);
-                        return (T) _this;//the type T should be removed
-                    } else if (targetAttr != null && !Collection.class.isAssignableFrom(targetAttr.getType())) {
-                        persistResolverIfNotCascading(targetAttr, resolver);
-                    }
-                    getCurrentData().add(item);
-                    return item;
-                }
-
-                private Object persistResolverIfNotCascading(IAttributeDefinition<?> targetAttr, Object resolver) {
-                    if (targetAttr == null || !targetAttr.cascading()) {
-                        HashMap<BeanValue<?>, String> errors = new HashMap<>();
-                        if (Bean.getBean(resolver).isValid(errors, true)) {
-                            resolver = Bean.getBean(resolver).save();
-                        } else {
-                            LOG.error("couldn't persist resolver of type " + resolver.getClass() + " for composition target " + targetAttr);
-                            String msg = StringUtil.toFormattedString(errors, -1, true);
-                            if (ENV.get("app.mode.strict", false))
-                                throw new ManagedException(msg);
-                            else
-                                Message.send(msg);
-                        }
-                    }
-                    return resolver;
+                    return composeItem(preparedComposition, baseAttribute, targetType, targetAttribute, base, getParameter());
                 }
 
                 @Override
@@ -302,6 +262,62 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
             });
         }
         return actions;
+    }
+
+    public T composeItem(final T preparedComposition, final Object base, Object...parameters) {
+        return composeItem(preparedComposition, baseAttribute, targetType, targetAttribute, base, parameters);
+    }
+
+    public T composeItem(final T preparedComposition, final String baseAttribute,
+            final Class<?> targetType, final String targetAttribute,
+            final Object base, Object...parameters) {
+        BeanCollector c = targetAttribute == null ? this
+                : BeanCollector.getBeanCollector((Class) targetType);
+        T item = (T) c.createItem(preparedComposition);
+        BeanContainer.initDefaults(item);
+        if (targetAttribute == null) {
+            setDefaultValues(item, true);
+
+            //fill context parameters
+            Object[] pars = parameters;
+            if (pars != null)
+                fillContext(item, pars);
+        }
+        BeanValue parent = (BeanValue) Bean.getBean(base).getAttribute(baseAttribute);
+        //on manyTomany targetAttribute must not be null
+        IAttributeDefinition<?> targetAttr = targetAttribute != null ? c.getAttribute(targetAttribute) : null;
+        Composition comp = new Composition(parent, targetAttr);
+        Object resolver = comp.createChildOnTarget(item);
+        if (resolver == item) //yes we need direct instance comparing with '=='
+            resolver = base;
+        if (!forceUserInteraction && Bean.getBean(item).isValid(null, true)) {
+            resolver = (T) persistResolverIfNotCascading(targetAttr, resolver);
+            item = (T) Bean.getBean(item).save();
+            getCurrentData().add(item);
+            return (T) this;//the type T should be removed
+        } else if (targetAttr != null && !Collection.class.isAssignableFrom(targetAttr.getType())) {
+            persistResolverIfNotCascading(targetAttr, resolver);
+        }
+        getCurrentData().add(item);
+        return item;
+    }
+
+    private Object persistResolverIfNotCascading(IAttributeDefinition<?> targetAttr, Object resolver) {
+        if (targetAttr == null || !targetAttr.cascading()) {
+            HashMap<BeanValue<?>, String> errors = new HashMap<>();
+            if (Bean.getBean(resolver).isValid(errors, true)) {
+                resolver = Bean.getBean(resolver).save();
+            } else {
+                LOG.error("couldn't persist resolver of type " + resolver.getClass() + " for composition target "
+                        + targetAttr);
+                String msg = StringUtil.toFormattedString(errors, -1, true);
+                if (ENV.get("app.mode.strict", false))
+                    throw new ManagedException(msg);
+                else
+                    Message.send(msg);
+            }
+        }
+        return resolver;
     }
 
     protected String createCompositorActionId(final Object baseInstance) {

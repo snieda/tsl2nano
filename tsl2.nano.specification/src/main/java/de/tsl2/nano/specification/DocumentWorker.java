@@ -131,33 +131,38 @@ public class DocumentWorker {
 		LOG.info("starting documentworker on " + fileName);
 		LOG.info("=============================================================================\n");
 		Message.send("starting documentworker on " + fileName);
-		Scanner sc = Util.trY( () -> new Scanner(new File(fileName)));
-		String l, tag = null, tagfile;
-		StringBuilder content = new StringBuilder();
-		int line = 0;
-		while (sc.hasNextLine()) {
-			l = sc.nextLine();
-			line++;
-			try {
-				if (isNewChapterWithTag(l)) {
-					if (content.length() > 0) {
-						tagfile = writeLastChapter(line, tag, content);
-						runTag(tag, tagfile);
-						tag = readTag(l);
-						content.setLength(0);
-					} else {
-						tag = readTag(l);
+		try (Scanner sc = Util.trY( () -> new Scanner(new File(fileName)))) {
+			String l, tag = null, tagfile;
+			StringBuilder content = new StringBuilder();
+			int line = 0;
+			while (sc.hasNextLine()) {
+				l = sc.nextLine();
+				line++;
+				try {
+					if (isNewChapterWithTag(l)) {
+						if (content.length() > 0) {
+							tagfile = writeLastChapter(line, tag, content);
+							runTag(tag, tagfile);
+							tag = readTag(l);
+							content.setLength(0);
+						} else {
+							tag = readTag(l);
+						}
 					}
+					else if (l.matches(LINK)) {
+						String link = StringUtil.substring(l, "(", ")");
+						content.append(new String(FilePath.read(link)));
+					} else if (!isCodeTag(l))
+						content.append(l + "\n");
+				} catch (Exception e) {
+					throw new IllegalStateException("Exception thrown reading line [" + line + "]:" + l, e);
 				}
-				else if (l.matches(LINK)) {
-					String link = StringUtil.substring(l, "(", ")");
-					content.append(new String(FilePath.read(link)));
-				} else if (!isCodeTag(l))
-					content.append(l + "\n");
-			} catch (Exception e) {
-				throw new IllegalStateException("Exception thrown reading line [" + line + "]:" + l, e);
+			}
+			if (content.length() > 0 && tag != null) {
+				runTag(tag, writeLastChapter(++line, tag, content));
 			}
 		}
+		FileUtil.copy(fileName, Pool.getSpecificationRootDir() + fileName + ".done");
 		ENV.moveBackup(fileName);
 		LOG.info("documentworker finished (time: " + DateUtil.fromStartTime(start) + ", file: " + fileName + ")");
 		LOG.info("=============================================================================\n");

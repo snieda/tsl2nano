@@ -111,7 +111,7 @@ public class WSDialog {
     private static Element createFormDialog(String rootTag) {
         Document doc = HtmlUtil.createDocument("");
         Element e = doc.createElement(rootTag);
-        e.setAttribute("open", "true");
+        // e.setAttribute("open", "true");
         doc.appendChild(e);
         HtmlUtil.appendAttributes(e, HtmlUtil.ATTR_ID, PREFIX_NAME + "formDialog");
         return HtmlUtil.appendElement(e, HtmlUtil.TAG_FORM, HtmlUtil.ATTR_METHOD, TAG_ROOT);

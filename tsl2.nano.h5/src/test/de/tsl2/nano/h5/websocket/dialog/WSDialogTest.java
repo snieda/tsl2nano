@@ -29,12 +29,12 @@ public class WSDialogTest implements Serializable {
 
     @Before
     public void setUp() {
-        ConcurrentUtil.reset();
+        Message.removeLocalResponse();
     }
 
     @Test
     public void testDialogCreation() {
-        String expected = "<dialog id=\"wsdialog.formDialog\" open=\"true\"><form method=\"dialog\"><h3>title</h3><p>message</p><div>my Test Field<input id=\"wsdialog.input.myTestField.id\" name=\"myTestField\" type=\"textarea\" value=\"empty\"/></div><button id=\"wsdialog.button\" name=\"myTestButton\" value=\"myTestButton\">my Test Button</button></form></dialog>";
+        String expected = "<dialog id=\"wsdialog.formDialog\"><form method=\"dialog\"><h3>title</h3><p>message</p><div>my Test Field<input id=\"wsdialog.input.myTestField.id\" name=\"myTestField\" type=\"textarea\" value=\"empty\"/></div><button id=\"wsdialog.button.myTestButton.id\" name=\"myTestButton\" value=\"myTestButton\">my Test Button</button></form></dialog>";
         WSDialog dlg = createTestDialog();
         String output = dlg.toHtmlDialog();
         System.out.println(expected);
@@ -47,7 +47,7 @@ public class WSDialogTest implements Serializable {
         WSDialog dlg = createTestDialog();
         String expected = createThreadSimulatingAResponse("passt");
         String response = Message.sendAndWaitForResponse(dlg.toWSMessage(), String.class);
-        // assertEquals(expected, response);
+        // assertEquals(expected, response); // TODO: make a test sequence: assertion runs in singularity - but not running this tests together!
     }
 
     @Test
@@ -58,9 +58,9 @@ public class WSDialogTest implements Serializable {
         System.out.println(htmlDlg);
         Object expected = createThreadSimulatingAResponse(instance);
         Object response = Message.sendAndWaitForResponse(htmlDlg, ValueHolder.class);
-        assertTrue(htmlDlg.startsWith(WSDialog.PREFIX_DIALOG + "<dialog id=\"wsdialog.formDialog\" open=\"true\"><form method=\"dialog\">"));
+        assertTrue(htmlDlg.startsWith(WSDialog.PREFIX_DIALOG + "<dialog id=\"wsdialog.formDialog\"><form method=\"dialog\">"));
         assertTrue(htmlDlg.contains(instance.getValue().toString()));
-        // assertEquals(expected, response);
+        // assertEquals(expected, response); // TODO: make a test sequence: assertion runs in singularity - but not running this tests together!
     }
 
     @Test
@@ -71,8 +71,8 @@ public class WSDialogTest implements Serializable {
         System.out.println(htmlDlg);
         Object expected = createThreadSimulatingAResponse(defaultResponse);
         Object response = Message.sendAndWaitForResponse(htmlDlg, Integer.class);
-        // assertEquals(expected, response);
-        assertTrue(htmlDlg.startsWith(WSDialog.PREFIX_DIALOG + "<dialog id=\"wsdialog.formDialog\" open=\"true\"><form method=\"dialog\">"));
+        // assertEquals(expected, response); // TODO: make a test sequence: assertion runs in singularity - but not running this tests together!
+        assertTrue(htmlDlg.startsWith(WSDialog.PREFIX_DIALOG + "<dialog id=\"wsdialog.formDialog\"><form method=\"dialog\">"));
         assertTrue(htmlDlg.contains(String.valueOf(defaultResponse)));
         assertTrue(htmlDlg.contains("wsdialog.button"));
     }
@@ -85,8 +85,8 @@ public class WSDialogTest implements Serializable {
         System.out.println(htmlDlg);
         boolean expected = createThreadSimulatingAResponse(true);
         Boolean response = Message.sendAndWaitForResponse(htmlDlg, Boolean.class);
-        // assertEquals(expected, response);
-        assertTrue(htmlDlg.startsWith(WSDialog.PREFIX_DIALOG + "<dialog id=\"wsdialog.formDialog\" open=\"true\"><form method=\"dialog\">"));
+        // assertEquals(expected, response); // TODO: make a test sequence: assertion runs in singularity - but not running this tests together!
+        assertTrue(htmlDlg.startsWith(WSDialog.PREFIX_DIALOG + "<dialog id=\"wsdialog.formDialog\"><form method=\"dialog\">"));
         assertTrue(htmlDlg.contains(String.valueOf(WSDialog.getYesNoButtons()[0].getName())));
         assertTrue(htmlDlg.contains("wsdialog.button"));
     }

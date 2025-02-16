@@ -536,6 +536,9 @@ public class Persistence implements Serializable, Cloneable {
     }
 
     public Persistence getReplication() {
+        if (replication == null && ENV.getAsking("service.use.database.replication", false)) {
+            replication = new Replication();
+        }
         return replication;
     }
 
@@ -644,9 +647,6 @@ public class Persistence implements Serializable, Cloneable {
                 Persistence.class);
         } else {
             p = new Persistence();
-        }
-        if (p.getReplication() == null && ENV.get("service.use.database.replication", false)) {
-            p.setReplication(new Replication());
         }
         return p;
     }

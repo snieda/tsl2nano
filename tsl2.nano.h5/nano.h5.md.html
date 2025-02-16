@@ -93,6 +93,9 @@ All packages (under name *tsl2nano*) are available in maven central, sourceforge
 * generic import mechanism of flat data (csv, etc)
 * document/specification based full configuration/extension for non-coding or low-coding
 * json/yaml/xml de-/serialization (object mapping) (only 750 lines of code ;-) )
+* clickable color-themes (mouse click between beanEx Icon and Html Title)
+* event sourcing: through tsl2.nano.cursus (persists the state of a business entity as a sequence of state-changing events)
+
 * planned interfaces:
 	* xsd-->bean
 	* java-interface-->java-bean (mock through internal proxy)
@@ -637,7 +640,7 @@ The tsl2.nano.h5 framework can be started through it's jar _tsl2.nano.h5-xxxxx.j
 
 On first start, the most important files will be created!
 
-Normally, you will start with an example: download the file _tsl2.nano.h5.x.y.z-hibernate.zip_ to have an example using lots of features of this project - you have a simple test database and are able to generate your bean jar, see a trivial application-extension, workflow, autorization and rule.
+Normally, you will start with an example: download the file _tsl2.nano.h5.x.y.z-hibernate.zip_ to have an example using lots of features of this project - you have a simple test database and are able to generate your bean jar, see a trivial application-extension, workflow, authorization and rule.
  
 Feel free to test, whether a database-connection of a project you know is working with nano.h5....
 
@@ -1699,6 +1702,18 @@ this will look like:
 
 [[img src=h5.sample.layout.jpg]]
 	
+### Color Themes
+
+On a running tsl2 application it is possible to switch through simple mouse clicks between different color themes.
+
+Do a mouse click between the BeanEx symbol on the upper left corner and the Html Title to switch between the following color themes:
+
+* Light
+* Light-Contrast
+* Dark
+* Dark-Constrast
+* Dark-Image (copy another image to icons/blue-planets.jpg to change the picture)
+
 ### Configuring Presentation, Layout and Constraints
 
 Layouts and LayoutConstraints must be of type *Map* or *String*. If a string is given, this string will be set as element style.
@@ -2044,13 +2059,15 @@ The entities have the following access methods:
 
 The icon is an optional reference to an attribute holding an image to be presented on the button.
 
-The simpliest way to create such a _Compositor_ is to use the BeanConfigurator of your current open detail bean:
+The simpliest way to create such a _Compositor_ is to use the BeanConfigurator of your current open detail bean (in this example: Charge):
 
 [[img src=h5.sample.config.compositor.png]]
 
 [[img src=h5.sample.config.compositor.detail.png]]
 
 If you put in the desired variables and click again 'Create Compositor' this compositor will be saved as virtual definition to be presented in the list of beans on the next start.
+
+For further informations, have a look at the environment folder: specification/readme.txt
 
 ##### Using the Compositor
 
@@ -3031,42 +3048,6 @@ Use that parameters for your activity condition.
 
 TODO: use bean-path to inspect condition expressions like 'times.type = F'.
 
-## Database Replication - Working Offline
-
-It is possible to replicate the data loaded from a remote database. The environments property _service.use.database.replication_ must be true (default is false!). The replication will be done through a second persistence-unit 'replication' (see _persistence.tml_ and finally _persistence.xml_). For each user an own local replication database (default url: _jdbc-replication_) will be created.
-
-The replication is done in it's own thread to avoid conflictions with the application. The O/R mapper will create all tables through bean informations. A special bean holds the information (time, id, change-type) about the changes done by the user. All data, loaded and edited by the current user will be replicated to a local database. Dependent data will be replicated, too, to have a valid datastore.
-*Warning*: On cycling bindings (@OneToMany <-> @ManyToOne) the mechanism will fail, if no cascading is defined! Then the relational data is not persisted yet but and therefor not persistable by the O/R mapper. There is no possibility to invoke that cascading on runtime. As alternative, NanoH5 provides a manual so called _entity-replication_ provided on each list of beans (inside the beancollector). 
-
-The replication connection is configurable like the persistence-unit is. But at the moment, only the combination hsqldb/h2 and hibernate are tested - and it's only usable in standalone-mode - without application-server!
-
-The replications h2 database will be started internally (configuration :see META-INF/persistence.tml).
-- database: jdbc:h2:./jdbc-replication
-
-If the model cycles entity relations, replication may fail. Sometimes, it helps to increase the heap memory (specially for the permormance) - if not, you should select other bean instance (base instances) before to replicate.
-
-### Entity Replication
-
-Each bean list (BeanCollector) provides a menu action for _replication_ of current loaded beans. The following dialog will ask for a source and a destination. If you export your data, the source should always be _PUNIT1_. If you import your data, the destination should always be _PUNIT1_.
-
-* PUNIT1    : standard persistence unit and database connection (_genericPersistenceUnit_)
-* PUNIT2    : secondary persistence unit (_replication_). only active, if _service.use.database.replication_ is true.
-* BYTES     : java object serialization
-* XML       : java object xml serialization
-* JAXB      : java object jaxb serialization. external libraries are needed!
-* SIMPLE_XML: java object serialization with _simplexml_. included in nanoh5.
-* YAML      : java object serialization with snakeyaml
-
-#### Examples
-
-* Source=PUNIT1, Destination=YAML   : current visible data will be *exported* from standard database to YAML files in the projects root directory
-* Source=YAML, Destination=PUNIT1   : data will be *imported* from YAML files in the projects root directory into the standard database
-* Source=PUNIT1, Destination=PUNIT2 : current visible data will be *exported* from standard database to the replication database
-* Source=PUNIT2, Destination=PUNIT1 : undefined! not able to select data from PUNIT2!
-
-*NOTE*: If you have cycling bindings (assozations in both directions) and no cascading defined, the replication import to the second persistence unit may fail.
-In that case, you may do an entity replication from PUNIT1 to any file-serialization (YAML, XML, etc.). Edit the file and remove the redirections from onetomany children to their parent (manytoone).
-
 ## A simple specification Workflow
 
 Another type of workflow is implemented as *Flow* inside the core package and extended in the *tsl2.nano.specification* module.
@@ -3105,6 +3086,47 @@ public class TaskTest {
 	}
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## Database Replication - Working Offline
+
+It is possible to replicate the data loaded from a remote database. The environments property _service.use.database.replication_ must be true (default is false!). The replication will be done through a second persistence-unit 'replication' (see _persistence.tml_ and finally _persistence.xml_). For each user an own local replication database (default url: _jdbc-replication_) will be created.
+
+The replication is done in it's own thread to avoid conflictions with the application. The O/R mapper will create all tables through bean informations. A special bean holds the information (time, id, change-type) about the changes done by the user. All data, loaded and edited by the current user will be replicated to a local database. Dependent data will be replicated, too, to have a valid datastore.
+*Warning*: On cycling bindings (@OneToMany <-> @ManyToOne) the mechanism will fail, if no cascading is defined! Then the relational data is not persisted yet but and therefor not persistable by the O/R mapper. There is no possibility to invoke that cascading on runtime. As alternative, NanoH5 provides a manual so called _entity-replication_ provided on each list of beans (inside the beancollector). 
+
+The replication connection is configurable like the persistence-unit is. But at the moment, only the combination hsqldb/h2 and hibernate are tested - and it's only usable in standalone-mode - without application-server!
+
+The replications database will be started internally (configuration :see META-INF/persistence.tml).
+- database: hsqldb port 9992
+
+If the model cycles entity relations, replication may fail. Sometimes, it helps to increase the heap memory (specially for the permormance) - if not, you should select other bean instance (base instances) before to replicate.
+
+NOTE: if active (service.use.database.replication.autothread=true), the automatic replication is done e.g. on re-searching in a beancollector (table).
+   it is not optimized and has problems on OneToMany connections not having CASCADETYPE=ALL - being the default (no cascading) generated by hibernate-tools!.
+NOTE: The replication is viewable on the login page (only admin mode!) if you expand the invisible second detail panel - the last item there.
+   Additional, have a look into the files of environments folder META-INF/persistence*.*ml.
+
+### Entity Replication
+
+Each bean list (BeanCollector) provides a menu action for _replication_ of current loaded beans. The following dialog will ask for a source and a destination. If you export your data, the source should always be _PUNIT1_. If you import your data, the destination should always be _PUNIT1_.
+
+* PUNIT1    : standard persistence unit and database connection (_genericPersistenceUnit_)
+* PUNIT2    : secondary persistence unit (_replication_). only active, if _service.use.database.replication_ is true.
+* BYTES     : java object serialization
+* XML       : java object xml serialization
+* JAXB      : java object jaxb serialization. external libraries are needed!
+* SIMPLE_XML: java object serialization with _simplexml_. included in nanoh5.
+* YAML      : java object serialization with snakeyaml
+
+#### Examples
+
+* Source=PUNIT1, Destination=YAML   : current visible data will be *exported* from standard database to YAML files in the projects root directory
+* Source=YAML, Destination=PUNIT1   : data will be *imported* from YAML files in the projects root directory into the standard database
+* Source=PUNIT1, Destination=PUNIT2 : current visible data will be *exported* from standard database to the replication database
+* Source=PUNIT2, Destination=PUNIT1 : undefined! not able to select data from PUNIT2!
+
+*NOTE*: If you have cycling bindings (assozations in both directions) and no cascading defined, the replication import to the second persistence unit may fail.
+In that case, you may do an entity replication from PUNIT1 to any file-serialization (YAML, XML, etc.). Edit the file and remove the redirections from onetomany children to their parent (manytoone).
 
 ## Working on multiple Databases
 
@@ -5015,7 +5037,7 @@ hint II: a script (upgrade-old-tsl2-apps.sh) to do this is inside the resources 
  2.5.1  | 04.06.2023 | Fix secure users loading, fix etag 304, NEW module: modelkit
  2.5.2  | 24.11.2024 | dependency updates, h5 stylings enhanced, jmockit -> mockito (serviceacces, replication), complete json, yaml, xml de-/serializing,enhancing autotest,cursus: fix package: tsl2.nano->de.tsl2.nano , beanattribute respecting generic type,many fixes/enhancings on object creation, stringutil, ENV static self removed
  2.5.3  | 03.01.2025 | corrections on internationalization (generic regex creation), autotest valueset on json objects
- 2.5.4  | 09.02.2025 | run scripts refactored, using formtarget=_page for exports
+ 2.5.4  | 23.02.2025 | +script-engine (nashorn+dependencies), property asking, fixes on html dialog, run scripts refactored, using formtarget=_blank for exports, specification: +doc, +timesheet-sample 
 |------ | ---------- | -----------
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
@@ -6256,6 +6278,7 @@ StringBuffer
    * BeanCollectors: plugin handler call on NanoH5.createBeanCollectors() ?
 
 ### Use old Projects as Samples
+
 * [-] affiliate: ok (nur mit SA, Vorsicht: spezielle Daten)
 * [v] bestellung: ok
 * [v] EM-2016: ok
@@ -6263,7 +6286,7 @@ StringBuffer
 * [-] estore: 
    * SADMIN-permissions.xml were automatically resetted
    * view: only two entities: Category , customer
-* [ ] exam: ok
+* [v] exam: ok
 * [-] forum: no beans built 
 * [x] hausehalt: anyway.jar generiert -> Datenprobleme bei Anzeige
 * [v] logbook (jar: logbook-2.5.4.jar) ok
@@ -6277,4 +6300,10 @@ StringBuffer
 * [v] photo: ok
 * [v] skiller: ok (chaotic translation)
 * [v] store -> id skiller?
-* [x] timesheet: compositor/controller not loaded as Bean/BeanColletor
+* [v] timesheet: compositor/controller not loaded as Bean/BeanColletor
+* [v] ask on all important properties...
+* [ ] extend the Compositor to be findable and to provide bean creation methods (to avoid impl. like FBRImport)
+
+Errors:
+* Create Action fails: session outdated
+* [-] Create Compositor: which attributes? <- be sure to be in the right target beandef!

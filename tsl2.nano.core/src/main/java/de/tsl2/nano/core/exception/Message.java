@@ -24,6 +24,7 @@ import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.FormatUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * To handle a message - not to be thrown. See UncaughtExceptionHandler. can be handled anywhere in the own thread.
@@ -69,9 +70,13 @@ public class Message extends RuntimeException {
     public static final void send(String message) {
         // TODO: why the current thread doesn't have the right handler? using
         // the environment will create problems on multi-sessions!
-        send(ENV.get(UncaughtExceptionHandler.class), message);
-
-        send(Thread.currentThread().getUncaughtExceptionHandler(), message);
+        UncaughtExceptionHandler handler = Thread.currentThread().getUncaughtExceptionHandler();
+        if (!handler.getClass().getPackageName().startsWith(Util.FRAMEWORK_PACKAGE)
+            // || (handler instanceof Closeable && ((Closeable)handler).isClosed()???)
+        ) {
+            handler = ENV.get(UncaughtExceptionHandler.class);
+        }
+        send(handler, message);
     }
 
     public static final void send(ByteBuffer message) {
@@ -107,12 +112,16 @@ public class Message extends RuntimeException {
         // on dialog message, the exceptionhandler has to wait for a response in another thread
         send(message);
         Response response = ConcurrentUtil.getCurrent(Response.class);
-        ConcurrentUtil.removeCurrent(Response.class);
+        removeLocalResponse();
         T value = response != null ? (T)response.value : null;
         if (value instanceof String && PrimitiveUtil.isPrimitiveOrWrapper(responseType))
             value = (T) FormatUtil.parse(responseType, (String)value);
         LOG.info("message response: " + response + " ==> converting to (" + responseType + ") " + value);
         return value;
+    }
+
+	public static void removeLocalResponse() {
+        ConcurrentUtil.removeCurrent(Response.class);
     }
 
 	public static Response createResponse(Object value) {

@@ -253,9 +253,10 @@ public class XmlUtil {
                     fileInputStream = new FileInputStream(FileUtil.userDirFile(xmlFile)));
         } catch (Exception e) {
         	if (ENV.isAvailable()) {
-        		Message.ask(ManagedException.toStringCause(e), true); //otherwise it may not be visible on reloading all...
+                //TODO: why asking without using the response?
+        		Message.ask("ERROR on file: " + xmlFile + "\n" + ManagedException.toStringCause(e), true); //otherwise it may not be visible on reloading all...
             } else
-        		LOG.error(e);
+        		LOG.error(xmlFile, e);
         	if (fileInputStream != null)
         		fileInputStream = FileUtil.close(fileInputStream, false);
             //mark the loaded xml file as corrupt

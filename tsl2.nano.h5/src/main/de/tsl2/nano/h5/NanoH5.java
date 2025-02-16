@@ -334,8 +334,11 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
             ENV.extractResource("doc/entry.help.html");
             ENV.extractResource("doc/persistence.help.html");
 
-            ENV.extractResource("specification/specification-timesheet.properties.csv");
-            ENV.extractResource("specification/import-timesheet.log");
+            ENV.extractResource("specification/create-sample-timesheet.sh");
+            ENV.extractResource("specification/specification.properties-timesheet.csv");
+            ENV.extractResource("specification/timesheet-src.zip");
+            ENV.extractResource("specification/timesheet-classes.zip");
+            ENV.extractResource("specification/specification-documentworker-timesheet.md.html");
             onStandaloneExtractJars();
         } catch (Exception ex) {
             LOG.error("couldn't extract ant or shell script", ex);
@@ -383,7 +386,6 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         final String JAR_JPA_API = ENV.get("app.standalone.zip.file.check", "hibernate-jpa-2.1-api-1.0.2.Final.jar");
         if (FileUtil.hasResource(ZIP_STANDALONE) && !new File(ENV.getConfigPath() + JAR_JPA_API).exists()) {
             LOG.info("setting tsl2nano to offfline modus...");
-            ENV.setProperty("tsl2nano.offline", true);
             System.setProperty("tsl2nano.offline", "true");
             LOG.info("extracting " + ZIP_STANDALONE + " and " + JAR_JPA_API);
             ENV.extractResource(JAR_JPA_API, true, false);
@@ -969,7 +971,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
             if (FileUtil.hasResource("messages.properties")) {
                 ENV.registerBundle("messages", true);
 
-                if (ENV.get("app.translate.bundle.project", true)) {
+                if (ENV.getAsking("app.translate.bundle.project", true)) {
                     Message.send("doing machine translation for locale " + Locale.getDefault());
                     Translator.translateBundle(ENV.getConfigPath() + "messages", Messages.keySet(), Locale.ENGLISH,
                         Locale.getDefault());
