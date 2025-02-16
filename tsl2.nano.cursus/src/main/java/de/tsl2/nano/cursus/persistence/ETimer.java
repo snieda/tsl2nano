@@ -19,11 +19,11 @@ import de.tsl2.nano.service.util.IPersistable;
 @Entity
 @ValueExpression("{from} <--> {until} (Step: {stepType}:{stepLength})")
 @Attributes(names = { "from", "until", "generator", "stepType", "stepLength" })
-@Presentable(label = "ΔTimer", icon = "icons/clock.png")
-public class ETimer extends Timer implements IPersistable<String> {
+@Presentable(label = "ΔTimer", icon = "icons/clock.png", description = "time period constraint")
+public class ETimer extends Timer implements IPersistable<Long> {
 	private static final long serialVersionUID = 1L;
 
-	String id;
+	Long id;
 
 	public ETimer() {
 	}
@@ -43,11 +43,11 @@ public class ETimer extends Timer implements IPersistable<String> {
 	@Override
 	@Id
 	@GeneratedValue
-	public String getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 

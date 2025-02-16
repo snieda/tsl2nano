@@ -13,10 +13,10 @@ import de.tsl2.nano.service.util.IPersistable;
 @ValueExpression("{name}")
 @Attributes(names = { "name" })
 @Presentable(label = "ΔConsilium-ID", icon = "icons/point-green.png")
-public class EConsiliumID implements IPersistable<String> {
+public class EConsiliumID implements IPersistable<Long> {
 	private static final long serialVersionUID = 1L;
 
-	String id;
+	Long id;
 	String name;
 
 	public EConsiliumID() {
@@ -29,11 +29,11 @@ public class EConsiliumID implements IPersistable<String> {
 	@Id
 	@GeneratedValue
 	@Override
-	public String getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 

@@ -22,11 +22,11 @@ import de.tsl2.nano.service.util.IPersistable;
 @Entity
 @ValueExpression("{genRes}")
 @Attributes(names = { "genRes", "validObjectIDs" })
-@Presentable(label = "ΔGrex", icon = "icons/cascade.png")
-public class EGrex extends Grex<Object, Object> implements IPersistable<String> {
+@Presentable(label = "ΔGrex", icon = "icons/cascade.png", description = "group of business objects to be changed")
+public class EGrex extends Grex<Object, Object> implements IPersistable<Long> {
 	private static final long serialVersionUID = 1L;
 
-	String id;
+	Long id;
 
 	public EGrex() {
 	}
@@ -42,11 +42,11 @@ public class EGrex extends Grex<Object, Object> implements IPersistable<String> 
 	@Id
 	@GeneratedValue
 	@Override
-	public String getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 

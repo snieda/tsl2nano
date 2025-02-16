@@ -80,6 +80,7 @@ public class DatabaseTool {
                     	Util.trY( () -> BeanContainer.instance().executeStmt(backupScript.replace("<FILE>", FileUtil.getUniqueFileName(ENV.getTempPath() + scriptFile)), true, null), false);
     			    
                     shutdownDBServer();
+                    shutdownReplicationDBServer();
 //                    shutdownDatabase(); //doppelt gemoppelt hält besser ;-)
                     String sqldbScript = isH2() ? persistence.getDefaultSchema() + ".mv.db" : persistence.getDatabase() + ".script";
                     String backupFile =
@@ -322,12 +323,23 @@ public class DatabaseTool {
 	public static void shutdownDBServerDefault() {
 		new DatabaseTool(Persistence.current()).shutdownDBServer();
 	}
-	
-	public void shutdownDBServer() {
+
+    public void shutdownDBServer() {
+        shutdownDBServer(persistence);
+    }
+
+    public void shutdownReplicationDBServer() {
+        shutdownDBServer(persistence.getReplication());
+    }
+
+	public void shutdownDBServer(Persistence p) {
+        if (p == null) {
+            LOG.info("no persistence information available -> nothing to do");
+        }
 		if (isH2())
-			stopDBServer(persistence.getConnectionUrl(), persistence.getConnectionPassword());
-        else if (isInternalDatabase())
-			shutdownDatabase();
+			stopDBServer(p.getConnectionUrl(), p.getConnectionPassword());
+        else if (isInternalDatabase(p.getConnectionUrl()))
+			shutdownDatabase(p.getConnectionUrl());
 	}
 	
 	/** calls h2 server directly through java...*/

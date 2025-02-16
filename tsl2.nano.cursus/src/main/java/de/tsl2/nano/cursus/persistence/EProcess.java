@@ -43,12 +43,12 @@ import de.tsl2.nano.service.util.IPersistable;
 @ValueExpression("{startedAt}: {startPeriod}-{endPeriod} (Items: {items}, Status: {status})")
 @Attributes(names = { "startPeriod", "endPeriod", "startedAt", "items", "status", "log" })
 @Presentable(label = "ΔProcess", icon = "icons/go.png", enabled = false)
-public class EProcess implements IPersistable<String>, IListener<Object> {
+public class EProcess implements IPersistable<Long>, IListener<Object> {
 	private static final long serialVersionUID = 1L;
 	private static final Log LOG = LogFactory.getLog(EProcess.class);
 
 	transient Processor prc = new Processor();
-	String id;
+	Long id;
 
 	Date startedAt;
 	Date endedAt;
@@ -84,11 +84,11 @@ public class EProcess implements IPersistable<String>, IListener<Object> {
 
 	@Id
 	@GeneratedValue
-	public String getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 

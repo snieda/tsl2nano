@@ -310,6 +310,9 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
                         }
                         container.addDependencies(attrValue, BeanValue.getBeanValue(e, attr.getName()));
                     } else {
+                        // on orphan removal we should detach from original database
+                        // if (super.entityManager.contains(e))
+                        //     super.entityManager.detach(e);
                         attr.setValue(e, loadedBean);
                     }
                 }
@@ -329,6 +332,9 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
                     addReplicationEntities(repService, new ArrayList<Object>(values), container,
                         !bv.composition(), excludes);
                     // if no CASCADINGTYPE=ALL is defined, we cannot persist that - so we remove the oneToMany items
+                    // on orphan removal we should detach from original database
+                    // if (super.entityManager.contains(e))
+                    //     super.entityManager.detach(e);
                     bv.setValue(new ListSet<>());
                 }
             }

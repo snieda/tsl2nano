@@ -17,10 +17,10 @@ import de.tsl2.nano.service.util.IPersistable;
 @ValueExpression("{ruleName}: {res}")
 @Attributes(names = { "ruleName", "res" })
 @Presentable(label = "ΔRule-Effectus", icon = "icons/attach.png")
-public class ERuleEffectus extends RuleEffectus<Object, Object> implements IPersistable<String> {
+public class ERuleEffectus extends RuleEffectus<Object, Object> implements IPersistable<Long> {
 	private static final long serialVersionUID = 1L;
 
-	String id;
+	Long id;
 	EExsecutio exsecutio;
 
 	public ERuleEffectus() {
@@ -32,11 +32,11 @@ public class ERuleEffectus extends RuleEffectus<Object, Object> implements IPers
 
 	@Id
 	@GeneratedValue
-	public String getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 

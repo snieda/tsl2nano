@@ -20,11 +20,11 @@ import de.tsl2.nano.service.util.IPersistable;
 @Entity
 @ValueExpression("{name}: {mutatio} -> {effectus}")
 @Attributes(names = { "name", "description", "consilium", "mutatio", "effectus" })
-@Presentable(label = "ΔExsecutio", icon = "icons/wrench.png")
-public class EExsecutio extends Exsecutio<Object> implements IPersistable<String> {
+@Presentable(label = "ΔExsecutio", icon = "icons/wrench.png", description = "change execution")
+public class EExsecutio extends Exsecutio<Object> implements IPersistable<Long> {
 	private static final long serialVersionUID = 1L;
 
-	String id;
+	Long id;
 	EConsilium consilium;
 
 	public EExsecutio() {
@@ -38,12 +38,12 @@ public class EExsecutio extends Exsecutio<Object> implements IPersistable<String
 	@GeneratedValue
 	@Presentable(visible = false)
 	@Override
-	public String getId() {
+	public Long getId() {
 		return id;
 	}
 
 	@Override
-	public void setId(String id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 

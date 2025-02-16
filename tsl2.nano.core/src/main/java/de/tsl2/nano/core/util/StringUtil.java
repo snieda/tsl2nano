@@ -331,6 +331,8 @@ public class StringUtil extends Strings {
 
     public static String toStringCut(Object obj, int len) {
     	String s = String.valueOf(obj);
+        if (s == null) // proxies may return null on obj.toString()
+            s = "null";
     	return s.length() > len ? s.substring(0, Math.min(s.length(), len)) : s;
     }
     /**

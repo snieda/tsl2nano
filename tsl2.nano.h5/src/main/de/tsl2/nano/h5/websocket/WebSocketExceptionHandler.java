@@ -89,7 +89,7 @@ public class WebSocketExceptionHandler extends ExceptionHandler implements Close
 
                 if (waitForResponse) {
                     final Object obj0 = obj;
-                    long timeout = ENV.get("wsdialog.response.timeout.milliseconds", 4000l);
+                    long timeout = ENV.get("wsdialog.response.timeout.milliseconds", 5000l);
                     ConcurrentUtil.waitOn(socket.session, timeout, r -> convertAndProvide(obj0, r));
                 }
             }

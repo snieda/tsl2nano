@@ -252,8 +252,16 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
         this.sessionStart = System.currentTimeMillis();
         Persistence p = Persistence.current(); //only for id-creation
         this.id = inetAddress + p.getConnectionUrl() + "&" + p.getConnectionUserName() + "&" + p.getJarFile() + "&" + sessionStart;
+        // perhapsAskSomeQuestions(); // TODO html must be sent/served before asking
     }
 
+    void perhapsAskSomeQuestions() {
+        ENV.getAsking("service.use.database.replication", false);
+        ENV.getAsking("layout.sidenav", false);
+        ENV.getAsking("session.onpersist.broadcast.alert", true);
+        Message.info("If you want to use the 'Event Sourcing' plugin cursus, select the cursus jar file as bean-jar file");
+    }
+        
     /**
      * initContext
      * 

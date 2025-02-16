@@ -17,11 +17,11 @@ import de.tsl2.nano.service.util.IPersistable;
 @Entity
 @ValueExpression("{consiliumID} ({grex}: {timer})")
 @Attributes(names = { "consiliumID", "grex", "timer" })
-@Presentable(label = "ΔObsidio", icon = "icons/blocked.png")
-public class EObsidio extends Obsidio implements IPersistable<String> {
+@Presentable(label = "ΔObsidio", icon = "icons/blocked.png", description = "change execution blocker")
+public class EObsidio extends Obsidio implements IPersistable<Long> {
 	private static final long serialVersionUID = 1L;
 
-	String id;
+	Long id;
 
 	public EObsidio() {
 	}
@@ -33,11 +33,11 @@ public class EObsidio extends Obsidio implements IPersistable<String> {
 	@Id
 	@GeneratedValue
 	@Override
-	public String getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 

@@ -19,10 +19,10 @@ import de.tsl2.nano.service.util.IPersistable;
 @ValueExpression("{res}: {next}")
 @Attributes(names = { "previous", "next", "res" })
 @Presentable(label = "ΔMutatio", icon = "icons/compose.png")
-public class EMutatio extends Mutatio<Object, Object> implements IPersistable<String> {
+public class EMutatio extends Mutatio<Object, Object> implements IPersistable<Long> {
 	private static final long serialVersionUID = 1L;
 
-	String id;
+	Long id;
 
 	EExsecutio exsecutio;
 
@@ -36,11 +36,11 @@ public class EMutatio extends Mutatio<Object, Object> implements IPersistable<St
 	@Id
 	@GeneratedValue
 	@Override
-	public String getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 

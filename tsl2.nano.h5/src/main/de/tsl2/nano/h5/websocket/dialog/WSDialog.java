@@ -48,8 +48,11 @@ public class WSDialog {
     }
 
     public static String createWSMessageFromBean(String title, Object beanInstance) {
-        if (PrimitiveUtil.isPrimitiveOrWrapper(beanInstance.getClass())) {
-            if (PrimitiveUtil.isAssignableFrom(Boolean.class, beanInstance.getClass()))
+        Class responseType = beanInstance != null ? beanInstance.getClass() : null;
+        if ("null".equals(beanInstance)) 
+            return new WSDialog(title, "", getOkButton()).toWSMessage();
+        else if (PrimitiveUtil.isPrimitiveOrWrapper(responseType)) {
+            if (PrimitiveUtil.isAssignableFrom(Boolean.class, responseType))
                 return new WSDialog(title, "", getYesNoButtons()).toWSMessage();
             else
                 return new WSDialog(title, "", getDefaultButtons()).addFields(new WSField("value", beanInstance, null)).toWSMessage();
@@ -123,6 +126,10 @@ public class WSDialog {
 
     static WSButton[] getDefaultButtons() {
         return new WSButton[]{new WSButton("Ok"), new WSButton("Cancel")};
+    }
+
+    static WSButton[] getOkButton() {
+        return new WSButton[]{new WSButton("Ok")};
     }
 
     static WSButton[] getYesNoButtons() {

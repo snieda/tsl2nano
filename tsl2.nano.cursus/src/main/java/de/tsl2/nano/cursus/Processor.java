@@ -79,6 +79,7 @@ public final class Processor {
 					log("expired: " + c.getName() + " with timer: " + c.getTimer());
 					cmdManager.doIt(c.getExsecutios().toArray(new ICommand[0]));
 					c.setStatus(Status.ACTIVE);
+					// TODO: we should create a sealed chain through all consilii
 					c.refreshSeal(ID);
 					eventController.fireEvent(c);
 				} catch (Exception ex) {

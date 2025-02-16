@@ -19,11 +19,11 @@ import de.tsl2.nano.service.util.IPersistable;
 @Entity
 @ValueExpression("{process}: {started} {consilium} ({status})")
 @Attributes(names = { "process", "started", "consilium", "status" })
-@Presentable(label = "ΔProcessLog", icon = "icons/about.png", enabled = false)
-public class EProcessLog implements IPersistable<String> {
+@Presentable(label = "ΔProcessLog", icon = "icons/about.png", enabled = false, description = "process execution results")
+public class EProcessLog implements IPersistable<Long> {
 	private static final long serialVersionUID = 1L;
 
-	String id;
+	Long id;
 	Timestamp started;
 	EConsilium consilium;
 	SStatus status;
@@ -40,11 +40,11 @@ public class EProcessLog implements IPersistable<String> {
 
 	@Id
 	@GeneratedValue
-	public String getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 

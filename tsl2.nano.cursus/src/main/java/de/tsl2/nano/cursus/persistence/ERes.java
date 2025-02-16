@@ -21,13 +21,13 @@ import de.tsl2.nano.cursus.Res;
 import de.tsl2.nano.service.util.IPersistable;
 
 @Entity
-@ValueExpression("@{typeName}:{objectid}->{path}")
+@ValueExpression("{typeName}:{objectid}->{path}")
 @Attributes(names = { "typeName", "path", "objectid" })
-@Presentable(label = "ΔRes", icon = "icons/images_all.png")
-public class ERes extends Res<Object, Object> implements IPersistable<String> {
+@Presentable(label = "ΔRes", icon = "icons/images_all.png", description = "business object to be changed")
+public class ERes extends Res<Object, Object> implements IPersistable<Long> {
 	private static final long serialVersionUID = 1L;
 
-	String id;
+	Long id;
 	EMutatio mutatio;
 
 	public ERes() {
@@ -48,11 +48,11 @@ public class ERes extends Res<Object, Object> implements IPersistable<String> {
 
 	@Id
 	@GeneratedValue
-	public String getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 

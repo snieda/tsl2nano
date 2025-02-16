@@ -25,11 +25,11 @@ import de.tsl2.nano.service.util.IPersistable;
 @Entity
 @ValueExpression("{name}: {timer} {status}")
 @Attributes(names = { "name", "author", "priority", "timer", "exsecutios" })
-@Presentable(label = "ΔConsilium", icon = "icons/blue_pin.png")
-public class EConsilium extends Consilium implements IPersistable<String> {
+@Presentable(label = "ΔConsilium", icon = "icons/blue_pin.png", description = "change event descriptor")
+public class EConsilium extends Consilium implements IPersistable<Long> {
 	private static final long serialVersionUID = 1L;
 
-	String id;
+	Long id;
 	EConsiliumID name;
 
 	public EConsilium() {
@@ -45,11 +45,11 @@ public class EConsilium extends Consilium implements IPersistable<String> {
 	@GeneratedValue
 	@Presentable(visible = false)
 	@Override
-	public String getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 

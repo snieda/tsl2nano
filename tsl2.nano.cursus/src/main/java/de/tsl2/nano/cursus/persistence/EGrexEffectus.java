@@ -15,10 +15,10 @@ import de.tsl2.nano.service.util.IPersistable;
 @ValueExpression("{grex}: {effectus}")
 @Attributes(names = { "grex", "effectus" })
 @Presentable(label = "ΔGrex-Effectus", icon = "icons/links.png")
-public class EGrexEffectus implements IPersistable<String> {
+public class EGrexEffectus implements IPersistable<Long> {
 	private static final long serialVersionUID = 1L;
 
-	String id;
+	Long id;
 	EGrex grex;
 	ERuleEffectus effectus;
 
@@ -34,11 +34,11 @@ public class EGrexEffectus implements IPersistable<String> {
 	@Id
 	@GeneratedValue
 	@Override
-	public String getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 

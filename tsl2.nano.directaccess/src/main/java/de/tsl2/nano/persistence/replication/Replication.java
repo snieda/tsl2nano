@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.serialize.XmlUtil;
@@ -136,10 +137,10 @@ public class Replication extends Persistence implements Runnable {
             //first: check, if connection available
             Socket socket = new Socket((String) null, Integer.valueOf(getPort()));
             socket.close();
-            LogFactory.getLog(Replication.class).warn("connection localhost:" + getPort()
+            Message.info("connection localhost:" + getPort()
                 + " already in use. can't start the replication-database!");
         } catch (Exception e) {
-            LogFactory.getLog(Replication.class).info("starting replication database '" + database
+            Message.info("starting replication database '" + database
                 + "' on port "
                 + port);
             Thread replicationRunner = Executors.defaultThreadFactory().newThread(this);

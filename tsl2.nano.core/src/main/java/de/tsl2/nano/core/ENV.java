@@ -442,7 +442,7 @@ public class ENV implements Serializable {
 
     /** 
      * asks the user (if UI is available!) to set the default boolean value for the given key.
-     * if not responding (timeout 4000ms) or responding with 'Yes', default value will be used,
+     * if not responding (timeout 5000ms) or responding with 'Yes', default value will be used,
      * otherwise the negation of defaultValue will be used 
      */
     public static final boolean getAsking(String key, boolean defaultValue) {

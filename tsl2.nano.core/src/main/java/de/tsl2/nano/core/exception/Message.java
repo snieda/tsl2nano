@@ -108,6 +108,10 @@ public class Message extends RuntimeException {
         return result != null ? result : askInstance;
     }
 
+    public static final void info(String message) {
+        send(message + "@" + hex("null"));
+    }
+
     public static final <T> T sendAndWaitForResponse(String message, Class<T> responseType) {
         // on dialog message, the exceptionhandler has to wait for a response in another thread
         send(message);

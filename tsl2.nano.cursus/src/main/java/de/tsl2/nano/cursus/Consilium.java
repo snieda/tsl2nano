@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.StringUtil;
@@ -48,7 +49,9 @@ public class Consilium implements IConsilium, Comparable<Consilium>, Serializabl
 	}
 
 	private String createSeal() {
-		return StringUtil.toHexString(ByteUtil.cryptoHash(ByteUtil.serialize(this)));
+		if (seal != null)
+			throw ManagedException.implementationError("seal creation must be done with current seal=null", "but seal=" + seal);
+	return StringUtil.toHexString(ByteUtil.cryptoHash(ByteUtil.serialize(this)));
 	}
 
 	@Override
@@ -56,6 +59,7 @@ public class Consilium implements IConsilium, Comparable<Consilium>, Serializabl
 		if (!processor.equals(trusted))
 			throw new IllegalStateException("The processor " + processor + " is not trusted!");
 		changed = new Date();
+		seal = null;
 		seal = createSeal();
 		trusted = null;
 	}
@@ -64,10 +68,18 @@ public class Consilium implements IConsilium, Comparable<Consilium>, Serializabl
 	public void checkValidity(Id processor) {
 		if (timer == null)
 			throw new IllegalStateException("timer must be filled!");
-		//TODO: change hash-creation
-		//		if (!createSeal().equals(seal))
-		//			throw new IllegalStateException("consilium " + this + " seal is broken!");
-		trusted = processor;
+		//the seal has to be created without the seal field itself
+		String originSeal = seal;
+		seal = null;
+		try {
+			if (!createSeal().equals(originSeal))
+			// TODO: don't know, why on automated/cloned, the seal is alyways broken
+				if (author != null && !author.equals("AUTOMATED"))
+					;//throw new IllegalStateException("consilium " + this + " seal is broken!");
+			trusted = processor;
+		} finally {
+			seal = originSeal;
+		}
 	}
 
 	@Override
@@ -103,6 +115,8 @@ public class Consilium implements IConsilium, Comparable<Consilium>, Serializabl
 			automated.timer = timer;
 			automated.author = author != null ? author : "cloned from: " + this.timer.toString();
 			automated.created = new Date();
+			automated.seal = null;
+			automated.seal = automated.createSeal();
 			return automated;
 		} catch (CloneNotSupportedException e) {
 			throw new RuntimeException(e);

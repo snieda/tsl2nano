@@ -645,7 +645,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     private boolean useSideNav(int actionCount) {
         // use sideNav after login...
         return isAuthenticated && ENV.getAsking("layout.sidenav", false) 
-                && actionCount > ENV.get("layout.sidenav.min.count.action", 3);
+                && actionCount > ENV.get("layout.sidenav.min.count.action", 5);
     }
 
     private Element createMetaAndBody(ISession session, Element html, String title, boolean interactive) {

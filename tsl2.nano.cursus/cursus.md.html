@@ -5,9 +5,11 @@
 
 Cursus is a change management system or change log using delta entries and timers in a scheduled process. Target is any store or database content that should be changed in a scheduled manner. The advantage is a history of changes and the possibility to undo/redo/replay the changes at any time.
 
-Cursus is totally independent to the target system (e.g. a database) and needs relation pathes plus object ids to reference the target entries.
+Cursus is totally independent of the target system (e.g. a database) and needs relation pathes plus object ids to reference the target entries.
 
 Cursus may be instrumented by insurances and other financial systems to build a course/track through changes on contracts.
+
+It is a kind of an implementation of the event source pattern. persisting the state of a business entity (like an Order or Customer) as a sequence of state-changing events, the application reconstructs an entity’s current state by replaying the events.
 
 ### Overview
  
@@ -83,22 +85,23 @@ The rules for the path are described in the class _ValuePath_:
  10 customer.address[?].city                        <- find the first address, or if not existing, create a new one 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-## Examples
+## Usage / Examples
 
 To see a simple example for a financial organization with Contracts, Partners and Accounts see the junit test *CursusTests*.
 
 ## First Steps using it in NanoH5
 
 * on the first login/connection dialog
-	* select 'tsl2.nano.cursus-2.2.2-SNAPSHOT.jar' as _jar-file_
+	* select 'tsl2.nano.cursus-x.x.x-SNAPSHOT.jar' as _jar-file_
 	* select 'update' on _Auto-DDL_
-* create a new _EConsilium_
-* create a new _EExecutio_ pointing to a new _EMutatio_ pointing to a new _ERes_
-	* the new _ERes_ has to point to your desired Entity with a known Entity ID 
-* create a new EProcess and start it
-	* create a new EGrex using the existing _ERes_, let the validObjectIDs empty to run the process through all inactive consilii
+	* restart application
+* create a new change event: _EConsilium_
+* create a new change execution: _EExecutio_ pointing to a new _EMutatio_ pointing to a new _ERes_
+	* the new "thing" (_ERes_) has to point to your desired Business Entity with a known Entity ID 
+* create a new EProcess and start it (to run through the change)
+	* create a new group (EGrex) using the existing _ERes_, let the validObjectIDs empty to run the process through all inactive consilii
 	* press the button start - now the process starts and will show a result
-	* only inactive consilii with expired timer will be executed
+	* only inactive change events (consilii) with expired timer will be executed
 * check, if your desired Entity with your given ID was changed
 
 ## Changelog
