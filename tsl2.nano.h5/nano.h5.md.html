@@ -93,7 +93,7 @@ All packages (under name *tsl2nano*) are available in maven central, sourceforge
 * generic import mechanism of flat data (csv, etc)
 * document/specification based full configuration/extension for non-coding or low-coding
 * json/yaml/xml de-/serialization (object mapping) (only 750 lines of code ;-) )
-* clickable color-themes (mouse click between beanEx Icon and Html Title)
+* clickable color-themes (mouse click at upper left corner (left of beanEx Icon)
 * event sourcing: through tsl2.nano.cursus (persists the state of a business entity as a sequence of state-changing events)
 
 * planned interfaces:
@@ -588,6 +588,14 @@ mapper.
 To initialize the BeanContainer to get its data from other data-layers you have to provide actions that get their data
 from e.g. rest-service calls.
 To do so, have a look at BeanContainer.initEmtpyServiceActions(...) to have a simple expample.
+
+### Cursus: The Event Sourcing Framework
+
+As part of the tsl2nano framework, the cursus library provides an implementation of a kind of the event sourcing pattern.
+persisting the state of a business entity (like an Order or Customer) as a sequence of state-changing events, the application reconstructs an entity’s current state by replaying the events.
+
+for further informations, have a look here: https://sourceforge.net/p/tsl2nano/code/ci/master/tree/tsl2.nano.cursus/cursus.md.html?format=raw
+
 
 ## Starting / Test
 
@@ -1706,7 +1714,7 @@ this will look like:
 
 On a running tsl2 application it is possible to switch through simple mouse clicks between different color themes.
 
-Do a mouse click between the BeanEx symbol on the upper left corner and the Html Title to switch between the following color themes:
+Do a mouse click at the upper left corner (left of the BeanEx symbol to switch between the following color themes:
 
 * Light
 * Light-Contrast
@@ -6305,5 +6313,11 @@ StringBuffer
 * [ ] extend the Compositor to be findable and to provide bean creation methods (to avoid impl. like FBRImport)
 
 Errors:
-* Create Action fails: session outdated
+* [-] Create Action fails: session outdated
 * [-] Create Compositor: which attributes? <- be sure to be in the right target beandef!
+
+Cursus:
+* why the processor needs a Grex with Res?
+* why the EConsilium needs an EConsiliumID?
+* why the Processor is inside a hidden expandable?
+* can we work/change nested items?

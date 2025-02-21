@@ -163,7 +163,7 @@ public class EProcess implements IPersistable<Long>, IListener<Object> {
 	}
 
 	@Action(argNames = { "grex" })
-	@Presentable(icon = "icons/go.png")
+	@Presentable(icon = "icons/go.png", description = "select the group of change items and start")
 	public List<EProcessLog> actionStart(EGrex grex) {
 		loadEffectree(grex);
 		Set<IConsilium> consilii = new LinkedHashSet<>();
@@ -175,7 +175,7 @@ public class EProcess implements IPersistable<Long>, IListener<Object> {
 		if (consilii.isEmpty())
 			throw new IllegalStateException("For given Grex " + grex + " no bound consilii were found! Nothing to do!");
 		final UncaughtExceptionHandler uncaughtExceptionHandler = Thread.currentThread().getUncaughtExceptionHandler();
-		ConcurrentUtil.startDaemon(toString(), new Runnable() {
+		ConcurrentUtil.start(toString(), new Runnable() {
 			@Override
 			public void run() {
 				try {
@@ -186,7 +186,7 @@ public class EProcess implements IPersistable<Long>, IListener<Object> {
 					Message.send(e);
 					setEndedAt(new Date());
 					setStatus(Status.FAILED);
-					try { //if that failes, too, no error may be shown, so we should catch that
+					try { //if that fails, too, no error may be shown, so we should catch that
 						current = BeanContainer.instance().save(EProcess.this);
 					} catch (Throwable e1) {
 						LOG.error("", e1);
@@ -209,7 +209,7 @@ public class EProcess implements IPersistable<Long>, IListener<Object> {
 		}
 	}
 
-	@Presentable(icon = "icons/stop.png")
+	@Presentable(icon = "icons/stop.png", description = "stop a long running process")
 	public List<EProcessLog> actionStop() {
 		prc.stop();
 		ConcurrentUtil.sleep(1000);
@@ -217,14 +217,14 @@ public class EProcess implements IPersistable<Long>, IListener<Object> {
 	}
 
 	@Action(argNames = { "res" })
-	@Presentable(icon = "icons/blocked.png")
+	@Presentable(icon = "icons/blocked.png", description = "deactivate all consilii bound to given res")
 	public void actionDeactivate(ERes res) {
 		checkAndSave();
 		prc.deactivate(new HashSet<>(res.getConsilii()), getStartPeriod(), getEndPeriod());
 	}
 
 	@Action(argNames = { "lastActiveConsilium" })
-	@Presentable(icon = "icons/reload.png")
+	@Presentable(icon = "icons/reload.png", description = "resets the chain of changes to the given consilium")
 	public void actionResetTo(EConsilium lastActiveConsilium) {
 		checkAndSave();
 		prc.resetTo(lastActiveConsilium.followers(), lastActiveConsilium);

@@ -52,6 +52,8 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.action.IActivable;
 import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.bean.BeanFileUtil;
+import de.tsl2.nano.bean.BeanFileUtil.FileType;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.Context;
 import de.tsl2.nano.bean.IAttributeDef;
@@ -1628,7 +1630,7 @@ public class BeanPresentationHelper<T> {
                 });
 
                 pageActions
-                .add(new SecureAction(bean.getClazz(), "import", IAction.MODE_UNDEFINED, false, "icons/upload.png") {
+                .add(new SecureAction(bean.getClazz(), "import-valueexpressions", IAction.MODE_UNDEFINED, false, "icons/upload.png") {
                     String file = ENV.getConfigPath(bean.getClazz()) + ".txt";
 
                     @Override
@@ -1649,12 +1651,12 @@ public class BeanPresentationHelper<T> {
 
                     @Override
                     public String getLongDescription() {
-                        return "imports " + bean.getName() + " elements from file " + file;
+                        return "imports " + bean.getName() + " value expressions from file " + file + ". Note: value expressions may not contain all members of a bean";
                     }
                 });
 
             pageActions
-                .add(new SecureAction(bean.getClazz(), "export", IAction.MODE_UNDEFINED, false, "icons/save.png") {
+                .add(new SecureAction(bean.getClazz(), "export-valueexpressions", IAction.MODE_UNDEFINED, false, "icons/save.png") {
                     String file = ENV.getConfigPath(bean.getClazz()) + "-" + System.currentTimeMillis() + ".txt";
 
                     @Override
@@ -1666,11 +1668,61 @@ public class BeanPresentationHelper<T> {
 
                     @Override
                     public String getLongDescription() {
-                        return "exports " + bean.getName() + " visible elements to file " + file;
+                        return "exports " + bean.getName() + " visible value expressions to file " + file + ". Note: value expressions may not contain all members of a bean";
+                    }
+                    @Override
+                    public boolean isCreatingExternalContent() {
+                        return true;
                     }
                 });
-            }
             pageActions
+            .add(new SecureAction(bean.getClazz(), "import", IAction.MODE_UNDEFINED, false, "icons/upload.png") {
+                String file = ENV.getConfigPath(bean.getClazz()) + ".csv";
+
+                @Override
+                public Object action() throws Exception {
+                    //import from file
+                    Collection<T> objects = BeanFileUtil.fromFile(file, FileType.TABSHEET, bean.getClazz());
+                    Message.send("trying to import new " + bean.getName() + " beans: " + objects.size());
+                    //persist
+                    for (T e : objects) {
+                        //TODO: create a transaction on all objects
+                        if (e != null)
+                            BeanContainer.instance().save(e);
+                    }
+                    //reload
+                    ((BeanCollector) bean).getBeanFinder().getData();
+                    return bean;
+                }
+
+                @Override
+                public String getLongDescription() {
+                    return "imports " + bean.getName() + " elements from csv file " + file;
+                }
+            });
+
+        pageActions
+            .add(new SecureAction(bean.getClazz(), "export", IAction.MODE_UNDEFINED, false, "icons/save.png") {
+                String file = ENV.getConfigPath(bean.getClazz()) + "-" + System.currentTimeMillis() + ".csv";
+
+                @Override
+                public Object action() throws Exception {
+                    //export to file
+                    BeanFileUtil.toFile(((BeanCollector) bean).getBeanFinder().getData(), file, FileType.TABSHEET);
+                    return "exported file: " + file;
+                }
+
+                @Override
+                public String getLongDescription() {
+                    return "exports " + bean.getName() + " visible elements to csv file " + file;
+                }
+                @Override
+                public boolean isCreatingExternalContent() {
+                    return true;
+                }
+            });
+        }
+        pageActions
                 .add(new SecureAction(bean.getClazz(), "print", IAction.MODE_UNDEFINED, false, "icons/print.png") {
                     @Override
                     public Object action() throws Exception {
@@ -1755,7 +1807,7 @@ public class BeanPresentationHelper<T> {
                 final File htmlFile = new File(helpFile + "html");
                 final File pdfFile = new File(helpFile + "pdf");
                 final String tooltip = htmlFile.getPath() + " or " + pdfFile.getPath();
-                // the docName is the dir where html.doc generates html-doc on generating the database
+                // the docName is the dir where hbm-doc generates html-doc on generating the database
                 String docName = ENV.get("app.doc.name", ENV.get(ENV.getApplicationMainPackage(), "test"));
                 final File generatedIndexFile =
                     new File(ENV.getConfigPathRel() + "doc/" + docName + "/index.html");
@@ -1788,7 +1840,11 @@ public class BeanPresentationHelper<T> {
                     }
                     return htmlFile.canRead() || pdfFile.canRead();
                 }
-            });
+                @Override
+                public boolean isCreatingExternalContent() {
+                    return true;
+                }
+        });
 
         } else {
             vsession.setValue(session);

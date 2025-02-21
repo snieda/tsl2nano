@@ -1101,6 +1101,7 @@ public class ENV implements Serializable {
         }
         //load the dependencies through maven, if available
         ENV.getAsking("tsl2nano.offline", true);
+        ENV.getAsking("app.translate.bundle.project", false);
         if (get("classloader.usenetwork.loader", true) && NetUtil.isOnline()
             && get(CompatibilityLayer.class).isAvailable(TSL2_JARRESOLVER)) {
             Message.send("resolving dependencies: "
@@ -1119,8 +1120,6 @@ public class ENV implements Serializable {
                 throw new IllegalStateException("couldn't resolve dependencies:\n"
                     + StringUtil.toFormattedString(dependencyNames, 100, true));
         } else {
-            if (!Boolean.getBoolean("tsl2nano.offline")) // don't ask several times
-                return System.setProperty("tsl2nano.offline", "true");
             throw new IllegalStateException("couldn't resolve dependencies:\n"
                 + StringUtil.toFormattedString(dependencyNames, 100, true));
         }

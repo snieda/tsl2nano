@@ -20,6 +20,7 @@ import de.tsl2.nano.bean.annotation.Presentable;
 import de.tsl2.nano.bean.annotation.ValueExpression;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.cursus.Consilium;
+import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.service.util.IPersistable;
 
 @Entity
@@ -54,6 +55,9 @@ public class EConsilium extends Consilium implements IPersistable<Long> {
 	}
 
 	public String getAuthor() {
+		if (author == null && Persistence.current() != null) {
+			author = Persistence.current().getConnectionUserName();
+		}
 		return author;
 	}
 
@@ -70,7 +74,7 @@ public class EConsilium extends Consilium implements IPersistable<Long> {
 		this.created = created;
 	}
 
-	@Presentable(visible = false)
+	@Presentable(enabled = false)
 	public Date getChanged() {
 		return changed;
 	}
@@ -87,7 +91,7 @@ public class EConsilium extends Consilium implements IPersistable<Long> {
 		this.priority = priority;
 	}
 
-	@Presentable(visible = false)
+	@Presentable(enabled = false)
 	public String getSeal() {
 		return seal;
 	}
@@ -97,8 +101,8 @@ public class EConsilium extends Consilium implements IPersistable<Long> {
 	}
 
 	@Override
-	@OneToOne
-	@JoinColumn
+	@OneToOne()
+	@JoinColumn(nullable = false)
 	public ETimer getTimer() {
 		return super.getTimer() != null && !(super.getTimer() instanceof ETimer)
 				? setTimer(ETimer.from(super.getTimer()))
@@ -140,6 +144,7 @@ public class EConsilium extends Consilium implements IPersistable<Long> {
 	}
 
 	@Override
+	@JoinColumn(nullable = false)
 	public EConsiliumID getName() {
 		return name;
 	}

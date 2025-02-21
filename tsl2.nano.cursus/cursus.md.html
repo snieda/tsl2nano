@@ -91,13 +91,16 @@ To see a simple example for a financial organization with Contracts, Partners an
 
 ## First Steps using it in NanoH5
 
+CAUTION: does not work together with replication!
+
 * on the first login/connection dialog
 	* select 'tsl2.nano.cursus-x.x.x-SNAPSHOT.jar' as _jar-file_
 	* select 'update' on _Auto-DDL_
 	* restart application
 * create a new change event: _EConsilium_
-* create a new change execution: _EExecutio_ pointing to a new _EMutatio_ pointing to a new _ERes_
-	* the new "thing" (_ERes_) has to point to your desired Business Entity with a known Entity ID 
+* create a new change execution: _EExecutio_ pointing to the EConsilium and to a new _EMutatio_ pointing to a new _ERes_
+	* the new "thing" (_ERes_) has to point to your desired Business Entity with a known Entity ID
+* assign the new EExecutio to the EConsilium (important: the connection must be visible in both directions)
 * create a new EProcess and start it (to run through the change)
 	* create a new group (EGrex) using the existing _ERes_, let the validObjectIDs empty to run the process through all inactive consilii
 	* press the button start - now the process starts and will show a result

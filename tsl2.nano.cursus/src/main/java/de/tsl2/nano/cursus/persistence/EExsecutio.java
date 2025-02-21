@@ -20,7 +20,7 @@ import de.tsl2.nano.service.util.IPersistable;
 @Entity
 @ValueExpression("{name}: {mutatio} -> {effectus}")
 @Attributes(names = { "name", "description", "consilium", "mutatio", "effectus" })
-@Presentable(label = "ΔExsecutio", icon = "icons/wrench.png", description = "change execution")
+@Presentable(label = "ΔExsecutio", icon = "icons/wrench.png", description = "change command")
 public class EExsecutio extends Exsecutio<Object> implements IPersistable<Long> {
 	private static final long serialVersionUID = 1L;
 

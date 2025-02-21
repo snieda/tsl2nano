@@ -3,18 +3,42 @@ Nano.H5 environment directory
 ------------------------------
 
 This folder holds all content for the application tsl2.nano.h5 and is known by the java classpath. 
-all jar files will be added to the classpath - in an alphabetic order.
+all jar files will be added to the classpath - in an alphabetic order. most of all files will be
+re-created if you delete them.
 
-NOTE: the classloader tries to get 
-	all missing libraries through jarresolver - this may result in long loading times.
-	and the automatic translation tries to do online translation through 
-		to avoid that, set system-property: 'tsl2nano.offline=true'
+NOTE: 
+  - the classloader tries to get all missing libraries through jarresolver - this may result in long loading times.
+  - the automatic translation tries to do online translation
+  => to avoid that, set system-property: 'tsl2nano.offline=true'
 
 the main libraries are: 
 	ant, jpa-persistence-provider with dependencies, the generated bean jar file, database drivers etc.
 others:
 	database ddl scripts, authentication: users.xml, authorization: *-permissions.xml, persistence properties: persistence-bean.xml
 
+The following files are used to generate database and beans:
+- ant*.jar         ant libraries
+- mda.*            ant-scripts using shell.xml to build database and beans jar file
+- shell.xml        ant base scripts
+- reverse-eng.xml  ant script parts for hibernate-tools and openjpa
+- hibernate*.*     (if used hibernate-tools)
+- *.sql            (*anyway.sql if using standard database)
+
+For persistence, user login (authentication+authorization) the following files are used:
+- META-INF/persistence*.*ml  jpa templates     
+- persistence-bean.xml       jpa+login properties
+- peristence.properties      jpa+login properties
+- jdbc-connection.properties jdbc properties
+- users.xml                  (secure: will only be re-created in admin mode!)
+- *-permission.xml           (secure: will only be re-created in admin mode!)
+
+Other files:
+- environment.xml                    main application environment property file
+- network.classloader.unresolvables  classes/libs that couldn't be resolved/downloaded through jarresolver
+- runServer.cmd                      generated script to start the selected local database
+- logfactory.xml                     log properties
+- apploader.log                      application starting log
+- environment.log                    standard application log
 
 SUB-FOLDERS:
 
@@ -34,7 +58,7 @@ if deleted it will be re-created with defaults by the application.
 
 doc:
 ==============
-contains generated html documents for all entities
+contains generated html and svg documents for all entities
 
 icons:
 ==============
@@ -61,3 +85,9 @@ compiled java sources from generated-src.
 lib:
 ==============
 unused...
+
+maven
+==============
+exists only, if you are not in "tsl2nano.offline" mode and some dependencies could not be resolved. then, the jarresolver tries to 
+reolve the dependencies through maven on runtime. maven libraries are downloaded before into this folder. if you use the tsl2.nano.h5 virgin
+library, "tsl2nano.offline=false" will be standard to resolve through maven.

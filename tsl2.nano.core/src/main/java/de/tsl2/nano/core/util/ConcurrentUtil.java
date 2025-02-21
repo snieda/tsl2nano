@@ -52,11 +52,19 @@ public class ConcurrentUtil {
     }
 
     public static Thread startDaemon(Runnable runnable) {
-        return startDaemon(runnable.toString(), runnable, true, null);
+        return startThread(runnable.toString(), runnable, true, true, null);
     }
 
     public static Thread startDaemon(String name, Runnable runtime) {
-        return startDaemon(name, runtime, true, null);
+        return startThread(name, runtime, true, true, null);
+    }
+
+    public static Thread start(Runnable runnable) {
+        return startThread(runnable.toString(), runnable, false, false, null);
+    }
+
+    public static Thread start(String name, Runnable runtime) {
+        return startThread(name, runtime, false, false, null);
     }
 
     /**
@@ -66,7 +74,7 @@ public class ConcurrentUtil {
      * @param runtime
      * @param lowPriority
      */
-    public static Thread startDaemon(String name, Runnable runtime, boolean lowPriority,
+    public static Thread startThread(String name, Runnable runtime, boolean daemon, boolean lowPriority,
             UncaughtExceptionHandler handler) {
         LOG.info("starting thread " + name);
         Thread thread = Executors.defaultThreadFactory().newThread(runtime);
@@ -77,7 +85,8 @@ public class ConcurrentUtil {
         if (lowPriority) {
             thread.setPriority(Thread.MIN_PRIORITY);
         }
-        thread.setDaemon(true);
+        if (daemon)
+            thread.setDaemon(true);
         thread.start();
         return thread;
     }
@@ -260,7 +269,7 @@ public class ConcurrentUtil {
 	public static void runWithTimeout(String name, Runnable runnable, int timeout) {
 		try {
 			AtomicReference<Throwable> ref = new AtomicReference<Throwable>();
-			Thread runner = ConcurrentUtil.startDaemon(name, runnable, false,  (t, e) -> ref.set(e));
+			Thread runner = ConcurrentUtil.startThread(name, runnable, false, false,  (t, e) -> ref.set(e));
 			runner.join(timeout);
 			if (runner.isAlive()) {
 				runner.interrupt();
@@ -378,7 +387,7 @@ class Worker<INPUT, OUTPUT> {
             if (count - result.size() > maxthreads) {
                 ConcurrentUtil.sleep(idle);
             }
-            ConcurrentUtil.startDaemon(name + "-" + ++count, jobs[i], priority == Thread.MIN_PRIORITY, null);
+            ConcurrentUtil.startThread(name + "-" + ++count, jobs[i], priority == Thread.MIN_PRIORITY, false, null);
         }
     }
 

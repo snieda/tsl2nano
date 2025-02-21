@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
+import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.PReference;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
@@ -108,6 +109,8 @@ public class Exsecutio<CONTEXT> implements ICommand<CONTEXT>, Serializable {
 		if (iChange.getItem() instanceof PReference) {
 			PReference<?, Object> bref = (PReference<?, Object>) iChange.getItem();
 			bref.getValueAccess().setValue(iChange.getNew());
+			if (BeanContainer.isInitialized() && BeanContainer.instance().isPersistable(bref.resolve().getClass()))
+				BeanContainer.instance().save(bref.resolve());
 		}
 	}
 

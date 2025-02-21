@@ -181,7 +181,7 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
     }
 
     protected void doForReplication(Runnable replicationJob) {
-        ConcurrentUtil.startDaemon(replicationJob.toString() + ":" + threadcount++, replicationJob, true,
+        ConcurrentUtil.startThread(replicationJob.toString() + ":" + threadcount++, replicationJob, true, false,
             ENV.get(UncaughtExceptionHandler.class));
     }
 

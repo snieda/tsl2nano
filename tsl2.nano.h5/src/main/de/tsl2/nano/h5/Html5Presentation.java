@@ -544,7 +544,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
          * c3: center: Page-Title with image
          */
         Element row = appendTag(createGrid(body, "page.header.table", "page.header.table", 0), TABLE(TAG_ROW));
-        Element c1 = appendTag(row, TABLE(TAG_CELL, "onclick", "toggleOnClick()", "content", "T"));
+        Element c1 = appendTag(row, TABLE(TAG_CELL, "onclick", "toggleOnClick()", "content", "T", ATTR_STYLE, "width: 0px;"));
         Element c2 = appendTag(row, TABLE(TAG_CELL));
         Element c3 = appendTag(row, TABLE(TAG_CELL));
         String localDoc = ENV.getConfigPath() + "nano.h5.html";
@@ -582,7 +582,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             if (new File(ENV.getConfigPath() + docURL).canRead() || (!docURL.contains(" ") && NetUtil.isURL(docURL))) {
                 c3 = appendElement(c3, TAG_H3, ATTR_ALIGN, ALIGN_CENTER, ATTR_STYLE,
                         style("display", "flex"));
-                appendElement(c3, TAG_LINK, content(title), ATTR_HREF, ENV.getConfigPath() + docURL, ATTR_CLASS, "title");
+                appendElement(c3, TAG_LINK, content(title), ATTR_HREF, docURL, ATTR_CLASS, "title");
             } else {
                 c3 = appendElement(c3, TAG_H3, content(getTitleWithLink(title, session)), ATTR_ID, "title", ATTR_ALIGN, ALIGN_CENTER, ATTR_STYLE,
                         style("display", "flex"));
@@ -636,7 +636,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     		return title;
     	} else {
 	    	String ddlName = StringUtil.substring(Persistence.current().getJarFile(), "/", ".jar", true);
-			String defaultUrl = "https://editor.ponyorm.com/user/pony/" + ddlName + "/designer";
+            String defaultUrl;
+            if (ddlName.startsWith("anyway"))
+                defaultUrl = "doc/anyway.png";
+            else if (ddlName.contains("cursus"))
+                defaultUrl = "https://sourceforge.net/p/tsl2nano/code/ci/master/tree/tsl2.nano.cursus/cursus.md.html?format=raw";
+            else
+			    defaultUrl = "https://editor.ponyorm.com/user/pony/" + ddlName + "/designer";
 			String url = ENV.get("app.database.ddl.designer.url", defaultUrl);
 			return "<a href=\"" + url + "\" class=\"title\">" + title + "</a>";
     	}
@@ -695,8 +701,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             if (jsWebsocketTemplate == null) {
                 InputStream jsStream = ENV.getResource("websocket.client.js.template");
                 jsWebsocketTemplate = String.valueOf(FileUtil.getFileData(jsStream, "UTF-8"));
-                ENV.getAsking("websocket.window.alert.message", true);
-                ENV.getAsking("websocket.speak.alert.message", true);
+                ENV.get("websocket.window.alert.message", true);
+                ENV.get("websocket.speak.alert.message", true);
                 ENV.get("app.login.secure", false);
             }
             Element script = appendElement(parent, TAG_SCRIPT, ATTR_TYPE, ATTR_TYPE_JS, "nonce", (ENV.isTestMode() ? "1" : session.getRequestId()));

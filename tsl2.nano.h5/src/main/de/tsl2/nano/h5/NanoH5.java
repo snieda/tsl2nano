@@ -333,6 +333,15 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
             ENV.extractResource("doc/attributeconfigurator.help.html");
             ENV.extractResource("doc/entry.help.html");
             ENV.extractResource("doc/persistence.help.html");
+            ENV.extractResource("doc/anyway.png");
+            ENV.extractResource("doc/econsilium.help.html");
+            ENV.extractResource("doc/eexecutio.help.html");
+            ENV.extractResource("doc/emutatio.help.html");
+            ENV.extractResource("doc/eres.help.html");
+            ENV.extractResource("doc/egrex.help.html");
+            ENV.extractResource("doc/eprocess.help.html");
+            ENV.extractResource("doc/eobsidio.help.html");
+            ENV.extractResource("doc/etimer.help.html");
 
             ENV.extractResource("specification/create-sample-timesheet.sh");
             ENV.extractResource("specification/specification.properties-timesheet.csv");
@@ -971,7 +980,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
             if (FileUtil.hasResource("messages.properties")) {
                 ENV.registerBundle("messages", true);
 
-                if (ENV.getAsking("app.translate.bundle.project", true)) {
+                if (ENV.getAsking("app.translate.bundle.project", false)) {
                     Message.send("doing machine translation for locale " + Locale.getDefault());
                     Translator.translateBundle(ENV.getConfigPath() + "messages", Messages.keySet(), Locale.ENGLISH,
                         Locale.getDefault());

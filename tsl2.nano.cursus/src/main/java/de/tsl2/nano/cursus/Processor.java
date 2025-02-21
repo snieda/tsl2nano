@@ -19,6 +19,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.resource.spi.IllegalStateException;
+
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.log.LogFactory;
@@ -77,7 +79,8 @@ public final class Processor {
 				try {
 					eventController.fireEvent(c);
 					log("expired: " + c.getName() + " with timer: " + c.getTimer());
-					cmdManager.doIt(c.getExsecutios().toArray(new ICommand[0]));
+					if (!cmdManager.doIt(c.getExsecutios().toArray(new ICommand[0])))
+						throw new IllegalStateException("no change command was executed!");
 					c.setStatus(Status.ACTIVE);
 					// TODO: we should create a sealed chain through all consilii
 					c.refreshSeal(ID);

@@ -208,7 +208,6 @@ i:hover + p {
 .sidenav a, .panelaction {
     padding: 8px 8px 8px 32px;
     text-decoration: none;
-    display: block;
     transition: 0.3s;
 }
 
