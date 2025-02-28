@@ -67,7 +67,15 @@ public class DatabaseTool {
     }
 
     public void addShutdownHook() {
-        Runtime.getRuntime().addShutdownHook(Executors.defaultThreadFactory().newThread(new Runnable() {
+        Runtime.getRuntime().addShutdownHook(Executors.defaultThreadFactory().newThread(shutdownAndBackupDatabaseRunnable()));
+    }
+
+    public static void doShutdownAndBackupDatabaseServer() {
+        new DatabaseTool(Persistence.current()).shutdownAndBackupDatabaseRunnable().run();
+    }
+
+    private Runnable shutdownAndBackupDatabaseRunnable() {
+        return new Runnable() {
             @Override
             public void run() {
                 if (BeanContainer.isInitialized()) {
@@ -90,7 +98,7 @@ public class DatabaseTool {
                     FileUtil.writeToZip(backupFile, sqldbScript, FileUtil.getFileBytes(ENV.getConfigPath() + sqldbScript, null));
                 }
             }
-        }));
+        };
     }
 
 	public static void shutdownDatabaseDefault() {

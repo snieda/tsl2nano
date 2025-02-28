@@ -27,6 +27,7 @@ import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.CollectionUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
@@ -141,6 +142,17 @@ public class JarResolver {
     }
 
     /**
+     * to simply run a given maven script (downloading maven before) with addional parameters
+     * @param file
+     * @param args
+     */
+    public static int runMaven(File file, String...args) {
+        JarResolver jarResolver = new JarResolver();
+        jarResolver.loadMvn();
+        return jarResolver.runMaven(CollectionUtil.concat(new String[]{"-p", file.getAbsolutePath()}, args));
+    }
+
+    /**
      * installs given package. see {@link #start(String...)}
      * 
      * @param packages
@@ -162,17 +174,20 @@ public class JarResolver {
         }
         loadMvn();
         createMvnScript();
-        int result = loadDependencies();
+        int result = runMavenInstall();
 
         return (result > 0 ? "FAILED: " : "") + props.getProperty(JAR_DEPENDENCIES);
     }
 
+    private int runMavenInstall() {
+        return runMaven("install");
+    }
     /**
      * loadDependencies
      * 
      * @return mvn process exit value (0: Ok, >0 otherwise)
      */
-    private int loadDependencies() {
+    private int runMaven(String ...args) {
         try {
             System.setProperty("M2_HOME", new File(mvnRoot).getCanonicalPath());
         } catch (IOException e) {
@@ -185,11 +200,11 @@ public class JarResolver {
         if (AppLoader.isWindows()) {
             String script = "\\bin\\mvn.cmd";
             new File(mvnRoot + script).setExecutable(true);
-            process = SystemUtil.execute(baseDirectory, "cmd", "/C", mvnRootRel + script, "install");
+            process = SystemUtil.execute(baseDirectory, CollectionUtil.concat(new String[]{"cmd", "/C", mvnRootRel + script}, args));
         } else {
             String script = "/bin/mvn";
             new File(mvnRoot + script).setExecutable(true);
-            process = SystemUtil.execute(baseDirectory, mvnRootRel + script, "install");
+            process = SystemUtil.execute(baseDirectory, CollectionUtil.concat(new String[]{mvnRootRel + script}, args));
         }
         if (process.exitValue() != 0) {
             LOG.error("Process returned with: " + process.exitValue());

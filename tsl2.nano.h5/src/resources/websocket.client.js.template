@@ -318,6 +318,7 @@ function showDialog(htmlDlg) {
 	body.insertAdjacentHTML('afterbegin', htmlDlg);
 
 	//show the dialog
+	console.log('opening dialog...'); 
 	var formDialog = document.getElementById('wsdialog.formDialog');
 	formDialog.showModal();
 
@@ -335,6 +336,10 @@ function showDialog(htmlDlg) {
 		console.log('sending dialog result: \'' + result + '\'');
 		socket.send(result);
 	});
+
+	setTimeout(() => {
+    	formDialog.close();
+  	}, ${wsdialog.response.timeout.milliseconds});
 }
 
 function hex2a(hexx) {

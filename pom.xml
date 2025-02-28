@@ -38,6 +38,7 @@
 	*   then you should define a "default-key {KEY-ID}" in your gpg.conf in home dir
 	*   test that with: "gpg - -clearsign {my-test-file}"
 	*   upload your key to a keyserver: "sudo gpg - -keyserver http://keyserver.ubuntu.com - -send-keys ""
+	*   to RELEASE the new deployed artifacts, go to https://oss.sonatype.org/#stagingRepositories^
 	* to get a maven wrapper: "mvn -N io.takari:maven:wrapper"
 	* fastest maven build with maven daemon:
 	*	mvnd install -T 8 -pl tsl2.nano.h5 -am  -o -DskipTests -Dmaven.experimental.buildconsumer=false

@@ -19,7 +19,6 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -72,7 +71,7 @@ public class ModelKit<T> extends AIdentified implements Function<List<T>, List<T
     private static boolean testMode;
 
     @JsonDeserialize(converter = JsonToMapConverter.class)
-    Map<Class<? extends Identified>, List<? extends Identified>> env = new HashMap<>();
+    Map<Class<? extends Identified>, List<? extends Identified>> env = new LinkedHashMap<>();
 
     @Getter @Setter
     private String cron;

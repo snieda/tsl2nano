@@ -89,6 +89,7 @@
 				<filtering>true</filtering>
 				<includes>
 					<include>**/*.bat</include>
+					<include>**/*.cmd</include>
 					<include>**/*.sh</include>
 				</includes>
 			</resource>

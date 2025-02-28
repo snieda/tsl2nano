@@ -704,6 +704,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ENV.get("websocket.window.alert.message", true);
                 ENV.get("websocket.speak.alert.message", true);
                 ENV.get("app.login.secure", false);
+                ENV.get("wsdialog.response.timeout.milliseconds", 4000);
             }
             Element script = appendElement(parent, TAG_SCRIPT, ATTR_TYPE, ATTR_TYPE_JS, "nonce", (ENV.isTestMode() ? "1" : session.getRequestId()));
 

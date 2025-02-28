@@ -328,6 +328,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
             ENV.extractResource("compilejar.cmd");
             ENV.extractResource("tsl2nano-appcache.mf");
             ENV.extractResource("favicon.ico");
+            ENV.extractResource("hfs.cmd");
             
             ENV.extractResource("doc/beanconfigurator.help.html");
             ENV.extractResource("doc/attributeconfigurator.help.html");
@@ -1348,7 +1349,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         ENV.setProperty("service.url", serviceURL.toString());
         BeanClass.callStatic("de.tsl2.nano.core.classloader.NetworkClassLoader", "resetUnresolvedClasses", ENV.getConfigPath());
         Thread.currentThread().setContextClassLoader(appstartClassloader);
-
+        DatabaseTool.doShutdownAndBackupDatabaseServer();
         createPageBuilder();
         builder = ENV.get(IPageBuilder.class);
     }

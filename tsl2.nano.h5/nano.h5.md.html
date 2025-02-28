@@ -1,9 +1,9 @@
 <font size="6" align="center">FullRelation Nano.H5<br/></font>
-<font size="-1">&copy; Thomas Schneider 2012-2023
+<font size="-1">&copy; Thomas Schneider 2012-2025
 <br/>
-<a href="http://sourceforge.net/projects/tsl2nano/files/1.1.0/tsl2.nano.h5.1.1.0.jar/download">Download on sourceforge</a>
+<a href="https://sourceforge.net/projects/tsl2nano/files/latest/download">Download on sourceforge</a>
 <br/>
-<a href="http://sourceforge.net/projects/tsl2nano/files/1.1.0/nano.h5.jnlp">Start Nano.H5 through WebStart</a>
+<a href="http://sourceforge.net/projects/tsl2nano/files/2.5.4/nano.h5.jnlp">Start Nano.H5 through WebStart</a>
 </font>
 <p/>
 
@@ -62,10 +62,11 @@ All packages (under name *tsl2nano*) are available in maven central, sourceforge
 * resolves all bean/entity relations to be browsed (showing assist/comboboxes to select available items).
 * navigation can be a configurable sql-property-workflow, a specification workflow  - or simply an entity browser 
 * pre-defines formatting, validation and presentation of relations
-* pure html-5 (no javascript, only html5-scripting-api for websockets)
+* pure html-5 (javascript only html5-scripting-api for websockets)
 * jvm scripts like javascript, groovy and python can be included by rules using the java scriptengine
 * using websockets to show status messages, input-assist and dependency field or timer refreshing
 * using websockets to provide a chat system
+* websockets: interactive actions on images: 
 * pure jpa - jpa-annotations are read to resolve attribute-presentation
 * independent of a special o/r mapper. all o/r mappers supporting javax.persistence with an EntityManager are usable.
 * simple database replication on user-loaded data - offline working possible
@@ -2528,9 +2529,12 @@ Example for a rule using another sub-rule:
 
 If an attribute holds data of type _byte[]_, it may be presented as image or any other non-textual type. The default-mechanism will declare the attributes type as _TYPE_DATA_ which will save the attributes value to a temporary file to be sent through http to the client and to be shown as image - or if a special style was defined, as _embed_, _object_, _audio_, _video_, _canvas_ or _device_ - as known from _HTML5_ embedded content tags.
 
-#### Interactive actions on images
+#### Interactive actions on images/pictures
 
 Using pixel or vector pictures as attribute content and defining a dependency listener of type _WebSocketDependencyListener_ will give you the possibility to let the user interact on data content. your dependency listener will have access to the clients mouse click position to refresh other attributes depending on that click into the picture or vector graphic.
+
+The client event would be of type WSEvent (coming from websocket listening on mouseclick). To use the mouse click position, use the methods
+wsEvent.getClickX() and wsEvent.getClickY().
 
 #### Attribute Encryption
 
@@ -6321,3 +6325,13 @@ Cursus:
 * why the EConsilium needs an EConsiliumID?
 * why the Processor is inside a hidden expandable?
 * can we work/change nested items?
+
+* [x] dialog -> setTimeout(() -> ...close(), 5000)
+* [x] hfs
+* [ ] eval html structure elements like footer, aside
+* [ ] eval html role attribute
+* [ ] check nanoh5 canvas elements with positions
+* [ ] create openapi module:
+   * pom with openapi generator for given openapi.json url
+   * generate method actions pointing to endpoints
+   * generate beans with annotated methodactions

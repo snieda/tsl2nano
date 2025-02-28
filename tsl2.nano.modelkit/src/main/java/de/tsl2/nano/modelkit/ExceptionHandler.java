@@ -1,11 +1,17 @@
+/*
+ * File: $HeadURL$
+ * Id  : $Id$
+ * 
+ * created by: Tom
+ * created on: 31.03.2017
+ * 
+ * Copyright: (c) Thomas Schneider 2017, all rights reserved
+ */
 package de.tsl2.nano.modelkit;
 
 import java.util.Arrays;
 import java.util.function.Supplier;
 
-/**
- * @author scne522
- */
 public class ExceptionHandler {
     private ExceptionHandler() {
     }

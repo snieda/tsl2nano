@@ -459,7 +459,7 @@ public class PersistenceUI {
         helper.chg("replication", PROP_ENABLER, new IActivable() {
             @Override
             public boolean isActive() {
-                return ENV.getAsking("service.use.database.replication", false);
+                return ENV.get("service.use.database.replication", false);
             }
         });
 
