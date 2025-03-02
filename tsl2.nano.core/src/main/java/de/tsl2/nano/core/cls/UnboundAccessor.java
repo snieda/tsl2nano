@@ -377,7 +377,7 @@ public class UnboundAccessor<T> {
             }
             return (M) m.invoke(instance, args);
         } catch (Exception e) {
-            ManagedException.forward(e);
+            ManagedException.forward(e, false);
             return null;
         }
     }

@@ -5050,6 +5050,7 @@ hint II: a script (upgrade-old-tsl2-apps.sh) to do this is inside the resources 
  2.5.2  | 24.11.2024 | dependency updates, h5 stylings enhanced, jmockit -> mockito (serviceacces, replication), complete json, yaml, xml de-/serializing,enhancing autotest,cursus: fix package: tsl2.nano->de.tsl2.nano , beanattribute respecting generic type,many fixes/enhancings on object creation, stringutil, ENV static self removed
  2.5.3  | 03.01.2025 | corrections on internationalization (generic regex creation), autotest valueset on json objects
  2.5.4  | 23.02.2025 | +script-engine (nashorn+dependencies), property asking, fixes on html dialog and replication, run scripts refactored, using formtarget=_blank for exports, specification: +doc, +timesheet-sample, refresh cursus (id: Long for hibernate 5)
+ 2.5.5  | 09.03.2025 | h5:+openapi-generate-scripts, html-dialogs: timeout-close, minor fixes
 |------ | ---------- | -----------
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
@@ -6314,7 +6315,7 @@ StringBuffer
 * [v] store -> id skiller?
 * [v] timesheet: compositor/controller not loaded as Bean/BeanColletor
 * [v] ask on all important properties...
-* [ ] extend the Compositor to be findable and to provide bean creation methods (to avoid impl. like FBRImport)
+* [x] extend the Compositor to be findable and to provide bean creation methods (to avoid impl. like FBRImport)
 
 Errors:
 * [-] Create Action fails: session outdated
@@ -6326,12 +6327,13 @@ Cursus:
 * why the Processor is inside a hidden expandable?
 * can we work/change nested items?
 
-* [x] dialog -> setTimeout(() -> ...close(), 5000)
-* [x] hfs
-* [ ] eval html structure elements like footer, aside
-* [ ] eval html role attribute
-* [ ] check nanoh5 canvas elements with positions
-* [ ] create openapi module:
+* [v] dialog -> setTimeout(() -> ...close(), 5000)
+* [v] hfs
+* [-] eval html structure elements like footer, aside
+* [-] eval html role attribute
+* [v] check nanoh5 canvas elements with positions
+* [ ] provide sample projects
+* [x] create openapi module:
    * pom with openapi generator for given openapi.json url
    * generate method actions pointing to endpoints
    * generate beans with annotated methodactions

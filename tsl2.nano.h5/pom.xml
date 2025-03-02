@@ -303,77 +303,9 @@
 							</excludes>
 						</configuration>
 					</execution>
-					<execution>
-						<id>standalone-jar</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-						<phase>package</phase>
-						<configuration>
-							<classifier>standalone</classifier>
-							<archive>
-								<manifest>
-									<addClasspath>true</addClasspath>
-									<mainClass>de.tsl2.nano.h5.Loader</mainClass>
-								</manifest>
-								<manifestEntries>
-									<Application-Name>Nano.H5</Application-Name>
-									<Application-Class>de.tsl2.nano.h5.NanoH5</Application-Class>
-									<Application-Source>${application.source}</Application-Source>
-									<Application-redirect>/download</Application-redirect>
-									<Permissions>all-permissions</Permissions>
-                                    <Add-Opens>
-										${add-opens-unnamed}
-									</Add-Opens>
-                                    <!-- <Add-Exports>
-										${add-export-unnamed}
-                                    </Add-Exports> -->
-								</manifestEntries>
-							</archive>
-							<excludes>
-								<exclude>**/persistence.xml</exclude>
-							</excludes>
-						</configuration>
-					</execution>
-					<execution>
-						<id>signed-jar</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-						<phase>package</phase>
-						<configuration>
-							<classifier>signed</classifier>
-							<archive>
-								<manifest>
-									<addClasspath>true</addClasspath>
-									<mainClass>de.tsl2.nano.h5.Loader</mainClass>
-								</manifest>
-								<manifestEntries>
-									<Application-Name>Nano.H5</Application-Name>
-									<Application-Class>de.tsl2.nano.h5.NanoH5</Application-Class>
-									<Application-Source>${application.source}</Application-Source>
-									<Application-redirect>/download</Application-redirect>
-									<Permissions>all-permissions</Permissions>
-                                    <Add-Opens>
-										${add-opens-unnamed}
-									</Add-Opens>
-                                    <!-- <Add-Exports>
-										${add-export-unnamed}
-                                    </Add-Exports> -->
-								</manifestEntries>
-							</archive>
-							<!-- <archive> <manifest> <addClasspath>true</addClasspath> <classpathLayoutType>repository</classpathLayoutType> 
-								</manifest> </archive> <includes> <include>../**/core/**</include> <include>../**/resources/**</include> 
-								<include>${project.build.outputDirectory}/**/h5/**</include> <include>${project.build.directory}/${project.build.finalName}.lib/**</include> 
-								</includes> -->
-							<excludes>
-								<exclude>**/persistence.xml</exclude>
-							</excludes>
-						</configuration>
-					</execution>
 				</executions>
 			</plugin>
-			<plugin>
+			<!-- <plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jarsigner-plugin</artifactId>
 				<version>1.4</version>
@@ -396,7 +328,7 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin> -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>

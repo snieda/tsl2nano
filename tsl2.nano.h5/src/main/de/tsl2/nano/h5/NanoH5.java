@@ -318,10 +318,15 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
                 ENV.extractResourceToDir("run.sh", "../", false, true, true);
                 ENV.extractResourceToDir("runasservice.sh", "../", false, true, true);
                 ENV.extractResource("mda.sh", true, true);
+                ENV.extractResource("mvnw");
             } else {
                 ENV.extractResourceToDir("run.bat", "../", false, false, true);
                 ENV.extractResource("mda.bat");
+                ENV.extractResource("mvnw.cmd");
             }
+            ENV.extractResource(".mvn/wrapper/maven-wrapper.jar");
+            ENV.extractResource(".mvn/wrapper/maven-wrapper.properties");
+            
             ENV.extractResource("readme.txt");
             ENV.extractResource("shell.xml");
             ENV.extractResource(MDA_SCRIPT);
@@ -329,6 +334,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
             ENV.extractResource("tsl2nano-appcache.mf");
             ENV.extractResource("favicon.ico");
             ENV.extractResource("hfs.cmd");
+            ENV.extractResource("generate-openapi.sh");
+            ENV.extractResource("pom-openapi.xml");
             
             ENV.extractResource("doc/beanconfigurator.help.html");
             ENV.extractResource("doc/attributeconfigurator.help.html");
