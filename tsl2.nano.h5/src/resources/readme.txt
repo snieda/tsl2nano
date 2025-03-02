@@ -39,6 +39,12 @@ Other files:
 - logfactory.xml                     log properties
 - apploader.log                      application starting log
 - environment.log                    standard application log
+- compiler.cmd                       CLI to manually generate classes and jar from generated-src
+- hfs.cmd                            tool to use NanoHttpServer as file server on current folder
+- mvnw                               maven wrapper scripts and libs
+- generate-openapi.sh                tool to generate openapi spec from generated-src or to generate java client classes from openapi.json
+- sql_graphviz.py                    script to generate images from ddl/sql database model
+- create-sql-graphviz.cmd            CLI using sql_graphviz.py to generate images in doc folder
 
 SUB-FOLDERS:
 
