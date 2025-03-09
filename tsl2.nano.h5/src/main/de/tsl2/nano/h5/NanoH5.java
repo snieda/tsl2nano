@@ -9,16 +9,19 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.lang.annotation.Annotation;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -330,11 +333,11 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
             ENV.extractResource("readme.txt");
             ENV.extractResource("shell.xml");
             ENV.extractResource(MDA_SCRIPT);
-            ENV.extractResource("compilejar.cmd");
+            ENV.extractResource("compilejar.cmd", true, true);
             ENV.extractResource("tsl2nano-appcache.mf");
             ENV.extractResource("favicon.ico");
-            ENV.extractResource("hfs.cmd");
-            ENV.extractResource("generate-openapi.sh");
+            ENV.extractResource("hfs.cmd", true, true);
+            ENV.extractResource("generate-openapi.sh", true, true);
             ENV.extractResource("pom-openapi.xml");
             
             ENV.extractResource("doc/beanconfigurator.help.html");
@@ -351,7 +354,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
             ENV.extractResource("doc/eobsidio.help.html");
             ENV.extractResource("doc/etimer.help.html");
 
-            ENV.extractResource("specification/create-sample-timesheet.sh");
+            ENV.extractResource("specification/create-sample-timesheet.sh", false, true);
             ENV.extractResource("specification/specification.properties-timesheet.csv");
             ENV.extractResource("specification/timesheet-src.zip");
             ENV.extractResource("specification/timesheet-classes.zip");
@@ -929,7 +932,9 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
 			    	ENV.get(DocumentWorker.class).consume(docWorkerFile.getAbsolutePath());
 	    	}
     	}
-    	
+
+        createVirtualActionBeans();
+        
         Message.send("loading bean collectors for " + beanClasses.size() + " types");
         LOG.debug("creating collector for: ");
         List<BeanDefinition> types = new ArrayList(beanClasses.size());
@@ -980,6 +985,32 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         return entryPoints == 0 ? root : entityBrowser.next(null); //if entrypoints are found, root and entrypoints are push to the navigationstack
     }
 
+    void createVirtualActionBeans() {
+        String jarFile = ENV.getConfigPath() + Persistence.current().getJarFile();
+        if (!new File(jarFile).exists()) {
+            LOG.warn(jarFile + " not found -> not generating any virtual action bean");
+            return;
+        }
+        String[] beanJarFiles = FileUtil.readFileNamesFromZip(jarFile, "*.class");
+        // if the jar files was not generated yet
+        List<Class> beanClasses = (List<Class>)(Object)Arrays.stream(beanJarFiles)
+            .map(f -> Util.trY( () -> Thread.currentThread().getContextClassLoader().loadClass(FileUtil.getPackagePath(f))))
+            .toList();
+        List<Class> actionClasses = beanClasses.stream().filter(c -> !BeanContainerUtil.isPersistable(c)).toList();
+        Message.send("preparing virtual action beans for " + actionClasses.size() + " types");
+        actionClasses.parallelStream().forEach(c -> {
+            if (c.getSimpleName().length() > 0 && !BeanDefinition.isDefined(StringUtil.toFirstLower(c.getSimpleName()))) {
+                ENV.assignClassloaderToCurrentThread();
+                Message.send("preparing virtual action bean for: " + c.getSimpleName());
+                StatelessActionBean<?> b = new StatelessActionBean<>(c);
+                b.saveDefinition();
+            }
+        });
+    }
+    
+    boolean isAnnotationPresent(Class src, Class<? extends Annotation>... annotations) {
+        return Arrays.stream(src.getAnnotations()).anyMatch(a -> Arrays.stream(annotations).anyMatch(a1 -> a.getClass().isAssignableFrom(a1)));
+    }
     private void provideResourceBundelWithAutoTranslation() {
         /*
          * perhaps, do auto-translation if no resourcebundle present for current locale
@@ -1355,7 +1386,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         ENV.setProperty(ENV.KEY_CONFIG_PATH, configPath);
         ENV.setProperty("service.url", serviceURL.toString());
         BeanClass.callStatic("de.tsl2.nano.core.classloader.NetworkClassLoader", "resetUnresolvedClasses", ENV.getConfigPath());
-        Thread.currentThread().setContextClassLoader(appstartClassloader);
+        if (!(Thread.currentThread().getContextClassLoader() instanceof URLClassLoader) && appstartClassloader instanceof URLClassLoader)
+            Thread.currentThread().setContextClassLoader(appstartClassloader);
         DatabaseTool.doShutdownAndBackupDatabaseServer();
         createPageBuilder();
         builder = ENV.get(IPageBuilder.class);

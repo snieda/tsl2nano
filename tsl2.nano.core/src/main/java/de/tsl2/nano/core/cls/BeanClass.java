@@ -532,12 +532,22 @@ public class BeanClass<T> implements Serializable {
      * @throws NullPointerException {@inheritDoc}
      * @since 1.5
      */
-    public boolean isAnnotationPresent(Class<? extends Annotation> annotationClass) {
-        return getAnnotation(annotationClass) != null;
+    public boolean isAnnotationPresent(Class<? extends Annotation>... annotations) {
+        return Arrays.stream(annotations).anyMatch(a -> clazz.isAnnotationPresent(a));
     }
 
     public boolean isInstanceOf(Class cls) {
         return cls.isAssignableFrom(clazz);
+    }
+
+    public static boolean isExtendsionOf(Class<?> cls, Class<?> baseClass) {
+        Class<?> superClass = cls.getSuperclass();
+        if (superClass == null)
+            return false;
+        else if (superClass.equals(baseClass))
+            return true;
+        else
+            return isExtendsionOf(superClass, baseClass);
     }
 
     /**
@@ -1283,7 +1293,7 @@ public class BeanClass<T> implements Serializable {
         	? cls 
         		: Proxy.isProxyClass(cls) 
         			? cls.getInterfaces()[0]
-        				: (cls.getEnclosingClass() != null  || cls.getSimpleName().contains("$") || cls.isSynthetic()) && cls.getSuperclass() != null 
+        				: ((cls.getEnclosingClass() != null && !Modifier.isPublic(cls.getModifiers())) || cls.getSimpleName().contains("$") || cls.isSynthetic()) && cls.getSuperclass() != null 
         					? getDefiningClass(cls.getSuperclass())
         						: cls);
     }

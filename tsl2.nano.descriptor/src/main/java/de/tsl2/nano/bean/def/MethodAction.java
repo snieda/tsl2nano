@@ -95,7 +95,9 @@ public class MethodAction<T> extends CommonAction<T> implements IsPresentable {
      */
     static final String createId(Method m) {
         final String cls = m.getDeclaringClass().getSimpleName().toLowerCase();
-        final String name = m.getName().substring(ACTION_PREFIX.length());
+        final String name = m.getName().startsWith(ACTION_PREFIX) 
+            ? m.getName().substring(ACTION_PREFIX.length()) 
+            : m.getName();
         return cls + "." + name.toLowerCase();
     }
 

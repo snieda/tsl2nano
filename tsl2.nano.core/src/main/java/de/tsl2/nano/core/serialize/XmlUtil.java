@@ -253,8 +253,7 @@ public class XmlUtil {
                     fileInputStream = new FileInputStream(FileUtil.userDirFile(xmlFile)));
         } catch (Exception e) {
         	if (ENV.isAvailable()) {
-                //TODO: why asking without using the response?
-        		Message.ask("ERROR on file: " + xmlFile + "\n" + ManagedException.toStringCause(e), true); //otherwise it may not be visible on reloading all...
+        		Message.info("ERROR on file: " + xmlFile + "\n" + ManagedException.toStringCause(e)); //otherwise it may not be visible on reloading all...
             } else
         		LOG.error(xmlFile, e);
         	if (fileInputStream != null)

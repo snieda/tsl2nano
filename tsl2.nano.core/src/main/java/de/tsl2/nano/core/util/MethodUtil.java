@@ -7,6 +7,7 @@
 package de.tsl2.nano.core.util;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 
 import de.tsl2.nano.core.ManagedException;
@@ -74,4 +75,7 @@ public class MethodUtil extends FieldUtil {
         return genType instanceof Class ? (Class<?>) genType : Object.class;
     }
 
+    public static boolean isPublic(Method m) {
+        return Modifier.isPublic(m.getModifiers());
+    }
 }

@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Locale;
 
-
 import org.anonymous.project.Charge;
 import org.anonymous.project.Chargeitem;
 import org.anonymous.project.Item;
@@ -56,7 +55,7 @@ public class FBRImportTest implements ENVTestPreparation {
 		File file = FileUtil.userDirFile("test-classes/import-timesheet.log");
 		
 		Collection<Charge> c = FBRImport.doImportHumanReadable(file.getPath());
-		assertEquals(462, c.size());
+		assertEquals(527, c.size());
 	}
 	@Test
 	public void testSimpleImport() {

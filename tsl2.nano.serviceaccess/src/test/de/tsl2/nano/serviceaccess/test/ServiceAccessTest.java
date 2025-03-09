@@ -12,7 +12,9 @@ import static de.tsl2.nano.service.util.finder.Finder.not;
 import static de.tsl2.nano.service.util.finder.Finder.or;
 import static de.tsl2.nano.service.util.finder.Finder.orderBy;
 import static de.tsl2.nano.service.util.finder.Finder.union;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.net.URL;
 import java.util.Arrays;
@@ -30,7 +32,9 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
@@ -46,6 +50,7 @@ import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.service.feature.FeatureFactory;
 import de.tsl2.nano.service.schedule.IJobScheduleService;
+import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.service.util.GenericServiceBean;
 import de.tsl2.nano.service.util.ServiceUtil;
 import de.tsl2.nano.service.util.finder.Finder;
@@ -330,6 +335,18 @@ public class ServiceAccessTest {
 //        assertTrue(started.get());
     }
 
+    @Test
+    public void testEntityCheck() {
+        assertFalse(BeanContainerUtil.isPersistable(ServiceFactory.class));
+        assertFalse(BeanContainerUtil.isPersistable(ServiceUtil.class));
+        assertFalse(BeanContainerUtil.isPersistable(ServiceAccessTest.class));
+
+        assertTrue(BeanContainerUtil.isPersistable(Address.class));
+        assertTrue(BeanContainerUtil.isPersistable(Team.class));
+        assertTrue(BeanContainerUtil.isPersistable(Person.class));
+        assertTrue(BeanContainerUtil.isPersistable(Identified.class));
+        assertTrue(BeanContainerUtil.isPersistable(Statistics.class));
+    }
     /*
      * Some Test beans
      */
@@ -487,5 +504,14 @@ public class ServiceAccessTest {
         public void setPlayer(Set<Person> player) {
             this.player = player;
         }
+    }
+
+    @MappedSuperclass
+    public interface Identified {
+        @Id Long getId();
+    }
+    @Table
+    public class Statistics implements Identified {
+        public Long getId() { return 1l;}
     }
 }

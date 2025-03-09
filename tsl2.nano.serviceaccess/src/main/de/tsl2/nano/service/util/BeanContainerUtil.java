@@ -22,7 +22,6 @@ import java.util.function.Supplier;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -121,7 +120,7 @@ public class BeanContainerUtil {
             public Object action() {
                 final Class entityType = (Class) parameters().getValue(0);
                 final Object id = parameters().getValue(1);
-                if (!BeanClass.getBeanClass(entityType).isAnnotationPresent(Entity.class)) {
+                if (!isPersistable(entityType)) {
                     return null;
                 }
                 return service.get().findById(entityType, id);
@@ -136,7 +135,7 @@ public class BeanContainerUtil {
                     final Class entityType = (Class) parameters().getValue(0);
                     final int startIndex = (Integer) parameters().getValue(1);
                     final int maxResult = (Integer) parameters().getValue(2);
-                    if (!BeanClass.getBeanClass(entityType).isAnnotationPresent(Entity.class)) {
+                    if (!isPersistable(entityType)) {
                         return null;
                     }
                     return service.get().findAll(entityType, startIndex, maxResult);
@@ -193,7 +192,7 @@ public class BeanContainerUtil {
             @Override
             public Object action() {
                 //use the weak implementation of BeanClass to avoid classloader problems!
-                if (BeanClass.getBeanClass(parameters().getValue(0).getClass()).isAnnotationPresent(Entity.class)) {
+                if (isPersistable(parameters().getValue(0).getClass())) {
                     return service.get().instantiateLazyRelationship(parameters().getValue(0));
                 } else {
                     return parameters().getValue(0);
@@ -267,7 +266,10 @@ public class BeanContainerUtil {
      * @return true, if class is entity
      */
     public static boolean isPersistable(Class<?> beanClass) {
-        return BeanClass.getBeanClass(BeanClass.getDefiningClass(beanClass)).isAnnotationPresent(Entity.class);
+        return BeanClass.getBeanClass(BeanClass.getDefiningClass(beanClass)).isAnnotationPresent(
+                javax.persistence.Entity.class, jakarta.persistence.Entity.class, javax.persistence.Table.class,
+                jakarta.persistence.Table.class, javax.persistence.MappedSuperclass.class,
+                jakarta.persistence.MappedSuperclass.class);
     }
 
     /**

@@ -53,7 +53,7 @@ public final class ObjectMapper {
   private ObjectMapper() {}
 
   public static <T> T get(Function<String, T> getter, String varName, T defaultValue) {
-    Object o = get(getter, varName, (Class<T>) defaultValue.getClass(), false);
+    Object o = get(getter, varName, (Class<T>) (defaultValue != null ? defaultValue.getClass() : Object.class), false);
     return o == null ? defaultValue : (T) o;
   }
 
@@ -65,7 +65,10 @@ public final class ObjectMapper {
       } else if (o instanceof String && o.toString().trim().isEmpty()) {
         throw new IllegalArgumentException(varName + " must not be empty");
       }
-    } else if (type != null && !type.isAssignableFrom(type)) {
+    } else if (o == null) {
+      return null;
+    }
+    if (type != null && !type.isAssignableFrom(o.getClass())) {
       return ObjectMapper.wrap(o, type, wrappingArguments);
     }
     return (T) o;

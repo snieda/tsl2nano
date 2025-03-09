@@ -712,7 +712,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      * @param actions (optional) collection to be filled with actions
      * @return all public methods (wrapped into actions) starting with 'action' and having no arguments.
      */
-    public static Collection<IAction> getActionsByClass(Class<?> clazz,
+    public Collection<IAction> getActionsByClass(Class<?> clazz,
             Collection<IAction> actions,
             Object... parameters) {
         final Method[] methods = getDefiningClass(clazz).getMethods();
@@ -720,14 +720,17 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             actions = new ArrayList<IAction>();
         }
         for (int i = 0; i < methods.length; i++) {
-            if (methods[i].getName().startsWith(MethodAction.ACTION_PREFIX)
-                || methods[i].isAnnotationPresent(Action.class)) {
+            if (isActionMethod(methods[i]) || methods[i].isAnnotationPresent(Action.class)) {
                 CommonAction<Object> newAction = new MethodAction<Object>(methods[i]);
                 newAction.setParameter(parameters);
                 actions.add(newAction);
             }
         }
         return actions;
+    }
+
+    protected boolean isActionMethod(Method m) {
+        return m.getName().startsWith(MethodAction.ACTION_PREFIX);
     }
 
     /**
@@ -1296,7 +1299,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             try {
                 if (!xmlFile.exists()) {
                     xmlFile.getParentFile().mkdirs();
-                    if (FileUtil.hasResource(BEANDEF_XSD))
+                    if (FileUtil.hasResource(BEANDEF_XSD) && !new File(xmlFile.getParentFile().getPath() + "/" + BEANDEF_XSD).exists())
                         ENV.extractResourceToDir(BEANDEF_XSD, xmlFile.getParentFile().getPath() + "/");
                 }
                 ENV.save(xmlFile.getPath(), this);

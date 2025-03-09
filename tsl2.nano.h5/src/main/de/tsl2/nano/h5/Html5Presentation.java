@@ -94,6 +94,7 @@ import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.cls.IValueAccess;
 import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.exception.Message;
+import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.messaging.ChangeEvent;
 import de.tsl2.nano.core.messaging.IListener;
@@ -195,7 +196,6 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         super(bean);
     }
 
-    @SuppressWarnings("serial")
     @Override
     public Collection<IAction> getApplicationActions(ISession session) {
         boolean firstTime = appActions == null;
@@ -317,6 +317,23 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     return beanTool;
                 }
             });
+            
+            bEnv.addAction(new SecureAction(bean.getClass(),
+            "generateopenapi",
+            IAction.MODE_UNDEFINED,
+            false,
+            "icons/cascade.png") {
+            @Override
+            public Object action() throws Exception {
+                return SystemUtil.execute(new File(ENV.getConfigPathRel()), 
+                    new String[] {"./generate-openapi.sh", "https://github.com/bump-sh-examples/train-travel-api/raw/refs/heads/main/openapi.yaml"});
+            }
+            @Override
+            public boolean isEnabled() {
+                return super.isEnabled() && new File(ENV.getConfigPath() + "generate-openapi.sh").exists();
+            }
+        });
+
         }
         super.addAdministrationActions(session, bEnv);
     }

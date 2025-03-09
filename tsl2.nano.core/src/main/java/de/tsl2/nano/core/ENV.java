@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.reflect.Proxy;
+import java.net.URLClassLoader;
 import java.text.Format;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -263,28 +264,7 @@ public class ENV implements Serializable {
             + "===========================================================");
 
         //provide some external functions as options for this framework
-        CompatibilityLayer layer = new CompatibilityLayer();
-        layer.registerMethod("ant",
-            "de.tsl2.nano.execution.ScriptUtil",
-            "ant",
-            true,
-            String.class,
-            String.class,
-            Properties.class);
-
-        layer.registerMethod("antbuild",
-            "de.tsl2.nano.execution.ScriptUtil",
-            "ant",
-            true,
-            String.class,
-            String.class,
-            Properties.class);
-
-        layer.registerMethod("reflectionToString",
-            "de.tsl2.nano.format.ToStringBuilder",
-            "reflectionToString",
-            true,
-            Object.class);
+        CompatibilityLayer layer = provideCompatibilityLayer();
 
         File configFile = getConfigFile(dir, ".xml");//new File(System.getProperty(KEY_CONFIG_PATH, System.getProperty("user.dir")));
         if (configFile.canRead()) {
@@ -324,6 +304,32 @@ public class ENV implements Serializable {
 //        self.persist();
         LogFactory.log("==> ENV " + name + " created successful!");
         return lastCreated = self;
+    }
+
+    private static CompatibilityLayer provideCompatibilityLayer() {
+        CompatibilityLayer layer = new CompatibilityLayer();
+        layer.registerMethod("ant",
+            "de.tsl2.nano.execution.ScriptUtil",
+            "ant",
+            true,
+            String.class,
+            String.class,
+            Properties.class);
+
+        layer.registerMethod("antbuild",
+            "de.tsl2.nano.execution.ScriptUtil",
+            "ant",
+            true,
+            String.class,
+            String.class,
+            Properties.class);
+
+        layer.registerMethod("reflectionToString",
+            "de.tsl2.nano.format.ToStringBuilder",
+            "reflectionToString",
+            true,
+            Object.class);
+        return layer;
     }
 
     private void update(File configFile, String buildInfo) {
@@ -841,6 +847,8 @@ public class ENV implements Serializable {
         reset();
         create(envDir);
 
+        if (!(Thread.currentThread().getContextClassLoader() instanceof URLClassLoader))
+            assignENVClassloaderToCurrentThread(AppLoader.provideClassloader_(envDir));
         //don't overwrite the new values
         MapUtil.removeAll(tempProperties, self().properties.keySet());
         MapUtil.removeAll(tempServices, self().services().keySet());

@@ -100,7 +100,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      * holds the connection to the composition parent. if not null, the beancollector will work only on items having a
      * connection to this composition (uml-composition where childs can't exist without it's parent!).
      */
-    @Transient
+    @Transient // NOTE: the transient annotation tells the BeanDefinition that it has to provide Extension informations!
     protected Composition composition;
 
     protected transient IAction<?> newAction;

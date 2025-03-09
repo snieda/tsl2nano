@@ -337,6 +337,9 @@ public class AppLoader {
      * @param environment name/path to be added to the classloader
      */
     protected NetworkClassLoader provideClassloader(String environment) {
+        return provideClassloader_(environment);
+    }
+    protected static NetworkClassLoader provideClassloader_(String environment) {
         environment = FileUtil.getURIFile(environment).getPath();
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         String classPath = System.getProperty("java.class.path");

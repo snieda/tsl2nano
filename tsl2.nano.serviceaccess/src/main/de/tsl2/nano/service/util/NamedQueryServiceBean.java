@@ -17,14 +17,11 @@ import java.util.Collection;
 import java.util.UUID;
 
 import javax.ejb.Stateless;
-import javax.persistence.Entity;
-import javax.persistence.MappedSuperclass;
 import javax.persistence.NamedNativeQueries;
 import javax.persistence.NamedNativeQuery;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Query;
-import javax.persistence.Table;
 
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.core.ManagedException;
@@ -120,8 +117,7 @@ public class NamedQueryServiceBean extends AbstractStatelessServiceBean implemen
      * @return true, if no table is bound to entity
      */
     protected <T> boolean isVirtualEntity(Class<T> beanType) {
-        return !beanType.isAnnotationPresent(Table.class) && !beanType.isAnnotationPresent(Entity.class) 
-                && !beanType.isAnnotationPresent(MappedSuperclass.class);
+        return !BeanContainerUtil.isPersistable(beanType);
     }
 
     /**

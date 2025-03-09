@@ -220,6 +220,8 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
         final Compositor _this = this;
         Collection<?> bases = BeanContainer.instance().getBeans(baseType, 0, -1);
         ArrayList<IAction> actions = new ArrayList<>();
+        if (bases == null)
+            return actions;
         for (final Object base : bases) {
             actions.add(new SecureAction<T>(createCompositorActionId(base),
                 Bean.getBean(base).toString()) {

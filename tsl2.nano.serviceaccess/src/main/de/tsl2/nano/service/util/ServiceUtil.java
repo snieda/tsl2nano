@@ -1039,7 +1039,7 @@ public class ServiceUtil {
      * @return true, if class of value has annotation {@link Entity}
      */
     static boolean isEntity(Object value) {
-        return BeanClass.getBeanClass(value.getClass()).isAnnotationPresent(Entity.class);
+        return BeanContainerUtil.isPersistable(value.getClass());
     }
     
     public static boolean isExcecutionStatement(String strStmt) {

@@ -11,6 +11,7 @@ package de.tsl2.nano.core.cls;
 
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -238,7 +239,9 @@ public class PrimitiveUtil {
      */
     public static <T> T getMaximumValue(Class<T> standardType) {
         assert isPrimitiveOrWrapper(standardType) : "standardType must be a primitive, but is:" + standardType;
-        Class<T> t = getWrapper(standardType);
+        Class<T> t = BigDecimal.class.isAssignableFrom(standardType) || BigInteger.class.isAssignableFrom(standardType) 
+            ? (Class<T>) Long.class 
+            : getWrapper(standardType);
         return (T) (Boolean.class.isAssignableFrom(t) ? Boolean.TRUE : BeanClass.getBeanClass(t).createInstance(
             BeanClass.getStatic(t, "MAX_VALUE")));
     }
