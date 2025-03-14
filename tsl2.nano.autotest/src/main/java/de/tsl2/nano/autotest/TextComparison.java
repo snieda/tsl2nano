@@ -9,6 +9,8 @@
  */
 package de.tsl2.nano.autotest;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -16,7 +18,9 @@ import java.util.Set;
 
 import org.junit.Assert;
 
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * Utility to compare to texts, ignoring given regular expressions and printing the differences
@@ -29,25 +33,31 @@ public class TextComparison {
     public static String REGEX_TIME_DE = "\\d\\d\\:\\d\\d(\\:\\d\\d([.,]\\d(\\d(\\d)?)?)?)?";
     public static String XXX = "XXX";
     
-    public static void assertEquals(String exptected, String result, boolean ignoreWhitespace, Map<String, String> replacements) {
+    public static void assertEquals(String name, String expected, String result, boolean ignoreWhitespace, Map<String, String> replacements) {
         if (ignoreWhitespace) {
-            exptected = exptected.replaceAll("[\\s\\p{Z}]+", " ");
+            expected = expected.replaceAll("[\\s\\p{Z}]+", " ");
             result = result.replaceAll("[\\s\\p{Z}]+", " ");
         }
-        StringBuilder exp = new StringBuilder(exptected);
+        StringBuilder exp = new StringBuilder(expected);
         StringBuilder res = new StringBuilder(result);
         prepareForComparison(exp, res, replacements);
         
-        exptected = exp.toString();
+        expected = exp.toString();
         result = res.toString();
-        Map<String, String> diffs = getDiffs(exptected, result);
+        Map<String, String> diffs = getDiffs(expected, result);
         String formDiff = StringUtil.toFormattedString(diffs, -1, true);
         if (diffs.size() > 0) {
+            String file1 = FileUtil.userDirFile(name + "-expected-file.txt").getAbsolutePath();
+            String file2 = FileUtil.userDirFile(name + "-result-file.txt").getAbsolutePath();
+            final String fexpected = expected, fresult = result;
+            Util.trY( () -> Files.write(Paths.get(file1), fexpected.getBytes()));
+            Util.trY( () -> Files.write(Paths.get(file2), fresult.getBytes()));
             formDiff = "\n====================================================\n"
 				+ "!!! DIFFERENCE BETWEEN EXPECTED AND RESULT:\n" + StringUtil.toFormattedString(diffs, -1, true)
+                + "\n ==> see files: " + file1 + " <=> " + file2
             	+ "\n====================================================\n";
         }
-        Assert.assertEquals(formDiff, exptected, result);
+        Assert.assertEquals(formDiff, expected, result);
     }
     
     public static void prepareForComparison(StringBuilder expected, StringBuilder result,

@@ -26,6 +26,7 @@
 		<tsl2.nano.serviceaccess.jar>tsl2.nano.serviceaccess-${project.version}.jar</tsl2.nano.serviceaccess.jar>
 		<tsl2.nano.incubation.jar>tsl2.nano.incubation-${project.version}.jar</tsl2.nano.incubation.jar>
 		<tsl2.nano.cursus.jar>tsl2.nano.cursus-${project.version}.jar</tsl2.nano.cursus.jar>
+		<tsl2.nano.cursus.jar>tsl2.nano.descriptor-${project.version}.jar</tsl2.nano.cursus.jar>
 		<tsl2.nano.simple-xml.jar>simple-xml-2.7.1.jar</tsl2.nano.simple-xml.jar>
 		<tsl2.nano.resources.jar>tsl2.nano.h5.default-resources.jar</tsl2.nano.resources.jar>
 		<tsl2.nano.sample.jar>tsl2.nano.h5.sample.jar</tsl2.nano.sample.jar>

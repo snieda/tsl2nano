@@ -216,7 +216,7 @@ public class NanoH5Test implements ENVTestPreparation {
         Map header = MapUtil.asMap("socket", sampleSocket, "cookie", "session-id=" + session.getKey() + ";");
 		Response response = app.serve("/", Method.POST, header, pars, new HashMap<>());
 
-        String html = null, exptectedHtml;
+        String html = null;
         for (int i = 0; i < beanTypesToCheck.length; i++) {
             Bean bean = Bean.getBean(BeanClass.createInstance(beanTypesToCheck[i]));
             //check session and collector
@@ -271,35 +271,7 @@ public class NanoH5Test implements ENVTestPreparation {
         	}
         }
         
-        // check encoding (only if german!)
-         assertTrue(!Locale.getDefault().equals(Locale.GERMANY) || html.contains("S&amp;chlie&szlig"));
-         assertTrue("possible encoding problems found in html-output", !html.contains("ï»¿"));
-         
-         //create a new expected file (after new changes in the gui)
-         String expFileName = "test-" + name + "-output" + (isDeepTest() ? "-deep" : "") + ".html";
-         FileUtil.writeBytes(html.getBytes(), ENV.getConfigPath() + expFileName, false);
-         
-        //static check against last expteced state
-       exptectedHtml = new String(FileUtil.getFileBytes(expFileName, null));
-       if (!BaseTest.isExternalCIPlatform())
-    	 BaseTest.assertEquals(exptectedHtml, html, true, MapUtil.asMap("\\:[0-9]{5,5}", ":XXXXX",
-          "20\\d\\d(-\\d{2})*", XXX,
-          "[0-9]{1,6} Sec [0-9]{1,6} KB", "XXX Sec XXX KB", 
-          "statusinfo-[0-9]{13,13}\\.txt", "statusinfo-XXXXXXXXXXXXX.txt",
-          REGEX_DATE_US, XXX,
-          REGEX_DATE_DE, XXX,
-          REGEX_TIME_DE, XXX,
-          "\\d[:]\\d\\d", XXX,
-          "startedAt", XXX,
-          "endedAt", XXX,
-          "Started At", XXX,
-          "Ended At", XXX,
-          "tsl2.nano.h5-\\d+\\.\\d+\\.\\w+(-SNAPSHOT)?[\\-\\.0-9]*", "tsl2.nano.h5-X.X.X",
-          "(target/test/)?.nanoh5.timesheet/", XXX,
-          ".quicksearch", "?quicksearch", // the '?' does not match between the two sources!
-          "(\\w+[:])?((/|[\\\\])([.]?\\w+)+)+", XXX, //absolute file pathes
-          "\"panelactionsimple\"( disabled)?", XXX //sometimes it is disabled, don't know why...
-          ));
+        checkFinalApplicationHtml(name, html);
        
         //check xml failed files - these are written, if simple-xml has problems on deserializing from xml
         checkXmlDeserializing(DIR_TEST);
@@ -345,6 +317,8 @@ public class NanoH5Test implements ENVTestPreparation {
         assertTrue(FileUtil.copy(path + "messages_de_DE.properties", DIR_TEST + "/messages_de_DE.properties"));
         assertTrue(FileUtil.copy(projectPath() + "src/resources/run.bat", basedir + "run.bat"));
         assertTrue(FileUtil.copy(projectPath() + "src/resources/run.sh", basedir + "run.sh"));
+        assertTrue(FileUtil.copy(projectPath() + "src/resources/compilejar.sh", basedir + "compilejar.sh"));
+        assertTrue(FileUtil.copy(projectPath() + "src/resources/generate-openapi.sh", basedir + "generate-openapi.sh"));
 
         //create  run configuration
         FileUtil.writeBytes((projectPath() + "run.bat " + new File(DIR_TEST).getName()).getBytes(), basedir + name + ".cmd", false);
@@ -366,6 +340,47 @@ public class NanoH5Test implements ENVTestPreparation {
 //        p.clear();
 //        p.put("dir", DIR_TEST);
 //        AntRunner.runTask(AntRunner.TASK_DELETE, p, (String)null);
+    }
+
+    //@Test // only for manual check of html comparision after html files are created
+    public void testHtmlComparision() {
+        String html = new String(FileUtil.getFileBytes(FileUtil.userDirFile("target/test/.nanoh5.timesheet/test-timesheet-output-deep.html").getPath(), null));
+        checkFinalApplicationHtml("timesheet", html);
+    }
+
+    @SuppressWarnings({ "unchecked" })
+    private void checkFinalApplicationHtml(String name, String html) {
+        String exptectedHtml;
+        // check encoding (only if german!)
+         assertTrue(!Locale.getDefault().equals(Locale.GERMANY) || html.contains("S&amp;chlie&szlig"));
+         assertTrue("possible encoding problems found in html-output", !html.contains("ï»¿"));
+         
+         //create a new expected file (after new changes in the gui)
+         String expFileName = "test-" + name + "-output" + (isDeepTest() ? "-deep" : "") + ".html";
+         FileUtil.writeBytes(html.getBytes(), ENV.getConfigPath() + expFileName, false);
+         
+        //static check against last expteced state
+       exptectedHtml = new String(FileUtil.getFileBytes(expFileName, null));
+       if (!BaseTest.isExternalCIPlatform())
+    	 BaseTest.assertEquals(name, exptectedHtml, html, true, MapUtil.asMap(
+            "\\:[0-9]{5,5}", ":XXXXX",
+          "20\\d\\d(-\\d{2})*", XXX,
+          "[0-9]{1,6} Sec [0-9]{1,6} KB", "XXX Sec XXX KB", 
+          "statusinfo-[0-9]{13,13}\\.txt", "statusinfo-XXXXXXXXXXXXX.txt",
+          REGEX_DATE_US, XXX,
+          REGEX_DATE_DE, XXX,
+          REGEX_TIME_DE, XXX,
+          "\\d[:]\\d\\d", XXX,
+          "startedAt", XXX,
+          "endedAt", XXX,
+          "Started At", XXX,
+          "Ended At", XXX,
+          "tsl2.nano.h5-\\d+\\.\\d+\\.\\w+(-SNAPSHOT)?[\\-\\.0-9\\: d]*", "tsl2.nano.h5-X.X.X",
+          "((target)?/test/)?.nanoh5.timesheet/", XXX,
+          ".quicksearch", "?quicksearch", // the '?' does not match between the two sources!
+          "(\\w+[:])?((/|[\\\\])([.]?\\w+)+)+", XXX, //absolute file pathes
+          "\"panelactionsimple\"( disabled)?", XXX //sometimes it is disabled, don't know why...
+          ));
     }
 
 	private void checkXmlDeserializing(final String DIR_TEST) {

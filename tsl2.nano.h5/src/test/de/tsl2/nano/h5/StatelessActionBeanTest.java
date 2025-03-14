@@ -2,6 +2,7 @@ package de.tsl2.nano.h5;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import de.tsl2.nano.autotest.TypeBean;
@@ -10,11 +11,18 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 
 public class StatelessActionBeanTest implements ENVTestPreparation {
+    @Before
+    public void setUp() {
+        ENVTestPreparation.setUp();
+    }
+    
     @Test
     public void testStatelessActionBeanUsage() {
         StatelessActionBean<StatelessTestBean> bean = new StatelessActionBean<>(StatelessTestBean.class);
+        bean.saveDefinition();
         assertEquals(1, bean.getActions().size());
-        assertEquals("create", bean.getActionByName("create").getShortDescription());
+        assertEquals("Create", bean.getActions().iterator().next().getShortDescription());
+        assertEquals("Create", bean.getActionByName("create").getShortDescription());
         
         BeanDefinition<StatelessTestBean> bean2 = BeanDefinition.getBeanDefinition(StatelessTestBean.class);
         assertEquals(bean, bean2);

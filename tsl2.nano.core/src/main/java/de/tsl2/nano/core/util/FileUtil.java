@@ -378,6 +378,12 @@ public class FileUtil {
         return classPath.replace('.', '/');
     }
 
+    /** returns the absolute file path of a given relative file path. file must be found through current classpath */
+    public static File getResourceFilePath(String fileInClassPath) {
+        URI uri = Util.trY( () -> Thread.currentThread().getContextClassLoader().getResource(fileInClassPath).toURI());
+        return Paths.get(uri).toFile();
+    }
+
     /**
      * guarantees full path existing.
      * 

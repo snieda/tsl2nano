@@ -325,15 +325,33 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             "icons/cascade.png") {
             @Override
             public Object action() throws Exception {
-                return SystemUtil.execute(new File(ENV.getConfigPathRel()), 
-                    new String[] {"./generate-openapi.sh", "https://github.com/bump-sh-examples/train-travel-api/raw/refs/heads/main/openapi.yaml"});
-            }
-            @Override
-            public boolean isEnabled() {
-                return super.isEnabled() && new File(ENV.getConfigPath() + "generate-openapi.sh").exists();
-            }
-        });
+                ValueHolder vh = new ValueHolder("https://github.com/bump-sh-examples/train-travel-api/raw/refs/heads/main/openapi.yaml");
+                Bean b = Bean.getBean(vh);
+                id = "openapi.generate";
+                String lbl = ENV.translate("generateopenapi", true);
 
+                b.addAction(new CommonAction<Process>(id, lbl, lbl) {
+                    @Override
+                    public Process action() throws Exception {
+                            ENV.extractResource(NanoH5.JAR_DESCRIPTOR);
+                            Process prc = SystemUtil.execute(new File(ENV.getConfigPathRel()),
+                                new String[] { "./generate-openapi.sh", String.valueOf(vh.getValue()) });
+                            prc.waitFor();
+                            if (prc.exitValue() == 0 && Message.ask("Do you want to restart session and load new generated-model.jar?", true)) {
+                                Persistence.current().setJarFile("generated-model.jar");
+                                Persistence.current().setAutoddl("update");
+                                session.close();
+                            }
+                            return prc;
+                        }
+                        @Override
+                        public boolean isEnabled() {
+                            return super.isEnabled() && new File(ENV.getConfigPath() + "generate-openapi.sh").exists();
+                        }
+                    });
+                return b;
+                }
+            });
         }
         super.addAdministrationActions(session, bEnv);
     }

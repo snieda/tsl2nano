@@ -130,6 +130,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
     public static final String JAR_COMMON = "tsl2.nano.common.jar";
     public static final String JAR_SERVICEACCESS = "tsl2.nano.serviceaccess.jar";
     public static final String JAR_DIRECTACCESS = "tsl2.nano.directaccess.jar";
+    public static final String JAR_DESCRIPTOR = "tsl2.nano.descriptor.jar";
     public static final String JAR_INCUBATION = "tsl2.nano.incubation.jar";
     public static final String JAR_CURSUS = "tsl2.nano.cursus.jar";
     public static final String JAR_SAMPLE = "tsl2.nano.h5.sample.jar";
@@ -996,13 +997,14 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         List<Class> beanClasses = (List<Class>)(Object)Arrays.stream(beanJarFiles)
             .map(f -> Util.trY( () -> Thread.currentThread().getContextClassLoader().loadClass(FileUtil.getPackagePath(f))))
             .toList();
-        List<Class> actionClasses = beanClasses.stream().filter(c -> !BeanContainerUtil.isPersistable(c)).toList();
+        List<Class> actionClasses = beanClasses.stream().filter(c -> !BeanContainerUtil.isPersistable(c) && Util.isInstanceable(c)).toList();
         Message.send("preparing virtual action beans for " + actionClasses.size() + " types");
         actionClasses.parallelStream().forEach(c -> {
             if (c.getSimpleName().length() > 0 && !BeanDefinition.isDefined(StringUtil.toFirstLower(c.getSimpleName()))) {
                 ENV.assignClassloaderToCurrentThread();
                 Message.send("preparing virtual action bean for: " + c.getSimpleName());
                 StatelessActionBean<?> b = new StatelessActionBean<>(c);
+                // b.autoInit(b.getName());
                 b.saveDefinition();
             }
         });
@@ -1201,6 +1203,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         ENV.extractResource(JAR_COMMON);
         ENV.extractResource(JAR_DIRECTACCESS);
         ENV.extractResource(JAR_SERVICEACCESS);
+        ENV.extractResource(JAR_DESCRIPTOR);
 
         DatabaseTool dbTool = new DatabaseTool(persistence);
         provideScripts(persistence);
