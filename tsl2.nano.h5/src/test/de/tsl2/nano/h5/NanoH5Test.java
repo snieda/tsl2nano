@@ -378,7 +378,7 @@ public class NanoH5Test implements ENVTestPreparation {
           "tsl2.nano.h5-\\d+\\.\\d+\\.\\w+(-SNAPSHOT)?[\\-\\.0-9\\: d]*", "tsl2.nano.h5-X.X.X",
           "((target)?/test/)?.nanoh5.timesheet/", XXX,
           ".quicksearch", "?quicksearch", // the '?' does not match between the two sources!
-          "(\\w+[:])?((/|[\\\\])([.]?\\w+)+)+", XXX, //absolute file pathes
+          "(\\w+[:])?((\\/|[\\\\])([.]?\\w+)+)+", XXX, //absolute file pathes
           "\"panelactionsimple\"( disabled)?", XXX //sometimes it is disabled, don't know why...
           ));
     }

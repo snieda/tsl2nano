@@ -105,7 +105,7 @@ public class Message extends RuntimeException {
 
     public static final <T> T ask(String message, T askInstance) {
         T result = sendAndWaitForResponse(message + "@" + hex(askInstance), (Class<T>)askInstance.getClass());
-        return result != null ? result : askInstance;
+        return result == null || result.equals(Boolean.TRUE) ? askInstance : result;
     }
 
     public static final void info(String message) {

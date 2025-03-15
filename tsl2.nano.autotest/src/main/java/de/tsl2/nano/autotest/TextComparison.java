@@ -9,8 +9,6 @@
  */
 package de.tsl2.nano.autotest;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -20,7 +18,6 @@ import org.junit.Assert;
 
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.core.util.Util;
 
 /**
  * Utility to compare to texts, ignoring given regular expressions and printing the differences
@@ -49,9 +46,8 @@ public class TextComparison {
         if (diffs.size() > 0) {
             String file1 = FileUtil.userDirFile(name + "-expected-file.txt").getAbsolutePath();
             String file2 = FileUtil.userDirFile(name + "-result-file.txt").getAbsolutePath();
-            final String fexpected = expected, fresult = result;
-            Util.trY( () -> Files.write(Paths.get(file1), fexpected.getBytes()));
-            Util.trY( () -> Files.write(Paths.get(file2), fresult.getBytes()));
+            FileUtil.writeBytes(expected.getBytes(), file1, false);
+            FileUtil.writeBytes(result.getBytes(), file2, false);
             formDiff = "\n====================================================\n"
 				+ "!!! DIFFERENCE BETWEEN EXPECTED AND RESULT:\n" + StringUtil.toFormattedString(diffs, -1, true)
                 + "\n ==> see files: " + file1 + " <=> " + file2

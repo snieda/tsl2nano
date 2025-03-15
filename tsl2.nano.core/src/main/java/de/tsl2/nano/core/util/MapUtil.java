@@ -381,7 +381,15 @@ public class MapUtil {
 	 * @param args argument values
 	 * @return index sorted map containing zero-indexed integers as keys, and args as values
 	 */
-	public static Map<Integer, Object> asIndexedMap(Object[] args) {
+	public static Map<String, Object> asArgMap(String argPrefix, int startIndex, Object[] args) {
+		LinkedHashMap<String,Object> map = new LinkedHashMap<>();
+		for (int i = 0; i < args.length; i++) {
+			map.put(argPrefix + (startIndex + i), args[i]);
+		}
+		return map;
+    }
+
+     public static Map<Integer, Object> asIndexedMap(Object[] args) {
 		LinkedHashMap<Integer,Object> map = new LinkedHashMap<>();
 		for (int i = 0; i < args.length; i++) {
 			map.put(i, args[i]);

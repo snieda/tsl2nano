@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.Stack;
 
 import javax.net.ssl.SSLContext;
 
@@ -554,12 +555,18 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
     }
 
     @Override
-    public void close() {
-        LOG.debug("closing session " + this);
+    public void invalidate() {
+        LOG.debug("invalidating session " + this);
         server.removeSession(this);
-        nav = null;
+        nav = new EntityBrowser("entity-browser", new Stack<BeanDefinition<?>>());
         response = null;
         authorization = null;
+    }
+
+    @Override
+    public void close() {
+        LOG.debug("closing session " + this);
+        invalidate();
         beanContainer = null;
         builder = null;
         if (sessionClassloader instanceof URLClassLoader) {

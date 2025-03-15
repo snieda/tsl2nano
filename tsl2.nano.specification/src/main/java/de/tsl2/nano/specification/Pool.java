@@ -150,6 +150,10 @@ public class Pool {
         return get(name, null);
     }
 
+    public boolean exists(String name) {
+        return runnables().get(name) != null;
+    }
+
     /**
      * gets the runnable by name
      * 
@@ -186,21 +190,22 @@ public class Pool {
         return name.matches(".*[.][a-z]{3}") ? name : getDirectory(type) + name + ENV.getFileExtension();
     }
 
-    public void add(String prefixedName, String expression) {
+    public IPRunnable add(String prefixedName, String expression) {
     	String pref = prefixedName.substring(0, 1);
     	for (Class<? extends IPRunnable> rt : registeredTypes) {
 			if (IPrefixed.class.isAssignableFrom(rt) && ((IPrefixed)BeanClass.createInstance(rt)).prefix().equals(pref)) {
-				add(BeanClass.createInstance(rt, prefixedName.substring(1), expression, null));
-				return;
+				return add(BeanClass.createInstance(rt, prefixedName.substring(1), expression, null));
 			}
 		}
     	throw new IllegalArgumentException(" prefixedName rule name must start with: " + getExpressionPattern());
     }
+
     /**
      * delegates to {@link #add(String, IPRunnable)} using {@link IPRunnable#getName()}
-     */
-    public void add(IPRunnable runnable) {
-        add(getPrefixedName(runnable), runnable);
+          * @return 
+          */
+    public IPRunnable add(IPRunnable runnable) {
+        return add(getPrefixedName(runnable), runnable);
     }
 
     /**
@@ -209,11 +214,12 @@ public class Pool {
      * @param name runnable name
      * @param runnable runnable to add
      */
-    protected void add(String name, IPRunnable runnable) {
+    protected IPRunnable add(String name, IPRunnable runnable) {
         runnables().put(name, runnable);
         String fileName = getFileName(runnable.getName(), runnable.getClass());
         LOG.info("adding runnable '" + name + "' and saving it to " + fileName);
         ENV.save(fileName, runnable);
+        return runnable;
     }
 
     public void reset() {

@@ -340,7 +340,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                             if (prc.exitValue() == 0 && Message.ask("Do you want to restart session and load new generated-model.jar?", true)) {
                                 Persistence.current().setJarFile("generated-model.jar");
                                 Persistence.current().setAutoddl("update");
-                                session.close();
+                                Persistence.current().save();
+                                session.invalidate();
                             }
                             return prc;
                         }
@@ -1872,7 +1873,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 	}
 
     private void addManyToOnePicture(Element cell, IValueDefinition<?> attr) {
-        if (BeanContainer.instance().isPersistable(attr.getType())) {
+        if (BeanContainer.isInitialized() && BeanContainer.instance().isPersistable(attr.getType())) {
             addPicture(cell, attr.getType(), attr.getValue());
         }
     }

@@ -997,14 +997,17 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         List<Class> beanClasses = (List<Class>)(Object)Arrays.stream(beanJarFiles)
             .map(f -> Util.trY( () -> Thread.currentThread().getContextClassLoader().loadClass(FileUtil.getPackagePath(f))))
             .toList();
-        List<Class> actionClasses = beanClasses.stream().filter(c -> !BeanContainerUtil.isPersistable(c) && Util.isInstanceable(c)).toList();
+        List<Class> actionClasses = beanClasses.stream().filter(c -> 
+            !BeanContainerUtil.isPersistable(c) 
+                && Util.isInstanceable(c)
+                && c.getName().matches(ENV.get("app.bean.statelessactionbean.namefilter", ".*Api")))
+                .toList();
         Message.send("preparing virtual action beans for " + actionClasses.size() + " types");
         actionClasses.parallelStream().forEach(c -> {
             if (c.getSimpleName().length() > 0 && !BeanDefinition.isDefined(StringUtil.toFirstLower(c.getSimpleName()))) {
                 ENV.assignClassloaderToCurrentThread();
                 Message.send("preparing virtual action bean for: " + c.getSimpleName());
                 StatelessActionBean<?> b = new StatelessActionBean<>(c);
-                // b.autoInit(b.getName());
                 b.saveDefinition();
             }
         });

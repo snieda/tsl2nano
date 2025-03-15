@@ -176,7 +176,7 @@ public class WebSecurity {
 			+ ":" + session.getWebsocketPort() : "";
 		p.put("service.url", serviceUrl);
 		p.put("websocket.url", websocketUrl);
-		p.put("requestId", session != null ? session.getRequestId() : "");
+		p.put("requestId", session != null && session.getRequestId() != null ? session.getRequestId() : "");
 		return p;
 	}
 	private String getStandardHeader() {

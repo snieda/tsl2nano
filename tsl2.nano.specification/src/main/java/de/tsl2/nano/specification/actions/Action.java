@@ -15,18 +15,24 @@ import java.util.Map;
 
 import org.simpleframework.xml.Attribute;
 
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.MethodUtil;
 import de.tsl2.nano.specification.AbstractRunnable;
 import de.tsl2.nano.specification.ParType;
+import de.tsl2.nano.specification.Pool;
 
 /**
  * Action to be loaded by ActionPool and provided to SpecifiedAction.
+ * To {@link #run(Map, Object...)} this action, you have (if its not static) to provide the "instance" object inside the given context
  * 
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
 public class Action<T> extends AbstractRunnable<T> {
+    public  static final String KEY_CONTEXT_INSTANCE = "instance";
+
     @Attribute
     Class<?> declaringClass;
     /** serialVersionUID */
@@ -108,12 +114,31 @@ public class Action<T> extends AbstractRunnable<T> {
     
     @SuppressWarnings("unchecked")
     @Override
+    /** 
+     * you have (if its not static) to provide the "instance" object and the method/operation/action arguments inside the given context.
+     * the arguments may be given as sequence, or with keys like "arg1", "arg2" etc.
+     */
     public T run(Map<String, Object> context, Object... extArgs) {
-        Object instance = context.remove("instance");
+        Object instance = context.remove(KEY_CONTEXT_INSTANCE);
         if (parameter == null)
         	createParameter(getMethod(declaringClass.getName() + "." + getOperation()));
         return (T) BeanClass.getBeanClass(declaringClass).callMethod(instance, getOperation(),
             getParameterList().toArray(new Class[0]), checkedArguments(context, false).values()
                 .toArray());
     }
+    
+    /** convenience to create and run a runnable e.g. to run a kind of a proxy */
+    @SuppressWarnings("unchecked")
+    public static <R> R defineAndRun(String name, Object instance, String actionMethodName, Class<R> resultType, Object... args) {
+        Action<?> runnable;
+        if (ENV.get(Pool.class).exists(name)) {
+            runnable = ENV.get(Pool.class).get(name, Action.class);
+        } else {
+            runnable = (Action<?>) ENV.get(Pool.class).add(name, instance.getClass().getName() + "." + actionMethodName);
+        }
+        Map<String, Object> context = MapUtil.asArgMap("arg", 1, args);
+        context.put(KEY_CONTEXT_INSTANCE, instance);
+        return (R) runnable.run(context);
+    }
+
 }

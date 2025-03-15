@@ -9,6 +9,8 @@ import de.tsl2.nano.autotest.TypeBean;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.ENVTestPreparation;
+import de.tsl2.nano.specification.Pool;
+import de.tsl2.nano.specification.actions.Action;
 
 public class StatelessActionBeanTest implements ENVTestPreparation {
     @Before
@@ -18,6 +20,8 @@ public class StatelessActionBeanTest implements ENVTestPreparation {
     
     @Test
     public void testStatelessActionBeanUsage() {
+        Pool.registerTypes(Action.class);
+
         StatelessActionBean<StatelessTestBean> bean = new StatelessActionBean<>(StatelessTestBean.class);
         bean.saveDefinition();
         assertEquals(1, bean.getActions().size());

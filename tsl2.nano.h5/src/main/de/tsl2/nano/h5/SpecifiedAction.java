@@ -56,8 +56,8 @@ public class SpecifiedAction<RETURNTYPE> extends SecureAction<RETURNTYPE> implem
     /**
      * constructor
      * 
-     * @param name
-     * @param instance
+     * @param name id to be found in specifications and as default label
+     * @param instance optional. if null, you have to provide the instance as first parameter before call of activate()
      */
     public SpecifiedAction(String name, Object instance) {
         super(name, ENV.translate(name, true));

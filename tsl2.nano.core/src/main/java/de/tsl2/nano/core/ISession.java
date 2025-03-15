@@ -46,6 +46,9 @@ public interface ISession<WORK> {
     /** @return main application instance/server */
     Main getApplication();
 
+    /** unregister session from server and remove navigation stack and authorization */
+    void invalidate();
+
     /** closes this session */
     void close();
 

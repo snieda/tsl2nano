@@ -12,9 +12,12 @@ import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.util.MethodUtil;
+import de.tsl2.nano.specification.actions.Action;
 
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({ "rawtypes" })
 public class StatelessActionBean<T> extends Bean<T> {
+    private static final String STATELESSACTIONBEAN_ISACTIONMETHOD = "!statelessactionbeanisactionmethod";
+
     @Transient // NOTE: the transient annotation tells the BeanDefinition that it has to provide Extension informations!
     Boolean actionsOnly = true;
 
@@ -22,16 +25,18 @@ public class StatelessActionBean<T> extends Bean<T> {
 
     public StatelessActionBean() {
     }
+
     public StatelessActionBean(Class<T> beanClass) {
         clazz = beanClass;
         name = getName(beanClass);
         getActions();
     }
-    
+
     @Override
     public List<IAttribute> getAttributes(boolean readAndWriteAccess) {
         return emptyAttributes;
     }
+
     @Override
     public boolean isVirtual() {
         return true;
@@ -48,7 +53,13 @@ public class StatelessActionBean<T> extends Bean<T> {
 
     @Override
     protected boolean isActionMethod(Method m) {
-        // TODO: move to SpecifiedAction
+    /** defines a configurable method to be changed in ENV properties and/or specifiedactions */
+    return (boolean) Action.defineAndRun(STATELESSACTIONBEAN_ISACTIONMETHOD, this, "isPublicAndNotJdkMethod",
+                Boolean.class, m);
+    }
+
+    /** default method used by specifiedaction to be called by {@link #isActionMethod(Method)} */
+    public boolean isPublicAndNotJdkMethod(Method m) {
         return MethodUtil.isPublic(m) && !m.getDeclaringClass().getPackageName().startsWith("java");
     }
 
