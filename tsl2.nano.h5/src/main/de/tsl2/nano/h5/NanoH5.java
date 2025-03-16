@@ -188,7 +188,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         ENV.addService(ClassLoader.class, appstartClassloader);
         eventController = new EventController();
         sessions = Collections.synchronizedMap(
-            new ExpiringMap<Object, NanoH5Session>(ENV.get("session.timeout.millis", 12 * DateUtil.T_HOUR)));
+            new ExpiringMap<Object, NanoH5Session>(ENV.get("app.session.max.timeout.millis", 12 * DateUtil.T_HOUR)));
         registereExpressionsAndPools();
         
         Plugins.process(INanoPlugin.class).configuration(ENV.getProperties(), ENV.services());

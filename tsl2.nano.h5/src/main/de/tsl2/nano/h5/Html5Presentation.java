@@ -746,8 +746,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
             TreeMap p = new TreeMap<>();
             //on reset, before re-loading ENV, it may be null
-            if (ENV.isAvailable())
-                p.putAll(ENV.getProperties());
+            if (ENV.isAvailable()) {
+                // WORKAROUND: try/catch -> don't know why exception on putAll (NoSuchElement) occurs
+                //             but this should break the presentation!
+                Util.trY( () -> p.putAll(ENV.getProperties()), false);
+            }
             URL url = NanoH5.getServiceURL(null);
             p.put("websocket.server.ip", url.getHost());
             p.put("websocket.server.port", session.getWebsocketPort());
