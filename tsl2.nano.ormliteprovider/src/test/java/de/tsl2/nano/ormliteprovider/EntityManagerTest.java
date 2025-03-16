@@ -28,7 +28,7 @@ public class EntityManagerTest implements ENVTestPreparation {
 	}
 	@Test
 	public void testSimpleCRUD() {
-		EntityManager em = new EntityManager(MapUtil.asProperties("jdbc.url", "jdbc:h2:mem:db1;DB_CLOSE_DELAY=-1;MVCC=TRUE", "jdbc.username", "SA", "jdbc.password", "")) {
+		EntityManager em = new EntityManager(MapUtil.asProperties("jdbc.url", "jdbc:h2:mem:db1;DB_CLOSE_DELAY=-1", "jdbc.username", "SA", "jdbc.password", "")) {
 			
 		};
 		Address address = new Address("1", "Buxdehude", "Einoede 1");

@@ -6,7 +6,7 @@
 		<class>de.tsl2.nano.persistence.Address1</class>
 		<properties>
 			<property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
-	        <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:db1;DB_CLOSE_DELAY=-1;MVCC=TRUE"/>
+	        <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:db1;DB_CLOSE_DELAY=-1"/>
 	        <property name="javax.persistence.jdbc.user" value="SA"/>
 	        <property name="javax.persistence.jdbc.password" value=""/>
 
@@ -20,7 +20,7 @@
 		<class>de.tsl2.nano.persistence.replication.Address</class>
 		<properties>
 			<property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
-	        <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:db1;DB_CLOSE_DELAY=-1;MVCC=TRUE"/>
+	        <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:db1;DB_CLOSE_DELAY=-1"/>
 	        <property name="javax.persistence.jdbc.user" value="SA"/>
 	        <property name="javax.persistence.jdbc.password" value=""/>
 
