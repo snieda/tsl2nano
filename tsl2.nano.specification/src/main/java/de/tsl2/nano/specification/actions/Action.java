@@ -71,6 +71,10 @@ public class Action<T> extends AbstractRunnable<T> {
         this.name = name;
     }
 
+    public Class<?> getDeclaringClass() {
+        return declaringClass;
+    }
+    
     /**
      * createMethod
      * @param method

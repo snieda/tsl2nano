@@ -65,12 +65,18 @@ public class SpecifiedAction<RETURNTYPE> extends SecureAction<RETURNTYPE> implem
         this.instance = instance;
     }
 
+    /** if instance is null, it tries to use first given parameter as instance */
     @SuppressWarnings("unchecked")
     @Override
     public RETURNTYPE action() throws Exception {
         int i = instance == null ? 1 : 0;
-        if (instance == null && !Util.isEmpty(getParameter()))
+        Action<?> a = getActionRunner();
+        if (instance == null 
+            && !Util.isEmpty(getParameter()) 
+            && getParameter(0) != null
+            && a.getDeclaringClass().isAssignableFrom(getParameter(0).getClass())) {
             instance = getParameter(0);
+        }
         //fill specified action parameters
         Set<String> argNames = getArgumentNames();
         LinkedHashMap<String, Object> pars = new LinkedHashMap<String, Object>();
@@ -83,7 +89,6 @@ public class SpecifiedAction<RETURNTYPE> extends SecureAction<RETURNTYPE> implem
             pars.putAll(BeanUtil.toValueMap(instance));
             pars.put("instance", instance);
         }
-        Action<?> a = getActionRunner();
         Object result = a.run(pars);
         if (BeanUtil.isStandardType(result)) {
             Message.send(ENV.translate("tsl2nano.result.information", false, getShortDescription(), result));

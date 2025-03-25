@@ -317,7 +317,7 @@ public class NanoH5Test implements ENVTestPreparation {
         assertTrue(FileUtil.copy(path + "messages_de_DE.properties", DIR_TEST + "/messages_de_DE.properties"));
         assertTrue(FileUtil.copy(projectPath() + "src/resources/run.bat", basedir + "run.bat"));
         assertTrue(FileUtil.copy(projectPath() + "src/resources/run.sh", basedir + "run.sh"));
-        assertTrue(FileUtil.copy(projectPath() + "src/resources/compilejar.sh", basedir + "compilejar.sh"));
+        assertTrue(FileUtil.copy(projectPath() + "src/resources/compilejar.cmd", basedir + "compilejar.cmd"));
         assertTrue(FileUtil.copy(projectPath() + "src/resources/generate-openapi.sh", basedir + "generate-openapi.sh"));
 
         //create  run configuration
@@ -342,8 +342,11 @@ public class NanoH5Test implements ENVTestPreparation {
 //        AntRunner.runTask(AntRunner.TASK_DELETE, p, (String)null);
     }
 
-    //@Test // only for manual check of html comparision after html files are created
+    // @Test // only for manual check of html comparision after html files are created
     public void testHtmlComparision() {
+        setENVProperties();
+        System.setProperty("nanoh5test.run.deep", "true");
+
         String html = new String(FileUtil.getFileBytes(FileUtil.userDirFile("target/test/.nanoh5.timesheet/test-timesheet-output-deep.html").getPath(), null));
         checkFinalApplicationHtml("timesheet", html);
     }
@@ -362,7 +365,7 @@ public class NanoH5Test implements ENVTestPreparation {
         //static check against last expteced state
        exptectedHtml = new String(FileUtil.getFileBytes(expFileName, null));
        if (!BaseTest.isExternalCIPlatform())
-    	 BaseTest.assertEquals(name, exptectedHtml, html, true, MapUtil.asMap(
+    	 BaseTest.assertEquals(name, exptectedHtml, html, false, MapUtil.asMap(
             "\\:[0-9]{5,5}", ":XXXXX",
           "20\\d\\d(-\\d{2})*", XXX,
           "[0-9]{1,6} Sec [0-9]{1,6} KB", "XXX Sec XXX KB", 
@@ -378,7 +381,8 @@ public class NanoH5Test implements ENVTestPreparation {
           "tsl2.nano.h5-\\d+\\.\\d+\\.\\w+(-SNAPSHOT)?[\\-\\.0-9\\: d]*", "tsl2.nano.h5-X.X.X",
           "((target)?/test/)?.nanoh5.timesheet/", XXX,
           ".quicksearch", "?quicksearch", // the '?' does not match between the two sources!
-          "(\\w+[:])?((\\/|[\\\\])([.]?\\w+)+)+", XXX, //absolute file pathes
+          "(\\w+[:])?((\\/|[\\\\])([.]?\\w+)+){2,20}", XXX, //absolute file pathes
+          "<span id=\"footer\">(.*?)</span>", XXX, // footer is filled by websocket (may be a question of milliseconds which text was transferred)
           "\"panelactionsimple\"( disabled)?", XXX //sometimes it is disabled, don't know why...
           ));
     }

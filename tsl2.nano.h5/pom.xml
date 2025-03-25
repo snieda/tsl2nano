@@ -14,7 +14,7 @@
 		<keystore>${module.parent}/tsl2store</keystore>
 		<alias>tsl2</alias>
 		<storepass>${gpg.passphrase}</storepass>
-		<jar-extension>-standalone</jar-extension>
+		<jar-extension></jar-extension> <!-- previousely:-standalone-->
 		<build.name>${project.artifactId}</build.name>
 		<build.java>${maven.compiler.target}</build.java>
 		<build.version>${project.version}</build.version>
@@ -424,7 +424,7 @@
 									<sysproperty key="app.stop.allow.system.exit" value="false" />
 									<sysproperty key="app.session.anticsrf" value="false" />>
 								</java>
-								<sleep seconds="5" />
+								<sleep seconds="10" />
 								<echo>RESUMING ${project.build.finalName} integration-test</echo>
 	                        </target>
 	                    </configuration>

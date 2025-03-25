@@ -43,6 +43,13 @@ public class StatelessActionBean<T> extends Bean<T> {
     }
 
     @Override
+    public Bean<T> setInstance(T instance) {
+        //Workaround to set only own instance
+        this.instance = createInstance();
+        return this;
+    }
+
+    @Override
     public Collection<IAction> getActions() {
         // copy of getActions() in BeanDefinition in cause of not able to call super.super
         if (actions == null) {

@@ -11,6 +11,7 @@ package de.tsl2.nano.bean.def;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -28,6 +29,7 @@ import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.format.RegExpFormat;
@@ -121,7 +123,12 @@ public class MethodAction<T> extends CommonAction<T> implements IsPresentable {
     }
 
 	private Object getInstance() {
-		return getParameter()[0];
+		return getParameter(0) != null 
+                && method.getDeclaringClass().isAssignableFrom(getParameter(0).getClass()) 
+            ? getParameter(0)
+            : Modifier.isStatic(method.getModifiers()) 
+                ? null 
+                : BeanClass.getBeanClass(method.getDeclaringClass()).createInstance();
 	}
 
 	@Override

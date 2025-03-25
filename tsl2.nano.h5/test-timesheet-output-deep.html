@@ -18,7 +18,7 @@ setTheme(false);
  * websocket client implementation.
  */
 var socket = new WebSocket(
-		'ws://' + window.document.location.hostname + ':35403');
+		'wss://' + window.document.location.hostname + ':43485');
 console.log('websocket created:' + socket);
 
 socket.onopen = function() {
@@ -406,7 +406,7 @@ function setTheme(next) {
 <table border="0" frame="box" id="page.header.table" sortable="" width="100%">
 <tbody>
 <tr style="background: transparent;">
-<td content="T" onclick="toggleOnClick()" style="width: 0px;"><a href="https://sourceforge.net/p/tsl2nano/wiki/"><img src="icons/beanex-logo-micro.jpg" title="Framework Version: tsl2.nano.h5-2.5.5-SNAPSHOT-2438-20-03-2025 08:54-d"></a></td><td>
+<td content="T" onclick="toggleOnClick()" style="width: 0px;"><a href="https://sourceforge.net/p/tsl2nano/wiki/"><img src="icons/beanex-logo-micro.jpg" title="Framework Version: tsl2.nano.h5-2.5.5-SNAPSHOT-2438-20-03-2025 18:54-d"></a></td><td>
 <form action="?" method="post" style="display: inline; ">
 <div>
 <nav>
@@ -426,16 +426,16 @@ function setTheme(next) {
 <button accesskey="m" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="statusinfoliste.memorize" name="statusinfoliste.memorize" onclick="fade(this)" style="" title="Memorize (ALT+m)" type="submit">Merken<img src="icons/yellow_pin.png"></button>
 </li>
 <li>
-<button accesskey="s" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="statusinfoliste.session" name="statusinfoliste.session" onclick="fade(this)" style="" title="Session (ALT+s)" type="submit">Sitzung<img src="icons/blue_pin.png"></button>
+<button accesskey="s" class="panelactionsimple" formnovalidate="" formtarget="_self" id="statusinfoliste.session" name="statusinfoliste.session" onclick="fade(this)" style="" title="Session (ALT+s)" type="submit">Sitzung<img src="icons/blue_pin.png"></button>
 </li>
 <li>
-<button accesskey="l" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="statusinfoliste.logout" name="statusinfoliste.logout" onclick="fade(this)" style="" title="Logout (ALT+l)" type="submit">Logout<img src="icons/exit.png"></button>
+<button accesskey="l" class="panelactionsimple" formnovalidate="" formtarget="_self" id="statusinfoliste.logout" name="statusinfoliste.logout" onclick="fade(this)" style="" title="Logout (ALT+l)" type="submit">Logout<img src="icons/exit.png"></button>
 </li>
 <li>
-<button accesskey="r" class="panelactionsimple" disabled formnovalidate="" formtarget="_blank" id="statusinfoliste.restful" name="statusinfoliste.restful" onclick="fade(this)" style="" title="Restful (ALT+r)" type="submit">Restful<img src="icons/point-green.png"></button>
+<button accesskey="r" class="panelactionsimple" formnovalidate="" formtarget="_blank" id="statusinfoliste.restful" name="statusinfoliste.restful" onclick="fade(this)" style="" title="Restful (ALT+r)" type="submit">Restful<img src="icons/point-green.png"></button>
 </li>
 <li>
-<button accesskey="!" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="statusinfoliste.restfului" name="statusinfoliste.restfului" onclick="fade(this)" style="" title="Restfului (ALT+!)" type="submit">Restfului<img src="icons/point-yellow.png"></button>
+<button accesskey="!" class="panelactionsimple" formnovalidate="" formtarget="_self" id="statusinfoliste.restfului" name="statusinfoliste.restfului" onclick="fade(this)" style="" title="Restfului (ALT+!)" type="submit">Restfului<img src="icons/point-yellow.png"></button>
 </li>
 </ul>
 </li>
@@ -443,19 +443,19 @@ function setTheme(next) {
 <a>Seite<img src="icons/full_screen.png"></a>
 <ul>
 <li>
-<button accesskey="d" class="panelactionsimple" disabled formnovalidate="" formtarget="_blank" id="statusinfoliste.print" name="statusinfoliste.print" onclick="fade(this)" style="" title="Print (ALT+d)" type="submit">Drucken<img src="icons/print.png"></button>
+<button accesskey="d" class="panelactionsimple" formnovalidate="" formtarget="_blank" id="statusinfoliste.print" name="statusinfoliste.print" onclick="fade(this)" style="" title="Print (ALT+d)" type="submit">Drucken<img src="icons/print.png"></button>
 </li>
 <li>
-<button accesskey="p" class="panelactionsimple" disabled formnovalidate="" formtarget="_blank" id="statusinfoliste.plaintext" name="statusinfoliste.plaintext" onclick="fade(this)" style="" title="Plaintext (ALT+p)" type="submit">Plaintext<img src="icons/view.png"></button>
+<button accesskey="p" class="panelactionsimple" formnovalidate="" formtarget="_blank" id="statusinfoliste.plaintext" name="statusinfoliste.plaintext" onclick="fade(this)" style="" title="Plaintext (ALT+p)" type="submit">Plaintext<img src="icons/view.png"></button>
 </li>
 <li>
-<button accesskey="j" class="panelactionsimple" disabled formnovalidate="" formtarget="_blank" id="statusinfoliste.json" name="statusinfoliste.json" onclick="fade(this)" style="" title="Json (ALT+j)" type="submit">Json<img src="icons/view.png"></button>
+<button accesskey="j" class="panelactionsimple" formnovalidate="" formtarget="_blank" id="statusinfoliste.json" name="statusinfoliste.json" onclick="fade(this)" style="" title="Json (ALT+j)" type="submit">Json<img src="icons/view.png"></button>
 </li>
 <li>
-<button accesskey="&quot;" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="statusinfoliste.document" name="statusinfoliste.document" onclick="fade(this)" style="" title="exporting (see environment.properties, variable names are starting and ending with &sect;&sect;) to: target/test/.nanoh5.myapp/statusinfo.rtf (ALT+&quot;)" type="submit">Dokument<img src="icons/images_all.png"></button>
+<button accesskey="&quot;" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="statusinfoliste.document" name="statusinfoliste.document" onclick="fade(this)" style="" title="exporting (see environment.properties, variable names are starting and ending with &sect;&sect;) to: target/test/.nanoh5.timesheet/statusinfo.rtf (ALT+&quot;)" type="submit">Dokument<img src="icons/images_all.png"></button>
 </li>
 <li>
-<button accesskey="h" class="panelactionsimple" disabled formnovalidate="" formtarget="_blank" id="statusinfoliste.help" name="statusinfoliste.help" onclick="fade(this)" style="" title="target/test/.nanoh5.myapp/doc/statusinfo.help.html or target/test/.nanoh5.myapp/doc/statusinfo.help.pdf (ALT+h)" type="submit">Hilfe<img src="icons/trust_unknown.png"></button>
+<button accesskey="h" class="panelactionsimple" formnovalidate="" formtarget="_blank" id="statusinfoliste.help" name="statusinfoliste.help" onclick="fade(this)" style="" title="target/test/.nanoh5.timesheet/doc/statusinfo.help.html or target/test/.nanoh5.timesheet/doc/statusinfo.help.pdf (ALT+h)" type="submit">Hilfe<img src="icons/trust_unknown.png"></button>
 </li>
 </ul>
 </li>
@@ -481,7 +481,7 @@ function setTheme(next) {
 <tr>
 <td class="beanfieldlabel" id="statusInfo.message.label" style="color: var(--label-color); " width="250">Message</td><td>
 <table>
-<input align="start" autofocus="autofocus" class="beanfieldinput" disabled id="statusInfo.message" lang="de_DE" max="" maxlength="2147483647" min="" name="message" pattern="[\x00-\xFF &euro;]{0,5000}" readonly size="-1" style="background-color: rgba(247,247,247,.5);" tabindex="1" title="statusInfo.message" type="text" value="test.workflow finished with status: OK{startedAt: 2025-03-20 09:58:54.809, endedAt: 2025-03-20 09:58:59.441}" width="-1">
+<input align="start" autofocus="autofocus" class="beanfieldinput" disabled id="statusInfo.message" lang="de_DE" max="" maxlength="2147483647" min="" name="message" pattern="[\x00-\xFF &euro;]{0,5000}" readonly size="-1" style="background-color: rgba(247,247,247,.5);" tabindex="1" title="statusInfo.message" type="text" value="test.workflow finished with status: OK{startedAt: 2025-03-20 19:56:24.399, endedAt: 2025-03-20 19:56:46.112}" width="-1">
 </table>
 </td>
 </tr>
@@ -506,7 +506,7 @@ function setTheme(next) {
 <table border="0" frame="box" id="action.panel" sortable="" width="100%">
 <tbody>
 <tr class="actionpanel">
-<td align="center" style="" width="100%"><button accesskey="#" class="panelactionsimple" disabled formtarget="_self" id="statusinfo.save" name="statusinfo.save" onclick="fade(this)" style="" title="&amp;Speichern (ALT+#)" type="submit">Speichern<img src="icons/save.png"></button><button accesskey="c" class="panelactionsimple" formnovalidate="" formtarget="_self" id="de.tsl2.nano.action.action_cancelled" name="de.tsl2.nano.action.action_cancelled" style="" title="S&amp;chlie&szlig;en (ALT+c)">Schlie&szlig;en<img src="icons/stop.png"></button></td>
+<td align="center" style="" width="100%"><button accesskey="&uuml;" class="panelactionsimple" formtarget="_self" id="statusinfo.save" name="statusinfo.save" onclick="fade(this)" style="" title="&amp;&Uuml;bernehmen (ALT+&uuml;)" type="submit">&Uuml;bernehmen<img src="icons/save.png"></button><button accesskey="c" class="panelactionsimple" formnovalidate="" formtarget="_self" id="de.tsl2.nano.action.action_cancelled" name="de.tsl2.nano.action.action_cancelled" style="" title="S&amp;chlie&szlig;en (ALT+c)">Schlie&szlig;en<img src="icons/stop.png"></button></td>
 </tr>
 </tbody>
 </table>
@@ -517,21 +517,11 @@ function setTheme(next) {
 <tr>
 <td><span>
 <progress hidden="true" id="progressbar"></progress>
-<span id="progress"> 	WAITING FOR WEBSOCKET TO CONNECT...!</span><span id="footer"><img src="icons/properties.png"><b color="#0000FF">@Benutzer  </b><i color="#000000" title="Subjekt:
-	Principal: UserPrincipal:  SA
-	Principal: Role:  admin
-
-RequestID: 1">S  <p class="tooltip">Subjekt:
-	Principal: UserPrincipal:  SA
-	Principal: Role:  admin
-
-RequestID: 1</p>
-</i><img src="icons/properties.png"><b color="#0000FF">Online  </b><i color="#000000">00:04 Min  </i><img src="icons/properties.png"><b color="#0000FF">Zeit  </b><i color="#000000">09:58:59  </i><img src="icons/properties.png"><b color="#0000FF">Sitzung  </b><i color="#000000" title="SA (items:  [0]: )">Workflo  <p class="tooltip">SA (items:  [0]: )</p>
-</i><img src="icons/properties.png"><b color="#0000FF">Anforderung  </b><i color="#000000">4 Sec 51 KB  </i><img src="icons/properties.png"></span></span></td>
+<span id="progress"> 	WAITING FOR WEBSOCKET TO CONNECT...!</span><span id="footer"><img src="icons/properties.png"><b color="#0000FF">@/home/ts/workspace/tsl2nano-code/tsl2.nano.h5/target/test/.nanoh5.timesheet/mda.xml:188  </b><i color="#000000">Mda Generation Task Successful Finished!  </i><img src="icons/properties.png"></span></span></td>
 </tr>
 </tbody>
 </table>
-<embed mediatype="text/html" src="/home/ts/workspace/tsl2nano-code/tsl2.nano.h5/target/test/.nanoh5.myapp/temp/thymeoutput.html"></embed>
+<embed mediatype="text/html" src="/home/ts/workspace/tsl2nano-code/tsl2.nano.h5/target/test/.nanoh5.timesheet/temp/thymeoutput.html"></embed>
 </body>
 <h1>de.tsl2.nano.h5.DOMExtender</h1>
 </html>
