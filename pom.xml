@@ -22,6 +22,7 @@
 	* increase version number: "mvn release:update-versions -DautoVersionSubmodules=true"
 	* batch-increase version : "mvn - -batch-mode release:update-versions -DdevelopmentVersion=1.2.0-SNAPSHOT"
     * show all possible newer dependency versions: versions:display-dependency-updates
+	* show all possible newer plugin versions: mvn versions:display-plugin-updates (if not working use: mvn org.codehaus.mojo:versions-maven-plugin:2.18.0:display-plugin-updates)
 	* update all minor versions: mvn versions:use-latest-releases -DallowMajorUpdates=false  -DgenerateBackupPoms=false
     * remove the SNAPSHOTS in a release: mvn versions:use-releases
     * use only newest RELEASES: mvn versions:use-latest-releases
@@ -49,7 +50,9 @@
 		<module.parent>${project.basedir}</module.parent>
         <timestamp>${maven.build.timestamp}</timestamp>
 		<!--workaround for automatic gitlab-ci, there ci is not starting properties-maven-plugin -->
-		<version.compiler.plugin>3.13.0</version.compiler.plugin>
+		<version.compiler.plugin>3.14.0</version.compiler.plugin>
+		<version.jar.plugin>3.4.2</version.jar.plugin>
+		<version.dependency.plugin>3.8.1</version.dependency.plugin>
 		<!-- <maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target> -->
 		<maven.compiler.debug>true</maven.compiler.debug>
@@ -66,7 +69,6 @@
 		<hibernate-jpa-2.1-ap.version>1.0.2.Final</hibernate-jpa-2.1-ap.version>
 		<jakarta.persistence-api.version>3.2.0</jakarta.persistence-api.version>
 		<jboss-jee-apis-version>2.0.0.Final</jboss-jee-apis-version>
-
     </properties>
 	<inceptionYear>2012</inceptionYear>
 	<licenses>
@@ -241,7 +243,7 @@
       			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.5.1</version> <!-- when I remove the version, tests in h5 fail - what the fuck... -->
+				<version>3.5.2</version> <!-- when I remove the version, tests in h5 fail - what the fuck... -->
 				<configuration>
 					<argLine>${surefire.argLine} ${argLine}</argLine>
 					<testFailureIgnore>${surefire.testFailureIgnore}</testFailureIgnore>
@@ -332,7 +334,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>3.2.1</version>
+				<version>3.3.1</version>
 				<configuration>
 					<excludes>
 						<exclude>**/*.zip</exclude>
@@ -351,7 +353,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.2.0</version>
+				<version>3.11.2</version>
 				<configuration>
 					<force>true</force>
 					<failOnError>false</failOnError>
