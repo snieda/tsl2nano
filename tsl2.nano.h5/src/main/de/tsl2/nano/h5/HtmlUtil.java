@@ -531,7 +531,7 @@ public class HtmlUtil {
             DOMSource source = new DOMSource(doc);
             trans.transform(source, result);
             String html = sw.toString();
-            
+
             String regexRepl = ENV.get("html.regex.replacement.sed", "");
             if (Util.isEmpty(regexRepl)) {
             	return Plugins.process(INanoPlugin.class).manipulateHtmlResponse(sw.toString());

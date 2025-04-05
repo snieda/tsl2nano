@@ -576,7 +576,6 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
     }
 
     /** returns an optional action as finder/assigner - useful to select a new value */
-    @SuppressWarnings("serial")
     public IAction<IBeanCollector<?, T>> getSelectorAction() {
         //TODO: move that to the attribute: IPresentable
         return new SecureAction<IBeanCollector<?, T>>(getName() + POSTFIX_SELECTOR,

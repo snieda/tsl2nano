@@ -22,6 +22,7 @@ import de.tsl2.nano.core.messaging.EventController;
 import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
@@ -198,7 +199,7 @@ public class Attachment implements IValueAccess<byte[]>, IAttribute<byte[]> {
      * @return
      */
     public static String getFilename(Object instance, String attribute, String name) {
-        return ENV.getTempPathRel()
+        return NetUtil.isURL(name) ? name : ENV.getTempPathRel()
             + FileUtil.getValidFileName(BeanValue.getBeanValue(instance, attribute).getValueId() + "."
                 + Util.asString(name));
     }

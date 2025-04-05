@@ -213,6 +213,11 @@ public class ManagedException extends RuntimeException {
         }
     }
     
+    public static <T> T trYWithDefault(SupplierEx<T> callback, T defaultValue) {
+        T result = trY(callback, false);
+        return result != null ? result : defaultValue;
+    }
+
     public static <T> T trY(SupplierEx<T> callback) {
         return trY(callback, true);
     }

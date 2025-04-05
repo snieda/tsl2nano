@@ -437,6 +437,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
 //                    }
                     msg = getNextPage(userResponse);
                 }
+                msg = dirtyWorkaroundOnImagesWithRemovedSlash(msg);
                 response = server.createResponse(msg);
             } else {
                 close();
@@ -488,6 +489,11 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
             Message.send(exceptionHandler, ex.toString());
         webSec.addSessionHeader(this, response);
         return Plugins.process(INanoPlugin.class).handleResponse(response);
+    }
+
+    static String dirtyWorkaroundOnImagesWithRemovedSlash(String html) {
+        /* at the moment, we have the problem img src tags with absolute urls are transformed to have only one slash (https:/sourceforge...) */
+        return html.replaceAll("(https?[:][/])(\\w+)", "$1/$2");
     }
 
 	private void logRequest(String uri, String method, Map<String, String> header, Map<String, String> parms,

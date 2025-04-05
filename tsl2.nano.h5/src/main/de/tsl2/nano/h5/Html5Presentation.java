@@ -353,6 +353,43 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 return b;
                 }
             });
+            bEnv.addAction(new SecureAction(bean.getClass(),
+            Messages.getStringOpt("downloadSampleApplication"),
+            IAction.MODE_UNDEFINED,
+            false,
+            "icons/buy.png") {
+            @Override
+            public Object action() throws Exception {
+                return SampleApplicationBean.provideSampleApplicationInstallation();
+            }});
+            bEnv.addAction(new SecureAction(bean.getClass(),
+            Messages.getStringOpt(ENV.get("app.login.administration", true) ? "setProductiveMode" : "setUnsecureMOde"),
+            IAction.MODE_UNDEFINED,
+            false,
+            "icons/apply.png") {
+            @Override
+            public Object action() throws Exception {
+                boolean isProdMode = !ENV.get("app.login.administration", true);
+                String url = (String) ENV.get("service.url");
+                if (!isProdMode) {
+                    url = url.replace("http://", "https://");
+                    url = url.replace("localhost", NetUtil.getMyIP());
+                } else {
+                    url = url.replace("https://", "http://");
+                    url = url.replace(NetUtil.getMyIP(), "localhost");
+                }
+                ENV.setProperty("service.url", url);
+
+                ENV.setProperty("app.ssl.activate", !isProdMode);
+                ENV.setProperty("app.ssl.shortcut", isProdMode ? "" : "s");
+                ENV.setProperty("app.login.administration", isProdMode);
+                ENV.setProperty("app.login.secure", !isProdMode);
+                ENV.setProperty("service.autorization.new.createdefault", isProdMode);
+                ENV.setProperty("app.http.allow.directorylisting", !isProdMode);
+                // ENV.setProperty("app.login.service.connection.check", !isProdMode);
+                ENV.persist();
+                return "Application Mode changed to secure Productivity on URL: \"" + url + "\".\nPlease read the documentation for creating users with hash passwords and permissions.\nPlease RESTART";
+            }});
         }
         super.addAdministrationActions(session, bEnv);
     }

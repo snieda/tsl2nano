@@ -184,7 +184,12 @@ public class NetUtil {
             URLConnection con = url(strUrl).openConnection();
         	con.setConnectTimeout(connectionTimeout);
         	con.setReadTimeout(readTimeout);
-        	con.setRequestProperty ( "User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0" );
+            con.setUseCaches(true);
+            con.setIfModifiedSince(1000*1800);
+        	con.setRequestProperty ( "User-Agent", "Mozilla" );
+
+            con = followRedirect(con);
+
 			String response = String.valueOf(FileUtil.getFileData(con.getInputStream(), null, false));
             if (LOG.isDebugEnabled()) {
                 LOG.debug("response: " + StringUtil.toString(response, 100));
@@ -205,6 +210,33 @@ public class NetUtil {
             ManagedException.forward(e);
             return null;
         }
+    }
+
+    @Deprecated //seems to be done by default in HttpUrlConnection
+    static HttpURLConnection followRedirect(URLConnection con) throws Exception {
+        HttpURLConnection conn = (HttpURLConnection) con;
+        // normally, 3xx is redirect
+        int status = conn.getResponseCode();
+        if (status != HttpURLConnection.HTTP_OK) {
+            if (status == HttpURLConnection.HTTP_MOVED_TEMP
+                || status == HttpURLConnection.HTTP_MOVED_PERM
+                    || status == HttpURLConnection.HTTP_SEE_OTHER) {
+        
+                // get redirect url from "location" header field
+                String redirect = conn.getHeaderField("Location");
+        
+                // open the new connnection again
+                conn = (HttpURLConnection) new URL(redirect).openConnection();
+                conn.setRequestProperty("Cookie", conn.getHeaderField("Set-Cookie"));
+
+                conn.addRequestProperty("Accept-Language", "en-US,en;q=0.8");
+                conn.addRequestProperty("User-Agent", "Mozilla");
+                conn.addRequestProperty("Referer", "google.com");
+                                        
+                LOG.info("status: " + status + " ==> redirect to url : " + redirect);
+            }
+        }
+        return conn;
     }
 
     /**

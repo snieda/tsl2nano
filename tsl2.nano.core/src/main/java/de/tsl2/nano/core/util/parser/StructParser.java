@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
@@ -578,7 +579,7 @@ class TreeInfo {
     }
 
     boolean contains(Object obj) {
-        return refs.contains(obj) || parentPathContains(obj);
+        return ManagedException.trYWithDefault( () -> refs.contains(obj) || parentPathContains(obj), false);
     }
 
     private boolean parentPathContains(Object obj) {

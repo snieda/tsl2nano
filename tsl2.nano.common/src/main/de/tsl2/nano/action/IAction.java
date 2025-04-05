@@ -9,7 +9,7 @@ import java.util.Collection;
  * @author ts 13.11.2008
  * @version $Revision: 1.0 $
  */
-public interface IAction<RETURNTYPE> extends Runnable {
+public interface IAction<RETURNTYPE> extends Runnable, IFAction<RETURNTYPE> {
     public static final String CANCELED = "de.tsl2.nano.action.action_cancelled";
 
     /** dialog return value - no dialog handling will be done */
@@ -86,14 +86,6 @@ public interface IAction<RETURNTYPE> extends Runnable {
      * @return Returns the synchron.
      */
     boolean isSynchron();
-
-    /**
-     * The action to be started
-     * 
-     * @return result of the action. use {@link #CANCELED} to define for buttons, the action was canceled.
-     * @throws Exception
-     */
-    RETURNTYPE action() throws Exception;
 
     /**
      * starts this action.

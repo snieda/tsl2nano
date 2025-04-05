@@ -55,6 +55,7 @@ public class WebSecurity {
     	Content-Security-Policy: frame-ancestors 'self';
     	Content-Security-Policy: form-action 'self';
     	Content-Security-Policy: default-src 'self' 'unsafe-inline' filesystem ${service.url} ${websocket.url};
+		Content-Security-Policy: img-src 'self' https://sourceforge.net;
     	"""; 
 
     public static boolean useAntiCSRFToken() {
