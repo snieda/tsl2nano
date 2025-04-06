@@ -20,7 +20,9 @@ import de.tsl2.nano.core.util.NetUtil;
 @Attributes(names = { "name", "description", "imagePath", "applicationZipPath", "insideCurrentEnvironment" })
 @Presentable()
 public class SampleApplicationBean {
-    static final String SF_BASE_URL = "https://sourceforge.net/projects/tsl2nano/files/sample-applications/";
+    static final String SF_BASE_URL_FILE = "https://sourceforge.net/projects/tsl2nano/files/sample-applications/";
+    static final String SF_BASE_URL_WIKI = "https://sourceforge.net/p/tsl2nano/wiki/";
+
     //TODO: while it's an enum, it should be dynamic extendable/configurable
     enum Samples {TIMESHEET, HOUSEHOLD, LOGBOOK, MAGISTER, EM_TIP_GAME, SPORT_RESULT_SERVICE, ESTORE};
 
@@ -63,19 +65,23 @@ public class SampleApplicationBean {
 
     @Presentable(type = IPresentable.TYPE_ATTACHMENT, style = IPresentable.STYLE_DATA_IMG, enabled = false)
     public String getImagePath() {
-        return "https://tse4.mm.bing.net/th?id=OIP.lzUwaH51f2tsh-7phpKq2wHaEX&pid=Api"; //SF_BASE_URL + name + ".jpg/download";
+        return SF_BASE_URL_WIKI + name + "/attachment/" + name + ".jpg";
     }
 
     public String getApplicationZipPath() {
-        return SF_BASE_URL + name + ".zip";
+        return SF_BASE_URL_FILE + name + ".zip";
     }
 
     @Presentable(type = IPresentable.TYPE_INPUT_MULTILINE, enabled = false)
     public String getDescription() {
         if (description == null) {
-            description = NetUtil.get(SF_BASE_URL + name + ".txt");
+            description = NetUtil.get(SF_BASE_URL_FILE + name + ".txt");
         }
         return description;
+    }
+
+    public String getDetailsUrl() {
+        return SF_BASE_URL_WIKI + name;
     }
 
     public boolean isInsideCurrentEnvironment() {

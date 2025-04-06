@@ -319,7 +319,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             });
             
             bEnv.addAction(new SecureAction(bean.getClass(),
-            "generateopenapi",
+            Messages.getStringOpt("generateOpenApi", true),
             IAction.MODE_UNDEFINED,
             false,
             "icons/cascade.png") {
@@ -354,7 +354,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 }
             });
             bEnv.addAction(new SecureAction(bean.getClass(),
-            Messages.getStringOpt("downloadSampleApplication"),
+            Messages.getStringOpt("downloadSampleApplication", true),
             IAction.MODE_UNDEFINED,
             false,
             "icons/buy.png") {
@@ -363,7 +363,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 return SampleApplicationBean.provideSampleApplicationInstallation();
             }});
             bEnv.addAction(new SecureAction(bean.getClass(),
-            Messages.getStringOpt(ENV.get("app.login.administration", true) ? "setProductiveMode" : "setUnsecureMOde"),
+            Messages.getStringOpt(ENV.get("app.login.administration", true) ? "setProductiveMode" : "setUnsecureMOde", true),
             IAction.MODE_UNDEFINED,
             false,
             "icons/apply.png") {
@@ -390,6 +390,26 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ENV.persist();
                 return "Application Mode changed to secure Productivity on URL: \"" + url + "\".\nPlease read the documentation for creating users with hash passwords and permissions.\nPlease RESTART";
             }});
+            if (ENV.get("app.login.administration", true)) {
+                bEnv.addAction(new SecureAction(bean.getClass(),
+                Messages.getStringOpt("addUser", true),
+                IAction.MODE_UNDEFINED,
+                false,
+                "icons/people.png") {
+                @Override
+                public Object action() throws Exception {
+                    Bean<User> userBean = new Bean<>(new User());
+                    String name = Messages.getStringOpt("addUser");
+                    userBean.addAction(new CommonAction(name, name, name) {
+                        @Override
+                        public Object action() throws Exception {
+                            Users.load().auth(userBean.getInstance().getName(), userBean.getInstance().getPasswd());
+                            return "user added";
+                        }
+                    });
+                    return userBean;
+                }});
+            }
         }
         super.addAdministrationActions(session, bEnv);
     }
