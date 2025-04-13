@@ -13,7 +13,7 @@ do
 	cp -b -v run.sh ../$a
 	cp -b -v runasservice.sh ../$a
 
-	[[ ! -f $envdir/icons/blue-planets.jpg ]] && cp .nanoh5.$baseapp/icons/blue-planets.jpg  $envdir/icons
+	[[ ! -f $envdir/icons/background-image.jpg ]] && cp .nanoh5.$baseapp/icons/background-image.jpg  $envdir/icons
 
 	cp -b -v .nanoh5.$baseapp/environment.xml $envdir
 	cp -b -v .nanoh5.$baseapp/users.xml $envdir

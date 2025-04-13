@@ -78,7 +78,7 @@ html[data-theme='dark-picture'] {
     --disabled-color: lightgray;
     --label-color: white;
     --text-shadow: none;
-    --bg-color: url('icons/blue-planets.jpg');
+    --bg-color: url('icons/background-image.jpg');
     --bg-input-panel: transparent;
     --button-bg-color: #0055AA;
     --button-bg-hover: gray;

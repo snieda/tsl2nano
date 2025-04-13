@@ -413,6 +413,9 @@ attr.getType().isInterface()
 
 The found best attribute will be checked against an available database to be unique inside the current table-data.
 
+NOTE: for all html responses, you are able to define a simple regex to replace some expression with a desired one.
+      Simply change the ENV entry 'html.regex.replacement.sed' to your expression.
+
 ##### Configuration through Serialization
 
 The environment and the bean-definitions are the main constructs serializing it's properties to the file-system.
@@ -1721,11 +1724,12 @@ Do a mouse click at the upper left corner (left of the BeanEx symbol to switch b
 * Light-Contrast
 * Dark
 * Dark-Constrast
-* Dark-Image (copy another image to icons/blue-planets.jpg to change the picture)
+* Dark-Image (copy another image to icons/background-image.jpg to change the picture)
 
 ### Configuring Presentation, Layout and Constraints
 
 Layouts and LayoutConstraints must be of type *Map* or *String*. If a string is given, this string will be set as element style.
+To add informations like company informations, impressum, contacts etc., the easiest way is to do that in your background-image.jpg
 
 Note: to add some help or informations for an entity or the application, you can put html files to the environment directory 'doc/'. If the application name is 'anyway', the help document will be searched in 'doc/anyway/entities/index.html'. If there is an entitiy of name 'Address', the help document will be searched in 'doc/entities/address.html'. To change these paths - perhaps to link to an url, change the dependent entry inside the environment.xml (e.g.: doc.url.address=http://anyurl.any)
 
@@ -1849,7 +1853,26 @@ Most Browsers will build unexpected results, so this feature is disabled on defa
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	collector.ignore.groupby.expandables = true
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	
+
+#### Adding addtional Panel Content on the left and right side - adding additional menu items under 'about'
+
+On normal html files, you have normally panels on the side and menu items to provide informations for the compony, the impressum, contact etc.
+
+You are able to:
+
+* add the additional content statically as html content
+* or you provide an implementation of ILayoutProvider to provide the additional html content dynamically
+
+The framework looks for the 3 additional presentation files under:
+
+* *left panel*: presentation/layout/leftpanel.div
+* *right panel*: presentation/layout/rightpanel.div
+* *about menu actions*: presentation/layout/menuactions.div
+
+If any of them exists, it looks, if the content may only be the class name. If so, it loads the class as ILayoutProvider (must be implemented).
+If not, the content is interpreted as html content to be placed statically.
+If menuactions contains html content, one menu action 'about' will be added to provide this html content on activation.
+
 #### Creating a detailed summary for a bean collector
 
 Example using the standard summary function of the bean collector on numbers:
@@ -4911,7 +4934,7 @@ hint II: a script (upgrade-old-tsl2-apps.sh) to do this is inside the resources 
    * ..amdin..
    * ..secure..
    * ..database.internal..
-* copy your background image inside the icons folder to 'blue-planets.jpg'
+* copy your background image inside the icons folder to 'background-image.jpg'
 * if generating of beans jar file fails: replace the DTD path in hibernate.reveng.xml to 'https://hibernate.org/dtd/hibernate-reverse-engineering-3.0.dtd'
 * on tsl2nano applications you may have to start the database manually through the script 'runServer.cmd'
 * search for all .failed or .stacktrace files inside the environement to see errors on loading
@@ -5051,6 +5074,7 @@ hint II: a script (upgrade-old-tsl2-apps.sh) to do this is inside the resources 
  2.5.3  | 03.01.2025 | corrections on internationalization (generic regex creation), autotest valueset on json objects
  2.5.4  | 23.02.2025 | +script-engine (nashorn+dependencies), property asking, fixes on html dialog and replication, run scripts refactored, using formtarget=_blank for exports, specification: +doc, +timesheet-sample, refresh cursus (id: Long for hibernate 5)
  2.5.5  | 31.03.2025 | h5:+openapi-generate-scripts, statelessa action beans, html-dialogs: timeout-close, minor fixes
+ 2.5.6  | 20.04.2025 | h5:+admin: provide sample applications, prod/admin switch, adding users, layout: additional left/right panels and info menu
 |------ | ---------- | -----------
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
@@ -6346,5 +6370,17 @@ Cursus:
    * [ ] create dialog to show each image and zip and download button
    * [v] create script to add the sample application in current environement
    * [ ] ...or create multi-application folder with restart all...
+   * [ ] for each sample appication do:
+      * [v] create screenshots/pictures
+      * [v] create description
+      * [ ] create zip file
+      * [ ] upload as files and wikis in sourceforge
 * [x] create admin action to switch between prod/secure and admin/unsecure mode
-   * [ ] add actions to create a user
+   * [x^] add actions to create a user
+* [x] add possibilities to add Menu-Entries (Top), Left-Pane and Right Pane
+   * [x] extend Html5Presentation to add these items
+   * [x] define default session entries for menu/left/right panels
+   * [x] define bean or configuration to enhance the top menu
+   * [x] define bean or configuration to provide left/right bar
+* [x] styles: blue-planets.jpg -> background-image.jpg
+* [ ] add oauth

@@ -84,6 +84,10 @@ public class Users {
         return auth(name, passwd, name, passwd, false);
     }
     
+    public User auth(String name, String passwd, boolean admin) {
+        return auth(name, passwd, name, passwd, admin);
+    }
+    
     public User auth(String name, String passwd, String dbName, String dbPasswd, boolean admin) {
         try{
             if (!ENV.get("app.login.secure", false)) {

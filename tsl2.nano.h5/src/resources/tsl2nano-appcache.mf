@@ -50,7 +50,7 @@ CACHE:
 /icons/widget.png
 /icons/wrench.png
 /icons/zoom.png
-/icons/blue-planets.jpg
+/icons/background-image.jpg
 
 # Resources that require the user to be online.
 #NETWORK:

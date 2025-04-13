@@ -38,6 +38,8 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -146,6 +148,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     private transient List<Character> availableshortCuts;
     private transient static final Character SHORTCUTS[];
 
+    transient protected Collection<IAction> infoActions;
+
     static {
         SHORTCUTS = new Character[222];
         for (char i = 0; i < SHORTCUTS.length; i++) {
@@ -236,7 +240,6 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     /**
      * addAdministrationActions
      */
-    @SuppressWarnings("serial")
     @Override
     protected void addAdministrationActions(final ISession session, Bean bEnv) {
         if (ENV.get("app.login.administration", true)) {
@@ -245,6 +248,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 IAction.MODE_UNDEFINED,
                 false,
                 "icons/go.png") {
+                    
                 Bean beanTool;
 
                 @Override
@@ -319,7 +323,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             });
             
             bEnv.addAction(new SecureAction(bean.getClass(),
-            Messages.getStringOpt("generateOpenApi", true),
+            "generateOpenApi",
             IAction.MODE_UNDEFINED,
             false,
             "icons/cascade.png") {
@@ -354,7 +358,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 }
             });
             bEnv.addAction(new SecureAction(bean.getClass(),
-            Messages.getStringOpt("downloadSampleApplication", true),
+            "downloadSampleApplication",
             IAction.MODE_UNDEFINED,
             false,
             "icons/buy.png") {
@@ -363,7 +367,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 return SampleApplicationBean.provideSampleApplicationInstallation();
             }});
             bEnv.addAction(new SecureAction(bean.getClass(),
-            Messages.getStringOpt(ENV.get("app.login.administration", true) ? "setProductiveMode" : "setUnsecureMOde", true),
+            ENV.get("app.login.administration", true) ? "setProductiveMode" : "setUnsecureMOde",
             IAction.MODE_UNDEFINED,
             false,
             "icons/apply.png") {
@@ -392,18 +396,20 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             }});
             if (ENV.get("app.login.administration", true)) {
                 bEnv.addAction(new SecureAction(bean.getClass(),
-                Messages.getStringOpt("addUser", true),
+                "addUser",
                 IAction.MODE_UNDEFINED,
                 false,
                 "icons/people.png") {
                 @Override
                 public Object action() throws Exception {
-                    Bean<User> userBean = new Bean<>(new User());
+                    Bean<User> userBean = new Bean<>(new User("MUSTER", "nanoh5")) {
+                        public void setName(String name) {this.name = name;}
+                    };
                     String name = Messages.getStringOpt("addUser");
                     userBean.addAction(new CommonAction(name, name, name) {
                         @Override
                         public Object action() throws Exception {
-                            Users.load().auth(userBean.getInstance().getName(), userBean.getInstance().getPasswd());
+                            Users.load().auth(userBean.getInstance().getName(), userBean.getInstance().getPasswd(), true);
                             return "user added";
                         }
                     });
@@ -448,7 +454,6 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         return sessionActions;
     }
 
-    @SuppressWarnings("serial")
     @Override
     public Collection<IAction> getPageActions(ISession session) {
         boolean firstTime = pageActions == null;
@@ -500,6 +505,20 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             });
         }
         return pageActions;
+    }
+
+    public Collection<IAction> getInfoActions(ISession session) {
+        boolean firstTime = infoActions == null;
+        if (infoActions == null) {
+            infoActions = new ArrayList<IAction>(10);
+        }
+        if (firstTime && session.getUserAuthorization() != null) {
+            initLayoutProvider();
+            ILayoutProvider layoutProvider = ENV.get(ILayoutProvider.class);
+            if (layoutProvider != null && layoutProvider.getMenuActions(session, bean) != null)
+                infoActions.addAll(layoutProvider.getMenuActions(session, bean));
+        }
+        return infoActions;
     }
 
     @Override
@@ -702,6 +721,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         getSessionActions(session));
                     createSubMenu(menu, ENV.translate("tsl2nano.page", true), "icons/full_screen.png",
                         getPageActions(session));
+                    createSubMenu(menu, ENV.translate("tsl2nano.info", true), "icons/about.png",
+                        getInfoActions(session));
                 } else {
                     Collection<IAction> actions = new ArrayList<IAction>(getPageActions(session));
                     actions.addAll(getApplicationActions(session));
@@ -884,15 +905,93 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Element panel =
             appendElement(parent, TAG_DIV, ATTR_STYLE,
                 (interactive ? ENV.get("layout.page.data.style", "overflow: auto; height: 70vh;") : null));
+        if (isRoot && session.getUserAuthorization() != null)
+            createLeftPanel(session, panel, bean, interactive);
+        
         createContentPanel(session, panel, bean, interactive, ENV.get("layout.page.data.fullwidth", false));
 
         if (isRoot) {
+            if (session.getUserAuthorization() != null)
+                createRightPanel(session, panel, bean, interactive);
             if (interactive) {
                 createBeanActions(parent, bean);
                 createFooter(parent.getOwnerDocument(), message);
             }
         }
         return parent;
+    }
+
+    protected void createLeftPanel(ISession session, Element panel, BeanDefinition<T> bean, boolean interactive) {
+        initLayoutProvider();
+        ILayoutProvider layoutProvider = ENV.get(ILayoutProvider.class);
+        if (layoutProvider != null) {
+            String leftPanel = null;
+            if ((leftPanel = layoutProvider.getLeftPanel(session, bean)) != null) {
+                appendNodesFromText(panel, leftPanel);
+            }
+        }
+    }
+
+    private void initLayoutProvider() {
+        if (ENV.get(ILayoutProvider.class) == null) {
+            String leftFileName = ENV.get("layout.leftPanel.file", BeanDefinition.getDefinitionDirectory() + "/layout/leftpanel.div");
+            String rightFileName = ENV.get("layout.rightPanel.file", BeanDefinition.getDefinitionDirectory() + "/layout/rightpanel.div");
+            String menuFileName = ENV.get("layout.menuactions.file", BeanDefinition.getDefinitionDirectory() + "/layout/menuactions.div");
+            ILayoutProvider layoutProvider = null;
+            String leftPanel = new File(leftFileName).exists() ? Util.trY( () -> new String(Files.readAllBytes(Paths.get(leftFileName)))) : null;
+            String rightPanel = new File(rightFileName).exists() ? Util.trY( () -> new String(Files.readAllBytes(Paths.get(rightFileName)))) : null;
+            String menuActions = new File(menuFileName).exists() ? Util.trY( () -> new String(Files.readAllBytes(Paths.get(menuFileName)))) : null;
+            if (leftPanel != null && leftPanel.matches("(\\w+[.])*[A-Z]\\w+")) {
+                layoutProvider = (ILayoutProvider) BeanClass.getBeanClass(BeanClass.load(leftPanel));
+            } else if (rightPanel != null && rightPanel.matches("(\\w+[.])*[A-Z]\\w+")) {
+                layoutProvider = (ILayoutProvider) BeanClass.getBeanClass(BeanClass.load(rightPanel));
+            } else if (menuActions != null && rightPanel.matches("(\\w+[.])*[A-Z]\\w+")) {
+                layoutProvider = (ILayoutProvider) BeanClass.getBeanClass(BeanClass.load(menuActions));
+            }
+            // ok, do it the default way
+            if (layoutProvider == null) {
+                layoutProvider = new ILayoutProvider() {
+
+                    @Override
+                    public String getLeftPanel(ISession session, BeanDefinition bean) {
+                        return leftPanel;
+                    }
+
+                    @Override
+                    public String getRightPanel(ISession session, BeanDefinition bean) {
+                        return rightPanel;
+                    }
+
+                    @Override
+                    public List<IAction> getMenuActions(ISession session, BeanDefinition bean) {
+                        if (!Util.isEmpty(menuActions)) {
+                        return Arrays.asList(new CommonAction<String>("layoutprovider.about.id", "about", "about") {
+                            public String action() throws Exception {
+                                return menuActions;
+                            }
+                            public boolean isEnabled() {
+                                return session.getUserAuthorization() != null;
+                            }
+                        });
+                    } else {
+                        return null;
+                    }
+                }
+                };
+            }
+            ENV.addService(layoutProvider);
+        }
+    }
+
+    protected void createRightPanel(ISession session, Element panel, BeanDefinition<T> bean, boolean interactive) {
+        initLayoutProvider();
+        ILayoutProvider layoutProvider = ENV.get(ILayoutProvider.class);
+        if (layoutProvider != null) {
+            String rightPanel = null;
+            if ((rightPanel = layoutProvider.getRightPanel(session, bean)) != null) {
+                appendNodesFromText(panel, rightPanel);
+            }
+        }
     }
 
     /**

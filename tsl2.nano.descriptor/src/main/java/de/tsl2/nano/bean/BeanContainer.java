@@ -538,7 +538,7 @@ public class BeanContainer implements IBeanContainer {
         if (Messages.unknown(text)) {
             text = Messages.getString("tsl2nano." + actionSimpleName + tooltip_postfix);
             if (Messages.unknown(text)) {
-                return StringUtil.toFirstUpper(actionSimpleName);
+                return Messages.getStringOpt(actionId, true);
             } else if (tooltip) {
                 return "";
             } else {
