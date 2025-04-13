@@ -13,8 +13,11 @@ import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.exception.Message;
+import de.tsl2.nano.core.util.FilePath;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
+import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.specification.Pool;
 
 @ValueExpression("{name}")
 @Attributes(names = { "name", "description", "imagePath", "applicationZipPath", "insideCurrentEnvironment" })
@@ -22,9 +25,6 @@ import de.tsl2.nano.core.util.NetUtil;
 public class SampleApplicationBean {
     static final String SF_BASE_URL_FILE = "https://sourceforge.net/projects/tsl2nano/files/sample-applications/";
     static final String SF_BASE_URL_WIKI = "https://sourceforge.net/p/tsl2nano/wiki/";
-
-    //TODO: while it's an enum, it should be dynamic extendable/configurable
-    enum Samples {TIMESHEET, HOUSEHOLD, LOGBOOK, MAGISTER, EM_TIP_GAME, SPORT_RESULT_SERVICE, ESTORE};
 
     String name;
     String description;
@@ -34,10 +34,19 @@ public class SampleApplicationBean {
         this.name = name;
     }
 
+    public static List<String> evalSampleApplications() {
+        File readme = NetUtil.download(SF_BASE_URL_FILE, Pool.getSpecificationRootDir());
+        String readmeText = FilePath.read(readme);
+        String apps = StringUtil.extract(readmeText, "sample-application-names: .*");
+        return Arrays.asList(apps.split(","));
+    }
+
+
     @SuppressWarnings("rawtypes")
     public static BeanCollector provideSampleApplicationInstallation() {
-        List<SampleApplicationBean> samples = new ArrayList<>(Samples.values().length);
-        Arrays.stream(Samples.values()).forEach(n -> samples.add(new SampleApplicationBean(n.name().toLowerCase())));
+        List<String> appNames = evalSampleApplications();
+        List<SampleApplicationBean> samples = new ArrayList<>(appNames.size());
+        appNames.forEach(n -> samples.add(new SampleApplicationBean(n)));
         return new BeanCollector<List<SampleApplicationBean>,SampleApplicationBean>(samples, 1);
     }
 

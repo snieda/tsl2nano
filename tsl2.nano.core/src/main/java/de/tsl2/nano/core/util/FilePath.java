@@ -165,6 +165,12 @@ public class FilePath {
 		return Util.trY(() -> Files.readAllBytes(Paths.get(absolutePath(file))));
 	}
 
+	/** WARNING: test-pathes not working here */
+	public static String read(File file) {
+		// the absolute path is used to respect changes on 'user.dir' (in tests)
+		return Util.trY(() -> new String(Files.readAllBytes(file.toPath())));
+	}
+
 	public static Path write(String file, byte[] bytes, OpenOption...options) {
 		// the absolute path is used to respect changes on 'user.dir' (in tests)
 		return Util.trY(() -> Files.write(Paths.get(absolutePath(file)), bytes, Util.isEmpty(options) ? new OpenOption[]{CREATE, WRITE, APPEND} : options));
