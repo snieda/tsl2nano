@@ -474,11 +474,16 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         if (!serviceURLString.contains("://")) {
             serviceURLString = "http" + ENV.get("app.ssl.shortcut", "") + "://" + serviceURLString;
         }
+        // IPv6 with http://[...]:port
+        if (serviceURLString.matches("(.*[:]//)[^\\[]((.+[:]){4,8})(\\d+)$")) {
+            serviceURLString = serviceURLString.replaceFirst("(.*[:]//)(.+)([:]\\d+)$", "$1[$2]$3");
+        }
         URL serviceURL = null;
         try {
             serviceURL = new URL(serviceURLString);
             ENV.setProperty("service.url", serviceURL.toString());
         } catch (MalformedURLException e) {
+            System.out.println("serviceUrl: " + serviceURLString);
             ManagedException.forward(e);
         }
         return serviceURL;
