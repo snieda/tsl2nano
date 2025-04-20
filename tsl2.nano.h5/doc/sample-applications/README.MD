@@ -8,6 +8,6 @@ administration area to download and test them locally.
 Each sample application contains its own wiki page under sourceforge, to do a short description with
 some screenshots.
 
-sample-application-names: bestellung, em-2016, exam, ergebnisdienst, haushalt, logbook, magister, openclinica, skiller, store, timesheet
+{{NAMES}}: bestellung, em-2016, exam, ergebnisdienst, haushalt, logbook, magister, openclinica, skiller, store, timesheet
 
 See https://sourceforge.net/p/tsl2nano/wiki/timesheet or https://sourceforge.net/p/tsl2nano/wiki/magister etc.

@@ -42,7 +42,6 @@ public class SimpleExpression extends RunnableExpression<String> {
         return "[^@!§$%&].*";
     }
 
-    @SuppressWarnings("serial")
     @Override
     protected IPRunnable<String, Map<String, Object>> createRunnable() {
         return new AbstractRunnable<String>() {

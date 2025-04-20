@@ -531,17 +531,19 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      * mechanism. see {@link AttributeDefinition#setExpression(String)}.
      * 
      * @param name desired name of the attribute
-     * @param expression value expression to be used as attribute-value
+     * @param attr value expression to be used as attribute-value
      * @param format (optional) regexp to constrain the value
      * @param description (optional) description of this attribute. if null, the name will be used.
      * @param presentation (optional) abstract presentation informations
      * @return new added bean value
      */
     public <A> AttributeDefinition<A> addAttribute(String name,
-            IAttribute<A> expression,
+            IAttribute<A> attr,
             String description,
             IPresentable presentation) {
-        AttributeDefinition<A> bv = new AttributeDefinition<A>(expression);
+        AttributeDefinition<A> bv = attr instanceof ValueHolder
+            ? new BeanValue<A>(((ValueHolder)attr).getValue(), attr)
+            : new AttributeDefinition<>(attr);
         bv.setBasicDef(-1, true, null, null, description != null ? description : name);
         bv.setPresentation(presentation);
         return (AttributeDefinition<A>) addAttribute(bv.getName(), bv);
@@ -1616,6 +1618,10 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
 
     public Map<String, Object> toValueMap(Map<String, Object> properties) {
         throw new UnsupportedOperationException();
+    }
+
+    public Map<String, Object> toValueMap(Object instance) {
+        return toValueMap(instance, null, false, true);
     }
 
     /**

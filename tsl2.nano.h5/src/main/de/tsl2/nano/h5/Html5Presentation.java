@@ -365,7 +365,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             "icons/buy.png") {
             @Override
             public Object action() throws Exception {
-                return SampleApplicationBean.provideSampleApplicationInstallation();
+                // return SampleApplicationBean.provideSampleApplicationInstallation();
+                return CMSBean.provideCMSBeans(SampleApplicationBean.SF_BASE_URL_FILE);
             }});
             if (ENV.get("app.login.administration", true)) {
                 bEnv.addAction(new SecureAction(bean.getClass(),

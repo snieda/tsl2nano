@@ -67,7 +67,7 @@ import de.tsl2.nano.util.DelegatorProxy;
  * @author Thomas Schneider
  * @version $Revision$
  */
-@SuppressWarnings({ "rawtypes", "unchecked", "serial" })
+@SuppressWarnings({ "rawtypes", "unchecked"})
 @Default(value = DefaultType.FIELD, required = false)
 public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends BeanDefinition<T> implements
         IBeanCollector<COLLECTIONTYPE, T> {
