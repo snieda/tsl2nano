@@ -755,6 +755,8 @@ public class Bean<T> extends BeanDefinition<T> {
      * @return new created bean
      */
     public static <I> Bean<I> getBean(I instanceOrName, boolean cacheInstance) {
+        if (instanceOrName instanceof Bean)
+            return (Bean<I>) instanceOrName;
         Bean<I> bean = timedCache.get(instanceOrName);
         if (bean != null) {
             return bean;

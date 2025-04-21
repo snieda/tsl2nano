@@ -52,12 +52,16 @@ public class SampleApplicationBean {
 
     @Action
     public String downloadAndInstall() {
+        return downloadAndExtract(name, getApplicationZipPath(), isInsideCurrentEnvironment());
+    }
+
+    public static String downloadAndExtract(String name, String zipUrl, boolean insideCurrentEnvironment) {
         String path = ENV.getConfigPath();
         if (!insideCurrentEnvironment) {
             path = System.getProperty("user.dir") + "." + name + ".environment";
             new File(path).mkdirs();
         }
-        File zip = NetUtil.download(getApplicationZipPath(), path);
+        File zip = NetUtil.download(zipUrl, path);
         FileUtil.extract(zip.getPath(), path, null);
         String info = name + "successfully downloaded and installed on path: " + path;
         Message.info(info + "\n\n" + (insideCurrentEnvironment

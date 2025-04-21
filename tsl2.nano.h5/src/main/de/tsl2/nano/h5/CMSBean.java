@@ -16,13 +16,18 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
+import de.tsl2.nano.action.IActivable;
+import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IIPresentable;
+import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.Value;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FilePath;
@@ -47,6 +52,7 @@ import de.tsl2.nano.specification.actions.Action;
  * Each attribute is defined by its 
  *  - name (read from README.MD -> {{NAMES}})
  *  - description (optional) read from {NAME}-description.txt
+ *  - presentable (optional) read from {NAME}-presentable.json
  *  - image (optional)       read from {NAME}-image.jpg
  *  - value                  read from {NAME}-value.obj
  *
@@ -83,6 +89,7 @@ public class CMSBean {
     }
     /** if strict=true, all attribute files must be present */
     public static BeanCollector<List<BeanDefinition>, BeanDefinition> provideCMSBeans(String definitionUrl, boolean strict) {
+        ENV.assignClassloaderToCurrentThread();
         definitionUrl = definitionUrl.endsWith(INFO) ? definitionUrl : definitionUrl + (definitionUrl.endsWith("/") ? INFO.substring(1) : INFO);
         logFrame("starting from " + definitionUrl + "\n\tall content will be downloaded to: " + getDefinitionDirectory());
 
@@ -96,7 +103,12 @@ public class CMSBean {
         return new BeanCollector<List<BeanDefinition>,BeanDefinition>(beans, 1);
     }
 
+    static void logMsg(String txt) {
+        Message.send(txt);
+    }
+
     static void logFrame(String txt) {
+        Message.send(txt);
         String frame = "\n" + StringUtil.fixString(80, '=') + "\n";
         LOG.info(frame + txt + frame);
     }
@@ -107,6 +119,7 @@ public class CMSBean {
 
 
     private static Bean<?> createBean(String baseUrl, String name, boolean strict) {
+        ENV.assignClassloaderToCurrentThread();
         Bean<Object> bean = new Bean<>();
         bean.setName(name);
         // bean.setAttributeFilter("name");
@@ -115,54 +128,78 @@ public class CMSBean {
         List<String> names = readNamesFromUrl(baseUrl + name + INFO, false);
         String baseUrlName = baseUrl + name + "/";
         if (names == null) {
-            names = Arrays.stream(DefaultAttributes.values()).map(a -> a.toString().toLowerCase()).toList();
+            // names = Arrays.stream(DefaultAttributes.values()).map(a -> a.toString().toLowerCase()).toList();
             addDefaultAttributes(bean, baseUrlName, name, strict);
         } else {
-            LOG.info("creating bean '" + name + "' with attributes: " + names);
+            logMsg("creating bean '" + name + "' with attributes: " + names);
             names.forEach(n -> addAttribute(bean, baseUrlName,  n, strict));
         }
         List<String> actions = readNamesFromUrl(baseUrl + name + INFO, TAG_ACTIONS, false);
-        if (actions != null) {
-            LOG.info("adding actions to  bean '" + name + "': " + actions);
-            actions.forEach(n -> bean.addAction(createAction(baseUrlName, n)));
+        if (actions == null) {
+            actions = Arrays.asList(name);
         }
+        logMsg("adding actions to  bean '" + name + "': " + actions);
+        Map<String, Object> props = bean.toValueMap(null);
+        props.put("bean", bean.getName());
+        actions.forEach(n -> addAction(bean, baseUrlName, n, strict, props));
         return bean;
     }
 
     private static void addDefaultAttributes(Bean<Object> bean, String baseUrlName, String name, boolean strict) {
+        logMsg("adding default attributes on " + name);
         Map<String, Object> props = bean.toValueMap(null);
         props.put("bean", bean.getName());
-        bean.addAttribute(NAME.toString(), new Value<String>(NAME.toString(), name), null, null);
-        bean.addAttribute(DESCRIPTION.toString(),
+        AttributeDefinition<String> attr = bean.addAttribute(NAME.toString(), new Value<String>(NAME.toString(), name), null, null);
+        extendPresentable(attr.getPresentation());
+        
+        attr = bean.addAttribute(DESCRIPTION.toString(),
             new Value<String>(DESCRIPTION.toString(), 
                     readFromDownload(attrFile(baseUrlName, name, DESCRIPTION.toString(), ".txt"), strict, props)), 
                 null, 
                 null);
+        extendPresentable(attr.getPresentation(), IPresentable.TYPE_INPUT_MULTILINE);
         
         String imageUrl = getImageUrl(baseUrlName, name, strict, props);
-        bean.addAttribute(IMAGE.toString(),
+        attr = bean.addAttribute(IMAGE.toString(),
             new Value<String>(IMAGE.toString(), imageUrl), 
                 null, 
                 null);
+        extendPresentable(attr.getPresentation(), IPresentable.TYPE_ATTACHMENT);
 
-        bean.addAttribute(VALUE.toString(),
+        attr = bean.addAttribute(VALUE.toString(),
             new Value(VALUE.toString(), 
                     getValue(baseUrlName, name, strict, props)), 
                 null, 
                 null);
-        }
+        extendPresentable(attr.getPresentation());
+    }
+
+    private static IPresentable extendPresentable(IPresentable p, int type) {
+        IPresentable pres = extendPresentable(p);
+        pres.setType(type);
+        return pres;
+    }
+    private static IPresentable extendPresentable(IPresentable p) {
+        p.setEnabler(IActivable.INACTIVE);
+        return p;
+    }
     private static void addAttribute(Bean<?> bean, String baseUrl, String name, boolean strict) {
         Map<String, Object> props = bean.toValueMap(null);
         props.put("bean", bean.getName());
         String description = readFromDownload(attrFile(baseUrl, name, "description", ".txt"), false, props);
         Object valueObject = getValue(baseUrl, name, strict, props);
         String imageUrl = getImageUrl(baseUrl, name, strict, props);
-        Html5Presentable html5Presentable = null;
+        Html5Presentable html5Presentable = getPresentable(baseUrl, name, props);
         if (imageUrl != null) {
-            html5Presentable = new Html5Presentable();
+            html5Presentable = html5Presentable == null ? new Html5Presentable() : html5Presentable;
             html5Presentable.setIcon(imageUrl);
         }
         bean.addAttribute(name, new Value<>(name, valueObject) , description, html5Presentable);
+    }
+    private static Html5Presentable getPresentable(String baseUrl, String name, Map<String, Object> props) {
+        String presJson = readFromDownload(attrFile(baseUrl, name, "presentable", ".json"), false, props);
+        presJson = StringUtil.insertProperties(presJson, props);
+        return BeanUtil.fromJSON(Html5Presentable.class, presJson);
     }
     private static String getImageUrl(String baseUrlName, String name, boolean strict, Map<String, Object> props) {
         String imageDownload = readFromDownload(attrFile(baseUrlName, name, IMAGE.toString(), ".jpg"), strict, props);
@@ -184,26 +221,34 @@ public class CMSBean {
         return baseUrl + (name.equals(ext) ? "" : name + "-") + add + ext;
     }
 
-    private static IAction<?> createAction(String baseUrl, String name) {
-        String actionSpec = readFromDownload(baseUrl + name + ".action");
-        IPRunnable action = null;
+    private static IAction<?> addAction(Bean<?> bean, String baseUrl, String name, boolean strict, Map<String, Object> props) {
+        String actionSpec = readFromDownload(baseUrl + name + ".action", strict, props);
+        if (actionSpec == null) {
+            return null;
+        }
+
+        IPRunnable runnable = null;
+        IAction<?> action = null;
         if (actionSpec.matches("(http|s?ftp)[:]//.*")) {
-            action = ENV.get(Pool.class).add(WebClient.create(actionSpec, null));
+            runnable = ENV.get(Pool.class).add(WebClient.create(actionSpec, null));
         } else {
-            action = Util.trY( () -> new Action<>(actionSpec), false);
-            if (action != null) {
-                ENV.get(Pool.class).add(action);
+            runnable = Util.trY( () -> new Action<>(actionSpec), false);
+            if (runnable != null) {
+                ENV.get(Pool.class).add(runnable);
             }
         }
 
-        if (action == null) {
-            return new CommonAction<>(name) {
+        if (runnable == null) {
+            action = new CommonAction<>(name, name, name) {
                 public Object action() throws Exception {
                     return SystemUtil.execute(actionSpec);
                 }
             };
+        } else {
+            action = new SpecifiedAction<>(runnable.getName(), null);
         }
-        return new SpecifiedAction<>(action.getName(), null);
+        bean.addAction(action);
+        return action;
     }
 
     static List<String> readNamesFromUrl(String readmeUrl) {
@@ -247,7 +292,7 @@ public class CMSBean {
         return file != null ? FilePath.read(file) : null;
     }
     private static File download(String url, boolean mandatory) {
-        return Util.trY( () -> NetUtil.download(url, getDefinitionDirectory()), mandatory);
+        return Util.trY( () -> NetUtil.download(url, getDefinitionDirectory(), false, false), mandatory);
     }
 
     private static String getDefinitionDirectory() {

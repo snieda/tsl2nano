@@ -1,0 +1,2 @@
+Bestellung provides the organisation and input of reservations and orders.
+It is able to show some statistics and tries to provide user friendly input masks.

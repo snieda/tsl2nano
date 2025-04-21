@@ -30,7 +30,7 @@ public class MethodUtil extends FieldUtil {
         String methodName = StringUtil.substring(splitted[0], ".", null, true);
         Class[] pars = new Class[splitted.length - 1];
         for (int i = 1; i < splitted.length; i++) {
-            pars[i - 1] = splitted[i].length() < 3 ? Object.class : BeanClass.load(splitted[i]);
+            pars[i - 1] = splitted[i].length() < 3 ? Object.class : BeanClass.load(splitted[i].trim());
         }
         return PrivateAccessor.findMethod(cls, methodName, null, pars).iterator().next();
     }

@@ -15,6 +15,7 @@ import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.core.Commit;
 
+import de.tsl2.nano.bean.annotation.Action;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.Period;
 import de.tsl2.nano.core.util.StringUtil;
@@ -58,6 +59,7 @@ class User implements Comparable<User> {
         this.passwd = hash(passwd);
     }
 
+    @Action(name = "Create Hash", argNames = {"password"})
     private static final String hash(String txt) {
         return StringUtil.toHexString(StringUtil.cryptoHash(txt));
     }
@@ -112,7 +114,12 @@ class User implements Comparable<User> {
         if (passwd == null)
             passwd = "";
     }
-    
+
+    @Action(name = "Add User", argNames = {"Name", "Password"})
+    public User addUser(String name, String passwd) {
+        return Users.load().auth(name, passwd, true);
+    }
+
     public static final void main(String...args) {
         if (args.length != 1) {
             System.out.println("Please give a password to be hashed!");

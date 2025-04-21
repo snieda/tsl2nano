@@ -484,7 +484,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
         //TODO: eliminate bug in NanoHTTPD not resetting uri...
 //        header.clear();
 //        response.header.remove(uri);
-        Message.send(exceptionHandler, createStatusText(startTime));
+        Util.trY( () -> Message.send(exceptionHandler, createStatusText(startTime)), false);
         if (ex != null)
             Message.send(exceptionHandler, ex.toString());
         webSec.addSessionHeader(this, response);
@@ -607,7 +607,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
             + ": " + DateUtil.getFormattedTime(new Date()) + ", "
             + (nav != null ? ENV.translate("tsl2nano.session", true)
                 + ": " + workflow + "§"
-                + StringUtil.toHexString(getContext().toString().getBytes()) : "")
+                + StringUtil.toHexString(getContext() != null ? getContext().toString().getBytes() : new byte[0]) : "")
             + ", "
             + ENV.translate("tsl2nano.request", true) + ": "
             + (int)DateUtil.seconds(System.currentTimeMillis() - startTime) + " sec "
@@ -1112,7 +1112,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
      * ******************************************************************/
 
     protected <T> boolean isSearchRequest(String actionId, BeanCollector<?, T> model) {
-        return model.hasMode(IBeanCollector.MODE_SEARCHABLE) && actionId.equals(model.getSearchAction().getId());
+        return model.hasMode(IBeanCollector.MODE_SEARCHABLE) && model.getSearchAction() != null && actionId.equals(model.getSearchAction().getId());
     }
 
     protected <T> BeanCollector<?, T> processSearchRequest(Map<String, String> parms, BeanCollector<?, T> model) {

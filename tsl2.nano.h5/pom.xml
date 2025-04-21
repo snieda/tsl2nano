@@ -34,29 +34,29 @@
 		<surefire.testFailureIgnore>false</surefire.testFailureIgnore>
 		<maven.test.failure.ignore>false</maven.test.failure.ignore>
 		<!-- add-opens: the spaces at line-starts are important! -->
-		<add-opens-unnamed> java.base/java.lang=ALL-UNNAMED 
- java.base/java.util=ALL-UNNAMED
- java.base/java.text=ALL-UNNAMED
- java.base/java.time.format=ALL-UNNAMED
- java.base/java.lang.reflect=ALL-UNNAMED
- java.base/sun.reflect.annotation=ALL-UNNAMED
- java.base/sun.security.x509=ALL-UNNAMED
- java.base/javax.security.auth=ALL-UNNAMED
- java.base/java.io=ALL-UNNAMED
- java.base/sun.nio.ch=ALL-UNNAMED
- java.base/java.net=ALL-UNNAMED
- java.base/sun.security.ssl=ALL-UNNAMED
- jdk.unsupported/jdk.internal.module=ALL-UNNAMED
- java.xml/javax.xml.stream.events=ALL-UNNAMED
- java.xml/org.w3c.dom=ALL-UNNAMED
- java.xml/javax.xml.namespace=ALL-UNNAMED
- jdk.management/com.sun.management.internal=ALL-UNNAMED
- java.management/sun.management=ALL-UNNAMED
+		<add-opens-unnamed> java.base/java.lang 
+ java.base/java.util
+ java.base/java.text
+ java.base/java.time.format
+ java.base/java.lang.reflect
+ java.base/sun.reflect.annotation
+ java.base/sun.security.x509
+ java.base/javax.security.auth
+ java.base/java.io
+ java.base/sun.nio.ch
+ java.base/java.net
+ java.base/sun.security.ssl
+ jdk.unsupported/jdk.internal.module
+ java.xml/javax.xml.stream.events
+ java.xml/org.w3c.dom
+ java.xml/javax.xml.namespace
+ jdk.management/com.sun.management.internal
+ java.management/sun.management
 		</add-opens-unnamed>
 		<!-- WARN: add-exports only on compile scope otherwise jar file will be corrupt -->
 		<add-export-unnamed>
- java.base/sun.security.x509=ALL-UNNAMED
- java.management/sun.management=ALL-UNNAMED
+ java.base/sun.security.x509
+ java.management/sun.management
 		</add-export-unnamed>
 	</properties>
 	<build>

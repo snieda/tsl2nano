@@ -333,7 +333,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ValueHolder vh = new ValueHolder("https://github.com/bump-sh-examples/train-travel-api/raw/refs/heads/main/openapi.yaml");
                 Bean b = Bean.getBean(vh);
                 id = "openapi.generate";
-                String lbl = ENV.translate("generateopenapi", true);
+                String lbl = ENV.translate("generateOpenApi", true);
 
                 b.addAction(new CommonAction<Process>(id, lbl, lbl) {
                     @Override
@@ -354,41 +354,51 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         public boolean isEnabled() {
                             return super.isEnabled() && new File(ENV.getConfigPath() + "generate-openapi.sh").exists();
                         }
+                        @Override
+                        public String getShortDescription() {
+                            return "Generate OpenAPI Client";
+                        }
                     });
                 return b;
                 }
-            });
+                @Override
+                public String getShortDescription() {
+                    return "Generate OpenAPI Client";
+                }
+    });
             bEnv.addAction(new SecureAction(bean.getClass(),
             "downloadSampleApplication",
             IAction.MODE_UNDEFINED,
             false,
             "icons/buy.png") {
-            @Override
-            public Object action() throws Exception {
-                // return SampleApplicationBean.provideSampleApplicationInstallation();
-                return CMSBean.provideCMSBeans(SampleApplicationBean.SF_BASE_URL_FILE);
-            }});
+                @Override
+                public Object action() throws Exception {
+                    // return SampleApplicationBean.provideSampleApplicationInstallation();
+                    return CMSBean.provideCMSBeans(SampleApplicationBean.SF_BASE_URL_FILE);
+                }
+                @Override
+                public String getShortDescription() {
+                    return "Download Sample Application";
+                }
+            });
             if (ENV.get("app.login.administration", true)) {
                 bEnv.addAction(new SecureAction(bean.getClass(),
-                "addUser",
+                "Users",
                 IAction.MODE_UNDEFINED,
                 false,
                 "icons/people.png") {
-                @Override
-                public Object action() throws Exception {
-                    Bean<User> userBean = new Bean<>(new User("MUSTER", "nanoh5")) {
-                        public void setName(String name) {this.name = name;}
-                    };
-                    String name = Messages.getStringOpt("addUser");
-                    userBean.addAction(new CommonAction(name, name, name) {
-                        @Override
-                        public Object action() throws Exception {
-                            Users.load().auth(userBean.getInstance().getName(), userBean.getInstance().getPasswd(), true);
-                            return "user added";
-                        }
-                    });
-                    return userBean;
-                }});
+                    @Override
+                    public Object action() throws Exception {
+                        BeanCollector bc = new BeanCollector(Users.load(true).getUsers(), 1);
+                        // bc.addAction(new CommonAction("addUser", "Add User", "Add User") {
+                        //     @Override
+                        //     public Object action() throws Exception {
+                        //         return Users.load(true).auth(name, passwd, true);
+                        //     }
+                        // });
+                        return bc;
+                    }
+                });
             }
         }
 
@@ -397,29 +407,34 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         IAction.MODE_UNDEFINED,
         false,
         "icons/apply.png") {
-        @Override
-        public Object action() throws Exception {
-            boolean isProdMode = !ENV.get("app.login.administration", true);
-            String url = (String) ENV.get("service.url");
-            if (!isProdMode) {
-                url = url.replace("http://", "https://");
-                url = url.replace("localhost", NetUtil.getMyIP());
-            } else {
-                url = url.replace("https://", "http://");
-                url = url.replace(NetUtil.getMyIP(), "localhost");
-            }
-            ENV.setProperty("service.url", url);
+            @Override
+            public Object action() throws Exception {
+                boolean isProdMode = !ENV.get("app.login.administration", true);
+                String url = (String) ENV.get("service.url");
+                if (!isProdMode) {
+                    url = url.replace("http://", "https://");
+                    url = url.replace("localhost", NetUtil.getMyIP());
+                } else {
+                    url = url.replace("https://", "http://");
+                    url = url.replace(NetUtil.getMyIP(), "localhost");
+                }
+                ENV.setProperty("service.url", url);
 
-            ENV.setProperty("app.ssl.activate", !isProdMode);
-            ENV.setProperty("app.ssl.shortcut", isProdMode ? "" : "s");
-            ENV.setProperty("app.login.administration", isProdMode);
-            ENV.setProperty("app.login.secure", !isProdMode);
-            ENV.setProperty("service.autorization.new.createdefault", isProdMode);
-            ENV.setProperty("app.http.allow.directorylisting", !isProdMode);
-            // ENV.setProperty("app.login.service.connection.check", !isProdMode);
-            ENV.persist();
-            return "Application Mode changed to secure Productivity on URL: \"" + url + "\".\nPlease read the documentation for creating users with hash passwords and permissions.\nPlease RESTART";
-        }});
+                ENV.setProperty("app.ssl.activate", !isProdMode);
+                ENV.setProperty("app.ssl.shortcut", isProdMode ? "" : "s");
+                ENV.setProperty("app.login.administration", isProdMode);
+                ENV.setProperty("app.login.secure", !isProdMode);
+                ENV.setProperty("service.autorization.new.createdefault", isProdMode);
+                ENV.setProperty("app.http.allow.directorylisting", !isProdMode);
+                // ENV.setProperty("app.login.service.connection.check", !isProdMode);
+                ENV.persist();
+                return "Application Mode changed to secure Productivity on URL: \"" + url + "\".\nPlease read the documentation for creating users with hash passwords and permissions.\nPlease RESTART";
+            }
+            @Override
+            public String getShortDescription() {
+                return ENV.get("app.login.administration", true) ? "Productive Mode" : "Unsecure Mode";
+            }
+        });
         
         super.addAdministrationActions(session, bEnv);
     }

@@ -1378,7 +1378,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         }
     }
 
-	private void createColumnDefinitions() {
+	protected void createColumnDefinitions() {
 		BeanCollector.createColumnDefinitions(this, new IActivable() {
             private static final long serialVersionUID = 1L;
             @Override

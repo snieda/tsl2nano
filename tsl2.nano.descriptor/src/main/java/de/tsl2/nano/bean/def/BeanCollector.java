@@ -180,8 +180,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      * see constructor {@link #CollectionEditorBean(IBeanFinder, boolean, boolean, boolean)}.
      */
     public BeanCollector(Class<T> beanType, final COLLECTIONTYPE collection, int workingMode, Composition composition) {
-        this(new BeanFinder<T, Object>(beanType), workingMode, composition);
+        super(beanType);
         this.collection = collection;
+        init(collection, new BeanFinder<T, Object>(beanType), workingMode, composition);
         if (isStaticCollection || !hasMode(MODE_SEARCHABLE)) {
             this.searchStatus = "";
         }
@@ -972,7 +973,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     @Override
     public Collection<IPresentableColumn> getColumnDefinitions() {
         if (columnDefinitions == null) {
-            columnDefinitions = createColumnDefinitions(this, new IActivable() {
+            T firstContentItem = getCurrentData() != null && !getCurrentData().isEmpty() ? getCurrentData().iterator().next() : null;
+            BeanDefinition<T> def = firstContentItem instanceof Bean ? (BeanDefinition<T>) firstContentItem : this;
+            columnDefinitions = createColumnDefinitions(def, new IActivable() {
                 @Override
                 public boolean isActive() {
                     return hasMode(MODE_SHOW_MULTIPLES);
@@ -1000,6 +1003,20 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         }
         Collections.sort(colDefCopy);
         return colDefCopy;
+    }
+
+    @Override
+    protected void createColumnDefinitions() {
+        T firstContentItem = getCurrentData() != null && !getCurrentData().isEmpty() ? getCurrentData().iterator().next() : null;
+        BeanDefinition<T> def = firstContentItem instanceof Bean ? (BeanDefinition<T>) firstContentItem : this;
+        BeanCollector.createColumnDefinitions(def, new IActivable() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public boolean isActive() {
+                return getPresentationHelper().matches("default.present.attribute.multivalue", true);
+            }
+        });
     }
 
     /**

@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.h5;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -68,6 +69,11 @@ public class Users {
         return userCheck;
     }
 
+    Collection<User> getUsers() {
+        if (!ENV.get("app.login.administration", true))
+            throw new IllegalStateException("only accessbile in administration mode");
+        return userMapping.values();
+    }
     /**
      * checks the given (perhaps synthetic) user and may do some mapping to a real user. depends on ENV property
      * "app.login.secure".
