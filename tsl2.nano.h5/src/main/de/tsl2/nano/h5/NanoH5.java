@@ -360,6 +360,11 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
             ENV.extractResource("specification/timesheet-src.zip");
             ENV.extractResource("specification/timesheet-classes.zip");
             ENV.extractResource("specification/specification-documentworker-timesheet.md.html");
+
+            ENV.extractResource("presentation/frame/left-panel.frm");
+            ENV.extractResource("presentation/frame/right-panel.frm");
+            ENV.extractResource("presentation/frame/menu-actions.frm");
+
             onStandaloneExtractJars();
         } catch (Exception ex) {
             LOG.error("couldn't extract ant or shell script", ex);

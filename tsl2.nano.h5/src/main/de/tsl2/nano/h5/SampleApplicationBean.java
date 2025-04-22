@@ -9,6 +9,7 @@ import de.tsl2.nano.bean.annotation.Action;
 import de.tsl2.nano.bean.annotation.Attributes;
 import de.tsl2.nano.bean.annotation.Presentable;
 import de.tsl2.nano.bean.annotation.ValueExpression;
+import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.core.ENV;
@@ -19,6 +20,7 @@ import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.specification.Pool;
 
+@Deprecated // replaced by CMSBean - but action #downloadAndExtract0() is refeenced!
 @ValueExpression("{name}")
 @Attributes(names = { "name", "description", "imagePath", "applicationZipPath", "insideCurrentEnvironment" })
 @Presentable()
@@ -55,10 +57,14 @@ public class SampleApplicationBean {
         return downloadAndExtract(name, getApplicationZipPath(), isInsideCurrentEnvironment());
     }
 
-    public static String downloadAndExtract(String name, String zipUrl, boolean insideCurrentEnvironment) {
+    public static String downloadAndExtract0(Bean<?> selected) {
+        return downloadAndExtract(selected.getName(), (String)selected.getValue("value"), false);
+    }
+
+    private static String downloadAndExtract(String name, String zipUrl, boolean insideCurrentEnvironment) {
         String path = ENV.getConfigPath();
         if (!insideCurrentEnvironment) {
-            path = System.getProperty("user.dir") + "." + name + ".environment";
+            path = System.getProperty("user.dir") + "/." + name + ".environment/";
             new File(path).mkdirs();
         }
         File zip = NetUtil.download(zipUrl, path);

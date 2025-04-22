@@ -65,8 +65,8 @@ import de.tsl2.nano.specification.actions.Action;
  * All Actions (names are defined in README.MD through {{ACTION}} list) have to have the extension ".action"
  * 
  * Each Action will be interpreted by the content:
- *  - class+method name
- *  - url
+ *  - class+method name (parameter: de.tsl2.nano.bean.def.Bean.class (to get all informations through current selected bean/attributes))
+ *  - url (starting with uri scheme expression (see https://en.wikipedia.org/wiki/List_of_URI_schemes))
  *  - otherwise: shell action
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -229,7 +229,7 @@ public class CMSBean {
 
         IPRunnable runnable = null;
         IAction<?> action = null;
-        if (actionSpec.matches("(http|s?ftp)[:]//.*")) {
+        if (actionSpec.matches(ENV.get("uri.scheme.expression", "(file|https?|s?ftp|mailto|tel|imap|irc|nntp|acap|icap|mtqp|wss)[:]//.*"))) {
             runnable = ENV.get(Pool.class).add(WebClient.create(actionSpec, null));
         } else {
             runnable = Util.trY( () -> new Action<>(actionSpec), false);

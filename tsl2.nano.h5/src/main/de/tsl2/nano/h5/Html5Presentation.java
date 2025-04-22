@@ -426,6 +426,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ENV.setProperty("app.login.secure", !isProdMode);
                 ENV.setProperty("service.autorization.new.createdefault", isProdMode);
                 ENV.setProperty("app.http.allow.directorylisting", !isProdMode);
+                ENV.setProperty("app.security.trusted.sites", isProdMode ? "" : "https://sourceforge.net");
                 // ENV.setProperty("app.login.service.connection.check", !isProdMode);
                 ENV.persist();
                 return "Application Mode changed to secure Productivity on URL: \"" + url + "\".\nPlease read the documentation for creating users with hash passwords and permissions.\nPlease RESTART";
@@ -533,7 +534,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         }
         if (firstTime && session.getUserAuthorization() != null) {
             initLayoutProvider();
-            ILayoutProvider layoutProvider = ENV.get(ILayoutProvider.class);
+            IFrameProvider layoutProvider = ENV.get(IFrameProvider.class);
             if (layoutProvider != null && layoutProvider.getMenuActions(session, bean) != null)
                 infoActions.addAll(layoutProvider.getMenuActions(session, bean));
         }
@@ -544,6 +545,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     public void reset() {
         AttributeCover.resetTypeCache();
         ENV.get(Pool.class).reset();
+        ENV.addService(IFrameProvider.class, null);
         super.reset();
         //clear template cache
         jsWebsocketTemplate = null;
@@ -924,13 +926,20 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Element panel =
             appendElement(parent, TAG_DIV, ATTR_STYLE,
                 (interactive ? ENV.get("layout.page.data.style", "overflow: auto; height: 70vh;") : null));
-        if (isRoot && session.getUserAuthorization() != null)
-            createLeftPanel(session, panel, bean, interactive);
+
+        boolean hasFrame = false;
+        if (isRoot && session.getUserAuthorization() != null) {
+            hasFrame = createLeftPanel(session, panel, bean, interactive);
+            if (hasFrame) {
+                appendAttributes(panel, ATTR_CLASS, TAG_ROW);
+            }
+        }
         
-        createContentPanel(session, panel, bean, interactive, ENV.get("layout.page.data.fullwidth", false));
+        Element contentPanel = hasFrame ? appendElement(panel, TAG_DIV, ATTR_CLASS, TAG_CELL, ATTR_ID, "content-panel-id", ATTR_STYLE, "vertical-align: top; width: 100%;") : panel;
+        createContentPanel(session, contentPanel, bean, interactive, ENV.get("layout.page.data.fullwidth", false));
 
         if (isRoot) {
-            if (session.getUserAuthorization() != null)
+            if (hasFrame)
                 createRightPanel(session, panel, bean, interactive);
             if (interactive) {
                 createBeanActions(parent, bean);
@@ -940,36 +949,38 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         return parent;
     }
 
-    protected void createLeftPanel(ISession session, Element panel, BeanDefinition<T> bean, boolean interactive) {
+    protected boolean createLeftPanel(ISession session, Element panel, BeanDefinition<T> bean, boolean interactive) {
         initLayoutProvider();
-        ILayoutProvider layoutProvider = ENV.get(ILayoutProvider.class);
+        String leftPanel = null;
+        IFrameProvider layoutProvider = ENV.get(IFrameProvider.class);
         if (layoutProvider != null) {
-            String leftPanel = null;
             if ((leftPanel = layoutProvider.getLeftPanel(session, bean)) != null) {
-                appendNodesFromText(panel, leftPanel);
+                Element cell = appendElement(panel, TAG_DIV, ATTR_CLASS, TAG_CELL, ATTR_ID, "indiviual-left-panel-id", ATTR_STYLE, "width: 15%");
+                appendNodesFromText(cell, leftPanel);
             }
         }
+        return leftPanel != null;
     }
 
     private void initLayoutProvider() {
-        if (ENV.get(ILayoutProvider.class) == null) {
-            String leftFileName = ENV.get("layout.leftPanel.file", BeanDefinition.getDefinitionDirectory() + "/layout/leftpanel.div");
-            String rightFileName = ENV.get("layout.rightPanel.file", BeanDefinition.getDefinitionDirectory() + "/layout/rightpanel.div");
-            String menuFileName = ENV.get("layout.menuactions.file", BeanDefinition.getDefinitionDirectory() + "/layout/menuactions.div");
-            ILayoutProvider layoutProvider = null;
+        if (ENV.get(IFrameProvider.class) == null) {
+            String leftFileName = ENV.get("layout.leftPanel.file", BeanDefinition.getDefinitionDirectory() + "/frame/left-panel.frm");
+            String rightFileName = ENV.get("layout.rightPanel.file", BeanDefinition.getDefinitionDirectory() + "/frame/right-panel.frm");
+            String menuFileName = ENV.get("layout.menuactions.file", BeanDefinition.getDefinitionDirectory() + "/frame/menu-actions.frm");
+            IFrameProvider layoutProvider = null;
             String leftPanel = new File(leftFileName).exists() ? Util.trY( () -> new String(Files.readAllBytes(Paths.get(leftFileName)))) : null;
             String rightPanel = new File(rightFileName).exists() ? Util.trY( () -> new String(Files.readAllBytes(Paths.get(rightFileName)))) : null;
             String menuActions = new File(menuFileName).exists() ? Util.trY( () -> new String(Files.readAllBytes(Paths.get(menuFileName)))) : null;
             if (leftPanel != null && leftPanel.matches("(\\w+[.])*[A-Z]\\w+")) {
-                layoutProvider = (ILayoutProvider) BeanClass.getBeanClass(BeanClass.load(leftPanel));
+                layoutProvider = (IFrameProvider) BeanClass.getBeanClass(BeanClass.load(leftPanel));
             } else if (rightPanel != null && rightPanel.matches("(\\w+[.])*[A-Z]\\w+")) {
-                layoutProvider = (ILayoutProvider) BeanClass.getBeanClass(BeanClass.load(rightPanel));
+                layoutProvider = (IFrameProvider) BeanClass.getBeanClass(BeanClass.load(rightPanel));
             } else if (menuActions != null && rightPanel.matches("(\\w+[.])*[A-Z]\\w+")) {
-                layoutProvider = (ILayoutProvider) BeanClass.getBeanClass(BeanClass.load(menuActions));
+                layoutProvider = (IFrameProvider) BeanClass.getBeanClass(BeanClass.load(menuActions));
             }
             // ok, do it the default way
             if (layoutProvider == null) {
-                layoutProvider = new ILayoutProvider() {
+                layoutProvider = new IFrameProvider() {
 
                     @Override
                     public String getLeftPanel(ISession session, BeanDefinition bean) {
@@ -1002,15 +1013,17 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         }
     }
 
-    protected void createRightPanel(ISession session, Element panel, BeanDefinition<T> bean, boolean interactive) {
+    protected boolean createRightPanel(ISession session, Element panel, BeanDefinition<T> bean, boolean interactive) {
         initLayoutProvider();
-        ILayoutProvider layoutProvider = ENV.get(ILayoutProvider.class);
+        String rightPanel = null;
+        IFrameProvider layoutProvider = ENV.get(IFrameProvider.class);
         if (layoutProvider != null) {
-            String rightPanel = null;
             if ((rightPanel = layoutProvider.getRightPanel(session, bean)) != null) {
-                appendNodesFromText(panel, rightPanel);
+                Element cell = appendElement(panel, TAG_DIV, ATTR_CLASS, TAG_CELL, ATTR_ID, "indiviual-right-panel-id", ATTR_STYLE, "width: 15%");
+                appendNodesFromText(cell, rightPanel);
             }
         }
+        return rightPanel != null;
     }
 
     /**

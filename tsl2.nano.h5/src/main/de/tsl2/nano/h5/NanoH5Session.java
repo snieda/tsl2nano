@@ -879,9 +879,10 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
              * TODO: refactore access to names ('reset' and 'save')
              */
             if (action.getParameter() == null) {
-                if (current instanceof Bean && !current.isMultiValue())
-                    action.setParameter(((Bean)current).getInstance());
-                else if (current.isMultiValue())
+                if (current instanceof Bean && !current.isMultiValue()) {
+                    Bean bean = (Bean) current;
+                    action.setParameter(bean.isVirtual() ? bean : bean.getInstance());
+                } else if (current.isMultiValue())
                     action.setParameter(getContextParameter());
             }
             Object result;

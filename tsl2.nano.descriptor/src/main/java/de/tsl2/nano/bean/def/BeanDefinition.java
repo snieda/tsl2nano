@@ -1655,6 +1655,11 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         return toValueMap(instance, keyPrefix, onlySingleValues, false, onlyFilterAttributes, filterAttributes);
     }
 
+    @Override
+    public List<IAttribute> getAttributes() {
+        return isVirtual() ? new ArrayList(getAttributeDefinitions().values()) : super.getAttributes();
+    }
+
     /**
      * fills a map with all bean-attribute-names and their values. keys in defined order.
      * 

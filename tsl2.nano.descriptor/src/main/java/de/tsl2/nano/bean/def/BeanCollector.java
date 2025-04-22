@@ -1145,8 +1145,10 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         if (element == null) {
             return null;
         }
-        Object value;
-        value = (attribute instanceof IValueDefinition) && !element.getClass().isArray()
+        if (element instanceof Bean) { // resolve right beanvalue assigned through columnDefinition.attributeDefinition
+            attribute = ((Bean)element).getAttribute(attribute.getName());
+        }
+        Object value = (attribute instanceof IValueDefinition) && !element.getClass().isArray()
             ? ((IValueDefinition) attribute).getValue()
             : attribute.getValue(element);
         return (V) value;

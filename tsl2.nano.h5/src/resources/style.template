@@ -441,6 +441,10 @@ input {
 }
 
 @media only screen and (max-width: 480px) {
+#indiviual-left-panel-id indiviual-right-panel-id {
+    display: none;
+}
+
 thead, .thead {
 	display: none;
 }

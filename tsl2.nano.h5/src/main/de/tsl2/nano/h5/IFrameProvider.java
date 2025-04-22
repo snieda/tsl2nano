@@ -10,7 +10,7 @@ import de.tsl2.nano.core.ISession;
  * may be implemented by any application to provide side panels and menu info/about actions
  */
 @SuppressWarnings("rawtypes")
-public interface ILayoutProvider {
+public interface IFrameProvider {
     /** null or html content to be placed on the left side of the main content */
     String getLeftPanel(ISession session, BeanDefinition bean);
     /** null or html content to be placed on the right side of the main content */

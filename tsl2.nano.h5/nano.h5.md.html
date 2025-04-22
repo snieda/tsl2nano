@@ -94,8 +94,9 @@ All packages (under name *tsl2nano*) are available in maven central, sourceforge
 * generic import mechanism of flat data (csv, etc)
 * document/specification based full configuration/extension for non-coding or low-coding
 * json/yaml/xml de-/serialization (object mapping) (only 750 lines of code ;-) )
-* clickable color-themes (mouse click at upper left corner (left of beanEx Icon)
+* clickable color-themes (mouse click at top left corner (left of beanEx Icon)
 * event sourcing: through tsl2.nano.cursus (persists the state of a business entity as a sequence of state-changing events)
+* is able to evaluate beans through a file or content managment system (CMS)
 
 * planned interfaces:
 	* xsd-->bean
@@ -1854,24 +1855,27 @@ Most Browsers will build unexpected results, so this feature is disabled on defa
 	collector.ignore.groupby.expandables = true
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#### Adding addtional Panel Content on the left and right side - adding additional menu items under 'about'
+#### Frames: Adding addtional Panel Content on the left and right side - adding additional menu items under 'about'
 
 On normal html files, you have normally panels on the side and menu items to provide informations for the compony, the impressum, contact etc.
 
 You are able to:
 
 * add the additional content statically as html content
-* or you provide an implementation of ILayoutProvider to provide the additional html content dynamically
+* or you provide an implementation of IFrameProvider to provide the additional html content dynamically
 
 The framework looks for the 3 additional presentation files under:
 
-* *left panel*: presentation/layout/leftpanel.div
-* *right panel*: presentation/layout/rightpanel.div
-* *about menu actions*: presentation/layout/menuactions.div
+* *left panel*: presentation/frame/left-panel.frm
+* *right panel*: presentation/frame/right-panel.frm
+* *about menu actions*: presentation/frame/menu-actions.frm
 
-If any of them exists, it looks, if the content may only be the class name. If so, it loads the class as ILayoutProvider (must be implemented).
+If any of them exists, it looks, if the content may only be the class name. If so, it loads the class as IFrameProvider (must be implemented).
 If not, the content is interpreted as html content to be placed statically.
 If menuactions contains html content, one menu action 'about' will be added to provide this html content on activation.
+
+You may fill iframe tags inside these frames. But the site, beeing reference by the source (src) can block the presentation. On the framework side, you have to
+provide the site url inside the environment property 'app.security.trusted.sites'.
 
 #### Creating a detailed summary for a bean collector
 
@@ -2143,6 +2147,88 @@ If a cell starts with '=', it will be calculated and replaced by the result. The
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If a cell is bound into '<<' and '>>', the formula/action will be calculated without replacing the cell content with the result.
+
+#### The CMSBean (reading its content from urls of an content managment or file system)
+
+##### description
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/**
+ * Creates Beans from a given content url. 
+ * This url must point to a README.MD.
+ * The README.MD must contain a tag "{{NAMES}}" followed by a comma separated list of bean names.
+ * This bean names have to be found as child folders of the given baseurl (where the README.MD was found)
+ * So each bean has to have its own folder. If the name (=folder) starts with "-" it is marked as beeing a collection of sub beans.
+ * Each bean (=folder) has to have its own README.MD containing a tag "{{NAMES}}", specifying the attribute names.
+ * If a bean has actions, the names of these actions have to be specified after the tag {{ACTIONS}}.
+ * 
+ * Each attribute is defined by its 
+ *  - name (read from README.MD -> {{NAMES}})
+ *  - description (optional) read from {NAME}-description.txt
+ *  - presentable (optional) read from {NAME}-presentable.json
+ *  - image (optional)       read from {NAME}-image.jpg
+ *  - value                  read from {NAME}-value.obj
+ *
+ * The value will be interpreted by the content:
+ *  - url : the url will be called
+ *  - json: the json content will be wrapped into an object given by {NAME}-valuetype.txt
+ *  - endswith a standard extension like zip/jpg/tar: it is a download link
+ *  - otherwise: it is a simple string
+ * 
+ * All Actions (names are defined in README.MD through {{ACTION}} list) have to have the extension ".action"
+ * 
+ * Each Action will be interpreted by the content:
+ *  - class+method name (parameter: de.tsl2.nano.bean.def.Bean.class (to get all informations through current selected bean/attributes))
+ *  - url (starting with uri scheme expression (see https://en.wikipedia.org/wiki/List_of_URI_schemes))
+ *  - otherwise: shell action
+ */
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+##### A Simple Sample using the default attributes
+
+Samples can be seen at the tsl2nano sample-application site: https://sourceforge.net/projects/tsl2nano/files/sample-applications
+
+The list of sample applications is read from the README.MD file:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# TSL2 H5 Sample Applications
+
+To see the scope or area of the tsl2nano framework, we provide some very simple sample applications.
+All of them (exept the logbook) are created without any coding in java.
+If you start the default application tsl2.nano.h5, you are able to select this applications in the
+administration area to download and test them locally.
+
+Each sample application contains its own wiki page under sourceforge, to do a short description with
+some screenshots.
+
+{{NAMES}}: bestellung, em-2016, exam, ergebnisdienst, haushalt, logbook, magister, openclinica, skiller, store, timesheet
+
+See https://sourceforge.net/p/tsl2nano/wiki/timesheet or https://sourceforge.net/p/tsl2nano/wiki/magister etc.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For the sample application 'bestellung':
+
+bestellung-description.txt:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   Bestellung provides the organisation and input of reservations and orders.
+   It is able to show some statistics and tries to provide user friendly input masks.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+bestellung-image.url:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   https://sourceforge.net/p/tsl2nano/wiki/bestellung/attachment/bestellung-controller.jpg
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+bestellung-value.obj
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   https://sourceforge.net/projects/tsl2nano/files/sample-applications/${bean}/${bean}.zip
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+bestellung.action:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   de.tsl2.nano.h5.SampleApplicationBean.downloadAndExtract(de.tsl2.nano.bean.def.Bean)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+As you can see in the description, attributes can be defined much more flexible in its own folders.
 
 ### Bean Presentation
 
@@ -5074,7 +5160,7 @@ hint II: a script (upgrade-old-tsl2-apps.sh) to do this is inside the resources 
  2.5.3  | 03.01.2025 | corrections on internationalization (generic regex creation), autotest valueset on json objects
  2.5.4  | 23.02.2025 | +script-engine (nashorn+dependencies), property asking, fixes on html dialog and replication, run scripts refactored, using formtarget=_blank for exports, specification: +doc, +timesheet-sample, refresh cursus (id: Long for hibernate 5)
  2.5.5  | 31.03.2025 | h5:+openapi-generate-scripts, statelessa action beans, html-dialogs: timeout-close, minor fixes
- 2.5.6  | 20.04.2025 | h5:+admin: provide sample applications, prod/admin switch, adding users, layout: additional left/right panels and info menu
+ 2.5.6  | 20.04.2025 | h5:+CMSBean, +admin: provide sample applications, prod/admin switch, adding users, layout: additional left/right panels and info menu
 |------ | ---------- | -----------
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
@@ -6383,6 +6469,8 @@ Cursus:
    * [x] define bean or configuration to enhance the top menu
    * [x] define bean or configuration to provide left/right bar
 * [x] styles: blue-planets.jpg -> background-image.jpg
-* [ ] add oauth
 * [x] create generic CMS Bean Creator
 * [x] simulate NetUtil.download() through existing files
+* [-] add oauth: lot of work....
+* [ ] authorization (e.g. MUSTER-permissions.xml" cannot be saved in cause of failing permission on reading subject
+   * [ ] "--add-opens java.base/javax.security.auth=ALL-UNNAMED" not working

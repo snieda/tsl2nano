@@ -51,11 +51,11 @@ public class WebSecurity {
     	Strict-Transport-Security: maxage=31536000;
     	IncludeSubDomains: true;
     	Content-Security-Policy: script-src 'self' 'unsafe-inline' 'XnXoXnXcXe-${requestId}';
-    	Content-Security-Policy: frame-src 'self';
+    	Content-Security-Policy: frame-src 'self' ${app.security.trusted.sites};
     	Content-Security-Policy: frame-ancestors 'self';
     	Content-Security-Policy: form-action 'self';
     	Content-Security-Policy: default-src 'self' 'unsafe-inline' filesystem ${service.url} ${websocket.url};
-		Content-Security-Policy: img-src 'self' https://sourceforge.net;
+		Content-Security-Policy: img-src 'self' ${app.security.trusted.sites};
     	"""; 
 
     public static boolean useAntiCSRFToken() {
@@ -178,6 +178,7 @@ public class WebSecurity {
 		p.put("service.url", serviceUrl);
 		p.put("websocket.url", websocketUrl);
 		p.put("requestId", session != null && session.getRequestId() != null ? session.getRequestId() : "");
+		p.put("app.security.trusted.sites", ENV.get("app.security.trusted.sites", "https://sourceforge.net"));
 		return p;
 	}
 	private String getStandardHeader() {
