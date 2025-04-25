@@ -1,0 +1,2 @@
+EM-2016 shows the use as simple bet system on a tournament.
+It is able to show some statistics and tries to provide user friendly input masks.

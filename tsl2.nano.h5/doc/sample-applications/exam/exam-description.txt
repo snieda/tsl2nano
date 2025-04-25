@@ -1,0 +1,2 @@
+Exam provides the organisation and input of classes and exams of a university or school system.
+It is able to show some statistics and tries to provide user friendly input masks.
