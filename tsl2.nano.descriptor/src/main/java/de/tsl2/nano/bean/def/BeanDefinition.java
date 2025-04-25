@@ -1687,18 +1687,23 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         for (final IAttribute<?> beanAttribute : attributes) {
             if ((onlyFilteredAttributes && filter.contains(beanAttribute.getName()))
                 || (!onlyFilteredAttributes && !filter.contains(beanAttribute.getName()))) {
-                value =
-                    beanAttribute instanceof IValueAccess ? ((IValueAccess) beanAttribute).getValue() : beanAttribute
-                        .getValue(instance);
-                if (formatted) {
-                    BeanValue<?> bv = (BeanValue<?>) beanAttribute;
-                    if (bv.getFormat() != null) {
-                        value = bv.getFormat().format(value);
-                    } else {
-                        value = value != null ? value.toString() : "";
+                try {
+                    value =
+                        beanAttribute instanceof IValueAccess ? ((IValueAccess) beanAttribute).getValue() : beanAttribute
+                            .getValue(instance);
+                    if (formatted) {
+                        BeanValue<?> bv = (BeanValue<?>) beanAttribute;
+                        if (bv.getFormat() != null) {
+                            value = bv.getFormat().format(value);
+                        } else {
+                            value = value != null ? value.toString() : "";
+                        }
+                    } else if (ENV.get("bean.format.date.iso8601", false) && value instanceof Date) {
+                        value = DateUtil.toISO8601UTC((Date)value);
                     }
-                } else if (ENV.get("bean.format.date.iso8601", false) && value instanceof Date) {
-                    value = DateUtil.toISO8601UTC((Date)value);
+                } catch(Throwable e) {
+                    LOG.error("failed to get value from " + beanAttribute, e);
+                    value = e;                    
                 }
                 map.put(keyPrefix + beanAttribute.getName(), value);
             }

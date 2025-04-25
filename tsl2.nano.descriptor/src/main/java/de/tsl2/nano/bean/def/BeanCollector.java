@@ -1645,6 +1645,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     @Override
     public String toString() {
         if (asString == null && name != null) {
+            //don't call getPresentable() to early
+            // String n = presentable != null && !Util.isEmpty(presentable.getLabel()) ? presentable.getLabel() : name;
             //empty search-beans are possible
             asString =
                 (useExtraCollectorDefinition() ? ENV.translate("tsl2nano.list", false) + " " : "")

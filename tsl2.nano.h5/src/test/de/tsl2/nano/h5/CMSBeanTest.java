@@ -27,9 +27,8 @@ public class CMSBeanTest implements ENVTestPreparation {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
     public void testProvideCMSBeans() {
-        if (!NetUtil.isOnline())
-            return;
-        BeanCollector<List<BeanDefinition>, BeanDefinition> beans = CMSBean.provideCMSBeans(SampleApplicationBean.SF_BASE_URL_FILE + "README.MD");
+        String url = NetUtil.isOnline() ? SampleApplicationBean.SF_BASE_URL_FILE : "file:doc/sample-applications/";
+        BeanCollector<List<BeanDefinition>, BeanDefinition> beans = CMSBean.provideCMSBeans(url + "README.MD");
         ConcurrentUtil.sleep(2000);
         beans.getCurrentData().forEach(b -> System.out.println(((BeanDefinition)b).toValueMap(null)));
 
@@ -43,7 +42,7 @@ public class CMSBeanTest implements ENVTestPreparation {
         assertEquals(IPresentable.TYPE_ATTACHMENT, defBestellung.getAttribute("image").getPresentation().getType());
         
         assertEquals(2, defBestellung.getActions().size());
-        assertTrue(defBestellung.getAction("downloadAndExtract") instanceof SpecifiedAction);
+        assertTrue(defBestellung.getAction("downloadAndExtract0") instanceof SpecifiedAction);
 
     }
 }

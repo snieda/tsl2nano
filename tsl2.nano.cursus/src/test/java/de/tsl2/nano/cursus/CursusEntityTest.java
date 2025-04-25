@@ -204,7 +204,7 @@ public class CursusEntityTest implements Serializable /* only for the inner-clas
 	}
 
 	private Bean<Object> bean(Object instance) {
-		return Bean.getBean(instance);
+		return Bean.getBean(instance, true, true);
 	}
 
 }

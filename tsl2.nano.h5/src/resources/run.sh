@@ -82,7 +82,7 @@ MODULES=" --add-modules=ALL-SYSTEM --illegal-access=warn \
     --add-opens java.base/java.time.format=ALL-UNNAMED \
     --add-opens java.base/java.lang.reflect=ALL-UNNAMED \
     --add-opens java.base/sun.reflect.annotation=ALL-UNNAMED \
-    --add-opens jdk.unsupported/jdk.internal.module=ALL-UNNAMED \
+    --add-opens java.base/jdk.internal.module=ALL-UNNAMED \
     --add-opens java.base/sun.security.x509=ALL-UNNAMED \
     --add-opens java.base/javax.security.auth=ALL-UNNAMED \
     --add-opens java.base/java.io=ALL-UNNAMED \
@@ -93,9 +93,9 @@ MODULES=" --add-modules=ALL-SYSTEM --illegal-access=warn \
     --add-opens java.xml/org.w3c.dom=ALL-UNNAMED \
     --add-opens java.xml/javax.xml.namespace=ALL-UNNAMED \
     --add-opens java.base/java.nio.charset=ALL-UNNAMED \
+    --add-exports java.base/jdk.internal.module=ALL-UNNAMED \
     --add-exports java.management/sun.management=ALL-UNNAMED \
-    --add-exports java.xml/com.sun.org.apache.xerces.internal.dom=ALL-UNNAMED \
-    --add-exports jdk.unsupported/jdk.internal.module=ALL-UNNAMED"
+    --add-exports java.xml/com.sun.org.apache.xerces.internal.dom=ALL-UNNAMED" \
 
 echo "starting:\n\tjava $MODULES $SECURITY_LEAK $IPv4 $OFFLINE $SERVICEURL $UH $COMPAT $LLANG $ENCODING $JSU_ENC $USERDIR $NANO_DEBUG $AGENT $PROXY  $DEBUG \
 	$UH $HPROF_CPU $HPROF_HEAP $PROFILER $NO_DB_CHECK $NOSTARTPAGE $INTERNAL_DB \

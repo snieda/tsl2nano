@@ -746,16 +746,21 @@ public class Bean<T> extends BeanDefinition<T> {
         return getBean(instanceOrName, true/*!BeanUtil.isStandardType(instanceOrName)*/);
     }
 
+    public static <I> Bean<I> getBean(I instanceOrName, boolean cacheInstance) {
+        return getBean(instanceOrName, cacheInstance, false);
+    }
+
     /**
      * creates a bean with given instance or name. if you give a name, a virtual bean will be created and returned. if
      * you give an instance, a bean definition will be searched and copied to a new created bean.
      * 
      * @param <I> bean instance type
      * @param instanceOrName an object or string (--> {@link #isVirtual()})
+     * @param allowWrappingInstanceBean if true, a given instance of type Bean will be wrapped into another bean, otherwise the instance(=Bean) will be returned itself
      * @return new created bean
      */
-    public static <I> Bean<I> getBean(I instanceOrName, boolean cacheInstance) {
-        if (instanceOrName instanceof Bean)
+    public static <I> Bean<I> getBean(I instanceOrName, boolean cacheInstance, boolean allowWrappingInstanceBean) {
+        if (!allowWrappingInstanceBean && instanceOrName instanceof Bean)
             return (Bean<I>) instanceOrName;
         Bean<I> bean = timedCache.get(instanceOrName);
         if (bean != null) {

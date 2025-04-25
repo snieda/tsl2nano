@@ -14,6 +14,10 @@ import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.util.MethodUtil;
 import de.tsl2.nano.specification.actions.Action;
 
+/**
+ * Wrapper Bean to define virtual beans without any attributes - but actions - mostly for openapi generated web client
+ * classes to call the rest services.
+ */
 @SuppressWarnings({ "rawtypes" })
 public class StatelessActionBean<T> extends Bean<T> {
     private static final String STATELESSACTIONBEAN_ISACTIONMETHOD = "!statelessactionbeanisactionmethod";

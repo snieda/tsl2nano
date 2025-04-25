@@ -389,13 +389,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 "icons/people.png") {
                     @Override
                     public Object action() throws Exception {
-                        BeanCollector bc = new BeanCollector(Users.load(true).getUsers(), 1);
-                        // bc.addAction(new CommonAction("addUser", "Add User", "Add User") {
-                        //     @Override
-                        //     public Object action() throws Exception {
-                        //         return Users.load(true).auth(name, passwd, true);
-                        //     }
-                        // });
+                        Collection<User> users = new ArrayList(Users.load(true).getUsers());
+                        if (users.isEmpty()) {
+                            users.add(new User("MUSTER", "MYPASSWORD"));
+                        }
+                        BeanCollector bc = new BeanCollector(users, 1);
                         return bc;
                     }
                 });
@@ -545,7 +543,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     public void reset() {
         AttributeCover.resetTypeCache();
         ENV.get(Pool.class).reset();
-        ENV.addService(IFrameProvider.class, null);
+        ENV.services().remove(IFrameProvider.class);
         super.reset();
         //clear template cache
         jsWebsocketTemplate = null;
@@ -967,49 +965,55 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             String leftFileName = ENV.get("layout.leftPanel.file", BeanDefinition.getDefinitionDirectory() + "/frame/left-panel.frm");
             String rightFileName = ENV.get("layout.rightPanel.file", BeanDefinition.getDefinitionDirectory() + "/frame/right-panel.frm");
             String menuFileName = ENV.get("layout.menuactions.file", BeanDefinition.getDefinitionDirectory() + "/frame/menu-actions.frm");
-            IFrameProvider layoutProvider = null;
+            IFrameProvider frameProvider = null;
             String leftPanel = new File(leftFileName).exists() ? Util.trY( () -> new String(Files.readAllBytes(Paths.get(leftFileName)))) : null;
             String rightPanel = new File(rightFileName).exists() ? Util.trY( () -> new String(Files.readAllBytes(Paths.get(rightFileName)))) : null;
             String menuActions = new File(menuFileName).exists() ? Util.trY( () -> new String(Files.readAllBytes(Paths.get(menuFileName)))) : null;
             if (leftPanel != null && leftPanel.matches("(\\w+[.])*[A-Z]\\w+")) {
-                layoutProvider = (IFrameProvider) BeanClass.getBeanClass(BeanClass.load(leftPanel));
+                frameProvider = (IFrameProvider) BeanClass.getBeanClass(BeanClass.load(leftPanel));
             } else if (rightPanel != null && rightPanel.matches("(\\w+[.])*[A-Z]\\w+")) {
-                layoutProvider = (IFrameProvider) BeanClass.getBeanClass(BeanClass.load(rightPanel));
+                frameProvider = (IFrameProvider) BeanClass.getBeanClass(BeanClass.load(rightPanel));
             } else if (menuActions != null && rightPanel.matches("(\\w+[.])*[A-Z]\\w+")) {
-                layoutProvider = (IFrameProvider) BeanClass.getBeanClass(BeanClass.load(menuActions));
+                frameProvider = (IFrameProvider) BeanClass.getBeanClass(BeanClass.load(menuActions));
             }
             // ok, do it the default way
-            if (layoutProvider == null) {
-                layoutProvider = new IFrameProvider() {
+            if (frameProvider == null) {
+                frameProvider = new IFrameProvider() {
 
                     @Override
                     public String getLeftPanel(ISession session, BeanDefinition bean) {
-                        return leftPanel;
+                        return StringUtil.insertProperties(leftPanel, context(bean));
                     }
 
                     @Override
                     public String getRightPanel(ISession session, BeanDefinition bean) {
-                        return rightPanel;
+                        return StringUtil.insertProperties(rightPanel, context(bean));
+                    }
+
+                    private Map context(BeanDefinition bean) {
+                        Map c = ENV.concatProperties(bean.toValueMap(null));
+                        c.put("bean", bean.getName());
+                        return c;
                     }
 
                     @Override
                     public List<IAction> getMenuActions(ISession session, BeanDefinition bean) {
                         if (!Util.isEmpty(menuActions)) {
-                        return Arrays.asList(new CommonAction<String>("layoutprovider.about.id", "about", "about") {
-                            public String action() throws Exception {
-                                return menuActions;
-                            }
-                            public boolean isEnabled() {
-                                return session.getUserAuthorization() != null;
-                            }
-                        });
-                    } else {
-                        return null;
+                            return Arrays.asList(new CommonAction<String>("layoutprovider.about.id", "about", "about") {
+                                public String action() throws Exception {
+                                    return StringUtil.insertProperties(menuActions, context(bean));
+                                }
+                                public boolean isEnabled() {
+                                    return session.getUserAuthorization() != null;
+                                }
+                            });
+                        } else {
+                            return null;
+                        }
                     }
-                }
                 };
             }
-            ENV.addService(layoutProvider);
+            ENV.addService(frameProvider);
         }
     }
 

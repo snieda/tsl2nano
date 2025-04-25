@@ -33,30 +33,11 @@
 		<build.debug>${maven.compiler.debug}</build.debug>
 		<surefire.testFailureIgnore>false</surefire.testFailureIgnore>
 		<maven.test.failure.ignore>false</maven.test.failure.ignore>
-		<!-- add-opens: the spaces at line-starts are important! -->
-		<add-opens-unnamed> java.base/java.lang 
- java.base/java.util
- java.base/java.text
- java.base/java.time.format
- java.base/java.lang.reflect
- java.base/sun.reflect.annotation
- java.base/sun.security.x509
- java.base/javax.security.auth
- java.base/java.io
- java.base/sun.nio.ch
- java.base/java.net
- java.base/sun.security.ssl
- jdk.unsupported/jdk.internal.module
- java.xml/javax.xml.stream.events
- java.xml/org.w3c.dom
- java.xml/javax.xml.namespace
- jdk.management/com.sun.management.internal
- java.management/sun.management
+		<!-- add-opens: don't add line breaks by yourself - this is done through maven (72 cols) -->
+		<add-opens-unnamed>java.base/java.lang java.base/java.util java.base/java.text java.base/java.time.format java.base/java.lang.reflect java.base/javax.security.auth java.base/sun.reflect.annotation java.base/sun.security.x509 java.base/java.io java.base/sun.nio.ch java.base/java.net java.base/sun.security.ssl java.base/jdk.internal.module java.xml/javax.xml.stream.events java.xml/org.w3c.dom java.xml/javax.xml.namespace jdk.management/com.sun.management.internal java.management/sun.management
 		</add-opens-unnamed>
-		<!-- WARN: add-exports only on compile scope otherwise jar file will be corrupt -->
-		<add-export-unnamed>
- java.base/sun.security.x509
- java.management/sun.management
+		<!-- WARN: add-exports only on compile scope otherwise jar file may be corrupt -->
+		<add-export-unnamed>java.base/jdk.internal.module java.base/sun.security.x509 java.management/sun.management
 		</add-export-unnamed>
 	</properties>
 	<build>

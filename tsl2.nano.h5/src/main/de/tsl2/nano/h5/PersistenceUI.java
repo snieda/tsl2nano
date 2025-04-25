@@ -443,7 +443,7 @@ public class PersistenceUI {
         ((RegExpFormat) login.getAttribute("database").getFormat()).setPattern(RegExpFormat.alphanum(100000, false),
             null, 100000, Pattern.MULTILINE);
         login.getAttribute("database").getPresentation()
-            .setLayoutConstraints((Serializable) MapUtil.asMap("rows", 1, "cols", "50", "style", "width:382;"));
+            .setLayoutConstraints((Serializable) MapUtil.asMap("rows", 1, "cols", "50", "style", "width:382; height: 60px; background-color: lightyellow;"));
 
         /*
          * caution: this is a flag to disable changing any field of the persistence.xml. The persistence.xml 

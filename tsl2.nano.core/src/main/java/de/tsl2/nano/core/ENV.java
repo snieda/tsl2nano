@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -525,6 +526,12 @@ public class ENV implements Serializable {
         return self().properties;
     }
 
+    public static Map<String, Object> concatProperties(Map<String, Object> context) {
+        LinkedHashMap<String, Object> p = new LinkedHashMap<>(getProperties());
+        p.putAll(context);
+        return p;
+    }
+    
     /**
      * setProperty
      * 

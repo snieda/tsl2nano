@@ -1,4 +1,14 @@
-package de.tsl2.nano.h5;
+/*
+ * File: $HeadURL$
+ * Id  : $Id$
+ * 
+ * created by: Thomas Schneider
+ * created on: Apr 19, 2025
+ * 
+ * Copyright: (c) Thomas Schneider 2025, all rights reserved
+ */
+
+ package de.tsl2.nano.h5;
 
 import static de.tsl2.nano.h5.CMSBean.DefaultAttributes.DESCRIPTION;
 import static de.tsl2.nano.h5.CMSBean.DefaultAttributes.IMAGE;
@@ -41,7 +51,7 @@ import de.tsl2.nano.specification.Pool;
 import de.tsl2.nano.specification.actions.Action;
 
 /**
- * Creates Beans from a given content url. 
+ * Creates Beans from a given content url. Usable like a constraint FlatFile Content Management System or Editorial System.
  * This url must point to a README.MD.
  * The README.MD must contain a tag "{{NAMES}}" followed by a comma separated list of bean names.
  * This bean names have to be found as child folders of the given baseurl (where the README.MD was found)
@@ -100,7 +110,11 @@ public class CMSBean {
         names.parallelStream().forEach(n -> beans.add(n.startsWith(PREFIX_COLLECTOR) ? provideCMSBeans(baseUrl + n + INFO, strict) : createBean(baseUrl, n, strict)));
         
         logFrame(beans.size() + " beans created:\n" + beans.stream().map(b -> ((BeanDefinition)b).toValueMap(null).toString() + "\n").toList());
-        return new BeanCollector<List<BeanDefinition>,BeanDefinition>(beans, 1);
+        BeanCollector<List<BeanDefinition>, BeanDefinition> bc = new BeanCollector<List<BeanDefinition>,BeanDefinition>(beans, 1);
+        String name = StringUtil.substring(baseUrl.substring(0, baseUrl.length() - 1), "/", null, true);
+        bc.setName(name);
+        bc.getPresentable().setIcon("icons/cascade.png");
+        return bc;
     }
 
     static void logMsg(String txt) {
@@ -139,16 +153,15 @@ public class CMSBean {
             actions = Arrays.asList(name);
         }
         logMsg("adding actions to  bean '" + name + "': " + actions);
-        Map<String, Object> props = bean.toValueMap(null);
-        props.put("bean", bean.getName());
+        Map<String, Object> props = context(bean);
         actions.forEach(n -> addAction(bean, baseUrlName, n, strict, props));
+        bean.getPresentable().setIcon("icons/open.png");
         return bean;
     }
 
     private static void addDefaultAttributes(Bean<Object> bean, String baseUrlName, String name, boolean strict) {
         logMsg("adding default attributes on " + name);
-        Map<String, Object> props = bean.toValueMap(null);
-        props.put("bean", bean.getName());
+        Map<String, Object> props = context(bean);
         AttributeDefinition<String> attr = bean.addAttribute(NAME.toString(), new Value<String>(NAME.toString(), name), null, null);
         extendPresentable(attr.getPresentation());
         
@@ -173,6 +186,11 @@ public class CMSBean {
                 null);
         extendPresentable(attr.getPresentation());
     }
+    protected static Map<String, Object> context(Bean<?> bean) {
+        Map<String, Object> props = ENV.concatProperties(bean.toValueMap(null));
+        props.put("bean", bean.getName());
+        return props;
+    }
 
     private static IPresentable extendPresentable(IPresentable p, int type) {
         IPresentable pres = extendPresentable(p);
@@ -184,8 +202,7 @@ public class CMSBean {
         return p;
     }
     private static void addAttribute(Bean<?> bean, String baseUrl, String name, boolean strict) {
-        Map<String, Object> props = bean.toValueMap(null);
-        props.put("bean", bean.getName());
+        Map<String, Object> props = context(bean);
         String description = readFromDownload(attrFile(baseUrl, name, "description", ".txt"), false, props);
         Object valueObject = getValue(baseUrl, name, strict, props);
         String imageUrl = getImageUrl(baseUrl, name, strict, props);

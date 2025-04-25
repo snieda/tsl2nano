@@ -967,6 +967,9 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
          */
         types.addAll(BeanDefinition.loadVirtualDefinitions());
 
+        /* CMSBeans through folder specification/cms */
+        loadContentBeans(types);
+
         for (BeanDefinition beanDef : types) {
             Plugins.process(INanoPlugin.class).defineBeanDefinition(beanDef);
         }
@@ -994,6 +997,18 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
         if (entityBrowser != null)
             entryPoints = createNavigationStartPoint(entityBrowser, root);
         return entryPoints == 0 ? root : entityBrowser.next(null); //if entrypoints are found, root and entrypoints are push to the navigationstack
+    }
+
+    private void loadContentBeans(List<BeanDefinition> types) {
+        String contentReadme = ENV.get(Pool.class).getSpecificationRootDir() + "content/README.MD";
+        if (new File(contentReadme).exists()) {
+            try {
+                contentReadme = "file:" + FileUtil.getRelativePath(contentReadme);
+                types.add(CMSBean.provideCMSBeans(contentReadme));
+            } catch(Exception ex) {
+                Message.info("Error on loading content beans '" + contentReadme + "': " + ex.toString());
+            }
+        }
     }
 
     void createVirtualActionBeans() {

@@ -19,7 +19,6 @@ public class BeanArrayEntryTest {
 		Object bServices = bean.getValue("services");
 		Bean<Object> mapBean = Bean.getBean(bServices);
 		Iterator<BeanValue<?>> it = mapBean.getBeanValues().iterator();
-		it.next();
 		BeanValue<?> mapValue = it.next();
 		assertEquals("a0", mapValue.getName());
 		assertEquals(myMapValue, mapValue.getValue());

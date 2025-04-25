@@ -2148,7 +2148,24 @@ If a cell starts with '=', it will be calculated and replaced by the result. The
 
 If a cell is bound into '<<' and '>>', the formula/action will be calculated without replacing the cell content with the result.
 
+#### Stateless Action Beans (virtual action beans)
+
+On first login, the application will load the beans, found inside the given beans jar file (inside the persistence defintions).
+This beans are created by a O/R mapper generator like hibernate-tools or openjpa.
+
+Then, virtual beans, found inside the folder 'presenetation/virtual' are added.
+
+If you start the administration 'Generate Opan API Client' action, the openapi generator will add these classes as virtual beans
+of type StatelessActionBean if their name ends with 'Api'.
+So, these are beans without persistence annotations from JPA like @Table or @Entity and are stored inside the folder 'presentation/virtual'.
+They are stateless and have not attributes but action buttons to start the web service calls.
+
+You can test it for example, with the testing rest service: https://github.com/bump-sh-examples/train-travel-api/raw/refs/heads/main/openapi.yaml
+
 #### The CMSBean (reading its content from urls of an content managment or file system)
+
+CMSBeans are loaded by default from folder 'specification/content' if existing. But you can use it in any other way.
+As example, you may copy the content from git 'tsl2nano/tsl2.nano.h5/doc/sample-applications'
 
 ##### description
 
@@ -5159,7 +5176,7 @@ hint II: a script (upgrade-old-tsl2-apps.sh) to do this is inside the resources 
  2.5.2  | 24.11.2024 | dependency updates, h5 stylings enhanced, jmockit -> mockito (serviceacces, replication), complete json, yaml, xml de-/serializing,enhancing autotest,cursus: fix package: tsl2.nano->de.tsl2.nano , beanattribute respecting generic type,many fixes/enhancings on object creation, stringutil, ENV static self removed
  2.5.3  | 03.01.2025 | corrections on internationalization (generic regex creation), autotest valueset on json objects
  2.5.4  | 23.02.2025 | +script-engine (nashorn+dependencies), property asking, fixes on html dialog and replication, run scripts refactored, using formtarget=_blank for exports, specification: +doc, +timesheet-sample, refresh cursus (id: Long for hibernate 5)
- 2.5.5  | 31.03.2025 | h5:+openapi-generate-scripts, statelessa action beans, html-dialogs: timeout-close, minor fixes
+ 2.5.5  | 31.03.2025 | h5:+openapi-generate-scripts, stateless action beans, html-dialogs: timeout-close, minor fixes
  2.5.6  | 20.04.2025 | h5:+CMSBean, +admin: provide sample applications, prod/admin switch, adding users, layout: additional left/right panels and info menu
 |------ | ---------- | -----------
 
@@ -6456,7 +6473,7 @@ Cursus:
    * [x] create dialog to show each image and zip and download button
    * [v] create script to add the sample application in current environement
    * [ ] ...or create multi-application folder with restart all...
-   * [ ] for each sample appication do:
+   * [x] for each sample appication do:
       * [v] create screenshots/pictures
       * [v] create description
       * [x] create zip file
@@ -6470,7 +6487,95 @@ Cursus:
    * [x] define bean or configuration to provide left/right bar
 * [x] styles: blue-planets.jpg -> background-image.jpg
 * [x] create generic CMS Bean Creator
-* [x] simulate NetUtil.download() through existing files
+* [v] NetUtil.download(): if overwrite=false use existing file
 * [-] add oauth: lot of work....
-* [ ] authorization (e.g. MUSTER-permissions.xml" cannot be saved in cause of failing permission on reading subject
-   * [ ] "--add-opens java.base/javax.security.auth=ALL-UNNAMED" not working
+* [ ] CMSBean: editable on asking permissions
+* [v] authorization (e.g. MUSTER-permissions.xml" cannot be saved in cause of failing permission on reading subject
+   * [v] "--add-opens java.base/javax.security.auth=ALL-UNNAMED" not working
+* [-] rules/cover listener not working anymore !!!
+* [ ] create list of synonyms to show naming icons
+
+public class IconCategories {
+   String[] icons = new String[] { 
+       "about.png", "about", "info", "tip", "note", 
+       "e-mail.png", "e-mail", "email", "mail", 
+       "print.png", "paper", "printer", 
+       "accounting.png", "accouning", "bill", "cash", "credit", "payment", "pay", 
+       "equipment.png", "equipment", "tool", "tools", 
+       "properties.png", 
+       "add.png", "add", "append",
+       "euro.png", "euro", "currency",
+       "reload.png", "refresh", "actualize", "around",
+       "apply.png", "apply", "use", 
+       "exit.png", "exit", "stop", "quit", "logout", "leave",
+       "report.png", "classfication",
+       "art008.jpg",
+       "favicon.ico", 
+       "ripplez.gif", 
+       "art029.jpg", 
+       "fenz.gif", 
+       "save.png", "save", "store",
+       "art036.jpg", 
+       "find.png", 
+       "search.png",
+       "attach.png", "attach", "image", "picture", 
+       "forward.png", 
+       "search-small.png", 
+       "background-image.jpg", 
+       "full_screen.png", "screen", "display", "view", "monitor",
+       "shopping cart.png", "shopping", "cart" "buy", "session", "order",
+       "back.png", 
+       "goback.png", 
+       "spe.jpg", 
+       "barchart.png", 
+       "go.png", 
+       "splatz.gif",
+       "beanex-logo.jpg", 
+       "grass1.jpg", 
+       "stop.png", 
+       "beanex-logo-micro.jpg", 
+       "home.png", "organisation",
+       "table.png", "table", "sheet", "excel",
+       "beanex-logo-mini.jpg", 
+       "images_all.png", 
+       "tex30.gif", 
+       "beanex-logo-small.jpg", 
+       "key.png", "key", "secure", "security", "lock",
+       "throbber-red.gif", 
+       "blocked.png", 
+       "links.png", 
+       "trash.png", "trash", "discharge",
+       "blue_pin.png", 
+       "mail_attachment.png",
+       "trust_unknown.png", 
+       "blue-planets_.jpg", 
+       "male.png", 
+       "turnoff.png", 
+       "boss.png", "boss", "agent", "admin", "administration",
+       "message.png", "message", "document",
+       "upload.png", "load",
+       "bricks9.jpg", 
+       "mobile-phone.png", "mobile", "phone", "telephone"
+       "up.png", "buff_noise.jpg", "mosaic9.jpg", "view.png",
+       "buy.png", "charge",
+       "new.png", "new", "create", "document",
+       "waterz.gif", 
+       "calendar.png", 
+       "open.png", "folder",
+       "widget.png", "configure", "status",
+       "cascade.png", "structure", "cateogry", "content",
+       "paperz.gif",
+       "wood1.jpg", 
+       "clock.png", "clock", "time",
+       "people.png", "party", "partner", "user",
+       "wood.jpg", 
+       "compose.png", "address", "location",
+       "point-green.png", 
+       "wrench.png", "tool", "tools", "configure", "change",
+       "disaster.png", "disaster", "error", "fatal",
+       "point-red.png", 
+       "yellow_pin.png" };
+
+   
+}
+
