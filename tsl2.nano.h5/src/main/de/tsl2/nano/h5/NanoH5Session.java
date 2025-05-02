@@ -846,6 +846,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
         if (current.getActions() != null) {
             actions.addAll(current.getActions());
         }
+        actions.addAll(current.getPresentationHelper().getInfoActions(this));
         actions.addAll(current.getPresentationHelper().getPageActions(this));
         actions.addAll(current.getPresentationHelper().getSessionActions(this));
         actions.addAll(current.getPresentationHelper().getApplicationActions(this));

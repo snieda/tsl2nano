@@ -165,6 +165,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
     static final Log LOG = LogFactory.getLog(Html5Presentation.class);
     private transient boolean isAuthenticated;
+    private static Category iconCategories;
     private static transient String jsWebsocketTemplate;
 
     public static final String L_GRIDWIDTH = "layout.gridwidth";
@@ -548,6 +549,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         //clear template cache
         jsWebsocketTemplate = null;
         tableDivStyle = null;
+        iconCategories = null;
     }
 
     /**
@@ -2105,6 +2107,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     icon = name + ".png";
                 else if (new File(ENV.getConfigPath() + name + ".gif").canRead())
                     icon = name + ".gif";
+                else {
+                    icon = findIcon(value.toLowerCase());
+                }
             }
         }
         //check the presentable for an icon 
@@ -2113,6 +2118,14 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 && (icon = ((BeanDefinition<?>) item).getPresentable().getIcon()) != null ? icon : null;
         }
         return icon;
+    }
+
+    String findIcon(String name) {
+        if (iconCategories == null) {
+            iconCategories = new Category("icon-categories.properties");
+        }
+        String iconFile = iconCategories.get(name);
+        return iconFile != null ? "icons/" + iconFile : null;
     }
 
     private String dark(String color) {

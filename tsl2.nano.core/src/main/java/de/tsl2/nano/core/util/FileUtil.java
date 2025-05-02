@@ -511,7 +511,7 @@ public class FileUtil {
         }
         try (InputStream resource = classLoader.getResourceAsStream(resourceFile)) {
 	        if (resource == null) {
-	            throw new IllegalArgumentException("file: " + resourceFile + " not found");
+	            throw new IllegalArgumentException("resource file: " + resourceFile + " not found");
 	        }
 	        final Properties properties = new Properties();
             LOG.info("loading resource: " + resourceFile);

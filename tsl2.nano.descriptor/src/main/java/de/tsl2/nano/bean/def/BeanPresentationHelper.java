@@ -1852,6 +1852,10 @@ public class BeanPresentationHelper<T> {
         return pageActions;
     }
 
+    public Collection<IAction> getInfoActions(ISession session) {
+        return new ArrayList<>(0);
+    }
+
     /**
      * override this method to define a special command handler to be used e.g. by BeanCollector.editItem() - perhaps
      * opening a detail dialog.
