@@ -984,12 +984,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
                     @Override
                     public String getLeftPanel(ISession session, BeanDefinition bean) {
-                        return StringUtil.insertProperties(leftPanel, context(bean));
+                        return leftPanel != null && bean != null ? StringUtil.insertProperties(leftPanel, context(bean)) : null;
                     }
 
                     @Override
                     public String getRightPanel(ISession session, BeanDefinition bean) {
-                        return StringUtil.insertProperties(rightPanel, context(bean));
+                        return rightPanel != null && bean != null ? StringUtil.insertProperties(rightPanel, context(bean)) : null;
                     }
 
                     private Map context(BeanDefinition bean) {
@@ -1000,7 +1000,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
                     @Override
                     public List<IAction> getMenuActions(ISession session, BeanDefinition bean) {
-                        if (!Util.isEmpty(menuActions)) {
+                        if (!Util.isEmpty(menuActions) && bean != null) {
                             return Arrays.asList(new CommonAction<String>("layoutprovider.about.id", "about", "about") {
                                 public String action() throws Exception {
                                     return StringUtil.insertProperties(menuActions, context(bean));

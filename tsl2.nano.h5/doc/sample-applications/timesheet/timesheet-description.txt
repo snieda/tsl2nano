@@ -1,2 +1,3 @@
 Timesheet provides the organisation and input of project times for each worker.
 It is able to show some statistics and tries to provide user friendly input masks.
+See https://sourceforge.net/p/tsl2nano/wiki/timesheet/

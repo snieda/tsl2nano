@@ -73,7 +73,8 @@ public class RegExUtil {
             .replaceAll("([:.?,!*+\\-\\|$<>\\}\\{\\]\\[\\)\\(])", (softOnSeparation ? "?" : "") + "[$1]")
             .replaceAll("[a-zA-Z\\p{L}]", ".")
             .replaceAll("\\d", "\\\\d")
-            .replaceAll("\\s", "\\\\s");
+            .replaceAll("\\s", "\\\\s")
+			.replace("[.]\\s", "[.]?\\s");//WORKAROUND on FRANCE dates ending month names with '.' - but not on Mai, because its short enough.
     }
 
 	public static String createFromRegEx(String regex, int minLength, int maxLength, int maxIterations) {
