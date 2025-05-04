@@ -50,8 +50,9 @@
 
 ## Documentation
 
-* [Wiki-Documentation on SourceForge](https://sourceforge.net/p/tsl2nano/wiki/tsl2-nano%20Home/)
-* [Wiki-Documentation](tsl2.nano.h5/nano.h5.md.html)
+* [Short Wiki-Documentation on SourceForge](https://sourceforge.net/p/tsl2nano/wiki/tsl2-nano%20Home/)
+* [Full Wiki-Documentation on SourceForge (not actualized, long loading)](https://sourceforge.net/p/tsl2nano/wiki/tsl2-nano%20Home/)
+* [Full Wiki-Documentation (actualized, no pictures)](tsl2.nano.h5/nano.h5.md.html)
 * [Video Tutorial on Youtube](https://www.youtube-nocookie.com/embed/WuC37CLdxSA?rel=0)
 
 ### Documentation of Submodules
@@ -76,11 +77,16 @@
 * [github](https://github.com/snieda/tsl2nano.git)
 * [gitlab](https://gitlab.com/snieda/tsl2nano.git)
 
+## Releases
+
+* [Maven Central](https://mvnrepository.com/artifact/net.sf.tsl2nano/tsl2.nano.h5-package/2.5.6)
+
 ## Screenshots
 
 ![application+datbase-login](tsl2.nano.h5/doc/application+datbase-login.png)
 ![entity-attribute-configuration](tsl2.nano.h5/doc/entity-attribute-configuration.png)
 ![entity-browser](tsl2.nano.h5/doc/entity-browser.png)
+![entity-browser](tsl2.nano.h5/doc/entity-browser-mobile.png)
 ![entity-configuration](tsl2.nano.h5/doc/entity-configuration.png)
 ![entity-detaildialog](tsl2.nano.h5/doc/entity-detaildialog.png)
 ![entity-searchdialog](tsl2.nano.h5/doc/entity-searchdialog.png)
