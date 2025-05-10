@@ -3,20 +3,36 @@
   <parent>
     <groupId>net.sf.tsl2nano</groupId>
     <artifactId>tsl2.nano.h5-package</artifactId>
-    <version>2.5.7-SNAPSHOT</version>
+    <version>2.5.6</version>
   </parent>
-  <artifactId>tsl2.nano.filter</artifactId>
-  <name>TSL2 Framework Filter</name>
-  <description>TSL2 Framework to filter objects through named predicates  - the filters can be configured through a yaml file</description>
+  <artifactId>tsl2.nano.nosql-provider</artifactId>
+  <name>TSL2 Framework NoSQL Provider</name>
+  <description>TSL2 Framework using jakarta nosql to implement a JPA persistence provider</description>
 	<properties>
 		<module.parent>..</module.parent>
 		<quarkus.version>2.16.6.Final</quarkus.version>
+		<jakarta.persistence-api.version>3.2.0</jakarta.persistence-api.version>
 	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>tsl2.nano.core</artifactId>
 			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.tsl2nano</groupId>
+			<artifactId>tsl2.nano.directaccess</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.persistence</groupId>
+			<artifactId>jakarta.persistence-api</artifactId>
+			<version>${jakarta.persistence-api.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.nosql</groupId>
+			<artifactId>jakarta.nosql-api</artifactId>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.enterprise</groupId>
