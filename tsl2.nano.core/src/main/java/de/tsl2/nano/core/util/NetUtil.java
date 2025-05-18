@@ -120,7 +120,7 @@ public class NetUtil {
                         continue;
                     }
                     //TODO: how to check for VPN connections?
-                    if (inetAddress.isReachable(2000)) {
+                    if (Util.trYWithDefault( () -> inetAddress.isReachable(2000), false)) {
                         return inetAddress;
                     }
                 }

@@ -582,6 +582,10 @@ public class Util {
         return cl;
 	}
 
+    public static <T> T trYWithDefault(SupplierEx<T> callback, T defaultValue) {
+        return ManagedException.trYWithDefault(callback, defaultValue);
+    }
+
     /**let the trY to the standard exception handling  */
     public static <T> T trY(SupplierEx<T> callback) {
         return trY(callback, true);

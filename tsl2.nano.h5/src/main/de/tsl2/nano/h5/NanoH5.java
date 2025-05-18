@@ -1354,6 +1354,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
 
 	private static Boolean runAntScript(Properties p, String script, String target) {
 		p.put("basedir", ENV.getConfigPath());
+        p.put("includeantruntime", false);
         return (Boolean) ENV.get(CompatibilityLayer.class).runRegistered("ant",
             ENV.getConfigPath() + script,
             target,
