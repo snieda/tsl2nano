@@ -328,8 +328,9 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
                 ENV.extractResource("mda.bat");
                 ENV.extractResource("mvnw.cmd");
             }
-            ENV.extractResource(".mvn/wrapper/maven-wrapper.jar");
-            ENV.extractResource(".mvn/wrapper/maven-wrapper.properties");
+            // don't know why, but on android systems (termux) the wrapper files are not packed into the jar file
+            Util.trY( () -> ENV.extractResource(".mvn/wrapper/maven-wrapper.jar"), false);
+            Util.trY( () -> ENV.extractResource(".mvn/wrapper/maven-wrapper.properties"), false);
             
             ENV.extractResource("readme.txt");
             ENV.extractResource("shell.xml");
