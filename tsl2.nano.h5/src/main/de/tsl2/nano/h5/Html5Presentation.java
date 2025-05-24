@@ -343,6 +343,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                             Process prc = SystemUtil.execute(new File(ENV.getConfigPathRel()),
                                 new String[] { "./generate-openapi.sh", String.valueOf(vh.getValue()) });
                             prc.waitFor();
+                            Message.info("a new \"generated-model.jar\" was created.\nto use it,\n  " + 
+                                "1. close the session\n  " + 
+                                "2. change the persistence jar-File to \"generated-model.jar\"\n  " + 
+                                "3. change the persistence auto-ddl to \"update\"\n" +
+                                "start the session through \"Ok\"");
                             if (prc.exitValue() == 0 && Message.ask("Do you want to restart session and load new generated-model.jar?", true)) {
                                 Persistence.current().setJarFile("generated-model.jar");
                                 Persistence.current().setAutoddl("update");

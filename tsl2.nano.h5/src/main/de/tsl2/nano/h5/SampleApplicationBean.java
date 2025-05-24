@@ -64,12 +64,12 @@ public class SampleApplicationBean {
     private static String downloadAndExtract(String name, String zipUrl, boolean insideCurrentEnvironment) {
         String path = ENV.getConfigPath();
         if (!insideCurrentEnvironment) {
-            path = System.getProperty("user.dir") + "/." + name + ".environment/";
+            path = System.getProperty("user.dir") + "/." + name + ".install/";
             new File(path).mkdirs();
         }
         File zip = NetUtil.download(zipUrl, path);
         FileUtil.extract(zip.getPath(), path, null);
-        String info = name + "successfully downloaded and installed on path: " + path;
+        String info = name + " successfully downloaded and installed on path: " + path;
         Message.info(info + "\n\n" + (insideCurrentEnvironment
                 ? "to start it, re-login selecting " + name + ".jar file"
                 : "to start it, you have to shutdown and start the application with: ./run.sh ." + name

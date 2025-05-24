@@ -21,6 +21,9 @@ if [[ ! -f "$DIR/$SRC_FILE"  && ! -f "~/.local/bin/$SRC_FILE" ]]; then
 fi
 . $DIR/mainargs.sh || . mainargs.sh
 
+ARGS0=( $OPTARGS )
+set -- $ARGS0
+
 if [ "$1" == "" ] 
 	then PRJ=.nanoh5.environment
 	else PRJ=$1 && shift

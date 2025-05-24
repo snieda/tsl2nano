@@ -41,6 +41,7 @@ import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FilePath;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
@@ -314,6 +315,27 @@ public class CMSBean {
 
     private static String getDefinitionDirectory() {
         return Pool.getSpecificationRootDir() + "cms/";
+    }
+
+    /* copied from deprecated SampleApplicationBean */
+    public static String downloadAndExtract0(Bean<?> selected) {
+        return downloadAndExtract(selected.getName(), (String)selected.getValue("value"), false);
+    }
+
+    private static String downloadAndExtract(String name, String zipUrl, boolean insideCurrentEnvironment) {
+        String path = ENV.getConfigPath();
+        if (!insideCurrentEnvironment) {
+            path = System.getProperty("user.dir") + "/." + name + ".install/";
+            new File(path).mkdirs();
+        }
+        File zip = NetUtil.download(zipUrl, path, true, false);
+        FileUtil.extract(zip.getPath(), path, null);
+        String info = name + " successfully downloaded and installed on path: " + path;
+        Message.info(info + "\n\n" + (insideCurrentEnvironment
+                ? "to start it, re-login selecting " + name + ".jar file"
+                : "to start it, you have to shutdown and start the application with: ./run.sh ." + name
+                        + ".environment"));
+        return info;
     }
 
 }
