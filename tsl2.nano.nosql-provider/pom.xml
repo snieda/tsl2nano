@@ -35,6 +35,11 @@
 			<version>1.0.0</version>
 		</dependency>
 		<dependency>
+			<groupId>org.eclipse.jnosql.databases</groupId>
+			<artifactId>jnosql-mongodb</artifactId>
+			<version>1.1.0</version>
+		</dependency>
+		<dependency>
 			<groupId>javax.enterprise</groupId>
 			<artifactId>cdi-api</artifactId>
 			<version>2.0-PFD2</version>
