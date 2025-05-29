@@ -1,7 +1,8 @@
 <font size="6" align="center">FullRelation Nano.H5<br/></font>
 <font size="-1">&copy; Thomas Schneider 2012-2025
 <br/>
-<a href="https://sourceforge.net/projects/tsl2nano/files/latest/download">Download on sourceforge</a>
+<a href="https://sourceforge.net/projects/tsl2nano/files/latest/download">Download from sourceforge</a>
+<a href="https://repo.maven.apache.org/maven2/net/sf/tsl2nano/tsl2.nano.h5/2.5.7/tsl2.nano.h5-2.5.7.jar">Download from maven-central</a>
 <br/>
 <a href="http://sourceforge.net/projects/tsl2nano/files/2.5.4/nano.h5.jnlp">Start Nano.H5 through WebStart</a>
 </font>
@@ -606,14 +607,12 @@ for further informations, have a look here: https://sourceforge.net/p/tsl2nano/c
 
 ### Quick-Start
 
-* install a <a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html">java jdk at least version 1.8</a>. If you only install a java jre-version, the bean-jar file cannot be generated - then you have to select an existing one.
+* install a <a href="https://openjdk.org/projects/jdk/">openjdk java</a> or <a href="https://docs.aws.amazon.com/corretto/latest/corretto-17-ug/downloads-list.html">corretto java jdk</a>  at least version 17. If you only install a java jre-version, the bean-jar file cannot be generated - then you have to select an existing one.
 * get the newest version of <a href="https://sourceforge.net/projects/tsl2nano/">tsl2.nano.h5</a>
-* start this jar file with _java -jar tsl2.nano.h5.[version-number].jar_. this will create the environments _nanoh5.environment_ and a _run.bat_.
-* go into the extracted sub-directory _sample_ and start the _Windows_-batch file _runServer.cmd_. This will start the sample database.
-* start the _run.bat_
-* if you are not on a _Windows_ system, start your internet browser with adress _localhost:8067_, or just do a double-click on the file _application.html_
-* In the center of the browser-page do a click on the centered link, starting with text 'Start...'
-* Do a login filling the user-name 'time' and password 'time' and clicking the Ok-Button.
+* start this jar file with _java -jar tsl2.nano.h5.[version-number].jar_. this will create the environments _nanoh5.environment_ and a _run.sh_ (or _run.bat_).
+* normally your standard browser will be opened with adress _localhost:8067_
+* just do a double-click on the file _application.html_
+* Do a login filling the user-name 'SADMIN' and password 'nanoh5' and clicking the Ok-Button.
 * After a while you will see all availabe entity-types to be browsable...
 
 ### Online Quick-Start with a great selection of Database-Models on PonyORM
@@ -624,7 +623,7 @@ Since most UML-model designers will generate a DDL (database definition language
 
 Here is a short description how to use a model from PonyORM and starting a full database-application with web-start on that model:
 
- - using java 8, you have to add the tsl2.nano site from sourceforge *https://sourceforge.net/projects/tsl2nano/* to the exception list, to start jnlp without a real certification (only a self-certification is available, yet!)
+ - using java >=17, you have to add the tsl2.nano site from sourceforge *https://sourceforge.net/projects/tsl2nano/* to the exception list, to start jnlp without a real certification (only a self-certification is available, yet!)
  - open the link https://editor.ponyorm.com/user/pony/OnlineStore in your browser
  - select a datbase dialect on the top tab panel and click on it (prefered: oracle)
  - click the button _select all_
@@ -653,8 +652,6 @@ The tsl2.nano.h5 framework can be started through it's jar _tsl2.nano.h5-xxxxx.j
 
 On first start, the most important files will be created!
 
-Normally, you will start with an example: download the file _tsl2.nano.h5.x.y.z-hibernate.zip_ to have an example using lots of features of this project - you have a simple test database and are able to generate your bean jar, see a trivial application-extension, workflow, authorization and rule.
- 
 Feel free to test, whether a database-connection of a project you know is working with nano.h5....
 
 ### Using the sample-content
@@ -737,7 +734,7 @@ If you set it to true, the synthetic user will be the user asked by the login. I
 To create a hash for a new password start the following:
  
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	java -cp tsl2.nano.h5-2.5.4.jar de.tsl2.nano.h5.User mypassword
+	java -cp tsl2.nano.h5-2.5.7.jar de.tsl2.nano.h5.User mypassword
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This hashcode then can be used inside the __usercheck.xml__ for the synthetic user:
@@ -4594,7 +4591,7 @@ Example Procfile:
 	# NOTE: change the path of jar file to be relative, starting on target/
 	#
 	# see .env vor environment variables - only for local start
-	web: java $NOLOGIN $NOSTARTPAGE $DEBUG $INTERNAL_DB $NO_DB_CHECK $TSL_SERVICE $TSL_SSL_ACTIVATE $TSL_SSL $TSL_SSL_FILE $TSL_SSL_PASSWORD $JAVAX_TSL12 $JAVAX_NET_DEBUG $JAVAX_TRUSTSTORE $JAVAX_TRUSTPASSWD -jar target/classes/tsl2.nano.h5-2.4.2-SNAPSHOT-standalone.jar target/classes/.nanoh5.timesheet "$APP_URL:$PORT"
+	web: java $NOLOGIN $NOSTARTPAGE $DEBUG $INTERNAL_DB $NO_DB_CHECK $TSL_SERVICE $TSL_SSL_ACTIVATE $TSL_SSL $TSL_SSL_FILE $TSL_SSL_PASSWORD $JAVAX_TSL12 $JAVAX_NET_DEBUG $JAVAX_TRUSTSTORE $JAVAX_TRUSTPASSWD -jar target/classes/tsl2.nano.h5-2.5.7.jar target/classes/.nanoh5.timesheet "$APP_URL:$PORT"
 
 ```
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -4624,8 +4621,8 @@ Example .env file:
 	JAVAX_NET_DEBUG=-Djavax.net.debug=all
 	# JAVAX_TRUSTSTORE=-Djavax.net.ssl.trustStore=nanoh5.pks
 	# JAVAX_TRUSTPASSWD=-Djavax.net.ssl.trustStorePassword=nanoh5
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ```
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you start the second line comment of the .env example file, you can set all that variables on heroku for you remote application.
 
@@ -5179,6 +5176,7 @@ hint II: a script (upgrade-old-tsl2-apps.sh) to do this is inside the resources 
  2.5.5  | 31.03.2025 | h5:+openapi-generate-scripts, stateless action beans, html-dialogs: timeout-close, minor fixes
  2.5.6  | 04.05.2025 | h5:+CMSBean, +admin: provide sample applications, prod/admin switch, adding users, layout: additional left/right panels and info menu
  2.5.7  | 25.05.2025 | hotfix: running on android, windows, fixes on openapi, sampleapplications, OSSRH -> maven central portal
+ 2.5.8  | 31.12.2025 | ???
 |------ | ---------- | -----------
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
@@ -6498,4 +6496,4 @@ Cursus:
 * [ ] reverse-eng.xml ant script: hibernate.reveng.xml with DTD load fails offline
 * [ ] check to add jakarta nosql as persistence provider
    *[ ] perhaps provide an EntityManager implementation covering jakarta-nosql
-
+* [ ] to be compilable on jdk <= 20, change the setter methods of sun.security.x509.X509Cert* in class PKI in core module
