@@ -3269,6 +3269,62 @@ In standalone mode, database connections are defined inside the _persistence.xml
 
 Working inside an application server, the server will provide a database pool. connections are defined for example in jboss in a deployed xml file (or the jboss configuration file like standalone.xml) having datasource entries.
 
+## A short story to NoSQL
+
+As many projects try to include or use a NoSQL Database like Cassandra, CouchDB, MongoDB, Neo4J, Redis, there grew three projects to combine the relational EE world with the non relational:
+
+* hibernate-ogm (https://hibernate.org/ogm/): a layer to wrap nosql databases into the ee standard *JPA*. the project was stopped in 2018 with version 5.4.1.
+* JNoSQL (https://www.jnosql.org/docs/document.html): trying to provide a standard api with own annotations for most nosql databases.
+* Spring Data: integrating nosql database into the spring data jpa layer (see https://medium.com/tuanhdotnet/integrating-spring-data-jpa-with-nosql-databases-a-step-by-step-guide-with-code-examples-and-f35037016e7c)
+
+NOTE: the hibernate-ogm is pronounced to be dead since 2018 (5.4.1), but 09-2024 a new version 5.4.2 was distributed!
+
+While JNoSQL would be expensive to include, spring-data is out of scope in nano, hibernate-ogm would easy to use. The project may be dead, but you can use it for legacy database versions without leaving the jpa path.
+
+### hibernate-ogm
+
+The module names are hibernate-ogm-infinispan, hibernate-ogm-ehcache, hibernate-ogm-mongodb, hibernate-ogm-neo4j and hibernate-ogm-couchdb.
+specific shortcuts (preferable): map (only to be used for unit tests), infinispan_embedded, infinispan_remote, ehcache, mongodb, neo4j_embedded, neo4j_http, neo4j_bolt
+couchdb, cassandra, redis, ignite are experimental!
+
+Just 
+
+* provide the url to your nosql database
+* select the _org.hibernate.ogm.jpa.HibernateOgmPersistence_ jpa provider in the persistence (or login details dialog)
+* select _JTA_ as transaction provider
+* select the hibernate dialect as one of (MONGODB, )
+* provide the dependency jar files for the desired nosql database inside the environment folder.
+
+to see the current configuration, have a look at your environment folder _META-INF/persistence.tml_
+
+Example content of your META-INF/persistence.xml (filled by login detail dialog):
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   <persistence-unit name="ogm-mongodb" transaction-type="JTA">
+      <provider>org.hibernate.ogm.jpa.HibernateOgmPersistence</provider>
+      <properties>
+         <property name="hibernate.ogm.datastore.provider" value="mongodb" />
+         <property name="hibernate.ogm.datastore.database" value="TestDB" />
+         <property name="hibernate.ogm.datastore.create_database" value="true" />
+      </properties>
+   </persistence-unit>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Example dependencies for mongodb (to be downloaded!):
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   <dependency>
+      <groupId>org.hibernate.ogm</groupId>
+      <artifactId>hibernate-ogm-mongodb</artifactId>
+      <version>5.4.2.Final</version>
+   </dependency>
+   <dependency>
+      <groupId>org.jboss.narayana.jta</groupId>
+      <artifactId>narayana-jta</artifactId>
+      <version>5.9.2.Final</version>
+   </dependency>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To see a detailed configuration introduction for e.g. mongodb, have a look at https://docs.jboss.org/hibernate/stable/ogm/reference/en-US/html_single/?v=5.4#ogm-mongodb.
+
 ## Using an Applicationserver
 
 If you don't want to have a standalone appliation, you are able to use an application server like jboss. To do this you must have:
@@ -5176,7 +5232,7 @@ hint II: a script (upgrade-old-tsl2-apps.sh) to do this is inside the resources 
  2.5.5  | 31.03.2025 | h5:+openapi-generate-scripts, stateless action beans, html-dialogs: timeout-close, minor fixes
  2.5.6  | 04.05.2025 | h5:+CMSBean, +admin: provide sample applications, prod/admin switch, adding users, layout: additional left/right panels and info menu
  2.5.7  | 25.05.2025 | hotfix: running on android, windows, fixes on openapi, sampleapplications, OSSRH -> maven central portal
- 2.5.8  | 31.12.2025 | ???
+ 2.5.8  | 31.12.2025 | nosql support: +hibernate-omg-5.4.2
 |------ | ---------- | -----------
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
@@ -6497,3 +6553,4 @@ Cursus:
 * [ ] check to add jakarta nosql as persistence provider
    *[ ] perhaps provide an EntityManager implementation covering jakarta-nosql
 * [ ] to be compilable on jdk <= 20, change the setter methods of sun.security.x509.X509Cert* in class PKI in core module
+* [ ] include hibernate-ogm to use nosql databases through jpa persistence layer (project stopped already, final version 5.4.1) 

@@ -125,7 +125,6 @@
 		<module>tsl2.nano.replication</module>
 		<module>tsl2.nano.serviceaccess</module>
 		<module>tsl2.nano.directaccess</module>
-		<!-- <module>tsl2.nano.nosql-provider</module> -->
 		<module>tsl2.nano.ebeanprovider</module>
 		<module>tsl2.nano.ormliteprovider</module>
 		<module>tsl2.nano.cursus</module>

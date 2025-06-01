@@ -379,7 +379,7 @@ public class NanoH5Test implements ENVTestPreparation {
           "Started At", XXX,
           "Ended At", XXX,
           "tsl2.nano.h5-\\d+\\.\\d+\\.\\w+(-SNAPSHOT)?[\\-\\.0-9\\: d]*", "tsl2.nano.h5-X.X.X",
-          "((target)?/test/)?.nanoh5.timesheet/", XXX,
+          "((target)?/test/)?.nanoh5.\\w+/", XXX,
           ".quicksearch", "?quicksearch", // the '?' does not match between the two sources!
           "(\\w+[:])?((\\/|[\\\\])([.]?\\w+)+){2,20}", XXX, //absolute file pathes
           "<span id=\"footer\">(.*?)</span>", XXX, // footer is filled by websocket (may be a question of milliseconds which text was transferred)

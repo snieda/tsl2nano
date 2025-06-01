@@ -99,6 +99,7 @@ public class PersistenceUI {
                     props.setProperty("PROVIDER_BatooJPA", "org.batoo.jpa.core.BatooPersistenceProvider");
                     props.setProperty("PROVIDER_EBean", "de.tsl2.nano.ebeanprovider.EntityManager");
                     props.setProperty("PROVIDER_ORMLite", "de.tsl2.nano.ormliteprovider.EntityManager");
+                    props.setProperty("PROVIDER_PROVIDER_Hibernate_OMG_NoSQL", "org.hibernate.ogm.jpa.HibernateOgmPersistence");
 
                     props.setProperty("DRIVER_jdbc.odbc", "sun.jdbc.odbc.JdbcOdbcDriver");
                     props.setProperty("DRIVER_jdbc.oracle", "oracle.jdbc.OracleDriver");
@@ -116,6 +117,16 @@ public class PersistenceUI {
                     props.setProperty("DRIVER_jdbc.firebirdsql", "jaybird-jdk17");
                     props.setProperty("DRIVER_jdbc.ucanaccess", "net.ucanaccess.jdbc.UcanaccessDriver");
                     props.setProperty("DRIVER_jdbc.sapdb", "com.sap.dbtech.jdbc.DriverSapDB");
+
+                    // nosql with hibernate-ogm (couchdb, cassandra, redis, ignite are experimental)
+                    props.setProperty("DRIVER_map", "map");
+                    props.setProperty("DRIVER_infinispan_embedded", "infinispan_embedded");
+                    props.setProperty("DRIVER_infinispan_remote", "infinispan_remote");
+                    props.setProperty("DRIVER_ehcache", "ehcache");
+                    props.setProperty("DRIVER_mongodb", "mongodb");
+                    props.setProperty("DRIVER_neo4j_embedded", "neo4j_embedded");
+                    props.setProperty("DRIVER_neo4j_http", "neo4j_http");
+                    props.setProperty("DRIVER_neo4j_bolt", "neo4j_bolt");
 
                     //if unknown, we use the driver name...
                     props.setProperty("DATASOURCE_jdbc.odbc", "sun.jdbc.odbc.JdbcOdbcDriver");
@@ -148,6 +159,14 @@ public class PersistenceUI {
                     props.setProperty("DIALECT_jdbc.firebirdsql", "org.hibernate.dialect.FirebirdDialect");//jaybird
                     props.setProperty("DIALECT_jdbc.sapdb", "org.hibernate.dialect.SAPDBDialect");
 
+                    // nosql with hibernate-ogm
+                    props.setProperty("DIALECT_GridDialect", "GridDialect");
+                    props.setProperty("DIALECT_QueryableGridDialect", "QueryableGridDialect");
+                    props.setProperty("DIALECT_BatchableGridDialect", "BatchableGridDialect");
+                    props.setProperty("DIALECT_IdentityColumnAwareGridDialect", "IdentityColumnAwareGridDialect");
+                    props.setProperty("DIALECT_OptimisticLockingAwareGridDialect", "OptimisticLockingAwareGridDialect");
+                    props.setProperty("DIALECT_MultigetGridDialect", "MultigetGridDialect");
+
                     props.setProperty("URLSYNTAX_jdbc.odbc", "jdbc:odbc:<alias>");
                     props.setProperty("URLSYNTAX_jdbc.oracle",
                         "jdbc:oracle:thin:@<server>[:<port(default 1521)>]:<database_name (default xe)>");
@@ -167,6 +186,7 @@ public class PersistenceUI {
                     props.setProperty("URLSYNTAX_jdbc.firebirdsql", "jdbc:firebirdsql://host[:port]/<database>");
                     props.setProperty("URLSYNTAX_jdbc.ucanaccess", "jdbc:ucanaccess://<mdb-file-path>");//ms-access
                     props.setProperty("URLSYNTAX_jdbc.sapdb", "jdbc:sapdb://<server>[:<port>]/<databaseName>");//default-port: 7210
+                    props.setProperty("URLSYNTAX_mongodb", "mongodb+srv://<username>:<password>@beyondthebasics.abcde.mongodb.net/<databasename>");
 
                     FileUtil.saveProperties(pfile, props);
                 }

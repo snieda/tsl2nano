@@ -469,9 +469,12 @@ public class Persistence implements Serializable, Cloneable {
 
         put(prop, "jar-file", jarURL());
         put(prop, "jta-data-source", getJtaDataSource());
+        put(prop, "datasource.class", getDatasourceClass());
         put(prop, "hibernate.dialect", getHibernateDialect());
         put(prop, "connection.driver_class", getConnectionDriverClass());
         put(prop, "connection.url", getConnectionUrl());
+        put(prop, "connection.port", getPort());
+        put(prop, "connection.database", getDatabase());
         put(prop, "connection.username", getConnectionUserName());
         put(prop, "connection.password", getConnectionPassword());
         put(prop, "autoddl", getAutoddl());
