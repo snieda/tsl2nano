@@ -3289,11 +3289,12 @@ couchdb, cassandra, redis, ignite are experimental!
 
 Just 
 
-* provide the url to your nosql database
+* provide the url to your nosql database (something like _localhost:27017_)
 * select the _org.hibernate.ogm.jpa.HibernateOgmPersistence_ jpa provider in the persistence (or login details dialog)
-* select _JTA_ as transaction provider
-* select the hibernate dialect as one of (MONGODB, )
-* provide the dependency jar files for the desired nosql database inside the environment folder.
+* provide the dependency jar files for the desired nosql database inside the environment folder. But the framework should be able to download that for you.
+* optional:
+   * select _JTA_ as transaction provider
+   * select the "hibernate dialect" as one of (GridDialect, QueryableGridDialect, BatchableGridDialect, IdentityColumnAwareGridDialect, OptimisticLockingAwareGridDialect, MultigetGridDialect)
 
 to see the current configuration, have a look at your environment folder _META-INF/persistence.tml_
 

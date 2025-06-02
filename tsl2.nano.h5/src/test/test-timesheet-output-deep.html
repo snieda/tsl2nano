@@ -1,6 +1,6 @@
 <!DOCTYPE HTML SYSTEM "html">
 <html manifest="tsl2nano-appcache.mf">
-<head title="Nano-H5 Application: Status Info">
+<head title="Nano-H5 Application: Anmeldung">
 <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <style>@-webkit-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @-moz-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @-o-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}}; :root {    --font-family: Lato, 'sans-serif';    --font-color: white;    --disabled-color: lightgray;    --label-color: blue;    --text-shadow: 1px 2px 2px black;    --bg-color: radial-gradient(#9999FF, #000000);    --bg-input-panel: url('icons/spe.jpg');    --button-bg-color: #0055AA;    --button-bg-hover: black;    --table-bg-color: rgba(247,247,247,.5);    --table-bg-even-color: rgba(255,255,255,.3);    --table-bg-odd-color: rgba(196,196,196,.3);    --border: none;}/* theme switching through a button (see left header panel) */html[data-theme='light'] {    --font-color: black;    --disabled-color: lightgray;    --label-color: blue;    --text-shadow: none;    --bg-color: radial-gradient(#FFFFFF, #BBBBBB);    --bg-input-panel: url('icons/spe.jpg');    --button-bg-color: lightgray;    --button-bg-hover: white;    --table-bg-color: rgba(247,247,247,.8);    --table-bg-even-color: rgba(255,255,255,.6);    --table-bg-odd-color: rgba(196,196,196,.6);}html[data-theme='dark'] {    --font-color: white;    --disabled-color: lightgray;    --label-color: darkblue;    --text-shadow: 1px 2px 2px black;    --bg-color: radial-gradient(#9999FF, #000000);    --bg-input-panel: url('icons/spe.jpg');    --button-bg-color: #0055AA;    --button-bg-hover: black;    --table-bg-color: rgba(247,247,247,.5);    --table-bg-even-color: rgba(255,255,255,.3);    --table-bg-odd-color: rgba(196,196,196,.3);}html[data-theme='light-contrast'] {    --font-color: black;    --disabled-color: gray;    --label-color: darkblue;    --text-shadow: none;    --bg-color: white;    --bg-input-panel: url('icons/spe.jpg');    --button-bg-color: lightgray;    --button-bg-hover: white;    --table-bg-color: transparent;    --table-bg-even-color: rgba(196,196,196,.6);    --table-bg-odd-color: transparent;    --border: 1 px;}html[data-theme='dark-contrast'] {    --font-family: 'Comic Sans MS', 'serif';    --font-color: white;    --disabled-color: lightgray;    --label-color: white;    --text-shadow: none;    --bg-color: black;    --bg-input-panel: url('icons/spe.jpg');    --button-bg-color: #0055AA;    --button-bg-hover: gray;    --table-bg-color: transparent;    --table-bg-even-color: rgba(96,96,96,.6);    --table-bg-odd-color: transparent;    --border: 1 px;}html[data-theme='dark-picture'] {    --font-family: 'Comic Sans MS', 'serif';    --font-color: white;    --disabled-color: lightgray;    --label-color: white;    --text-shadow: none;    --bg-color: url('icons/background-image.jpg');    --bg-input-panel: transparent;    --button-bg-color: #0055AA;    --button-bg-hover: gray;    --table-bg-color: transparent;    --table-bg-even-color: rgba(96,96,96,.6);    --table-bg-odd-color: transparent;    --border: 1 px;}::selection, ::-moz-selection { /* Code for Firefox */    font-family: var(--font-family);    transition: background-color .5s;    color: var(--font-color);    background: var(--bg-color);    background-size: cover;}/* will be assigned as tag style under the html header */body {    font-family: var(--font-family);    transition: background-color .5s;    color: var(--font-color);    background: var(--bg-color);    background-size: cover;}table, .table .fieldpanel {       display: table;       margin: 0 auto;      color: var(--font-color);   /* width: 100%;  */} tbody, .tbody {   display: table-row-group; }thead, .thead {   display: table-header-group;   background-color: var(--table-bg-color);   font-weight: bold; } tfoot, .tfoot {   display: table-footer-group;   font-weight: bold;background-color: var(--table-bg-color); } tr, .tr, .beancollectorsearchrow {   display: table-row; } td, th, .td, .th {   display: table-cell;   padding: 3px 10px;   border: 1px;     /*width: 100%;*/} tr:nth-child(even), .tr:nth-child(even) {  background-color: var(--table-bg-even-color);}tr:nth-child(odd), .tr:nth-child(odd) {  background-color: var(--table-bg-odd-color);}tr:hover, .tr:hover {  background-color: var(--table-bg-color);}#page\.header\.table h3, #title, .title {    margin-block-start: 8px;    margin-block-end: 0px;}#page\.header\.table td, #page\.header\.table td {    width: auto;}.beanfieldlabel {    color: var(--label-color);    width: fit-content;    min-width: 50px;}textarea {    width: 100%;}input {    min-width: 100px;    border-radius: 4px;    width: 100%;    border: var(--border);    border-bottom: 2px solid black;    padding-bottom: 2px;}span > input[type='search'] {    min-width: 30px;    width: 100%;}.fade-out {opacity:0;}.fade-in {opacity:1;}.tooltip {     display: none;     position: relative;    top: 0;    left: 0;    z-index: 99;    border: var(--border);    color: var(--font-color);    background: -var(--bg-color);    width: 300px;    text-align: left;}i:hover + p { display: block;}.sidenav {    height: 100%;    width: 0;    position: fixed;    z-index: 1;    top: 0;    left: 0;    background-color: #111;    overflow-x: hidden;    transition: 0.5s;    padding-top: 60px;}.sidenav a, .panelaction {    padding: 8px 8px 8px 32px;    text-decoration: none;    transition: 0.3s;}.sidenav a:hover, .offcanvas a:focus{    color: #f1f1f1;}.sidenav .closebtn {    position: absolute;    top: 0;    right: 25px;    font-size: 36px;    margin-left: 50px;}/*.openbtn {    position: absolute;    top: 0;    left: 0;    font-size: 36px;}*/.openbtn, .closebtn {font-size: 36px;cursor: pointer;color: var(--font-color);background: radial-gradient(#9999FF, #000000);}#glasspane {    transition: margin-left .5s;    padding: 16px;}#title,.title {background: transparent;    color: var(--font-color);    text-shadow: var(--text-shadow);font-size: 1.4em; }#field§quicksearch {padding-top: 1;    padding-bottom: 1;    width: fit-content;}#beancollectorliste§quicksearch {padding-top: 0;    padding-bottom: 6;}th > button {    width: 80%;}input[type='search'] {    width: auto;}input[type='checkbox'] {    min-width: auto;    width: auto;}/* tag dialog used by websockets */dialog {    top: 28%;    width: 400px;      border: 1px solid rgba(0, 0, 0, 0.3);    border-radius: 15px;    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);    border-top: 5px solid #0099ff;}button {    display: inline-block;    background-image: linear-gradient(#30A1DC, #0060C0);    border-radius: 8px;    border: var(--border);    font-size: 0.9rem;    padding: 0.4rem 0.8em;    opacity: 0.7;    background: var(--button-bg-color);    border-bottom: 2px solid #0099ff;    color: var(--font-color);    font-weight: bold;    margin: 0 0.1rem;    text-align: center;}a{    display: inline-block;    border-radius: 0px;    border: var(--border);    font-size: 0.9rem;    padding: 0.0rem 0.0em;    opacity: 0.7;    background: var(--button-bg-color);    color: var(--font-color);    font-weight: bold;    margin: 0 0.0rem;    text-align: center;    vertical-align: middle;    text-decoration: none;}button:disabled,button[disabled],ul:not(.menu)>li>a:not([href]){  background: #999999;  color: var(--disabled-color);}button:hover,a:hover, button:focus,a:focus {    color: var(--font-color);    background: var(--button-bg-hover);    cursor: pointer;    transform: scale(1.05);}dialog::backdrop{    position: fixed;    top: 0;    left: 0;    right: 0;    bottom: 0;    background-color: rgba(0, 0, 0, 0.7);}body{    margin: 0;    padding: 0;}nav {    background: transparent;    border: 1px solid #333;    color: var(--font-color);    text-shadow: var(--text-shadow);    display: block;    margin: 0;    overflow: hidden;}nav ul{    margin: 0;    padding: 0;    list-style: none;}nav ul li {    margin: 0;    display: inline-block;    list-style-type: none;    transition: all 0.2s;}nav > ul > li > a {    color: var(--font-color);    text-shadow: var(--text-shadow);    display: block !important;    line-height: 2em;    padding: 0.5em 2em;}nav li > ul{    display : none;    margin-top:1px;    background-color: #bbb;}nav li > ul li{    display: block !important;}nav  li > ul li button:not(.selector) {    color: var(--font-color);    text-shadow: var(--text-shadow);    display: block;    line-height: 2em;    padding: 0.5em 2em;    width: 13em;}nav li:hover {    background-color: #666 !important;}nav li:hover > ul, li:focus > ul, li:active > ul {    position:absolute  !important;    z-index: 1000;    display : block !important;}@-ms-viewport only screen and (max-width: 800px){  user-scalable: no;}@media only screen and (max-width: 640px) {table, .table, .message {    border-radius: 8px;}tr, .tr {   display: flex; flex-wrap: wrap; } tr:nth-child(even), .tr:nth-child(even) {    border: var(--border);    padding-bottom: 10px;}tr:nth-child(odd), .tr:nth-child(odd) {    border: var(--border);    border-radius: 4px;    padding-bottom: 10px;}td, th, .td, .th {   display: table-cell;   padding: 3px 10px;   border: 1px;    width: 100%;}thead, .thead {display: none;}.beancollectorsearchrow {display: none;}#field§quicksearch {    width: fit-content;}.beanfieldlabel {    width: fit-content;    min-width: 50px;color: var(--label-color);    padding: 0px 10px;}input {    min-width: 60px;    border-radius: 4px;    width: 80%;    font-size: 14px;}}@media only screen and (max-width: 480px) {#indiviual-left-panel-id, #indiviual-right-panel-id {    display: none;}thead, .thead {display: none;}tr:not(#field\.panel *), .tr:not(#field\.panel *) {   width: 100%;    border-radius: 18px;    padding: 0px 6px;} td, th, .td, .th {    padding: 8px 8px;   width: 100%;}#field\.panel td, #field\.panel th, #field\.panel .td, #field\.panel .th {    padding: 0px 2px;   width: 100%;}button, input, #field§quicksearch, .actionpanel {    min-width: 50px;width: 100%;}#field§quicksearch {    width: 100%;}input[type='search'] {    width: 100%;}input[type='checkbox'] {    width: 28px;    height: 28px;    float: right;}.actionpanel {    border-radius: 8px;}.sidenav {padding-top: 15px;}.sidenav a {font-size: 18px;}.sidenav button {font-size: 18px; width: 100%}nav {    display: none;}}/* the media types for theme switching in browser tools */@media (prefers-color-scheme: dark) {    :root{        --font-color: white;        --disabled-color: lightgray;        --label-color: lightgray;        --text-shadow: 1px 2px 2px black;        --bg-color: radial-gradient(#9999FF, #000000);        --bg-input-panel: url('icons/spe.jpg');        --button-bg-color: #0055AA;        --button-bg-hover: black;        --table-bg-color: rgba(247,247,247,.5);        --table-bg-even-color: rgba(255,255,255,.3);        --table-bg-odd-color: rgba(196,196,196,.3);    }}@media (prefers-color-scheme: light) {    :root{        --font-color: black;        --disabled-color: lightgray;        --label-color: darkblue;        --text-shadow: none;        --bg-color: radial-gradient(#FFFFFF, #BBBBBB);        --bg-input-panel: url('icons/spe.jpg');        --button-bg-color: lightgray;        --button-bg-hover: white;        --table-bg-color: rgba(247,247,247,.8);        --table-bg-even-color: rgba(255,255,255,.6);        --table-bg-odd-color: rgba(196,196,196,.6);    }}     </style>
 <meta content="tsl2.nano.h5 (by Thomas Schneider/2012-2025)" name="author">
@@ -18,7 +18,7 @@ setTheme(false);
  * websocket client implementation.
  */
 var socket = new WebSocket(
-		'wss://' + window.document.location.hostname + ':41285');
+		'wss://' + window.document.location.hostname + ':42157');
 console.log('websocket created:' + socket);
 
 socket.onopen = function() {
@@ -402,11 +402,11 @@ function setTheme(next) {
 };
 </script>
 </head>
-<body id="Status Info" onoffline="showStatusMessage('-- OFFLINE --')" ononline="showStatusMessage('ONLINE')" style="background: var(--bg-color); background-size: cover;-webkit-animation: fade 2s; -webkit-animation-fill-mode: both; -moz-animation: fade 2s; -moz-animation-fill-mode: both; -o-animation: fade 2s; -o-animation-fill-mode: both; animation: fade 2s; animation-fill-mode: both;">
+<body id="Anmeldung" onoffline="showStatusMessage('-- OFFLINE --')" ononline="showStatusMessage('ONLINE')" style="background: var(--bg-color); background-size: cover;-webkit-animation: fade 2s; -webkit-animation-fill-mode: both; -moz-animation: fade 2s; -moz-animation-fill-mode: both; -o-animation: fade 2s; -o-animation-fill-mode: both; animation: fade 2s; animation-fill-mode: both;">
 <table border="0" frame="box" id="page.header.table" sortable="" width="100%">
 <tbody>
 <tr style="background: transparent;">
-<td content="T" onclick="toggleOnClick()" style="width: 0px;"><a href="https://sourceforge.net/p/tsl2nano/wiki/"><img src="icons/beanex-logo-micro.jpg" title="Framework Version: tsl2.nano.h5-2.5.8-SNAPSHOT-2438-30-05-2025 16:59-d"></a></td><td>
+<td content="T" onclick="toggleOnClick()" style="width: 0px;"><a href="https://sourceforge.net/p/tsl2nano/wiki/"><img src="icons/beanex-logo-micro.jpg" title="Framework Version: tsl2.nano.h5-2.5.8-SNAPSHOT-2438-02-06-2025 17:12-d"></a></td><td>
 <form action="?" method="post" style="display: inline; ">
 <div>
 <nav>
@@ -415,7 +415,7 @@ function setTheme(next) {
 <a>Anwendung<img src="icons/equipment.png"></a>
 <ul>
 <li>
-<button accesskey="a" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="statusinfoliste.administration" name="statusinfoliste.administration" onclick="fade(this)" style="" title="Administration (ALT+a)" type="submit">Administration<img src="icons/equipment.png"></button>
+<button accesskey="a" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="persistenceliste.administration" name="persistenceliste.administration" onclick="fade(this)" style="" title="Administration (ALT+a)" type="submit">Administration<img src="icons/equipment.png"></button>
 </li>
 </ul>
 </li>
@@ -423,19 +423,19 @@ function setTheme(next) {
 <a>Sitzung<img src="icons/home.png"></a>
 <ul>
 <li>
-<button accesskey="m" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="statusinfoliste.memorize" name="statusinfoliste.memorize" onclick="fade(this)" style="" title="Memorize (ALT+m)" type="submit">Merken<img src="icons/yellow_pin.png"></button>
+<button accesskey="m" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="persistenceliste.memorize" name="persistenceliste.memorize" onclick="fade(this)" style="" title="Memorize (ALT+m)" type="submit">Merken<img src="icons/yellow_pin.png"></button>
 </li>
 <li>
-<button accesskey="s" class="panelactionsimple" formnovalidate="" formtarget="_self" id="statusinfoliste.session" name="statusinfoliste.session" onclick="fade(this)" style="" title="Session (ALT+s)" type="submit">Sitzung<img src="icons/blue_pin.png"></button>
+<button accesskey="s" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="persistenceliste.session" name="persistenceliste.session" onclick="fade(this)" style="" title="Session (ALT+s)" type="submit">Sitzung<img src="icons/blue_pin.png"></button>
 </li>
 <li>
-<button accesskey="l" class="panelactionsimple" formnovalidate="" formtarget="_self" id="statusinfoliste.logout" name="statusinfoliste.logout" onclick="fade(this)" style="" title="Logout (ALT+l)" type="submit">Logout<img src="icons/exit.png"></button>
+<button accesskey="l" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="persistenceliste.logout" name="persistenceliste.logout" onclick="fade(this)" style="" title="Logout (ALT+l)" type="submit">Logout<img src="icons/exit.png"></button>
 </li>
 <li>
-<button accesskey="r" class="panelactionsimple" formnovalidate="" formtarget="_blank" id="statusinfoliste.restful" name="statusinfoliste.restful" onclick="fade(this)" style="" title="Restful (ALT+r)" type="submit">Restful<img src="icons/point-green.png"></button>
+<button accesskey="r" class="panelactionsimple" disabled formnovalidate="" formtarget="_blank" id="persistenceliste.restful" name="persistenceliste.restful" onclick="fade(this)" style="" title="Restful (ALT+r)" type="submit">Restful<img src="icons/point-green.png"></button>
 </li>
 <li>
-<button accesskey="!" class="panelactionsimple" formnovalidate="" formtarget="_self" id="statusinfoliste.restfului" name="statusinfoliste.restfului" onclick="fade(this)" style="" title="Restfului (ALT+!)" type="submit">Restfului<img src="icons/point-yellow.png"></button>
+<button accesskey="!" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="persistenceliste.restfului" name="persistenceliste.restfului" onclick="fade(this)" style="" title="Restfului (ALT+!)" type="submit">Restfului<img src="icons/point-yellow.png"></button>
 </li>
 </ul>
 </li>
@@ -443,19 +443,19 @@ function setTheme(next) {
 <a>Seite<img src="icons/full_screen.png"></a>
 <ul>
 <li>
-<button accesskey="d" class="panelactionsimple" formnovalidate="" formtarget="_blank" id="statusinfoliste.print" name="statusinfoliste.print" onclick="fade(this)" style="" title="Print (ALT+d)" type="submit">Drucken<img src="icons/print.png"></button>
+<button accesskey="d" class="panelactionsimple" disabled formnovalidate="" formtarget="_blank" id="persistenceliste.print" name="persistenceliste.print" onclick="fade(this)" style="" title="Print (ALT+d)" type="submit">Drucken<img src="icons/print.png"></button>
 </li>
 <li>
-<button accesskey="p" class="panelactionsimple" formnovalidate="" formtarget="_blank" id="statusinfoliste.plaintext" name="statusinfoliste.plaintext" onclick="fade(this)" style="" title="Plaintext (ALT+p)" type="submit">Plaintext<img src="icons/view.png"></button>
+<button accesskey="p" class="panelactionsimple" disabled formnovalidate="" formtarget="_blank" id="persistenceliste.plaintext" name="persistenceliste.plaintext" onclick="fade(this)" style="" title="Plaintext (ALT+p)" type="submit">Plaintext<img src="icons/view.png"></button>
 </li>
 <li>
-<button accesskey="j" class="panelactionsimple" formnovalidate="" formtarget="_blank" id="statusinfoliste.json" name="statusinfoliste.json" onclick="fade(this)" style="" title="Json (ALT+j)" type="submit">Json<img src="icons/view.png"></button>
+<button accesskey="j" class="panelactionsimple" disabled formnovalidate="" formtarget="_blank" id="persistenceliste.json" name="persistenceliste.json" onclick="fade(this)" style="" title="Json (ALT+j)" type="submit">Json<img src="icons/view.png"></button>
 </li>
 <li>
-<button accesskey="&quot;" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="statusinfoliste.document" name="statusinfoliste.document" onclick="fade(this)" style="" title="exporting (see environment.properties, variable names are starting and ending with &sect;&sect;) to: .nanoh5.timesheet/statusinfo.rtf (ALT+&quot;)" type="submit">Dokument<img src="icons/images_all.png"></button>
+<button accesskey="&quot;" class="panelactionsimple" disabled formnovalidate="" formtarget="_self" id="persistenceliste.document" name="persistenceliste.document" onclick="fade(this)" style="" title="exporting (see environment.properties, variable names are starting and ending with &sect;&sect;) to: target/test/.nanoh5.timesheet/persistence.rtf (ALT+&quot;)" type="submit">Dokument<img src="icons/images_all.png"></button>
 </li>
 <li>
-<button accesskey="h" class="panelactionsimple" formnovalidate="" formtarget="_blank" id="statusinfoliste.help" name="statusinfoliste.help" onclick="fade(this)" style="" title="target/test/.nanoh5.timesheet/doc/statusinfo.help.html or target/test/.nanoh5.timesheet/doc/statusinfo.help.pdf (ALT+h)" type="submit">Hilfe<img src="icons/trust_unknown.png"></button>
+<button accesskey="h" class="panelactionsimple" disabled formnovalidate="" formtarget="_blank" id="persistenceliste.help" name="persistenceliste.help" onclick="fade(this)" style="" title="target/test/.nanoh5.timesheet/doc/persistence.help.html or target/test/.nanoh5.timesheet/doc/persistence.help.pdf (ALT+h)" type="submit">Hilfe<img src="icons/trust_unknown.png"></button>
 </li>
 </ul>
 </li>
@@ -473,7 +473,7 @@ function setTheme(next) {
 </form>
 </td><td>
 <h3 align="center" id="title" style="display: flex; ">
-<span><a class="title" href="doc/anyway.png">Status Info</a></span>
+<span><a class="title" href="doc/anyway.png">Anmeldung</a></span>
 </h3>
 </td>
 </tr>
@@ -490,27 +490,171 @@ function setTheme(next) {
 </div>
 <div class="td" id="content-panel-id" style="vertical-align: top; width: 100%;">
 <details open="">
-<summary accesskey="U" align="left" style="color: var(--label-color);" title="ALT+U">StatusInfo</summary>
+<summary accesskey="U" align="left" style="color: var(--label-color);" title="ALT+U">connection</summary>
 <table align="center" border="0" class="fieldpanel" frame="box" id="field.panel" sortable="" style="background-image: url(icons/art029.jpg);padding:6px;-webkit-border-radius:6px;-moz-border-radius:6px;border-radius:6px;">
 <tbody>
 <tr>
-<td class="beanfieldlabel" id="statusInfo.message.label" style="color: var(--label-color); " width="250">Message</td><td>
+<td class="beanfieldlabel" id="persistence.connectionUserName.label" required="" style="color: var(--label-color); " width="250">Benutzer                                                                                                                                      (*)</td><td>
 <table>
-<input align="start" autofocus="autofocus" class="beanfieldinput" disabled id="statusInfo.message" lang="de_DE" max="" maxlength="2147483647" min="" name="message" pattern="[\x00-\xFF &euro;]{0,5000}" readonly size="-1" style="background-color: rgba(247,247,247,.5);" tabindex="1" title="statusInfo.message" type="text" value="test.workflow finished with status: OK{startedAt: 2025-05-30 19:01:15.829, endedAt: 2025-05-30 19:01:33.091}" width="-1">
+<input align="start" autofocus="autofocus" class="beanfieldinput" id="persistence.connectionUserName" lang="de_DE" max="" maxlength="2147483647" min="" name="connectionUserName" onblur="evaluatedependencies(event)" onclick="evaluatedependencies(event)" onfocus="this.select();" pattern="[\x00-\xFF &euro;]{0,5000}" required="" size="-1" style="text-align: start; " tabindex="1" title="Datenbank Benutzer" type="text" value="SA" width="-1">
 </table>
 </td>
 </tr>
 <tr>
-<td class="beanfieldlabel" id="statusInfo.endedAt.label" style="color: var(--label-color); " width="250">Ended At</td><td>
+<td class="beanfieldlabel" id="persistence.connectionPassword.label" style="color: var(--label-color); " width="250">Passwort</td><td>
 <table>
-<input align="start" class="beanfieldinput" disabled id="statusInfo.endedAt" lang="de_DE" max="" maxlength="2147483647" min="" name="endedAt" pattern="[0-3]\d\.[0-1]\d(\.([1-2]\d\d\d)?)?([,;|\/]?\s[0-2]\d\:[0-5]\d(\:[0-5]\d)?)?" readonly size="-1" style="background-color: rgba(247,247,247,.5);" tabindex="2" title="statusInfo.endedAt" type="date" value="2025-05-30" width="-1">
+<input align="start" class="beanfieldinput" id="persistence.connectionPassword" lang="de_DE" max="" maxlength="2147483647" min="" name="connectionPassword" onfocus="this.select();" pattern="[\x00-\xFF &euro;]{0,5000}" size="-1" style="text-align: start; " tabindex="2" title="Benutzer Passwort" type="password" value="" width="-1">
 </table>
 </td>
 </tr>
 <tr>
-<td class="beanfieldlabel" id="statusInfo.startedAt.label" style="color: var(--label-color); " width="250">Started At</td><td>
+<td class="beanfieldlabel" id="persistence.connectionUrl.label" required="" style="color: var(--label-color); " width="250"><span><a href="http://www.databasedrivers.com/jdbc/">Datenbank-URL</a><span> (*)</span></span></td><td>
 <table>
-<input align="start" class="beanfieldinput" disabled id="statusInfo.startedAt" lang="de_DE" max="" maxlength="2147483647" min="" name="startedAt" pattern="[0-3]\d\.[0-1]\d(\.([1-2]\d\d\d)?)?([,;|\/]?\s[0-2]\d\:[0-5]\d(\:[0-5]\d)?)?" readonly size="-1" style="background-color: rgba(247,247,247,.5);" tabindex="3" title="statusInfo.startedAt" type="date" value="2025-05-30" width="-1">
+<input align="start" class="beanfieldinput" id="persistence.connectionUrl" lang="de_DE" list="persistence.connectionUrl.datalist" max="" maxlength="2147483647" min="" name="connectionUrl" onblur="evaluatedependencies(event)" onclick="evaluatedependencies(event)" onfocus="this.select();" pattern="[\x00-\xFF &euro;]{0,5000}" required="" size="-1" style="text-align: start; " tabindex="3" title="Datenbank Verbindungs-Adresse.
+Wenn Hsqldb verwendet wird, k&ouml;nnen folgende Kompatibilit&auml;ts-Eigenschaften (z.B: ;sql.syntax_mys=true) angeh&auml;ngt werden:
+DB2          : sql.syntax_db2
+MS SQL Server: sql.syntax_mss
+MySQL        : sql.syntax_mys
+Oracle       : sql.syntax_ora
+Postgres     : sql.syntax_pgs" type="text" value="jdbc:hsqldb:hsql://localhost:9003" width="-1">
+<datalist id="persistence.connectionUrl.datalist">
+<option label="jdbc:firebirdsql://host[:port]/<database>" value="jdbc:firebirdsql://host[:port]/<database>">jdbc:firebirdsql://host[:port]/&lt;database&gt;</option><option label="jdbc:sapdb://<server>[:<port>]/<databaseName>" value="jdbc:sapdb://<server>[:<port>]/<databaseName>">jdbc:sapdb://&lt;server&gt;[:&lt;port&gt;]/&lt;databaseName&gt;</option><option label="jdbc:mysql://<hostname>[,<failoverhost>][<:3306>]/<dbname>[?<param1>=<value1>][&amp;<param2>=<value2>]" value="jdbc:mysql://<hostname>[,<failoverhost>][<:3306>]/<dbname>[?<param1>=<value1>][&amp;<param2>=<value2>]">jdbc:mysql://&lt;hostname&gt;[,&lt;failoverhost&gt;][&lt;:3306&gt;]/&lt;dbname&gt;[?&lt;param1&gt;=&lt;value1&gt;][&amp;&lt;param2&gt;=&lt;value2&gt;]</option><option label="jdbc:oracle:thin:@<server>[:<port(default 1521)>]:<database_name (default xe)>" value="jdbc:oracle:thin:@<server>[:<port(default 1521)>]:<database_name (default xe)>">jdbc:oracle:thin:@&lt;server&gt;[:&lt;port(default 1521)&gt;]:&lt;database_name (default xe)&gt;</option><option label="jdbc:odbc:<alias>" value="jdbc:odbc:<alias>">jdbc:odbc:&lt;alias&gt;</option><option label="jdbc:derby://[server:][:port][databaseName][;attribute=value]*" value="jdbc:derby://[server:][:port][databaseName][;attribute=value]*">jdbc:derby://[server:][:port][databaseName][;attribute=value]*</option><option label="jdbc:sqlite:<db-file-path>" value="jdbc:sqlite:<db-file-path>">jdbc:sqlite:&lt;db-file-path&gt;</option><option label="jdbc:postgresql://<HOST>:<PORT>/<DB>" value="jdbc:postgresql://<HOST>:<PORT>/<DB>">jdbc:postgresql://&lt;HOST&gt;:&lt;PORT&gt;/&lt;DB&gt;</option><option label="mongodb+srv://<username>:<password>@beyondthebasics.abcde.mongodb.net/<databasename>" value="mongodb+srv://<username>:<password>@beyondthebasics.abcde.mongodb.net/<databasename>">mongodb+srv://&lt;username&gt;:&lt;password&gt;@beyondthebasics.abcde.mongodb.net/&lt;databasename&gt;</option><option label="jdbc:sqlite:<db-file-path>" value="jdbc:sqlite:<db-file-path>">jdbc:sqlite:&lt;db-file-path&gt;</option><option label="jdbc:h2:[tcp://]<HOST>[:port(default 9092)]" value="jdbc:h2:[tcp://]<HOST>[:port(default 9092)]">jdbc:h2:[tcp://]&lt;HOST&gt;[:port(default 9092)]</option><option label="jdbc:ucanaccess://<mdb-file-path>" value="jdbc:ucanaccess://<mdb-file-path>">jdbc:ucanaccess://&lt;mdb-file-path&gt;</option><option label="jdbc:jtds:<server_type>://<server>[:<port>][/<database>][;<property>=<value>[;...]]" value="jdbc:jtds:<server_type>://<server>[:<port>][/<database>][;<property>=<value>[;...]]">jdbc:jtds:&lt;server_type&gt;://&lt;server&gt;[:&lt;port&gt;][/&lt;database&gt;][;&lt;property&gt;=&lt;value&gt;[;...]]</option><option label="jdbc:hsqldb:<databaseName>" value="jdbc:hsqldb:<databaseName>">jdbc:hsqldb:&lt;databaseName&gt;</option><option label="jdbc:sybase:Tds:<HOST>:<PORT>" value="jdbc:sybase:Tds:<HOST>:<PORT>">jdbc:sybase:Tds:&lt;HOST&gt;:&lt;PORT&gt;</option><option label="jdbc:db2://<HOST>:<PORT>/<DB>" value="jdbc:db2://<HOST>:<PORT>/<DB>">jdbc:db2://&lt;HOST&gt;:&lt;PORT&gt;/&lt;DB&gt;</option>
+</datalist>
+</table>
+</td>
+</tr>
+<tr>
+<td class="beanfieldlabel" id="persistence.jarFile.label" style="color: var(--label-color); " width="250">jar-Datei</td><td>
+<table>
+<input align="start" class="beanfieldinput" id="persistence.jarFile" lang="de_DE" list="persistence.jarFile.datalist" max="" maxlength="2147483647" min="" name="jarFile" onfocus="this.select();" pattern="[\x00-\xFF &euro;]{0,5000}" size="-1" style="text-align: start; " tabindex="4" title="Aus dieser Datei werden die EJB-Klassen f&uuml;r das O/R-mapping geladen.
+Wenn die jar-Datei nicht existiert, wird eine neue generiert durch Start des Skriptes 'reverse-eng.xml' (verwendet 'hibernate.reveng.xml').
+Die Bibliothek 'hibernate-tools' oder open-jpa muss dabei im Environment-Verzeichnis enthalten sein!" type="text" value="anyway.jar" width="-1">
+<datalist id="persistence.jarFile.datalist">
+<option label="checker-qual-2.5.2.jar" value="checker-qual-2.5.2.jar">checker-qual-2.5.2.jar</option><option label="commons-collections4-4.4.jar" value="commons-collections4-4.4.jar">commons-collections4-4.4.jar</option><option label="asm-util-7.3.1.jar" value="asm-util-7.3.1.jar">asm-util-7.3.1.jar</option><option label="hibernate-ogm-neo4j-5.4.2.Final.jar" value="hibernate-ogm-neo4j-5.4.2.Final.jar">hibernate-ogm-neo4j-5.4.2.Final.jar</option><option label="asm-commons-7.3.1.jar" value="asm-commons-7.3.1.jar">asm-commons-7.3.1.jar</option><option label="slf4j-simple-2.0.16.jar" value="slf4j-simple-2.0.16.jar">slf4j-simple-2.0.16.jar</option><option label="istack-commons-runtime-3.0.7.jar" value="istack-commons-runtime-3.0.7.jar">istack-commons-runtime-3.0.7.jar</option><option label="hibernate-ogm-mongodb-5.4.2.Final.jar" value="hibernate-ogm-mongodb-5.4.2.Final.jar">hibernate-ogm-mongodb-5.4.2.Final.jar</option><option label="jandex-2.4.2.Final.jar" value="jandex-2.4.2.Final.jar">jandex-2.4.2.Final.jar</option><option label="jsr305-3.0.2.jar" value="jsr305-3.0.2.jar">jsr305-3.0.2.jar</option><option label="google-java-format-1.7.jar" value="google-java-format-1.7.jar">google-java-format-1.7.jar</option><option label="classmate-1.5.1.jar" value="classmate-1.5.1.jar">classmate-1.5.1.jar</option><option label="FastInfoset-1.2.15.jar" value="FastInfoset-1.2.15.jar">FastInfoset-1.2.15.jar</option><option label="jboss-logging-3.4.3.Final.jar" value="jboss-logging-3.4.3.Final.jar">jboss-logging-3.4.3.Final.jar</option><option label="hibernate-tools-5.6.14.Final.jar" value="hibernate-tools-5.6.14.Final.jar">hibernate-tools-5.6.14.Final.jar</option><option label="freemarker-2.3.31.jar" value="freemarker-2.3.31.jar">freemarker-2.3.31.jar</option><option label="javax.activation-api-1.2.0.jar" value="javax.activation-api-1.2.0.jar">javax.activation-api-1.2.0.jar</option><option label="ant-launcher-1.10.12.jar" value="ant-launcher-1.10.12.jar">ant-launcher-1.10.12.jar</option><option label="javax.persistence-api-2.2.jar" value="javax.persistence-api-2.2.jar">javax.persistence-api-2.2.jar</option><option label="asm-7.3.1.jar" value="asm-7.3.1.jar">asm-7.3.1.jar</option><option label="asm-tree-7.3.1.jar" value="asm-tree-7.3.1.jar">asm-tree-7.3.1.jar</option><option label="jakarta.transaction-api-2.0.1.jar" value="jakarta.transaction-api-2.0.1.jar">jakarta.transaction-api-2.0.1.jar</option><option label="jaxb-runtime-2.3.1.jar" value="jaxb-runtime-2.3.1.jar">jaxb-runtime-2.3.1.jar</option><option label="jakarta.persistence-api-3.2.0.jar" value="jakarta.persistence-api-3.2.0.jar">jakarta.persistence-api-3.2.0.jar</option><option label="hibernate-ogm-infinispan-5.4.2.Final.jar" value="hibernate-ogm-infinispan-5.4.2.Final.jar">hibernate-ogm-infinispan-5.4.2.Final.jar</option><option label="jboss-transaction-api_1.2_spec-1.1.1.Final.jar" value="jboss-transaction-api_1.2_spec-1.1.1.Final.jar">jboss-transaction-api_1.2_spec-1.1.1.Final.jar</option><option label="guava-27.0.1-jre.jar" value="guava-27.0.1-jre.jar">guava-27.0.1-jre.jar</option><option label="hibernate-ogm-core-5.4.2.Final.jar" value="hibernate-ogm-core-5.4.2.Final.jar">hibernate-ogm-core-5.4.2.Final.jar</option><option label="hibernate-ogm-infinispan-embedded-5.4.2.Final.jar" value="hibernate-ogm-infinispan-embedded-5.4.2.Final.jar">hibernate-ogm-infinispan-embedded-5.4.2.Final.jar</option><option label="antlr-2.7.7.jar" value="antlr-2.7.7.jar">antlr-2.7.7.jar</option><option label="hibernate-core-5.6.14.Final.jar" value="hibernate-core-5.6.14.Final.jar">hibernate-core-5.6.14.Final.jar</option><option label="stax-ex-1.8.jar" value="stax-ex-1.8.jar">stax-ex-1.8.jar</option><option label="hibernate-commons-annotations-5.1.2.Final.jar" value="hibernate-commons-annotations-5.1.2.Final.jar">hibernate-commons-annotations-5.1.2.Final.jar</option><option label="narayana-jta-7.2.2.Final.jar" value="narayana-jta-7.2.2.Final.jar">narayana-jta-7.2.2.Final.jar</option><option label="error_prone_annotations-2.2.0.jar" value="error_prone_annotations-2.2.0.jar">error_prone_annotations-2.2.0.jar</option><option label="hsqldb-2.7.4.jar" value="hsqldb-2.7.4.jar">hsqldb-2.7.4.jar</option><option label="animal-sniffer-annotations-1.17.jar" value="animal-sniffer-annotations-1.17.jar">animal-sniffer-annotations-1.17.jar</option><option label="listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar" value="listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar">listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar</option><option label="byte-buddy-1.12.18.jar" value="byte-buddy-1.12.18.jar">byte-buddy-1.12.18.jar</option><option label="ant-1.10.12.jar" value="ant-1.10.12.jar">ant-1.10.12.jar</option><option label="failureaccess-1.0.1.jar" value="failureaccess-1.0.1.jar">failureaccess-1.0.1.jar</option><option label="nashorn-core-15.6.jar" value="nashorn-core-15.6.jar">nashorn-core-15.6.jar</option><option label="javac-shaded-9+181-r4173-1.jar" value="javac-shaded-9+181-r4173-1.jar">javac-shaded-9+181-r4173-1.jar</option><option label="txw2-2.3.1.jar" value="txw2-2.3.1.jar">txw2-2.3.1.jar</option><option label="j2objc-annotations-1.1.jar" value="j2objc-annotations-1.1.jar">j2objc-annotations-1.1.jar</option><option label="jaxb-api-2.3.1.jar" value="jaxb-api-2.3.1.jar">jaxb-api-2.3.1.jar</option>
+</datalist>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</details>
+<details>
+<summary accesskey="Z" align="left" style="color: var(--label-color);" title="ALT+Z">details   .tooltip</summary>
+<table align="center" border="0" class="fieldpanel" frame="box" id="field.panel" sortable="" style="background-image: url(icons/art029.jpg);padding:6px;-webkit-border-radius:6px;-moz-border-radius:6px;border-radius:6px;">
+<tbody>
+<tr>
+<td class="beanfieldlabel" id="persistence.connectionDriverClass.label" required="" style="color: var(--label-color); " width="250">Database Driver (*)</td><td>
+<table>
+<input align="start" autofocus="autofocus" class="beanfieldinput" id="persistence.connectionDriverClass" lang="de_DE" list="persistence.connectionDriverClass.datalist" max="" maxlength="2147483647" min="" name="connectionDriverClass" onfocus="this.select();" pattern="[\x00-\xFF &euro;]{0,5000}" required="" size="-1" style="text-align: start; " tabindex="6" title="Database Driver Class" type="text" value="org.hsqldb.jdbc.JDBCDriver" width="-1">
+<datalist id="persistence.connectionDriverClass.datalist">
+<option label="infinispan_embedded" value="infinispan_embedded">infinispan_embedded</option><option label="org.hsqldb.jdbc.JDBCDriver" value="org.hsqldb.jdbc.JDBCDriver">org.hsqldb.jdbc.JDBCDriver</option><option label="mongodb" value="mongodb">mongodb</option><option label="neo4j_http" value="neo4j_http">neo4j_http</option><option label="infinispan_remote" value="infinispan_remote">infinispan_remote</option><option label="neo4j_bolt" value="neo4j_bolt">neo4j_bolt</option><option label="org.apache.derby.jdbc.ClientDriver" value="org.apache.derby.jdbc.ClientDriver">org.apache.derby.jdbc.ClientDriver</option><option label="oracle.jdbc.OracleDriver" value="oracle.jdbc.OracleDriver">oracle.jdbc.OracleDriver</option><option label="ehcache" value="ehcache">ehcache</option><option label="neo4j_embedded" value="neo4j_embedded">neo4j_embedded</option><option label="sun.jdbc.odbc.JdbcOdbcDriver" value="sun.jdbc.odbc.JdbcOdbcDriver">sun.jdbc.odbc.JdbcOdbcDriver</option><option label="net.sourceforge.jtds.jdbc.Driver" value="net.sourceforge.jtds.jdbc.Driver">net.sourceforge.jtds.jdbc.Driver</option><option label="org.sqlite.JDBC" value="org.sqlite.JDBC">org.sqlite.JDBC</option><option label="com.mysql.jdbc.Driver" value="com.mysql.jdbc.Driver">com.mysql.jdbc.Driver</option><option label="org.postgresql.Driver" value="org.postgresql.Driver">org.postgresql.Driver</option><option label="map" value="map">map</option><option label="org.h2.Driver" value="org.h2.Driver">org.h2.Driver</option><option label="net.ucanaccess.jdbc.UcanaccessDriver" value="net.ucanaccess.jdbc.UcanaccessDriver">net.ucanaccess.jdbc.UcanaccessDriver</option><option label="com.sap.dbtech.jdbc.DriverSapDB" value="com.sap.dbtech.jdbc.DriverSapDB">com.sap.dbtech.jdbc.DriverSapDB</option><option label="com.sybase.jdbc2.jdbc.SybDriver" value="com.sybase.jdbc2.jdbc.SybDriver">com.sybase.jdbc2.jdbc.SybDriver</option><option label="jaybird-jdk17" value="jaybird-jdk17">jaybird-jdk17</option><option label="com.ibm.db2.jcc.DB2Driver" value="com.ibm.db2.jcc.DB2Driver">com.ibm.db2.jcc.DB2Driver</option><option label="org.sqldroid.SQLDroidDriver" value="org.sqldroid.SQLDroidDriver">org.sqldroid.SQLDroidDriver</option><option label="org.apache.derby.jdbc.EmbeddedDriver" value="org.apache.derby.jdbc.EmbeddedDriver">org.apache.derby.jdbc.EmbeddedDriver</option>
+</datalist>
+</table>
+</td>
+</tr>
+<tr>
+<td class="beanfieldlabel" id="persistence.provider.label" required="" style="color: var(--label-color); " width="250">Provider (*)</td><td>
+<table>
+<input align="start" class="beanfieldinput" id="persistence.provider" lang="de_DE" list="persistence.provider.datalist" max="" maxlength="2147483647" min="" name="provider" onblur="evaluatedependencies(event)" onclick="evaluatedependencies(event)" onfocus="this.select();" pattern="[\x00-\xFF &euro;]{0,5000}" required="" size="-1" style="text-align: start; " tabindex="7" title="Klassenpfad der Hauptklasse des JPA-Providers.
+Kann jeglicher Provider sein - bekannte w&auml;ren: hibernate, openjpa, datanucleus, eclipselink, toplink, acme, batoo, (ebean, ormlite)" type="text" value="org.hibernate.jpa.HibernatePersistenceProvider" width="-1">
+<datalist id="persistence.provider.datalist">
+<option label="de.tsl2.nano.ormliteprovider.EntityManager" value="de.tsl2.nano.ormliteprovider.EntityManager">de.tsl2.nano.ormliteprovider.EntityManager</option><option label="com.acme.persistence" value="com.acme.persistence">com.acme.persistence</option><option label="org.hibernate.jpa.HibernatePersistenceProvider" value="org.hibernate.jpa.HibernatePersistenceProvider">org.hibernate.jpa.HibernatePersistenceProvider</option><option label="org.apache.openjpa.persistence.PersistenceProviderImpl" value="org.apache.openjpa.persistence.PersistenceProviderImpl">org.apache.openjpa.persistence.PersistenceProviderImpl</option><option label="org.batoo.jpa.core.BatooPersistenceProvider" value="org.batoo.jpa.core.BatooPersistenceProvider">org.batoo.jpa.core.BatooPersistenceProvider</option><option label="de.tsl2.nano.ebeanprovider.EntityManager" value="de.tsl2.nano.ebeanprovider.EntityManager">de.tsl2.nano.ebeanprovider.EntityManager</option><option label="org.eclipse.persistence.jpa.PersistenceProvider" value="org.eclipse.persistence.jpa.PersistenceProvider">org.eclipse.persistence.jpa.PersistenceProvider</option><option label="oracle.toplink.essentials.PersistenceProvider" value="oracle.toplink.essentials.PersistenceProvider">oracle.toplink.essentials.PersistenceProvider</option><option label="org.hibernate.ogm.jpa.HibernateOgmPersistence" value="org.hibernate.ogm.jpa.HibernateOgmPersistence">org.hibernate.ogm.jpa.HibernateOgmPersistence</option><option label="org.hibernate.ejb.HibernatePersistence" value="org.hibernate.ejb.HibernatePersistence">org.hibernate.ejb.HibernatePersistence</option><option label="org.datanucleus.api.jpa.PersistenceProviderImpl" value="org.datanucleus.api.jpa.PersistenceProviderImpl">org.datanucleus.api.jpa.PersistenceProviderImpl</option>
+</datalist>
+</table>
+</td>
+</tr>
+<tr>
+<td class="beanfieldlabel" id="persistence.datasourceClass.label" required="" style="color: var(--label-color); " width="250">Datasource Class (*)</td><td>
+<table>
+<input align="start" class="beanfieldinput" id="persistence.datasourceClass" lang="de_DE" list="persistence.datasourceClass.datalist" max="" maxlength="2147483647" min="" name="datasourceClass" onfocus="this.select();" pattern="[\x00-\xFF &euro;]{0,5000}" required="" size="-1" style="text-align: start; " tabindex="8" title="Datasource Class used by Application Servers" type="text" value="org.hsqldb.jdbc.JDBCDriver" width="-1">
+<datalist id="persistence.datasourceClass.datalist">
+<option label="jaybird-jdk17" value="jaybird-jdk17">jaybird-jdk17</option><option label="com.sybase.jdbc2.jdbc.SybDataSource" value="com.sybase.jdbc2.jdbc.SybDataSource">com.sybase.jdbc2.jdbc.SybDataSource</option><option label="org.postgresql.Driver" value="org.postgresql.Driver">org.postgresql.Driver</option><option label="sun.jdbc.odbc.JdbcOdbcDriver" value="sun.jdbc.odbc.JdbcOdbcDriver">sun.jdbc.odbc.JdbcOdbcDriver</option><option label="org.sqlite.JDBC" value="org.sqlite.JDBC">org.sqlite.JDBC</option><option label="org.sqldroid.SQLDroidDriver" value="org.sqldroid.SQLDroidDriver">org.sqldroid.SQLDroidDriver</option><option label="org.h2.Driver" value="org.h2.Driver">org.h2.Driver</option><option label="com.sap.dbtech.jdbc.DriverSapDB" value="com.sap.dbtech.jdbc.DriverSapDB">com.sap.dbtech.jdbc.DriverSapDB</option><option label="oracle.jdbc.pool.OracleDataSource" value="oracle.jdbc.pool.OracleDataSource">oracle.jdbc.pool.OracleDataSource</option><option label="net.sourceforge.jtds.jdbc.Driver" value="net.sourceforge.jtds.jdbc.Driver">net.sourceforge.jtds.jdbc.Driver</option><option label="com.ibm.db2.jcc.DB2Driver" value="com.ibm.db2.jcc.DB2Driver">com.ibm.db2.jcc.DB2Driver</option><option label="org.hsqldb.jdbc.JDBCDataSource" value="org.hsqldb.jdbc.JDBCDataSource">org.hsqldb.jdbc.JDBCDataSource</option><option label="net.ucanaccess.jdbc.UcanaccessDriver" value="net.ucanaccess.jdbc.UcanaccessDriver">net.ucanaccess.jdbc.UcanaccessDriver</option><option label="com.mysql.jdbc.Driver" value="com.mysql.jdbc.Driver">com.mysql.jdbc.Driver</option><option label="org.apache.derby.jdbc.ClientDriver" value="org.apache.derby.jdbc.ClientDriver">org.apache.derby.jdbc.ClientDriver</option>
+</datalist>
+</table>
+</td>
+</tr>
+<tr>
+<td class="beanfieldlabel" id="persistence.jtaDataSource.label" required="" style="color: var(--label-color); " width="250">JTA-Datasource (*)</td><td>
+<table>
+<input align="start" class="beanfieldinput" id="persistence.jtaDataSource" lang="de_DE" max="" maxlength="2147483647" min="" name="jtaDataSource" onfocus="this.select();" pattern="[\x00-\xFF &euro;]{0,5000}" required="" size="-1" style="text-align: start; " tabindex="9" title="Java Transaction API class. In this context normally:<UNDEFINED>." type="text" value="<UNDEFINED>" width="-1">
+</table>
+</td>
+</tr>
+<tr>
+<td class="beanfieldlabel" id="persistence.transactionType.label" required="" style="color: var(--label-color); " width="250">Transaction Type (*)</td><td>
+<table>
+<input align="start" class="beanfieldinput" id="persistence.transactionType" lang="de_DE" list="persistence.transactionType.datalist" max="" maxlength="2147483647" min="" name="transactionType" onfocus="this.select();" pattern="[\x00-\xFF &euro;]{0,5000}" required="" size="-1" style="text-align: start; " tabindex="10" title="Transaction Type. One of:
+	RESOURCE_LOCAL
+	JTA" type="text" value="RESOURCE_LOCAL" width="-1">
+<datalist id="persistence.transactionType.datalist">
+<option label="RESOURCE_LOCAL" value="RESOURCE_LOCAL">RESOURCE_LOCAL</option><option label="JTA" value="JTA">JTA</option>
+</datalist>
+</table>
+</td>
+</tr>
+<tr>
+<td class="beanfieldlabel" id="persistence.persistenceUnit.label" required="" style="color: var(--label-color); " width="250">Persistence Unit (*)</td><td>
+<table>
+<input align="start" class="beanfieldinput" id="persistence.persistenceUnit" lang="de_DE" max="" maxlength="2147483647" min="" name="persistenceUnit" onfocus="this.select();" pattern="[\x00-\xFF &euro;]{0,5000}" required="" size="-1" style="text-align: start; " tabindex="11" title="Persistence Unit Name, defined in persistence.xml. Standard: genericPersistenceUnit.
+Change that only, if you know, what you do!" type="text" value="genericPersistenceUnit" width="-1">
+</table>
+</td>
+</tr>
+<tr>
+<td class="beanfieldlabel" id="persistence.hibernateDialect.label" required="" style="color: var(--label-color); " width="250"><span><a href="http://docs.jboss.org/hibernate/orm/4.2/javadocs/org/hibernate/dialect/package-summary.html">Hibernate Dialect</a><span> (*)</span></span></td><td>
+<table>
+<input align="start" class="beanfieldinput" id="persistence.hibernateDialect" lang="de_DE" list="persistence.hibernateDialect.datalist" max="" maxlength="2147483647" min="" name="hibernateDialect" onfocus="this.select();" pattern="[\x00-\xFF &euro;]{0,5000}" required="" size="-1" style="text-align: start; " tabindex="12" title="Only used, if JPA-provider is Hibernate. Depends on the selected database!" type="text" value="org.hibernate.dialect.HSQLDialect" width="-1">
+<datalist id="persistence.hibernateDialect.datalist">
+<option label="GridDialect" value="GridDialect">GridDialect</option><option label="org.hibernate.dialect.SybaseDialect" value="org.hibernate.dialect.SybaseDialect">org.hibernate.dialect.SybaseDialect</option><option label="org.hibernate.dialect.Oracle10gDialect" value="org.hibernate.dialect.Oracle10gDialect">org.hibernate.dialect.Oracle10gDialect</option><option label="org.hibernate.dialect.InformixDialect" value="org.hibernate.dialect.InformixDialect">org.hibernate.dialect.InformixDialect</option><option label="org.hibernate.dialect.MySQLDialect" value="org.hibernate.dialect.MySQLDialect">org.hibernate.dialect.MySQLDialect</option><option label="org.hibernate.dialect.DerbyDialect" value="org.hibernate.dialect.DerbyDialect">org.hibernate.dialect.DerbyDialect</option><option label="BatchableGridDialect" value="BatchableGridDialect">BatchableGridDialect</option><option label="org.hibernate.dialect.SQLServerDialect" value="org.hibernate.dialect.SQLServerDialect">org.hibernate.dialect.SQLServerDialect</option><option label="org.hibernate.dialect.H2Dialect" value="org.hibernate.dialect.H2Dialect">org.hibernate.dialect.H2Dialect</option><option label="MultigetGridDialect" value="MultigetGridDialect">MultigetGridDialect</option><option label="org.hibernate.dialect.HSQLDialect" value="org.hibernate.dialect.HSQLDialect">org.hibernate.dialect.HSQLDialect</option><option label="org.hibernate.dialect.DB2Dialect" value="org.hibernate.dialect.DB2Dialect">org.hibernate.dialect.DB2Dialect</option><option label="org.hibernate.dialect.SQLiteDialect" value="org.hibernate.dialect.SQLiteDialect">org.hibernate.dialect.SQLiteDialect</option><option label="IdentityColumnAwareGridDialect" value="IdentityColumnAwareGridDialect">IdentityColumnAwareGridDialect</option><option label="org.hibernate.dialect.FirebirdDialect" value="org.hibernate.dialect.FirebirdDialect">org.hibernate.dialect.FirebirdDialect</option><option label="QueryableGridDialect" value="QueryableGridDialect">QueryableGridDialect</option><option label="org.hibernate.dialect.PostgresDialect" value="org.hibernate.dialect.PostgresDialect">org.hibernate.dialect.PostgresDialect</option><option label="OptimisticLockingAwareGridDialect" value="OptimisticLockingAwareGridDialect">OptimisticLockingAwareGridDialect</option><option label="org.hibernate.dialect.SAPDBDialect" value="org.hibernate.dialect.SAPDBDialect">org.hibernate.dialect.SAPDBDialect</option>
+</datalist>
+</table>
+</td>
+</tr>
+<tr>
+<td class="beanfieldlabel" id="persistence.database.label" required="" style="color: var(--label-color); " width="250"><span><a href="https://editor.ponyorm.com/explore">Datenbank</a><span> (*)</span></span></td><td cols="50" rows="1" style="width:382; height: 60px; background-color: lightyellow;">
+<table>
+<textarea align="start" class="beanfieldinput" cols="50" id="persistence.database" lang="de_DE" max="" maxlength="100000" min="" name="database" onfocus="this.select();" pattern="[\x00-\xFF &euro;]{0,100000}" required="" rows="1" size="-1" style="width:382; height: 60px; background-color: lightyellow;" tabindex="13" title="Database-Name or full DDL-script with all create statements.
+If the given database url is a local hsqldb or h2 and the database name doesn't exist
+,nano-h5 looks for a ddl file with that name (extension: .sql) and creates that database.
+There exists already one sample: anyway.sql, so you can input: anyway.
+If the content is a full DDL script, it will be saved with same name as the jar-file name (without .jar)." type="text" value="" width="-1" wrap="">anyway</textarea>
+</table>
+</td>
+</tr>
+<tr>
+<td class="beanfieldlabel" id="persistence.defaultSchema.label" required="" style="color: var(--label-color); " width="250">Default Schema (*)</td><td>
+<table>
+<input align="start" class="beanfieldinput" id="persistence.defaultSchema" lang="de_DE" max="" maxlength="2147483647" min="" name="defaultSchema" onblur="evaluatedependencies(event)" onclick="evaluatedependencies(event)" onfocus="this.select();" pattern="[\x00-\xFF &euro;]{0,5000}" required="" size="-1" style="text-align: start; " tabindex="14" title="Default Database Schema. Mostly the database user name. On Hsqldb normally: PUBLIC" type="text" value="PUBLIC" width="-1">
+</table>
+</td>
+</tr>
+<tr>
+<td class="beanfieldlabel" id="persistence.port.label" required="" style="color: var(--label-color); " width="250">Database Port (*)</td><td>
+<table>
+<input align="start" class="beanfieldinput" id="persistence.port" lang="de_DE" max="" maxlength="2147483647" min="" name="port" onfocus="this.select();" pattern="[\x00-\xFF &euro;]{0,5000}" required="" size="-1" style="text-align: start; " tabindex="15" title="Database Port. Have a look at your Database-URL. Mostly, the port is defined there." type="text" value="9003" width="-1">
+</table>
+</td>
+</tr>
+<tr>
+<td class="beanfieldlabel" id="persistence.generator.label" required="" style="color: var(--label-color); " width="250">Rev.-Eng.-Generator (*)</td><td>
+<table>
+<select align="start" id="persistence.generator" name="generator" pattern="[\x00-\xFF &euro;]{0,5000}" required="" tabindex="16" title="Erm&ouml;glicht die Auswahl eines bekannten 'Reverse-Engineering Java-Generator's.
+Bekannt sind Hibernate-Tools und OpenJPA um JPA annotated java Klassen zu generieren." width="100%"><option label="hibernate-tools" selected value="hibernate-tools">hibernate-tools</option><option label="openjpa-reverse-eng" value="openjpa-reverse-eng">openjpa-reverse-eng</option></select>
+</table>
+</td>
+</tr>
+<tr>
+<td class="beanfieldlabel" id="persistence.autoddl.label" required="" style="color: var(--label-color); " width="250">Auto-DDL (*)</td><td>
+<table>
+<select align="start" id="persistence.autoddl" name="autoddl" pattern="[\x00-\xFF &euro;]{0,5000}" required="" tabindex="17" title="Flag for the used generator. If not false or validate, the generator will always try to recreate or update the database schema through the beans of the jar-File." width="100%"><option label="false" value="false">false</option><option label="validate" value="validate">validate</option><option label="update" value="update">update</option><option label="create" value="create">create</option><option label="create-drop" value="create-drop">create-drop</option></select>
+</table>
+</td>
+</tr>
+<tr>
+<td class="beanfieldlabel" id="persistence.replication.label" style="color: var(--label-color); " width="250">Replication</td><td>
+<table>
+<input align="start" class="beanfieldinput" disabled id="persistence.replication" lang="de_DE" max="" maxlength="2147483647" min="" name="replication" pattern=".*" readonly size="-1" style="background-color: rgba(247,247,247,.5);" tabindex="18" title="You can enable this field in the 'environments.xml' file.
+Will enable offline mode, synchronize your local database with remote one if internet connection is available." type="text" value="" width="-1"><button accesskey="%" class="selector" formnovalidate="" formtarget="_self" id="replication.selector" name="replication.selector" style="" tabindex="$" title="Auswahl (ALT+%)">...</button>
 </table>
 </td>
 </tr>
@@ -520,7 +664,7 @@ function setTheme(next) {
 </div>
 <div class="td" id="indiviual-right-panel-id" style="width: 15%">
 <span>
-<div style="writing-mode: vertical-rl; text-orientation: mixed; position: relative; font-size: 4em; transition: 0.5s; font-family: Arial, Helvetica, sans-serif; text-shadow: 0 1px 0 #ccc, 0 2px 0 #ccc, 0 3px 0 #ccc, 0 4px 0 #ccc, 0 5px 0 #ccc, 0 6px 0 #ccc, 0 7px 0 #ccc, 0 8px 0 #ccc, 0 9px 0 #ccc, 0 10px 0 #ccc, 0 11px 0 #ccc, 0 12px 0 #ccc, 0 20px 30px rgba(0, 0, 0, 0.5);">anyway: StatusInfo</div>
+<div style="writing-mode: vertical-rl; text-orientation: mixed; position: relative; font-size: 4em; transition: 0.5s; font-family: Arial, Helvetica, sans-serif; text-shadow: 0 1px 0 #ccc, 0 2px 0 #ccc, 0 3px 0 #ccc, 0 4px 0 #ccc, 0 5px 0 #ccc, 0 6px 0 #ccc, 0 7px 0 #ccc, 0 8px 0 #ccc, 0 9px 0 #ccc, 0 10px 0 #ccc, 0 11px 0 #ccc, 0 12px 0 #ccc, 0 20px 30px rgba(0, 0, 0, 0.5);">test: Persistence</div>
 <span>
 </span></span>
 </div>
@@ -528,7 +672,13 @@ function setTheme(next) {
 <table border="0" frame="box" id="action.panel" sortable="" width="100%">
 <tbody>
 <tr class="actionpanel">
-<td align="center" style="" width="100%"><button accesskey="&uuml;" class="panelactionsimple" formtarget="_self" id="statusinfo.save" name="statusinfo.save" onclick="fade(this)" style="" title="&amp;&Uuml;bernehmen (ALT+&uuml;)" type="submit">&Uuml;bernehmen<img src="icons/save.png"></button><button accesskey="c" class="panelactionsimple" formnovalidate="" formtarget="_self" id="de.tsl2.nano.action.action_cancelled" name="de.tsl2.nano.action.action_cancelled" style="" title="S&amp;chlie&szlig;en (ALT+c)">Schlie&szlig;en<img src="icons/stop.png"></button></td>
+<td align="center" style="" width="100%"><button accesskey="o" autofocus="" class="panelactionsimple" formtarget="_self" id="tsl2nano.login.ok" name="tsl2nano.login.ok" onclick="fade(this)" style="" title="Connects to given database-url and loads the persistence api of the given provider.
+Does the following:
+	1. If the database doesn't exist but is hsqldb or h2 and to the bean-jar file equal named ddl file is found, the database will be created
+	2. If any of the database/provider classes are not found, they will be downloaded through maven from internet
+	3. If the bean-jar file is not found, it will be created through the given generator.
+
+This may be a long term process for up to 10 minutes! (ALT+o)" type="submit">Ok<img src="icons/open.png"></button><button accesskey="c" class="panelactionsimple" formnovalidate="" formtarget="_self" id="de.tsl2.nano.action.action_cancelled" name="de.tsl2.nano.action.action_cancelled" style="" title="S&amp;chlie&szlig;en (ALT+c)">Schlie&szlig;en<img src="icons/stop.png"></button></td>
 </tr>
 </tbody>
 </table>
@@ -539,7 +689,13 @@ function setTheme(next) {
 <tr>
 <td><span>
 <progress hidden="true" id="progressbar"></progress>
-<span id="progress"> 	WAITING FOR WEBSOCKET TO CONNECT...!</span><span id="footer"><img src="icons/properties.png"><b color="#0000FF">@/home/ts/workspace/tsl2nano-code/tsl2.nano.h5/target/test/.nanoh5.timesheet/mda.xml:188  </b><i color="#000000">Mda Generation Task Successful Finished!  </i><img src="icons/properties.png"></span></span></td>
+<span id="progress"> 	WAITING FOR WEBSOCKET TO CONNECT...!</span>
+<details open="">
+<summary accesskey="i" align="left" style="color: FF6666;" title="ALT+i">ERROR: java.lang.ClassCastException: class java.lang.Boolean cannot be cast to class java.lang.String (java.lang.Bool...</summary>
+<a href="./timesheet.log">Exception</a>
+<pre>ERROR: java.lang.ClassCastException: class java.lang.Boolean cannot be cast to class java.lang.String (java.lang.Boolean and java.lang.String are in module java.base of loader 'bootstrap')</pre>
+</details>
+</span></td>
 </tr>
 </tbody>
 </table>

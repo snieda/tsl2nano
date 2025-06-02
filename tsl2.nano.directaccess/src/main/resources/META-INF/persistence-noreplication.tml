@@ -11,6 +11,7 @@
 		Acme Pers. : com.acme.persistence
 		DataNucleus: org.datanucleus.api.jpa.PersistenceProviderImpl
 		BatooJPA   : org.batoo.jpa.core.BatooPersistenceProvider
+		Hibernate-OMG: org.hibernate.ogm.jpa.HibernateOgmPersistence
 		 -->
 		 
 		<!-- JNDI name of the database resource to use -->
@@ -43,6 +44,19 @@
 			<property name="hibernate.jdbc.batch_size" value="50"/>
 			<!-- <property name="org.hibernate.FlushMode" value="commit" />  -->
          	<!-- Hibernate End -->
+
+			<!-- Hibernate-OGM (NoSQL support (MongoDB, CouchDB, Redis, Neo4j, etc., but project stopped 2018/2024 with 5.4.2) -->
+			<!-- names: map (only to be used for unit tests), infinispan_embedded, infinispan_remote, ehcache, mongodb, neo4j_embedded, neo4j_http, neo4j_bolt -->
+			<!-- couchdb, cassandra, redis, ignite are experimental and only available with old drivers -->
+			<property name="hibernate.ogm.datastore.provider" value="${connection.driver_class}" />
+			<property name="hibernate.ogm.datastore.dialect" value="${hibernate.dialect}" />
+			<property name="hibernate.ogm.datastore.host" value="${connection.url}" />
+			<property name="hibernate.ogm.datastore.database" value="${connection.database}" />
+			<!-- <property name="hibernate.ogm.datastore.port" value="${connection.port}" /> DEPRECATED, replaced by host -->
+			<property name="hibernate.ogm.datastore.username" value="${connection.username}" />
+			<property name="hibernate.ogm.datastore.password" value="${connection.password}" />
+			<property name="hibernate.ogm.datastore.create_database" value="${autoddl}" />
+         	<!-- Hibernate-OMG End -->
 
 			<!-- Eclipse-Link, OpenJPA and DataNucleus -->
 			<property name="javax.persistence.jdbc.driver" value="${connection.driver_class}"/>

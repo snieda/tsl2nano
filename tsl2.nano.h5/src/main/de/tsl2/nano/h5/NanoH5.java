@@ -1217,8 +1217,12 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
 //            ServiceFactory.instance().createSession(userObject, mandatorObject, subject, userRoles, features, featureInterfacePrefix)
             BeanContainerUtil.initGenericServices(runtimeClassloader);
         } else {
-            ENV.loadClassDependencies(persistence.getConnectionDriverClass(),
-                persistence.getDatasourceClass(), persistence.getProvider());
+            if (persistence.isNoSQLWithUndefinedDriver()) {
+                ENV.loadClassDependencies(persistence.getProvider());
+            } else {
+                ENV.loadClassDependencies(persistence.getConnectionDriverClass(),
+                    persistence.getDatasourceClass(), persistence.getProvider());
+            }
             GenericLocalBeanContainer.initLocalContainer(runtimeClassloader,
                 useJPAPersistenceProvider && ENV.get("app.login.service.connection.check", false));
         }

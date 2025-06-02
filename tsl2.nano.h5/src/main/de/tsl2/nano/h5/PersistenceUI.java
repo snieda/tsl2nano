@@ -14,6 +14,7 @@ import static de.tsl2.nano.bean.def.BeanPresentationHelper.PROP_LENGTH;
 import static de.tsl2.nano.bean.def.BeanPresentationHelper.PROP_NULLABLE;
 import static de.tsl2.nano.bean.def.BeanPresentationHelper.PROP_STYLE;
 import static de.tsl2.nano.bean.def.BeanPresentationHelper.PROP_VISIBLE;
+import static de.tsl2.nano.persistence.Persistence.NOSQL_HIBERNATE_OGM_PERSISTENCE;
 
 import java.io.File;
 import java.io.Serializable;
@@ -99,7 +100,7 @@ public class PersistenceUI {
                     props.setProperty("PROVIDER_BatooJPA", "org.batoo.jpa.core.BatooPersistenceProvider");
                     props.setProperty("PROVIDER_EBean", "de.tsl2.nano.ebeanprovider.EntityManager");
                     props.setProperty("PROVIDER_ORMLite", "de.tsl2.nano.ormliteprovider.EntityManager");
-                    props.setProperty("PROVIDER_PROVIDER_Hibernate_OMG_NoSQL", "org.hibernate.ogm.jpa.HibernateOgmPersistence");
+                    props.setProperty("PROVIDER_PROVIDER_Hibernate_OMG_NoSQL", NOSQL_HIBERNATE_OGM_PERSISTENCE);
 
                     props.setProperty("DRIVER_jdbc.odbc", "sun.jdbc.odbc.JdbcOdbcDriver");
                     props.setProperty("DRIVER_jdbc.oracle", "oracle.jdbc.OracleDriver");

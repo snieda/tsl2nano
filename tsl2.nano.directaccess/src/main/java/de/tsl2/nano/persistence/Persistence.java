@@ -35,6 +35,7 @@ import de.tsl2.nano.persistence.replication.Replication;
  * @version $Revision$
  */
 public class Persistence implements Serializable, Cloneable {
+
     private static final long serialVersionUID = 2360829578078838714L;
 
     public static final String FIX_PATH = "!";
@@ -73,6 +74,21 @@ public class Persistence implements Serializable, Cloneable {
     public static final String[] STD_LOCAL_DATABASE_DRIVERS = { HSQLDB_DATABASE_DRIVER, "org.hsqldb.jdbcDriver",
         H2_DATABASE_DRIVER, DERBY_DATABASE_DRIVER };
 
+    public static final String NOSQL_HIBERNATE_OGM_PERSISTENCE = "org.hibernate.ogm.jpa.HibernateOgmPersistence";
+
+    public enum NoSqlDriverClass {
+        mongodb("org.hibernate.ogm.datastore.mongodb.impl.MongoDBDatastoreProvider");
+        //TODO: find and add the classes for other supported nosql datbase drivers
+        //perhaps we can resolve it through the standard package name: org.hibernate.ogm/hibernate-ogm-<name>
+        private String driverClass;
+
+        NoSqlDriverClass(String driverClass) {
+            this.driverClass = driverClass;
+        }
+        public String getDriverClassName() {
+            return driverClass;
+        }
+    }
 
     protected String persistenceUnit = System.getProperty(KEY_PREF + "persistenceunit", "genericPersistenceUnit");
     protected String transactionType = System.getProperty(KEY_PREF + "transactiontype", "RESOURCE_LOCAL");
@@ -167,7 +183,7 @@ public class Persistence implements Serializable, Cloneable {
      * @return Returns the connectionDriverClass.
      */
     public String getConnectionDriverClass() {
-        return connectionDriverClass;
+        return isNoSQL() ? NoSqlDriverClass.valueOf(connectionDriverClass).getDriverClassName() : connectionDriverClass;
     }
 
     /**
@@ -285,7 +301,7 @@ public class Persistence implements Serializable, Cloneable {
      * @return Returns the datasourceClass.
      */
     public String getDatasourceClass() {
-        return datasourceClass;
+        return isNoSQL() && datasourceClass == null || !datasourceClass.contains(".") ? getConnectionDriverClass() : datasourceClass;
     }
 
     /**
@@ -667,6 +683,14 @@ public class Persistence implements Serializable, Cloneable {
     }
     public void setAuth(String auth) {
         this.auth = auth;
+    }
+
+    public boolean isNoSQL() {
+        return getProvider().equals(NOSQL_HIBERNATE_OGM_PERSISTENCE);
+    }
+
+    public boolean isNoSQLWithUndefinedDriver() {
+        return isNoSQL() && (getConnectionDriverClass() == null || !getConnectionDriverClass().contains("."));
     }
 
 }
