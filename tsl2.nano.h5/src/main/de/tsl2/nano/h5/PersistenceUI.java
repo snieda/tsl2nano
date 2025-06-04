@@ -43,6 +43,7 @@ import de.tsl2.nano.h5.websocket.WSEvent;
 import de.tsl2.nano.h5.websocket.WebSocketDependencyListener;
 import de.tsl2.nano.persistence.DatabaseTool;
 import de.tsl2.nano.persistence.Persistence;
+import de.tsl2.nano.persistence.Persistence.NoSqlDriverClass;
 import de.tsl2.nano.plugin.Plugins;
 
 /**
@@ -268,7 +269,7 @@ public class PersistenceUI {
                                         return p.getProperty("DRIVER_" + prefix);
                                     }
                                 }
-                                return null;
+                                return persistence.getConnectionDriverClass();
                             }
                         }, WSEvent.class);
                 login
@@ -287,7 +288,7 @@ public class PersistenceUI {
                                         return p.getProperty("DATASOURCE_" + prefix);
                                     }
                                 }
-                                return null;
+                                return persistence.getDatasourceClass();
                             }
                         }, WSEvent.class);
                 login
@@ -306,7 +307,7 @@ public class PersistenceUI {
                                         return p.getProperty("DIALECT_" + prefix);
                                     }
                                 }
-                                return null;
+                                return persistence.getHibernateDialect();
                             }
                         }, WSEvent.class);
                 login
@@ -353,7 +354,7 @@ public class PersistenceUI {
                                         return DatabaseTool.getPort(url);
                                     }
                                 }
-                                return null;
+                                return persistence.getPort();
                             }
                         }, WSEvent.class);
                 login
@@ -411,6 +412,55 @@ public class PersistenceUI {
                                     }
                                 }
                                 return provider;
+                            }
+                        }, WSEvent.class);
+                // NOSQL with hibernate-ogm
+                login
+                    .getAttribute("provider")
+                    .changeHandler()
+                    .addListener(
+                        new WebSocketDependencyListener<String>((AttributeDefinition<String>) login
+                            .getAttribute("connectionDriverClass")) {
+                            @Override
+                            protected String evaluate(WSEvent evt) {
+                                Object value = evt.newValue;
+                                String provider = Util.asString(value);
+                                if (provider.equals(NOSQL_HIBERNATE_OGM_PERSISTENCE)) {
+                                    return NoSqlDriverClass.mongodb.name();
+                                }
+                                return persistence.getConnectionDriverClass();
+                            }
+                        }, WSEvent.class);
+                login
+                    .getAttribute("provider")
+                    .changeHandler()
+                    .addListener(
+                        new WebSocketDependencyListener<String>((AttributeDefinition<String>) login
+                            .getAttribute("datasourceClass")) {
+                            @Override
+                            protected String evaluate(WSEvent evt) {
+                                Object value = evt.newValue;
+                                String provider = Util.asString(value);
+                                if (provider.equals(NOSQL_HIBERNATE_OGM_PERSISTENCE)) {
+                                    return NoSqlDriverClass.mongodb.name();
+                                }
+                                return persistence.getDatasourceClass();
+                            }
+                        }, WSEvent.class);
+                login
+                    .getAttribute("provider")
+                    .changeHandler()
+                    .addListener(
+                        new WebSocketDependencyListener<String>((AttributeDefinition<String>) login
+                            .getAttribute("hibernateDialect")) {
+                            @Override
+                            protected String evaluate(WSEvent evt) {
+                                Object value = evt.newValue;
+                                String provider = Util.asString(value);
+                                if (provider.equals(NOSQL_HIBERNATE_OGM_PERSISTENCE)) {
+                                    return "GridDialect";
+                                }
+                                return persistence.getHibernateDialect();
                             }
                         }, WSEvent.class);
                 /*

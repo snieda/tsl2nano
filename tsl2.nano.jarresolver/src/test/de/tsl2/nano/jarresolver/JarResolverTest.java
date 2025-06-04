@@ -1,7 +1,8 @@
 package de.tsl2.nano.jarresolver;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.net.SocketTimeoutException;
@@ -144,7 +145,7 @@ public class JarResolverTest   implements ENVTestPreparation {
 				assertTrue(mvnpath != null);
 				assertEquals("org.java-websocket:Java-WebSocket", StringUtil.substring(mvnpath, null, ":", true));
 			} catch (Exception e) {
-				if (e instanceof SocketTimeoutException || e.toString().matches(".*HTTP response.*50[023].*"))
+				if (ManagedException.getRootCause(e) instanceof SocketTimeoutException || e.toString().matches(".*HTTP response.*50[023].*"))
 					System.out.println(e.toString()); //OK, Problem on server side...
 				else
 					fail(e.toString());
@@ -163,7 +164,7 @@ public class JarResolverTest   implements ENVTestPreparation {
 				assertEquals("org.java-websocket:Java-WebSocket", StringUtil.substring(mvnpath, null, ":", true));
 //				assertTrue(StringUtil.extract(mvnpath, "\\w+").matches(".*(sparql|org|pusher|firebase).*"));
 			} catch (Exception e) {
-				if (e instanceof SocketTimeoutException || e.toString().matches(".*HTTP response.*50[023].*"))
+				if (ManagedException.getRootCause(e) instanceof SocketTimeoutException || e.toString().matches(".*HTTP response.*50[023].*"))
 					System.out.println(e.toString()); //OK, Problem on server side...
 				else
 					fail(e.toString());

@@ -451,7 +451,7 @@ public class Persistence implements Serializable, Cloneable {
 
     protected String savePersistenceXml() throws IOException {
         /*
-         * create the mypersistenc.xml
+         * create the mypersistence.xml
          */
         InputStream stream = (InputStream) Thread.currentThread()
             .getContextClassLoader()
