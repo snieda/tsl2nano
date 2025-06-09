@@ -497,7 +497,7 @@ public class PersistenceUI {
                 ".jar");
         }
         login.getAttribute("generator").setRange(Arrays.asList(Persistence.GEN_HIBERNATE, Persistence.GEN_OPENJPA));
-        login.getAttribute("autoddl").setRange(Arrays.asList("false", "validate", "update", "create", "create-drop"));
+        login.getAttribute("autoddl").setRange(Arrays.asList("false", "validate", "update", "create", "create-drop", "true"));
 
         helper.change(BeanPresentationHelper.PROP_DESCRIPTION,
             ENV.translate("jarFile.tooltip", true),
