@@ -183,7 +183,7 @@ public class Persistence implements Serializable, Cloneable {
      * @return Returns the connectionDriverClass.
      */
     public String getConnectionDriverClass() {
-        return isNoSQL() ? NoSqlDriverClass.valueOf(connectionDriverClass).getDriverClassName() : connectionDriverClass;
+        return noSQL() ? NoSqlDriverClass.valueOf(connectionDriverClass).getDriverClassName() : connectionDriverClass;
     }
 
     /**
@@ -301,7 +301,7 @@ public class Persistence implements Serializable, Cloneable {
      * @return Returns the datasourceClass.
      */
     public String getDatasourceClass() {
-        return isNoSQL() && datasourceClass == null || !datasourceClass.contains(".") ? getConnectionDriverClass() : datasourceClass;
+        return noSQL() && datasourceClass == null || !datasourceClass.contains(".") ? getConnectionDriverClass() : datasourceClass;
     }
 
     /**
@@ -685,12 +685,12 @@ public class Persistence implements Serializable, Cloneable {
         this.auth = auth;
     }
 
-    public boolean isNoSQL() {
+    public boolean noSQL() {
         return getProvider().equals(NOSQL_HIBERNATE_OGM_PERSISTENCE);
     }
 
-    public boolean isNoSQLWithUndefinedDriver() {
-        return isNoSQL() && (getConnectionDriverClass() == null || !getConnectionDriverClass().contains("."));
+    public boolean noSQLWithUndefinedDriver() {
+        return noSQL() && (getConnectionDriverClass() == null || !getConnectionDriverClass().contains("."));
     }
 
 }

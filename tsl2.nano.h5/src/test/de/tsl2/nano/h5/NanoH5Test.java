@@ -552,7 +552,7 @@ public class NanoH5Test implements ENVTestPreparation {
         Collection<java.lang.reflect.Method> elements = Arrays.asList(Persistence.class.getMethods());
         VerifyComparators.verifyTransitivity(new DeclaredMethodComparator(), elements );
         BeanDefinition<Persistence> bPers = BeanDefinition.getBeanDefinition(Persistence.class);
-        assertEquals(21, bPers.getAttributeNames().length);
+        assertEquals(19, bPers.getAttributeNames().length);
         
         Bean<Persistence> persistenceUI = PersistenceUI.createPersistenceUI(Persistence.current(), null);
         assertEquals("connectionUserName", persistenceUI.getAttributeNames()[0]);

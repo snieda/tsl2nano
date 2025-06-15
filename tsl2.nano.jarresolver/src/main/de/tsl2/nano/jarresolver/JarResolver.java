@@ -12,6 +12,7 @@ package de.tsl2.nano.jarresolver;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,11 +24,13 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.classloader.NetworkClassLoader;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.CollectionUtil;
+import de.tsl2.nano.core.util.FilePath;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
@@ -62,6 +65,10 @@ import de.tsl2.nano.core.util.Util;
  *   a. find the package path through all PACKAGE values
  *   b. if not found, cut last part concatenated through '-' and try to find PACKAGE value again. if found, use that as groupId.
  *   c. if not found, use artifact name as group name
+ * 3. find artifact through online services
+ *   a. search.maven.org
+ *   b. jar-download.com
+ *   c. findjar.com
  * 
  * </pre>
  * 
@@ -118,21 +125,38 @@ public class JarResolver {
     public JarResolver(String baseDir) {
         props = new Properties();
         try {
-            props.load(ENV.getResource("jarresolver.properties"));
-            String updateUrl = props.getProperty(URL_UPDATE_PROPERTIES);
             setBaseDir(baseDir);
-            if (updateUrl != null) {
-                try {
-                    LOG.info("updating jarresolver.properties through " + updateUrl);
-                    download(updateUrl, true, true);
-                } catch (Exception ex) {
-                    //no problem - perhaps no network connection
-                    LOG.warn("couldn't update jarresolver.properties from " + updateUrl);
-                }
-            }
+            props.load(ENV.getResource("jarresolver.properties"));
+            LOG.info("loading local jarresolver.properties version: " + props.get("version"));
+            updatePropertiesFromDefaultUrl(baseDir);
 
         } catch (IOException e) {
             ManagedException.forward(e);
+        }
+    }
+
+    private void updatePropertiesFromDefaultUrl(String baseDir) {
+        String updateUrl = props.getProperty(URL_UPDATE_PROPERTIES);
+        if (updateUrl != null) {
+            try {
+                LOG.info("looking for an update of jarresolver.properties through " + updateUrl);
+                File newPropFile = NetUtil.download(updateUrl, ENV.getTempPath(), true, true);
+                Properties newProps = new Properties();
+                newProps.load(ENV.getResource(newPropFile.getPath()));
+                String newVersion = newProps.getProperty("version");
+                if (newVersion != null && newVersion.compareTo(props.getProperty("version")) > 0) {
+                    LOG.info("using newer downloaded version (" + newVersion + ") of jarresolver.properties");
+                    props = newProps;
+                    FilePath.copy(newPropFile.getPath(), baseDir + "jarresolver.properties", StandardCopyOption.REPLACE_EXISTING);
+                    if (Message.ask("New jarresolver.properites (" + newVersion + " downloaded.\n\nShould we try to find all unresolved classes!", true)) {
+                        NetworkClassLoader.resetUnresolvedClasses(baseDir);
+                    }
+
+                }
+            } catch (Exception ex) {
+                //no problem - perhaps no network connection
+                LOG.warn("couldn't update jarresolver.properties from " + updateUrl);
+            }
         }
     }
 
@@ -299,7 +323,12 @@ public class JarResolver {
     }
 
     private void loadMvn() {
-        File mvnFile = download((String) props.get(URL_MVN_DOWNLOAD), false, false);
+        File mvnFile = null;
+        try {
+            mvnFile = download((String) props.get(URL_MVN_DOWNLOAD), false, false);            
+        } catch (Exception e) {
+            mvnFile = download((String) props.get(URL_MVN_DOWNLOAD + ".2"), false, false);            
+        }
         if (mvnFile.length() == 0)
             Message.send("jarresolver ist not able to work - mvn binary download failed!");
         mvnRoot = mvnFile.getParent();
