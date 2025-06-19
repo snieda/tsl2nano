@@ -183,7 +183,7 @@ public class Persistence implements Serializable, Cloneable {
      * @return Returns the connectionDriverClass.
      */
     public String getConnectionDriverClass() {
-        return noSQL() ? NoSqlDriverClass.valueOf(connectionDriverClass).getDriverClassName() : connectionDriverClass;
+        return /*noSQL() ? NoSqlDriverClass.valueOf(connectionDriverClass).getDriverClassName() : */connectionDriverClass;
     }
 
     /**
@@ -301,7 +301,7 @@ public class Persistence implements Serializable, Cloneable {
      * @return Returns the datasourceClass.
      */
     public String getDatasourceClass() {
-        return noSQL() && datasourceClass == null || !datasourceClass.contains(".") ? getConnectionDriverClass() : datasourceClass;
+        return /*noSQL() && datasourceClass == null || !datasourceClass.contains(".") ? getConnectionDriverClass() :*/ datasourceClass;
     }
 
     /**

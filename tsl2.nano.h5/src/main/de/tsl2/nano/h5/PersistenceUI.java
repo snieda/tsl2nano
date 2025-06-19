@@ -266,7 +266,8 @@ public class PersistenceUI {
                                 if (url != null) {
                                     String prefix = StringUtil.extract(url, "^\\w+[:]\\w+").replace(':', '.');
                                     if (!Util.isEmpty(prefix)) {
-                                        return p.getProperty("DRIVER_" + prefix);
+                                        String driver = p.getProperty("DRIVER_" + prefix);
+                                        return driver != null ? driver : persistence.getConnectionDriverClass();
                                     }
                                 }
                                 return persistence.getConnectionDriverClass();
@@ -284,7 +285,7 @@ public class PersistenceUI {
                                 String url = Util.asString(value);
                                 if (url != null) {
                                     String prefix = getDriverPrefix(url);
-                                    if (!Util.isEmpty(prefix)) {
+                                    if (!Util.isEmpty(prefix) && p.contains("DATASOURCE_" + prefix)) {
                                         return p.getProperty("DATASOURCE_" + prefix);
                                     }
                                 }
@@ -303,7 +304,7 @@ public class PersistenceUI {
                                 String url = Util.asString(value);
                                 if (url != null) {
                                     String prefix = getDriverPrefix(url);
-                                    if (!Util.isEmpty(prefix)) {
+                                    if (!Util.isEmpty(prefix) && p.contains("DIALECT_" + prefix)) {
                                         return p.getProperty("DIALECT_" + prefix);
                                     }
                                 }
@@ -355,6 +356,25 @@ public class PersistenceUI {
                                     }
                                 }
                                 return persistence.getPort();
+                            }
+                        }, WSEvent.class);
+                login
+                    .getAttribute("connectionUrl")
+                    .changeHandler()
+                    .addListener(
+                        new WebSocketDependencyListener<String>(
+                            (AttributeDefinition<String>) login.getAttribute("provider")) {
+                            @Override
+                            public String evaluate(WSEvent evt) {
+                                Object value = evt.newValue;
+                                String url = Util.asString(value);
+                                if (url != null) {
+                                    String port = DatabaseTool.getPort(url);
+                                    if (port.equals("27017")) {
+                                        return Persistence.NOSQL_HIBERNATE_OGM_PERSISTENCE;
+                                    }
+                                }
+                                return persistence.getProvider();
                             }
                         }, WSEvent.class);
                 login

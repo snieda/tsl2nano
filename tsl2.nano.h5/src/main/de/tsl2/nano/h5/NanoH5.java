@@ -1218,7 +1218,9 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
             BeanContainerUtil.initGenericServices(runtimeClassloader);
         } else {
             if (persistence.noSQLWithUndefinedDriver()) {
-                ENV.loadClassDependencies(persistence.getProvider());
+                ENV.loadClassDependencies(persistence.getProvider(), 
+                    Persistence.NoSqlDriverClass.valueOf(persistence.getConnectionDriverClass()).getDriverClassName(),
+                    Persistence.NoSqlDriverClass.valueOf(persistence.getDatasourceClass()).getDriverClassName());
             } else {
                 ENV.loadClassDependencies(persistence.getConnectionDriverClass(),
                     persistence.getDatasourceClass(), persistence.getProvider());
