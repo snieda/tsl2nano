@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLStreamHandlerFactory;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +31,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
@@ -330,6 +332,12 @@ public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
     			s.zipStream.close();
 		}
     	jarFileStreams.clear();
+    }
+
+    @Override
+    public URL findJarInClassPath(String regex) {
+        String jar = Arrays.stream(getNestedJars()).filter(j -> j.matches(regex)).findFirst().orElse(null);
+        return jar != null ? NetUtil.url(jar) : super.findJarInClassPath(regex);
     }
 }
 

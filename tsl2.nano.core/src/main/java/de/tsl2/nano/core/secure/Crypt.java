@@ -33,6 +33,7 @@ import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
@@ -236,7 +237,7 @@ public class Crypt implements ISecure {
 
     private static void downloadProvider(String algorithm2) {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        if (cl instanceof NetworkClassLoader) {
+        if (cl instanceof NetworkClassLoader && !((NetworkClassLoader)cl).isJarAvailable(algorithm2) && NetUtil.isOnline()) {
             //if available we try to download bouncycastle through maven
             new CompatibilityLayer().runOptionalMain(CompatibilityLayer.TSL2_JARRESOLVER, "org.bouncycastle");
         }

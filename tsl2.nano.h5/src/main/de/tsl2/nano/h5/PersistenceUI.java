@@ -268,6 +268,8 @@ public class PersistenceUI {
                                     if (!Util.isEmpty(prefix)) {
                                         String driver = p.getProperty("DRIVER_" + prefix);
                                         return driver != null ? driver : persistence.getConnectionDriverClass();
+                                    } else if (url.contains("27017") && !persistence.getProvider().equals(NOSQL_HIBERNATE_OGM_PERSISTENCE)) {
+                                        return NoSqlDriverClass.mongodb.name();
                                     }
                                 }
                                 return persistence.getConnectionDriverClass();
@@ -287,6 +289,8 @@ public class PersistenceUI {
                                     String prefix = getDriverPrefix(url);
                                     if (!Util.isEmpty(prefix) && p.contains("DATASOURCE_" + prefix)) {
                                         return p.getProperty("DATASOURCE_" + prefix);
+                                    } else if (url.contains("27017") && !persistence.getProvider().equals(NOSQL_HIBERNATE_OGM_PERSISTENCE)) {
+                                        return NoSqlDriverClass.mongodb.name();
                                     }
                                 }
                                 return persistence.getDatasourceClass();
@@ -306,6 +310,8 @@ public class PersistenceUI {
                                     String prefix = getDriverPrefix(url);
                                     if (!Util.isEmpty(prefix) && p.contains("DIALECT_" + prefix)) {
                                         return p.getProperty("DIALECT_" + prefix);
+                                    } else if (url.contains("27017") && !persistence.getProvider().equals(NOSQL_HIBERNATE_OGM_PERSISTENCE)) {
+                                        return "GridDialect";
                                     }
                                 }
                                 return persistence.getHibernateDialect();
@@ -431,6 +437,8 @@ public class PersistenceUI {
                                         }
                                     }
                                 }
+                                if (!NOSQL_HIBERNATE_OGM_PERSISTENCE.equals(provider) && persistence.getAutoddl().equals("true"))
+                                    persistence.setAutoddl("false");
                                 return provider;
                             }
                         }, WSEvent.class);
@@ -517,7 +525,7 @@ public class PersistenceUI {
                 ".jar");
         }
         login.getAttribute("generator").setRange(Arrays.asList(Persistence.GEN_HIBERNATE, Persistence.GEN_OPENJPA));
-        login.getAttribute("autoddl").setRange(Arrays.asList("false", "validate", "update", "create", "create-drop", "true"));
+        login.getAttribute("autoddl").setRange(Arrays.asList("false", "validate", "update", "create", "create-drop"));
 
         helper.change(BeanPresentationHelper.PROP_DESCRIPTION,
             ENV.translate("jarFile.tooltip", true),

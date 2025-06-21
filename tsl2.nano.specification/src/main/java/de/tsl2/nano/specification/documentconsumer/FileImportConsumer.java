@@ -20,7 +20,7 @@ public class FileImportConsumer implements Consumer<File> {
 				try {
 					BeanContainer.instance().save(b);
 				} catch (Exception ex) {
-					if (!Message.ask("ERROR on " + b + "!\n\nAbort?", true))
+					if (!Message.ask("ERROR on <i>" + b + "</i>!<p/>Abort?", true))
 						ManagedException.forward(ex);
 				}
 			});

@@ -53,15 +53,17 @@
 			<property name="hibernate.ogm.datastore.host" value="${connection.url}" />
 			<property name="hibernate.ogm.datastore.database" value="${connection.database}" />
 			<!-- <property name="hibernate.ogm.datastore.port" value="${connection.port}" /> DEPRECATED, replaced by host -->
-			<property name="hibernate.ogm.datastore.username" value="${connection.username}" />
-			<property name="hibernate.ogm.datastore.password" value="${connection.password}" />
-			<property name="hibernate.ogm.datastore.create_database" value="${autoddl}" />
+	        <!-- better to give the authentication through connection.url
+				<property name="hibernate.ogm.datastore.username" value="${connection.username}" />
+				<property name="hibernate.ogm.datastore.password" value="${connection.password}" />
+			-->
+			<property name="hibernate.ogm.datastore.create_database" value="${autoddlogm}" />
          	<!-- Hibernate-OMG End -->
 
 			<!-- Eclipse-Link, OpenJPA and DataNucleus -->
 			<property name="javax.persistence.jdbc.driver" value="${connection.driver_class}"/>
-	        <property name="javax.persistence.jdbc.user" value="${connection.username}"/>
 	        <property name="javax.persistence.jdbc.url" value="${connection.url}"/>
+	        <property name="javax.persistence.jdbc.user" value="${connection.username}"/>
 	        <property name="javax.persistence.jdbc.password" value="${connection.password}"/>
 	        
 	        <!-- OpenJPA -->

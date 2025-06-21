@@ -73,8 +73,6 @@
             "name": "Debug (Attach on 8787)",
             "type": "java",
             "request": "attach",
-            "remoteHost": "localhost",
-            "remotePort": 8787,
             "hostName": "localhost",
             "port": 8787,
             "projectName": "tsl2.nano.h5"
@@ -83,8 +81,6 @@
             "name": "Debug (Heroku 8787)",
             "type": "java",
             "request": "attach",
-            "remoteHost": "localhost",
-            "remotePort": 8787,
             "hostName": "localhost",
             "port": 8787,
             "projectName": "tsl2.nano.h5"

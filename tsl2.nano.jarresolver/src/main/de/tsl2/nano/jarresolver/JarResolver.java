@@ -148,7 +148,7 @@ public class JarResolver {
                     LOG.info("using newer downloaded version (" + newVersion + ") of jarresolver.properties");
                     props = newProps;
                     FilePath.copy(newPropFile.getPath(), baseDir + "jarresolver.properties", StandardCopyOption.REPLACE_EXISTING);
-                    if (Message.ask("New jarresolver.properites (" + newVersion + " downloaded.\n\nShould we try to find all unresolved classes!", true)) {
+                    if (Message.ask("New jarresolver.properties (" + newVersion + ") downloaded.<p/>Should we try to find all unresolved classes?", true)) {
                         NetworkClassLoader.resetUnresolvedClasses(baseDir);
                     }
 

@@ -70,6 +70,7 @@ All packages (under name *tsl2nano*) are available in maven central, sourceforge
 * websockets: interactive actions on images: 
 * pure jpa - jpa-annotations are read to resolve attribute-presentation
 * independent of a special o/r mapper. all o/r mappers supporting javax.persistence with an EntityManager are usable.
+* nosql databases (mongodb, neoj4, etc.) can be connected through persistence-provider _hibernate-jpa-ogm_
 * simple database replication on user-loaded data - offline working possible
 * database/json/xml replication through entity replication (using hibernate.replicate)
 * full key-navigation (shortcuts)
@@ -3326,6 +3327,55 @@ Example dependencies for mongodb (to be downloaded!):
 
 To see a detailed configuration introduction for e.g. mongodb, have a look at https://docs.jboss.org/hibernate/stable/ogm/reference/en-US/html_single/?v=5.4#ogm-mongodb.
 
+NOTE: Problems may be:
+
+* on classpath problems: if two hibernate-core jar files are present, deactivate the newest (f.e.: 'hibernate-core-5.6.14.Final.jar_')
+* on authorization problems: perhaps remove user and password from persistence.tml or persistence-noreplication.tml templates in jar file
+* blob database fields: " org.hibernate.HibernateException: OGM000059: Unable to find a GridType for blob". Don't use blobs
+
+#### details on working with mongodb
+
+##### Start MongoDB without access control.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   mongod --port 27017 --dbpath /data/db1
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+##### Connect to the instance.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   mongosh --port 27017
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+##### Create the user administrator.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ use admin
+ db.createUser(
+   {
+     user: "myUserAdmin",
+     pwd: passwordPrompt(), // or cleartext password
+     roles: [ 
+       { role: "userAdminAnyDatabase", db: "admin" },
+       { role: "dbAdminAnyDatabase", db: "admin" }, 
+       { role: "readWriteAnyDatabase", db: "admin" }
+     ]
+   }
+ )
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+##### Re-start the MongoDB instance with access control.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ mongod --auth --port 27017 --dbpath /data/db1
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+##### Authenticate as the user administrator.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ mongosh --port 27017 --authenticationDatabase "admin" -u "myUserAdmin" -p
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 ## Using an Applicationserver
 
 If you don't want to have a standalone appliation, you are able to use an application server like jboss. To do this you must have:
@@ -6551,7 +6601,11 @@ Cursus:
 * [-] rules/cover listener not working anymore !!!
 * [v] create list of synonyms to show naming icons
 * [ ] reverse-eng.xml ant script: hibernate.reveng.xml with DTD load fails offline
-* [ ] check to add jakarta nosql as persistence provider
-   *[ ] perhaps provide an EntityManager implementation covering jakarta-nosql
+* [-] check to add jakarta nosql as persistence provider
+   * [-] perhaps provide an EntityManager implementation covering jakarta-nosql
 * [ ] to be compilable on jdk <= 20, change the setter methods of sun.security.x509.X509Cert* in class PKI in core module
-* [ ] include hibernate-ogm to use nosql databases through jpa persistence layer (project stopped already, final version 5.4.1) 
+* [x] include hibernate-ogm to use nosql databases through jpa persistence layer (project stopped already, final version 5.4.2) 
+* [ ] wrong offlinemode=false on nanoh5 ENV.load(...)
+* [ ] autoddl not usable on both (hibtools and ogm)
+* [ ] jarresolver is not able to download definition from sourceforge
+* [ ] provide specification actions to e.g. send an email etc

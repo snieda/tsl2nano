@@ -180,16 +180,7 @@ public class NetUtil {
     }
     public static String get(String strUrl, int connectionTimeout, int readTimeout) {
         try {
-            LOG.info("starting request: " + strUrl);
-            URLConnection con = url(strUrl).openConnection();
-        	con.setConnectTimeout(connectionTimeout);
-        	con.setReadTimeout(readTimeout);
-            con.setUseCaches(true);
-            con.setIfModifiedSince(1000*1800);
-        	con.setRequestProperty ( "User-Agent", "Mozilla" );
-
-            con = followRedirect(con);
-
+            URLConnection con = openConnection(strUrl, connectionTimeout, readTimeout);
 			String response = String.valueOf(FileUtil.getFileData(con.getInputStream(), null, false));
             if (LOG.isDebugEnabled()) {
                 LOG.debug("response: " + StringUtil.toString(response, 100));
@@ -212,6 +203,24 @@ public class NetUtil {
         }
     }
 
+    public static URLConnection openConnection(String strUrl) {
+        return Util.trY( () -> openConnection(strUrl, 0, 0));
+    }
+
+    public static URLConnection openConnection(String strUrl, int connectionTimeout, int readTimeout)
+            throws IOException, Exception {
+        LOG.info("starting request: " + strUrl);
+        URLConnection con = url(strUrl).openConnection();
+        con.setConnectTimeout(connectionTimeout);
+        con.setReadTimeout(readTimeout);
+        con.setUseCaches(true);
+        con.setIfModifiedSince(1000*1800);
+        con.setRequestProperty ( "User-Agent", "Mozilla" );
+
+        con = followRedirect(con);
+        return con;
+    }
+
     @Deprecated //seems to be done by default in HttpUrlConnection
     static HttpURLConnection followRedirect(URLConnection con) throws Exception {
         HttpURLConnection conn = (HttpURLConnection) con;
@@ -228,7 +237,7 @@ public class NetUtil {
                 // open the new connnection again
                 conn = (HttpURLConnection) new URL(redirect).openConnection();
                 conn.setRequestProperty("Cookie", conn.getHeaderField("Set-Cookie"));
-
+                //TODO: copy orgin connection parameters
                 conn.addRequestProperty("Accept-Language", "en-US,en;q=0.8");
                 conn.addRequestProperty("User-Agent", "Mozilla");
                 conn.addRequestProperty("Referer", "google.com");
@@ -425,6 +434,8 @@ public class NetUtil {
             if (overwrite || !file.exists()) {
                 file.getParentFile().mkdirs();
                 LOG.info("downloading " + file.getName() + " from: " + url.toString());
+                //IMPROVE: extend openConnection to be usable directly through URL
+                // NOT WORKING: FileUtil.write(openConnection(url.toString()).getInputStream(), fileName);
                 FileUtil.write(url.openStream(), fileName);
             }
             return file;

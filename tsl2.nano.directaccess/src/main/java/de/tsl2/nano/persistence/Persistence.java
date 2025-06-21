@@ -494,6 +494,7 @@ public class Persistence implements Serializable, Cloneable {
         put(prop, "connection.username", getConnectionUserName());
         put(prop, "connection.password", getConnectionPassword());
         put(prop, "autoddl", getAutoddl());
+        put(prop, "autoddlogm", getAutoddlogm());
     }
 
     public String jarURL() {
@@ -613,6 +614,10 @@ public class Persistence implements Serializable, Cloneable {
             }
         }
         return autoddl;
+    }
+
+    public String getAutoddlogm() {
+        return Boolean.toString(!autoddl.equals("false"));
     }
 
     /**

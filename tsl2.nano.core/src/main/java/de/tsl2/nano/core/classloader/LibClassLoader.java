@@ -84,4 +84,12 @@ public class LibClassLoader extends RuntimeClassloader {
         Collections.reverse(list);
         return list.toArray(new File[0]);
     }
+
+    public boolean isJarAvailable(String regex) {
+        return findJarInClassPath(regex) != null;
+    }
+
+    public URL findJarInClassPath(String regex) {
+        return Arrays.stream(getURLs()).filter(u -> u.toString().matches(regex)).findFirst().orElse(null);
+    }
 }

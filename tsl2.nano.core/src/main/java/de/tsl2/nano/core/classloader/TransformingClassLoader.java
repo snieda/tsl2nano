@@ -21,7 +21,7 @@ import de.tsl2.nano.core.ITransformer;
  * @author Thomas Schneider
  * @version $Revision$
  */
-public class TransformingClassLoader extends LibClassLoader {
+public class TransformingClassLoader extends NetworkClassLoader {
 
     protected ITransformer<String, String> transformer;
     

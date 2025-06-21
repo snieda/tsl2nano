@@ -62,7 +62,7 @@ public class SpecificationH5Exchange extends SpecificationExchange {
 		}
 		exists = spec != null;
 		int errors = 0, rules = 0, attributes = 0, actions = 0, beanchanges = 0, attrchanges = 0;
-    	if (spec != null && Message.ask("Run Specification Exchange on file " + file + "?", true)) {
+    	if (spec != null && Message.ask("Run Specification Exchange on file <i>" + file + "</i>?", true)) {
         	LOG.info("=> importing " + spec.size() + " entries from " + file + " ...");
     		Pool pool = ENV.get(Pool.class);
     		String k, v, object, property;

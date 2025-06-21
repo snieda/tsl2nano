@@ -273,7 +273,7 @@ input[type='checkbox'] {
 /* tag dialog used by websockets */
 dialog {
     top: 28%;
-    width: 400px;  
+    width: 640px;  
     border: 1px solid rgba(0, 0, 0, 0.3);
     border-radius: 15px;
     box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);

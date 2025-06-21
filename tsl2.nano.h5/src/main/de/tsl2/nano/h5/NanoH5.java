@@ -57,6 +57,7 @@ import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.Main;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
+import de.tsl2.nano.core.classloader.NetworkClassLoader;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.UnboundAccessor;
 import de.tsl2.nano.core.exception.ExceptionHandler;
@@ -939,10 +940,10 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
     	File docWorkerFile = new File(ENV.getConfigPath() + "specification-documentworker.md.html");
     	if (docWorkerFile.exists() && ENV.get("app.login.administration", true))
         {
-	    		if (Message.ask("Run Specification Documentworker on file " + docWorkerFile + "?", true)) {
-			    	ENV.addService(new DocumentWorker());
-			    	ENV.get(DocumentWorker.class).consume(docWorkerFile.getAbsolutePath());
-	    	}
+            if (Message.ask("Run Specification Documentworker on file <i>" + docWorkerFile + "</i>?", true)) {
+                ENV.addService(new DocumentWorker());
+                ENV.get(DocumentWorker.class).consume(docWorkerFile.getAbsolutePath());
+            }
     	}
 
         createVirtualActionBeans();
@@ -1191,6 +1192,10 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
          */
         if (!ENV.get("app.use.applicationserver", false)) {
 //            Environment.loadDependencies(persistence.getProvider());
+            if (!ENV.get(CompatibilityLayer.class).isAvailable(persistence.getProvider()) && ENV.isModeOffline()) {
+                if (ENV.askForOnline(Arrays.asList(persistence.getProvider())))
+                    NetworkClassLoader.resetUnresolvedClasses(ENV.getConfigPath());
+            }
             Class[] provider = ENV.get(CompatibilityLayer.class).load(persistence.getProvider());
             if (NanoEntityManagerFactory.AbstractEntityManager.class.isAssignableFrom(provider[0])) {
                 useJPAPersistenceProvider = false;

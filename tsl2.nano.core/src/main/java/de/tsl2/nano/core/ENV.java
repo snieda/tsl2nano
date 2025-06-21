@@ -456,7 +456,7 @@ public class ENV implements Serializable {
         Object definedValue = get(key, null);
         if (definedValue instanceof String)
             definedValue = Boolean.valueOf((String)definedValue);
-        Boolean askedValue = definedValue != null ? (Boolean) definedValue : Message.ask("do you want to set the property " + key + " with default value: " + defaultValue, defaultValue);
+        Boolean askedValue = definedValue != null ? (Boolean) definedValue : Message.ask("do you want to set the property <i>" + key + "</i><p/>with default value: <i>" + defaultValue + "</i>", defaultValue);
         return get(key, askedValue);
     }
 
@@ -1091,9 +1091,16 @@ public class ENV implements Serializable {
             }
         }
         if (unresolvedDependencies.size() > 0) {
+            askForOnline(unresolvedDependencies);
             return loadDependencies(unresolvedDependencies.toArray(new String[0]));
         }
         return "nothing to do!";
+    }
+
+    public static boolean askForOnline(List<String> unresolvedDependencies) {
+        boolean shouldDownload = Message.ask("should the framework download the unresolved classes:<p/>" + StringUtil.toFormattedString(unresolvedDependencies, -1, true, "<br/>"), true);
+        System.setProperty("tsl2nano.offline", Boolean.valueOf(!shouldDownload).toString());
+        return shouldDownload;
     }
 
     /**
@@ -1125,7 +1132,7 @@ public class ENV implements Serializable {
                     + StringUtil.toString(dependencyNames, 300));
             
             if (!get("classloader.usenetwork.loader.asked", false) 
-                && !Message.ask("load dependencies from maven: " + StringUtil.toString(dependencyNames, 300) + "? ", true)) {
+                && !Message.ask("load dependencies from maven:<p/>" + StringUtil.toString(dependencyNames, 300) + "? ", true)) {
                 setProperty("classloader.usenetwork.loader", false);
                 setProperty("classloader.usenetwork.loader.asked", true);
                 return "user denied - no dependencies loaded";
