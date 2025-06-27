@@ -45,7 +45,7 @@ public class WebSocketRuleDependencyListener<T> extends RuleDependencyListener<T
 
     @Override
     public void handleEvent(WSEvent evt) {
-        if (evt.breakEvent == true) { // event was consumed
+        if (evt.breakEvent) { // event was consumed
             LOG.trace(this + ": ignoring event '" + evt + "' in cause of already be consumed!");
             return;
         }

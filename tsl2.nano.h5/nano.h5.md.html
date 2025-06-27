@@ -5148,6 +5148,17 @@ hint II: a script (upgrade-old-tsl2-apps.sh) to do this is inside the resources 
 * if the database does not start (-> connection problem) remove '-web -webDaemon' from 'runServer.cmd' script and start it manually
 * if regexp expresssions in your presentation don't work, set environment property 'field.format.regexp.check.ignore' to true.
 
+## customer confirmations through emails
+
+If you need to send an email to a (database) registered customer, that has to be confirmed, you can use the function
+      de.tsl2.nano.util.Mail.main()
+
+* create a specification action calling the *de.tsl2.nano.util.Mail.main()*
+* reference that by the desired bean or presentation action
+* as an alternative you can define a listener on a field in a presenter to call that action
+* evaluate through rest (http://localhost:8067/rest) or restui the link to change an instance. E.g.: http://localhost:8067/restui/Post/{select-attribute-name}/{select-attribute-value}/{attribute-name-of-new-value}/{new-value}
+* the email should have a message text containing a link to the rest service of your tsl2nano application
+
 ## FAQ Known Problems and some Solutions
 
 * Performance going down:
@@ -5283,7 +5294,7 @@ hint II: a script (upgrade-old-tsl2-apps.sh) to do this is inside the resources 
  2.5.5  | 31.03.2025 | h5:+openapi-generate-scripts, stateless action beans, html-dialogs: timeout-close, minor fixes
  2.5.6  | 04.05.2025 | h5:+CMSBean, +admin: provide sample applications, prod/admin switch, adding users, layout: additional left/right panels and info menu
  2.5.7  | 25.05.2025 | hotfix: running on android, windows, fixes on openapi, sampleapplications, OSSRH -> maven central portal
- 2.5.8  | 31.12.2025 | nosql support: +hibernate-omg-5.4.2, jarresolver maven load fix
+ 2.5.8  | 31.12.2025 | nosql support: +hibernate-omg-5.4.2, jarresolver maven load fix, CMSBean/Bean fix
 |------ | ---------- | -----------
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
@@ -6605,7 +6616,8 @@ Cursus:
    * [-] perhaps provide an EntityManager implementation covering jakarta-nosql
 * [ ] to be compilable on jdk <= 20, change the setter methods of sun.security.x509.X509Cert* in class PKI in core module
 * [x] include hibernate-ogm to use nosql databases through jpa persistence layer (project stopped already, final version 5.4.2) 
-* [ ] wrong offlinemode=false on nanoh5 ENV.load(...)
-* [ ] autoddl not usable on both (hibtools and ogm)
+* [v] wrong offlinemode=false on nanoh5 ENV.load(...)
+* [v] autoddl not usable on both (hibtools and ogm)
+* [ ] test on mongodb: java.lang.NullPointerException: Cannot invoke "java.sql.ResultSet.close()" because "resultSet" is null
 * [ ] jarresolver is not able to download definition from sourceforge
-* [ ] provide specification actions to e.g. send an email etc
+* [-] provide specification actions to e.g. send an email etc

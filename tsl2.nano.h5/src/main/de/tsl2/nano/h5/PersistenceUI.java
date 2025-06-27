@@ -27,6 +27,7 @@ import de.tsl2.nano.action.IActivable;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
+import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.bean.def.IIPresentable;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.SecureAction;
@@ -265,14 +266,13 @@ public class PersistenceUI {
                                 String url = Util.asString(value);
                                 if (url != null) {
                                     String prefix = StringUtil.extract(url, "^\\w+[:]\\w+").replace(':', '.');
-                                    if (!Util.isEmpty(prefix)) {
-                                        String driver = p.getProperty("DRIVER_" + prefix);
-                                        return driver != null ? driver : persistence.getConnectionDriverClass();
+                                    if (!Util.isEmpty(prefix) && p.containsKey("DRIVER_" + prefix)) {
+                                        return p.getProperty("DRIVER_" + prefix);
                                     } else if (url.contains("27017") && !persistence.getProvider().equals(NOSQL_HIBERNATE_OGM_PERSISTENCE)) {
                                         return NoSqlDriverClass.mongodb.name();
                                     }
                                 }
-                                return persistence.getConnectionDriverClass();
+                                return (String)((BeanValue<?>)attribute).getValue();
                             }
                         }, WSEvent.class);
                 login
@@ -287,13 +287,13 @@ public class PersistenceUI {
                                 String url = Util.asString(value);
                                 if (url != null) {
                                     String prefix = getDriverPrefix(url);
-                                    if (!Util.isEmpty(prefix) && p.contains("DATASOURCE_" + prefix)) {
+                                    if (!Util.isEmpty(prefix) && p.containsKey("DATASOURCE_" + prefix)) {
                                         return p.getProperty("DATASOURCE_" + prefix);
                                     } else if (url.contains("27017") && !persistence.getProvider().equals(NOSQL_HIBERNATE_OGM_PERSISTENCE)) {
                                         return NoSqlDriverClass.mongodb.name();
                                     }
                                 }
-                                return persistence.getDatasourceClass();
+                                return (String)((BeanValue<?>)attribute).getValue();
                             }
                         }, WSEvent.class);
                 login
@@ -308,13 +308,13 @@ public class PersistenceUI {
                                 String url = Util.asString(value);
                                 if (url != null) {
                                     String prefix = getDriverPrefix(url);
-                                    if (!Util.isEmpty(prefix) && p.contains("DIALECT_" + prefix)) {
+                                    if (!Util.isEmpty(prefix) && p.containsKey("DIALECT_" + prefix)) {
                                         return p.getProperty("DIALECT_" + prefix);
                                     } else if (url.contains("27017") && !persistence.getProvider().equals(NOSQL_HIBERNATE_OGM_PERSISTENCE)) {
                                         return "GridDialect";
                                     }
                                 }
-                                return persistence.getHibernateDialect();
+                                return (String)((BeanValue<?>)attribute).getValue();
                             }
                         }, WSEvent.class);
                 login
@@ -342,7 +342,7 @@ public class PersistenceUI {
 	                                }
                             	}
                                 //fallback
-                                return persistence.getDatabase();
+                                return (String)((BeanValue<?>)attribute).getValue();
                             }
                         }, WSEvent.class);
                 login
@@ -361,7 +361,7 @@ public class PersistenceUI {
                                         return DatabaseTool.getPort(url);
                                     }
                                 }
-                                return persistence.getPort();
+                                return (String)((BeanValue<?>)attribute).getValue();
                             }
                         }, WSEvent.class);
                 login
@@ -380,7 +380,7 @@ public class PersistenceUI {
                                         return Persistence.NOSQL_HIBERNATE_OGM_PERSISTENCE;
                                     }
                                 }
-                                return persistence.getProvider();
+                                return (String)((BeanValue<?>)attribute).getValue();
                             }
                         }, WSEvent.class);
                 login
@@ -456,7 +456,7 @@ public class PersistenceUI {
                                 if (provider.equals(NOSQL_HIBERNATE_OGM_PERSISTENCE)) {
                                     return NoSqlDriverClass.mongodb.name();
                                 }
-                                return persistence.getConnectionDriverClass();
+                                return (String)((BeanValue<?>)attribute).getValue();
                             }
                         }, WSEvent.class);
                 login
@@ -472,7 +472,7 @@ public class PersistenceUI {
                                 if (provider.equals(NOSQL_HIBERNATE_OGM_PERSISTENCE)) {
                                     return NoSqlDriverClass.mongodb.name();
                                 }
-                                return persistence.getDatasourceClass();
+                                return (String)((BeanValue<?>)attribute).getValue();
                             }
                         }, WSEvent.class);
                 login
@@ -488,7 +488,7 @@ public class PersistenceUI {
                                 if (provider.equals(NOSQL_HIBERNATE_OGM_PERSISTENCE)) {
                                     return "GridDialect";
                                 }
-                                return persistence.getHibernateDialect();
+                                return (String)((BeanValue<?>)attribute).getValue();
                             }
                         }, WSEvent.class);
                 /*

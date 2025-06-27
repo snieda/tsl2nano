@@ -191,7 +191,7 @@ public class Bean<T> extends BeanDefinition<T> {
     }
     public void setId(Object value) {
         IAttribute idAttribute = getIdAttribute();
-        if (idAttribute == null)
+        if (idAttribute == null && !isVirtual())
         	throw new IllegalStateException(this + " has no idAttribute --> setId(.) cannot be called!");
         idAttribute.setValue(instance, value);
 	}

@@ -58,7 +58,8 @@ public class WebSocketServiceListener<T> extends WebSocketDependencyListener<T> 
     
     @Override
     public void handleEvent(WSEvent source) {
-        sendValue(attributeID, propertyName, evaluate(source));
+        if (!source.breakEvent)
+            sendValue(attributeID, propertyName, evaluate(source));
     }
 
     public static void sendValue(String attributeID, String propertyName, Object value) {

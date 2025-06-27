@@ -628,6 +628,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             attributeFilter = CollectionUtil.concatNew(new String[attributeFilter.length + 1],
                 attributeFilter,
                 new String[] { name });
+            createNaturalSortedAttributeNames(attributeFilter);
         }
         allDefinitionsCached = false;
         return newAttribute;

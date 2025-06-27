@@ -41,7 +41,8 @@ public abstract class WebSocketDependencyListener<T> extends AbstractDependencyL
 
     @Override
     public void handleEvent(WSEvent evt) {
-        sendValue(attributeID, propertyName, evaluate(evt));
+        if (!evt.breakEvent)
+            sendValue(attributeID, propertyName, evaluate(evt));
     }
 
     public static void sendValue(String attributeID, String propertyName, Object value) {
