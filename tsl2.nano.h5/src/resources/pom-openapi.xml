@@ -15,6 +15,13 @@
   </properties>
   <dependencies>
 
+<!-- used by generate-fromjsonschema with jsonschema2pojo-->
+  <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+      <version>2.4</version>
+  </dependency>
+
 <!-- openapitool with libary=<default> so generated classes need: okhttp3, gson  -->
 	<dependency>
 	    <groupId>com.google.code.gson</groupId>

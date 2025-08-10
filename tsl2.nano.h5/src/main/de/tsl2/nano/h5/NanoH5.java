@@ -113,9 +113,7 @@ import de.tsl2.nano.util.Translator;
  * An Application of subclassing NanoHTTPD to make a custom HTTP server.
  * 
  * <pre>
- * TODO: 
- * - Bean-->
- * BeanValue-->getColumnDefinition() --> Table(columns)
+ * - Bean-->BeanValue-->getColumnDefinition() --> Table(columns)
  * - PageBuilder --> Bean.Presentable
  * - Navigation
  * - Verbindung/Abgrenzung BeanContainer
@@ -124,7 +122,7 @@ import de.tsl2.nano.util.Translator;
  * </pre>
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, IEnvChangeListener {
+public class NanoH5 extends NanoH5ExternalBackend implements ISystemConnector<Persistence>, IEnvChangeListener {
 
 	private static final Log LOG = LogFactory.getLog(NanoH5.class);
 
@@ -863,7 +861,11 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence>, 
      */
     @Override
     public synchronized BeanDefinition<?> connect(Persistence persistence) {
-        
+        if (isExternalBackendRequired()) {
+            // doesn't use any NanoH5 features
+            return super.connect(persistence);
+        }
+
         //define a new classloader to access all beans of given jar-file
         ClassLoader rootCl;
         if (rootClassloader() instanceof Cloneable)

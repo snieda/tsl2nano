@@ -92,6 +92,8 @@ public abstract class ARESTDynamic<RESPONSE> {
 		try {
 			if (url.equals(BASE_PATH) || method.equals("OPTIONS"))
 				return createResponse(Status.OK, printManual());
+			else if (url.equals(BASE_PATH + "/health"))
+				return createResponse(Status.OK, "{ build-tsl2.nano.h5: " + ENV.getBuildInformations() + " }");
 			else if (url.equals(BASE_PATH + "/entities"))
 				return createResponse(Status.OK, printEntities());
 			else if (url.equals(BASE_PATH + "/entitiesjson"))
@@ -330,6 +332,7 @@ public abstract class ARESTDynamic<RESPONSE> {
 		return 
 				  "\n-------------------- RESTDynamic usage informations ------------------------------\n"
 				+ "\nREQUEST FORMAT: " + USAGE
+				+ "\n\thealth              : simple application health with build informations"
 				+ "\n\t(login)             : to login into a session, open: " + ENV.get("service.url")
 				+ "\n\tentities            : metainfo as list of all available entities"
 				+ "\n\tentitiesjson        : metainfo as json of all available entities"
@@ -353,6 +356,7 @@ public abstract class ARESTDynamic<RESPONSE> {
 				+ "\n\tauthorization       : user date digest for basic authentication"
 				+ "\n\tuser                : user for method authorization"
 				+ "\n\tpassword            : password for method authorization"
+				+"\n\nOPTIONS:             : prints this help"
 				+ "\n---------------------------------------------------------------------------------\n";
 	}
 }
