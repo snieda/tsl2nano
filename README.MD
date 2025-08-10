@@ -80,7 +80,34 @@
 
 ## Releases
 
-* [Maven Central](https://mvnrepository.com/artifact/net.sf.tsl2nano/tsl2.nano.h5-package/2.5.6)
+* [Maven Central](https://mvnrepository.com/artifact/net.sf.tsl2nano/tsl2.nano.h5-package)
+* [Sourceforge]  (https://sourceforge.net/projects/tsl2nano/files/latest/download)
+* [Gitlab]       (https://gitlab.com/snieda/tsl2nano/-/releases)
+* [Github]       (https://github.com/snieda/tsl2nano/releases)
+
+## Quickstart
+
+### preconditions
+
+* installed java jdk at least version 17
+* be online to refresh jars and generate sample database 
+* download a release of tsl2.nano.h5 jar file
+
+### start
+
+* open a terminal/console 
+* go to folder where you downloaded the jar file
+* start: *java -jar tsl2.nano.h5-x.x.x.jar (replace 'x' with version number)
+* a browser window will open: hit the central link to enter the login dialog
+* for a first impression, just start with default entries, hit button 'Ok' or ALT+o
+* after a while, a default 'anyway' database is created and opened to play around
+
+### ...and then...
+
+* after first start, a *run.sh* or *run.bat* is created to be started on the second time
+* perhaps change the database url to another one to generate beans for it and to work on it
+* on the login dialog open the details expandable panel to play around it
+* if you are connected, open a database entry, enter the configuration through the menu and change the layout
 
 ## Screenshots
 

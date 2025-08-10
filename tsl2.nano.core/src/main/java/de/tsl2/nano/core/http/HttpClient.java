@@ -14,12 +14,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ByteUtil;
+import de.tsl2.nano.core.util.MapUtil;
 
 /**
  * simple http client
@@ -34,14 +36,8 @@ public class HttpClient implements Runnable {
     
     HttpURLConnection http;
 
-    Object result;
     static final String UTF8 = "UTF-8";
 
-    /**
-     * constructor
-     * 
-     * @param http
-     */
     public HttpClient(String wsUrl) {
         createHttpConnection(wsUrl);
     }
@@ -72,6 +68,11 @@ public class HttpClient implements Runnable {
         return this;
     }
 
+    public HttpClient setHeader(Map<String, Object> header) {
+        header.forEach( (k, v) -> http.setRequestProperty(k, String.valueOf(v)));
+        return this;
+    }
+
     public void setReadTimeout(int timeout) {
         http.setReadTimeout(timeout);
     }
@@ -98,10 +99,16 @@ public class HttpClient implements Runnable {
      * @return the http response after sending the request. error handling is included using unchecked exceptions
      */
     public InputStream send(String method, String contenttype, byte[] data) {
+        return send(method, MapUtil.asProperties("Content-Type", contenttype), data);
+    }
+
+    public InputStream send(String method, Map<String, Object> header, byte[] data) {
+
         try {
             http.setRequestMethod(method);
-            if (contenttype != null)
-                http.setRequestProperty("Content-Type", contenttype);
+            if (header != null) {
+                header.forEach( (k, v) -> http.addRequestProperty(k, String.valueOf(v) ) );
+            }
             if ((method.equals("POST") || method.equals("PUT")) && data != null) {
                 http.setDoOutput(true);
                 http.setFixedLengthStreamingMode(data.length);

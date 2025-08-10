@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.net.Authenticator;
 import java.net.URLEncoder;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -32,6 +33,8 @@ import de.tsl2.nano.core.util.StringUtil;
 /**
  * Extended Http Client, providing REST param evaluation and multipart form data with files.
  * 
+ * usage: see {@link #rest(String, String, String, String, Object...)} and {@link #restJSON(String, Object...)}
+ * 
  * @author Thomas Schneider
  * @version $Revision$
  */
@@ -49,6 +52,29 @@ public class EHttpClient extends HttpClient {
     public EHttpClient(String wsUrl) {
         this(wsUrl, true);
     }
+
+    public EHttpClient(String wsUrl, Map<String, Object> header, Authenticator auth) {
+        this(wsUrl, true);
+        setHeader(header);
+        http.setAuthenticator(auth);
+    }
+
+    public EHttpClient(String wsUrl, Map<String, Object> header, String user, char[] passwd) {
+        this(wsUrl, true);
+        
+        header.putAll(createBasicAuthorization(user, passwd));
+        setHeader(header);
+
+        // http.setAuthenticator(new Authenticator() {
+        //     // TODO: implement with new PasswordAuthentication(user, passwd));
+        // });
+    }
+
+    @SuppressWarnings("unchecked")
+    public static  Map<String, Object>  createBasicAuthorization(String user, char[] passwd) {
+        return MapUtil.asProperties("Authorization", "Basic " + StringUtil.toBase64(user + String.valueOf(passwd)));
+    }
+
     /**
      * constructor
      * @param wsUrl base url
@@ -190,10 +216,10 @@ public class EHttpClient extends HttpClient {
     /**
      * path
      * 
-     * @param url
-     * @param separators
-     * @param args
-     * @return
+     * @param url baseurl where the args are appended - or a rest url with e.g.: /mybaseurl/{mypathparam1}/{mypathparam2}
+     * @param separators should be one of {@link #SEPARATORS_REST} or {@link #SEPARATORS_QUERY}
+     * @param args arguments to insert or append
+     * @return complete url
      */
     protected static String parameter(String url, char[] separators, Object... args) {
         StringBuilder buf = new StringBuilder(path(url, args));
