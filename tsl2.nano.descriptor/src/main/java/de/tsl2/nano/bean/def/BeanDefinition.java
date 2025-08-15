@@ -430,7 +430,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      */
     public boolean isVirtual() {
         return clazz.equals(UNDEFINED.getClass())
-            || /*after deserialization it is only object */clazz.equals(Object.class) || clazz.isArray();
+            || /*after deserialization it is only object */clazz.equals(Object.class) 
+            || clazz.isArray()
+            || (Map.class.isAssignableFrom(clazz) && !isMultiValue());
     }
 
     public List<IAttributeDefinition<?>> getBeanAttributes() {
@@ -1016,8 +1018,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                     LOG.info("beandef loaded from '" + xmlFile.getPath() + "' [name: " + beandef.getName() + ", attributes: " + beandef.getAttributeDefinitions().size() + ", actions: " + beandef.getActions().size() + "]");
                     //perhaps, the file defines another bean-name or bean-type
                     if ((name == null || beandef.isVirtual() || name.equalsIgnoreCase(beandef.getName())
-                        || name.equalsIgnoreCase(FileUtil
-                            .getValidFileName(beandef.getName()))
+                        || name.equalsIgnoreCase(FileUtil.getValidFileName(beandef.getName()))
                             && (type == null || type.equals(beandef.getClazz())))) {
                         beandef.newSeal(); // only persisted defs have a seal > 0
                         virtualBeanCache.add(beandef);

@@ -141,6 +141,8 @@ public class Bean<T> extends BeanDefinition<T> {
 
     transient private boolean onCallStack;
 
+    private Boolean multiValue;
+
     /** used to registere/find extensions of BeanDefinition/Bean through ENV property */
     public static final String BEANWRAPPER = "BeanWrapper";
     
@@ -190,8 +192,10 @@ public class Bean<T> extends BeanDefinition<T> {
         return idAttribute != null && instance != null ? idAttribute.getValue(instance) : super.getId();
     }
     public void setId(Object value) {
+        if (isVirtual())
+            return;
         IAttribute idAttribute = getIdAttribute();
-        if (idAttribute == null && !isVirtual())
+        if (idAttribute == null)
         	throw new IllegalStateException(this + " has no idAttribute --> setId(.) cannot be called!");
         idAttribute.setValue(instance, value);
 	}
@@ -217,6 +221,15 @@ public class Bean<T> extends BeanDefinition<T> {
             }
         }
         return this;
+    }
+
+    @Override
+    public boolean isMultiValue() {
+        return this.multiValue == null ? super.isMultiValue() : multiValue;
+    }
+
+    void setMultiValue(Boolean multiValue) {
+        this.multiValue = multiValue;
     }
 
     @Override
@@ -847,6 +860,7 @@ public class Bean<T> extends BeanDefinition<T> {
     private static Bean createMapBean(Object mapInstance) {
         Map map = (Map) mapInstance;
         Bean bean = new Bean(map);
+        bean.setMultiValue(false);
         Set keySet = map.keySet();
         Object v;
         if (map.keySet() != null) {//on a proxy instance, keySet() may return null!
