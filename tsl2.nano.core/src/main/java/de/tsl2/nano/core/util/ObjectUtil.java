@@ -72,6 +72,9 @@ public class ObjectUtil extends MethodUtil {
 			SortedMap.class, TreeMap.class,
 			CharSequence.class, String.class);
 
+    @SuppressWarnings("rawtypes")
+    private static final Map<Class, Boolean> HAVING_STRING_REPRESENTATION = new HashMap<>();
+
     /**
      * delegates to {@link BeanClass#copy(Object, Object)}.
      * <p/>
@@ -138,6 +141,10 @@ public class ObjectUtil extends MethodUtil {
      */
     public static void addStandardTypePackages(String stdTypePackage) {
         STD_TYPE_PKGS.add(stdTypePackage);
+    }
+
+    public static <T> void addDefaultImplementation(Class<T> interfaze, Class<? extends T> implementation) {
+        STD_IMPLEMENTATIONS.put(interfaze, implementation);
     }
 
     /**
@@ -503,6 +510,25 @@ public class ObjectUtil extends MethodUtil {
     	}
     }
 
+    public static boolean hasStringRepresentation(Object obj) {
+        if (obj == null)
+            return false;
+        Class<?> type = obj.getClass();
+        if (!HAVING_STRING_REPRESENTATION.containsKey(type)) {
+                if (BeanClass.hasStringConstructor(type) && hasToString(type)) {
+                    String representation = obj.toString();
+                    Object recreation = BeanClass.createInstance(type, representation);
+                    if (representation.equals(recreation.toString())) {
+                        LOG.info("adding type " + type.getName() + " to set HAVING_STRING_REPRESENTATIONS");
+                        HAVING_STRING_REPRESENTATION.put(type, true);
+                        return true;
+                    }
+            }
+            HAVING_STRING_REPRESENTATION.put(type, false);
+        }
+        return HAVING_STRING_REPRESENTATION.get(type);
+    }
+
     public static boolean hasToString(Object obj) {
         return obj != null && hasToString(obj.getClass());
     }
@@ -567,5 +593,11 @@ public class ObjectUtil extends MethodUtil {
 
     public static boolean isObject(Object o) {
         return o != null && !o.getClass().isArray() && !o.getClass().isPrimitive();
+    }
+
+    public static int clearCache() {
+        int cached = HAVING_STRING_REPRESENTATION.size();
+        HAVING_STRING_REPRESENTATION.clear();
+        return cached;
     }
 }

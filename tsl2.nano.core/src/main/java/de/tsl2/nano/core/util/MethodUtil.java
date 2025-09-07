@@ -71,6 +71,7 @@ public class MethodUtil extends FieldUtil {
         Object genType = method.getGenericReturnType();
         if (genType instanceof ParameterizedType) {
             genType = ((ParameterizedType) genType).getActualTypeArguments()[typePos];
+            genType = ((ParameterizedType)genType).getRawType();
         }
         return genType instanceof Class ? (Class<?>) genType : Object.class;
     }

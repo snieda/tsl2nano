@@ -43,6 +43,7 @@ import org.simpleframework.xml.core.Persist;
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.action.IActivable;
+import de.tsl2.nano.action.IConstraint;
 import de.tsl2.nano.annotation.extension.AnnotationFactory;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
@@ -66,8 +67,10 @@ import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.DefaultFormat;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.ListSet;
+import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.format.RegExpFormat;
 
 /**
  * Holds all informations to define a bean as a container of bean-attributes. Uses {@link BeanClass} and
@@ -160,7 +163,14 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     private static final List<BeanDefinition> virtualBeanCache = new ListSet<BeanDefinition>();
     private static final BeanDefinition volatileBean = new BeanDefinition(Object.class);
     private static boolean usePersistentCache = ENV.get("beandef.usepersistent.cache", true);
-    
+
+    static {
+        ObjectUtil.addDefaultImplementation(Format.class, RegExpFormat.class);
+        ObjectUtil.addDefaultImplementation(IAttribute.class, BeanAttribute.class);
+        ObjectUtil.addDefaultImplementation(IAttributeDefinition.class, AttributeDefinition.class);
+        ObjectUtil.addDefaultImplementation(IConstraint.class, Constraint.class);
+    }
+
     private long seal;
     
     /**

@@ -43,6 +43,7 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.IPredicate;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.AdapterProxy;
 import de.tsl2.nano.core.util.AnnotationProxy;
 import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.ByteUtil;
@@ -579,8 +580,7 @@ public class BeanClass<T> implements Serializable {
     public Object getField(T instance, String fieldName, boolean declared) {
         try {
             Field field = declared ? clazz.getDeclaredField(fieldName) : clazz.getField(fieldName);
-            field.setAccessible(true);
-            return field.get(instance);
+            return Util.withAccessAquired(field, () -> field.get(instance));
         } catch (Exception e) {
             return ManagedException.forward(e, declared);
         }
@@ -620,8 +620,7 @@ public class BeanClass<T> implements Serializable {
     public void setField(T instance, String fieldName, Object value, boolean declared) {
         try {
             Field field = declared ? clazz.getDeclaredField(fieldName) : clazz.getField(fieldName);
-            field.setAccessible(true);
-            field.set(instance, ObjectUtil.wrap(value, field.getType()));
+            Util.withAccessAquiredVoid(field, () -> field.set(instance, ObjectUtil.wrap(value, field.getType()) ));
         } catch (Exception e) {
             ManagedException.forward(e);
         }
@@ -837,6 +836,7 @@ public class BeanClass<T> implements Serializable {
     public static boolean hasDefaultConstructor(Class<?> clazz, boolean mustBePublic) {
         try {
             Constructor c;
+            clazz = clazz.isInterface() ? ObjectUtil.getDefaultImplementation(clazz) : clazz;
             return (c = clazz.getDeclaredConstructor(new Class[0])) != null && (!mustBePublic || c.isAccessible());
         } catch (Exception e) {
             return false;
@@ -1346,6 +1346,7 @@ public class BeanClass<T> implements Serializable {
      * @return amount of cleared objects
      */
     public static int clearCache() {
+        ObjectUtil.clearCache();
         return CachedBeanClass.clear();
     }
 
@@ -1365,12 +1366,16 @@ public class BeanClass<T> implements Serializable {
             return fromValueMap(createInstanceFromValueMap(values), values);
         }
 
-        private T createInstanceFromValueMap(Map<String, Object> values) {
+        protected T createInstanceFromValueMap(Map<String, Object> values) {
             if (hasDefaultConstructor(false)) {
                 return createInstance();
+            } else if (hasConstructor(clazz, Map.class)) {
+                return createInstance(values);
             } else if (values.size() == 1) {
                 if (clazz.equals(Class.class) || clazz.equals(Method.class))
                     return (T) ObjectUtil.wrap(values, clazz);
+            } else if (clazz.isInterface()) {
+                return AdapterProxy.create(clazz, values);
             }
             return createInstance(values.values().toArray());
         }
@@ -1391,7 +1396,7 @@ public class BeanClass<T> implements Serializable {
         references.put(values, instance);
         for (String name : values.keySet()) {
             final IAttribute attr = getAttribute(name, false);
-            if (attr != null && attr.hasWriteAccess()) {
+            if (attr != null && attr.hasWriteAccess(instance.getClass())) {
                 final Serial serial = ASerializer.Proprietizer.serial(attr, true);
                 Object value = values.get(name);
                 if (Util.isEmpty(value) && attr.getValue(instance) == null)
@@ -1424,7 +1429,7 @@ public class BeanClass<T> implements Serializable {
                     attr.setValue(instance, value);
                 }
             } else {
-                LOG.warn("ignoring value of " + name + " - it is not an attribute of " + getClazz());
+                LOG.warn("ignoring value of " + name + " - attribute has no write access in " + getClazz());
             }
         }
         return instance;

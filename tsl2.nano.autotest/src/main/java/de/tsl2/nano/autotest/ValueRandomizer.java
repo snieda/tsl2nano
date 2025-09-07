@@ -314,8 +314,7 @@ public class ValueRandomizer {
 					throw new IllegalStateException("max depth reached on recursion. there is a cycle in parameter instantiation: " + typeOf);
 				parameters = provideRandomizedObjects(depth, 1, getParameterTypes(constructor));
 			}
-			constructor.setAccessible(true);
-			V instance = (V) constructor.newInstance(parameters);
+			V instance = (V) Util.withAccessAquired(constructor, () -> constructor.newInstance(parameters));
 			try {
 				if (Boolean.getBoolean(PREFIX_FUNCTIONTEST + "inject.beanattributes")) {
 					di.inject(instance);

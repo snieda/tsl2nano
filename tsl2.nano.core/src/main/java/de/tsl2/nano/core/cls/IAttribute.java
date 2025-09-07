@@ -53,6 +53,8 @@ public interface IAttribute<T> extends Comparable<IAttribute<T>>, Serializable {
      */
     boolean hasWriteAccess();
 
+    boolean hasWriteAccess(Class<?> extensionOfDeclaringClass);
+
     /**
      * @return for internal use only! getter method of current attribute or null, if not available (then it is virtual).
      */

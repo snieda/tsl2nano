@@ -98,7 +98,7 @@ public class Util {
     public static boolean isDataType(Class<?> cls) {
     	return Serializable.class.isAssignableFrom(cls) && Cloneable.class.isAssignableFrom(cls) && Comparable.class.isAssignableFrom(cls);
     }
-    
+
     /**
      * 
      * @param cls class to evaluate
@@ -628,6 +628,18 @@ public class Util {
             return callBack.get();
         } catch (Exception ex) {
             return (R) ManagedException.forward(ex);
+        } finally {
+            accessible.setAccessible(lastAccessValue);
+        }
+    }
+
+    public static <A extends AccessibleObject, Void> void withAccessAquiredVoid(A accessible, SupplierExVoid callBack) {
+        boolean lastAccessValue = accessible.isAccessible();
+        try {
+            accessible.setAccessible(true);
+            callBack.get();
+        } catch (Exception ex) {
+            ManagedException.forward(ex);
         } finally {
             accessible.setAccessible(lastAccessValue);
         }

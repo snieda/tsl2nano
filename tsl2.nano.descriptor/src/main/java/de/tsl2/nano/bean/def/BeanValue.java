@@ -54,6 +54,7 @@ import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.core.util.parser.SerialClass;
 
 /**
  * BeanAttribute holding the bean instance, observers and exact attribute definitions - with validation.
@@ -65,6 +66,7 @@ import de.tsl2.nano.core.util.Util;
  * @version $Revision$
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
+@SerialClass(attributeOrder = {"attribute", "constraint", "description", "presentation", "secure", "selector"})
 public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefinition<T> {
     /** serialVersionUID */
     private static final long serialVersionUID = 8690371851484504875L;
@@ -392,6 +394,18 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
         }
     }
 
+    @Override
+    public final IConstraint<T> getConstraint() {
+        if (constraint == null && attribute == null && instance != null) {
+            T result = getValue();
+            if (result != null) {
+                getConstraint((Class<T>) BeanClass.getDefiningClass(result.getClass()));
+            }
+        } else if (attribute == null) {
+            throw new IllegalStateException("attribute must not be null");
+        }
+        return super.getConstraint(attribute.getType());
+    }
     /**
      * removes this bean value from internal cache
      * 

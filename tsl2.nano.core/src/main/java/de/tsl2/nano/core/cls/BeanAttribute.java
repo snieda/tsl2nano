@@ -31,6 +31,7 @@ import de.tsl2.nano.core.util.AnnotationProxy;
 import de.tsl2.nano.core.util.MethodUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * used by the class {@link BeanClass} to represent its bean attributes. The bean attributes are handled through its
@@ -185,15 +186,24 @@ public class BeanAttribute<T> implements IAttribute<T> {
     * @param readAccessMethod
     * @return the setter method for the given getter method or null if not available.
     */
-    @SuppressWarnings("unchecked")
     Method getWriteAccessMethod(Method readAccessMethod) {
-        if (writeAccessMethod == null) {
+        return getWriteAccessMethod(readAccessMethod, null);
+    }
+
+    @SuppressWarnings("unchecked")
+    Method getWriteAccessMethod(Method readAccessMethod, Class declaringClass) {
+        boolean isExtension = false;
+        if (writeAccessMethod == null || (isExtension=!readAccessMethod.getDeclaringClass().equals(declaringClass))) {
             assert isGetterMethod(readAccessMethod) : "method has to start with " + PREFIX_READ_ACCESS;
             //use the generic name through readAccessMethod, because extension may override getName() returning a presentation name.
             final String attributeName = getName(readAccessMethod);
-            writeAccessMethod =
-                getWriteAccessMethod(readAccessMethod.getDeclaringClass(), attributeName,
-                    (Class<T>) readAccessMethod.getReturnType());
+            declaringClass = declaringClass != null ? declaringClass : readAccessMethod.getDeclaringClass();
+            Method newWriteAccessMethod = getWriteAccessMethod(declaringClass, attributeName,
+                                            (Class<T>) readAccessMethod.getReturnType());
+            if (isExtension)
+                return newWriteAccessMethod;
+            else
+                writeAccessMethod = newWriteAccessMethod;
         }
         return writeAccessMethod;
     }
@@ -319,18 +329,16 @@ public class BeanAttribute<T> implements IAttribute<T> {
      */
     @Override
     public void setValue(Object beanInstance, Object value) {
-        if (hasWriteAccess()) {
+        Class<?> extensionOfDeclaringClass = beanInstance != null ? beanInstance.getClass() : getDeclaringClass();
+        if (hasWriteAccess(extensionOfDeclaringClass)) {
             //String --> File(String) etc.
-            if (value != null && !writeAccessMethod.getReturnType().isAssignableFrom(value.getClass()))
+            if (value != null && !readAccessMethod.getReturnType().isAssignableFrom(value.getClass()))
                 value = wrap(value);
             //on primitive it is not possible to set a null value - we ignore setValue(null)
             if (!(getType().isPrimitive() && value == null)) {
-                try {
-                    writeAccessMethod.setAccessible(true);
-                    writeAccessMethod.invoke(beanInstance, new Object[] { value });
-                } catch (final Exception e) {
-                    ManagedException.forward(e);
-                }
+                Object v = value;
+                Method setter = getWriteAccessMethod(readAccessMethod, extensionOfDeclaringClass);
+                Util.withAccessAquired(setter, () -> setter.invoke(beanInstance, new Object[] { v }));
             }
         } else {
             LOG.warn("no write access for attribute value '" + getName() + "'! missing setter for: " + readAccessMethod);
@@ -445,6 +453,14 @@ public class BeanAttribute<T> implements IAttribute<T> {
     @Override
     public boolean hasWriteAccess() {
         return getWriteAccessMethod(readAccessMethod) != null;
+    }
+
+    /**
+     * @return whether there is a public setter defined
+     */
+    @Override
+    public boolean hasWriteAccess(Class<?> extensionOfDeclaringClass) {
+        return getWriteAccessMethod(readAccessMethod, extensionOfDeclaringClass) != null;
     }
 
     /**

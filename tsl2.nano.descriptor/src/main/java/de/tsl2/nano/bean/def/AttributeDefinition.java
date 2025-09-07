@@ -384,7 +384,10 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     }
 
     @Override
-    public final IConstraint<T> getConstraint() {
+    public IConstraint<T> getConstraint() {
+        return getConstraint(BeanClass.getDefiningClass(getType()));
+    }
+    public final IConstraint<T> getConstraint(Class<T> type) {
         if (constraint == null) {
             constraint = new Constraint(BeanClass.getDefiningClass(attribute.getType()));
         }
@@ -1041,6 +1044,11 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     @Override
     public boolean hasWriteAccess() {
         return attribute.hasWriteAccess();
+    }
+
+    @Override
+    public boolean hasWriteAccess(Class<?> extensionOfDeclaringClass) {
+        return attribute.hasWriteAccess(extensionOfDeclaringClass);
     }
 
     /**

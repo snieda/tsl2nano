@@ -119,7 +119,8 @@ public interface StructParser {
         return obj == null || ObjectUtil.isSimpleType(obj.getClass())
                 || obj instanceof AnnotatedElement // this are reflection types calling native methods -> may result in fatal errors on reflecting values of their properties
                 || obj instanceof Enum
-                || obj.getClass().getPackageName().startsWith("java.net");
+                || obj.getClass().getPackageName().startsWith("java.net")
+                || ObjectUtil.hasStringRepresentation(obj);
     }
 
     /** @return the implementors quotation characters. default: [\"]. used to enclose keys or strings */
@@ -575,7 +576,7 @@ class TreeInfo {
     }
 
     public boolean isReference(Object obj) {
-        return obj instanceof String && ((String) obj).matches("@\\d+");
+        return obj instanceof String && ((String) obj).matches("((\\w+\\.)*.+)+@\\d+");
     }
 
     boolean contains(Object obj) {
@@ -628,7 +629,7 @@ class TreeInfo {
     }
 
     public Object getReferenceKey(Object object) {
-        return "@" + refs.indexOf(object);
+        return object.getClass().getName() + "@" + refs.indexOf(object);
     }
 
     private boolean avoidEndlessReferenceLoop(Object value) {
@@ -754,6 +755,6 @@ class SelfReferencingMap extends LinkedHashMap<String, Object> {
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName() + "@" + hashCode;
+        return this.getClass().getName() + "@" + hashCode;
     }
 }

@@ -763,7 +763,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
      */
     @Override
     public String toString() {
-        return this.getClass().getSimpleName() + "[pattern: " + pattern + ", initMask: " + getInitMask() + "]";
+        return pattern;//this.getClass().getSimpleName() + "[pattern: " + pattern + ", initMask: " + getInitMask() + "]";
     }
 
     /**

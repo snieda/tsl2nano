@@ -173,6 +173,21 @@ public class Bean<T> extends BeanDefinition<T> {
         this.instance = instance;
     }
 
+    /** only for deserialization */
+    protected void setClazz(Class<T> cls) {
+        this.clazz = cls;
+    }
+
+    /** only for deserialization */
+    protected void setDeclaringClass(Class<T> cls) {
+        setClazz(cls);
+    }
+
+    /** only for deserialization */
+    public void setBeanValues(List<BeanValue> attributes) {
+        attributes.forEach(a -> getAttributeDefinitions().put(a.getName(), (IAttributeDefinition<?>) a));
+    }
+
     /**
      * @return Returns the instance.
      */
@@ -180,25 +195,6 @@ public class Bean<T> extends BeanDefinition<T> {
         return instance;
     }
 
-    /**
-     * unique id for this bean. on persistable beans, it is defined by evaluating {@link #getIdAttribute()} on current
-     * instance.
-     * 
-     * @return unique bean id
-     */
-    @Override
-    public Object getId() {
-        IAttribute idAttribute = getIdAttribute();
-        return idAttribute != null && instance != null ? idAttribute.getValue(instance) : super.getId();
-    }
-    public void setId(Object value) {
-        if (isVirtual())
-            return;
-        IAttribute idAttribute = getIdAttribute();
-        if (idAttribute == null)
-        	throw new IllegalStateException(this + " has no idAttribute --> setId(.) cannot be called!");
-        idAttribute.setValue(instance, value);
-	}
     /**
      * only to be used by framework for performance aspects.
      * 
@@ -222,6 +218,26 @@ public class Bean<T> extends BeanDefinition<T> {
         }
         return this;
     }
+
+    /**
+     * unique id for this bean. on persistable beans, it is defined by evaluating {@link #getIdAttribute()} on current
+     * instance.
+     * 
+     * @return unique bean id
+     */
+    @Override
+    public Object getId() {
+        IAttribute idAttribute = getIdAttribute();
+        return idAttribute != null && instance != null ? idAttribute.getValue(instance) : super.getId();
+    }
+    public void setId(Object value) {
+        if (isVirtual())
+            return;
+        IAttribute idAttribute = getIdAttribute();
+        if (idAttribute == null)
+        	throw new IllegalStateException(this + " has no idAttribute --> setId(.) cannot be called!");
+        idAttribute.setValue(instance, value);
+	}
 
     @Override
     public boolean isMultiValue() {
@@ -790,7 +806,7 @@ public class Bean<T> extends BeanDefinition<T> {
         } else if (instanceOrName.getClass().isArray()) {
             bean = createArrayBean(instanceOrName);
         } else if (Map.class.isAssignableFrom(instanceOrName.getClass())) {
-            bean = createMapBean(instanceOrName);
+            bean = (Bean<I>) createMapBean((Map)instanceOrName);
         } else if (Entry.class.isAssignableFrom(instanceOrName.getClass())) {
             BeanDefinition<I> beandef =
                 getBeanDefinition((Class<I>) BeanClass.getDefiningClass(instanceOrName.getClass()));
@@ -857,23 +873,23 @@ public class Bean<T> extends BeanDefinition<T> {
         return bean;
     }
 
-    private static Bean createMapBean(Object mapInstance) {
-        Map map = (Map) mapInstance;
-        Bean bean = new Bean(map);
+    private static Bean<Map> createMapBean(Map map) {
+        Bean<Map> bean = new BeanValueMap(map);
         bean.setMultiValue(false);
         Set keySet = map.keySet();
         Object v;
         if (map.keySet() != null) {//on a proxy instance, keySet() may return null!
-        	bean.attributeFilter = new String[map.size()];
+        	bean.attributeFilter = new String[/*map.size()*/0];
         	int i = 0;
             for (Object k : keySet) {
-            	bean.attributeFilter[i++] = String.valueOf(k);
+            	// bean.attributeFilter[i++] = String.valueOf(k);
                 v = map.get(k);
                 bean.addAttribute(
                     new BeanValue(bean.instance,
                         new MapValue(k, (v != null ? BeanClass.getDefiningClass(v
                             .getClass()) : null), map)));
             }
+            bean.allDefinitionsCached = true;
         }
         return bean;
     }

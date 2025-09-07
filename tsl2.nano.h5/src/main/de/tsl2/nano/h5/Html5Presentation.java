@@ -63,6 +63,7 @@ import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.bean.IBeanContainer;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.bean.def.Attachment;
 import de.tsl2.nano.bean.def.AttributeCover;
@@ -76,6 +77,7 @@ import de.tsl2.nano.bean.def.GroupBy;
 import de.tsl2.nano.bean.def.GroupingPresentable;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.bean.def.IBeanCollector;
+import de.tsl2.nano.bean.def.IColumn;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.IPresentableColumn;
@@ -84,6 +86,7 @@ import de.tsl2.nano.bean.def.IsPresentable;
 import de.tsl2.nano.bean.def.MethodAction;
 import de.tsl2.nano.bean.def.Presentable;
 import de.tsl2.nano.bean.def.SecureAction;
+import de.tsl2.nano.bean.def.ValueColumn;
 import de.tsl2.nano.bean.def.ValueExpressionFormat;
 import de.tsl2.nano.bean.def.ValueGroup;
 import de.tsl2.nano.core.AppLoader;
@@ -108,6 +111,7 @@ import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.NumberUtil;
+import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.GenericParser;
@@ -155,6 +159,15 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         for (char i = 0; i < SHORTCUTS.length; i++) {
             SHORTCUTS[i] = (char) (i + 33);
         }
+
+        registereNanoH5Implemenations();
+    }
+    public static void registereNanoH5Implemenations() {
+        ObjectUtil.addDefaultImplementation(IPresentable.class, Html5Presentable.class);
+        ObjectUtil.addDefaultImplementation(IColumn.class, ValueColumn.class);
+        ObjectUtil.addDefaultImplementation(IPresentableColumn.class, ValueColumn.class);
+        ObjectUtil.addDefaultImplementation(BeanPresentationHelper.class, Html5Presentation.class);
+        ObjectUtil.addDefaultImplementation(IBeanContainer.class, BeanContainer.class);
     }
 
     private transient String row1style;

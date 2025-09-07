@@ -92,11 +92,7 @@ public class FieldUtil extends ByteUtil {
 	}
 
 	public static Object getValue(Object obj, Field f) {
-		try {
-			return Util.withAccessAquired(f, () -> f.get(obj));
-		} catch (Exception ex) {
-			throw new RuntimeException(ex);
-		}
+		return Util.withAccessAquired(f, () -> f.get(obj));
 	}
 
 	public static void setValue(Object obj, Field f, Object value) {
