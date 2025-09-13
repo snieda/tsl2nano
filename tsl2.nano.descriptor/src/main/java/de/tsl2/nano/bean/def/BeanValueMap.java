@@ -45,13 +45,13 @@ public class BeanValueMap extends Bean<Map> {
     }
 
     // @Override
-    public Bean<Map> setInstance(Object instance) {
+    public <M extends Map> Bean<M> setInstance(M instance) {
         Objects.requireNonNull(instance);
         if (instance instanceof Map)
             super.setInstance((Map) instance);
         else
             LOG.warn("not an instanceof Map --> ignoring instance of type " + instance.getClass().getName());
-        return this;    
+        return (Bean<M>) this;    
     }
 
     @Override

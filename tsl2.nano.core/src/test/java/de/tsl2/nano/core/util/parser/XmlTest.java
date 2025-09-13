@@ -102,7 +102,7 @@ public class XmlTest {
     }
 
     private String createXmlStringWithAttributes() {
-        return "<TypeBean index=\"2\"  name=\"test2\"  value=\"2.2\" ><connections><TypeBean index=\"1\"  name=\"test1\"  value=\"1.1\" ><byteStream>[49, 50, 51]</byteStream> <intStream>[1, 2, 3]</intStream></TypeBean> <TypeBean>@0</TypeBean></connections></TypeBean>";
+        return "<TypeBean index=\"2\"  name=\"test2\"  value=\"2.2\" ><connections><TypeBean index=\"1\"  name=\"test1\"  value=\"1.1\" ><byteStream>[49, 50, 51]</byteStream> <intStream>[1, 2, 3]</intStream></TypeBean> <TypeBean>de.tsl2.nano.core.util.parser.TypeBean@0</TypeBean></connections></TypeBean>";
     }
 
     @Test
@@ -111,6 +111,6 @@ public class XmlTest {
     }
 
     private String createXmlString() {
-        return "<TypeBean><index>2</index> <name>test2</name> <value>2.2</value> <connections><TypeBean><index>1</index> <name>test1</name> <value>1.1</value> <byteStream>[49, 50, 51]</byteStream> <intStream>[1, 2, 3]</intStream></TypeBean> <TypeBean>@0</TypeBean></connections></TypeBean>";
+        return "<TypeBean><index>2</index> <name>test2</name> <value>2.2</value> <connections><TypeBean><index>1</index> <name>test1</name> <value>1.1</value> <byteStream>[49, 50, 51]</byteStream> <intStream>[1, 2, 3]</intStream></TypeBean> <TypeBean>de.tsl2.nano.core.util.parser.TypeBean@0</TypeBean></connections></TypeBean>";
     }
 }

@@ -6,9 +6,12 @@
  */
 package de.tsl2.nano.core.util;
 
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -71,7 +74,23 @@ public class MethodUtil extends FieldUtil {
         Object genType = method.getGenericReturnType();
         if (genType instanceof ParameterizedType) {
             genType = ((ParameterizedType) genType).getActualTypeArguments()[typePos];
-            genType = ((ParameterizedType)genType).getRawType();
+            if (!(genType instanceof Class)) {
+                if (genType instanceof ParameterizedType) {
+                    genType = ((ParameterizedType)genType).getRawType();
+                } else if (genType instanceof WildcardType) {
+                    WildcardType wildcardType = (WildcardType) genType;
+                    if (wildcardType.getUpperBounds().length > 0) {
+                        genType = wildcardType.getUpperBounds()[0];
+                    } else if (wildcardType.getLowerBounds().length > 0) {
+                        genType = wildcardType.getLowerBounds()[0];
+                    }
+                } else if (genType instanceof TypeVariable) {
+                    if (((TypeVariable)genType).getBounds().length > 0)
+                        genType = ((TypeVariable)genType).getBounds()[0];
+                } else if (genType instanceof GenericArrayType) {
+                    genType = ((GenericArrayType)genType).getGenericComponentType();
+                }
+            }
         }
         return genType instanceof Class ? (Class<?>) genType : Object.class;
     }

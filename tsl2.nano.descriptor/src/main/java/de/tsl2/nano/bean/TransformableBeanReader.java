@@ -197,7 +197,7 @@ public class TransformableBeanReader<T> {
 				content.add(bean.getInstance());
 				properties.put("lastValues", values);
 			} catch (Exception e) {
-				throw new IllegalStateException("Exception thrown reading line [" + line + "]:" + l, e);
+				throw new IllegalStateException("Exception thrown reading " + fileName + " on line [" + line + "]:" + l, e);
 			}
 		}
 		printInfo(content.size(), ignoredlines, System.currentTimeMillis() - start);

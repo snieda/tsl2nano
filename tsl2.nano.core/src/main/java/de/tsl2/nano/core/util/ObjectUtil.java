@@ -359,7 +359,7 @@ public class ObjectUtil extends MethodUtil {
     public static <T> T wrap(Object value, Class<T> wrapperType) {
         if (value == null || (value != null && wrapperType.isAssignableFrom(value.getClass())))
             return (T) value;
-        LOG.debug("trying to convert '" + value + "' to " + wrapperType);
+        LOG.debug("trying to convert type " + value.getClass() + " (value: '" + (Util.isSimpleType(value.getClass()) ? value : "<...>") + "') to " + wrapperType);
         // check, if constructor for value is available in wrapper type
         try {
             if (value != null && !PrimitiveUtil.isAssignableFrom(wrapperType, value.getClass())) {
@@ -516,12 +516,16 @@ public class ObjectUtil extends MethodUtil {
         Class<?> type = obj.getClass();
         if (!HAVING_STRING_REPRESENTATION.containsKey(type)) {
                 if (BeanClass.hasStringConstructor(type) && hasToString(type)) {
-                    String representation = obj.toString();
-                    Object recreation = BeanClass.createInstance(type, representation);
-                    if (representation.equals(recreation.toString())) {
-                        LOG.info("adding type " + type.getName() + " to set HAVING_STRING_REPRESENTATIONS");
-                        HAVING_STRING_REPRESENTATION.put(type, true);
-                        return true;
+                    try {
+                        String representation = obj.toString();
+                        Object recreation = BeanClass.createInstance(type, representation);
+                        if (representation.equals(recreation.toString())) {
+                            LOG.info("adding type " + type.getName() + " to set HAVING_STRING_REPRESENTATIONS");
+                            HAVING_STRING_REPRESENTATION.put(type, true);
+                            return true;
+                        }
+                    } catch (Throwable e) {
+                        LOG.warn("hasStringRepresentation cannot check given object - error: " + e.toString());
                     }
             }
             HAVING_STRING_REPRESENTATION.put(type, false);

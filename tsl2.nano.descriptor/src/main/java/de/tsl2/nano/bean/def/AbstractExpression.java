@@ -166,6 +166,11 @@ public abstract class AbstractExpression<T> implements IValueExpression<T>, IAtt
         return false;
     }
 
+    @Override
+    public boolean hasWriteAccess(Class<?> extensionOfDeclaringClass) {
+        return false;
+    }
+    
     /**
      * {@inheritDoc}
      */

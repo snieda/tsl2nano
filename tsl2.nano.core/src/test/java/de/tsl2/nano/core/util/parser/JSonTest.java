@@ -99,7 +99,7 @@ public class JSonTest {
         String result = Util.toJson(v2);
         System.out.println(result);
         assertEquals(
-                "{\"type\": {\"name\": \"de.tsl2.nano.core.util.ValueHolder\"},\"value\": {\"type\": {\"name\": \"de.tsl2.nano.core.util.ValueHolder\"},\"value\": \"@0\"}}",
+                "{\"type\": {\"name\": \"de.tsl2.nano.core.util.ValueHolder\"},\"value\": {\"type\": {\"name\": \"de.tsl2.nano.core.util.ValueHolder\"},\"value\": \"de.tsl2.nano.core.util.ValueHolder@0\"}}",
                         result);
     }
 
@@ -111,8 +111,13 @@ public class JSonTest {
 
         String result = Util.toJson(proxy2);
         System.out.println(result);
-        assertEquals("{\"value\": {\"value\": \"@0\"}}", result);
+        assertEquals(ignoreSome("{\"value\": {\"value\": \"jdk.proxy2.$Proxy7@0\"}}"), ignoreSome(result));
     }
+
+    private String ignoreSome(String s) {
+        return s.replaceAll("\\$Proxy\\d+", "\\$ProxyXXX");
+    }
+
 
     @Test
     public void testJsonObject() {

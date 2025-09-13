@@ -106,6 +106,11 @@ public class Attachment implements IValueAccess<byte[]>, IAttribute<byte[]> {
     }
 
     @Override
+    public boolean hasWriteAccess(Class<?> extensionOfDeclaringClass) {
+        return false;
+    }
+
+    @Override
     public Method getAccessMethod() {
         return null;
     }

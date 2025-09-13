@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,8 +13,13 @@ import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanValueMap;
@@ -21,16 +27,21 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.parser.JSon;
+import de.tsl2.nano.persistence.Persistence;
 
 
-class NanoH5ExternalBackendTest {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+public class NanoH5ExternalBackendTest {
 
     NanoH5ExternalBackend backend;
+    @Mock Persistence persistence;
 
     @BeforeEach
     void setUp() throws IOException {
         backend = new NanoH5ExternalBackend(8080, new File("."));
         backend.setBackendUrl("http://test-backend");
+        when(persistence.getConnectionUrl()).thenReturn("http://test-backend");
     }
 
     @Test
@@ -75,11 +86,10 @@ class NanoH5ExternalBackendTest {
             netUtilMock.when(() -> NetUtil.get("http://test-backend")).thenReturn("{\"data\":{}}");
 
             Bean<?> expectedBean = Mockito.mock(Bean.class);
-            JSon jsonParser = Mockito.mock(JSon.class);
-            jsonMock.when(JSon::new).thenReturn(jsonParser);
+            JSon jsonParser = Mockito.spy(JSon.class);
             Mockito.when(jsonParser.toObject(Mockito.eq(Bean.class), anyString())).thenReturn(expectedBean);
 
-            Bean<?> result = backend.connect();
+            Bean<?> result = (Bean<?>) backend.connect(persistence);
             assertSame(expectedBean, result);
         }
     }
@@ -93,7 +103,7 @@ class NanoH5ExternalBackendTest {
         ) {
             envMock.when(() -> ENV.get("app.external.backend.user", null)).thenReturn("user");
             envMock.when(() -> ENV.get("app.external.backend.password", null)).thenReturn("pass");
-            assertThrows(NullPointerException.class, backend::connect);
+            assertThrows(NullPointerException.class, () -> backend.connect(persistence));
         }
     }
 
@@ -104,7 +114,7 @@ class NanoH5ExternalBackendTest {
         ) {
             envMock.when(() -> ENV.get("app.external.backend.user", null)).thenReturn(null);
             envMock.when(() -> ENV.get("app.external.backend.password", null)).thenReturn("pass");
-            assertThrows(NullPointerException.class, backend::connect);
+            assertThrows(NullPointerException.class, () -> backend.connect(persistence));
         }
     }
 
@@ -115,7 +125,7 @@ class NanoH5ExternalBackendTest {
         ) {
             envMock.when(() -> ENV.get("app.external.backend.user", null)).thenReturn("user");
             envMock.when(() -> ENV.get("app.external.backend.password", null)).thenReturn(null);
-            assertThrows(NullPointerException.class, backend::connect);
+            assertThrows(NullPointerException.class, () -> backend.connect(persistence));
         }
     }
 }

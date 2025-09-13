@@ -35,7 +35,7 @@ public class YamlTest {
                 "\t\t\tvalue: 1.1\n" + //
                 "\t\t\tbyteStream: [49, 50, 51]\n" + //
                 "\t\t\tintStream: [1, 2, 3]\n" + //
-                "\t\t- TypeBean: \"@0\"";
+                "\t\t- TypeBean: \"de.tsl2.nano.core.util.parser.TypeBean@0\"";
         return expected;
     }
 

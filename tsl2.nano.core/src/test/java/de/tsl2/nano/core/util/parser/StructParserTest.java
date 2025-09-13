@@ -98,8 +98,7 @@ class TypeBean {
 
     @Override
     public String toString() {
-        return "TypeBean [index=" + index + ", name=" + name + ", value=" + value + ", connections=" + connections
-                + "]";
+        return "TypeBean [index=" + index + ", name=" + name + ", value=" + value /*+ ", connections=" + connections */+ "]";
     }
 
     public String getName() {

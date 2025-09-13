@@ -26,6 +26,11 @@ public interface IDefaultAttribute<T> extends IAttribute<T> {
     }
 
     @Override
+    default boolean hasWriteAccess(Class<?> extensionOfDeclaringClass) {
+        return true;
+    }
+
+    @Override
     default Method getAccessMethod() {
         return null;
     }

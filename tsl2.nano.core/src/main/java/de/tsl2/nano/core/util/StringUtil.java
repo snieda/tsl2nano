@@ -862,7 +862,7 @@ public class StringUtil extends Strings {
                 c = indexOf(s, close, ++c);
                 if (c == -1)
                     throw new IllegalStateException("unclosed tag " + open + " at index " + i);
-            } while (countFindings(s.subSequence(i + open.length(), c), name) % 2 == 1);
+            } while (countFindings(s.subSequence(i + open.length(), c), open) % 2 == 1);
             lsplit.add(s.subSequence(i, c + close.length()).toString());
             i = c + close.length();
         }
