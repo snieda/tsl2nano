@@ -226,7 +226,12 @@ public interface StructParser {
          */
         public Object toStructure(CharSequence s) {
             s = removeCommentsAndEmptyLines(s);
-            return toStructure(s, new TreeInfo(s, properties));
+            TreeInfo tree = new TreeInfo(s, properties);
+            Object result = toStructure(s, tree);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("tostructure finished with references: " + tree);
+            }
+            return result;
         }
 
         public Object toStructure(CharSequence s, TreeInfo tree) {
@@ -264,7 +269,7 @@ public interface StructParser {
         <T> List<T> toStructList(Class<T> type, CharSequence s, TreeInfo tree) {
             tree.path.getLast().setIsArray(true);
             String[] attrs = splitArray(s, tree);
-            List<T> list = new ArrayList<>(attrs.length);
+            List<T> list = tree.addRef(new ArrayList<>(attrs.length));
             for (int i = 0; i < attrs.length; i++) {
                 list.add((T) (isParseable(attrs[i]) && !attrs[i].equals(s)
                         ? tree.addRef(toStructure(attrs[i], tree))
@@ -296,7 +301,12 @@ public interface StructParser {
         }
 
         public String serialize(Object obj) {
-            return serialize(obj, createInitialStringBuilder(), new TreeInfo(null, properties)).toString();
+            TreeInfo tree = new TreeInfo(null, properties);
+            StringBuilder result = serialize(obj, createInitialStringBuilder(), tree);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("serialization finished with stored references: " + tree.refs);
+            }
+            return result.toString();
         }
 
         StringBuilder createInitialStringBuilder() {
@@ -304,7 +314,7 @@ public interface StructParser {
         }
 
         StringBuilder serialize(final Object object, StringBuilder result, TreeInfo tree) {
-            final Object obj = tree.contains(object) ? tree.getReferenceKey(object)
+            final Object obj = tree.contains(object) ? tree.createReferenceKey(object)
                     : isSimpleType(object) ? object : tree.addRef(object);
             // TODO: should we remove the object from refs (added above)?
             if (tree.serializablesOnly != null && tree.serializablesOnly && !(object instanceof Serializable))
@@ -451,7 +461,7 @@ public interface StructParser {
                 if (Util.isEmpty(v)) {
                     continue;
                 } else if (tree.contains(v)) {
-                    v = tree.getReferenceKey(v);
+                    v = tree.createReferenceKey(v);
                 }
                 s.append(encloseKey(k, tree.increaseRecursion(k, v)));
                 serialize(v, s, tree);
@@ -576,7 +586,7 @@ class TreeInfo {
     }
 
     public boolean isReference(Object obj) {
-        return obj instanceof String && ((String) obj).matches("((\\w+\\.)*.+)+@\\d+");
+        return obj instanceof String && ((String) obj).matches("((\\w+\\.)*[⁼\\=\\:\\,]+)+@\\d+");
     }
 
     boolean contains(Object obj) {
@@ -602,24 +612,31 @@ class TreeInfo {
 
     Object getReference(String value) {
         if (isReference(value)) {
-            Integer index = Integer.valueOf(StringUtil.extract(value, "\\d+"));
+            Integer index = Integer.valueOf(StringUtil.extract(value, "@(\\d+)"));
             if (index >= refs.size()) {
                 String msg = IndexOutOfBoundsException.class.getSimpleName() + ": " + value
                         + " --> ref index >  size of references:" + refs.size();
                 LOG.error(msg);
                 return msg;
-            } else
-                return get(index);
+            } else {
+                Object myRef = get(index);
+                if (myRef != null && !(myRef instanceof SelfReferencingMap)) {
+                    String clsName = StringUtil.extract(value, "(.*)@\\d+");
+                    if (clsName.equals(myRef.getClass().getName()))
+                        throw new IllegalStateException("wrong type of reference " + value + ": " + myRef);
+                }
+                return myRef;
+            }
         } else {
             return value;
         }
     }
 
-    Object addRef(Object value) {
+    <T> T addRef(T value) {
         return addRef(value, null);
     }
 
-    Object addRef(Object value, SupplierExVoid callback) {
+    <T> T addRef(T value, SupplierExVoid callback) {
         boolean parentReferenceAdded = avoidEndlessReferenceLoop(value);
         if (callback != null)
             callback.get();
@@ -628,7 +645,7 @@ class TreeInfo {
         return value;
     }
 
-    public Object getReferenceKey(Object object) {
+    public Object createReferenceKey(Object object) {
         return object.getClass().getName() + "@" + refs.indexOf(object);
     }
 
@@ -732,7 +749,7 @@ class TreeInfo {
         StringBuffer s = new StringBuffer();
         path.forEach(i -> s.append(i.key + "=>"));
         s.replace(s.length(), s.length(), " [");
-        s.append("refs: " + refs.size() + ", recursion: " + recursion + "]");
+        s.append("refs: " + refs.size() + ", recursion: " + recursion + ", refs: " + refs + "]");
         return s.toString();
     }
 }

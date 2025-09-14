@@ -519,7 +519,13 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      */
     @Override
     public boolean isVirtual() {
-        return super.isVirtual() || instance instanceof IValueAccess;
+        // on deserializing, attribute may be null...
+        return attribute == null || super.isVirtual() || instance instanceof IValueAccess;
+    }
+
+    @Override
+    protected boolean isVirtualAccess() {
+        return attribute == null || super.isVirtualAccess();
     }
 
     /**

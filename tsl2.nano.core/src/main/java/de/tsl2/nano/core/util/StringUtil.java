@@ -862,7 +862,7 @@ public class StringUtil extends Strings {
                 c = indexOf(s, close, ++c);
                 if (c == -1)
                     throw new IllegalStateException("unclosed tag " + open + " at index " + i);
-            } while (countFindings(s.subSequence(i + open.length(), c), open) % 2 == 1);
+            } while (countFindings(s.subSequence(i + open.length(), c), name, '@') % 2 == 1);
             lsplit.add(s.subSequence(i, c + close.length()).toString());
             i = c + close.length();
         }
@@ -1238,6 +1238,9 @@ public class StringUtil extends Strings {
     }
 
     public static int countFindings(CharSequence data, String search) {
+        return countFindings(data, search, null);
+    }
+    public static int countFindings(CharSequence data, String search, Character notFollowedByChar) {
     	int c = 0;
     	int i, last = 0;
     	int ll = search.length();
@@ -1246,6 +1249,8 @@ public class StringUtil extends Strings {
     		if (i == -1)
     			break;
     		last = i + ll;
+            if (notFollowedByChar != null && data.charAt(last) == notFollowedByChar.charValue())
+                continue;
     		++c;
     	} while (true);
 		return c;
