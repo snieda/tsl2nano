@@ -586,7 +586,7 @@ class TreeInfo {
     }
 
     public boolean isReference(Object obj) {
-        return obj instanceof String && ((String) obj).matches("((\\w+\\.)*[⁼\\=\\:\\,]+)+@\\d+");
+        return obj instanceof String && ((String) obj).matches("((\\w+\\.)*[^\\=\\:\\,]+)+@\\d+");
     }
 
     boolean contains(Object obj) {
@@ -772,6 +772,9 @@ class SelfReferencingMap extends LinkedHashMap<String, Object> {
 
     @Override
     public String toString() {
-        return this.getClass().getName() + "@" + hashCode;
+        return this.getClass().getName() + "@" + hashCode + keySet().toString();
+    }
+    public String toStringExplicit() {
+        return super.toString();
     }
 }

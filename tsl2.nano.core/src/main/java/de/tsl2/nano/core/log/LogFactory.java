@@ -377,7 +377,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
     }
 
     private static final String state(int loglevel) {
-        return STATETXT[BitUtil.highestBitPosition(loglevel)];
+        return STATETXT[loglevel > 0 ? BitUtil.highestBitPosition(loglevel) - 1: 0];
     }
 
     private static final String description(int loglevel) {
@@ -463,7 +463,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
 
             @Override
             public void fatal(Object arg0) {
-                log(logClass, FATAL, arg0, null);
+                log(logClass, FATAL, tag(arg0, LIGHT_RED), null);
             }
 
             @Override
@@ -473,7 +473,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
 
             @Override
             public void error(Object arg0) {
-                log(logClass, ERROR, arg0, null);
+                log(logClass, ERROR, tag(arg0, LIGHT_RED), null);
             }
 
             @Override

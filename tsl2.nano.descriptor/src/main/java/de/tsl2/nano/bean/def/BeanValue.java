@@ -235,7 +235,10 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      * @return temporary file-path of the current bean-value, saved as byte-array.
      */
     public File getValueFile() {
-        return String.class.isAssignableFrom(getType()) ? new File(Attachment.getFilename(instance, getName(), (String) getValue())) : Attachment.getValueFile(getId(), getValue());
+        if (Attachment.isAttachment(this))
+            return String.class.isAssignableFrom(getType()) ? new File(Attachment.getFilename(instance, getName(), (String) getValue())) : Attachment.getValueFile(getId(), getValue());
+        else
+            return null;
     }
 
     @Override
@@ -696,7 +699,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
     	return (v != null && !ObjectUtil.isStandardType(v) && !ByteUtil.isByteStream(v.getClass())) || super.isSelectable();
     }
 
-    public void setConstraint(Constraint<T> newConstraint) {
+    public void setConstraint(IConstraint<T> newConstraint) {
     	this.constraint = newConstraint;
     }
     

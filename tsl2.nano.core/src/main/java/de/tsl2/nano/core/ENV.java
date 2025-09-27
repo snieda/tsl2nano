@@ -213,6 +213,7 @@ public class ENV implements Serializable {
                 && BeanClass.hasDefaultConstructor(service, !Util.isFrameworkClass(service))) {
                 self.info("trying to create service " + service + " through default construction");
                 serviceImpl = self.addService(BeanClass.createInstance(service));
+                serviceImpl = self.addService(service, BeanClass.createInstance(service));
                 if (serviceImpl instanceof Serializable) {
                     get(XmlUtil.class).saveXml(path, serviceImpl);
                 }

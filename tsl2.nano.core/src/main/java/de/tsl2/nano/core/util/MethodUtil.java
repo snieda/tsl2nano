@@ -42,8 +42,14 @@ public class MethodUtil extends FieldUtil {
         try {
             return cls.getDeclaredMethod(name, par);
         } catch (NoSuchMethodException e) {
-            if (cls.getSuperclass() != null) {
-                return getMethod(cls.getSuperclass(), name, par);
+            try {
+                if (cls.getSuperclass() != null) {
+                    return getMethod(cls.getSuperclass(), name, par);
+                }
+            } catch (Exception e1) {
+                if (cls.isAnonymousClass()) {
+                    return getMethod(cls.getEnclosingClass(), name, par);                
+            }
             }
             ManagedException.forward(e, false);
             return null;

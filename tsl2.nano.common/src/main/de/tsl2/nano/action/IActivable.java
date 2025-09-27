@@ -21,6 +21,9 @@ import org.simpleframework.xml.Attribute;
  */
 public interface IActivable extends Serializable {
 
+    public static final String ALWAYS_ACTIVE = "Always Active";
+    public static final String ALWAYS_INACTIVE = "Always Inactive";
+
     /**
      * used as callback by framework to check for activation/enabling. may be called more than one time for refreshings.
      * implementation should be fast - please don't call remote services.
@@ -28,6 +31,10 @@ public interface IActivable extends Serializable {
      * @return true if the component should be activated (enabled and visible).
      */
     boolean isActive();
+
+    public static IActivable valueOf(String alwaysActiveOrInActive) {
+        return ALWAYS_INACTIVE.equals(alwaysActiveOrInActive) ? INACTIVE : ACTIVE;
+    }
 
     /** {@link #isActive()} will return always true */
     static final IActivable ACTIVE = new IActivable() {
@@ -43,7 +50,7 @@ public interface IActivable extends Serializable {
         }
         @Override
         public String toString() {
-            return "Always Active";
+            return ALWAYS_ACTIVE;
         }
     };
 
@@ -61,7 +68,7 @@ public interface IActivable extends Serializable {
         }
         @Override
         public String toString() {
-            return "Always Inactive";
+            return ALWAYS_INACTIVE;
         }
     };
 }

@@ -840,6 +840,8 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
         final String initmask = getInitMask();
         if (initmask != null) {
             newText = prefixInit(newText, initmask);
+            if (newText.length() >= initmask.length())
+                return newText;
             int ti = 0;
             char c, mc;
             for (int i = 0; i < initmask.length(); i++) {

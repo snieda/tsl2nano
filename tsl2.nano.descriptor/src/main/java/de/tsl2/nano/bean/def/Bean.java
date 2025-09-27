@@ -186,6 +186,7 @@ public class Bean<T> extends BeanDefinition<T> {
     /** only for deserialization */
     public void setBeanValues(List<BeanValue> attributes) {
         attributes.forEach(a -> getAttributeDefinitions().put(a.getName(), (IAttributeDefinition<?>) a));
+        allDefinitionsCached = true;
     }
 
     /**
@@ -874,24 +875,7 @@ public class Bean<T> extends BeanDefinition<T> {
     }
 
     private static Bean<Map> createMapBean(Map map) {
-        Bean<Map> bean = new BeanValueMap(map);
-        bean.setMultiValue(false);
-        Set keySet = map.keySet();
-        Object v;
-        if (map.keySet() != null) {//on a proxy instance, keySet() may return null!
-        	bean.attributeFilter = new String[/*map.size()*/0];
-        	int i = 0;
-            for (Object k : keySet) {
-            	// bean.attributeFilter[i++] = String.valueOf(k);
-                v = map.get(k);
-                bean.addAttribute(
-                    new BeanValue(bean.instance,
-                        new MapValue(k, (v != null ? BeanClass.getDefiningClass(v
-                            .getClass()) : null), map)));
-            }
-            bean.allDefinitionsCached = true;
-        }
-        return bean;
+        return new BeanValueMap(map);
     }
 
     /**

@@ -24,7 +24,7 @@ public class BeanMapEntryTest {
 		Object bServices = bean.getValue("services");
 		Bean<Object> mapBean = Bean.getBean(bServices);
 		Iterator<BeanValue<?>> it = mapBean.getBeanValues().iterator();
-		it.next();
+		// it.next();
 		BeanValue<?> mapValue = it.next();
 		
 		//check all representations

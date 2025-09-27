@@ -1100,7 +1100,8 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
 
     /** convenience to get the attributes parent bean */
     public BeanDefinition<?> getParentBean() {
-    	return getId() != null ? BeanDefinition.getBeanDefinition(StringUtil.substring(getId(), null, ".", true, true)) : null;
+    	String name = getId() != null ? StringUtil.substring(getId(), null, ".", true, true) : null;
+        return name != null ? BeanDefinition.getBeanDefinition(name) : null;
     }
 
     /** convenience to get access to an attribute internal property (see {@link ValuePath}.<p/>

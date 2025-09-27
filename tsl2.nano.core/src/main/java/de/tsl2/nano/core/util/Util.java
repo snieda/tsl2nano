@@ -627,6 +627,7 @@ public class Util {
             accessible.setAccessible(true);
             return callBack.get();
         } catch (Exception ex) {
+            LOG.error("error calling " + accessible + " with " + callBack);
             return (R) ManagedException.forward(ex);
         } finally {
             accessible.setAccessible(lastAccessValue);
@@ -639,6 +640,7 @@ public class Util {
             accessible.setAccessible(true);
             callBack.get();
         } catch (Exception ex) {
+            LOG.error("error calling " + accessible + " with " + callBack);
             ManagedException.forward(ex);
         } finally {
             accessible.setAccessible(lastAccessValue);

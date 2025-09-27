@@ -21,11 +21,15 @@ import static de.tsl2.nano.h5.Html5Presentation.L_GRIDWIDTH;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_BORDER;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_SIZE;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_SPANCOL;
+import static de.tsl2.nano.h5.NanoH5Util.addVirtualAttribute;
+import static de.tsl2.nano.h5.NanoH5Util.createStatistics;
+import static de.tsl2.nano.h5.NanoH5Util.createUser;
 import static de.tsl2.nano.h5.NanoH5Util.define;
 import static de.tsl2.nano.h5.NanoH5Util.defineAction;
 import static de.tsl2.nano.h5.NanoH5Util.icon;
-import static de.tsl2.nano.specification.SpecificationExchange.*;
-import static de.tsl2.nano.h5.NanoH5Util.*;
+import static de.tsl2.nano.h5.NanoH5Util.ve;
+import static de.tsl2.nano.specification.SpecificationExchange.PATH_COLDEF_LAYOUTCONSTRAINTS;
+import static de.tsl2.nano.specification.SpecificationExchange.PATH_LAYOUTCONSTRAINTS;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_CHARGEITEM;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_COMMENT;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_FROMDATE;
@@ -262,7 +266,7 @@ public class Timesheet extends NanoH5App {
 
         // create dependency listeners for websocket and NOT standard bean-changing
         ENV.get(Pool.class).add(calcTime);
-        Html5Presentation helper = charge.getPresentationHelper();
+        Html5Presentation helper = (Html5Presentation) charge.getPresentationHelper();
         helper.addRuleListener(ATTR_VALUE, RuleScript.PREFIX + calcTime.getName(), 2, ATTR_FROMTIME, ATTR_TOTIME, ATTR_PAUSE);
 
         /*

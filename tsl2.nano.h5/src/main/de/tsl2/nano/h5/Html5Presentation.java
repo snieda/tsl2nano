@@ -82,11 +82,13 @@ import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.IPresentableColumn;
 import de.tsl2.nano.bean.def.IValueDefinition;
+import de.tsl2.nano.bean.def.IValueExpression;
 import de.tsl2.nano.bean.def.IsPresentable;
 import de.tsl2.nano.bean.def.MethodAction;
 import de.tsl2.nano.bean.def.Presentable;
 import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.bean.def.ValueColumn;
+import de.tsl2.nano.bean.def.ValueExpression;
 import de.tsl2.nano.bean.def.ValueExpressionFormat;
 import de.tsl2.nano.bean.def.ValueGroup;
 import de.tsl2.nano.core.AppLoader;
@@ -94,6 +96,7 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
+import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.cls.IValueAccess;
@@ -163,9 +166,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         registereNanoH5Implemenations();
     }
     public static void registereNanoH5Implemenations() {
+        ObjectUtil.addDefaultImplementation(IAttribute.class, BeanAttribute.class);
+        ObjectUtil.addDefaultImplementation(IAttributeDefinition.class, AttributeDefinition.class);
         ObjectUtil.addDefaultImplementation(IPresentable.class, Html5Presentable.class);
         ObjectUtil.addDefaultImplementation(IColumn.class, ValueColumn.class);
         ObjectUtil.addDefaultImplementation(IPresentableColumn.class, ValueColumn.class);
+        ObjectUtil.addDefaultImplementation(IValueExpression.class, ValueExpression.class);
         ObjectUtil.addDefaultImplementation(BeanPresentationHelper.class, Html5Presentation.class);
         ObjectUtil.addDefaultImplementation(IBeanContainer.class, BeanContainer.class);
     }

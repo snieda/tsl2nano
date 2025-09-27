@@ -963,6 +963,8 @@ public class BeanClass<T> implements Serializable {
                         }
                     }
                 }
+            } if (args != null && args.length == 1 && ObjectUtil.hasValueOfMethod(clazz, args[0])) {
+                instance = (T) ObjectUtil.getValueOf(clazz, args[0]);
             }
             if (instance == null) {
                 throw ManagedException.implementationError(
@@ -1365,27 +1367,31 @@ public class BeanClass<T> implements Serializable {
         public T fromValueMap(Map<String, Object> values) {
             return fromValueMap(createInstanceFromValueMap(values), values);
         }
-
         protected T createInstanceFromValueMap(Map<String, Object> values) {
-            if (hasDefaultConstructor(false)) {
-                return createInstance();
-            } else if (hasConstructor(clazz, Map.class)) {
+            return createInstanceFromValueMap(null, values);
+        }
+
+        protected T createInstanceFromValueMap(T providedDefaultInstance, Map<String, Object> values) {
+            if (hasConstructor(clazz, Map.class)) {
                 return createInstance(values);
-            } else if (values.size() == 1) {
-                if (clazz.equals(Class.class) || clazz.equals(Method.class))
+            } else if (values.size() == 1 && clazz.equals(Class.class) || clazz.equals(Method.class)) {
                     return (T) ObjectUtil.wrap(values, clazz);
+            } else if (providedDefaultInstance != null) {
+                return providedDefaultInstance;
+            } else if (hasDefaultConstructor(false)) {
+                return createInstance();
             } else if (clazz.isInterface()) {
                 return AdapterProxy.create(clazz, values);
             }
             return createInstance(values.values().toArray());
         }
 
-    public T fromValueMap(Map<String, Object> values, Map<Map, Object> selfReferences) {
+    public T fromValueMapWithReference(T providedDefaultInstance, Map<String, Object> values, Map<Map, Object> selfReferences) {
         Object v;
         if (values.size() == 1 && (v = values.get(KEY_REF)) != null && selfReferences.containsKey(v)) {
             return (T) selfReferences.get(v);
         }
-        return fromValueMap(createInstanceFromValueMap(values), values, selfReferences);
+        return fromValueMap(createInstanceFromValueMap(providedDefaultInstance, values), values, selfReferences);
     }
 
     public T fromValueMap(T instance, Map<String, Object> values) {
@@ -1393,16 +1399,19 @@ public class BeanClass<T> implements Serializable {
     }
 
     T fromValueMap(T instance, Map<String, Object> values, Map<Map, Object> references) {
+        logAndCheck(instance, values);
         references.put(values, instance);
         for (String name : values.keySet()) {
-            final IAttribute attr = getAttribute(name, false);
-            if (attr != null && attr.hasWriteAccess(instance.getClass())) {
+            final IAttribute attr = BeanClass.getBeanClass(instance.getClass()).getAttribute(name, false);
+            if (attr != null) {
                 final Serial serial = ASerializer.Proprietizer.serial(attr, true);
                 Object value = values.get(name);
                 if (Util.isEmpty(value) && attr.getValue(instance) == null)
                     continue;
                 else if (serial != null && serial.formatter() != null
-                        && ObjectUtil.isInstanceable(serial.formatter().getClass()) && value instanceof String) {
+                        && (ObjectUtil.isInstanceable(serial.formatter().getClass()) 
+                            || ObjectUtil.hasValueOfMethod(serial.formatter().getClass(), String.class)) 
+                        && value instanceof String) {
                     String sValue = (String) value;
                     Util.trY(() -> attr.setValue(instance, createInstance(serial.formatter()).parseObject(sValue)));
                 } else if (Date.class.isAssignableFrom(typeOf(attr)) && value instanceof String
@@ -1415,7 +1424,8 @@ public class BeanClass<T> implements Serializable {
                         value = references.get(value);
                     } else {
                         references.put((Map) value, null);
-                        Object v = getBeanClass(typeOf(attr)).map().fromValueMap((Map) value, references);
+                        Object providedDefaultInstance = Util.trY( () -> attr.getValue(instance), false);
+                        Object v = getBeanClass(typeOf(attr)).map().fromValueMapWithReference(providedDefaultInstance, (Map) value, references);
                         references.put((Map) value, v);
                         value = v;
                     }
@@ -1426,13 +1436,25 @@ public class BeanClass<T> implements Serializable {
                     ((IValueAccess) attr).setValue(value);
                 else {
                     fillRecursiveList(attr, value, references);
-                    attr.setValue(instance, value);
+                    if (attr.hasWriteAccess(instance.getClass()))
+                        attr.setValue(instance, value);
+                    else
+                        LOG.warn("ignoring value of " + name + " - attribute has no write access in " + instance.getClass());
                 }
             } else {
-                LOG.warn("ignoring value of " + name + " - attribute has no write access in " + getClazz());
+                LOG.warn("ignoring value of " + name + " - attribute not existing in " + instance.getClass());
             }
         }
         return instance;
+    }
+
+    private void logAndCheck(T instance, Map<String, Object> values) {
+        if (LOG.isDebugEnabled()) {
+            LOG.info(instance.getClass() + " => " + values.keySet());
+            if (!Arrays.asList(getAttributeNames()).containsAll(values.keySet())) {
+                throw new IllegalStateException(instance.getClass() + " => " + values.keySet() + " <== but " + getClazz() + " has attributes: " + getAttributeNames());
+            }
+        }
     }
 
     static Class typeOf(IAttribute attr) {
@@ -1460,7 +1482,7 @@ public class BeanClass<T> implements Serializable {
             item = listOfMaps.get(i);
             if (item instanceof Map) {
                 listOfMaps.set(i, references.containsKey(item) ? references.get(item)
-                        : getBeanClass(type).map().fromValueMap((Map<String, Object>) item, references));
+                        : getBeanClass(type).map().fromValueMapWithReference(null, (Map<String, Object>) item, references));
             }
         }
         return listOfMaps;

@@ -72,8 +72,9 @@ public class RegExUtil {
         return template
             .replaceAll("([:.?,!*+\\-\\|$<>\\}\\{\\]\\[\\)\\(])", (softOnSeparation ? "?" : "") + "[$1]")
             .replaceAll("[a-zA-Z\\p{L}]", ".")
+			.replaceAll("[.]\\s+", "..?\\\\s+")	//WORKAROUND on UK, ES , having Sept with 4 chars
             .replaceAll("\\d", "\\\\d")
-            .replaceAll("\\s", "\\\\s")
+            .replaceAll("\\s", "\\\\s" + (softOnSeparation ? "+" : ""))
 			.replace("[.]\\s", "[.]?\\s");//WORKAROUND on FRANCE dates ending month names with '.' - but not on Mai, because its short enough.
     }
 

@@ -241,6 +241,10 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     	return (allDefinitionsCached && attributeFilter != null ? attributeFilter : super.getAttributeNames());
     }
     
+    public String[] getAttributeFilter() {
+        return attributeFilter;
+    }
+
     /**
      * constrains the available attributes. the order of the filter will be used for generic attribute evaluations.
      * 

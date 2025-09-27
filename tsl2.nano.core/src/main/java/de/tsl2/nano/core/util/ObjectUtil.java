@@ -20,6 +20,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -73,7 +74,7 @@ public class ObjectUtil extends MethodUtil {
 			CharSequence.class, String.class);
 
     @SuppressWarnings("rawtypes")
-    private static final Map<Class, Boolean> HAVING_STRING_REPRESENTATION = new HashMap<>();
+    private static final Map<Class, Boolean> HAVING_STRING_REPRESENTATION = Collections.synchronizedMap(new HashMap<>());
 
     /**
      * delegates to {@link BeanClass#copy(Object, Object)}.
@@ -368,6 +369,8 @@ public class ObjectUtil extends MethodUtil {
                         : wrapperType;
 
                 if (Class.class.isAssignableFrom(wType)) {
+                    if (value instanceof Map)
+                        value = ((Map)value).get("name");
                     return (T) BeanClass.load(
                             StringUtil.subRegex(value.toString(), "(class |name\"?\\s*[=:]\s*\"?)", "(@|\"|\\})", 0,
                                     true, false));
@@ -471,14 +474,26 @@ public class ObjectUtil extends MethodUtil {
 		return STD_IMPLEMENTATIONS.containsKey(wrapperType) ? STD_IMPLEMENTATIONS.get(wrapperType) : wrapperType;
 	}
 
-	private static boolean hasValueOfMethod(Class<?> wrapperType, Object value) {
+	public static boolean hasValueOfMethod(Class<?> type, Object arg) {
+        return hasValueOfMethod(type, arg != null ? arg.getClass() : Object.class);
+    }
+
+	public static boolean hasValueOfMethod(Class<?> type, Class<?> argType) {
 		try {
-			return wrapperType.getDeclaredMethod("valueOf", new Class[] {PrimitiveUtil.getPrimitive(value.getClass())}) != null;
-		} catch (NoSuchMethodException | SecurityException e) {
+			return getValueOfMethod(type, argType) != null;
+		} catch (Exception e) {
 			//ok, no problem
 			return false;
 		}
 	}
+
+    public static Method getValueOfMethod(Class<?> type, Class<?> argType) {
+        return getMethod(type, "valueOf", new Class[] {PrimitiveUtil.getPrimitive(argType)});
+    }
+
+    public static Object getValueOf(Class<?> type, Object arg) {
+        return trY( () -> getMethod(type, "valueOf", new Class[] {PrimitiveUtil.getPrimitive(arg.getClass())}).invoke(null, arg));
+    }
 
 	/**
      * wraps (see {@link #wrap(Object, Class)}) the given value through the castInfo information to the desired cast.
@@ -515,8 +530,9 @@ public class ObjectUtil extends MethodUtil {
             return false;
         Class<?> type = obj.getClass();
         if (!HAVING_STRING_REPRESENTATION.containsKey(type)) {
-                if (BeanClass.hasStringConstructor(type) && hasToString(type)) {
+                if (BeanClass.hasStringConstructor(type) || hasValueOfMethod(type, String.class) && hasToString(type)) {
                     try {
+                        HAVING_STRING_REPRESENTATION.put(type, false);  // -> to avoid Stackoverflow on recursion on same type
                         String representation = obj.toString();
                         Object recreation = BeanClass.createInstance(type, representation);
                         if (representation.equals(recreation.toString())) {
