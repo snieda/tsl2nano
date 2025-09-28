@@ -66,7 +66,7 @@ import de.tsl2.nano.core.util.parser.SerialClass;
  * @version $Revision$
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-@SerialClass(attributeOrder = {"attribute", "constraint", "description", "presentation", "secure", "selector"})
+@SerialClass(attributeOrder = {"attribute", "name", "description", "constraint", "presentation", "secure", "selector"})
 public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefinition<T> {
     /** serialVersionUID */
     private static final long serialVersionUID = 8690371851484504875L;

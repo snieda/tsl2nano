@@ -627,7 +627,7 @@ public class Util {
             accessible.setAccessible(true);
             return callBack.get();
         } catch (Exception ex) {
-            LOG.error("error calling " + accessible + " with " + callBack);
+            LOG.error("error calling " + accessible + " with " + callBack + ": " + ManagedException.getRootCause(ex).toString());
             return (R) ManagedException.forward(ex);
         } finally {
             accessible.setAccessible(lastAccessValue);

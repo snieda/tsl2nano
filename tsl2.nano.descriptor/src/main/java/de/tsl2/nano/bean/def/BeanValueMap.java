@@ -22,7 +22,7 @@ import de.tsl2.nano.core.util.parser.SerialClass;
  * usable to transfer any data with its presentation
  */
 @SuppressWarnings("rawtypes")
-@SerialClass(attributeOrder = {"id", "name", "clazz", "presentation", "valueExpression", "beanValues"})
+@SerialClass(attributeOrder = {"id", "name", "clazz", "instance", "presentation", "valueExpression", "attributeDefs"})
 public class BeanValueMap extends Bean<Map> {
     private static final Log LOG = LogFactory.getLog(BeanValueMap.class);
 
@@ -45,7 +45,9 @@ public class BeanValueMap extends Bean<Map> {
             for (Object k : keySet) {
                 v = map.get(k);
                 if (isOwnBeanAttribute(k)) {
-                    if (k.equals("beanValues") && v instanceof List) {
+                    if (k.equals("instance") && v instanceof Map) {
+                        bean.setInstance((Map) v);
+                    } else if (k.equals("beanValues") && v instanceof List) {
                         addAllBeanValues(bean, (List)v);
                     } else {
                         setOwnBeanAttribute(bean, (String)k, v);
@@ -62,7 +64,7 @@ public class BeanValueMap extends Bean<Map> {
     @SuppressWarnings("unchecked")
     private static void addMapValue(Bean<Map> bean, Map map, Object k, Object v) {
         bean.addAttribute(
-            new BeanValue(bean.instance,
+            new MBeanValue((String)k, bean.instance,
                 new MapValue(k, (v != null ? BeanClass.getDefiningClass(v
                     .getClass()) : null), map)));
     }
@@ -105,6 +107,41 @@ public class BeanValueMap extends Bean<Map> {
         super.setClazz(cls);
     }
 
+    @SuppressWarnings("unchecked")
+    public List<MBeanValue> getAttributeDefs() {
+        return (List<MBeanValue>)Util.untyped(super.getAttributes());
+    }
+
+    // @Override
+    @SuppressWarnings("unchecked")
+    public void setAttributeDefs(List<MBeanValue> attributes) {
+        BeanDefinition<MBeanValue> beanDef = BeanDefinition.getBeanDefinition(MBeanValue.class);
+        List<IAttribute> definedAttributes = beanDef.getAttributes();
+        attributes.forEach(a -> {
+            BeanValue bv_ = (BeanValue) getAttribute(a.getName(), false);
+            boolean addIt = bv_ == null;
+            final BeanValue bv = bv_ != null ? bv_ : a;
+
+            if (!addIt) {
+                definedAttributes.forEach(da -> {
+                    // use the filled deep structure from given beanvalues (perhaps givne by structparser)
+                    if (!Util.isSimpleType(da.getType()) && !da.getType().getPackage().getName().startsWith("java")) {
+                        
+                        Object deepValue = da.getValue(a);
+                        if (deepValue != null)
+                            da.setValue(bv, deepValue);
+                    }
+                });
+            }
+            if (bv.instance == null) {
+                bv.instance = instance;
+            }
+            if (addIt)
+                this.getAttributeDefinitions().put(bv.getName(), bv);
+        });
+        allDefinitionsCached = true;
+    }
+
     // @Override
     @SuppressWarnings("unchecked")
     public <M extends Map> Bean<M> setInstance(M instance) {
@@ -125,11 +162,5 @@ public class BeanValueMap extends Bean<Map> {
     @Override
     public void setId(Object value) {
         instance.put("id", value);
-    }
-
-    public class BeanMapValue<T> extends BeanValue<T> {
-        public BeanMapValue(Object bean, IAttribute<T> attribute) {
-            super(bean, attribute);
-        }
     }
 }

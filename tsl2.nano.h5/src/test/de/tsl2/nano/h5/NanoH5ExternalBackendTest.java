@@ -46,6 +46,7 @@ public class NanoH5ExternalBackendTest {
 
     @SuppressWarnings("rawtypes")
     @Test
+    //TODO: remove prefix from attribute names (e.g. mybean), let the submap be visible
     void testBeanMapSerialization() {
         LogFactory.setLogLevel(LogFactory.DEBUG);
         Html5Presentation.registereNanoH5Implemenations();
@@ -56,7 +57,7 @@ public class NanoH5ExternalBackendTest {
         Bean<Map> bean = Bean.getBean(instance);
 
         String json = new JSon().serialize(bean);
-        String expected = "{\"id\":\"mybean\",\"name\":\"MyBean\",\"valueExpression\":{\"attributeNames\":[\"id\"],\"comparator\":{},\"expression\":\"{id}\",\"name\":\"{id}\",\"type\":{\"name\":\"java.util.LinkedHashMap\"}},\"beanValues\":[{\"constraint\":{\"format\":\"[\\x00-\\xFF€]{0,XXX}\",\"length\":-1,\"precision\":-1,\"scale\":-1,\"type\":{\"name\":\"java.lang.String\"},\"nullable\":true},\"description\":\"mybeanid\",\"presentation\":{\"description\":\"mybeanid\",\"enabler\":\"AlwaysActive\",\"gridHeight\":0,\"gridWidth\":0,\"height\":-1,\"label\":\"Mybeanid\",\"serialversionuid\":-XXX,\"style\":4,\"type\":1,\"width\":-1,\"nesting\":false,\"searchable\":true,\"visible\":true}},{\"constraint\":{\"format\":\"[\\x00-\\xFF€]{0,XXX}\",\"length\":-1,\"precision\":-1,\"scale\":-1,\"type\":{\"name\":\"java.lang.String\"},\"nullable\":true},\"description\":\"mybeanname\",\"presentation\":{\"description\":\"mybeanname\",\"enabler\":\"AlwaysActive\",\"gridHeight\":0,\"gridWidth\":0,\"height\":-1,\"label\":\"Mybeanname\",\"serialversionuid\":-XXX,\"style\":4,\"type\":1,\"width\":-1,\"nesting\":false,\"searchable\":true,\"visible\":true}},{\"constraint\":{\"format\":{\"valueExpression\":{\"comparator\":{},\"type\":{\"name\":\"java.lang.Object\"}}},\"length\":-1,\"precision\":-1,\"scale\":-1,\"type\":{\"name\":\"java.util.LinkedHashMap\"},\"nullable\":true},\"description\":\"mybeansubmap\",\"presentation\":{\"description\":\"mybeansubmap\",\"enabler\":\"AlwaysActive\",\"gridHeight\":0,\"gridWidth\":0,\"height\":-1,\"label\":\"Mybeansubmap\",\"serialversionuid\":-XXX,\"style\":4,\"type\":XXX,\"width\":-1,\"nesting\":false,\"searchable\":true,\"visible\":true}}]}";
+        String expected = "{\"id\":\"mybean\",\"name\":\"MyBean\",\"instance\":{\"id\":\"mybean\",\"name\":\"MyBean\",\"submap\":{\"ki1\":\"vi1\"}},\"valueExpression\":{\"attributeNames\":[\"id\"],\"comparator\":{},\"expression\":\"{id}\",\"name\":\"{id}\",\"type\":{\"name\":\"java.util.LinkedHashMap\"}},\"attributeDefs\":[{\"name\":\"id\",\"description\":\"mybeanid\",\"constraint\":{\"format\":\"[\\x00-\\xFF€]{0,XXX}\",\"length\":-1,\"precision\":-1,\"scale\":-1,\"type\":{\"name\":\"java.lang.String\"},\"nullable\":true},\"presentation\":{\"description\":\"mybeanid\",\"enabler\":\"AlwaysActive\",\"gridHeight\":0,\"gridWidth\":0,\"height\":-1,\"label\":\"Mybeanid\",\"serialversionuid\":-XXX,\"style\":4,\"type\":1,\"width\":-1,\"nesting\":false,\"searchable\":true,\"visible\":true}},{\"name\":\"name\",\"description\":\"mybeanname\",\"constraint\":{\"format\":\"[\\x00-\\xFF€]{0,XXX}\",\"length\":-1,\"precision\":-1,\"scale\":-1,\"type\":{\"name\":\"java.lang.String\"},\"nullable\":true},\"presentation\":{\"description\":\"mybeanname\",\"enabler\":\"AlwaysActive\",\"gridHeight\":0,\"gridWidth\":0,\"height\":-1,\"label\":\"Mybeanname\",\"serialversionuid\":-XXX,\"style\":4,\"type\":1,\"width\":-1,\"nesting\":false,\"searchable\":true,\"visible\":true}},{\"name\":\"submap\",\"description\":\"mybeansubmap\",\"constraint\":{\"format\":{\"valueExpression\":{\"comparator\":{},\"type\":{\"name\":\"java.lang.Object\"}}},\"length\":-1,\"precision\":-1,\"scale\":-1,\"type\":{\"name\":\"java.util.LinkedHashMap\"},\"nullable\":true},\"presentation\":{\"description\":\"mybeansubmap\",\"enabler\":\"AlwaysActive\",\"gridHeight\":0,\"gridWidth\":0,\"height\":-1,\"label\":\"Mybeansubmap\",\"serialversionuid\":-XXX,\"style\":4,\"type\":XXX,\"width\":-1,\"nesting\":false,\"searchable\":true,\"visible\":true}}]}";
         
         assertEquals(ignoreSome(expected), ignoreSome(json));
 
@@ -67,7 +68,12 @@ public class NanoH5ExternalBackendTest {
         // assertArrayEquals(bean.getAttributeNames(), rbean.getAttributeNames());
         // assertEquals(bean.getBeanValues(), rbean.getBeanValues());
 
-        // assertEquals(ignoreSome(json), ignoreSome(new JSon().serialize(rbean)));
+        //WORKAROUND: on submap the format is different....
+        bean.getAttribute("submap").getConstraint().setFormat(null);
+        rbean.getAttribute("submap").getConstraint().setFormat(null);
+        json = new JSon().serialize(bean);
+        
+        assertEquals(ignoreSome(json), ignoreSome(new JSon().serialize(rbean)));
     }
 
     private String ignoreSome(String str) {
