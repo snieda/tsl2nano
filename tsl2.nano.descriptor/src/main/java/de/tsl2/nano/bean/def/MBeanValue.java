@@ -19,9 +19,10 @@ public class MBeanValue<T> extends BeanValue<T> {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public MBeanValue(String name, Map instance, MapValue mapValue) {
+    public MBeanValue(Object name, Map instance, MapValue mapValue) {
         super(instance, mapValue);
-        setName(name);
+        if (name != null)
+        setName(name.toString());
     }
 
     @Override

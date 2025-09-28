@@ -64,7 +64,7 @@ public class BeanValueMap extends Bean<Map> {
     @SuppressWarnings("unchecked")
     private static void addMapValue(Bean<Map> bean, Map map, Object k, Object v) {
         bean.addAttribute(
-            new MBeanValue((String)k, bean.instance,
+            new MBeanValue(k, bean.instance,
                 new MapValue(k, (v != null ? BeanClass.getDefiningClass(v
                     .getClass()) : null), map)));
     }

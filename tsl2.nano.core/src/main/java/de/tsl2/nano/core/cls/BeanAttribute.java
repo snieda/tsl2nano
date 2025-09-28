@@ -193,7 +193,7 @@ public class BeanAttribute<T> implements IAttribute<T> {
     @SuppressWarnings("unchecked")
     Method getWriteAccessMethod(Method readAccessMethod, Class declaringClass) {
         boolean isExtension = false;
-        if (writeAccessMethod == null || (isExtension=!readAccessMethod.getDeclaringClass().equals(declaringClass))) {
+        if (writeAccessMethod == null || (readAccessMethod != null) && (isExtension=!readAccessMethod.getDeclaringClass().equals(declaringClass))) {
             assert isGetterMethod(readAccessMethod) : "method has to start with " + PREFIX_READ_ACCESS;
             //use the generic name through readAccessMethod, because extension may override getName() returning a presentation name.
             final String attributeName = getName(readAccessMethod);
@@ -332,7 +332,7 @@ public class BeanAttribute<T> implements IAttribute<T> {
         Class<?> extensionOfDeclaringClass = beanInstance != null ? beanInstance.getClass() : getDeclaringClass();
         if (hasWriteAccess(extensionOfDeclaringClass)) {
             //String --> File(String) etc.
-            if (value != null && !readAccessMethod.getReturnType().isAssignableFrom(value.getClass()))
+            if (value != null && (readAccessMethod != null && !readAccessMethod.getReturnType().isAssignableFrom(value.getClass())))
                 value = wrap(value);
             //on primitive it is not possible to set a null value - we ignore setValue(null)
             if (!(getType().isPrimitive() && value == null)) {
