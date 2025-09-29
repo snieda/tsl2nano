@@ -38,6 +38,12 @@
 					</exclusion>
 			    </exclusions>
 		</dependency>
+		<!-- since JDK > 17, the internal crypto with 'sun.security.x509' is not available anymore -->
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcpkix-jdk15to18</artifactId>
+			<version>1.82</version>
+		</dependency>
 		<dependency>
 			<groupId>org.glassfish</groupId>
 			<artifactId>javax.json</artifactId>

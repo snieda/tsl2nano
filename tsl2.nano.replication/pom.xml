@@ -100,11 +100,22 @@
 		    <version>${jmockit.version}</version>
 			<scope>test</scope>
 		</dependency> -->
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
 			<version>5.13.0</version>
 			<scope>test</scope>
+		</dependency> -->
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<version>5.18.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.bytebuddy</groupId>
+			<artifactId>byte-buddy</artifactId>
+			<version>1.17.7</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

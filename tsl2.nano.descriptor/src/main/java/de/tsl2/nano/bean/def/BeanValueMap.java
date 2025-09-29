@@ -80,7 +80,7 @@ public class BeanValueMap extends Bean<Map> {
     }
 
     private static boolean isOwnBeanAttribute(Object k) {
-        if (COMMON_ATTRIBUTES.contains(k))
+        if (!(k instanceof String) || COMMON_ATTRIBUTES.contains(k))
             return false;
         BeanDefinition<BeanValueMap> def = BeanDefinition.getBeanDefinition(BeanValueMap.class);
         return Arrays.asList(def.getAttributeNames()).contains(k);

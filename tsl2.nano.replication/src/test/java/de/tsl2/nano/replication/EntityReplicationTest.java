@@ -22,6 +22,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 //import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockedConstruction;
@@ -29,6 +30,9 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.SupplierExVoid;
@@ -49,6 +53,8 @@ import de.tsl2.nano.replication.util.SimpleTransformer;
 // import mockit.integration.junit4.JMockit;
 
 // @RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class EntityReplicationTest implements ENVTestPreparation {
 	@Mock
 	EntityManagerFactory entityManagerFactory;

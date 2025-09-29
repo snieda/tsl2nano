@@ -42,8 +42,10 @@ public class CoreTest implements ENVTestPreparation {
         System.out.println(Policy.getPolicy());
         //setze SecurityManager/Policy zurück
         BeanClass.call(AppLoader.class, "noSecurity", false);
-        assertTrue(System.getSecurityManager() == null);
-        assertTrue(Policy.getPolicy().toString().contains("all-permissions"));
+
+		// securitymanager and policy will be removed (without replacement!) on JDK >= 18
+        // assertTrue(System.getSecurityManager() == null);
+        // assertTrue(Policy.getPolicy().toString() + " should contain: \"all-permissions\"", Policy.getPolicy().toString().contains("all-permissions"));
     }
 
     @Test

@@ -424,6 +424,15 @@ public class AppLoader {
     public static final boolean isJdkOracle() {
         return System.getProperty("java.vm.vendor").contains("Oracle");
     }
+
+    public static final boolean isJdkVersionHigherAs(String version) {
+        return System.getProperty("java.runtime.version").compareTo(version) > 0;
+    }
+
+    public static final boolean isJdkVersionLowerAs(String version) {
+        return System.getProperty("java.runtime.version").compareTo(version) < 0;
+    }
+
     public static final boolean isOpenJDK() {
         return System.getProperty("java.vm.name").contains("OpenJDK");
     }

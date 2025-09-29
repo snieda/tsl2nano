@@ -205,9 +205,11 @@
 					<encoding>${project.build.sourceEncoding}</encoding>
                     <compilerArgs>
 						<!-- <arg>-verbose</arg> -->
-                        <arg>--add-exports</arg><arg>java.base/sun.security.x509=ALL-UNNAMED</arg>
+                        <arg>--add-opens</arg><arg>java.base/jdk.internal.module=ALL-UNNAMED</arg>
                         <arg>--add-exports</arg><arg>java.base/jdk.internal.module=ALL-UNNAMED</arg>
-						<arg>--add-exports</arg><arg>java.base/sun.security.x509=ALL-UNNAMED</arg>
+                        <!-- 
+						<arg>add-exports</arg><arg>java.base/sun.security.x509=ALL-UNNAMED</arg>
+						<arg>add-exports</arg><arg>java.base/sun.security.x509=ALL-UNNAMED</arg> -->
                     </compilerArgs>                  
 				</configuration>
 			</plugin>

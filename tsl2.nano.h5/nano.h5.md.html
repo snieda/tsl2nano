@@ -5295,7 +5295,7 @@ If you need to send an email to a (database) registered customer, that has to be
  2.5.6  | 04.05.2025 | h5:+CMSBean, +admin: provide sample applications, prod/admin switch, adding users, layout: additional left/right panels and info menu
  2.5.7  | 25.05.2025 | hotfix: running on android, windows, fixes on openapi, sampleapplications, OSSRH -> maven central portal
  2.5.8  | 04.07.2025 | nosql support: +hibernate-omg-5.4.2, jarresolver maven load fix, CMSBean/Bean fix
- 2.5.9  | 31.12.2025 | RESTDynamic:+health, script jsonschema2pojo, New: ExternalBackend, DetachedBean
+ 2.5.9  | 31.12.2025 | RESTDynamic:+health, script jsonschema2pojo, New: ExternalBackend, DetachedBean: BeanValueMap, PKI (sun.security -> bouncycastle)
 |------ | ---------- | -----------
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
@@ -6615,7 +6615,6 @@ Cursus:
 * [ ] reverse-eng.xml ant script: hibernate.reveng.xml with DTD load fails offline
 * [-] check to add jakarta nosql as persistence provider
    * [-] perhaps provide an EntityManager implementation covering jakarta-nosql
-* [ ] to be compilable on jdk <= 20, change the setter methods of sun.security.x509.X509Cert* in class PKI in core module
 * [x] include hibernate-ogm to use nosql databases through jpa persistence layer (project stopped already, final version 5.4.2) 
 * [v] wrong offlinemode=false on nanoh5 ENV.load(...)
 * [v] autoddl not usable on both (hibtools and ogm)
@@ -6623,10 +6622,10 @@ Cursus:
 * [ ] jarresolver is not able to download definition from sourceforge
 * [-] provide specification actions to e.g. send an email etc
 * [x] add maven script to call jsonschema2pojo to generate bean classes
-* [ ] provide implementation to get and navigate only through data given by rest calls with de-/serialized tsl2nano beans
+* [x] provide implementation to get and navigate only through data given by rest calls with de-/serialized tsl2nano beans
    * [ ] add new login with bearer token and jwt holding the service url
-   * [ ] extend or override nanoh5/nanoh5session through rest call results (on tsl2nano beans)
-   * [ ] extend tsl2nano beans to de-/serialize including its values
+   * [x] extend or override nanoh5/nanoh5session through rest call results (on tsl2nano beans)
+   * [v] extend tsl2nano beans to de-/serialize including its values
    * [ ] use de-/serialization for json through own serializer or jackson
    * [x] new subclass 'NanoH5ExternalBackend' 
       * [x] providing check of ENV property 'app.externalBackendUrl'
@@ -6635,11 +6634,15 @@ Cursus:
          * [ ] deserialize response bean and start a session. all following actions are defined by this bean
       * [ ] provide a default implementaion as backend service to be used by itself
    * [ ] swagger json to define the backend service with a payload of json serialized Bean<Map>  
-   * [ ] Bean<Map> (mapOfMaps) coming from external service through json
-      * [ ] bean instance may be a simple untyped mapOfMaps through json (parts already implemented in Bean class)
-      * [ ] bean attribute values reference this map of maps through a path expression, or get directly simple values 
+   * [v] Bean<Map> (mapOfMaps) coming from external service through json
+      * [v] new BeanValueMap: bean instance may be a simple untyped mapOfMaps through json (parts already implemented in Bean class)
+      * [v] bean attribute values reference this map of maps through a path expression, or get directly simple values 
    * [ ] perhaps get data encapsulated through a REST Beancontainer?
    * [ ] Documentation for external backend
 * [x] provide a health endpoint (with ENV.buildinfo)
-* [ ] migrate to jdk 21
-* [ ] migrate sun.internals
+* [x] migrate to be comilable on jdk 25
+   * [x] tests on h5 not working in cause of:
+      * [ ] failing to load scripting engine
+      * [ ] linkedlist in proxy extension TransformingIterable not working with: List, Deque
+      * [ ] NanoH5Test: IAttributeDefinition.getColumnDefinition()" is null
+   * [v] migrate sun.internals to java.security.cert using bouncy-castle in PKI to be compilable on JDK >= 18

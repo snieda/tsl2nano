@@ -14,11 +14,9 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
-import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.Key;
 import java.security.KeyFactory;
@@ -28,7 +26,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.SecureRandom;
+import java.security.Security;
 import java.security.Signature;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertPath;
@@ -60,7 +58,25 @@ import java.util.Set;
 
 import javax.net.ssl.KeyManagerFactory;
 
+// import sun.security.x509.AlgorithmId;
+// import sun.security.x509.CertificateAlgorithmId;
+// import sun.security.x509.CertificateSerialNumber;
+// import sun.security.x509.CertificateValidity;
+// import sun.security.x509.CertificateVersion;
+// import sun.security.x509.CertificateX509Key;
+// import sun.security.x509.X500Name;
+// import sun.security.x509.X509CertImpl;
+// import sun.security.x509.X509CertInfo;
+
 import org.apache.commons.logging.Log;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
 import de.tsl2.nano.core.Argumentator;
 import de.tsl2.nano.core.ManagedException;
@@ -68,15 +84,6 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.Util;
-import sun.security.x509.AlgorithmId;
-import sun.security.x509.CertificateAlgorithmId;
-import sun.security.x509.CertificateSerialNumber;
-import sun.security.x509.CertificateValidity;
-import sun.security.x509.CertificateVersion;
-import sun.security.x509.CertificateX509Key;
-import sun.security.x509.X500Name;
-import sun.security.x509.X509CertImpl;
-import sun.security.x509.X509CertInfo;
 
 /** <pre>
  * Public Key Infrastructure. creates and verifies Certificate Paths, by 
@@ -127,6 +134,11 @@ public class PKI {
 	private static final String KEYSTORE_TYPE = System.getProperty("tsl2nano.pki.keystore.type", "PKCS12");
 	private static final String HASHSIGN_ALG = System.getProperty("tsl2nano.pki.hashsign.algorithm", "SHA256withRSA");
 
+    private static final BouncyCastleProvider PROVIDER = new BouncyCastleProvider();
+    static {
+        Security.addProvider(PROVIDER);
+    }    
+
     public PKI(PublicKey key, DistinguishedName issuer) {
     	this(new KeyPair(key, null), issuer);
     }
@@ -167,36 +179,63 @@ public class PKI {
      * @param days      days until expiring
      * @param algorithm the signing algorithm, eg "SHA256withRSA"
      */
-    @SuppressWarnings("restriction")
-	public X509Certificate generateCertificate(String dn, KeyPair pair, int days, String algorithm)
-            throws GeneralSecurityException, IOException {
-        PrivateKey privkey = pair.getPrivate();
-        X509CertInfo info = new X509CertInfo();
-        Date from = new Date();
-        Date to = new Date(from.getTime() + days * 86400000l);
-        CertificateValidity interval = new CertificateValidity(from, to);
-        BigInteger sn = new BigInteger(64, new SecureRandom());
-        X500Name owner = new X500Name(dn);
+    // sun.security not available in JDK >17
+    // @SuppressWarnings("restriction")
+	// public X509Certificate generateCertificate(String dn, KeyPair pair, int days, String algorithm)
+    //         throws GeneralSecurityException, IOException {
+    //     PrivateKey privkey = pair.getPrivate();
+    //     X509CertInfo info = new X509CertInfo();
+    //     Date from = new Date();
+    //     Date to = new Date(from.getTime() + days * 86400000l);
+    //     CertificateValidity interval = new CertificateValidity(from, to);
+    //     BigInteger sn = new BigInteger(64, new SecureRandom());
+    //     X500Name owner = new X500Name(dn);
 
-        info.set(X509CertInfo.VALIDITY, interval);
-        info.set(X509CertInfo.SERIAL_NUMBER, new CertificateSerialNumber(sn));
-        info.set(X509CertInfo.SUBJECT, owner);
-        info.set(X509CertInfo.ISSUER, owner);
-        info.set(X509CertInfo.KEY, new CertificateX509Key(pair.getPublic()));
-        info.set(X509CertInfo.VERSION, new CertificateVersion(CertificateVersion.V3));
-        AlgorithmId algo = AlgorithmId.get("MD5withRSA");
-        info.set(X509CertInfo.ALGORITHM_ID, new CertificateAlgorithmId(algo));
+    //     info.set(X509CertInfo.VALIDITY, interval);
+    //     info.set(X509CertInfo.SERIAL_NUMBER, new CertificateSerialNumber(sn));
+    //     info.set(X509CertInfo.SUBJECT, owner);
+    //     info.set(X509CertInfo.ISSUER, owner);
+    //     info.set(X509CertInfo.KEY, new CertificateX509Key(pair.getPublic()));
+    //     info.set(X509CertInfo.VERSION, new CertificateVersion(CertificateVersion.V3));
+    //     AlgorithmId algo = AlgorithmId.get("MD5withRSA");
+    //     info.set(X509CertInfo.ALGORITHM_ID, new CertificateAlgorithmId(algo));
 
-        // Sign the cert to identify the algorithm that's used.
-        X509CertImpl cert = new X509CertImpl(info);
-        cert.sign(privkey, algorithm);
+    //     // Sign the cert to identify the algorithm that's used.
+    //     X509CertImpl cert = new X509CertImpl(info);
+    //     cert.sign(privkey, algorithm);
 
-        // Update the algorith, and resign.
-        algo = (AlgorithmId) cert.get(X509CertImpl.SIG_ALG);
-        info.set(CertificateAlgorithmId.NAME + "." + CertificateAlgorithmId.ALGORITHM, algo);
-        cert = new X509CertImpl(info);
-        cert.sign(privkey, algorithm);
-        return cert;
+    //     // Update the algorith, and resign.
+    //     algo = (AlgorithmId) cert.get(X509CertImpl.SIG_ALG);
+    //     info.set(CertificateAlgorithmId.NAME + "." + CertificateAlgorithmId.ALGORITHM, algo);
+    //     cert = new X509CertImpl(info);
+    //     cert.sign(privkey, algorithm);
+    //     return cert;
+    // }
+
+    // using BouncyCastle for JDK>=18
+	public Certificate generateCertificate(String dn, KeyPair keyPair, int days, String algorithm) {
+        try {
+            SubjectPublicKeyInfo subPubKeyInfo = SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded());
+            Date validFrom = new Date();
+            Date validTo = new Date(validFrom.getTime() + days * 86400000l);
+            X509v3CertificateBuilder certBuilder = new X509v3CertificateBuilder(
+                new X500Name(dn), //CA
+                BigInteger.ONE,
+                validFrom,
+                validTo,
+                new X500Name(dn), //Self-Signer
+                subPubKeyInfo
+            );
+            ContentSigner signer = new JcaContentSignerBuilder("SHA256WithRSA")
+                .setProvider(new BouncyCastleProvider())
+                .build(keyPair.getPrivate());
+            return new JcaX509CertificateConverter()
+                .setProvider(PROVIDER)
+                .getCertificate(certBuilder.build(signer));
+        } catch (OperatorCreationException | CertificateException e) {
+            ManagedException.forward(e);
+            return null;
+        }
     }
 
     /**

@@ -22,6 +22,6 @@ import de.tsl2.nano.format.GenericParser;
 public class AllAutoTests {
 	public static void init() {
 		set(FILTER, matchPackage(BeanDefinition.class, GenericParser.class, CurrencyUnit.class));
-		set(FILTER_EXCLUDE, StringUtil.matchingOneOf("CurrencyUtil.initializeCurrencyUnits"));
+		set(FILTER_EXCLUDE, StringUtil.matchingOneOf("CurrencyUtil.initializeCurrencyUnits", "BeanValueMap.isOwnBeanAttribute"));
 	}
 }

@@ -1,12 +1,11 @@
 package de.tsl2.nano.core.secure;
 
-import java.io.IOException;
-
 import javax.security.auth.x500.X500Principal;
 
-import de.tsl2.nano.core.ManagedException;
+import org.bouncycastle.asn1.x500.X500Name;
+
 import de.tsl2.nano.core.util.Util;
-import sun.security.x509.X500Name;
+// import sun.security.x509.X500Name;
 
 /**
  * creates an object to be used as issuer or subject for certificates. for specification see
@@ -174,14 +173,14 @@ public class DistinguishedName {
         return (outputSimpleValuesOnly ? "" : "EMAILADDRESS=") + email;
     }
 
-    public Object toX500Name() {
-        try {
-            return new X500Name(toString());
-        } catch (IOException e) {
-            ManagedException.forward(e);
-            return null;
-        }
-    }
+    // public Object toX500Name() {
+    //     try {
+    //         return new X500Name(toString());
+    //     } catch (IOException e) {
+    //         ManagedException.forward(e);
+    //         return null;
+    //     }
+    // }
 
     public X500Principal toX500Principal() {
         return new X500Principal(toString());

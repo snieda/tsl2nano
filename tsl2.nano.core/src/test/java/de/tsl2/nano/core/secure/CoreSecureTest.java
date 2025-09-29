@@ -144,7 +144,7 @@ public class CoreSecureTest implements ENVTestPreparation {
         assertTrue(to.hashCode() != to1.hashCode());
         assertNotEquals(to, to1);
         assertNotEquals(to.toString(), to1.toString());
-        assertNotEquals(to.toX500Name(), to1.toX500Name());
+        // assertNotEquals(to.toX500Name(), to1.toX500Name());
         assertNotEquals(to.toX500Principal(), to1.toX500Principal());
     }
 }
