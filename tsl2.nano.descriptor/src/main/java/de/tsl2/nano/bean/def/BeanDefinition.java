@@ -1064,7 +1064,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         return beandef;
     }
 
-    private static int getIndexOf(String name, Class type) {
+    protected static int getIndexOf(String name, Class type) {
         volatileBean.name = name;
         //TODO: think about using a structure through package path on file system
         int i = virtualBeanCache.indexOf(volatileBean);

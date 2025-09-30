@@ -457,7 +457,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
             if (description != null) {
                 return description;
             } else if (getName() != null){
-                return StringUtil.toString(getParent()) + getName();
+                return getParent().getId() + "." + getName();
             } else {
                 return BeanUtil.createUUID();
             }
@@ -703,6 +703,15 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
     	this.constraint = newConstraint;
     }
     
+    /**
+     * only for internal use!
+     * provides to replace a saved and edited configuration with a current attribute instance (e.g.: MapValue)
+     * @param newAttribute new attribute
+     */
+    void replaceAttribute(IAttribute newAttribute) {
+        this.attribute = newAttribute; 
+    }
+
 	public static int removeFromCache(Bean<?> bean) {
 		List<BeanValue<?>> beanValues = bean.getBeanValues();
 		int c = 0;

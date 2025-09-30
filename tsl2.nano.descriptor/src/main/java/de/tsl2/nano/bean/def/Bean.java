@@ -807,7 +807,7 @@ public class Bean<T> extends BeanDefinition<T> {
         } else if (instanceOrName.getClass().isArray()) {
             bean = createArrayBean(instanceOrName);
         } else if (Map.class.isAssignableFrom(instanceOrName.getClass())) {
-            bean = (Bean<I>) createMapBean((Map)instanceOrName);
+            bean = createMapBean(instanceOrName, cacheInstance);
         } else if (Entry.class.isAssignableFrom(instanceOrName.getClass())) {
             BeanDefinition<I> beandef =
                 getBeanDefinition((Class<I>) BeanClass.getDefiningClass(instanceOrName.getClass()));
@@ -850,6 +850,24 @@ public class Bean<T> extends BeanDefinition<T> {
         return bean;
     }
 
+    private static <I> Bean<I> createMapBean(I instanceOrName, boolean cacheInstance) {
+        Bean<I> bean;
+        Map instance = (Map) instanceOrName;
+        Object name = instance.get("name");
+        if (name != null && getIndexOf(name.toString(), Map.class) != -1) {
+            BeanDefinition<I> beandef = (BeanDefinition<I>) getBeanDefinition(name.toString());
+            bean = createBean((I)instance, beandef, (Bean<I>)new BeanValueMap(instance));
+        } else {
+            bean = (Bean<I>) new BeanValueMap(instance);
+            //must be cached to avoid stackoverflow on Bean.getBean(...)
+            if (cacheInstance && ENV.get("bean.use.cache", true)) {
+                timedCache.put(instanceOrName, bean);
+            }
+            bean.saveDefinition();
+        }
+        return bean;
+    }
+
     public static boolean canWrap(Object obj) {
     	return !Util.isContainer(obj) || obj instanceof Map || obj.getClass().isArray();
     }
@@ -872,10 +890,6 @@ public class Bean<T> extends BeanDefinition<T> {
             bean.addAttribute(new BeanValue(bean.instance, new ArrayValue("a" + i, i)));
         }
         return bean;
-    }
-
-    private static Bean<Map> createMapBean(Map map) {
-        return new BeanValueMap(map);
     }
 
     /**

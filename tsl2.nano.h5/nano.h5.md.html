@@ -6633,16 +6633,17 @@ Cursus:
          * [ ] send a request to backend service with authentication/authorization
          * [ ] deserialize response bean and start a session. all following actions are defined by this bean
       * [ ] provide a default implementaion as backend service to be used by itself
+         * [ ] how to compose BeanValueMap through given BeanDefinition?
    * [ ] swagger json to define the backend service with a payload of json serialized Bean<Map>  
    * [v] Bean<Map> (mapOfMaps) coming from external service through json
       * [v] new BeanValueMap: bean instance may be a simple untyped mapOfMaps through json (parts already implemented in Bean class)
       * [v] bean attribute values reference this map of maps through a path expression, or get directly simple values 
-   * [ ] perhaps get data encapsulated through a REST Beancontainer?
+   * [-] perhaps get data encapsulated through a REST Beancontainer?
    * [ ] Documentation for external backend
 * [x] provide a health endpoint (with ENV.buildinfo)
 * [x] migrate to be comilable on jdk 25
+   * [v] migrate sun.internals to java.security.cert using bouncy-castle in PKI to be compilable on JDK >= 18
    * [x] tests on h5 not working in cause of:
       * [ ] failing to load scripting engine
       * [ ] linkedlist in proxy extension TransformingIterable not working with: List, Deque
       * [ ] NanoH5Test: IAttributeDefinition.getColumnDefinition()" is null
-   * [v] migrate sun.internals to java.security.cert using bouncy-castle in PKI to be compilable on JDK >= 18

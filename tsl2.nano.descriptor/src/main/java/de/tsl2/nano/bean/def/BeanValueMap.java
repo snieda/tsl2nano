@@ -63,10 +63,17 @@ public class BeanValueMap extends Bean<Map> {
 
     @SuppressWarnings("unchecked")
     private static void addMapValue(Bean<Map> bean, Map map, Object k, Object v) {
-        bean.addAttribute(
-            new MBeanValue(k, bean.instance,
-                new MapValue(k, (v != null ? BeanClass.getDefiningClass(v
-                    .getClass()) : null), map)));
+        String name = k.toString();
+        MapValue mapValue = new MapValue(name, (v != null ? BeanClass.getDefiningClass(v.getClass()) : null), map);
+        BeanValue existingBeanValue = bean.hasAttribute(name) ? (BeanValue)bean.getAttribute(name) : null;
+        
+        if (existingBeanValue != null) {
+            // TODO: use an instanceof MBeanValue to not lose the 'name' field
+            existingBeanValue.replaceAttribute(mapValue);
+        } else {
+            bean.addAttribute(new MBeanValue(name, bean.instance, mapValue));
+        }
+        ((BeanValue)bean.getAttribute(name)).setParent(bean);
     }
 
     private static void addAllBeanValues(Bean<Map> bean, List mappedBeanValues) {

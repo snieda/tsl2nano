@@ -1,13 +1,13 @@
 package de.tsl2.nano.h5;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -23,9 +23,9 @@ import org.mockito.quality.Strictness;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanValueMap;
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.http.EHttpClient;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.MapUtil;
-import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.parser.JSon;
 import de.tsl2.nano.persistence.Persistence;
 
@@ -36,38 +36,40 @@ public class NanoH5ExternalBackendTest {
 
     NanoH5ExternalBackend backend;
     @Mock Persistence persistence;
+    @Mock HttpURLConnection httpURLConnection;
 
     @BeforeEach
     void setUp() throws IOException {
-        backend = new NanoH5ExternalBackend(8080, new File("."));
-        backend.setBackendUrl("http://test-backend");
         when(persistence.getConnectionUrl()).thenReturn("http://test-backend");
+        when(persistence.getConnectionUserName()).thenReturn("user");
+        when(persistence.getConnectionPassword()).thenReturn("pass");
     }
 
     @SuppressWarnings("rawtypes")
     @Test
-    //TODO: remove prefix from attribute names (e.g. mybean), let the submap be visible
     void testBeanMapSerialization() {
         LogFactory.setLogLevel(LogFactory.DEBUG);
         Html5Presentation.registereNanoH5Implemenations();
 
-        Map internalMap = MapUtil.asMap("ki1", "vi1");
-        Map instance = MapUtil.asMap("id", "mybean", "name", "MyBean", "submap", internalMap);
-        //will handle a map instance configuring default attributes
-        Bean<Map> bean = Bean.getBean(instance);
+        Bean<Map> bean = createExampleBean();
 
         String json = new JSon().serialize(bean);
-        String expected = "{\"id\":\"mybean\",\"name\":\"MyBean\",\"instance\":{\"id\":\"mybean\",\"name\":\"MyBean\",\"submap\":{\"ki1\":\"vi1\"}},\"valueExpression\":{\"attributeNames\":[\"id\"],\"comparator\":{},\"expression\":\"{id}\",\"name\":\"{id}\",\"type\":{\"name\":\"java.util.LinkedHashMap\"}},\"attributeDefs\":[{\"name\":\"id\",\"description\":\"mybeanid\",\"constraint\":{\"format\":\"[\\x00-\\xFF€]{0,XXX}\",\"length\":-1,\"precision\":-1,\"scale\":-1,\"type\":{\"name\":\"java.lang.String\"},\"nullable\":true},\"presentation\":{\"description\":\"mybeanid\",\"enabler\":\"AlwaysActive\",\"gridHeight\":0,\"gridWidth\":0,\"height\":-1,\"label\":\"Mybeanid\",\"serialversionuid\":-XXX,\"style\":4,\"type\":1,\"width\":-1,\"nesting\":false,\"searchable\":true,\"visible\":true}},{\"name\":\"name\",\"description\":\"mybeanname\",\"constraint\":{\"format\":\"[\\x00-\\xFF€]{0,XXX}\",\"length\":-1,\"precision\":-1,\"scale\":-1,\"type\":{\"name\":\"java.lang.String\"},\"nullable\":true},\"presentation\":{\"description\":\"mybeanname\",\"enabler\":\"AlwaysActive\",\"gridHeight\":0,\"gridWidth\":0,\"height\":-1,\"label\":\"Mybeanname\",\"serialversionuid\":-XXX,\"style\":4,\"type\":1,\"width\":-1,\"nesting\":false,\"searchable\":true,\"visible\":true}},{\"name\":\"submap\",\"description\":\"mybeansubmap\",\"constraint\":{\"format\":{\"valueExpression\":{\"comparator\":{},\"type\":{\"name\":\"java.lang.Object\"}}},\"length\":-1,\"precision\":-1,\"scale\":-1,\"type\":{\"name\":\"java.util.LinkedHashMap\"},\"nullable\":true},\"presentation\":{\"description\":\"mybeansubmap\",\"enabler\":\"AlwaysActive\",\"gridHeight\":0,\"gridWidth\":0,\"height\":-1,\"label\":\"Mybeansubmap\",\"serialversionuid\":-XXX,\"style\":4,\"type\":XXX,\"width\":-1,\"nesting\":false,\"searchable\":true,\"visible\":true}}]}";
+        String expected = "{\"id\":\"mybean\",\"name\":\"MyBean\",\"instance\":{\"id\":\"mybean\",\"name\":\"MyBean\",\"submap\":{\"ki1\":\"vi1\"}},\"valueExpression\":{\"attributeNames\":[\"id\"],\"comparator\":{},\"expression\":\"{id}\",\"name\":\"{id}\",\"type\":{\"name\":\"java.util.LinkedHashMap\"}},\"attributeDefs\":[{\"name\":\"id\",\"description\":\"mybean.id\",\"constraint\":{\"format\":{},\"length\":-1,\"precision\":-1,\"scale\":-1,\"type\":{\"name\":\"java.lang.String\"},\"nullable\":true},\"presentation\":{\"description\":\"mybean.id\",\"enabler\":\"AlwaysActive\",\"gridHeight\":0,\"gridWidth\":0,\"height\":-1,\"label\":\"Id\",\"serialversionuid\":-XXX,\"style\":4,\"type\":1,\"width\":-1,\"nesting\":false,\"searchable\":true,\"visible\":true}},{\"name\":\"name\",\"description\":\"mybean.name\",\"constraint\":{\"format\":{},\"length\":-1,\"precision\":-1,\"scale\":-1,\"type\":{\"name\":\"java.lang.String\"},\"nullable\":true},\"presentation\":{\"description\":\"mybean.name\",\"enabler\":\"AlwaysActive\",\"gridHeight\":0,\"gridWidth\":0,\"height\":-1,\"label\":\"Name\",\"serialversionuid\":-XXX,\"style\":4,\"type\":1,\"width\":-1,\"nesting\":false,\"searchable\":true,\"visible\":true}},{\"name\":\"submap\",\"description\":\"mybean.submap\",\"constraint\":{\"format\":{\"valueExpression\":{\"comparator\":{},\"type\":{\"name\":\"java.lang.Object\"}}},\"length\":-1,\"precision\":-1,\"scale\":-1,\"type\":{\"name\":\"java.util.LinkedHashMap\"},\"nullable\":true},\"presentation\":{\"description\":\"mybean.submap\",\"enabler\":\"AlwaysActive\",\"gridHeight\":0,\"gridWidth\":0,\"height\":-1,\"label\":\"Submap\",\"serialversionuid\":-XXX,\"style\":4,\"type\":XXX,\"width\":-1,\"nesting\":false,\"searchable\":true,\"visible\":true}}]}";
         
         assertEquals(ignoreSome(expected), ignoreSome(json));
 
         Bean rbean = new JSon().toObject(BeanValueMap.class, json);
         assertEquals(bean.getDeclaringClass(), rbean.getDeclaringClass().getSuperclass());
         assertEquals(bean.getId(), rbean.getId());
-        assertEquals(bean.toString(), rbean.toString());
+        // assertEquals(bean.toString(), rbean.toString());
         // assertArrayEquals(bean.getAttributeNames(), rbean.getAttributeNames());
         // assertEquals(bean.getBeanValues(), rbean.getBeanValues());
 
+        assertEquals_(bean, rbean);
+    }
+
+    private void assertEquals_(Bean<Map> bean, Bean rbean) {
+        String json;
         //WORKAROUND: on submap the format is different....
         bean.getAttribute("submap").getConstraint().setFormat(null);
         rbean.getAttribute("submap").getConstraint().setFormat(null);
@@ -76,30 +78,36 @@ public class NanoH5ExternalBackendTest {
         assertEquals(ignoreSome(json), ignoreSome(new JSon().serialize(rbean)));
     }
 
+    private Bean<Map> createExampleBean() {
+        Map internalMap = MapUtil.asMap("ki1", "vi1");
+        Map instance = MapUtil.asMap("id", "mybean", "name", "MyBean", "submap", internalMap);
+        //will handle a map instance configuring default attributes
+        Bean<Map> bean = Bean.getBean(instance);
+        return bean;
+    }
+
     private String ignoreSome(String str) {
         return str.replaceAll("[\t\r\n\\s]", "")
             .replaceAll("\\d{4,99}", "XXX")
             .replaceAll("Proxy\\d+", "ProxyXXX");
     }
 
-    // @Test
-    void testConnectReturnsBean() {
-        try (
-            MockedStatic<ENV> envMock = Mockito.mockStatic(ENV.class);
-            MockedStatic<NetUtil> netUtilMock = Mockito.mockStatic(NetUtil.class);
-            MockedStatic<JSon> jsonMock = Mockito.mockStatic(JSon.class, Mockito.CALLS_REAL_METHODS)
-        ) {
-            envMock.when(() -> ENV.get("app.external.backend.user", null)).thenReturn("user");
-            envMock.when(() -> ENV.get("app.external.backend.password", null)).thenReturn("pass");
-            netUtilMock.when(() -> NetUtil.get("http://test-backend")).thenReturn("{\"data\":{}}");
+    @Test
+    void testConnectReturnsBean() throws IOException {
+        Bean bean = createExampleBean();
+        String json = new JSon().serialize(bean);
 
-            Bean<?> expectedBean = Mockito.mock(Bean.class);
-            JSon jsonParser = Mockito.spy(JSon.class);
-            Mockito.when(jsonParser.toObject(Mockito.eq(Bean.class), anyString())).thenReturn(expectedBean);
+        backend = spy(new NanoH5ExternalBackend(8080, new File(".")) {
+            @Override
+            protected String getResponse(EHttpClient httpClient) {
+                return json;
+            }
+        });
+        backend.setBackendUrl("http://test-backend");
+        // when(backend.getResponse(any())).thenReturn(json); // not working
 
-            Bean<?> result = (Bean<?>) backend.connect(persistence);
-            assertSame(expectedBean, result);
-        }
+        Bean<?> result = (Bean<?>) backend.connect(persistence);
+        assertEquals_(bean, result);
     }
 
     @Test

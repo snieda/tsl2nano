@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Objects;
 
-import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
+import de.tsl2.nano.bean.def.BeanValueMap;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.http.EHttpClient;
 import de.tsl2.nano.core.util.parser.JSon;
@@ -45,7 +45,11 @@ public class NanoH5ExternalBackend extends NanoHTTPD {
         // TODO set header and inital query string
         // String json = NetUtil.get(backendUrl);
         EHttpClient httpClient = new EHttpClient(serviceUrl, new HashMap<>(), persistence.getConnectionUserName(), persistence.getConnectionPassword().toCharArray());
-        String json = httpClient.rest(backendUrl, "GET", "application/json", null);
-        return new JSon().toObject(Bean.class, json);
+        String json = getResponse(httpClient);
+        return new JSon().toObject(BeanValueMap.class, json);
+    }
+
+    protected String getResponse(EHttpClient httpClient) {
+        return httpClient.rest(backendUrl, "GET", "application/json", null);
     }
 }

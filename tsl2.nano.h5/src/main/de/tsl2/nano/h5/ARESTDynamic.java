@@ -98,6 +98,8 @@ public abstract class ARESTDynamic<RESPONSE> {
 				return createResponse(Status.OK, printEntities());
 			else if (url.equals(BASE_PATH + "/entitiesjson"))
 				return createResponse(Status.OK, printEntitiesJSON());
+			else if (url.equals(BASE_PATH + "/backend"))
+				return createResponse(Status.OK, printBackendHelp());
 			
 			if (!internalCall) 
 				checkAuthentication(url, method, header);
@@ -105,10 +107,13 @@ public abstract class ARESTDynamic<RESPONSE> {
 			String beanName = get(url, BASE_PATH, "entity");
 			String actionOrAttribute = get(url, beanName, "attribute-or-action");
 			checkAuthorization(beanName, actionOrAttribute, header);
-			if (method.equals("POST"))
+			if (isBackendRequest(url)) {
+				return doBackendRequest(url, method, payload, header, beanName, actionOrAttribute);
+			} else if (method.equals("POST")) {
 				return doPost(url, method, payload, beanName, actionOrAttribute);
-			else
+			} else {
 				return doWithQuery(url, method, parms, beanName, actionOrAttribute);
+			}
 		} catch (SecurityException ex) {
 			LOG.error(ex);
 			return createResponse(Status.FORBIDDEN, ex.getMessage());
@@ -326,6 +331,160 @@ public abstract class ARESTDynamic<RESPONSE> {
 			attributeMap.put("actions", actionMap);
 		}
 		return MapUtil.toJSon(entityMap);
+	}
+
+	protected boolean isBackendRequest(String url) {
+		return url.contains(BASE_PATH + "/backend");
+	}
+
+	protected RESPONSE doBackendRequest(String url, String method, Map<String, String> payload, Map<String, String> header, String beanName, String actionOrAttribute) {
+		String identity = header.get("identity");
+		if (identity == null)
+			return createResponse(Status.BAD_REQUEST, "no identity given for backend request");
+		Status status = Status.OK;
+		StringBuilder result = new StringBuilder();
+		result.append(evalBackendDataForGivenIdentity(identity, beanName, actionOrAttribute));
+		LOG.info("REST (" + method + ") " + url + " --> " + result);
+		return createResponse(status, result.toString());
+	}
+
+	protected String evalBackendDataForGivenIdentity(String identity, String beanName, String actionOrAttribute) {
+		// List<Class> beanTypes = ENV.get("service.loadedBeanTypes", new LinkedList<Class>());
+		// BeanDefinition<?> beanDef;
+		// for (Class b : beanTypes) {
+		// 	beanDef = BeanDefinition.getBeanDefinition(b);
+		// }
+
+		BeanDefinit
+	}
+
+	protected String printBackendHelp() {
+		// TODO: read help/tutorial from md.html file
+		String example = "{\n" + //
+						"    \"id\": \"mybean\",\n" + //
+						"    \"name\": \"MyBean\",\n" + //
+						"    \"instance\": {\n" + //
+						"        \"id\": \"mybean\",\n" + //
+						"        \"name\": \"MyBean\",\n" + //
+						"        \"submap\": {\n" + //
+						"            \"ki1\": \"vi1\"\n" + //
+						"        }\n" + //
+						"    },\n" + //
+						"    \"valueExpression\": {\n" + //
+						"        \"attributeNames\": [\n" + //
+						"            \"id\"\n" + //
+						"        ],\n" + //
+						"        \"comparator\": {},\n" + //
+						"        \"expression\": \"{id}\",\n" + //
+						"        \"name\": \"{id}\",\n" + //
+						"        \"type\": {\n" + //
+						"            \"name\": \"java.util.LinkedHashMap\"\n" + //
+						"        }\n" + //
+						"    },\n" + //
+						"    \"attributeDefs\": [\n" + //
+						"        {\n" + //
+						"            \"name\": \"id\",\n" + //
+						"            \"description\": \"mybeanid\",\n" + //
+						"            \"constraint\": {\n" + //
+						"                \"format\": \"[x00-xFF€]{0,XXX}\",\n" + //
+						"                \"length\": -1,\n" + //
+						"                \"precision\": -1,\n" + //
+						"                \"scale\": -1,\n" + //
+						"                \"type\": {\n" + //
+						"                    \"name\": \"java.lang.String\"\n" + //
+						"                },\n" + //
+						"                \"nullable\": true\n" + //
+						"            },\n" + //
+						"            \"presentation\": {\n" + //
+						"                \"description\": \"mybeanid\",\n" + //
+						"                \"enabler\": \"AlwaysActive\",\n" + //
+						"                \"gridHeight\": 0,\n" + //
+						"                \"gridWidth\": 0,\n" + //
+						"                \"height\": -1,\n" + //
+						"                \"label\": \"Mybeanid\",\n" + //
+						"                \"serialversionuid\":-XXX,\n" + //
+						"                \"style\": 4,\n" + //
+						"                \"type\": 1,\n" + //
+						"                \"width\": -1,\n" + //
+						"                \"nesting\": false,\n" + //
+						"                \"searchable\": true,\n" + //
+						"                \"visible\": true\n" + //
+						"            }\n" + //
+						"        },\n" + //
+						"        {\n" + //
+						"            \"name\": \"name\",\n" + //
+						"            \"description\": \"mybeanname\",\n" + //
+						"            \"constraint\": {\n" + //
+						"                \"format\": \"[x00-xFF€]{0,XXX}\",\n" + //
+						"                \"length\": -1,\n" + //
+						"                \"precision\": -1,\n" + //
+						"                \"scale\": -1,\n" + //
+						"                \"type\": {\n" + //
+						"                    \"name\": \"java.lang.String\"\n" + //
+						"                },\n" + //
+						"                \"nullable\": true\n" + //
+						"            },\n" + //
+						"            \"presentation\": {\n" + //
+						"                \"description\": \"mybeanname\",\n" + //
+						"                \"enabler\": \"AlwaysActive\",\n" + //
+						"                \"gridHeight\": 0,\n" + //
+						"                \"gridWidth\": 0,\n" + //
+						"                \"height\": -1,\n" + //
+						"                \"label\": \"Mybeanname\",\n" + //
+						"                \"serialversionuid\":-XXX,\n" + //
+						"                \"style\": 4,\n" + //
+						"                \"type\": 1,\n" + //
+						"                \"width\": -1,\n" + //
+						"                \"nesting\": false,\n" + //
+						"                \"searchable\": true,\n" + //
+						"                \"visible\": true\n" + //
+						"            }\n" + //
+						"        },\n" + //
+						"        {\n" + //
+						"            \"name\": \"submap\",\n" + //
+						"            \"description\": \"mybeansubmap\",\n" + //
+						"            \"constraint\": {\n" + //
+						"                \"format\": {\n" + //
+						"                    \"valueExpression\": {\n" + //
+						"                        \"comparator\": {},\n" + //
+						"                        \"type\": {\n" + //
+						"                            \"name\": \"java.lang.Object\"\n" + //
+						"                        }\n" + //
+						"                    }\n" + //
+						"                },\n" + //
+						"                \"length\": -1,\n" + //
+						"                \"precision\": -1,\n" + //
+						"                \"scale\": -1,\n" + //
+						"                \"type\": {\n" + //
+						"                    \"name\": \"java.util.LinkedHashMap\"\n" + //
+						"                },\n" + //
+						"                \"nullable\": true\n" + //
+						"            },\n" + //
+						"            \"presentation\": {\n" + //
+						"                \"description\": \"mybeansubmap\",\n" + //
+						"                \"enabler\": \"AlwaysActive\",\n" + //
+						"                \"gridHeight\": 0,\n" + //
+						"                \"gridWidth\": 0,\n" + //
+						"                \"height\": -1,\n" + //
+						"                \"label\": \"Mybeansubmap\",\n" + //
+						"                \"serialversionuid\":-XXX,\n" + //
+						"                \"style\": 4,\n" + //
+						"                \"type\":XXX,\n" + //
+						"                \"width\": -1,\n" + //
+						"                \"nesting\": false,\n" + //
+						"                \"searchable\": true,\n" + //
+						"                \"visible\": true\n" + //
+						"            }\n" + //
+						"        }\n" + //
+						"    ]\n" + //
+						"}";
+		return 
+		"provides responses containing full dynamic beans with presentation+mapped-data.\n" +
+		"the h5 framework itself is able to use this backend as base for its html5 presentation instead of\n" +
+		"a direct connection to a database through its persistence informations on login\n" +
+		"the login persistence informations have to provide the connectionUrl, connectionUser and connectionPassword\n" +
+		"to connect and use the data given by such a backend request provider\n\n" +
+		"base object is Bean.class with a structure like: " + example;
 	}
 
 	String printManual() {
