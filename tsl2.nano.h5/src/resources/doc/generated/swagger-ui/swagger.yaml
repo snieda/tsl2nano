@@ -1,0 +1,1437 @@
+---
+swagger: "2.0"
+info:
+  description: "OpenApi for de.tsl2.nano.h5.rest"
+  version: "v1"
+  title: "OpenApi for de.tsl2.nano.h5.rest"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "localhost:8080"
+basePath: "/api"
+schemes:
+- "http"
+- "https"
+paths:
+  /backend:
+    get:
+      operationId: "NanoBackendJaxrs_backend_get"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "user"
+        in: "query"
+        required: false
+        type: "string"
+      - name: "password"
+        in: "query"
+        required: false
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/BeanValueMap"
+  /start/{config}/{port}:
+    get:
+      operationId: "NanoJAXRS_start_get"
+      produces:
+      - "text/html"
+      parameters:
+      - name: "config"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "port"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "string"
+securityDefinitions:
+  basicAuth:
+    type: "basic"
+definitions:
+  AnnotatedType:
+    type: "object"
+    properties:
+      annotations:
+        type: "array"
+        items:
+          $ref: "#/definitions/Annotation"
+      declaredAnnotations:
+        type: "array"
+        items:
+          $ref: "#/definitions/Annotation"
+      type:
+        $ref: "#/definitions/Type"
+      annotatedOwnerType:
+        $ref: "#/definitions/AnnotatedType"
+  Annotation:
+    type: "object"
+  Bean:
+    type: "object"
+    properties:
+      attributeFilter:
+        type: "array"
+        items:
+          type: "string"
+      presentable:
+        $ref: "#/definitions/IPresentable"
+      presentationHelper:
+        $ref: "#/definitions/BeanPresentationHelperObject"
+      name:
+        type: "string"
+      plugins:
+        type: "array"
+        items:
+          $ref: "#/definitions/IConnectorBeanDefinition"
+      valueExpression:
+        $ref: "#/definitions/ValueExpressionObject"
+      actions:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAction"
+      valueGroups:
+        type: "array"
+        items:
+          $ref: "#/definitions/ValueGroup"
+      instance:
+        type: "object"
+      multiValue:
+        type: "boolean"
+      id:
+        type: "object"
+      beanValues:
+        type: "array"
+        items:
+          $ref: "#/definitions/BeanValueObject"
+      interface:
+        type: "boolean"
+      virtual:
+        type: "boolean"
+      default:
+        type: "boolean"
+      attributes:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAttribute"
+      attributeNames:
+        type: "array"
+        items:
+          type: "string"
+      stale:
+        type: "boolean"
+      persistable:
+        type: "boolean"
+      idAttribute:
+        $ref: "#/definitions/IAttribute"
+      actionsByClass:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAction"
+      selectable:
+        type: "boolean"
+      beanAttributes:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAttributeDefinitionObject"
+      creatable:
+        type: "boolean"
+      nested:
+        type: "boolean"
+      nameAndPath:
+        type: "string"
+      final:
+        type: "boolean"
+      interfaces:
+        type: "array"
+      path:
+        type: "string"
+      singleton:
+        type: "boolean"
+      singleValueAttributes:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAttribute"
+      multiValueAttributes:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAttribute"
+      defaultInstanceable:
+        type: "boolean"
+  BeanDefinition:
+    type: "object"
+    properties:
+      attributeFilter:
+        type: "array"
+        items:
+          type: "string"
+      presentable:
+        $ref: "#/definitions/IPresentable"
+      presentationHelper:
+        $ref: "#/definitions/BeanPresentationHelperObject"
+      name:
+        type: "string"
+      plugins:
+        type: "array"
+        items:
+          $ref: "#/definitions/IConnectorBeanDefinition"
+      valueExpression:
+        $ref: "#/definitions/ValueExpressionObject"
+      actions:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAction"
+      valueGroups:
+        type: "array"
+        items:
+          $ref: "#/definitions/ValueGroup"
+      interface:
+        type: "boolean"
+      virtual:
+        type: "boolean"
+      id:
+        type: "object"
+      default:
+        type: "boolean"
+      attributes:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAttribute"
+      attributeNames:
+        type: "array"
+        items:
+          type: "string"
+      stale:
+        type: "boolean"
+      persistable:
+        type: "boolean"
+      idAttribute:
+        $ref: "#/definitions/IAttribute"
+      multiValue:
+        type: "boolean"
+      actionsByClass:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAction"
+      selectable:
+        type: "boolean"
+      beanAttributes:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAttributeDefinitionObject"
+      creatable:
+        type: "boolean"
+      nested:
+        type: "boolean"
+      nameAndPath:
+        type: "string"
+      final:
+        type: "boolean"
+      interfaces:
+        type: "array"
+      path:
+        type: "string"
+      singleton:
+        type: "boolean"
+      singleValueAttributes:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAttribute"
+      multiValueAttributes:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAttribute"
+      defaultInstanceable:
+        type: "boolean"
+  BeanDefinitionObject:
+    type: "object"
+    properties:
+      attributeFilter:
+        type: "array"
+        items:
+          type: "string"
+      presentable:
+        $ref: "#/definitions/IPresentable"
+      presentationHelper:
+        $ref: "#/definitions/BeanPresentationHelperObject"
+      name:
+        type: "string"
+      plugins:
+        type: "array"
+        items:
+          $ref: "#/definitions/IConnectorBeanDefinition"
+      valueExpression:
+        $ref: "#/definitions/ValueExpressionObject"
+      actions:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAction"
+      valueGroups:
+        type: "array"
+        items:
+          $ref: "#/definitions/ValueGroup"
+      interface:
+        type: "boolean"
+      virtual:
+        type: "boolean"
+      id:
+        type: "object"
+      default:
+        type: "boolean"
+      attributes:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAttribute"
+      attributeNames:
+        type: "array"
+        items:
+          type: "string"
+      stale:
+        type: "boolean"
+      persistable:
+        type: "boolean"
+      idAttribute:
+        $ref: "#/definitions/IAttribute"
+      multiValue:
+        type: "boolean"
+      actionsByClass:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAction"
+      selectable:
+        type: "boolean"
+      beanAttributes:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAttributeDefinitionObject"
+      creatable:
+        type: "boolean"
+      nested:
+        type: "boolean"
+      nameAndPath:
+        type: "string"
+      final:
+        type: "boolean"
+      interfaces:
+        type: "array"
+      path:
+        type: "string"
+      singleton:
+        type: "boolean"
+      singleValueAttributes:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAttribute"
+      multiValueAttributes:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAttribute"
+      defaultInstanceable:
+        type: "boolean"
+  BeanObject:
+    type: "object"
+    properties:
+      attributeFilter:
+        type: "array"
+        items:
+          type: "string"
+      presentable:
+        $ref: "#/definitions/IPresentable"
+      presentationHelper:
+        $ref: "#/definitions/BeanPresentationHelperObject"
+      name:
+        type: "string"
+      plugins:
+        type: "array"
+        items:
+          $ref: "#/definitions/IConnectorBeanDefinition"
+      valueExpression:
+        $ref: "#/definitions/ValueExpressionObject"
+      actions:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAction"
+      valueGroups:
+        type: "array"
+        items:
+          $ref: "#/definitions/ValueGroup"
+      instance:
+        type: "object"
+      multiValue:
+        type: "boolean"
+      id:
+        type: "object"
+      beanValues:
+        type: "array"
+        items:
+          $ref: "#/definitions/BeanValueObject"
+      interface:
+        type: "boolean"
+      virtual:
+        type: "boolean"
+      default:
+        type: "boolean"
+      attributes:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAttribute"
+      attributeNames:
+        type: "array"
+        items:
+          type: "string"
+      stale:
+        type: "boolean"
+      persistable:
+        type: "boolean"
+      idAttribute:
+        $ref: "#/definitions/IAttribute"
+      actionsByClass:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAction"
+      selectable:
+        type: "boolean"
+      beanAttributes:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAttributeDefinitionObject"
+      creatable:
+        type: "boolean"
+      nested:
+        type: "boolean"
+      nameAndPath:
+        type: "string"
+      final:
+        type: "boolean"
+      interfaces:
+        type: "array"
+      path:
+        type: "string"
+      singleton:
+        type: "boolean"
+      singleValueAttributes:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAttribute"
+      multiValueAttributes:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAttribute"
+      defaultInstanceable:
+        type: "boolean"
+  BeanPresentationHelper:
+    type: "object"
+    properties:
+      attributeWithPicture:
+        $ref: "#/definitions/IAttribute"
+      simpleTextualPresentation:
+        type: "string"
+  BeanPresentationHelperMap:
+    type: "object"
+    properties:
+      attributeWithPicture:
+        $ref: "#/definitions/IAttribute"
+      simpleTextualPresentation:
+        type: "string"
+  BeanPresentationHelperObject:
+    type: "object"
+    properties:
+      attributeWithPicture:
+        $ref: "#/definitions/IAttribute"
+      simpleTextualPresentation:
+        type: "string"
+  BeanValue:
+    type: "object"
+    properties:
+      constraint:
+        $ref: "#/definitions/IConstraintObject"
+      id:
+        type: "string"
+      description:
+        type: "string"
+      status:
+        $ref: "#/definitions/IStatus"
+      columnDefinition:
+        $ref: "#/definitions/IPresentableColumn"
+      doValidation:
+        type: "boolean"
+      secure:
+        $ref: "#/definitions/ISecure"
+      plugins:
+        type: "array"
+        items:
+          $ref: "#/definitions/IConnector"
+      instance:
+        type: "object"
+      name:
+        type: "string"
+      value:
+        type: "object"
+      virtual:
+        type: "boolean"
+      format:
+        $ref: "#/definitions/Format"
+      valueText:
+        type: "string"
+      selectable:
+        type: "boolean"
+      bean:
+        type: "boolean"
+      valueFile:
+        type: "file"
+      selectorAction:
+        $ref: "#/definitions/IActionIBeanCollectorObjectObject"
+      beanCollector:
+        type: "boolean"
+      valueId:
+        type: "string"
+      relation:
+        type: "boolean"
+      multiValue:
+        type: "boolean"
+      presentation:
+        $ref: "#/definitions/IPresentable"
+      valueExpression:
+        $ref: "#/definitions/ValueExpressionObject"
+      accessMethod:
+        $ref: "#/definitions/Method"
+      transient:
+        type: "boolean"
+      default:
+        type: "object"
+      path:
+        type: "string"
+      parentBean:
+        $ref: "#/definitions/BeanDefinitionObject"
+  BeanValueMap:
+    type: "object"
+    properties:
+      attributeFilter:
+        type: "array"
+        items:
+          type: "string"
+      presentable:
+        $ref: "#/definitions/IPresentable"
+      presentationHelper:
+        $ref: "#/definitions/BeanPresentationHelperMap"
+      name:
+        type: "string"
+      plugins:
+        type: "array"
+        items:
+          $ref: "#/definitions/IConnectorBeanDefinition"
+      valueExpression:
+        $ref: "#/definitions/ValueExpressionMap"
+      actions:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAction"
+      valueGroups:
+        type: "array"
+        items:
+          $ref: "#/definitions/ValueGroup"
+      instance:
+        type: "object"
+        additionalProperties:
+          type: "object"
+      multiValue:
+        type: "boolean"
+      id:
+        type: "object"
+      attributeNames:
+        type: "array"
+        items:
+          type: "string"
+      attributeDefs:
+        type: "array"
+        items:
+          $ref: "#/definitions/MBeanValue"
+      beanValues:
+        type: "array"
+        items:
+          $ref: "#/definitions/BeanValueObject"
+      interface:
+        type: "boolean"
+      virtual:
+        type: "boolean"
+      default:
+        type: "boolean"
+      attributes:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAttribute"
+      stale:
+        type: "boolean"
+      persistable:
+        type: "boolean"
+      idAttribute:
+        $ref: "#/definitions/IAttribute"
+      actionsByClass:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAction"
+      selectable:
+        type: "boolean"
+      beanAttributes:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAttributeDefinitionObject"
+      creatable:
+        type: "boolean"
+      nested:
+        type: "boolean"
+      nameAndPath:
+        type: "string"
+      final:
+        type: "boolean"
+      interfaces:
+        type: "array"
+      path:
+        type: "string"
+      singleton:
+        type: "boolean"
+      singleValueAttributes:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAttribute"
+      multiValueAttributes:
+        type: "array"
+        items:
+          $ref: "#/definitions/IAttribute"
+      defaultInstanceable:
+        type: "boolean"
+  BeanValueObject:
+    type: "object"
+    properties:
+      constraint:
+        $ref: "#/definitions/IConstraintObject"
+      id:
+        type: "string"
+      description:
+        type: "string"
+      status:
+        $ref: "#/definitions/IStatus"
+      columnDefinition:
+        $ref: "#/definitions/IPresentableColumn"
+      doValidation:
+        type: "boolean"
+      secure:
+        $ref: "#/definitions/ISecure"
+      plugins:
+        type: "array"
+        items:
+          $ref: "#/definitions/IConnector"
+      instance:
+        type: "object"
+      name:
+        type: "string"
+      value:
+        type: "object"
+      virtual:
+        type: "boolean"
+      format:
+        $ref: "#/definitions/Format"
+      valueText:
+        type: "string"
+      selectable:
+        type: "boolean"
+      bean:
+        type: "boolean"
+      valueFile:
+        type: "file"
+      selectorAction:
+        $ref: "#/definitions/IActionIBeanCollectorObjectObject"
+      beanCollector:
+        type: "boolean"
+      valueId:
+        type: "string"
+      relation:
+        type: "boolean"
+      multiValue:
+        type: "boolean"
+      presentation:
+        $ref: "#/definitions/IPresentable"
+      valueExpression:
+        $ref: "#/definitions/ValueExpressionObject"
+      accessMethod:
+        $ref: "#/definitions/Method"
+      transient:
+        type: "boolean"
+      default:
+        type: "object"
+      path:
+        type: "string"
+      parentBean:
+        $ref: "#/definitions/BeanDefinitionObject"
+  Comparable:
+    type: "object"
+  Comparator:
+    type: "object"
+  ComparatorMap:
+    type: "object"
+  ComparatorObject:
+    type: "object"
+  Executable:
+    type: "object"
+    properties:
+      declaredAnnotations:
+        type: "array"
+        items:
+          $ref: "#/definitions/Annotation"
+      name:
+        type: "string"
+      modifiers:
+        type: "integer"
+        format: "int32"
+      typeParameters:
+        type: "array"
+        items:
+          $ref: "#/definitions/TypeVariableObject"
+      parameterTypes:
+        type: "array"
+      synthetic:
+        type: "boolean"
+      varArgs:
+        type: "boolean"
+      annotatedParameterTypes:
+        type: "array"
+        items:
+          $ref: "#/definitions/AnnotatedType"
+      parameterCount:
+        type: "integer"
+        format: "int32"
+      parameterAnnotations:
+        type: "array"
+        items:
+          type: "array"
+          items:
+            $ref: "#/definitions/Annotation"
+      genericParameterTypes:
+        type: "array"
+        items:
+          $ref: "#/definitions/Type"
+      genericExceptionTypes:
+        type: "array"
+        items:
+          $ref: "#/definitions/Type"
+      exceptionTypes:
+        type: "array"
+      annotatedReturnType:
+        $ref: "#/definitions/AnnotatedType"
+      parameters:
+        type: "array"
+        items:
+          $ref: "#/definitions/Parameter"
+      annotatedReceiverType:
+        $ref: "#/definitions/AnnotatedType"
+      annotatedExceptionTypes:
+        type: "array"
+        items:
+          $ref: "#/definitions/AnnotatedType"
+      annotations:
+        type: "array"
+        items:
+          $ref: "#/definitions/Annotation"
+      accessible:
+        type: "boolean"
+  Format:
+    type: "object"
+  GenericDeclaration:
+    type: "object"
+    properties:
+      typeParameters:
+        type: "array"
+        items:
+          $ref: "#/definitions/TypeVariableObject"
+      annotations:
+        type: "array"
+        items:
+          $ref: "#/definitions/Annotation"
+      declaredAnnotations:
+        type: "array"
+        items:
+          $ref: "#/definitions/Annotation"
+  IAction:
+    type: "object"
+    properties:
+      enabled:
+        type: "boolean"
+      id:
+        type: "string"
+      default:
+        type: "boolean"
+      imagePath:
+        type: "string"
+      running:
+        type: "boolean"
+      argumentTypes:
+        type: "array"
+      parameter:
+        type: "array"
+        items:
+          type: "object"
+      actionMode:
+        type: "integer"
+        format: "int32"
+      synchron:
+        type: "boolean"
+      creatingExternalContent:
+        type: "boolean"
+      longDescription:
+        type: "string"
+      receiverIDs:
+        type: "array"
+        items:
+          type: "string"
+      keyStroke:
+        type: "object"
+      shortDescription:
+        type: "string"
+  IActionIBeanCollectorObjectObject:
+    type: "object"
+    properties:
+      enabled:
+        type: "boolean"
+      id:
+        type: "string"
+      default:
+        type: "boolean"
+      imagePath:
+        type: "string"
+      running:
+        type: "boolean"
+      argumentTypes:
+        type: "array"
+      parameter:
+        type: "array"
+        items:
+          type: "object"
+      actionMode:
+        type: "integer"
+        format: "int32"
+      synchron:
+        type: "boolean"
+      creatingExternalContent:
+        type: "boolean"
+      longDescription:
+        type: "string"
+      receiverIDs:
+        type: "array"
+        items:
+          type: "string"
+      keyStroke:
+        type: "object"
+      shortDescription:
+        type: "string"
+  IActivable:
+    type: "object"
+    properties:
+      active:
+        type: "boolean"
+  IAttribute:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      virtual:
+        type: "boolean"
+      id:
+        type: "string"
+      accessMethod:
+        $ref: "#/definitions/Method"
+  IAttributeDefinition:
+    type: "object"
+    properties:
+      format:
+        $ref: "#/definitions/Format"
+      description:
+        type: "string"
+      id:
+        type: "string"
+      status:
+        $ref: "#/definitions/IStatus"
+      constraint:
+        $ref: "#/definitions/IConstraintObject"
+      multiValue:
+        type: "boolean"
+      columnDefinition:
+        $ref: "#/definitions/IPresentableColumn"
+      presentation:
+        $ref: "#/definitions/IPresentable"
+      relation:
+        type: "boolean"
+      secure:
+        $ref: "#/definitions/ISecure"
+      valueExpression:
+        $ref: "#/definitions/ValueExpressionObject"
+      name:
+        type: "string"
+      virtual:
+        type: "boolean"
+      accessMethod:
+        $ref: "#/definitions/Method"
+      transient:
+        type: "boolean"
+      plugins:
+        type: "array"
+        items:
+          $ref: "#/definitions/IConnectorObject"
+  IAttributeDefinitionObject:
+    type: "object"
+    properties:
+      format:
+        $ref: "#/definitions/Format"
+      description:
+        type: "string"
+      id:
+        type: "string"
+      status:
+        $ref: "#/definitions/IStatus"
+      constraint:
+        $ref: "#/definitions/IConstraintObject"
+      multiValue:
+        type: "boolean"
+      columnDefinition:
+        $ref: "#/definitions/IPresentableColumn"
+      presentation:
+        $ref: "#/definitions/IPresentable"
+      relation:
+        type: "boolean"
+      secure:
+        $ref: "#/definitions/ISecure"
+      valueExpression:
+        $ref: "#/definitions/ValueExpressionObject"
+      name:
+        type: "string"
+      virtual:
+        type: "boolean"
+      accessMethod:
+        $ref: "#/definitions/Method"
+      transient:
+        type: "boolean"
+      plugins:
+        type: "array"
+        items:
+          $ref: "#/definitions/IConnectorObject"
+  IConnector:
+    type: "object"
+    properties:
+      connected:
+        type: "boolean"
+  IConnectorBeanDefinition:
+    type: "object"
+    properties:
+      connected:
+        type: "boolean"
+  IConnectorObject:
+    type: "object"
+    properties:
+      connected:
+        type: "boolean"
+  IConstraint:
+    type: "object"
+    properties:
+      length:
+        type: "integer"
+        format: "int32"
+      default:
+        type: "object"
+      maximum:
+        $ref: "#/definitions/Comparable"
+      minimum:
+        $ref: "#/definitions/Comparable"
+      scale:
+        type: "integer"
+        format: "int32"
+      format:
+        $ref: "#/definitions/Format"
+      nullable:
+        type: "boolean"
+      precision:
+        type: "integer"
+        format: "int32"
+      allowedValues:
+        type: "array"
+        items:
+          type: "object"
+  IConstraintObject:
+    type: "object"
+    properties:
+      length:
+        type: "integer"
+        format: "int32"
+      default:
+        type: "object"
+      maximum:
+        $ref: "#/definitions/Comparable"
+      minimum:
+        $ref: "#/definitions/Comparable"
+      scale:
+        type: "integer"
+        format: "int32"
+      format:
+        $ref: "#/definitions/Format"
+      nullable:
+        type: "boolean"
+      precision:
+        type: "integer"
+        format: "int32"
+      allowedValues:
+        type: "array"
+        items:
+          type: "object"
+  IPresentable:
+    type: "object"
+    properties:
+      type:
+        type: "integer"
+        format: "int32"
+      label:
+        type: "string"
+      description:
+        type: "string"
+      layout:
+        $ref: "#/definitions/Serializable"
+      visible:
+        type: "boolean"
+      style:
+        type: "integer"
+        format: "int32"
+      searchable:
+        type: "boolean"
+      nesting:
+        type: "boolean"
+      itemList:
+        type: "array"
+        items:
+          type: "object"
+      layoutConstraints:
+        $ref: "#/definitions/Serializable"
+      width:
+        type: "integer"
+        format: "int32"
+      height:
+        type: "integer"
+        format: "int32"
+      icon:
+        type: "string"
+      foreground:
+        type: "array"
+        items:
+          type: "integer"
+          format: "int32"
+      background:
+        type: "array"
+        items:
+          type: "integer"
+          format: "int32"
+      iconFromField:
+        type: "string"
+      enabler:
+        $ref: "#/definitions/IActivable"
+  IPresentableColumn:
+    type: "object"
+    properties:
+      summary:
+        $ref: "#/definitions/IValueExpressionObject"
+      presentable:
+        $ref: "#/definitions/IPresentable"
+      standardSummary:
+        type: "boolean"
+      name:
+        type: "string"
+      index:
+        type: "integer"
+        format: "int32"
+      format:
+        $ref: "#/definitions/Format"
+      description:
+        type: "string"
+      sortUpDirection:
+        type: "boolean"
+      width:
+        type: "integer"
+        format: "int32"
+      sortIndex:
+        type: "integer"
+        format: "int32"
+      minSearchValue:
+        $ref: "#/definitions/Comparable"
+      maxSearchValue:
+        $ref: "#/definitions/Comparable"
+  ISecure:
+    type: "object"
+  IStatus:
+    type: "object"
+  IValueExpression:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      expression:
+        type: "string"
+      expressionPattern:
+        type: "string"
+  IValueExpressionObject:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      expression:
+        type: "string"
+      expressionPattern:
+        type: "string"
+  MBeanValue:
+    type: "object"
+    properties:
+      constraint:
+        $ref: "#/definitions/IConstraintObject"
+      id:
+        type: "string"
+      description:
+        type: "string"
+      status:
+        $ref: "#/definitions/IStatus"
+      columnDefinition:
+        $ref: "#/definitions/IPresentableColumn"
+      doValidation:
+        type: "boolean"
+      secure:
+        $ref: "#/definitions/ISecure"
+      plugins:
+        type: "array"
+        items:
+          $ref: "#/definitions/IConnector"
+      instance:
+        type: "object"
+      parent:
+        $ref: "#/definitions/BeanObject"
+      name:
+        type: "string"
+      value:
+        type: "object"
+      virtual:
+        type: "boolean"
+      format:
+        $ref: "#/definitions/Format"
+      valueText:
+        type: "string"
+      selectable:
+        type: "boolean"
+      bean:
+        type: "boolean"
+      valueFile:
+        type: "file"
+      selectorAction:
+        $ref: "#/definitions/IActionIBeanCollectorObjectObject"
+      beanCollector:
+        type: "boolean"
+      valueId:
+        type: "string"
+      relation:
+        type: "boolean"
+      multiValue:
+        type: "boolean"
+      presentation:
+        $ref: "#/definitions/IPresentable"
+      valueExpression:
+        $ref: "#/definitions/ValueExpressionObject"
+      accessMethod:
+        $ref: "#/definitions/Method"
+      transient:
+        type: "boolean"
+      default:
+        type: "object"
+      path:
+        type: "string"
+      parentBean:
+        $ref: "#/definitions/BeanDefinitionObject"
+  Method:
+    type: "object"
+    properties:
+      declaredAnnotations:
+        type: "array"
+        items:
+          $ref: "#/definitions/Annotation"
+      name:
+        type: "string"
+      modifiers:
+        type: "integer"
+        format: "int32"
+      typeParameters:
+        type: "array"
+        items:
+          $ref: "#/definitions/TypeVariableMethod"
+      accessible:
+        type: "boolean"
+      parameterTypes:
+        type: "array"
+      synthetic:
+        type: "boolean"
+      varArgs:
+        type: "boolean"
+      parameterCount:
+        type: "integer"
+        format: "int32"
+      parameterAnnotations:
+        type: "array"
+        items:
+          type: "array"
+          items:
+            $ref: "#/definitions/Annotation"
+      genericParameterTypes:
+        type: "array"
+        items:
+          $ref: "#/definitions/Type"
+      genericExceptionTypes:
+        type: "array"
+        items:
+          $ref: "#/definitions/Type"
+      default:
+        type: "boolean"
+      genericReturnType:
+        $ref: "#/definitions/Type"
+      exceptionTypes:
+        type: "array"
+      bridge:
+        type: "boolean"
+      defaultValue:
+        type: "object"
+      annotatedReturnType:
+        $ref: "#/definitions/AnnotatedType"
+      annotatedParameterTypes:
+        type: "array"
+        items:
+          $ref: "#/definitions/AnnotatedType"
+      parameters:
+        type: "array"
+        items:
+          $ref: "#/definitions/Parameter"
+      annotatedReceiverType:
+        $ref: "#/definitions/AnnotatedType"
+      annotatedExceptionTypes:
+        type: "array"
+        items:
+          $ref: "#/definitions/AnnotatedType"
+      annotations:
+        type: "array"
+        items:
+          $ref: "#/definitions/Annotation"
+  Parameter:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      modifiers:
+        type: "integer"
+        format: "int32"
+      declaredAnnotations:
+        type: "array"
+        items:
+          $ref: "#/definitions/Annotation"
+      synthetic:
+        type: "boolean"
+      annotations:
+        type: "array"
+        items:
+          $ref: "#/definitions/Annotation"
+      annotatedType:
+        $ref: "#/definitions/AnnotatedType"
+      parameterizedType:
+        $ref: "#/definitions/Type"
+      varArgs:
+        type: "boolean"
+      declaringExecutable:
+        $ref: "#/definitions/Executable"
+      namePresent:
+        type: "boolean"
+      implicit:
+        type: "boolean"
+  Serializable:
+    type: "object"
+  Type:
+    type: "object"
+    properties:
+      typeName:
+        type: "string"
+  TypeVariable:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      bounds:
+        type: "array"
+        items:
+          $ref: "#/definitions/Type"
+      genericDeclaration:
+        $ref: "#/definitions/GenericDeclaration"
+      annotatedBounds:
+        type: "array"
+        items:
+          $ref: "#/definitions/AnnotatedType"
+      typeName:
+        type: "string"
+      annotations:
+        type: "array"
+        items:
+          $ref: "#/definitions/Annotation"
+      declaredAnnotations:
+        type: "array"
+        items:
+          $ref: "#/definitions/Annotation"
+  TypeVariableMethod:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      bounds:
+        type: "array"
+        items:
+          $ref: "#/definitions/Type"
+      genericDeclaration:
+        $ref: "#/definitions/Method"
+      annotatedBounds:
+        type: "array"
+        items:
+          $ref: "#/definitions/AnnotatedType"
+      typeName:
+        type: "string"
+      annotations:
+        type: "array"
+        items:
+          $ref: "#/definitions/Annotation"
+      declaredAnnotations:
+        type: "array"
+        items:
+          $ref: "#/definitions/Annotation"
+  TypeVariableObject:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      bounds:
+        type: "array"
+        items:
+          $ref: "#/definitions/Type"
+      genericDeclaration:
+        type: "object"
+      annotatedBounds:
+        type: "array"
+        items:
+          $ref: "#/definitions/AnnotatedType"
+      typeName:
+        type: "string"
+      annotations:
+        type: "array"
+        items:
+          $ref: "#/definitions/Annotation"
+      declaredAnnotations:
+        type: "array"
+        items:
+          $ref: "#/definitions/Annotation"
+  ValueExpression:
+    type: "object"
+    properties:
+      expression:
+        type: "string"
+      comparator:
+        $ref: "#/definitions/ComparatorObject"
+      name:
+        type: "string"
+      attributeNames:
+        type: "array"
+        items:
+          type: "string"
+      expressionPattern:
+        type: "string"
+  ValueExpressionMap:
+    type: "object"
+    properties:
+      expression:
+        type: "string"
+      comparator:
+        $ref: "#/definitions/ComparatorMap"
+      name:
+        type: "string"
+      attributeNames:
+        type: "array"
+        items:
+          type: "string"
+      expressionPattern:
+        type: "string"
+  ValueExpressionObject:
+    type: "object"
+    properties:
+      expression:
+        type: "string"
+      comparator:
+        $ref: "#/definitions/ComparatorObject"
+      name:
+        type: "string"
+      attributeNames:
+        type: "array"
+        items:
+          type: "string"
+      expressionPattern:
+        type: "string"
+  ValueGroup:
+    type: "object"
+    properties:
+      type:
+        type: "integer"
+        format: "int32"
+      style:
+        type: "integer"
+        format: "int32"
+      label:
+        type: "string"
+      description:
+        type: "string"
+      layout:
+        $ref: "#/definitions/Serializable"
+      layoutConstraints:
+        $ref: "#/definitions/Serializable"
+      visible:
+        type: "boolean"
+      searchable:
+        type: "boolean"
+      enabler:
+        $ref: "#/definitions/IActivable"
+      icon:
+        type: "string"
+      foreground:
+        type: "array"
+        items:
+          type: "integer"
+          format: "int32"
+      background:
+        type: "array"
+        items:
+          type: "integer"
+          format: "int32"
+      nesting:
+        type: "boolean"
+      iconFromField:
+        type: "string"
+      attributes:
+        type: "object"
+        additionalProperties:
+          type: "boolean"
+      itemList:
+        type: "array"
+        items:
+          type: "object"
+      width:
+        type: "integer"
+        format: "int32"
+      height:
+        type: "integer"
+        format: "int32"
+externalDocs:
+  description: "Example external docs"
+  url: "https://example.com/docs"

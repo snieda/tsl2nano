@@ -11,6 +11,7 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.core.util.parser.Serial;
 import de.tsl2.nano.core.util.parser.SerialClass;
@@ -28,6 +29,10 @@ public class BeanValueMap extends Bean<Map> {
 
     private static final List<String> COMMON_ATTRIBUTES = Arrays.asList("id", "name");
 
+    public BeanValueMap(Object... keysAndValues) {
+        this(MapUtil.asMap(keysAndValues));
+    }
+
     public BeanValueMap(Map map) {
         super(map);
         if (map.containsKey("name"))
@@ -35,6 +40,11 @@ public class BeanValueMap extends Bean<Map> {
         else if (getId() != null)
             name = getId().toString();
         createMapValueAttributes(map, this);            
+    }
+
+    public static BeanValueMap from(Object instance) {
+        Bean<Object> bean = Bean.getBean(instance);
+        return new BeanValueMap(bean.toValueMap(null));
     }
 
     public static Bean<Map> createMapValueAttributes(Map map, Bean<Map> bean) {

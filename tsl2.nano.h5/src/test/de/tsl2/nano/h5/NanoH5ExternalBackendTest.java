@@ -1,6 +1,8 @@
 package de.tsl2.nano.h5;
 
+import static de.tsl2.nano.h5.ARESTDynamic.BASE_PATH;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -8,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -22,9 +25,11 @@ import org.mockito.quality.Strictness;
 
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanValueMap;
+import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.http.EHttpClient;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.parser.JSon;
 import de.tsl2.nano.persistence.Persistence;
@@ -32,11 +37,16 @@ import de.tsl2.nano.persistence.Persistence;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class NanoH5ExternalBackendTest {
+public class NanoH5ExternalBackendTest /*implements ENVTestPreparation*/ {
 
     NanoH5ExternalBackend backend;
     @Mock Persistence persistence;
     @Mock HttpURLConnection httpURLConnection;
+
+    // @BeforeClass
+    // public static void setUpClass() {
+    //     ENVTestPreparation.setUp();
+    // }
 
     @BeforeEach
     void setUp() throws IOException {
@@ -66,13 +76,15 @@ public class NanoH5ExternalBackendTest {
         // assertEquals(bean.getBeanValues(), rbean.getBeanValues());
 
         assertEquals_(bean, rbean);
+        FileUtil.save("doc/generated/example-beanvaluemap.json", json);
     }
 
     private void assertEquals_(Bean<Map> bean, Bean rbean) {
         String json;
         //WORKAROUND: on submap the format is different....
-        bean.getAttribute("submap").getConstraint().setFormat(null);
-        rbean.getAttribute("submap").getConstraint().setFormat(null);
+        bean.getAttributes().forEach(a -> ((IValueDefinition)a).getConstraint().setFormat(null));
+        rbean.getAttributes().forEach(a -> ((IValueDefinition)a).getConstraint().setFormat(null));
+        
         json = new JSon().serialize(bean);
         
         assertEquals(ignoreSome(json), ignoreSome(new JSon().serialize(rbean)));
@@ -90,6 +102,44 @@ public class NanoH5ExternalBackendTest {
         return str.replaceAll("[\t\r\n\\s]", "")
             .replaceAll("\\d{4,99}", "XXX")
             .replaceAll("Proxy\\d+", "ProxyXXX");
+    }
+
+    @Test
+    void testBackendReturnsHelp() throws IOException {
+        ARestDynamicBackend<String> backend = createBackend();
+
+        String response = backend.serve(BASE_PATH + "/backend", "GET", null);
+        assertTrue(response, response.startsWith("provides responses containing full dynamic beans"));
+        assertTrue(response, response.contains("mybean"));
+    }
+
+    @Test
+    void testBackendReturnsBean() throws IOException {
+        ARestDynamicBackend<String> backend = createBackend();
+        String response = backend.serve(BASE_PATH + "/backend/muster/muster", "GET", new HashMap<>());
+        assertEquals("huhu", response);
+    }
+
+    @Test
+    void testPrintHealth() throws IOException {
+        ARestDynamicBackend<String> backend = createBackend();
+        String response = backend.serve(BASE_PATH + "/health", "GET", null);
+        assertTrue(response.contains("build-tsl2.nano.h5"));
+    }
+
+    private ARestDynamicBackend<String> createBackend() {
+        ARestDynamicBackend<String> backend = new ARestDynamicBackend<String>() {
+            @Override
+            void checkAuthorization(String beanName, String actionOrAttribute, Map<String, String> header)
+                    throws IllegalAccessException {
+                // not to be tested
+            }
+            @Override
+            String createResponse(Status status, String message) {
+                return status + ": " + message;
+            }
+        };
+        return backend;
     }
 
     @Test

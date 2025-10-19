@@ -17,16 +17,17 @@
 
 
 <meta-tag>
-crud, grud, crud2gui, crud2html, bean2html, naked objects, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, toplink, batoo, ormlite, ebean, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper, projector, callback, rule
+crud, grud, crud2gui, crud2html, bean2html, naked objects, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, toplink, batoo, ormlite, ebean, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper, projector, callback, rule, backend, frontend
 </meta-tag>
 
 <description>
-crud, grud, crud2gui, crud2html, bean2html, naked objects, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, toplink, batoo, ormlite, ebean, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper, projector, callback, rule
+crud, grud, crud2gui, crud2html, bean2html, naked objects, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, toplink, batoo, ormlite, ebean, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper, projector, callback, rule, backend, frontend
 </description>
 
 ## Introduction
 
-NanoH5 (or FullRelation) is an GUI independent UI implementation framework providing a model driven design (MDA) and following the projector pattern. Rules are used to describe any data or presentation value. NanoH5 is bound to the app framework __tsl2.nano.commons__ and the jpa-service framework __tsl2.nano.serviceaccess__. It is possible to build a complete html5 application through a given class- or database-model. An Html5 presentation layer using websockets is provided as default.
+NanoH5 (or FullRelation) is an GUI independent UI implementation framework providing a model driven design (MDA) and following the projector pattern. Rules are used to describe any data or presentation value. NanoH5 is bound to the app framework __tsl2.nano.commons__ and the jpa-service framework __tsl2.nano.serviceaccess__. It is possible to build a complete html5 application through a given class- or database-model.
+An Html5 presentation layer using websockets is provided as default. The framework can be used as fullstack application, as backend (providing database content through rest services) or frontend using any backend that provides dynamic beans through rest services.
 
 - Everything will be filled for you by defaults - presenting a full application getting a database connection through any persistence provider (jpa 2.x)
 - define it or implement it - all object-types have their representation (naked objects) as readable xml-file.
@@ -99,6 +100,8 @@ All packages (under name *tsl2nano*) are available in maven central, sourceforge
 * clickable color-themes (mouse click at top left corner (left of beanEx Icon)
 * event sourcing: through tsl2.nano.cursus (persists the state of a business entity as a sequence of state-changing events)
 * is able to evaluate beans through a file or content managment system (CMS)
+* usable as backend, providing database content through rest services
+* usable as encapsulated frontend, calling any backend providing dynamic beans through rest services 
 
 * planned interfaces:
 	* xsd-->bean
@@ -5295,7 +5298,7 @@ If you need to send an email to a (database) registered customer, that has to be
  2.5.6  | 04.05.2025 | h5:+CMSBean, +admin: provide sample applications, prod/admin switch, adding users, layout: additional left/right panels and info menu
  2.5.7  | 25.05.2025 | hotfix: running on android, windows, fixes on openapi, sampleapplications, OSSRH -> maven central portal
  2.5.8  | 04.07.2025 | nosql support: +hibernate-omg-5.4.2, jarresolver maven load fix, CMSBean/Bean fix
- 2.5.9  | 31.12.2025 | RESTDynamic:+health, script jsonschema2pojo, New: ExternalBackend, DetachedBean: BeanValueMap, PKI (sun.security -> bouncycastle)
+ 2.5.9  | 31.12.2025 | RESTDynamic:+health, script jsonschema2pojo, New: ExternalBackend, dyn. detached bean: BeanValueMap, PKI (sun.security -> bouncycastle), build on jdk 25 possible
 |------ | ---------- | -----------
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
@@ -6632,9 +6635,14 @@ Cursus:
       * [x] providing a connect method doing the following:
          * [ ] send a request to backend service with authentication/authorization
          * [ ] deserialize response bean and start a session. all following actions are defined by this bean
-      * [ ] provide a default implementaion as backend service to be used by itself
+      * [x] provide a default implementaion as backend service to be used by itself
          * [ ] how to compose BeanValueMap through given BeanDefinition?
-   * [ ] swagger json to define the backend service with a payload of json serialized Bean<Map>  
+         * [x] toValueMap(...) must be recursive
+   * [x] swagger json to define the backend service with a payload of json serialized Bean<Map>
+      * [v] use the (compiled) generate-openapi.sh (+pom-openapi.xml) script in *target/classes* 
+         * copy tsl2.nano.h5/src/main/java to target/classes/generated-src
+         * change the property *java.package* to *de.tsl2.nano.h5.rest*
+         * run in target/classes: ./generate-openapi.sh spec
    * [v] Bean<Map> (mapOfMaps) coming from external service through json
       * [v] new BeanValueMap: bean instance may be a simple untyped mapOfMaps through json (parts already implemented in Bean class)
       * [v] bean attribute values reference this map of maps through a path expression, or get directly simple values 
@@ -6647,3 +6655,77 @@ Cursus:
       * [ ] failing to load scripting engine
       * [ ] linkedlist in proxy extension TransformingIterable not working with: List, Deque
       * [ ] NanoH5Test: IAttributeDefinition.getColumnDefinition()" is null
+* [ ] structure (refactore packages) of nanoh5
+
+## Terminal Tips
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+clear && cat calc.cpp | pv -qL 10
+xdo key_press -k 46; sleep 0.2; xdo key_release -k 46
+
+## .profile_extension
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+bind -x '"\C-h":select_expression'
+bind -x '"\C-o":select_expression goto_select'
+
+# lets the user select a known directory or a directory inside the current tree (using smartcd, find and fzf)
+# usage: goto_select
+#
+goto_select() {
+   { smartcd --list | sed -E "s/^[0-9]+[:]//g"; find -type d; } | fzy 
+}
+
+# prints the given user selection directly to the commandline without executing it.
+# usage: select_expression [selected-item (default: help_select)]
+#
+select_expression() {
+  local selected=${1:-"$(help_detail "$(help_select)" )"}
+  READLINE_LINE="${READLINE_LINE:0:$READLINE_POINT}${selected}${READLINE_LINE:$READLINE_POINT}"
+  READLINE_POINT=$(( READLINE_POINT + ${#selected} ))
+}
+
+# downloads and caches a help file
+# usage: help_download <view-command> <url> <storing-filename>
+#
+help_download() {
+   [ ! -f $3 ] && curl $2 -o $3 || $1 $3
+}
+
+# provides a help command with arguments for a given string
+# usage: help_detail <text-to-evaluate-a-help-command-for>
+#
+help_detail() {
+   if [[ "$1" == *":bash.txt:"* ]]; then
+      echo "$1" | sed -E "s/([0-9]*)[:]([a-zA-Z0-9\.]+)[:](.*)/less +\1 \2 # \3/g"
+   elif [[ "$1" == *":apt:"* ]]; then
+      echo "$1" | sed -E "s/([0-9]*)[:]([a-zA-Z0-9\.]+)[:]\s*\w\s*([a-zA-Z0-9\.]+)(.*)/apt search \3 # \4/g"
+   elif [[ "$1" == *":man:"* ]]; then
+      echo "$1" | sed -E "s/([0-9]*)[:]([a-zA-Z0-9\.]+)[:]\s*([a-zA-Z0-9\.]+)(.*)/man \3 # \4/g"
+   elif [[ "$1" == *":compgen:"* || "$1" == *":bash:"* ]]; then
+      echo "$1" | sed -E "s/([0-9]*)[:]([a-zA-Z0-9\.]+)[:]\s*([a-zA-Z0-9\.]+)(.*)/\3 --help # \4/g"
+   elif [[ "$1" == *"help_download"* ]]; then
+      echo $1
+   else
+      echo "xdg-open www.google.com/search?q=$1"
+   fi
+}
+
+# creates a list of help entries and lets the user select one through 'fzf'
+# usage: help_select
+# we combine 'apropos', 'compgen', 'bash help', 'aptitude', bash.txt and some online cheatsheets, faqs, handbooks
+#
+help_select() {
+   echo $( { help -d '' | nl -b a -s ":bash: "; \
+      apropos . | nl -b a -s ":man: "; \
+      compgen -A function -abck | nl -b a -s ":compgen: "; \
+      help_download cat https://www.gnu.org/software/bash/manual/bash.txt ~/bash.txt | nl -b a -s ":bash.txt: "; \
+      aptitude search . | nl -b a -s ":apt: "; \
+      echo "help_download xdg-open https://devhints.io/bash ~/bash-scripting-cheatsheets.html # bash scripting cheatsheet"; \
+      echo "help_download xdg-open http://mywiki.wooledge.org/BashFAQ ~/bash-faq.html # bash FAQs"; \
+      echo "help_download xdg-open https://github.com/denysdovhan/bash-handbook ~/bash-handbook.html # bash handbook"; \
+   } | fzf )
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -1,9 +1,10 @@
 #!/bin/bash
-# generate openapi specifiation or api+client classes from specification (Thomas Schneider / 2025)
+# generate openapi specifiation - or api+client classes from specification (Thomas Schneider / 2025)
 # usage: generate-openapi.sh [spec|<url-to-openapi>]
 #
 # example-1: generate-openapi.sh https://github.com/bump-sh-examples/train-travel-api/raw/refs/heads/main/openapi.yaml
 # example-2: generate-openapi.sh spec
+
 
 DEF_OPENAPI="openapi.yaml"
 [[ "$1" == "spec" ]] && GENERATE_SPEC=1 || OPENAPI=${1:-$DEF_OPENAPI}
@@ -19,7 +20,7 @@ DEF_OPENAPI="openapi.yaml"
 #cp pom-openapi.xml pom.xml
 
 if [[ $GENERATE_SPEC != "" ]]; then
-	echo "Generating $DEF_OPENAPI from classes"
+	echo "Generating $DEF_OPENAPI through 'com.github.kongchen:swagger-maven-plugin' from classes in 'generated-src/'"
 	. mvnw -f pom-openapi.xml com.github.kongchen:swagger-maven-plugin:3.1.8:generate
 	
 else

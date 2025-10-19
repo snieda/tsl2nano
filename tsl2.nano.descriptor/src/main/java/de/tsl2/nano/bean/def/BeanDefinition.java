@@ -1668,7 +1668,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             boolean onlySingleValues,
             boolean onlyFilterAttributes,
             String... filterAttributes) {
-        return toValueMap(instance, keyPrefix, onlySingleValues, false, onlyFilterAttributes, filterAttributes);
+        return toValueMap(instance, keyPrefix, onlySingleValues, false, onlyFilterAttributes, true, filterAttributes);
     }
 
     @Override
@@ -1691,6 +1691,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             String keyPrefix,
             boolean onlySingleValues,
             boolean formatted,
+            boolean recursive,
             boolean onlyFilteredAttributes,
             String... filterAttributes) {
         final List<? extends IAttribute> attributes = onlySingleValues ? getSingleValueAttributes() : getAttributes();
@@ -1707,7 +1708,16 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                     value =
                         beanAttribute instanceof IValueAccess ? ((IValueAccess) beanAttribute).getValue() : beanAttribute
                             .getValue(instance);
-                    if (formatted) {
+                    if (recursive && value != null && !Util.isSimpleType(value.getClass())) {
+                        if (value instanceof Collection)
+                            value = toValueMapFromCollection((Collection)value);
+                        else if (value.getClass().isArray())
+                            value = toValueMapFromCollection((Arrays.asList(value)));
+                        else if (value instanceof Map)
+                            value = toValueMapFromMap((Map)(value));
+                        else
+                            value = toValueMap(value);
+                    } else if (formatted) {
                         BeanValue<?> bv = (BeanValue<?>) beanAttribute;
                         if (bv.getFormat() != null) {
                             value = bv.getFormat().format(value);
@@ -1725,6 +1735,17 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             }
         }
         return map;
+    }
+
+    private Map<String, Map> toValueMapFromMap(Map<String, Object> map) {
+        map.entrySet().forEach(e -> e.setValue(toValueMap(e.getValue())));
+        return (Map<String, Map>)Util.untyped(map);
+    }
+
+    private Collection toValueMapFromCollection(Collection collection) {
+        ArrayList<Object> collectionOfMaps = new ArrayList<>(collection.size());
+        collection.forEach(i -> collectionOfMaps.add(ObjectUtil.isObject(i) ? toValueMap(i) : i));
+        return collectionOfMaps;
     }
 
     public T fromValueMap(Map<String, Object> values) {

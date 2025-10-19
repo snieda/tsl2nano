@@ -10,7 +10,7 @@ import de.tsl2.nano.serviceaccess.IAuthorization;
 /**
  * @author Thomas Schneider
  */
-public class RESTDynamic extends ARESTDynamic<NanoHTTPD.Response> {
+public class RESTDynamic extends ARestDynamicBackend<NanoHTTPD.Response> {
 	
 	@Override
 	void checkAuthentication(String url, String method, Map<String, String> header) throws SecurityException {
