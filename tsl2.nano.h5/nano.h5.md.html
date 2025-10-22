@@ -713,6 +713,33 @@ It is possible to change the presentation of each bean. Inside the environments 
 
 It is possible to create an own java project to define own application and bean behaviour. This is described in chapter _Creating an own project_.
 
+## Separating Backend and Frontend
+
+The frameworks default manner is to provide a fullstack back- and frontend using a database. bean classes and their default presentations are
+generated through a database model. The presentation layer is able to present any object - but the generated bean classes will be presented by default.
+
+Separating the backend provides constraining the frontend to have access only to data of a single application user.
+
+If you want to separate backend and frontend, the nanoh5 frontend will call a given backend (maybe the nanoh5 application itself) to get the desired informations.
+To encapsulate the frontend from any kind of definition on the backend, the informations sent by the backend are not constraint or typed by model classes.
+
+we provide a json/yaml api definition (doc/generated/swagger-ui/swagger.yaml) of the backend endpoint, that can be used by the nanoh5 frontend part.
+show it through editor.swagger.io, pasting the content of the swagger.yaml into the left side.
+
+The frontend defines the backend url, user and password through the standard persistence login page of the nanoh5 application.
+To see a simple example, you can reference the nanoh5 itself:
+
+### LOGIN page
+
+* url: https://localhost:8067/rest/backend
+* user: muster
+* password: muster
+
+### On a running nanoh5 application, you can see the api definition through:
+
+* API: https://localhost:8067/rest/api
+* Help (with Example response content): https://localhost:8067/rest/backend
+
 ## The Environment
 
 Loading a _Nano.h5_ application will create and use an environment directory as workspace for it. Resources like icons, configuration xml-file and libraries will be put there - being on top of classpath.
@@ -6651,6 +6678,8 @@ Cursus:
 * [x] provide a health endpoint (with ENV.buildinfo)
 * [x] migrate to be comilable on jdk 25
    * [v] migrate sun.internals to java.security.cert using bouncy-castle in PKI to be compilable on JDK >= 18
+   * [ ] descriptor: tests cannot load tsl-logo.txt
+   * [ ] modelkit: problems on jackson
    * [x] tests on h5 not working in cause of:
       * [ ] failing to load scripting engine
       * [ ] linkedlist in proxy extension TransformingIterable not working with: List, Deque

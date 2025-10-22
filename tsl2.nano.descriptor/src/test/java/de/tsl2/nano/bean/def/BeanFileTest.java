@@ -14,7 +14,6 @@ import java.util.Map;
 
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.tsl2.nano.autotest.TypeBean;
@@ -156,7 +155,7 @@ public class BeanFileTest implements ENVTestPreparation {
         Map asMap = MapUtil.asMap(args);
         assertTrue(BeanUtil.toValueMap(tbm, false, false, true, "string", "primitiveInt").values()
             .containsAll(asMap.values()));
-        assertFalse(BeanUtil.toValueMap(tbm,
+        assertFalse(String.valueOf(asMap.values()), BeanUtil.toValueMap(tbm,
             "",
             false,
             false,

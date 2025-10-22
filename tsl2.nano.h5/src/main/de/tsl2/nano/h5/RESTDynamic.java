@@ -13,10 +13,10 @@ import de.tsl2.nano.serviceaccess.IAuthorization;
 public class RESTDynamic extends ARestDynamicBackend<NanoHTTPD.Response> {
 	
 	@Override
-	void checkAuthentication(String url, String method, Map<String, String> header) throws SecurityException {
+	void checkSessionToken(String url, String method, Map<String, String> header) throws SecurityException {
 		if (ENV.get("app.login.administration", true))
 			return;
-		super.checkAuthentication(url, method, header);
+		super.checkSessionToken(url, method, header);
 		if (preAuthenticatedSession(header))
 			return;
 		getAuthentication(header);

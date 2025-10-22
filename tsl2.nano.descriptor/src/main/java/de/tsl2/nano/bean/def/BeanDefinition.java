@@ -1668,7 +1668,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             boolean onlySingleValues,
             boolean onlyFilterAttributes,
             String... filterAttributes) {
-        return toValueMap(instance, keyPrefix, onlySingleValues, false, onlyFilterAttributes, true, filterAttributes);
+        return toValueMap(instance, keyPrefix, onlySingleValues, false, true, onlyFilterAttributes, filterAttributes);
     }
 
     @Override

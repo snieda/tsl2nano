@@ -10,8 +10,11 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.persistence.Tuple;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import de.tsl2.nano.bean.BeanProxy;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanValueMap;
 import de.tsl2.nano.bean.def.IValueDefinition;
@@ -32,7 +36,9 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.parser.JSon;
+import de.tsl2.nano.h5.rest.NanoBackendJaxrs;
 import de.tsl2.nano.persistence.Persistence;
+import de.tsl2.nano.service.util.BeanContainerUtil;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -109,15 +115,26 @@ public class NanoH5ExternalBackendTest /*implements ENVTestPreparation*/ {
         ARestDynamicBackend<String> backend = createBackend();
 
         String response = backend.serve(BASE_PATH + "/backend", "GET", null);
-        assertTrue(response, response.startsWith("provides responses containing full dynamic beans"));
+        assertTrue(response, response.startsWith("OK: provides responses containing full dynamic beans"));
         assertTrue(response, response.contains("mybean"));
     }
 
     @Test
-    void testBackendReturnsBean() throws IOException {
+    void testBackendNotAllowed() throws IOException {
         ARestDynamicBackend<String> backend = createBackend();
         String response = backend.serve(BASE_PATH + "/backend/muster/muster", "GET", new HashMap<>());
-        assertEquals("huhu", response);
+        assertEquals("FORBIDDEN: not allowed!", response);
+    }
+
+    @Test
+    void testBackendReturnsBean() throws IOException {
+        BeanContainerUtil.initEmptyProxyServices();
+        ARestDynamicBackend<String> backend = createBackend();
+        String url = BASE_PATH + "/backend/muster/muster";
+        String digest = ARestDynamicBackend.createDigest(url, "GET", "");
+        String response = backend.serve(url, "GET", MapUtil.asMap("identity", "muster", "authorization", digest));
+        String expected = "OK: {\"id\": \"bean-for-muster\",\"name\": \"musterbean\",\"instance\": {\"id\": \"bean-for-muster\",\"name\": \"musterbean\",\"key\": \"muster\",\"value\": \"found\"},\"valueExpression\": {\"attributeNames\": [\"id\"],\"comparator\": {},\"expression\": \"{id}\",\"name\": \"{id}\",\"type\": {\"name\": \"java.util.LinkedHashMap\"}},\"attributeDefs\": [{\"name\": \"id\",\"description\": \"bean-for-muster.id\",\"constraint\": {\"format\": {},\"length\": -1,\"precision\": -1,\"scale\": -1,\"type\": {\"name\": \"java.lang.String\"},\"nullable\": true},\"presentation\": {\"description\": \"bean-for-muster.id\",\"enabler\": \"Always Active\",\"height\": -1,\"label\": \"Bean-For-Id\",\"style\": 4,\"type\": 1,\"width\": -1,\"nesting\": false,\"searchable\": true,\"visible\": true}},{\"name\": \"name\",\"description\": \"bean-for-muster.name\",\"constraint\": {\"format\": {},\"length\": -1,\"precision\": -1,\"scale\": -1,\"type\": {\"name\": \"java.lang.String\"},\"nullable\": true},\"presentation\": {\"description\": \"bean-for-muster.name\",\"enabler\": \"Always Active\",\"height\": -1,\"label\": \"Bean-For-Name\",\"style\": 4,\"type\": 1,\"width\": -1,\"nesting\": false,\"searchable\": true,\"visible\": true}},{\"name\": \"key\",\"description\": \"bean-for-muster.key\",\"constraint\": {\"format\": {},\"length\": -1,\"precision\": -1,\"scale\": -1,\"type\": {\"name\": \"java.lang.String\"},\"nullable\": true},\"presentation\": {\"description\": \"bean-for-muster.key\",\"enabler\": \"Always Active\",\"height\": -1,\"label\": \"Bean-For-Key\",\"style\": 4,\"type\": 1,\"width\": -1,\"nesting\": false,\"searchable\": true,\"visible\": true}},{\"name\": \"value\",\"description\": \"bean-for-muster.value\",\"constraint\": {\"format\": {},\"length\": -1,\"precision\": -1,\"scale\": -1,\"type\": {\"name\": \"java.lang.String\"},\"nullable\": true},\"presentation\": {\"description\": \"bean-for-muster.value\",\"enabler\": \"Always Active\",\"height\": -1,\"label\": \"Bean-For-Value\",\"style\": 4,\"type\": 1,\"width\": -1,\"nesting\": false,\"searchable\": true,\"visible\": true}}]}";
+        assertEquals(expected, response);
     }
 
     @Test
@@ -137,6 +154,17 @@ public class NanoH5ExternalBackendTest /*implements ENVTestPreparation*/ {
             @Override
             String createResponse(Status status, String message) {
                 return status + ": " + message;
+            }
+            @Override
+            BeanValueMap callNanoBackendApi(Map<String, String> payload, String identity) {
+                return new NanoBackendJaxrs() {
+                    public java.util.Collection<Object> query(String user, String query) {
+                        return Arrays.asList(BeanProxy.createBeanImplementation(Tuple.class));
+                    }
+                    protected java.util.Map<String,String> toMap(Tuple first) {
+                        return MapUtil.asMap("id", "bean-for-muster", "name", "musterbean", "key", "muster", "value", "found");
+                    }
+                }.backend(identity, identity, (Map)payload);
             }
         };
         return backend;

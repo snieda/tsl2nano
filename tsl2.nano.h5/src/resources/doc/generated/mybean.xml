@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beanValueMap clazz="java.util.LinkedHashMap" name="MyBean" strict="false" isNested="false" isdefault="true" xmlns="http://sourceforge.net/projects/tsl2nano ./beandef.xsd">
+   <valueExpression expression="{id}" type="java.util.LinkedHashMap"/>
+   <isconnected>false</isconnected>
+   <seal>0</seal>
+   <attribute name="id">
+      <attributeDefinition class="de.tsl2.nano.bean.def.MBeanValue" id="false" unique="false" doValidation="true" composition="false" cascading="false" generatedValue="false" isTransient="false">
+         <declaring class="de.tsl2.nano.bean.def.MapValue" type="java.lang.String">
+            <name class="java.lang.String">id</name>
+         </declaring>
+         <constraint type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
+         <presentable class="de.tsl2.nano.h5.Html5Presentable" type="1" style="4" visible="true" searchable="true" nesting="false" gridWidth="0" gridHeight="0">
+            <label>mybean.id</label>
+            <description>mybean.id</description>
+            <enabler class="de.tsl2.nano.action.IActivable$1" active="true"/>
+         </presentable>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="name">
+      <attributeDefinition class="de.tsl2.nano.bean.def.MBeanValue" id="false" unique="false" doValidation="true" composition="false" cascading="false" generatedValue="false" isTransient="false">
+         <declaring class="de.tsl2.nano.bean.def.MapValue" type="java.lang.String">
+            <name class="java.lang.String">name</name>
+         </declaring>
+         <constraint type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
+         <presentable class="de.tsl2.nano.h5.Html5Presentable" type="1" style="4" visible="true" searchable="true" nesting="false" gridWidth="0" gridHeight="0">
+            <label>mybean.name</label>
+            <description>mybean.name</description>
+            <enabler class="de.tsl2.nano.action.IActivable$1" active="true"/>
+         </presentable>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="submap">
+      <attributeDefinition class="de.tsl2.nano.bean.def.MBeanValue" id="false" unique="false" doValidation="true" composition="false" cascading="false" generatedValue="false" isTransient="false">
+         <declaring class="de.tsl2.nano.bean.def.MapValue" type="java.util.LinkedHashMap">
+            <name class="java.lang.String">submap</name>
+         </declaring>
+         <constraint type="java.util.LinkedHashMap" nullable="true" length="-1" scale="-1" precision="-1"/>
+         <presentable class="de.tsl2.nano.h5.Html5Presentable" type="4097" style="4" visible="true" searchable="true" nesting="false" gridWidth="0" gridHeight="0">
+            <label>mybean.submap</label>
+            <description>mybean.submap</description>
+            <enabler class="de.tsl2.nano.action.IActivable$1" active="true"/>
+         </presentable>
+      </attributeDefinition>
+   </attribute>
+</beanValueMap>

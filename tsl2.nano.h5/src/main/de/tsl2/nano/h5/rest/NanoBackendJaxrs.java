@@ -43,13 +43,23 @@ public class NanoBackendJaxrs {
         String query = ENV.get("app.internal.backend.query",
             "select p.*, c.* from charge c, party p where party.name=:name and charge.party=party.id"
         );
-        Collection<Object> result = BeanContainer.instance().getBeansByQuery(query, true, new Object[]{user});
+        Collection<Object> result = query(user, query);
+        if (Util.isEmpty(result))
+            throw new IllegalArgumentException("no data found for: " + user);
         // should we return a collection? No, the single bean may have attributes containing collections!
         Tuple first = (Tuple) result.iterator().next();
-        first.getElements().stream().collect(Collectors.toMap( 
-            e -> ((TupleElement)e).getAlias(), 
+        return BeanValueMap.from(toMap(first));
+    }
+
+    @SuppressWarnings("rawtypes")
+    protected Map<String, String> toMap(Tuple first) {
+        return first.getElements().stream().collect(Collectors.toMap( 
+            e -> ((TupleElement)e).getAlias(),
             e -> ((TupleElement)e).toString())
             );
-        return !Util.isEmpty(result) ? BeanValueMap.from(first) : null;
+    }
+
+    protected Collection<Object> query(String user, String query) {
+        return BeanContainer.instance().getBeansByQuery(query, true, new Object[]{user});
     }
 }

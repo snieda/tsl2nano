@@ -43,8 +43,8 @@ public class BeanValueMap extends Bean<Map> {
     }
 
     public static BeanValueMap from(Object instance) {
-        Bean<Object> bean = Bean.getBean(instance);
-        return new BeanValueMap(bean.toValueMap(null));
+        Bean<?> bean = Bean.getBean(instance);
+        return instance instanceof Map ? (BeanValueMap)bean : new BeanValueMap(bean.toValueMap(null));
     }
 
     public static Bean<Map> createMapValueAttributes(Map map, Bean<Map> bean) {
@@ -172,7 +172,8 @@ public class BeanValueMap extends Bean<Map> {
 
     @Override
     public Object getId() {
-        return instance.get("id");
+        Object id = instance.get("id");
+        return id != null ? id : getName();
     }
 
     @SuppressWarnings("unchecked")

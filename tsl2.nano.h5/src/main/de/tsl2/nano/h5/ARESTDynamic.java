@@ -122,7 +122,7 @@ public abstract class ARESTDynamic<RESPONSE> {
 			return createResponse(Status.OK, printEntitiesJSON());
 		
 		if (!internalCall) 
-			checkAuthentication(url, method, header);
+			checkSessionToken(url, method, header);
 		checkMethod(method);
 		String beanName = get(url, BASE_PATH, "entity");
 		String actionOrAttribute = get(url, beanName, "attribute-or-action");
@@ -135,7 +135,7 @@ public abstract class ARESTDynamic<RESPONSE> {
 		}
 	}
 
-	void checkAuthentication(String url, String method, Map<String, String> header) throws SecurityException {
+	void checkSessionToken(String url, String method, Map<String, String> header) throws SecurityException {
 		if (header == null)
 			throw new SecurityException("please provide a header map with Authorization");
 		String auth = header.get("authorization");
@@ -144,6 +144,7 @@ public abstract class ARESTDynamic<RESPONSE> {
 			String digest = split[split.length-1];
 			StringBuilder buf = new StringBuilder();
 			ISession session = (ISession) Util.untyped(header.get(H5SESSION));
+			// TODO: securtiy leak. if session is null , redirect to nanoh5 login
 			if (session != null)
 				buf.append(session.getId().toString());
 			for (int i = 0; i < split.length-1; i++) {

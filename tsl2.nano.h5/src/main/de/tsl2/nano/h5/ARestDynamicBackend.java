@@ -2,7 +2,6 @@ package de.tsl2.nano.h5;
 
 import java.util.Map;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.bean.def.BeanValueMap;
@@ -20,7 +19,7 @@ public abstract class ARestDynamicBackend<RESPONSE> extends ARESTDynamic<RESPONS
             return createResponse(Status.OK, printBackendHelp());
 		} else if (isBackendRequest(url)) {
 			if (!internalCall) 
-				checkAuthentication(url, method, header);
+				checkSessionToken(url, method, header);
 			checkMethod(method);
 			
             return doBackendRequest(url, method, payload, header);
@@ -43,20 +42,15 @@ public abstract class ARestDynamicBackend<RESPONSE> extends ARESTDynamic<RESPONS
 		// StringBuilder result = new StringBuilder();
 		// result.append(evalBackendDataForGivenIdentity(identity));
 
-        BeanValueMap resultBean = new NanoBackendJaxrs().backend(identity, identity, (Map)payload);
+        BeanValueMap resultBean = callNanoBackendApi(payload, identity);
 		String json = new JSon().serialize(resultBean);
 		LOG.info("REST (" + method + ") " + url + " --> " + json);
         return createResponse(status, json);
 	}
 
-	private String evalBackendDataForGivenIdentity(String identity) {
-		// List<Class> beanTypes = ENV.get("service.loadedBeanTypes", new LinkedList<Class>());
-		// BeanDefinition<?> beanDef;
-		// for (Class b : beanTypes) {
-		// 	beanDef = BeanDefinition.getBeanDefinition(b);
-		// }
-		throw new NotImplementedException();
-	}
+    BeanValueMap callNanoBackendApi(Map<String, String> payload, String identity) {
+        return new NanoBackendJaxrs().backend(identity, identity, (Map)payload);
+    }
 
 	public static String printBackendHelp() {
         String example = FileUtil.getFileString("doc/generated/example-beanvaluemap.json");
