@@ -169,6 +169,7 @@ public class NanoH5Test implements ENVTestPreparation {
         String pckName = beanTypesToCheck[0].getPackage().getName();
         System.setProperty("bean.generation.packagename", pckName);
         System.setProperty("bean.generation.outputpath", DIR_TEST);
+        ENV.setProperty("app.doc.name", Persistence.current().getDatabase());
         
         ACodeGenerator.start(new String[] { "target/test-classes/" + pckName.replace('.', '/'), "codegen/beanconstant.vm" }, null, 0);
 

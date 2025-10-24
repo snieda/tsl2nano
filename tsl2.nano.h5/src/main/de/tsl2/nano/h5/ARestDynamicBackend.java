@@ -33,7 +33,6 @@ public abstract class ARestDynamicBackend<RESPONSE> extends ARESTDynamic<RESPONS
 		return url.contains(BASE_PATH + "/backend");
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
     protected RESPONSE doBackendRequest(String url, String method, Map<String, String> payload, Map<String, String> header) {
 		String identity = header.get("identity");
 		if (identity == null)
@@ -44,11 +43,12 @@ public abstract class ARestDynamicBackend<RESPONSE> extends ARESTDynamic<RESPONS
 
         BeanValueMap resultBean = callNanoBackendApi(payload, identity);
 		String json = new JSon().serialize(resultBean);
-		LOG.info("REST (" + method + ") " + url + " --> " + json);
+		LOG.debug("REST (" + method + ") " + url + " --> " + json);
         return createResponse(status, json);
 	}
 
-    BeanValueMap callNanoBackendApi(Map<String, String> payload, String identity) {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	BeanValueMap callNanoBackendApi(Map<String, String> payload, String identity) {
         return new NanoBackendJaxrs().backend(identity, identity, (Map)payload);
     }
 

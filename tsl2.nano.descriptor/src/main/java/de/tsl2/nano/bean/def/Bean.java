@@ -901,6 +901,13 @@ public class Bean<T> extends BeanDefinition<T> {
         this.detacher = detacher;
     }
 
+    public static boolean removeFromCache(Object instance, boolean removeWithDefinition) {
+         Bean bean = timedCache.remove(instance);
+        if (bean != null && removeWithDefinition)
+            bean.deleteDefinition();
+        return bean != null;
+    }
+
     /**
      * cleans all bean relevant caches (BeanClass, BeanValue, BeanDefinition, Bean).
      * 

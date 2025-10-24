@@ -34,7 +34,7 @@
 		<surefire.testFailureIgnore>false</surefire.testFailureIgnore>
 		<maven.test.failure.ignore>false</maven.test.failure.ignore>
 		<!-- add-opens: don't add line breaks by yourself - this is done through maven (72 cols) -->
-		<add-opens-unnamed>java.base/java.lang java.base/java.util java.base/java.text java.base/java.time.format java.base/java.lang.reflect java.base/java.security.auth java.base/sun.reflect.annotation java.base/java.io java.base/sun.nio.ch java.base/java.net java.base/jdk.internal.module java.xml/javax.xml.stream.events java.xml/org.w3c.dom java.xml/javax.xml.namespace jdk.management/com.sun.management.internal java.management/sun.management
+		<add-opens-unnamed>java.base/java.lang java.base/java.util java.base/java.text java.base/java.time.format java.base/java.lang.reflect java.base/java.security.auth java.base/sun.reflect.annotation java.base/java.io java.base/sun.nio.ch java.base/java.net java.base/jdk.internal.module java.base/javax.security.auth java.xml/javax.xml.stream.events java.xml/org.w3c.dom java.xml/javax.xml.namespace jdk.management/com.sun.management.internal java.management/sun.management
 		</add-opens-unnamed>
 		<!-- WARN: add-exports only on compile scope otherwise jar file may be corrupt -->
 		<add-export-unnamed>java.base/jdk.internal.module java.management/sun.management
@@ -398,6 +398,7 @@
 									   <jvmarg value="--add-opens=java.xml/javax.xml.namespace=ALL-UNNAMED" />
 										<jvmarg value="--add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED" />
 										<jvmarg value="--add-opens=java.management/sun.management=ALL-UNNAMED" />
+										<jvmarg value="--add-opens=java.base/javax.security.auth=ALL-UNNAMED" />
 									<sysproperty key="app.server.running" value="true" />
 	                                <sysproperty key="app.database.internal.server.run" value="true" />
 	                                <sysproperty key="websocket.use" value="true" />

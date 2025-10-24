@@ -16,6 +16,7 @@ import java.util.Map;
 
 import javax.persistence.Tuple;
 
+import org.junit.BeforeClass;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,11 +30,9 @@ import org.mockito.quality.Strictness;
 import de.tsl2.nano.bean.BeanProxy;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanValueMap;
-import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.http.EHttpClient;
-import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.parser.JSon;
 import de.tsl2.nano.h5.rest.NanoBackendJaxrs;
@@ -43,71 +42,24 @@ import de.tsl2.nano.service.util.BeanContainerUtil;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class NanoH5ExternalBackendTest /*implements ENVTestPreparation*/ {
+// @TestMethodOrder(MethodOrderer.Random.class)
+public class NanoH5ExternalBackendTest implements ENVTestPreparation {
 
     NanoH5ExternalBackend backend;
     @Mock Persistence persistence;
     @Mock HttpURLConnection httpURLConnection;
 
-    // @BeforeClass
-    // public static void setUpClass() {
-    //     ENVTestPreparation.setUp();
-    // }
+    @BeforeClass
+    public static void setUpClass() {
+        ENVTestPreparation.setUp();
+    }
+
 
     @BeforeEach
     void setUp() throws IOException {
         when(persistence.getConnectionUrl()).thenReturn("http://test-backend");
         when(persistence.getConnectionUserName()).thenReturn("user");
         when(persistence.getConnectionPassword()).thenReturn("pass");
-    }
-
-    @SuppressWarnings("rawtypes")
-    @Test
-    void testBeanMapSerialization() {
-        LogFactory.setLogLevel(LogFactory.DEBUG);
-        Html5Presentation.registereNanoH5Implemenations();
-
-        Bean<Map> bean = createExampleBean();
-
-        String json = new JSon().serialize(bean);
-        String expected = "{\"id\":\"mybean\",\"name\":\"MyBean\",\"instance\":{\"id\":\"mybean\",\"name\":\"MyBean\",\"submap\":{\"ki1\":\"vi1\"}},\"valueExpression\":{\"attributeNames\":[\"id\"],\"comparator\":{},\"expression\":\"{id}\",\"name\":\"{id}\",\"type\":{\"name\":\"java.util.LinkedHashMap\"}},\"attributeDefs\":[{\"name\":\"id\",\"description\":\"mybean.id\",\"constraint\":{\"format\":{},\"length\":-1,\"precision\":-1,\"scale\":-1,\"type\":{\"name\":\"java.lang.String\"},\"nullable\":true},\"presentation\":{\"description\":\"mybean.id\",\"enabler\":\"AlwaysActive\",\"gridHeight\":0,\"gridWidth\":0,\"height\":-1,\"label\":\"Id\",\"serialversionuid\":-XXX,\"style\":4,\"type\":1,\"width\":-1,\"nesting\":false,\"searchable\":true,\"visible\":true}},{\"name\":\"name\",\"description\":\"mybean.name\",\"constraint\":{\"format\":{},\"length\":-1,\"precision\":-1,\"scale\":-1,\"type\":{\"name\":\"java.lang.String\"},\"nullable\":true},\"presentation\":{\"description\":\"mybean.name\",\"enabler\":\"AlwaysActive\",\"gridHeight\":0,\"gridWidth\":0,\"height\":-1,\"label\":\"Name\",\"serialversionuid\":-XXX,\"style\":4,\"type\":1,\"width\":-1,\"nesting\":false,\"searchable\":true,\"visible\":true}},{\"name\":\"submap\",\"description\":\"mybean.submap\",\"constraint\":{\"format\":{\"valueExpression\":{\"comparator\":{},\"type\":{\"name\":\"java.lang.Object\"}}},\"length\":-1,\"precision\":-1,\"scale\":-1,\"type\":{\"name\":\"java.util.LinkedHashMap\"},\"nullable\":true},\"presentation\":{\"description\":\"mybean.submap\",\"enabler\":\"AlwaysActive\",\"gridHeight\":0,\"gridWidth\":0,\"height\":-1,\"label\":\"Submap\",\"serialversionuid\":-XXX,\"style\":4,\"type\":XXX,\"width\":-1,\"nesting\":false,\"searchable\":true,\"visible\":true}}]}";
-        
-        assertEquals(ignoreSome(expected), ignoreSome(json));
-
-        Bean rbean = new JSon().toObject(BeanValueMap.class, json);
-        assertEquals(bean.getDeclaringClass(), rbean.getDeclaringClass().getSuperclass());
-        assertEquals(bean.getId(), rbean.getId());
-        // assertEquals(bean.toString(), rbean.toString());
-        // assertArrayEquals(bean.getAttributeNames(), rbean.getAttributeNames());
-        // assertEquals(bean.getBeanValues(), rbean.getBeanValues());
-
-        assertEquals_(bean, rbean);
-        FileUtil.save("doc/generated/example-beanvaluemap.json", json);
-    }
-
-    private void assertEquals_(Bean<Map> bean, Bean rbean) {
-        String json;
-        //WORKAROUND: on submap the format is different....
-        bean.getAttributes().forEach(a -> ((IValueDefinition)a).getConstraint().setFormat(null));
-        rbean.getAttributes().forEach(a -> ((IValueDefinition)a).getConstraint().setFormat(null));
-        
-        json = new JSon().serialize(bean);
-        
-        assertEquals(ignoreSome(json), ignoreSome(new JSon().serialize(rbean)));
-    }
-
-    private Bean<Map> createExampleBean() {
-        Map internalMap = MapUtil.asMap("ki1", "vi1");
-        Map instance = MapUtil.asMap("id", "mybean", "name", "MyBean", "submap", internalMap);
-        //will handle a map instance configuring default attributes
-        Bean<Map> bean = Bean.getBean(instance);
-        return bean;
-    }
-
-    private String ignoreSome(String str) {
-        return str.replaceAll("[\t\r\n\\s]", "")
-            .replaceAll("\\d{4,99}", "XXX")
-            .replaceAll("Proxy\\d+", "ProxyXXX");
     }
 
     @Test
@@ -172,7 +124,7 @@ public class NanoH5ExternalBackendTest /*implements ENVTestPreparation*/ {
 
     @Test
     void testConnectReturnsBean() throws IOException {
-        Bean bean = createExampleBean();
+        Bean bean = BeanValueMapTest.createExampleBean();
         String json = new JSon().serialize(bean);
 
         backend = spy(new NanoH5ExternalBackend(8080, new File(".")) {
@@ -185,7 +137,7 @@ public class NanoH5ExternalBackendTest /*implements ENVTestPreparation*/ {
         // when(backend.getResponse(any())).thenReturn(json); // not working
 
         Bean<?> result = (Bean<?>) backend.connect(persistence);
-        assertEquals_(bean, result);
+        BeanValueMapTest.assertEquals_(bean, result);
     }
 
     @Test

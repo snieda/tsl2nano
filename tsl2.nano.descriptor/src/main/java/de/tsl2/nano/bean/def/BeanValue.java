@@ -457,7 +457,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
             if (description != null) {
                 return description;
             } else if (getName() != null){
-                return getParent().getId() + "." + getName();
+                return (getParent() != null ? getParent().getId() + ".": "") + getName();
             } else {
                 return BeanUtil.createUUID();
             }

@@ -1808,7 +1808,7 @@ public class BeanPresentationHelper<T> {
                 final File pdfFile = new File(helpFile + "pdf");
                 final String tooltip = htmlFile.getPath() + " or " + pdfFile.getPath();
                 // the docName is the dir where hbm-doc generates html-doc on generating the database
-                String docName = ENV.get("app.doc.name", ENV.get(ENV.getApplicationMainPackage(), "test"));
+                String docName = ENV.get("app.doc.name", ENV.getApplicationMainPackage());
                 final File generatedIndexFile =
                     new File(ENV.getConfigPathRel() + "doc/" + docName + "/index.html");
                 final File generatedIndexFileURL = new File("doc/" + docName + "/index.html");
