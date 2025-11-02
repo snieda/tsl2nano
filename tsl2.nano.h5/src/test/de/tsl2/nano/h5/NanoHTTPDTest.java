@@ -25,8 +25,9 @@ public class NanoHTTPDTest {
 		System.setIn(new ByteArrayInputStream( "\n".getBytes() ));
 		String port = "8069";
 		NanoHTTPD.main(new String[] {"-p", port});
-		HttpClient httpClient = new HttpClient("http://localhost:" + port);
-		InputStream response = httpClient.send("GET", "text/html", null);
+		String url = "http://localhost:" + port;
+		HttpClient httpClient = new HttpClient(url);
+		InputStream response = httpClient.send(url, "GET", "text/html", null);
 		System.out.println(StringUtil.fromInputStream(response));
 	}
 

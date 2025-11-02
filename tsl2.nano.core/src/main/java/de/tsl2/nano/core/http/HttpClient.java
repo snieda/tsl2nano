@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -33,50 +34,34 @@ import de.tsl2.nano.core.util.MapUtil;
  */
 public class HttpClient implements Runnable {
     Log LOG = LogFactory.getLog(HttpClient.class);
-    
-    HttpURLConnection http;
 
+    protected String url;
+
+    protected HttpURLConnection http;
+    
     static final String UTF8 = "UTF-8";
 
-    public HttpClient(String wsUrl) {
-        createHttpConnection(wsUrl);
+    public HttpClient(String url) {
+        this.url = url;
     }
 
-    /**
-     * createHttpConnection
-     * @param wsUrl
-     */
-    protected HttpClient createHttpConnection(String wsUrl) {
+    protected HttpURLConnection openHttpConnection(String wsUrl) {
         try {
             URL url = new URL(wsUrl);
-            http = (HttpURLConnection) url.openConnection();
+            return (HttpURLConnection) url.openConnection();
         } catch (Exception e) {
             ManagedException.forward(e);
+            return null;
         }
-        return this;
     }
 
     public String getString() {
-        return read(get(null), String.class);
+        return read(get(url, null), String.class);
     }
     public InputStream get() {
-        return get(null);
+        return get(url, null);
     }
 
-    public HttpClient setRequestProperty(String key, String value) {
-        http.setRequestProperty(key, value);
-        return this;
-    }
-
-    public HttpClient setHeader(Map<String, Object> header) {
-        header.forEach( (k, v) -> http.setRequestProperty(k, String.valueOf(v)));
-        return this;
-    }
-
-    public void setReadTimeout(int timeout) {
-        http.setReadTimeout(timeout);
-    }
-    
     /**
      * delegates to {@link #http(String, String, String, byte[])} with method GET
      * 
@@ -84,8 +69,8 @@ public class HttpClient implements Runnable {
      * @param contenttype
      * @return url inputstream
      */
-    public InputStream get(String contenttype) {
-        return send("GET", contenttype, null);
+    public InputStream get(String url, String contenttype) {
+        return send(url, "GET", contenttype, null);
     }
 
     /**
@@ -98,13 +83,14 @@ public class HttpClient implements Runnable {
      * @param data (optional) data to post or put (only if method is POST or PUT)
      * @return the http response after sending the request. error handling is included using unchecked exceptions
      */
-    public InputStream send(String method, String contenttype, byte[] data) {
-        return send(method, MapUtil.asProperties("Content-Type", contenttype), data);
+    public InputStream send(String url, String method, String contenttype, byte[] data) {
+        return send(url, method, MapUtil.asProperties("Content-Type", contenttype), data);
     }
 
-    public InputStream send(String method, Map<String, Object> header, byte[] data) {
+    public InputStream send(String url, String method, Map<String, Object> header, byte[] data) {
 
         try {
+            http = openHttpConnection(url);
             http.setRequestMethod(method);
             if (header != null) {
                 header.forEach( (k, v) -> http.addRequestProperty(k, String.valueOf(v) ) );
@@ -114,16 +100,19 @@ public class HttpClient implements Runnable {
                 http.setFixedLengthStreamingMode(data.length);
                 OutputStream os = http.getOutputStream();
                 os.write(data);
+                os.close();
             }
             run();
-            return response();
+            return response(http);
         } catch (Exception e) {
             ManagedException.forward(e);
             return null;
+        } finally {
+            http = null;
         }
     }
 
-    public InputStream response() {
+    public InputStream response(URLConnection http) {
         try {
             return http.getInputStream();
         } catch (IOException e) {
@@ -133,7 +122,14 @@ public class HttpClient implements Runnable {
     }
 
     public byte[] read(InputStream in) {
-        return ByteUtil.toByteArray(in);
+        try {
+            try (in) {
+                return ByteUtil.toByteArray(in);
+            }
+        } catch (IOException e) {
+            ManagedException.forward(e);
+            return null;
+        }
     }
     
     public <T> T read(InputStream in, Class<T> type) {
@@ -162,6 +158,6 @@ public class HttpClient implements Runnable {
 
     @Override
     public String toString() {
-        return http.toString();
+        return url;
     }
 }

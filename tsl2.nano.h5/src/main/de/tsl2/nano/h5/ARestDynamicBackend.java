@@ -5,8 +5,10 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.bean.def.BeanValueMap;
+import de.tsl2.nano.core.http.EHttpClient;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.core.util.parser.JSon;
 import de.tsl2.nano.h5.rest.NanoBackendJaxrs;
 
@@ -15,7 +17,7 @@ public abstract class ARestDynamicBackend<RESPONSE> extends ARESTDynamic<RESPONS
 
     @Override
 	protected RESPONSE doServe(String url, String method, Map<String, String> header, Map<String, String> parms, Map<String, String> payload, boolean internalCall) throws IllegalAccessException {
-        if (url.equals(BASE_PATH + "/backend")) {
+        if (url.equals(BASE_PATH + "/backend/help")) {
             return createResponse(Status.OK, printBackendHelp());
 		} else if (isBackendRequest(url)) {
 			if (!internalCall) 
@@ -34,14 +36,12 @@ public abstract class ARestDynamicBackend<RESPONSE> extends ARESTDynamic<RESPONS
 	}
 
     protected RESPONSE doBackendRequest(String url, String method, Map<String, String> payload, Map<String, String> header) {
-		String identity = header.get("identity");
-		if (identity == null)
-			return createResponse(Status.BAD_REQUEST, "no identity given for backend request");
+		String[] basicAuth = EHttpClient.getBasicAuthorization(header);
+		if (Util.isEmpty(basicAuth))
+			return createResponse(Status.UNAUTHORIZED, "missing Basic-Authorization on backend request");
 		Status status = Status.OK;
-		// StringBuilder result = new StringBuilder();
-		// result.append(evalBackendDataForGivenIdentity(identity));
 
-        BeanValueMap resultBean = callNanoBackendApi(payload, identity);
+        BeanValueMap resultBean = callNanoBackendApi(payload, basicAuth[0]);
 		String json = new JSon().serialize(resultBean);
 		LOG.debug("REST (" + method + ") " + url + " --> " + json);
         return createResponse(status, json);
@@ -53,7 +53,7 @@ public abstract class ARestDynamicBackend<RESPONSE> extends ARESTDynamic<RESPONS
     }
 
 	public static String printBackendHelp() {
-        String example = FileUtil.getFileString("doc/generated/example-beanvaluemap.json");
+        String example = new String(FileUtil.getFileBytes("doc/generated/example-beanvaluemap.json", null));
 		return 
 		"provides responses containing full dynamic beans with presentation+mapped-data.\n" +
 		"the h5 framework itself is able to use this backend as base for its html5 presentation instead of\n" +
@@ -68,7 +68,7 @@ public abstract class ARestDynamicBackend<RESPONSE> extends ARESTDynamic<RESPONS
         String help = super.printManual();
         return help 
             + "\n------------------- RESTDynamic Backend informations ----------------------------\n"
-            + "\n\tbackend-help        : prints a help for use as backend (see NanoBackendJaxrs)"
+            + "\n\tbackend/help        : prints a help for use as backend (see NanoBackendJaxrs)"
             + "\n\tbackend             : calls backend nanoh5 functionality"
             + "\n---------------------------------------------------------------------------------\n";
     }

@@ -315,12 +315,7 @@ public class ByteUtil extends Util {
      * @return all bytes of given stream
      */
     public static final byte[] toByteArray(InputStream stream) {
-        try {
-            return FileUtil.readBytes(stream);
-        } catch (IOException e) {
-            ManagedException.forward(e);
-            return null;
-        }
+        return Util.trY( () -> FileUtil.readBytes(stream));
     }
 
     public static final String toString(Object obj) {

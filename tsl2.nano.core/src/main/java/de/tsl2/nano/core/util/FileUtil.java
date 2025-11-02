@@ -188,7 +188,7 @@ public class FileUtil {
             }
 
             //read source
-            return readBytes(sourceStream/*, zipEntry.getName(), (int) zipEntry.getSize()*/);
+            return readBytes(sourceStream, false/*, zipEntry.getName(), (int) zipEntry.getSize()*/);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         } finally {
@@ -274,10 +274,22 @@ public class FileUtil {
 //    }
 
     public static byte[] readBytes(InputStream stream) throws IOException {
-        return readBytes(stream, new ByteArrayOutputStream()).toByteArray();
+        return readBytes(stream, true);
     }
 
-    public static <O extends OutputStream> O readBytes(InputStream stream, O output) throws IOException {
+    public static byte[] readBytes(InputStream stream, boolean close) throws IOException {
+        return close 
+            ? readBytes(stream, new ByteArrayOutputStream()).toByteArray() 
+            : readBytes_(stream, new ByteArrayOutputStream()).toByteArray();
+    }
+
+    private static <O extends OutputStream> O readBytes(InputStream stream, O output) throws IOException {
+        try (stream; output) {
+            return readBytes_(stream, output);
+        }
+    }
+
+    private static <O extends OutputStream> O readBytes_(InputStream stream, O output) throws IOException {
         int r;
         while ((r = stream.read()) != -1) {
             output.write(r);
@@ -809,7 +821,7 @@ public class FileUtil {
 	            }
 	            LOG.info(ByteUtil.amount(length) + " read from stream " + stream);
             } else {
-            	data = new String(readBytes(stream), encoding != null ? encoding : Charset.defaultCharset().name()).toCharArray();
+            	data = new String(readBytes(stream, false), encoding != null ? encoding : Charset.defaultCharset().name()).toCharArray();
             }
             //stream.available() does not guarantee to return the total amount of bytes!
             if (stream.available() > 0) {

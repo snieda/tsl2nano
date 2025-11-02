@@ -2,7 +2,10 @@ package de.tsl2.nano.h5;
 
 import java.util.Map;
 
+import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.http.EHttpClient;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.h5.NanoHTTPD.Response;
 import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.IAuthorization;
@@ -28,19 +31,26 @@ public class RESTDynamic extends ARestDynamicBackend<NanoHTTPD.Response> {
 	}
 
 	private IAuthorization getAuthentication(Map<String, String> header) {
-		String user = header.get("user");
-		String passwd = header.get("password");
-		if (user == null || passwd == null || Users.load().auth(user, passwd) == null)
-			throw new SecurityException("not authenticated");
-		return Authorization.create(user, Boolean.getBoolean("app.login.secure"));
+		// if (!BeanContainer.isInitialized() || !BeanContainer.instance().hasPermission(BASE_PATH, null))
+		// 	throw new SecurityException("not authenticated");
+
+		String[] auth = EHttpClient.getBasicAuthorization(header);
+		if (auth.length < 1)
+			throw new SecurityException("unauthorized");
+		String password = auth.length > 1 ? auth[1] : "";
+		if (Users.load().auth(auth[0], password) == null)
+			throw new SecurityException("unknown user or password");
+		return Authorization.create(auth[0], Boolean.getBoolean("app.login.secure"));
 	}
 
 	@Override
 	public void checkAuthorization(String beanName, String actionOrAttribute, Map<String, String> header) throws IllegalAccessException {
-		if (ENV.get("app.login.administration", true))
-			return;
-//		if (!getAuthentication(header).hasAccess(beanName, actionOrAttribute))
-//			throw new IllegalAccessException("not authorized");
+		// if (ENV.get("app.login.administration", true))
+		// 	return;
+		IAuthorization auth;
+		if (!(auth = getAuthentication(header)).hasAccess(beanName, actionOrAttribute))
+			throw new IllegalAccessException("not authorized");
+		ConcurrentUtil.setCurrent(auth, BeanContainer.instance());
 	}
 
 	@Override

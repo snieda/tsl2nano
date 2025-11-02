@@ -119,18 +119,21 @@ public class BeanPresentationHelper<T> {
     public static final String PROP_ALLOWED_VALUES = "allowedValues";
     public static final String PROP_NULLABLE = "nullable";
     public static final String PROP_DOVALIDATION = "doValidation";
-    public static final String PROP_LABEL = "label";
     public static final String PROP_DESCRIPTION = "description";
 
     /*
      * IPresentables
      */
 //    public static final String PROP_TYPE = "type";
+    public static final String PROP_LABEL = "label";
     public static final String PROP_STYLE = "style";
     public static final String PROP_LAYOUT = "layout";
     public static final String PROP_LAYOUTCONSTRAINTS = "layoutConstraints";
     public static final String PROP_ENABLER = "enabler";
     public static final String PROP_VISIBLE = "visible";
+    public static final String PROP_NESTING = "nesting";
+    public static final String PROP_SEARCHABLE = "searchable";
+    public static final String PROP_ICON = "icon";
 
     /*
      * Configuration
@@ -187,6 +190,7 @@ public class BeanPresentationHelper<T> {
         return propertyName.equals(PROP_STYLE) || propertyName.equals(PROP_LAYOUT)
             || propertyName.equals(PROP_LAYOUTCONSTRAINTS)
             || propertyName.equals(PROP_ENABLER)
+            || propertyName.equals(PROP_LABEL)
             || propertyName.equals(PROP_VISIBLE);
     }
 
@@ -593,7 +597,7 @@ public class BeanPresentationHelper<T> {
      */
     public boolean isDefaultAttribute(IAttribute attribute) {
         AttributeDefinition<?> attr = (AttributeDefinition<?>) attribute;
-        return (!BeanContainer.isInitialized() || BeanContainer.instance().hasPermission(attribute.getId(), null))
+        return (!BeanContainer.isInitialized() || Util.isJavaType(attribute.getDeclaringClass()) || Util.isFrameworkClass(attribute.getDeclaringClass()) || BeanContainer.instance().hasPermission(attribute.getId(), null))
             && (!attr.id() || matches("default.present.attribute.id",
                 false))
             && (!attr.isMultiValue() || matches("default.present.attribute.multivalue", true))

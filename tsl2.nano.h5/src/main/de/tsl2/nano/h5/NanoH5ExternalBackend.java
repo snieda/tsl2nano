@@ -5,10 +5,13 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Objects;
 
+import org.apache.commons.logging.Log;
+
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanValueMap;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.http.EHttpClient;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.parser.JSon;
 import de.tsl2.nano.persistence.Persistence;
 
@@ -20,6 +23,8 @@ import de.tsl2.nano.persistence.Persistence;
  * a map of maps. 
  */
 public class NanoH5ExternalBackend extends NanoHTTPD {
+	private static final Log LOG = LogFactory.getLog(NanoH5ExternalBackend.class);
+ 
     String backendUrl;
     String user;
     String passwd;
@@ -29,7 +34,15 @@ public class NanoH5ExternalBackend extends NanoHTTPD {
     }
 
     boolean isExternalBackendRequired() {
-        return backendUrl == null ? (backendUrl = ENV.get("app.external.backend.url", null)) != null : true;
+        return backendUrl == null ? (backendUrl = definedBackend()) != null : true;
+    }
+
+    public static boolean isBackendDefined() {
+        return definedBackend() != null;
+    }
+
+    static String definedBackend() {
+        return ENV.get("app.external.backend.url", null);
     }
 
     public void setBackendUrl(String backendUrl) {
@@ -41,10 +54,12 @@ public class NanoH5ExternalBackend extends NanoHTTPD {
         Objects.requireNonNull(persistence.getConnectionUserName());
         Objects.requireNonNull(persistence.getConnectionPassword());
 
-        String serviceUrl = backendUrl.equals("perssistence.connectionUrl") ? persistence.getConnectionUrl() : backendUrl;
+        String serviceUrl = backendUrl.equals("persistence.connectionUrl") ? persistence.getConnectionUrl() : backendUrl;
+        LOG.info("connecting to external backend '" + serviceUrl + "'' with user: '" + persistence.getConnectionUserName() + "'");
         // TODO set header and inital query string
         // String json = NetUtil.get(backendUrl);
         EHttpClient httpClient = new EHttpClient(serviceUrl, new HashMap<>(), persistence.getConnectionUserName(), persistence.getConnectionPassword().toCharArray());
+        setBackendUrl(serviceUrl);
         String json = getResponse(httpClient);
         return new JSon().toObject(BeanValueMap.class, json);
     }

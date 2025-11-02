@@ -28,7 +28,6 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 
@@ -518,5 +517,14 @@ public class CollectionUtil {
     			tmap.put(entry.getKey(), (T) entry.getValue());
 		}
     	return tmap;
+    }
+
+    public static String toPlainString(Collection c) {
+        StringBuilder buf = new StringBuilder();
+        c.forEach(i -> buf.append(Util.asString(i) + ","));
+        int lastComma = buf.lastIndexOf(",");
+        if (lastComma != -1)
+            buf.deleteCharAt(lastComma);
+        return buf.toString();
     }
 }

@@ -115,7 +115,7 @@ public abstract class ARESTDynamic<RESPONSE> {
 		else if (url.equals(BASE_PATH + "/health"))
 			return createResponse(Status.OK, "{ build-tsl2.nano.h5: " + ENV.getBuildInformations() + " }");
 		else if (url.equals(BASE_PATH + "/api"))
-			return createResponse(Status.OK, FileUtil.getFileString("doc/generated/swagger-ui/swagger.yaml"));
+			return createResponse(Status.OK, new String(FileUtil.getFileBytes("doc/generated/swagger-ui/swagger.yaml", null)));
 		else if (url.equals(BASE_PATH + "/entities"))
 			return createResponse(Status.OK, printEntities());
 		else if (url.equals(BASE_PATH + "/entitiesjson"))
@@ -123,10 +123,10 @@ public abstract class ARESTDynamic<RESPONSE> {
 		
 		if (!internalCall) 
 			checkSessionToken(url, method, header);
-		checkMethod(method);
 		String beanName = get(url, BASE_PATH, "entity");
 		String actionOrAttribute = get(url, beanName, "attribute-or-action");
 		checkAuthorization(beanName, actionOrAttribute, header);
+		checkMethod(method);
 		
 		if (method.equals("POST")) {
 			return doPost(url, method, payload, beanName, actionOrAttribute);

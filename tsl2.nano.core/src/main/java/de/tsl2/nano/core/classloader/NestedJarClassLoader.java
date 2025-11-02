@@ -391,7 +391,7 @@ class ZipStream {
                 if (zipEntry.getName().equals(file)) {
                     break;
                 } else {
-                    zipEntryBytes.put(zipEntry.getName(), FileUtil.readBytes(zipStream));
+                    zipEntryBytes.put(zipEntry.getName(), FileUtil.readBytes(zipStream, false));
                 }
             }
             if (zipEntry == null) {
@@ -407,7 +407,7 @@ class ZipStream {
             }
 
             //read source
-            return FileUtil.readBytes(zipStream);
+            return FileUtil.readBytes(zipStream, false);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }

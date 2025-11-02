@@ -235,17 +235,22 @@ public class NetUtil {
                 String redirect = conn.getHeaderField("Location");
         
                 // open the new connnection again
-                conn = (HttpURLConnection) new URL(redirect).openConnection();
-                conn.setRequestProperty("Cookie", conn.getHeaderField("Set-Cookie"));
-                //TODO: copy orgin connection parameters
-                conn.addRequestProperty("Accept-Language", "en-US,en;q=0.8");
-                conn.addRequestProperty("User-Agent", "Mozilla");
-                conn.addRequestProperty("Referer", "google.com");
-                                        
+                HttpURLConnection newConn = (HttpURLConnection) new URL(redirect).openConnection();
+                newConn.addRequestProperty("Accept-Language", "en-US,en;q=0.8");
+                newConn.addRequestProperty("User-Agent", "Mozilla");
+                newConn.addRequestProperty("Referer", "google.com");
+                
                 LOG.info("status: " + status + " ==> redirect to url : " + redirect);
+                return copyHeader(conn, newConn);
             }
         }
         return conn;
+    }
+
+    /** tries to copy all parameters from one connection to a new one - BUT getRequestProperties() IS ALWAYS EMPTY - not working yet! */
+    public static HttpURLConnection copyHeader(HttpURLConnection conn, HttpURLConnection newConn) {
+        conn.getRequestProperties().forEach( (k, list) -> {if (k != null) newConn.setRequestProperty(k, CollectionUtil.toPlainString(list));} );
+        return newConn;
     }
 
     /**

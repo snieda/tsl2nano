@@ -457,7 +457,11 @@ public class ENV implements Serializable {
         Object definedValue = get(key, null);
         if (definedValue instanceof String)
             definedValue = Boolean.valueOf((String)definedValue);
-        Boolean askedValue = definedValue != null ? (Boolean) definedValue : Message.ask("do you want to set the property <i>" + key + "</i><p/>with default value: <i>" + defaultValue + "</i>", defaultValue);
+        Boolean askedValue = definedValue != null 
+            ? (Boolean) definedValue 
+            : ENV.isModeAdmin() 
+                ? Message.ask("do you want to set the property <i>" + key + "</i><p/>with default value: <i>" + defaultValue + "</i>", defaultValue) 
+                : defaultValue;
         return get(key, askedValue);
     }
 
@@ -1317,4 +1321,9 @@ public class ENV implements Serializable {
     public static boolean isModeOffline() {
         return Boolean.getBoolean("tsl2nano.offline");
     }
+
+    public static Boolean isModeAdmin() {
+        return get("app.login.administration", true);
+    }
+
 }

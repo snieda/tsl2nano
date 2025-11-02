@@ -14,9 +14,11 @@ import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.Authenticator;
+import java.net.HttpURLConnection;
 import java.net.URLEncoder;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.json.Json;
@@ -29,6 +31,7 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * Extended Http Client, providing REST param evaluation and multipart form data with files.
@@ -36,13 +39,15 @@ import de.tsl2.nano.core.util.StringUtil;
  * usage: see {@link #rest(String, String, String, String, Object...)} and {@link #restJSON(String, Object...)}
  * 
  * @author Thomas Schneider
- * @version $Revision$
+ * @version $
  */
 public class EHttpClient extends HttpClient {
+    private static final String AUTHORIZATION = "Authorization";
     private static final Log LOG = LogFactory.getLog(EHttpClient.class);
     public static final char[] SEPARATORS_REST = new char[] { '/', '/', '/' };
     public static final char[] SEPARATORS_QUERY = new char[] { '?', '=', '&' };
     private boolean useRESTSeparators;
+    private Map<String, Object> header; // while HttpUrlConnection.getRequestProperties() does not return any added request property, we hold it here
 
     /**
      * constructor
@@ -51,28 +56,6 @@ public class EHttpClient extends HttpClient {
      */
     public EHttpClient(String wsUrl) {
         this(wsUrl, true);
-    }
-
-    public EHttpClient(String wsUrl, Map<String, Object> header, Authenticator auth) {
-        this(wsUrl, true);
-        setHeader(header);
-        http.setAuthenticator(auth);
-    }
-
-    public EHttpClient(String wsUrl, Map<String, Object> header, String user, char[] passwd) {
-        this(wsUrl, true);
-        
-        header.putAll(createBasicAuthorization(user, passwd));
-        setHeader(header);
-
-        // http.setAuthenticator(new Authenticator() {
-        //     // TODO: implement with new PasswordAuthentication(user, passwd));
-        // });
-    }
-
-    @SuppressWarnings("unchecked")
-    public static  Map<String, Object>  createBasicAuthorization(String user, char[] passwd) {
-        return MapUtil.asProperties("Authorization", "Basic " + StringUtil.toBase64(user + String.valueOf(passwd)));
     }
 
     /**
@@ -85,7 +68,56 @@ public class EHttpClient extends HttpClient {
         this.useRESTSeparators = useRESTSeparators;
     }
 
-    public HttpClient multipartData(Object... chunks) {
+    public EHttpClient(String wsUrl, Map<String, Object> header, Authenticator auth) {
+        this(wsUrl, true);
+        setHeader(header);
+        http.setAuthenticator(auth);
+    }
+
+    public EHttpClient(String url, Map<String, Object> header, String user, char[] passwd) {
+        super(url);
+        this.useRESTSeparators = true;
+        header.putAll(createBasicAuthorization(user, passwd));
+        setHeader(header);
+
+        // http.setAuthenticator(new Authenticator() {
+        //     // TODO: implement with new PasswordAuthentication(user, passwd));
+        // });
+    }
+
+    public HttpClient setHeader(Map<String, Object> header) {
+        this.header = header;
+        return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static  Map<String, ?>  createBasicAuthorization(String user, char[] passwd) {
+        return MapUtil.asProperties(AUTHORIZATION, "Basic " + StringUtil.toBase64(user + ":" + String.valueOf(passwd)));
+    }
+
+    /** extracts basic authorization from header returning user and password in string array */
+    public static String[] getBasicAuthorization(Map<String, ?> header) {
+        Objects.requireNonNull(header);
+        String auth = getEntry(header, AUTHORIZATION);
+        if (Util.isEmpty(auth))
+            throw new SecurityException("unauthorized");
+        auth = StringUtil.substring(auth, "Basic ", null);
+        auth = StringUtil.fromBase64(auth);
+        // TODO: password should be char[] instead of string
+        return auth.split(":");
+    }
+
+    private static String getEntry(Map<String,?> header, String key) {
+        String value;
+        if ((value = Util.asString(header.get(key))) != null)
+            return value;
+        else if ((value = Util.asString(header.get(key.toLowerCase()))) != null)
+            return value;
+        else
+            return Util.asString(header.get(key.toUpperCase()));
+    }
+
+    public HttpClient multipartData(HttpURLConnection http, Object... chunks) {
         try {
             String boundary = UUID.randomUUID().toString();
             byte[] boundaryBytes =
@@ -186,7 +218,12 @@ public class EHttpClient extends HttpClient {
      * @return content as object of type responseType
      */
     public String rest(String url, String method, String contenttype, String data /*, Class<T> responseType*/, char[] separators, Object... args) {
-        return read(createHttpConnection(parameter(http.getURL().toString() + url, separators, args)).send(method, contenttype, data != null ? data.getBytes() : null), String.class);
+        String restUrl = parameter( url.contains("://") ? url : this.url + url, separators, args);
+        header.put("Content-Type", contenttype);
+        LOG.debug("reading response from" + restUrl);
+        // if (true /* TODO: how to check if already connected or disconnected */)
+        //     http = NetUtil.copyHeader(http, openHttpConnection(restUrl));
+        return read(send(url, method, header, data != null ? data.getBytes() : null), String.class);
     }
 
     /**

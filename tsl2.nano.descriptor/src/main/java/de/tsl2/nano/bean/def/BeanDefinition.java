@@ -252,11 +252,14 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      *            {@link #getAttributes(boolean)}.
      */
     public void setAttributeFilter(String... availableAttributes) {
+        if (Util.isEmpty(attributeFilter))
+            LOG.warn("given attribute filter is empty. bean " + clazz + " will not show any attribute!");
         this.attributeFilter = availableAttributes;
         isdefault = false;
         checkAndResetValueExpression(availableAttributes);
         refreshAttributeDefinitions();
-        setColumnDefinitionOrder(availableAttributes);
+        if (!Util.isEmpty(availableAttributes))
+            setColumnDefinitionOrder(availableAttributes);
     }
 
 	private void checkAndResetValueExpression(String... availableAttributes) {
@@ -1242,11 +1245,11 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      * generates resource entries for each attribute+tooltip and each action to be edited later.
      */
     private void saveResourceEntries(Properties p, String fileName) {
-        p.put(getId(), getName());
+        p.put(String.valueOf(getId()), getName());
         Collection<IAttributeDefinition<?>> attributes = getAttributeDefinitions().values();
         String id;
         for (IAttributeDefinition<?> a : attributes) {
-            id = a.getId();
+            id = String.valueOf(a.getId());
             if (ENV.translate(id, false).startsWith(Messages.TOKEN_MSG_NOTFOUND)) {
                 if (a.getPresentation().getLabel() != null)
                     p.put(id, a.getPresentation().getLabel());
@@ -1256,10 +1259,10 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         }
         Collection<IAction> actions = getActions();
         for (IAction a : actions) {
-            id = a.getId();
+            id = String.valueOf(a.getId());
             if (ENV.translate(id, false).startsWith(Messages.TOKEN_MSG_NOTFOUND)) {
-                p.put(a.getId(), a.getShortDescription());
-                p.put(a.getId() + Messages.POSTFIX_TOOLTIP, a.getShortDescription());
+                p.put(id, a.getShortDescription());
+                p.put(id + Messages.POSTFIX_TOOLTIP, a.getShortDescription());
             }
         }
         FileUtil.saveProperties(ENV.getConfigPath() + fileName, p);
@@ -1668,7 +1671,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             boolean onlySingleValues,
             boolean onlyFilterAttributes,
             String... filterAttributes) {
-        return toValueMap(instance, keyPrefix, onlySingleValues, false, true, onlyFilterAttributes, filterAttributes);
+        return toValueMap(instance, keyPrefix, onlySingleValues, false, false, onlyFilterAttributes, filterAttributes);
     }
 
     @Override

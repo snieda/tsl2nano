@@ -155,8 +155,8 @@ public class WebClient<T> extends AbstractRunnable<T> {
             EHttpClient http = new EHttpClient(
                 operation + (valuesOnly ? URLEncoder.encode(StringUtil.concat(new char[]{' '}, extArgs)) : ""),
                 urlRESTSeparators);
-            if (readTimeout != null)
-                http.setReadTimeout(readTimeout);
+            // if (readTimeout != null)
+            //     http.setReadTimeout(readTimeout);
             if (valuesOnly)
                 response.set(http.getString());
             else

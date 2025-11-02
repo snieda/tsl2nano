@@ -6,11 +6,11 @@
 /target
 /dist
 /temp
-/*.log
-/.metadata
+**/*.log
 .*
+/.metadata
 /**/.settings/*eclipse.*.core.prefs
-/**/tsl2.nano.*/.vscode
+/**/tsl2.nano.*/.vscode/!launch.xml
 /**/tsl2.nano.*/.project
 /**/tsl2.nano.*/.classpath
 /**/logfactory.*ml

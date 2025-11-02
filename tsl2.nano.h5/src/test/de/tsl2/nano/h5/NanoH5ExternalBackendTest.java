@@ -66,7 +66,7 @@ public class NanoH5ExternalBackendTest implements ENVTestPreparation {
     void testBackendReturnsHelp() throws IOException {
         ARestDynamicBackend<String> backend = createBackend();
 
-        String response = backend.serve(BASE_PATH + "/backend", "GET", null);
+        String response = backend.serve(BASE_PATH + "/backend/help", "GET", null);
         assertTrue(response, response.startsWith("OK: provides responses containing full dynamic beans"));
         assertTrue(response, response.contains("mybean"));
     }
@@ -84,7 +84,8 @@ public class NanoH5ExternalBackendTest implements ENVTestPreparation {
         ARestDynamicBackend<String> backend = createBackend();
         String url = BASE_PATH + "/backend/muster/muster";
         String digest = ARestDynamicBackend.createDigest(url, "GET", "");
-        String response = backend.serve(url, "GET", MapUtil.asMap("identity", "muster", "authorization", digest));
+        Map<String, ?> auth = EHttpClient.createBasicAuthorization("muster", new char[] {'m', 'u', 's', 't', 'e', 'r'});
+        String response = backend.serve(url, "GET", MapUtil.asMap("identity", "muster", "authorization", digest, "Authorization", auth.get("Authorization")));
         String expected = "OK: {\"id\": \"bean-for-muster\",\"name\": \"musterbean\",\"instance\": {\"id\": \"bean-for-muster\",\"name\": \"musterbean\",\"key\": \"muster\",\"value\": \"found\"},\"valueExpression\": {\"attributeNames\": [\"id\"],\"comparator\": {},\"expression\": \"{id}\",\"name\": \"{id}\",\"type\": {\"name\": \"java.util.LinkedHashMap\"}},\"attributeDefs\": [{\"name\": \"id\",\"description\": \"bean-for-muster.id\",\"constraint\": {\"format\": {},\"length\": -1,\"precision\": -1,\"scale\": -1,\"type\": {\"name\": \"java.lang.String\"},\"nullable\": true},\"presentation\": {\"description\": \"bean-for-muster.id\",\"enabler\": \"Always Active\",\"height\": -1,\"label\": \"Bean-For-Id\",\"style\": 4,\"type\": 1,\"width\": -1,\"nesting\": false,\"searchable\": true,\"visible\": true}},{\"name\": \"name\",\"description\": \"bean-for-muster.name\",\"constraint\": {\"format\": {},\"length\": -1,\"precision\": -1,\"scale\": -1,\"type\": {\"name\": \"java.lang.String\"},\"nullable\": true},\"presentation\": {\"description\": \"bean-for-muster.name\",\"enabler\": \"Always Active\",\"height\": -1,\"label\": \"Bean-For-Name\",\"style\": 4,\"type\": 1,\"width\": -1,\"nesting\": false,\"searchable\": true,\"visible\": true}},{\"name\": \"key\",\"description\": \"bean-for-muster.key\",\"constraint\": {\"format\": {},\"length\": -1,\"precision\": -1,\"scale\": -1,\"type\": {\"name\": \"java.lang.String\"},\"nullable\": true},\"presentation\": {\"description\": \"bean-for-muster.key\",\"enabler\": \"Always Active\",\"height\": -1,\"label\": \"Bean-For-Key\",\"style\": 4,\"type\": 1,\"width\": -1,\"nesting\": false,\"searchable\": true,\"visible\": true}},{\"name\": \"value\",\"description\": \"bean-for-muster.value\",\"constraint\": {\"format\": {},\"length\": -1,\"precision\": -1,\"scale\": -1,\"type\": {\"name\": \"java.lang.String\"},\"nullable\": true},\"presentation\": {\"description\": \"bean-for-muster.value\",\"enabler\": \"Always Active\",\"height\": -1,\"label\": \"Bean-For-Value\",\"style\": 4,\"type\": 1,\"width\": -1,\"nesting\": false,\"searchable\": true,\"visible\": true}}]}";
         assertEquals(expected, response);
     }

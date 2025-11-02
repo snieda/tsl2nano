@@ -355,7 +355,14 @@ public class NanoH5 extends NanoH5ExternalBackend implements ISystemConnector<Pe
             ENV.extractResource("doc/eobsidio.help.html");
             ENV.extractResource("doc/etimer.help.html");
 
+            ENV.extractResource("doc/generated/swagger-ui/swagger.json");
+            ENV.extractResource("doc/generated/swagger-ui/swagger.yaml");
+            ENV.extractResource("doc/generated/example-beanvaluemap.json");
+            ENV.extractResource("doc/generated/example-beanvaluemap.json");
+            ENV.extractResource("doc/generated/mybean.xml");
+            
             ENV.extractResource("specification/create-sample-timesheet.sh", false, true);
+            ENV.extractResource("specification/readme.txt");
             ENV.extractResource("specification/specification.properties-timesheet.csv");
             ENV.extractResource("specification/timesheet-src.zip");
             ENV.extractResource("specification/timesheet-classes.zip");

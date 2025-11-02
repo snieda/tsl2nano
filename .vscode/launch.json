@@ -78,6 +78,14 @@
             "projectName": "tsl2.nano.h5"
         },
         {
+            "name": "Debug (Attach on 8788)",
+            "type": "java",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 8788,
+            "projectName": "tsl2.nano.h5"
+        },
+        {
             "name": "Debug (Heroku 8787)",
             "type": "java",
             "request": "attach",

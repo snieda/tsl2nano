@@ -40,10 +40,10 @@ public class NanoBackendJaxrs {
     public BeanValueMap backend(@QueryParam("user") String user, @QueryParam("password") String password, Map<String, Object> options) {
         // TODO: create new NanoH5 session , check authrization, set all thread values like BeanContainer
         // Bean<?> bean = new BeanValueMap("user", user);
-        String query = ENV.get("app.internal.backend.query",
-            "select p.*, c.* from charge c, party p where party.name=:name and charge.party=party.id"
+        String query = ENV.get("app.external.backend.nanoh5.query",
+            "select * from party where party.shortname='MM'"
         );
-        Collection<Object> result = query(user, query);
+        Collection<Object> result = query(query, user);
         if (Util.isEmpty(result))
             throw new IllegalArgumentException("no data found for: " + user);
         // should we return a collection? No, the single bean may have attributes containing collections!
@@ -59,7 +59,7 @@ public class NanoBackendJaxrs {
             );
     }
 
-    protected Collection<Object> query(String user, String query) {
-        return BeanContainer.instance().getBeansByQuery(query, true, new Object[]{user});
+    protected Collection<Object> query(String query, Object...args) {
+        return BeanContainer.instance().getBeansByQuery(query, true, args);
     }
 }

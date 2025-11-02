@@ -1,14 +1,21 @@
 package de.tsl2.nano.h5.thymeleaf;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
 import de.tsl2.nano.autotest.TypeBean;
+import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.h5.HtmlUtil;
 import de.tsl2.nano.h5.NanoH5Session;
 import de.tsl2.nano.h5.NanoH5Unit;
 
-public class DOMTLocationOnMapTest {
+public class DOMTLocationOnMapTest implements ENVTestPreparation {
+
+	@Before
+	public void setUp() {
+		ENVTestPreparation.setUp();
+	}
 
 	@Test
 	public void testSmoke() throws Exception {
