@@ -16,6 +16,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -42,7 +43,7 @@ import de.tsl2.nano.core.util.Util;
  * @version $
  */
 public class EHttpClient extends HttpClient {
-    private static final String AUTHORIZATION = "Authorization";
+    public static final String AUTHORIZATION = "Authorization";
     private static final Log LOG = LogFactory.getLog(EHttpClient.class);
     public static final char[] SEPARATORS_REST = new char[] { '/', '/', '/' };
     public static final char[] SEPARATORS_QUERY = new char[] { '?', '=', '&' };
@@ -77,12 +78,20 @@ public class EHttpClient extends HttpClient {
     public EHttpClient(String url, Map<String, Object> header, String user, char[] passwd) {
         super(url);
         this.useRESTSeparators = true;
+        if (header == null)
+            header = new HashMap<>();
         header.putAll(createBasicAuthorization(user, passwd));
         setHeader(header);
 
         // http.setAuthenticator(new Authenticator() {
         //     // TODO: implement with new PasswordAuthentication(user, passwd));
         // });
+    }
+
+    Map<String, Object> header() {
+        if (header == null)
+            header = new HashMap<>();
+        return header;
     }
 
     public HttpClient setHeader(Map<String, Object> header) {
@@ -219,7 +228,7 @@ public class EHttpClient extends HttpClient {
      */
     public String rest(String url, String method, String contenttype, String data /*, Class<T> responseType*/, char[] separators, Object... args) {
         String restUrl = parameter( url.contains("://") ? url : this.url + url, separators, args);
-        header.put("Content-Type", contenttype);
+        header().put("Content-Type", contenttype);
         LOG.debug("reading response from" + restUrl);
         // if (true /* TODO: how to check if already connected or disconnected */)
         //     http = NetUtil.copyHeader(http, openHttpConnection(restUrl));

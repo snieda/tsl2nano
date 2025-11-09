@@ -109,9 +109,10 @@ public class NanoH5ExternalBackendTest implements ENVTestPreparation {
                 return status + ": " + message;
             }
             @Override
+            @SuppressWarnings("unchecked")
             BeanValueMap callNanoBackendApi(Map<String, String> payload, String identity) {
                 return new NanoBackendJaxrs() {
-                    public java.util.Collection<Object> query(String user, String query) {
+                    public java.util.Collection<Object> query(String query, Object...args) {
                         return Arrays.asList(BeanProxy.createBeanImplementation(Tuple.class));
                     }
                     protected java.util.Map<String,String> toMap(Tuple first) {

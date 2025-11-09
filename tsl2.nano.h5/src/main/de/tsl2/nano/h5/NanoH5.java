@@ -1334,6 +1334,7 @@ public class NanoH5 extends NanoH5ExternalBackend implements ISystemConnector<Pe
 
         //check if an equal named ddl-script is inside our jar file. should be done on 'anyway' or 'timedb'.
         try {
+            ENV.extractResource("hibernate-reverse-engineering-3.0.dtd", false, false, false);
             ENV.extractResource(persistence.getDatabase() + ".sql", false, false, false);
             ENV.extractResource("drop-" + persistence.getDatabase() + ".sql", false, false, false);
             ENV.extractResource("init-" + persistence.getDatabase() + ".sql", false, false, false);
@@ -1385,6 +1386,8 @@ public class NanoH5 extends NanoH5ExternalBackend implements ISystemConnector<Pe
     protected static Boolean generateJarFile(String jarFile, String generator, String schema) {
         ENV.extractResource(REVERSE_ENG_SCRIPT);
         ENV.extractResource(HIBREVNAME_TEMPLATE);
+        ENV.extractResource("hibernate-reverse-engineering-3.0.dtd");
+
         Properties properties = new Properties();
         properties.setProperty(HIBREVNAME, ENV.getConfigPath() + HIBREVNAME);
 //    properties.setProperty("hbm.conf.xml", "hibernate.conf.xml");
@@ -1398,7 +1401,9 @@ public class NanoH5 extends NanoH5ExternalBackend implements ISystemConnector<Pe
         properties.setProperty("plugin.dir", FileUtil.userDirFile(plugin_dir).getAbsolutePath());
         if (plugin_dir.endsWith(".jar/")) {
             properties.setProperty("plugin_isjar", Boolean.toString(true));
-        } 
+        }
+        if (AppLoader.isJdkVersionHigherAs("22"))
+            properties.setProperty("activate-annotation-processor", "-proc:full");
         Message.send("starting generation of '" + jarFile + "' through script " + REVERSE_ENG_SCRIPT);
         //If no environment was saved before, we should do it now!
         ENV.persist();

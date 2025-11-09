@@ -16,6 +16,7 @@ import javax.security.auth.Subject;
 
 import org.simpleframework.xml.Attribute;
 
+import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.cls.PrivateAccessor;
 
 
@@ -49,8 +50,9 @@ public class APermission extends BasicPermission {
     
     @Override
     public void checkGuard(Object object) throws SecurityException {
-        super.checkGuard(object);
-        
+        if (AppLoader.isJdkVersionLowerAs("25")) {// SecurityManager, BasicPermission.checkGuard() removed without replacement on jdk25 -> not working  anymore: java.lang.SecurityException: checking permissions is not supported
+            super.checkGuard(object);
+        }
         if (object instanceof Subject) {
             Subject subject = (Subject) object;
             Set<Role> roles = subject.getPrincipals(Role.class);

@@ -6711,7 +6711,7 @@ Cursus:
    * [x] new subclass 'NanoH5ExternalBackend' 
       * [x] providing check of ENV property 'app.external.backend.url'
       * [x] providing a connect method doing the following:
-         * [ ] send a request to backend service with authentication/authorization
+         * [v] send a request to backend service with authentication/authorization
          * [ ] deserialize response bean and start a session. all following actions are defined by this bean
       * [x] provide a default implementaion as backend service to be used by itself
          * [ ] how to compose BeanValueMap through given BeanDefinition?
@@ -6725,7 +6725,7 @@ Cursus:
       * [v] new BeanValueMap: bean instance may be a simple untyped mapOfMaps through json (parts already implemented in Bean class)
       * [v] bean attribute values reference this map of maps through a path expression, or get directly simple values 
    * [-] perhaps get data encapsulated through a REST Beancontainer?
-   * [ ] Documentation for external backend
+   * [v] Documentation for external backend
 * [x] provide a health endpoint (with ENV.buildinfo)
 * [x] migrate to be comilable on jdk 25
    * [v] migrate sun.internals to java.security.cert using bouncy-castle in PKI to be compilable on JDK >= 18
@@ -6733,81 +6733,12 @@ Cursus:
    * [ ] modelkit: problems on jackson
    * [x] tests on h5 not working in cause of:
       * [ ] failing to load scripting engine
-      * [ ] linkedlist in proxy extension TransformingIterable not working with: List, Deque
+      * [v] linkedlist in proxy extension TransformingIterable not working with: List, Deque
       * [ ] NanoH5Test: IAttributeDefinition.getColumnDefinition()" is null
-* [ ] Html5Presentation shows 'test' (default for 'app.doc.name') instead of anyway (ENV setting 'app.doc.name' to database name)
+   * runtime:
+      * [v] JDK25: call of APermission.super.checkGuard() (java.security.BasicPermission.checkGuard()) : java.lang.SecurityException: checking permissions is not supported
+      * [v] JDK25: Proxy with interfaces List+Deque (e.g. on getFilteringIterable() ): java.lang.IllegalArgumentException: methods with same signature reversed() but incompatible return types: [interface java.util.List, interface java.util.Deque]
+      * [-] JDK25: generating jar file: compile not working in cause of new javac arg "-proc:full" to enable annotation processor
+* [v] Html5Presentation shows 'test' (default for 'app.doc.name') instead of anyway (ENV setting 'app.doc.name' to database name)
 * [ ] structure (refactore packages) of nanoh5
-* [ ] what to do with BeanDefinition.toValueMap(recursive=true) ?
-
-## Terminal Tips
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-clear && cat calc.cpp | pv -qL 10
-xdo key_press -k 46; sleep 0.2; xdo key_release -k 46
-
-## .profile_extension
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-bind -x '"\C-h":select_expression'
-bind -x '"\C-o":select_expression goto_select'
-
-# lets the user select a known directory or a directory inside the current tree (using smartcd, find and fzf)
-# usage: goto_select
-#
-goto_select() {
-   { smartcd --list | sed -E "s/^[0-9]+[:]//g"; find -type d; } | fzy 
-}
-
-# prints the given user selection directly to the commandline without executing it.
-# usage: select_expression [selected-item (default: help_select)]
-#
-select_expression() {
-  local selected=${1:-"$(help_detail "$(help_select)" )"}
-  READLINE_LINE="${READLINE_LINE:0:$READLINE_POINT}${selected}${READLINE_LINE:$READLINE_POINT}"
-  READLINE_POINT=$(( READLINE_POINT + ${#selected} ))
-}
-
-# downloads and caches a help file
-# usage: help_download <view-command> <url> <storing-filename>
-#
-help_download() {
-   [ ! -f $3 ] && curl $2 -o $3 || $1 $3
-}
-
-# provides a help command with arguments for a given string
-# usage: help_detail <text-to-evaluate-a-help-command-for>
-#
-help_detail() {
-   if [[ "$1" == *":bash.txt:"* ]]; then
-      echo "$1" | sed -E "s/([0-9]*)[:]([a-zA-Z0-9\.]+)[:](.*)/less +\1 \2 # \3/g"
-   elif [[ "$1" == *":apt:"* ]]; then
-      echo "$1" | sed -E "s/([0-9]*)[:]([a-zA-Z0-9\.]+)[:]\s*\w\s*([a-zA-Z0-9\.]+)(.*)/apt search \3 # \4/g"
-   elif [[ "$1" == *":man:"* ]]; then
-      echo "$1" | sed -E "s/([0-9]*)[:]([a-zA-Z0-9\.]+)[:]\s*([a-zA-Z0-9\.]+)(.*)/man \3 # \4/g"
-   elif [[ "$1" == *":compgen:"* || "$1" == *":bash:"* ]]; then
-      echo "$1" | sed -E "s/([0-9]*)[:]([a-zA-Z0-9\.]+)[:]\s*([a-zA-Z0-9\.]+)(.*)/\3 --help # \4/g"
-   elif [[ "$1" == *"help_download"* ]]; then
-      echo $1
-   else
-      echo "xdg-open www.google.com/search?q=$1"
-   fi
-}
-
-# creates a list of help entries and lets the user select one through 'fzf'
-# usage: help_select
-# we combine 'apropos', 'compgen', 'bash help', 'aptitude', bash.txt and some online cheatsheets, faqs, handbooks
-#
-help_select() {
-   echo $( { help -d '' | nl -b a -s ":bash: "; \
-      apropos . | nl -b a -s ":man: "; \
-      compgen -A function -abck | nl -b a -s ":compgen: "; \
-      help_download cat https://www.gnu.org/software/bash/manual/bash.txt ~/bash.txt | nl -b a -s ":bash.txt: "; \
-      aptitude search . | nl -b a -s ":apt: "; \
-      echo "help_download xdg-open https://devhints.io/bash ~/bash-scripting-cheatsheets.html # bash scripting cheatsheet"; \
-      echo "help_download xdg-open http://mywiki.wooledge.org/BashFAQ ~/bash-faq.html # bash FAQs"; \
-      echo "help_download xdg-open https://github.com/denysdovhan/bash-handbook ~/bash-handbook.html # bash handbook"; \
-   } | fzf )
-}
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* [-] what to do with BeanDefinition.toValueMap(recursive=true) ?

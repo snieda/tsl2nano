@@ -142,7 +142,7 @@ public class JarResolver {
                 LOG.info("looking for an update of jarresolver.properties through " + updateUrl);
                 File newPropFile = NetUtil.download(updateUrl, ENV.getTempPath(), true, true);
                 Properties newProps = new Properties();
-                newProps.load(ENV.getResource(newPropFile.getPath()));
+                newProps.load(FileUtil.getFile(newPropFile.getPath()));
                 String newVersion = newProps.getProperty("version");
                 if (newVersion != null && newVersion.compareTo(props.getProperty("version")) > 0) {
                     LOG.info("using newer downloaded version (" + newVersion + ") of jarresolver.properties");
@@ -152,10 +152,12 @@ public class JarResolver {
                         NetworkClassLoader.resetUnresolvedClasses(baseDir);
                     }
 
+                } else {
+                    LOG.info("local jarresolver.properties version " + props.getProperty("version") + " wont be updated with remote version: " + newVersion);
                 }
             } catch (Exception ex) {
                 //no problem - perhaps no network connection
-                LOG.warn("couldn't update jarresolver.properties from " + updateUrl);
+                LOG.warn("couldn't update jarresolver.properties from " + updateUrl + ": " + ManagedException.getRootCause(ex).toString());
             }
         }
     }

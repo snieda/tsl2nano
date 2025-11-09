@@ -371,7 +371,7 @@
 	                    <configuration>
 	                    	<failOnError>true</failOnError>
 	                    	<skip>${skipTests}</skip><!-- to be runnable through mvn antrun:run -->
-	                        <target>
+	                        <target name="start">
 								<echo>STARTING ${project.build.finalName} on pre-integration-test</echo>
 								<echoproperties />
 								<!--output="${project.build.directory}/pre-integration-test/pre-integration-test.log" -->
@@ -409,11 +409,15 @@
 									<sysproperty key="app.stop.allow.system.exit" value="false" />
 									<sysproperty key="app.session.anticsrf" value="false" />>
 								</java>
-								<sleep seconds="10" />
+								<sleep seconds="99" />
 								<echo>RESUMING ${project.build.finalName} integration-test</echo>
 	                        </target>
 	                    </configuration>
 	                </execution>
+					<!-- <execution>
+						<id>stop-tsl2nano-application</id>
+						<phase>post-integration-test</phase>
+					</execution> -->
 					</executions>
 	        </plugin>
 		</plugins>

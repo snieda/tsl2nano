@@ -18,6 +18,8 @@
 	* to start only a single test: "mvn -Dtest=*Jar*Test#testOne+testTwo test"
 	* to do a fast test:  mvn -o -T 4 -fae test
 	* to debug (port 5005) a test in surefire: "mvn -Dmaven.surefire.debug test"
+	* to test only integration tests: "mvn clean compile compiler:testCompile failsafe:integration-test failsafe:verify -Pfailsafe -Dfailsafe.rerunFailingTestsCount=0 "
+	* to start only a plugin execution (example): "mvn antrun:run@my-execution-name" (default name is "default-cli", the ant target must have a name!)
 	* aggregate coverage output: "mvn jacoco:report-aggregate"
 	* increase version number: "mvn release:update-versions -DautoVersionSubmodules=true"
 	* batch-increase version : "mvn - -batch-mode release:update-versions -DdevelopmentVersion=1.2.0-SNAPSHOT"

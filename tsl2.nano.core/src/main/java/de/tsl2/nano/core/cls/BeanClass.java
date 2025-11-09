@@ -39,6 +39,7 @@ import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 
+import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.IPredicate;
 import de.tsl2.nano.core.ManagedException;
@@ -130,6 +131,21 @@ public class BeanClass<T> implements Serializable {
 
     public static final <C> BeanClass<C> getBeanClass(Class<C> beanClass, boolean evalDefiningClass) {
         return CachedBeanClass.getCachedBeanClass(evalDefiningClass ? getDefiningClass(beanClass) : beanClass);
+    }
+
+    public static final Class[] getInterfazes(Class<?> beanClass) {
+        Class[] interfaces = getBeanClass(beanClass).getInterfaces();
+        if (!AppLoader.isJdkVersionLowerAs("25")) { // WORKAROUND ON JDK25
+            int dequeAndList = 0;
+            for (int i = 0; i < interfaces.length; i++) {
+                if (interfaces[i].getName().matches("java.util.List|java.util.Deque"))
+                    dequeAndList++;
+            }
+            if (dequeAndList > 1) {
+                return Arrays.stream(interfaces).filter(i -> !i.getName().equals("java.util.Deque")).toArray(Class[]::new);
+            }
+        }
+        return interfaces;
     }
 
     /**

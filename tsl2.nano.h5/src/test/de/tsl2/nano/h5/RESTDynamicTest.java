@@ -19,6 +19,7 @@ import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.http.EHttpClient;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.h5.NanoHTTPD.Response;
@@ -48,7 +49,10 @@ public class RESTDynamicTest {
 	private Map<String, String> header(String url, String method) {
 		String digest = new RESTDynamic().createDigest(url, method, "test2020-05-10");
 		System.out.println("digest: " + digest);
-		return MapUtil.asMap("authorization", "test 2020-05-10 " + digest, "user", "test", "password", "test");
+		Map<String, ?> auth = EHttpClient.createBasicAuthorization("SA", new char[0]);
+		Map header = MapUtil.asMap("authorization", "test 2020-05-10 " + digest, "user", "test", "password", "test");
+		header.putAll(auth);
+		return header;
 	}
 	
 	@Test
@@ -123,7 +127,8 @@ public class RESTDynamicTest {
 		assertTrue(RESTDynamic.canRest(url));
 		Map<String, String> header = header(url, "XXX");
 		header.remove("user");
-		Response response = new RESTDynamic().serve(url, "XXX", header, null);
+		header.putAll((Map)EHttpClient.createBasicAuthorization("XXX", new char[]{'x'}));
+		Response response = new RESTDynamic().serve(url, "GET", header, null);
 		assertEquals(Response.Status.FORBIDDEN, response.getStatus());
 	}
 	

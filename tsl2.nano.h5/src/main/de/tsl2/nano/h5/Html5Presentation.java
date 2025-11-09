@@ -448,6 +448,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ENV.setProperty("app.login.administration", isProdMode);
                 ENV.setProperty("app.login.secure", !isProdMode);
                 ENV.setProperty("service.autorization.new.createdefault", isProdMode);
+                ENV.setProperty("service.access.remote", !isProdMode);
                 ENV.setProperty("app.http.allow.directorylisting", !isProdMode);
                 ENV.setProperty("app.security.trusted.sites", isProdMode ? "" : "https://sourceforge.net");
                 // ENV.setProperty("app.login.service.connection.check", !isProdMode);
@@ -979,7 +980,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         IFrameProvider layoutProvider = ENV.get(IFrameProvider.class);
         if (layoutProvider != null) {
             if ((leftPanel = layoutProvider.getLeftPanel(session, bean)) != null) {
-                Element cell = appendElement(panel, TAG_DIV, ATTR_CLASS, TAG_CELL, ATTR_ID, "indiviual-left-panel-id", ATTR_STYLE, "width: 15%");
+                Element cell = appendElement(panel, TAG_DIV, ATTR_CLASS, TAG_CELL, ATTR_ID, "indiviual-left-panel-id", ATTR_STYLE, "width: 15%; align-content: start");
                 appendNodesFromText(cell, leftPanel);
             }
         }

@@ -426,11 +426,11 @@ public class AppLoader {
     }
 
     public static final boolean isJdkVersionHigherAs(String version) {
-        return System.getProperty("java.runtime.version").compareTo(version) > 0;
+        return System.getProperty("java.specification.version").compareTo(version) > 0;
     }
 
     public static final boolean isJdkVersionLowerAs(String version) {
-        return System.getProperty("java.runtime.version").compareTo(version) < 0;
+        return System.getProperty("java.specification.version").compareTo(version) < 0;
     }
 
     public static final boolean isOpenJDK() {

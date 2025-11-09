@@ -73,7 +73,7 @@ JSU_ENC=-Dsun.jnu.encoding=UTF-8
 #PROFILER="-agentpath:...visualvm_138/profiler/lib/deployed/jdk16/windows/profilerinterface.dll=...\visualvm_138\profiler\lib,5140"
 JAVA_OPTS="-Xmx512m -Djava.awt.headless=true $@"
 #LOG=">$PRJ.log"
-IPv4="-Djava.net.preferIPv4Stack=true"
+IPv4="-Djava.net.preferIPv4Stack=true java.net.preferIPv6Addresses=false"    # OLD and NEW property
 #NOSTARTPAGE=-Dapp.show.startpage=false
 #NO_DB_CHECK=-Dapp.db.check.connection=false
 #INTERNAL_DB=-Dapp.database.internal.server.run=true
