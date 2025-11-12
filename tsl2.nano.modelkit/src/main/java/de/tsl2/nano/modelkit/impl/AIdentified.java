@@ -51,6 +51,10 @@ public abstract class AIdentified implements Identified, Configured, Cloneable {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     @Override
     public void visited(Object... explanation) {
         if (ModelKit.isTestMode() && explanation.length > 0) {

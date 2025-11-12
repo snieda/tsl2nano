@@ -11,7 +11,7 @@
   <description>maven plugin to generate code through ClassGenerator+Velocity</description>
 	<properties>
 		<module.parent>..</module.parent>
-	    <maven.version>3.8.6</maven.version>
+	    <maven.version>3.9.11</maven.version>
 		<maven.plugin.skipErrorNoDescriptorsFound>true</maven.plugin.skipErrorNoDescriptorsFound>
 	</properties>
 
@@ -81,7 +81,7 @@
       <plugins>
         <plugin>
           <artifactId>maven-plugin-plugin</artifactId>
-          <version>3.6.4</version>
+          <version>3.15.2</version>
         </plugin>
         <plugin>
           <artifactId>maven-invoker-plugin</artifactId>
@@ -94,7 +94,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-plugin-plugin</artifactId>
         <configuration>
-          <!-- <goalPrefix>maven-archetype-plugin</goalPrefix> -->
+          <goalPrefix>maven-archetype-plugin</goalPrefix>
           <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
         </configuration>
         <executions>

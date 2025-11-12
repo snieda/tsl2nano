@@ -50,6 +50,7 @@ public class ObjectUtil {
         }
         return src.subList(0, Math.min(maxLength, src.size()));
     }
+    @SuppressWarnings("unchecked")
     public static Object getValue(Object instance, String fieldName) {
         return ExceptionHandler.trY(() -> {
             Field field = instance.getClass().getDeclaredField(fieldName);
@@ -63,6 +64,7 @@ public class ObjectUtil {
         setValue(obj.getClass(), propertyName, obj, value);
     }
 
+    @SuppressWarnings("unchecked")
     public static void setValue(Class<?> type, String propertyName, Object obj, Object value) {
         ExceptionHandler.trY(() -> new PropertyDescriptor(propertyName, type).getWriteMethod().invoke(obj, value));
     }

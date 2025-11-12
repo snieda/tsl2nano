@@ -594,14 +594,14 @@
 	  </dependency>
 	  <dependency>
 		<groupId>org.graalvm.js</groupId>
-		<artifactId>js</artifactId>
-		<version>22.3.5</version>
+		<artifactId>js-language</artifactId>
+		<version>25.0.1</version>
 	    <scope>test</scope>
 	  </dependency>  
 	  <dependency>
 		<groupId>org.graalvm.js</groupId>
 		<artifactId>js-scriptengine</artifactId>
-		<version>22.3.5</version>
+		<version>25.0.1</version>
 	    <scope>test</scope>
 	  </dependency>
 		<dependency>

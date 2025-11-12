@@ -53,11 +53,11 @@
 		<module.parent>${project.basedir}</module.parent>
         <timestamp>${maven.build.timestamp}</timestamp>
 		<!--workaround for automatic gitlab-ci, there ci is not starting properties-maven-plugin -->
-		<version.compiler.plugin>3.14.0</version.compiler.plugin>
+		<version.compiler.plugin>3.14.1</version.compiler.plugin>
 		<version.jar.plugin>3.4.2</version.jar.plugin>
 		<version.dependency.plugin>3.8.1</version.dependency.plugin>
-		<maven.compiler.source>17</maven.compiler.source>
-		<maven.compiler.target>17</maven.compiler.target>
+		<!-- <maven.compiler.source>25</maven.compiler.source>
+		<maven.compiler.target>25</maven.compiler.target> -->
 		<maven.compiler.debug>true</maven.compiler.debug>
 		
         <maven.build.timestamp.format>dd-MM-yyyy HH:mm</maven.build.timestamp.format>

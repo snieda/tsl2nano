@@ -6729,10 +6729,10 @@ Cursus:
 * [x] provide a health endpoint (with ENV.buildinfo)
 * [x] migrate to be comilable on jdk 25
    * [v] migrate sun.internals to java.security.cert using bouncy-castle in PKI to be compilable on JDK >= 18
-   * [ ] descriptor: tests cannot load tsl-logo.txt
-   * [ ] modelkit: problems on jackson
+   * [-] descriptor: tests cannot load tsl-logo.txt
+   * [ ] modelkit: Lombok: since jdk21 annotation processing not as default
    * [x] tests on h5 not working in cause of:
-      * [ ] failing to load scripting engine
+      * [v] failing to load scripting engine: artifactId: js -> js-language
       * [v] linkedlist in proxy extension TransformingIterable not working with: List, Deque
       * [ ] NanoH5Test: IAttributeDefinition.getColumnDefinition()" is null
    * runtime:

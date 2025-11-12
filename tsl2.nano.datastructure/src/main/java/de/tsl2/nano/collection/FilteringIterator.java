@@ -202,7 +202,7 @@ public class FilteringIterator<E> implements ListIterator<E> {
     @SuppressWarnings("unchecked")
     public static <I extends Iterable<T>, T> I getFilteringIterable(final I iterable, final IPredicate<T> predicate) {
         return (I) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
-            BeanClass.getInterfazes(iterable.getClass()), new IterableInvocationHandler<I, T>(iterable,
+            BeanClass.getBeanClass(iterable.getClass()).getInterfaces(), new IterableInvocationHandler<I, T>(iterable,
                 predicate));
     }
 
