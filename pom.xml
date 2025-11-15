@@ -293,7 +293,9 @@
 						<exclude>**/*.jar</exclude>
 						<exclude>**/*.zip</exclude>
 						<exclude>**/HelpMojo.class</exclude>
-						<exclude>com/gargoylesoftware/**</exclude>					</excludes>
+						<exclude>com/gargoylesoftware/**</exclude>
+						<exclude>org/htmlunit/**</exclude>					
+					</excludes>
 					<!-- <fileSets>
 						<fileSet implementation="org.apache.maven.shared.model.fileset.FileSet">
 							<directory>../</directory>

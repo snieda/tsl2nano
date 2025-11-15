@@ -128,7 +128,8 @@ public class JarResolver {
             setBaseDir(baseDir);
             props.load(ENV.getResource("jarresolver.properties"));
             LOG.info("loading local jarresolver.properties version: " + props.get("version"));
-            updatePropertiesFromDefaultUrl(baseDir);
+            if (!ENV.isModeOffline())
+                updatePropertiesFromDefaultUrl(baseDir);
 
         } catch (IOException e) {
             ManagedException.forward(e);

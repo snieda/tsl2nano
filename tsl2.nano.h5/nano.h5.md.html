@@ -6730,11 +6730,12 @@ Cursus:
 * [x] migrate to be comilable on jdk 25
    * [v] migrate sun.internals to java.security.cert using bouncy-castle in PKI to be compilable on JDK >= 18
    * [-] descriptor: tests cannot load tsl-logo.txt
-   * [ ] modelkit: Lombok: since jdk21 annotation processing not as default
+   * [v] modelkit: Lombok: since jdk21 annotation processing not as default (java.lang.ExceptionInInitializerError: com.sun.tools.javac.code.TypeTag :: UNKNOWN )
+      * solution: artifactId: 1.18.42
    * [x] tests on h5 not working in cause of:
       * [v] failing to load scripting engine: artifactId: js -> js-language
       * [v] linkedlist in proxy extension TransformingIterable not working with: List, Deque
-      * [ ] NanoH5Test: IAttributeDefinition.getColumnDefinition()" is null
+      * [v] NanoH5Test: IAttributeDefinition.getColumnDefinition()" is null
    * runtime:
       * [v] JDK25: call of APermission.super.checkGuard() (java.security.BasicPermission.checkGuard()) : java.lang.SecurityException: checking permissions is not supported
       * [v] JDK25: Proxy with interfaces List+Deque (e.g. on getFilteringIterable() ): java.lang.IllegalArgumentException: methods with same signature reversed() but incompatible return types: [interface java.util.List, interface java.util.Deque]

@@ -11,10 +11,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
-import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.HtmlButton;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import org.apache.commons.logging.Log;
+import org.htmlunit.BrowserVersion;
+import org.htmlunit.FailingHttpStatusCodeException;
+import org.htmlunit.WebClient;
+import org.htmlunit.html.HtmlButton;
+import org.htmlunit.html.HtmlPage;
+
+// import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+// import com.gargoylesoftware.htmlunit.WebClient;
+// import com.gargoylesoftware.htmlunit.html.HtmlButton;
+// import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
@@ -26,6 +33,7 @@ import de.tsl2.nano.core.Main;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.exception.ExceptionHandler;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
@@ -43,6 +51,7 @@ import de.tsl2.nano.serviceaccess.Authorization;
  * @version $Revision$ 
  */
 public abstract class NanoH5Unit implements ENVTestPreparation {
+	private static final Log LOG = LogFactory.getLog(NanoH5.class);
 
     protected static final int DEFAULT_H2_PORT = 9092;
     protected static final int DEFAULT_HSQLDB_PORT = 9003;
@@ -82,6 +91,8 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
 //    	tearDownAfter(250000);
         System.setProperty("tsl2nano.offline", "true");
         System.setProperty(ENV.KEY_TESTMODE, "true");
+        LogFactory.setLogLevel(LogFactory.DEBUG);
+		System.setProperty("tsl2nano.offline", "true");
         System.setProperty("app.stop.allow.system.exit", "false");
         nanoAlreadyRunning = Boolean.getBoolean("app.server.running");
         NanoH5UnitPlugin.setEnabled(!nanoAlreadyRunning);
@@ -137,7 +148,7 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
     protected static void startApplication(String...args) {
         System.setProperty("file.encoding", "UTF-8");
         System.setProperty("sun.jnu.encoding", "UTF-8");
-        System.setProperty("JAVA_OPTS", "-Xmx512m -Djava.awt.headless -agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=n");
+        System.setProperty("JAVA_OPTS", "-Xmx512m -Djava.awt.headless -agentlib:jdwp=transport=dt_socket,address=8788,server=y,suspend=n");
         System.setProperty("tsl2nano.offline", "true");
         System.setProperty("websocket.use", "false");
         System.setProperty("app.show.startpage", "false");
@@ -157,15 +168,19 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
     
     protected HtmlPage runWebClient(String serviceURL) {
         HtmlPage page = null;
-        webClient = new WebClient();
+        webClient = new WebClient(BrowserVersion.CHROME);
         webClient.getOptions().setJavaScriptEnabled(true);
-        webClient.getOptions().setTimeout(1200000); //20min
+        webClient.getOptions().setTimeout(300000); //5min
         webClient.getOptions().setPrintContentOnFailingStatusCode(true);
         webClient.getOptions().setThrowExceptionOnScriptError(false);
         webClient.getOptions().setCssEnabled(false);
         webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
-//        webClient.getOptions().setRedirectEnabled(true);
+        webClient.getOptions().setUseInsecureSSL(true);
+        webClient.getOptions().setRedirectEnabled(true);
+        webClient.getCookieManager().setCookiesEnabled(true);
         try {
+            LOG.info("htmlunit webclient trying to connect to: " + serviceURL);
+            LOG.info("webClient options: \n" + StringUtil.toFormattedString(webClient.getOptions(), -1));
             page = webClient.getPage(serviceURL);
         } catch (FailingHttpStatusCodeException | IOException e) {
             ManagedException.forward(e);
@@ -177,7 +192,7 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
     }
 
     protected HtmlPage submit(HtmlPage page, String buttonName) throws Exception {
-        System.out.println("htmlUnit testing button: " + buttonName);
+        LOG.info("htmlUnit activating button: " + buttonName);
         try {
             HtmlButton htmlButton = (HtmlButton) page.getElementById(buttonName);
             if (htmlButton == null) {
@@ -191,10 +206,9 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
             String pageName = page.getBody().getId();
             String buttonHandleError = "error on clicking button: '" + buttonName + "' on page '" + pageName + "'\n\n"
                     + StringUtil.toFormattedString(exceptions, -1);
-            String asXml = "<!--\n" + buttonHandleError +
-                ManagedException.toString(e) + "\n-->\n" + page.asXml();
+            String asXml = "<!--\n" + buttonHandleError +  ManagedException.toString(e) + "\n-->\n" + page.asXml();
             FileUtil.writeBytes(asXml.getBytes(), ENV.getTempPath() + "page-failed.html", false);
-            System.out.println(buttonHandleError);
+            LOG.error(pageName + ":" + buttonName + " ==> " + buttonHandleError);
             ManagedException.forward(e);
             return page;
         }
@@ -202,6 +216,7 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
     }
 
     protected HtmlPage back(HtmlPage page) throws Exception {
+        LOG.info("htmlUnit: trying to go back...");
         page.getWebClient().getWebWindows().get(0).getHistory().back();
         return (HtmlPage) page;//.refresh();
     }

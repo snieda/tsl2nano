@@ -31,7 +31,7 @@ rem set PROXY=-Dhttp.proxyHost=myproxy -Dhttp.proxyPort=8080
 REM set PROFILER="-agentpath:...visualvm_138/profiler/lib/deployed/jdk16/windows/profilerinterface.dll=...\visualvm_138\profiler\lib,5140"
 set JAVA_OPTS=-Xmx512m -Djava.awt.headless=true
 rem set LOG=">%PRJ%.log"
-set IPv4="-Djava.net.preferIPv4Stack=true java.net.preferIPv6Addresses=false"    REM OLD and NEW property
+set IPv4="-Djava.net.preferIPv4Stack=true -Djava.net.preferIPv6Addresses=false"    REM OLD and NEW property
 rem set SILENT=true
 if "%SILENT%"=="true" (set JAVA=@start javaw) else (set JAVA=java)
 set SECURITY_LEAK=-Dlog4j2.formatMsgNoLookups=true
