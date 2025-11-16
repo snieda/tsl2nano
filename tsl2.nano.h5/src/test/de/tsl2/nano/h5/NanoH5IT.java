@@ -16,7 +16,6 @@ import java.io.PipedOutputStream;
 import java.util.Locale;
 
 import org.htmlunit.html.HtmlPage;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -52,7 +51,7 @@ public class NanoH5IT extends NanoH5Unit {
         super.setUp();
     }
     
-    @After
+    // @After // let the flakes work on error
     public void tearDown() {
     	shutdownNanoHttpServer(new File("tsl2.nano.h5/target/temp/instance-id.txt"));
     	super.tearDown();

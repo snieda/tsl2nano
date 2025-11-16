@@ -169,7 +169,7 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
     protected HtmlPage runWebClient(String serviceURL) {
         HtmlPage page = null;
         webClient = new WebClient(BrowserVersion.CHROME);
-        webClient.getOptions().setJavaScriptEnabled(true);
+        webClient.getOptions().setJavaScriptEnabled(false); // since 2.5.9 the script engine seems not to be available in test
         webClient.getOptions().setTimeout(300000); //5min
         webClient.getOptions().setPrintContentOnFailingStatusCode(true);
         webClient.getOptions().setThrowExceptionOnScriptError(false);

@@ -508,7 +508,7 @@
 		<dependency>
 			<groupId>net.bytebuddy</groupId>
 			<artifactId>byte-buddy</artifactId>
-			<version>1.17.7</version>
+			<version>1.18.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.h2database</groupId>
