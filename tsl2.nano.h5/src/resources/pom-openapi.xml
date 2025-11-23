@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>net.sf.tsl2nano</groupId>
   <artifactId>tsl2.nano.openapi</artifactId>
-  <version>2.5.9</version>
+  <version>${project.version}</version>
   <name>TSL2 Framework OpenAPI</name>
   <description>TSL2 Framework to generate openapi java clients</description>
   <properties>

@@ -163,7 +163,7 @@ public class ENV implements Serializable {
      * @return build informations read through build.properties in jar
      */
     public static String getBuildInformations() {
-        String buildInfo = System.getProperty(KEY_BUILDINFO);
+        String buildInfo = getSysValue(KEY_BUILDINFO);
         if (buildInfo == null) {
             try {
                 InputStream biStream =
@@ -241,7 +241,7 @@ public class ENV implements Serializable {
         } else if (lastCreated == null || lastCreated.properties == null || lastCreated.services == null) {
             System.out.println("WARN: NO ENV was created before. creating a default instance");
             lastCreated = create(
-                    System.getProperty(KEY_CONFIG_PATH, System.getProperty("user.dir").replace('\\', '/')));
+                    getSysValue(KEY_CONFIG_PATH, System.getProperty("user.dir").replace('\\', '/')));
             selfThread.set(lastCreated);
             return lastCreated;
         } else // will never be reached ;-) - unclean
@@ -473,8 +473,9 @@ public class ENV implements Serializable {
      * @return system ENV or default value
      */
     public static final <T> T get(String key, T defaultValue) {
-        //system properties win...
-    	String sysValue = System.getProperty(key);
+        //system properties or system env win
+    	String sysValue = getSysValue(key);
+
     	T value = (T) (sysValue != null ? sysValue : self().properties.get(key));
         if (value == null && defaultValue != null) {
             value = defaultValue;
@@ -484,8 +485,25 @@ public class ENV implements Serializable {
     		if (!self().properties.containsKey(key)) {
     			setProperty(key, value);
     		}
-    	}
+    	} else if (value == null) {
+            if (key.equals("tsl2nano.env.dir"))
+                value = (T) getConfigPathRel();
+        }
         return value;
+    }
+
+    public static String getSysValue(String key, String defaultValue) {
+        String sysValue = getSysValue(key);
+        return sysValue != null ? sysValue : defaultValue;
+    }
+
+    public static String getSysValue(String key) {
+        String sysValue = System.getProperty(key);
+    	if (sysValue == null)
+            sysValue = System.getenv(key);
+        if (sysValue == null)
+            sysValue = System.getenv(key.toUpperCase().replace(".", "_"));
+        return sysValue;
     }
 
     /**
@@ -962,50 +980,55 @@ public class ENV implements Serializable {
      *         always false.
      */
     public static final boolean extractResourceToDir(String resourceName, String destinationDir) {
-        return extractResourceToDir(resourceName, destinationDir, false, false, true);
+        return extractResourceToDir(resourceName, destinationDir, false, false, true, false);
     }
 
     public static final boolean extractResourceToDir(String resourceName,
             String destinationDir,
             boolean flat,
             boolean executable,
-            boolean logError) {
+            boolean logError,
+            boolean insertProperties) {
         //put build informations into system-properties
         getBuildInformations();
         //perhaps enrich resource name with version-number from build-infos etc.
-        resourceName = System.getProperty(resourceName, resourceName);
+        resourceName = getSysValue(resourceName, resourceName);
         //perhaps get a templates destination name
-        String destName = System.getProperty(resourceName + ".destination", resourceName);
+        String destName = getSysValue(resourceName + ".destination", resourceName);
         return !AppLoader.isNestingJar() && resourceName.endsWith("ar") 
-        		? false : extractResource(resourceName, destinationDir + destName, flat, executable, logError);
+        		? false : extractResource(resourceName, destinationDir + destName, flat, executable, logError, insertProperties);
     }
 
     public static final boolean hasResourceOrFile(String resourceName) {
-    	String name = System.getProperty(resourceName, resourceName);
+    	String name = getSysValue(resourceName, resourceName);
     	return get(ClassLoader.class).getResourceAsStream(name) != null || new File(getConfigPath() + name).exists();
     }
     
     public static final boolean extractResource(String resourceName, boolean flat, boolean executable, boolean logError) {
-        return extractResourceToDir(resourceName, "", flat, executable, logError);
+        return extractResourceToDir(resourceName, "", flat, executable, logError, false);
     }
 
     public static final boolean extractResource(String resourceName, boolean flat, boolean executable) {
-        return extractResourceToDir(resourceName, "", flat, executable, true);
+        return extractResourceToDir(resourceName, "", flat, executable, true, false);
     }
     
     public static final boolean extractResource(String resourceName, boolean executable) {
-        return extractResourceToDir(resourceName, "", false, executable, true);
+        return extractResourceToDir(resourceName, "", false, executable, true, false);
     }
 
     public static final boolean extractResource(String resourceName) {
-        return extractResourceToDir(resourceName, "", false, false, true);
+        return extractResourceToDir(resourceName, "", false, false, true, false);
     }
 
+    public static final boolean extractResourceWithProperties(String resourceName) {
+        return extractResourceToDir(resourceName, "", false, false, true, true);
+    }
+    
     public static final boolean extractResource(String resourceName,
             String fileName,
             boolean flat,
             boolean executable) {
-        return extractResource(resourceName, fileName, flat, executable, true);
+        return extractResource(resourceName, fileName, flat, executable, true, false);
     }
     
     /**
@@ -1019,7 +1042,8 @@ public class ENV implements Serializable {
             String fileName,
             boolean flat,
             boolean executable,
-            boolean logError) {
+            boolean logError,
+            boolean insertProperties) {
         File destFile = new File(fileName);
         File file =
             destFile.isAbsolute() ? destFile : new File(getConfigPath() + (flat ? destFile.getName() : fileName)).getAbsoluteFile();
@@ -1035,7 +1059,13 @@ public class ENV implements Serializable {
                     throw new IllegalStateException("the resource '" + resourceName
                         + "' of our main-jar-file is not available or empty!");
                 }
-                FileUtil.write(res, new FileOutputStream(file), fileName, true);
+                if (insertProperties) {
+                    String data = String.valueOf(FileUtil.getFileData(res, null));
+                    data = StringUtil.fillProperties(data, key -> ENV.get(key));
+                    FileUtil.writeBytes(data.getBytes(), file.getPath(), false);
+                } else {
+                    FileUtil.write(res, new FileOutputStream(file), fileName, true);
+                }
                 if (executable)
                     file.setExecutable(true);
                 return true;

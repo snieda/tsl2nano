@@ -73,6 +73,7 @@
 					<include>**/*.bat</include>
 					<include>**/*.cmd</include>
 					<include>**/*.sh</include>
+					<include>**/pom-openapi.xml</include>
 				</includes>
 			</resource>
 			<resource>

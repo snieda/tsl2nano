@@ -231,13 +231,13 @@ public class Crypt implements ISecure {
         try {
             SecretKeyFactory.getInstance(algorithm);
         } catch (Exception e) {
-            downloadProvider(algorithm);
+            downloadProviderBouncyCastle(algorithm);
         }
     }
 
-    private static void downloadProvider(String algorithm2) {
+    private static void downloadProviderBouncyCastle(String algorithm2) {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        if (cl instanceof NetworkClassLoader && !((NetworkClassLoader)cl).isJarAvailable(algorithm2) && NetUtil.isOnline()) {
+        if (cl instanceof NetworkClassLoader && !((NetworkClassLoader)cl).isJarAvailable("bcprov-.*") && NetUtil.isOnline()) {
             //if available we try to download bouncycastle through maven
             new CompatibilityLayer().runOptionalMain(CompatibilityLayer.TSL2_JARRESOLVER, "org.bouncycastle");
         }
@@ -522,7 +522,7 @@ public class Crypt implements ISecure {
         try {
             cipher = Cipher.getInstance(algorithm);
         } catch (NoSuchAlgorithmException ex) {
-            downloadProvider(algorithm);
+            downloadProviderBouncyCastle(algorithm);
             cipher = Cipher.getInstance(algorithm);
             if (cipher == null) {
                 throw ex;

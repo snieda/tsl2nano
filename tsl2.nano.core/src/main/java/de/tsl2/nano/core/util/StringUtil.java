@@ -26,6 +26,7 @@ import java.util.Properties;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -478,6 +479,33 @@ public class StringUtil extends Strings {
         }
         return buf.toString();
     }
+
+    public static final <T extends CharSequence> T fillProperties(T text, Function<String, Object> env) {
+        return fillProperties(text, "${", "}", env);
+    }
+
+    /**
+     * fill variables with values from given environment function
+     * @param text string or stringbuilder 
+     * @param varStart variable start (e.g. '${')
+     * @param varEnd variable end (e.g. '}')
+     * @param env function to evaluate environment value through given string (key) 
+     * @return 
+     */
+    public static <T extends CharSequence> T fillProperties(T text, String varStart, String varEnd, Function<String, Object> env) {
+        StringBuilder buf = text instanceof StringBuilder ? (StringBuilder) text : new StringBuilder(text);
+        int i = 0, j = 0;
+        String str = null, val = null;
+        while ((i = buf.indexOf(varStart, i)) != -1) {
+            j = buf.indexOf(varEnd, i);
+            str = buf.substring(i + varStart.length(), j);
+            val = String.valueOf(env.apply(str));
+            buf.replace(i, j + varEnd.length(), val);
+        }
+        return text instanceof StringBuilder ? (T) buf : (T) buf.toString();
+    }
+
+
 
     /**
      * text with questionmarks (?). The questionmarks will be replaced by the toString() representation of the given

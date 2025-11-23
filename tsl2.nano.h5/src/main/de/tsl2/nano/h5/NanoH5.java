@@ -318,12 +318,12 @@ public class NanoH5 extends NanoH5ExternalBackend implements ISystemConnector<Pe
     protected void extractJarScripts() {
         try {
             if (AppLoader.isUnixFS()) {
-                ENV.extractResourceToDir("run.sh", "../", false, true, true);
-                ENV.extractResourceToDir("runasservice.sh", "../", false, true, true);
-                ENV.extractResource("mda.sh", true, true);
+                ENV.extractResourceToDir("run.sh", "../", false, true, true, false);
+                ENV.extractResourceToDir("runasservice.sh", "../", false, true, true, false);
+                ENV.extractResource("mda.sh", true, true, true);
                 ENV.extractResource("mvnw");
             } else {
-                ENV.extractResourceToDir("run.bat", "../", false, false, true);
+                ENV.extractResourceToDir("run.bat", "../", false, false, true, false);
                 ENV.extractResource("mda.bat");
                 ENV.extractResource("mvnw.cmd");
             }
@@ -1334,17 +1334,17 @@ public class NanoH5 extends NanoH5ExternalBackend implements ISystemConnector<Pe
 
         //check if an equal named ddl-script is inside our jar file. should be done on 'anyway' or 'timedb'.
         try {
-            ENV.extractResource("hibernate-reverse-engineering-3.0.dtd", false, false, false);
-            ENV.extractResource(persistence.getDatabase() + ".sql", false, false, false);
-            ENV.extractResource("drop-" + persistence.getDatabase() + ".sql", false, false, false);
-            ENV.extractResource("init-" + persistence.getDatabase() + ".sql", false, false, false);
+            ENV.extractResource("hibernate-reverse-engineering-3.0.dtd");
+            ENV.extractResource(persistence.getDatabase() + ".sql");
+            ENV.extractResource("drop-" + persistence.getDatabase() + ".sql");
+            ENV.extractResource("init-" + persistence.getDatabase() + ".sql");
             ENV.extractResource("create-sql-graphviz.cmd", true, true);
             SystemUtil.executeShell(new File(ENV.getConfigPath()), false, "./create-sql-graphviz.cmd");
         } catch (Exception e) {
             LOG.warn(e);
             //ok, it was only a try ;-)
         }
-        ENV.extractResource(HIBREVNAME_TEMPLATE);
+        ENV.extractResourceWithProperties(HIBREVNAME_TEMPLATE);
 
     }
 
@@ -1385,7 +1385,7 @@ public class NanoH5 extends NanoH5ExternalBackend implements ISystemConnector<Pe
 
     protected static Boolean generateJarFile(String jarFile, String generator, String schema) {
         ENV.extractResource(REVERSE_ENG_SCRIPT);
-        ENV.extractResource(HIBREVNAME_TEMPLATE);
+        ENV.extractResourceWithProperties(HIBREVNAME_TEMPLATE);
         ENV.extractResource("hibernate-reverse-engineering-3.0.dtd");
 
         Properties properties = new Properties();
