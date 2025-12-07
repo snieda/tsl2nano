@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.h5;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
@@ -59,7 +60,8 @@ public class Users {
         Users userCheck = null;
         try {
         	if (force || ENV.get("app.login.secure", false))
-        		userCheck = ENV.load(NAME_USERMAPPING, Users.class);
+                if (new File(NAME_USERMAPPING).exists())
+        		    userCheck = ENV.load(NAME_USERMAPPING, Users.class);
         } catch (Exception e) {
             LOG.error(e);
         } finally {

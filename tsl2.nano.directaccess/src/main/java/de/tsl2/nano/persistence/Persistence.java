@@ -458,7 +458,7 @@ public class Persistence implements Serializable, Cloneable {
             .getResourceAsStream(Util.isEmpty(getReplication()) ? FILE_PERSISTENCE_NOREP_TML : FILE_PERSISTENCE_TML);
         
         String persistence_xml = String.copyValueOf(FileUtil.getFileData(stream, null));
-        Map<String, Object> prop = getProperties();
+        Map<String, Object> prop = properties();
 
         if (replication != null) {
             replication.addPersistenceProperties(this, prop);
@@ -482,7 +482,7 @@ public class Persistence implements Serializable, Cloneable {
         throw new UnsupportedOperationException();
     }
 
-    public Map<String,Object> getProperties() {
+    public Map<String,Object> properties() {
         Map<String, Object> prop = new HashMap<String, Object>();
         put(prop, "persistence-unit", getPersistenceUnit());
         put(prop, "transaction-type", "RESOURCE_LOCAL");

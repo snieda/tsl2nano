@@ -708,7 +708,7 @@ public class NanoH5 extends NanoH5ExternalBackend implements ISystemConnector<Pe
                 header.putAll(response.getHeader());
                 header.put("cookie", response.getHeader("Set-Cookie"));
             }
-            Map<String, Object> p = Persistence.current().getProperties();
+            Map<String, Object> p = Persistence.current().properties();
             p.put("tsl2nano.login.ok", "");
             ENV.setProperty("app.init.opendefault", false);
             serve("/", Method.POST, header, (Map<String, String>)Util.untyped(p), new HashMap<>());                
