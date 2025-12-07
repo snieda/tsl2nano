@@ -52,7 +52,7 @@ public class Users {
     }
 
     public static Users load() {
-        return load(false);
+        return load(true);
     }
 
     public static Users load(boolean force) {

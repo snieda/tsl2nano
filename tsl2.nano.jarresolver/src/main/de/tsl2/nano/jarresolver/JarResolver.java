@@ -29,7 +29,6 @@ import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.core.util.CLI;
 import de.tsl2.nano.core.util.CollectionUtil;
 import de.tsl2.nano.core.util.FilePath;
 import de.tsl2.nano.core.util.FileUtil;
@@ -209,11 +208,8 @@ public class JarResolver {
     }
 
     private void logStart(String[] deps) {
-        String bar = "\n==============================================================\n";
-        String message = bar + "resolving packages:\n" + StringUtil.toFormattedString(deps, -1)
-            + "\n\twith dependencies:\n\t" + props.getProperty(JAR_DEPENDENCIES)
-            + bar;
-        LOG.info(CLI.tag(message, CLI.Color.BLUE, null, CLI.Style.BOLD));
+        LOG.info(StringUtil.paragraph("resolving packages", () -> StringUtil.toFormattedString(deps, -1)
+            + "\n\twith dependencies:\n\t" + props.getProperty(JAR_DEPENDENCIES)));
     }
 
     private int runMavenInstall() {

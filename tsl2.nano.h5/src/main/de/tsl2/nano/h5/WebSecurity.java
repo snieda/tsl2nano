@@ -137,7 +137,7 @@ public class WebSecurity {
 		String sessionTag = header.get(REQUEST_COOKIE);
 		String[] hs = sessionTag.split("[;]");
 		Map<String, String> sessionValues = new LinkedHashMap<>(hs.length);
-		Arrays.stream(hs).forEach(e -> MapUtil.add(sessionValues, e.trim().split("\\s*=\\s*")));
+		Arrays.stream(hs).filter(e -> e.contains("=")).forEach(e -> MapUtil.add(sessionValues, e.trim().split("\\s*=\\s*")));
 		return sessionValues;
 	}
 

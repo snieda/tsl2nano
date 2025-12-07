@@ -766,11 +766,15 @@ public class ENV implements Serializable {
     public static <T> T load(String name, Class<T> type, boolean renameOnError) {
         File path = getEnvPath(name, type);
         // ManagedException.assertion("exist", path.exists(), path);
-        if (self().get("app.configuration.persist.yaml", false)) {
+        if (isYamlConfiguration()) {
             return self().get(YamlUtil.class).load(path, type);
         } else {
             return self().get(XmlUtil.class).loadXml(path.getAbsolutePath(), type, renameOnError);
         }
+    }
+
+    public static Boolean isYamlConfiguration() {
+        return self().get("app.configuration.persist.yaml", false);
     }
 
     public static File getEnvPath(String name, Class<?> type) {
@@ -792,7 +796,7 @@ public class ENV implements Serializable {
      */
     public static void save(String name, Object obj) {
         String path = cleanpath(name);
-        if (self().get("app.configuration.persist.yaml", false)) {
+        if (isYamlConfiguration()) {
             self().get(YamlUtil.class).dump(obj, path + getFileExtension());
         } else {
             self().get(XmlUtil.class).saveXml(path + getFileExtension(), obj);
@@ -800,7 +804,9 @@ public class ENV implements Serializable {
     }
     
     public static String getFileExtension() {
-    	return ENV.get("app.configuration.persist.yaml", false) ? ".yml" : ".xml";
+    	String ext = isYamlConfiguration() ? ".yml" : ".xml";
+        ENV.get("app.configuration.persist.origin", ext);
+        return ext;
     }
 
     /**
@@ -832,7 +838,7 @@ public class ENV implements Serializable {
      * @param obj object to serialize to xml.
      */
     public static void persist(String name, Object obj) {
-        if (self().get("app.configuration.persist.yaml", false)) {
+        if (isYamlConfiguration()) {
             self().get(YamlUtil.class).dump(obj, getConfigPath() + name + getFileExtension());
         } else {
             self().get(XmlUtil.class).saveXml(getConfigPath() + name + getFileExtension(), obj);

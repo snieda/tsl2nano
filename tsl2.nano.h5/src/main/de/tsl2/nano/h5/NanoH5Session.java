@@ -28,9 +28,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.security.KeyManagementException;
 import java.security.KeyStore;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -337,7 +335,7 @@ public class NanoH5Session extends BeanModifier implements ISession<BeanDefiniti
                 KeyStore keyStore = PKI.createKeyStore(KeyStore.getDefaultType(), keystoreName, password.toCharArray());
                 sslContext.init(PKI.getKeyManagerFactory(keyStore, password).getKeyManagers(), null, null);
                 socketServer.setWebSocketFactory(new DefaultSSLWebSocketServerFactory(sslContext));
-            } catch (NoSuchAlgorithmException | KeyManagementException e) {
+            } catch (Exception e) {
                 //Don't stop the application, if websocket fails!
                 LOG.error(e);
             }

@@ -453,7 +453,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ENV.setProperty("app.security.trusted.sites", isProdMode ? "" : "https://sourceforge.net");
                 // ENV.setProperty("app.login.service.connection.check", !isProdMode);
                 ENV.persist();
-                return "Application Mode changed to secure Productivity on URL: \"" + url + "\".\nPlease read the documentation for creating users with hash passwords and permissions.\nPlease RESTART";
+                return "Application Mode changed to secure Productivity on URL: \"" + url + "\".\nPlease read the documentation for creating users with hash passwords and permissions.\nOn restarting the app consider to use the same jvm start parameters (important for using websockets with Ip4 or Ip6 Addresses.\nPlease RESTART";
             }
             @Override
             public String getShortDescription() {

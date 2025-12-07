@@ -13,14 +13,13 @@ import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.core.ENV;
-import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.util.FilePath;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.specification.Pool;
 
-@Deprecated // replaced by CMSBean - but action #downloadAndExtract0() is refeenced!
+@Deprecated // replaced by CMSBean - but action #downloadAndExtract0() is referenced by cms sample application on sourceforge!
 @ValueExpression("{name}")
 @Attributes(names = { "name", "description", "imagePath", "applicationZipPath", "insideCurrentEnvironment" })
 @Presentable()
@@ -63,17 +62,22 @@ public class SampleApplicationBean {
 
     private static String downloadAndExtract(String name, String zipUrl, boolean insideCurrentEnvironment) {
         String path = ENV.getConfigPath();
+        String installBase = "/." + name + ".install/";
         if (!insideCurrentEnvironment) {
-            path = System.getProperty("user.dir") + "/." + name + ".install/";
+            path = System.getProperty("user.dir") + installBase;
             new File(path).mkdirs();
         }
         File zip = NetUtil.download(zipUrl, path);
         FileUtil.extract(zip.getPath(), path, null);
         String info = name + " successfully downloaded and installed on path: " + path;
-        Message.info(info + "\n\n" + (insideCurrentEnvironment
-                ? "to start it, re-login selecting " + name + ".jar file"
-                : "to start it, you have to shutdown and start the application with: ./run.sh ." + name
-                        + ".environment"));
+        String runparameter = "./run.sh ." + installBase + "/" + name + "/.nanoh5." + name;
+        if (insideCurrentEnvironment) {
+            info = info + "\n\n" + "to start it, re-login selecting " + name + ".jar file";
+        } else {
+            FileUtil.writeBytes(runparameter.getBytes(), name + ".sh", false)
+                .setExecutable(true);
+            info = info + "\n\nto start it, you have to shutdown and start the application with: " + runparameter;
+        }
         return info;
     }
 

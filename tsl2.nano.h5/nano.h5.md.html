@@ -813,10 +813,29 @@ The default _app.login.administration_ value is true. all database and persisten
 On default, the environment property __app.login.secure__ is false. All persistence user will be added to __users.xml__.
 If you set it to true, the synthetic user will be the user asked by the login. If user, hashed password and validity time-period are ok, the mapped real database user will be evaluated to be given to the persistence provider. 
 
-To create a hash for a new password start the following:
- 
+To create and add  a new user:
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	java -cp tsl2.nano.h5-2.5.7.jar de.tsl2.nano.h5.User mypassword
+   user.sh add myuser mypassword
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To check a user:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   user.sh check myuser mypassword
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+To create a hash for a new password start the following:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   user.sh hash mypassword
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+or directly:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	java -cp tsl2.nano.h5-2.5.7.jar de.tsl2.nano.h5.User hash mypassword
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This hashcode then can be used inside the __usercheck.xml__ for the synthetic user:
@@ -950,11 +969,16 @@ At the moment, the following commands are known:
 * shutdown: does a system.exit(0)
 * close: closes the current session
 * back: goes back to the next working item
+* OPENDEFAULT: on first initial start: open default user and generate default anyway model ( aequivalent is ENV: -Dapp.init.opendefault=true)
 
 Example:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	http://xxx.xxx.xxx.xxx:8067/3217712234-shutdown
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	http://xxx.xxx.xxx.xxx:8067/3217712234-OPENDEFAULT
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Dependencies
@@ -5376,7 +5400,7 @@ If you need to send an email to a (database) registered customer, that has to be
  2.5.6  | 04.05.2025 | h5:+CMSBean, +admin: provide sample applications, prod/admin switch, adding users, layout: additional left/right panels and info menu
  2.5.7  | 25.05.2025 | hotfix: running on android, windows, fixes on openapi, sampleapplications, OSSRH -> maven central portal
  2.5.8  | 04.07.2025 | nosql support: +hibernate-omg-5.4.2, jarresolver maven load fix, CMSBean/Bean fix
- 2.5.9  | 31.12.2025 | RESTDynamic:+health, script jsonschema2pojo, New: ExternalBackend, dyn. detached bean: BeanValueMap, PKI (sun.security -> bouncycastle), build on jdk 25 possible
+ 2.6.0  | 06.01.2026 | RESTDynamic:+health, script jsonschema2pojo, New: ExternalBackend, dyn. detached bean: BeanValueMap, PKI (sun.security -> java.security+bouncycastle), build on jdk 25 possible, control: +OPENDEFAULT
 |------ | ---------- | -----------
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
@@ -6744,3 +6768,47 @@ Cursus:
 * [v] Html5Presentation shows 'test' (default for 'app.doc.name') instead of anyway (ENV setting 'app.doc.name' to database name)
 * [ ] structure (refactore packages) of nanoh5
 * [-] what to do with BeanDefinition.toValueMap(recursive=true) ?
+* [v] loading CMS Sample applications: define the right tsl2nano version jar
+* [-] users.xml has old hashes...
+      * [x] check with jdk17
+* [!] testing on old environemnts (e.g. on sample applications): hash code seems to be changed on new version (jdk25, java.security)
+* [v] create bash for creating hashcodes (extract with replacements)
+* [x] check timesheet environment
+
+
+
+## check for new framework on actual tools
+
+* [ ] tsl2nano: replacement with actual tools and libraries
+      * perhaps with AI coding
+      * functionality:
+         * generate base app from ddl model (perhaps with bootify.io or sqlscript2jpa-codegen)
+            * multi-user with secure login
+            * creating docker image
+            * single page app having someething like gridbadlayout and statusline
+            * message/confirm dialogs
+            * simple theming (switches on clicks on edge)
+            * everything has a default
+            * converter/formatter/parser of any types of values
+         * any bean must be presentable in web ui
+            * full key-navigation (shortcuts)
+            * configure UI through serialized beans
+            * virtual beans with virtual attributes
+            * online bean detail configuration
+            * selectable default beans, default behaivour on empty/one item lists 
+            * follow foreign keys providing selection boxes
+            * add/show attachments and any blobs/pictures (pixel, svg, etc.)
+            * pages with searchable/filterable tables and actions to add/edit/delete detailed beans
+            * administration/session configuration pages
+            * plugins on each phase of page build
+         * configuration through specification mechanism, including rules/workflows through script engine
+            * data import/export
+            * attribute covers
+      * [ ] base: spring or quarkus
+         * [ ] using spring-data-repositories
+         * [ ] rest with javalin?
+         * [ ] thymeleaf/mustache templates to generate htmx
+         * [ ] serialization with jackson
+         * [ ] bean properties
+         * [ ] dynamic crud rest api
+      * [ ] swaggerui: how to layout to be applicable

@@ -132,7 +132,7 @@ public class NetworkClassLoader extends NestedJarClassLoader {
         } catch (ClassNotFoundException e) {
             //try it again after loading it from network
             String pckName = BeanClass.getPackageName(name);
-            if (!pckName.startsWith(Util.FRAMEWORK_PACKAGE + ".core") && !unresolveables.contains(pckName)) {
+            if (!pckName.startsWith(Util.FRAMEWORK_PACKAGE + ".core") && !isUnresolvablePackage(pckName)) {
                 try {
                     if (BeanClass.isPublicClassName(name) && loadDependencies(name) != null) {
                         //reload jar-files from environment
@@ -151,7 +151,11 @@ public class NetworkClassLoader extends NestedJarClassLoader {
         }
     }
 
-	private void addToUnresolvables(String name, String pckName, Exception e2) {
+    public boolean isUnresolvablePackage(String pckName) {
+        return unresolveables.contains(pckName);
+    }
+
+	public void addToUnresolvables(String name, String pckName, Exception e2) {
 		if (LOG.isDebugEnabled()) {
 		    LOG.warn("couldn't load class " + name, e2);
 		} else {

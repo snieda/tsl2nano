@@ -27,6 +27,7 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -1324,6 +1325,16 @@ public class StringUtil extends Strings {
     public static boolean isXml(String txt) {
         return txt != null && (txt.contains("</") || txt.contains("/>"));
     }
+    public static  <T> String paragraph(String title, T... items) {
+        return paragraph(title, () -> StringUtil.toFormattedString(items, -1));
+    }
+
+    public static String paragraph(String title, Supplier<?> items) {
+        String bar = "\n" + fixString(79, '=') + "\n";
+        String message = bar + title + ":\n" + items.get() + bar;
+        return CLI.tag(message, CLI.Color.BLUE, null, CLI.Style.BOLD);
+    }
+
 }
 
 /*

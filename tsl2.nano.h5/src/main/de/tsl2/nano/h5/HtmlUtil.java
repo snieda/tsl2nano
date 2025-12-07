@@ -582,12 +582,12 @@ public class HtmlUtil {
     }
 
     public static String createMessagePage(String title, String msg) {
-        return "<html><head><style>" + templateStyles() + "</style></head><body><div id=" + title + " class=message style=\"border: 2px solid; float: middle; text-align: center; color: red; font-weight: bold;\">"
-            + title + "</div>" + createMessage(msg) + "</body></html>";
+        return "<html><head><style>" + templateStyles() + "</style></head><body class=messagedialog><div id=" + title + " class=message style=\"border: 2px solid; float: middle; text-align: center; color: red; font-weight: bold;\">"
+            + title + "</div><div style=\"padding: 20 px\">" + createMessage(msg) + "</div></body></html>";
     }
 
     public static String createMessage(String msg) {
-        return msg.contains("\n") ? "<pre>" + msg + "</pre>" : msg;
+        return "<p/>" + msg.replace("\n", "<p/>");
     }
 
     public static boolean isXml(String txt) {

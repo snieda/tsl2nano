@@ -117,14 +117,22 @@ class User implements Comparable<User> {
 
     @Action(name = "Add User", argNames = {"Name", "Password"})
     public User addUser(String name, String passwd) {
-        return Users.load().auth(name, passwd, true);
+        return Users.load(true).auth(name, passwd, true);
     }
 
     public static final void main(String...args) {
-        if (args.length != 1) {
-            System.out.println("Please give a password to be hashed!");
+        if (args.length < 2) {
+            System.out.println("usage: {add|check{name}|hash} {password}");
             System.exit(1);
         }
-        System.out.println(hash(args[0]));
+        Object result = "wrong arguments";
+        if (args[0].equals("add"))
+            result = new User().addUser(args[1], args[2]);
+        else if (args[0].equals("check")) {
+            Users.load(true).auth(args[1], args[2], false);
+            result = "Ok";
+        } else if (args[0].equals("hash"))
+            result = hash(args[1]);
+        System.out.println(result);
     }
 }

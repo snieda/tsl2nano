@@ -70,6 +70,7 @@ import de.tsl2.nano.core.messaging.EventController;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
@@ -340,6 +341,7 @@ public class NanoH5 extends NanoH5ExternalBackend implements ISystemConnector<Pe
             ENV.extractResource("hfs.cmd", true, true);
             ENV.extractResource("generate-openapi.sh", true, true);
             ENV.extractResource("pom-openapi.xml");
+            ENV.extractResource("user.sh", true, true);
             
             ENV.extractResource("doc/beanconfigurator.help.html");
             ENV.extractResource("doc/attributeconfigurator.help.html");
@@ -384,6 +386,10 @@ public class NanoH5 extends NanoH5ExternalBackend implements ISystemConnector<Pe
         super.start();
 
         try {
+            if (ENV.get("app.init.opendefault", false)) {
+                LOG.info("init and start with defaults");
+                control("OPENDEFAULT", null, defaultHeader(), new HashMap<>());
+            }
             if (System.getProperty("os.name").startsWith("Windows")
                     && ENV.get("app.show.startpage", true)) {
                 SystemUtil.executeRegisteredWindowsPrg(applicationHtmlFile());
@@ -409,6 +415,10 @@ public class NanoH5 extends NanoH5ExternalBackend implements ISystemConnector<Pe
                 ConcurrentUtil.sleep(3000, false);
             }
         }
+    }
+
+    private Map<String, String> defaultHeader() {
+        return MapUtil.asMap("socket", Util.trY( () -> new Socket(NetUtil.getMyAddress(), getPort(getDefaultURL()))));
     }
 
     /**
@@ -538,7 +548,7 @@ public class NanoH5 extends NanoH5ExternalBackend implements ISystemConnector<Pe
 
         String method = m.name();
         NanoH5Session session = null;
-        long startTime = 0;
+        long startTime = System.currentTimeMillis();
         try {
             Plugins.process(INanoPlugin.class).requestHandler(uri, m, header, parms, files);
             InetAddress requestor = ((Socket) ((Map) header).get("socket")).getInetAddress();
@@ -566,7 +576,6 @@ public class NanoH5 extends NanoH5ExternalBackend implements ISystemConnector<Pe
                 }
             }
 
-            startTime = System.currentTimeMillis();
             //TODO: in InternetExporer/Edge we get sometimes IP4 and sometimes IP6. should we set system property java.net.preferIPv6Addresses?
             //           sessions.keySet().iterator().next().getAllByName(requestor.getHostName()).equals(requestor) returns false
             Request req = new Request(requestor, uri, m, header, parms, files);
@@ -581,7 +590,7 @@ public class NanoH5 extends NanoH5ExternalBackend implements ISystemConnector<Pe
             if ((method.equals("GET") && uri.endsWith("/help")) || method.equals("OPTIONS"))
                 return help();
             if (isAdmin(uri)) {
-                control(StringUtil.substring(uri, String.valueOf(hashCode())+"-", null), session);
+                control(StringUtil.substring(uri, String.valueOf(hashCode())+"-", null), session, header, parms);
             }
             if (session != null && session.getNavigationStack() == null) {
                 Message.send("bad session state, please login again!");
@@ -684,14 +693,26 @@ public class NanoH5 extends NanoH5ExternalBackend implements ISystemConnector<Pe
     }
 
     private Response help() {
-        String help = "{application-hash}-{shutdown|close|back}";
+        String help = "{application-hash}-{opendefault|shutdown|close|back}";
         return new Response(Status.OK, "text/html", StringUtil.toInputStream(help), -1);
     }
 
     //TODO: do some encryptions...
     //TODO: provide generic semantics on beans
-    private void control(String cmd, NanoH5Session session) {
-        if (cmd.equals("close"))
+    private void control(String cmd, NanoH5Session session, Map<String,String> header, Map<String,String> parms) {
+        LOG.info(StringUtil.paragraph("CONTROL", cmd, session != null ? session.getId() : "no session"));
+        if (cmd.equals("OPENDEFAULT")) {
+            Response response = null;
+            if (session == null) {
+                response = serve("/", Method.POST, header, new HashMap<>(), new HashMap<>());
+                header.putAll(response.getHeader());
+                header.put("cookie", response.getHeader("Set-Cookie"));
+            }
+            Map<String, Object> p = Persistence.current().getProperties();
+            p.put("tsl2nano.login.ok", "");
+            ENV.setProperty("app.init.opendefault", false);
+            serve("/", Method.POST, header, (Map<String, String>)Util.untyped(p), new HashMap<>());                
+        } else if (cmd.equals("close"))
             session.close();
         else if (cmd.equals("back"))
             session.nav.next(null);
@@ -1555,13 +1576,15 @@ public class NanoH5 extends NanoH5ExternalBackend implements ISystemConnector<Pe
 	@Override
 	public void accept(ChangeEvent t) {
 		if (t.getSource().equals("*") || (t.getSource().equals("app.configuration.persist.yaml") && (boolean)t.newValue)) {
-			createYAMLFiles();
+            String originFileExtension = ENV.get("app.configuration.persist.origin", ".xml");
+            if (!ENV.getFileExtension().equals(originFileExtension))
+			    recreateAllConfigurations(originFileExtension);
 		}
 	}
 
-	public synchronized void createYAMLFiles() {
-		String originalFileExtension = ".xml";
-		ENV.persist(Users.load());
+    /** should only be called, if the configuration type changed from xml to yaml or vice versa */
+	synchronized void recreateAllConfigurations(String originalFileExtension) {
+		ENV.persist(Users.load(true));
 		if (ENV.get(IAuthorization.class) != null)
 			ENV.persist(ENV.get(IAuthorization.class)); //TODO: that's only the current user!
 		ENV.persist(Persistence.current());
@@ -1578,14 +1601,12 @@ public class NanoH5 extends NanoH5ExternalBackend implements ISystemConnector<Pe
 		
 		ENV.get(Pool.class).saveAll();
 
-		// deactivate the 
-		if (ENV.get("app.configuration.persist.yaml", false)) {
-			try {
-				String envXml = ENV.getConfigPath() + ENV.CONFIG_NAME + originalFileExtension;
-				Files.move(Paths.get(envXml), Paths.get(envXml + "_"));
-			} catch (IOException e) {
-                LOG.error(e);
-			}
-		}
+        // move old environment file to ..."_"
+        try {
+            String envXml = ENV.getConfigPath() + ENV.CONFIG_NAME + originalFileExtension;
+            Files.move(Paths.get(envXml), Paths.get(envXml + "_"));
+        } catch (IOException e) {
+            LOG.error(e);
+        }
 	}
 }

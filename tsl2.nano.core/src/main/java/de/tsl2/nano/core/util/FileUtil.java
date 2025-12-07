@@ -668,16 +668,19 @@ public class FileUtil {
 
     /**
      * Write 'data' into the file 'file' and perhaps appends it (if append==true)
+     * @return 
      */
-    public static void writeBytes(byte[] data, String file, boolean append) {
+    public static File writeBytes(byte[] data, String file, boolean append) {
         LOG.info("writing " + ByteUtil.amount(data.length) + " into file " + file);
         File f = userDirFile(file);
         if (f.getParentFile() != null)
             f.getParentFile().mkdirs();
         try (FileOutputStream out = new FileOutputStream(f, append)) {
             out.write(data);
+            return f;
         } catch (/*FileNotFound*/final Exception ex) {
             ManagedException.forward(ex);
+            return null;
         }
     }
     public static File userDirFile(String file) {

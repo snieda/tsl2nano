@@ -238,8 +238,14 @@ public class Crypt implements ISecure {
     private static void downloadProviderBouncyCastle(String algorithm2) {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         if (cl instanceof NetworkClassLoader && !((NetworkClassLoader)cl).isJarAvailable("bcprov-.*") && NetUtil.isOnline()) {
-            //if available we try to download bouncycastle through maven
-            new CompatibilityLayer().runOptionalMain(CompatibilityLayer.TSL2_JARRESOLVER, "org.bouncycastle");
+            NetworkClassLoader netCl = (NetworkClassLoader) cl;
+            String pkgBouncyCastle = "org.bouncycastle";
+            if (!netCl.isUnresolvablePackage(pkgBouncyCastle)) {
+                //if available we try to download bouncycastle through maven
+                new CompatibilityLayer().runOptionalMain(CompatibilityLayer.TSL2_JARRESOLVER, pkgBouncyCastle);
+                // do it only once
+                ((NetworkClassLoader)cl).addToUnresolvables(pkgBouncyCastle, pkgBouncyCastle, null);
+            }
         }
     }
 

@@ -341,7 +341,7 @@ public class PrimitiveUtil {
 	            value = Boolean.valueOf(value.toString()) ? 1 : 0;
 	        else if (isAssignableFrom(Character.class, value.getClass()))
 	            value = value.hashCode();
-	        else if (isAssignableFrom(String.class, value.getClass()))
+	        else if (isAssignableFrom(CharSequence.class, value.getClass()))
 	        	if (isAssignableFrom(Character.class, conversionType))
 	        		value = value.hashCode();
                 else if (!Util.isEmpty(value, true)) {

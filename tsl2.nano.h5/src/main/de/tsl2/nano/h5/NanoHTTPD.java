@@ -1322,6 +1322,11 @@ public abstract class NanoHTTPD extends Main {
             int getRequestStatus();
         }
 
+        // 05122025-ts: add access to header
+        Map<String,String> getHeader() {
+            return header;
+        }
+
         /**
          * Some HTTP response status codes
          */
